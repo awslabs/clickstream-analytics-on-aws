@@ -17,14 +17,15 @@ import {
   IAnalyticsItem,
 } from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';
+import { identity } from 'lodash';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
 
 interface AttributeGroupProps {
   groupParameters: CategoryItemType[];
-  groupOption: IAnalyticsItem | null;
-  setGroupOption: (option: SelectProps.Option | null) => void;
+  groupOptions: IAnalyticsItem[];
+  setGroupOptions: (options: SelectProps.Option[]) => void;
   loading?: boolean;
   disabled?: boolean;
 }
@@ -33,39 +34,72 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
   props: AttributeGroupProps
 ) => {
   const { t } = useTranslation();
-  const { groupOption, setGroupOption, groupParameters, loading, disabled } =
+  const { groupOptions, setGroupOptions, groupParameters, loading, disabled } =
     props;
   return (
     <div className="cs-analytics-dropdown">
-      <div className="cs-analytics-parameter">
-        <div className="flex gap-10 w-75p">
-          <div className="flex-1">
-            <EventItem
-              disableValidate
-              type="attribute"
-              placeholder={defaultStr(
-                t('analytics:labels.attributeSelectPlaceholder')
-              )}
-              categoryOption={groupOption}
-              changeCurCategoryOption={(item) => {
-                setGroupOption(item);
-              }}
-              categories={groupParameters}
-              loading={loading}
-              disabled={disabled}
-            />
+      {groupOptions.map((element, index) => {
+        return (
+          <div key={identity(index)}>
+            <div className="cs-analytics-parameter">
+              <div className="flex w-75p">
+                <div className="cs-para-name">{index + 1}</div>
+                <div className="flex-1">
+                  <EventItem
+                    disableValidate
+                    type="attribute"
+                    placeholder={defaultStr(
+                      t('analytics:labels.attributeSelectPlaceholder')
+                    )}
+                    categoryOption={element}
+                    changeCurCategoryOption={(item) => {
+                      if (!item) {
+                        return;
+                      }
+                      const newGroupOptions = [...groupOptions];
+                      newGroupOptions[index] = item;
+                      setGroupOptions(newGroupOptions);
+                    }}
+                    categories={groupParameters}
+                    loading={loading}
+                    disabled={disabled}
+                  />
+                </div>
+                <div className="event-delete">
+                  <span className="remove-icon">
+                    <Button
+                      onClick={() => {
+                        // remove index option from groupOptions
+                        const newGroupOptions = [...groupOptions];
+                        newGroupOptions.splice(index, 1);
+                        setGroupOptions(newGroupOptions);
+                      }}
+                      variant="link"
+                      iconName="close"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-          {groupOption?.value && (
-            <Button
-              onClick={() => {
-                setGroupOption(null);
-              }}
-              iconName="close"
-            >
-              {t('button.clear')}
-            </Button>
-          )}
-        </div>
+        );
+      })}
+      <div className="mt-10">
+        <Button
+          iconName="add-plus"
+          onClick={() => {
+            // add option to groupOptions
+            const newGroupOptions = [...groupOptions];
+            newGroupOptions.push({
+              value: '',
+              label: '',
+            });
+            setGroupOptions(newGroupOptions);
+          }}
+          disabled={groupOptions.length >= 5 || disabled}
+        >
+          {t('button.newGroup')}
+        </Button>
       </div>
     </div>
   );

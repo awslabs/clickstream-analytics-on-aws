@@ -11,6 +11,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     user_id,
     platform,
+    device,
     app_version,
     "operating_system / version",
     device_ua_browser,
@@ -21,14 +22,15 @@ select
   day::date as event_date,
   merged_user_id as user_id,
   platform,
+  coalesce(device_mobile_model_name, device_ua_device) as device,
   app_version,
-  device_operating_system || device_ua_os || ' / ' || device_operating_system_version || device_ua_os_version as "operating_system / version",
+  coalesce(device_operating_system, device_ua_os, 'null' ) || ' / ' || coalesce(device_operating_system_version, device_ua_os_version, 'null') as "operating_system / version",
   device_ua_browser,
-  device_screen_height || ' x ' || device_screen_width  as device_screen_resolution,
+  coalesce(device_screen_height, '') || ' x ' || coalesce(device_screen_width, '')  as device_screen_resolution,
   count(event_id) as event_count
 from {{database_name}}.{{schema}}.{{baseView}}
 where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
-group by 1,2,3,4,5,6,7
+group by 1,2,3,4,5,6,7,8
 ;
 
 EXCEPTION WHEN OTHERS THEN

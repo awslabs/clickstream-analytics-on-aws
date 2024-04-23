@@ -1452,6 +1452,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
+                Name: 'is_first_day_event',
+                Type: 'STRING',
+              },
+              {
                 Name: 'event_timestamp_local',
                 Type: 'DATETIME',
               },
@@ -1620,6 +1624,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'new_user_indicator',
               'view_session_indicator',
               'view_event_indicator',
+              'is_first_day_event',
               'event_timestamp_local',
               'event_date',
             ],
@@ -1847,11 +1852,15 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Intra_Day_User',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_intra_day where event_date >= <<$startDate23>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_intra_day_user_mv where event_date >= DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>)) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))",
             columns: [
               {
                 Name: 'event_date',
                 Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
               },
               {
                 Name: 'Active User',
@@ -1864,16 +1873,13 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
             dateTimeDatasetParameter: [
               {
-                name: 'startDate23',
-                timeGranularity: 'DAY',
-              },
-              {
                 name: 'endDate23',
                 timeGranularity: 'DAY',
               },
             ],
             projectedColumns: [
               'event_date',
+              'platform',
               'Active User',
               'New User',
             ],
@@ -2352,6 +2358,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'DATETIME',
               },
               {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
                 Name: 'this_week_value',
                 Type: 'STRING',
               },
@@ -2372,6 +2382,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
             projectedColumns: [
               'time_period',
+              'platform',
               'this_week_value',
               'sum',
             ],
@@ -2434,6 +2445,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
+                Name: 'device',
+                Type: 'STRING',
+              },
+              {
                 Name: 'app_version',
                 Type: 'STRING',
               },
@@ -2471,6 +2486,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             projectedColumns: [
               'event_date',
               'platform',
+              'device',
               'app_version',
               'user_id',
               'operating_system / version',

@@ -54,15 +54,6 @@
                     }
                 ],
                 "SmallMultiples": [
-                    {
-                        "CategoricalDimensionField": {
-                            "FieldId": "{{smalMultiplesFieldId}}",
-                            "Column": {
-                                "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                "ColumnName": "group_col"
-                            }
-                        }
-                    }
                 ]
             }
         },
@@ -120,12 +111,6 @@
                     {
                         "FieldTooltipItem":{
                             "FieldId":"{{dimFieldId}}",
-                            "Visibility":"VISIBLE"
-                        }
-                    },
-                    {
-                        "FieldTooltipItem":{
-                            "FieldId":"{{smalMultiplesFieldId}}",
                             "Visibility":"VISIBLE"
                         }
                     }

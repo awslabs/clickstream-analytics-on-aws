@@ -400,7 +400,7 @@ export const findAnalysisWithPrefix = async (quickSight: QuickSight, accountId: 
 
     for (const analysisSummary of analysisSummaries) {
       if (analysisSummary.AnalysisId?.startsWith(prefix) && analysisSummary.AnalysisId !== excludeAnalysisId ) {
-        console.log('found old version analysis:', analysisSummary.AnalysisId);
+        logger.info('found old version analysis:', analysisSummary.AnalysisId);
         return analysisSummary.AnalysisId;
       }
     }

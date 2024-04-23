@@ -639,9 +639,13 @@ describe('reporting test', () => {
       timeUnit: 'WK',
       groupColumn: 'week',
       groupCondition: {
-        category: ConditionCategory.EVENT_OUTER,
-        property: 'platform',
-        dataType: MetadataValueType.STRING,
+        conditions: [
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'platform',
+            dataType: MetadataValueType.STRING,
+          },
+        ],
       },
       dashboardCreateParameters: {
         region: 'us-east-1',
@@ -655,6 +659,7 @@ describe('reporting test', () => {
       .post('/api/reporting/event')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send(requestBody);
+
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
@@ -670,7 +675,7 @@ describe('reporting test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 3);
   });
 
-  it('event visual - preview - twice request with boolean group condition', async () => {
+  it('event visual - preview - 400 response with boolean group condition', async () => {
     quickSightMock.on(CreateDataSetCommand).callsFake(input => {
       expect(
         input.PhysicalTableMap.PhyTable1.CustomSql.Columns.length === 4,
@@ -737,9 +742,13 @@ describe('reporting test', () => {
       timeUnit: 'WK',
       groupColumn: 'week',
       groupCondition: {
-        category: ConditionCategory.EVENT_OUTER,
-        property: 'screen_view_entrances',
-        dataType: MetadataValueType.BOOLEAN,
+        conditions: [
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'screen_view_entrances',
+            dataType: MetadataValueType.BOOLEAN,
+          },
+        ],
       },
       dashboardCreateParameters: {
         region: 'us-east-1',
@@ -754,18 +763,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send(requestBody);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(201);
-    expect(res.body.success).toEqual(true);
-
-    const res2 = await request(app)
-      .post('/api/reporting/event')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send(requestBody);
-    expect(res2.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res2.statusCode).toBe(201);
-    expect(res2.body.success).toEqual(true);
-    expect(quickSightMock).toHaveReceivedNthSpecificCommandWith(2, CreateDataSetCommand, {});
-    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 3);
+    expect(res.statusCode).toBe(400);
   });
 
   it('event visual - publish', async () => {
@@ -832,6 +830,7 @@ describe('reporting test', () => {
         },
       });
 
+    console.log(res.body);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);

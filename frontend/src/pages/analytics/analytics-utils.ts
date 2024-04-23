@@ -833,22 +833,23 @@ export const getPairEventAndConditions = (
 };
 
 export const getGroupCondition = (
-  option: IAnalyticsItem | null,
+  options: IAnalyticsItem[],
   groupApplyToFirst: boolean | null
 ) => {
-  let groupingCondition: GroupingCondition = {
-    category: categoryMapping(option?.category),
-    property: defaultStr(option?.name, ''),
-    dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
+  const groupingCondition: GroupingCondition = {
+    applyTo: groupApplyToFirst ? 'FIRST' : 'ALL',
+    conditions: [],
   };
-  if (groupApplyToFirst !== null) {
-    groupingCondition = {
-      ...groupingCondition,
-      applyTo: groupApplyToFirst ? 'FIRST' : 'ALL',
+  for (const option of options) {
+    if (defaultStr(option.name, '') === '') {
+      continue;
+    }
+    const condition: IColumnAttribute = {
+      category: categoryMapping(option.category),
+      property: defaultStr(option.name, ''),
+      dataType: defaultStr(option.valueType, MetadataValueType.STRING),
     };
-  }
-  if (groupingCondition.property === '') {
-    return undefined;
+    groupingCondition.conditions.push(condition);
   }
   return groupingCondition;
 };

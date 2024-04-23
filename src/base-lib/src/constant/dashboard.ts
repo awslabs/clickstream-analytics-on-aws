@@ -30,8 +30,7 @@ export const CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP = 'clickstream_a
 export const CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION = 'clickstream_acquisition_day_user_acquisition';
 export const CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_SP = 'clickstream_acquisition_day_user_acquisition_sp';
 export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV = 'clickstream_acquisition_day_user_view_cnt_mv';
-export const CLICKSTREAM_ACQUISITION_INTRA_DAY = 'clickstream_acquisition_intra_day';
-export const CLICKSTREAM_ACQUISITION_INTRA_DAY_SP = 'clickstream_acquisition_intra_day_sp';
+export const CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV = 'clickstream_acquisition_intra_day_user_mv';
 
 export const CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW = 'clickstream_engagement_day_user_view';
 export const CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_SP = 'clickstream_engagement_day_user_view_sp';
