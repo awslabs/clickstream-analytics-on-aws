@@ -12,7 +12,8 @@
  */
 
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
+import nock from 'nock';
 import DataProcessing from 'pages/pipelines/create/steps/DataProcessing';
 import Reporting from 'pages/pipelines/create/steps/Reporting';
 import { SinkType } from 'ts/const';
@@ -165,7 +166,14 @@ describe('Test data processing settings', () => {
   });
 });
 
-describe('Test redsfhit settings', () => {
+describe('Test redshift settings', () => {
+  afterAll(() => {
+    nock.cleanAll();
+    nock.restore();
+  });
+  afterEach(() => {
+    nock.cleanAll();
+  });
   test('Should disable quicksight when not enable redshift', async () => {
     const pipelineData = {
       ...INIT_EXT_PIPELINE_DATA,
@@ -282,6 +290,67 @@ describe('Test redsfhit settings', () => {
       '#test-quicksight-id'
     );
     expect(reportingCheckbox).not.toBeInTheDocument();
+  });
+  test('Should disable quicksight when quicksight unavailable', async () => {
+    nock('http://localhost:8080')
+      .get('/api/env/quicksight/describe')
+      .reply(200, {
+        success: true,
+        message: '',
+        data: {
+          accountName: 'clickstream-mock-2023071103',
+          edition: 'ENTERPRISE',
+          notificationEmail: 'user@example.com',
+          authenticationType: 'IDENTITY_POOL',
+          accountSubscriptionStatus: 'ACCOUNT_CREATED',
+        },
+      });
+    nock('http://localhost:8080').get('/api/env/quicksight/users').reply(200, {
+      success: true,
+      message: '',
+      data: [],
+    });
+
+    const pipelineData = {
+      ...INIT_EXT_PIPELINE_DATA,
+      enableDataProcessing: true,
+      enableRedshift: true,
+      serviceStatus: {
+        ...INIT_EXT_PIPELINE_DATA.serviceStatus,
+        EMR_SERVERLESS: true,
+        QUICK_SIGHT: false,
+      },
+    };
+    let reportingDom;
+    await act(async () => {
+      reportingDom = render(
+        <Reporting
+          update={false}
+          pipelineInfo={pipelineData}
+          changeEnableReporting={() => {
+            return;
+          }}
+          changeQuickSightAccountName={() => {
+            return;
+          }}
+          quickSightUserEmptyError={false}
+          changeQuickSightDisabled={function (disabled: boolean): void {
+            throw new Error('Function not implemented.');
+          }}
+          changeQuickSightSelectedUser={function (
+            user: OptionDefinition
+          ): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
+    });
+
+    const reportingCheckbox = reportingDom.container.querySelector(
+      '#test-quicksight-id'
+    );
+    expect(reportingCheckbox).toBeInTheDocument();
+    expect(reportingCheckbox).toBeDisabled();
   });
 
   test('Should enable athena and enable quicksight when enable redshift with emr and quicksight service available', async () => {
