@@ -199,6 +199,11 @@
       "type": "build"
     },
     {
+      "name": "nock",
+      "version": "^13.5.4",
+      "type": "build"
+    },
+    {
       "name": "prettier",
       "version": "^2.7.1",
       "type": "build"

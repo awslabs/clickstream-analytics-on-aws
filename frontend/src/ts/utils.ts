@@ -307,7 +307,7 @@ export const isReportingDisabled = (
   update?: boolean,
   pipelineInfo?: IExtPipeline
 ) => {
-  if (!update) {
+  if (!update && pipelineInfo?.serviceStatus?.QUICK_SIGHT) {
     return false;
   } else {
     return (
