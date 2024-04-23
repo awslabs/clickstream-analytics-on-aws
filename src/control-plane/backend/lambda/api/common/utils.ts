@@ -248,18 +248,12 @@ function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | u
   return value!;
 }
 
-function getStackPrefix(prefix?: string): string {
+function getStackPrefix(): string {
+  const prefix = process.env.IAM_ROLE_PREFIX;
   if (!prefix || prefix === '') {
     return SolutionInfo.SOLUTION_SHORT_NAME;
   }
   return `${prefix}-${SolutionInfo.SOLUTION_SHORT_NAME}`;
-}
-
-function getRolePrefix(prefix?: string): string {
-  if (!prefix || prefix === '') {
-    return SolutionInfo.SOLUTION_SHORT_NAME;
-  }
-  return prefix;
 }
 
 function getStackName(pipelineId: string, key: PipelineStackType, sinkType: string): string {
@@ -1508,7 +1502,6 @@ export {
   getTokenFromRequestContext,
   getBucketPrefix,
   getStackPrefix,
-  getRolePrefix,
   getStackName,
   getKafkaTopic,
   getPluginInfo,
