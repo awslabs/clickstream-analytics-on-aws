@@ -138,7 +138,9 @@ const UserSegments: React.FC = () => {
 
   return (
     <div className="flex">
-      <AnalyticsNavigation activeHref={`/analytics/segments`} />
+      <AnalyticsNavigation
+        activeHref={`/analytics/${projectId}/app/${appId}/segments`}
+      />
       <div className="flex-1">
         <AppLayout
           tools={<HelpInfo />}
@@ -163,6 +165,10 @@ const UserSegments: React.FC = () => {
                           onItemClick={(e) => {
                             if (e.detail.id === 'delete') {
                               confirmDeleteSegments();
+                            } else if (e.detail.id === 'duplicate') {
+                              window.location.href = `/analytics/${projectId}/app/${appId}/segments/${selectedSegment[0].segmentId}/duplicate`;
+                            } else if (e.detail.id === 'edit') {
+                              window.location.href = `/analytics/${projectId}/app/${appId}/segments/${selectedSegment[0].segmentId}/edit`;
                             }
                           }}
                           loading={loadingDelete}

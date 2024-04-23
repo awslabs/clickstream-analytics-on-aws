@@ -25,7 +25,7 @@ import SegmentEditor from 'pages/analytics/segments/components/SegmentEditor';
 import { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import { useParams } from 'react-router-dom';
-import { INIT_SEGMENT_OBJ } from 'ts/const';
+import { DEFAULT_SEGMENT_GROUP_DATA, INIT_SEGMENT_OBJ } from 'ts/const';
 import {
   mockAttributeListData,
   mockBuiltInData,
@@ -103,6 +103,7 @@ describe('SegmentEditor', () => {
         <SegmentEditor
           segmentObject={{ ...INIT_SEGMENT_OBJ }}
           updateSegmentObject={updateSegmentObjFn}
+          actionType="new"
         />
       );
       queryAllByTestId = result.queryAllByTestId;
@@ -121,6 +122,7 @@ describe('SegmentEditor', () => {
         <SegmentEditor
           segmentObject={{ ...INIT_SEGMENT_OBJ }}
           updateSegmentObject={updateSegmentObjFn}
+          actionType="new"
         />
       );
       queryAllByTestId = result.queryAllByTestId;
@@ -136,5 +138,25 @@ describe('SegmentEditor', () => {
     });
     listItems = queryAllByTestId('test-segment-item');
     expect(listItems).toHaveLength(2);
+  });
+
+  it('should render edit page without errors', async () => {
+    let queryAllByTestId;
+    await act(async () => {
+      const result = renderWithProvider(
+        <SegmentEditor
+          segmentObject={{ ...INIT_SEGMENT_OBJ }}
+          updateSegmentObject={updateSegmentObjFn}
+          segmentGroupData={{ ...DEFAULT_SEGMENT_GROUP_DATA }}
+          actionType="edit"
+        />
+      );
+      queryAllByTestId = result.queryAllByTestId;
+    });
+    await waitFor(() => {
+      expect(screen.queryByText('loading')).not.toBeInTheDocument();
+    });
+    const listItems = queryAllByTestId('test-segment-item');
+    expect(listItems).toHaveLength(1);
   });
 });

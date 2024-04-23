@@ -586,6 +586,12 @@ export class ClickStreamApiConstruct extends Construct {
       resources: [role.roleArn],
     }));
 
+    // EventBridge rule will also assume this role to invoke step functions
+    role.assumeRolePolicy?.addStatements(new PolicyStatement({
+      actions: ['sts:AssumeRole'],
+      principals: [new ServicePrincipal('events.amazonaws.com')],
+    }));
+
     return role;
   }
 }

@@ -106,11 +106,16 @@ export class SegmentServ {
         refreshSchedule,
         criteria,
         eventBridgeRuleArn,
+        uiRenderingObject,
       } = req.body;
       const segmentDdbItem = await segmentStore.get(appId as string, segmentId as string);
       if (segmentDdbItem === undefined) {
         return res.status(400).send(new ApiFail(`Segment with id ${segmentId} is not found`));
       }
+
+      // Construct segment sql query
+      const userSegmentsSql = new UserSegmentsSql(this.constructSegmentFromInput(req, res));
+      const sql = userSegmentsSql.buildCriteriaStatement();
 
       const updatedItem = {
         ...segmentDdbItem,
@@ -121,6 +126,8 @@ export class SegmentServ {
         refreshSchedule,
         criteria,
         eventBridgeRuleArn,
+        sql,
+        uiRenderingObject,
       };
 
       // Update EventBridge rule
@@ -268,7 +275,7 @@ export class SegmentServ {
       refreshSchedule: input.refreshSchedule,
       criteria: input.criteria,
       eventBridgeRuleArn: '',
-      uiRenderingJson: input.uiRenderingJson ?? '',
+      uiRenderingObject: input.uiRenderingObject ?? {},
     };
   }
 

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Segment } from '@aws/clickstream-base-lib';
+import { Segment, SegmentDdbItem } from '@aws/clickstream-base-lib';
 import { apiRequest } from 'ts/request';
 
 export const getSegmentsList = async (params: {
@@ -23,8 +23,26 @@ export const getSegmentsList = async (params: {
   >;
 };
 
+export const getSegmentById = async (params: {
+  appId: string;
+  segmentId: string;
+}) => {
+  return (await apiRequest(
+    'get',
+    `/segments/${params.segmentId}?appId=${params.appId}`
+  )) as ApiResponse<SegmentDdbItem>;
+};
+
 export const createSegment = async (segmentObj: Segment) => {
   return await apiRequest('post', `/segments`, segmentObj);
+};
+
+export const updateSegment = async (segmentObj: Segment) => {
+  return await apiRequest(
+    'patch',
+    `/segments/${segmentObj.segmentId}`,
+    segmentObj
+  );
 };
 
 export const deleteSegment = async (params: {

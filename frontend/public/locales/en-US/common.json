@@ -25,6 +25,7 @@
     "analyzes": "Analyzes",
     "segments": "Segments",
     "createSegment": "Create Segment",
+    "editSegment": "Edit Segment",
     "data-management": "Data Management"
   },
   "nav": {
@@ -66,7 +67,7 @@
     "feedback": "Feedback",
     "signOut": "Sign out",
     "updateAvailable1": "A new version {{version}} is now available. Please click here to upgrade.",
-    "updateAvailable2": "A new version {{version}} is now available. Please contact your administrator to upgrade.",    
+    "updateAvailable2": "A new version {{version}} is now available. Please contact your administrator to upgrade.",
     "noNotification": "There are no new notifications",
     "search": "Search",
     "closeSearch": "Close search",
