@@ -92,8 +92,9 @@ export class CMetadataDisplay {
     const prefix = parameter.prefix.split('#')[0];
     const key = `${prefix}#${parameter.projectId}#${parameter.appId}#${parameter.category}#${parameter.name}#${parameter.valueType}`;
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
-    parameter.displayName = this.patchCategoryToDisplayName(parameter.category, parameter.name, metadataDisplay?.displayName);
-    parameter.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
+    parameter.displayName = parameter.displayName ??
+      this.patchCategoryToDisplayName(parameter.category, parameter.name, metadataDisplay?.displayName);
+    parameter.description = parameter.description ?? metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
     this._patchEventParameterInfoFromPresetConfiguration(parameter, eventName);
   }
 
@@ -138,8 +139,8 @@ export class CMetadataDisplay {
       }
     }
     if (!matchParameter) {
-      parameter.metadataSource = MetadataSource.CUSTOM;
-      parameter.parameterType = MetadataParameterType.PRIVATE;
+      parameter.metadataSource = parameter.metadataSource ?? MetadataSource.CUSTOM;
+      parameter.parameterType = parameter.parameterType ?? MetadataParameterType.PRIVATE;
     }
   }
 
