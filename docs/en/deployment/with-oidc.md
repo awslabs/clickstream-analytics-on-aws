@@ -6,7 +6,8 @@
 
 !!! info "Important"
     The {{ solution_name }} console is served via CloudFront distribution which is considered as an Internet information service.
-    If you are deploying the solution in **AWS China Regions**, the domain must have a valid [ICP Recordal][icp].
+
+    If deploying the solution in **AWS China Regions**, a valid [ICP Recordal][icp] is required. Check [this documentation][china-prerequisites] for additional prerequisites.
 
 * A domain. You will use this domain to access the {{ solution_name }} console. This is required for AWS China Regions, and is optional for AWS Regions.
 * An SSL certificate in AWS IAM. The SSL must be associated with the given domain. Follow [this guide](../resources/upload-ssl-certificate.md) to upload SSL certificate to IAM. This is required for AWS China Regions only.
@@ -271,3 +272,4 @@ Once you have logged into the {{ solution_name }} console, you can start to [cre
 [cloudformation]: https://console.aws.amazon.com/cloudformation/
 [create-project]: ../getting-started/1.create-project.md
 [iam-list-cert]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html#list-server-certificates
+[china-prerequisites]: ../resources/aws-china-prerequisites.md

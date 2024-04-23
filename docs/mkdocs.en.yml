@@ -84,6 +84,7 @@ nav:
     - Identity Management: identity-mgmt.md
     - Upgrade the solution: upgrade.md
     - Additional resources:
+      - AWS China Prerequisites: resources/aws-china-prerequisites.md
       - Upload Certificate: resources/upload-ssl-certificate.md
     - FAQ: faq.md
     - Troubleshooting: troubleshooting.md
