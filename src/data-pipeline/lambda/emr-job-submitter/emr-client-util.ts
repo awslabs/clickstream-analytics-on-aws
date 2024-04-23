@@ -26,6 +26,7 @@ import { CHANNEL_RULE } from './traffic_source_channel_rule_v1';
 import { TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME, TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME } from '../../../base-lib/src';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { isObjectExist, listObjectsByPrefix, putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
+import { getRuleConfigDir } from '../../data-pipeline';
 import { getJobInfoKey, getSinkLocationPrefix } from '../../utils/utils-common';
 
 
@@ -59,11 +60,17 @@ export class EMRServerlessUtil {
         logger.warn('appIds is empty, please check env: APP_IDS');
         return;
       }
-      await putInitRuleConfig(config.ruleConfigDir, config.appIds);
+
+      const ruleConfigDir = getRuleConfigDir(config.pipelineS3Prefix, config.projectId);
+      const ruleConfigDirS3 = `s3://${config.pipelineS3BucketName}/${ruleConfigDir}`;
+      logger.info('ruleConfigDirS3', { ruleConfigDirS3 });
+
+      await putInitRuleConfig(ruleConfigDirS3, config.appIds);
 
       const runJobInfo = await EMRServerlessUtil.startJobRun(
         event,
         config,
+        ruleConfigDirS3,
         context,
       );
       logger.info('started job:', { runJobInfo });
@@ -82,6 +89,7 @@ export class EMRServerlessUtil {
   private static async startJobRun(
     event: any,
     config: any,
+    ruleConfigDirS3: string,
     context: Context,
   ) {
 
@@ -114,7 +122,8 @@ export class EMRServerlessUtil {
       return { objectsInfo };
     }
 
-    const { startJobRunCommandInput } = await this.getJobRunCommandInput(event, config, startTimestamp, endTimestamp, funcTags, objectsInfo);
+    const { startJobRunCommandInput } = await this.getJobRunCommandInput(
+      event, config, startTimestamp, endTimestamp, funcTags, objectsInfo, ruleConfigDirS3);
 
     const startJobRunCommand = new StartJobRunCommand(startJobRunCommandInput);
     let jobInfo = await emrClient.send(startJobRunCommand);
@@ -150,7 +159,7 @@ export class EMRServerlessUtil {
   }
 
   private static async getJobRunCommandInput(event: any, config: any, startTimestamp: number, endTimestamp: number,
-    funcTags: Record<string, string> | undefined, objectsInfo: ObjectsInfo) {
+    funcTags: Record<string, string> | undefined, objectsInfo: ObjectsInfo, ruleConfigDirS3: string) {
 
     let sparkConfigEvent: string[] = event.sparkConfig || [];
     let sparkConfigS3: string[] = [];
@@ -205,7 +214,7 @@ export class EMRServerlessUtil {
       rePartitions, // [14] rePartitions.
       userKeepDays, // [15] userKeepDays
       itemKeepDays, // [16] itemKeepDays
-      config.ruleConfigDir, // [17] ruleConfigDir
+      ruleConfigDirS3, // [17] ruleConfigDir
     ];
 
     const jars = Array.from(
@@ -337,7 +346,6 @@ export class EMRServerlessUtil {
       rePartitions: process.env.RE_PARTITIONS ?? '200',
       userKeepDays: process.env.USER_KEEP_DAYS ?? '180',
       itemKeepDays: process.env.ITEM_KEEP_DAYS ?? '360',
-      ruleConfigDir: process.env.RULE_CONFIG_DIR!,
     };
   }
 

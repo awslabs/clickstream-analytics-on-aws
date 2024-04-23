@@ -174,7 +174,6 @@ export class LambdaUtil {
         OUTPUT_FORMAT: this.props.outputFormat,
         USER_KEEP_DAYS: this.props.userKeepDays + '',
         ITEM_KEEP_DAYS: this.props.itemKeepDays + '',
-        RULE_CONFIG_DIR: `s3://${this.props.pipelineS3Bucket.bucketName}/${ruleConfigDir}`,
       },
       ...functionSettings,
       memorySize: 1024,
