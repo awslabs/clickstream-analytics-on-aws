@@ -1597,7 +1597,7 @@ describe('SQL Builder test', () => {
     a.event_name || '_' || a.step_1 as source,
     CASE
       WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-      ELSE 'lost'
+      ELSE 'lost_' || a.step_2
     END as target,
     a.user_pseudo_id as x_id
   from
@@ -1606,7 +1606,7 @@ describe('SQL Builder test', () => {
     and a.session_id = b.session_id
     and a.user_pseudo_id = b.user_pseudo_id
   where
-    a.step_2 <= 10
+    a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
 
@@ -1866,7 +1866,7 @@ describe('SQL Builder test', () => {
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -1875,7 +1875,7 @@ describe('SQL Builder test', () => {
       and a.group_id = b.group_id
       and a.user_pseudo_id = b.user_pseudo_id
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
 
@@ -1915,7 +1915,7 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.session_id,
-          event.screen_name,
+          event.screen_view_screen_name,
           TO_CHAR(
             CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
             'YYYY-MM'
@@ -1957,7 +1957,7 @@ describe('SQL Builder test', () => {
         select
           base_data.event_timestamp,
           base_data.event_id,
-          max(screen_name) as node
+          max(screen_view_screen_name) as node
         from
           base_data
         group by
@@ -2061,7 +2061,7 @@ describe('SQL Builder test', () => {
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -2070,7 +2070,193 @@ describe('SQL Builder test', () => {
       and a.session_id = b.session_id
       and a.step_2 = b.step_1
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
+    `.trim().replace(/ /g, ''),
+    );
+  });
+
+  test('node path analysis view - start from', () => {
+
+    const sql = buildNodePathAnalysisView({
+      dbName: 'shop',
+      timezone: 'Asia/Shanghai',
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      groupColumn: ExploreGroupColumn.DAY,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      pathAnalysis: {
+        sessionType: ExplorePathSessionDef.SESSION,
+        nodeType: ExplorePathNodeType.SCREEN_NAME,
+        lagSeconds: 3600,
+        nodes: ['LoginActivity'],
+        includingOtherEvents: true,
+      },
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      base_data as (
+        select
+          event.event_id,
+          event.event_name,
+          event.event_timestamp,
+          event.merged_user_id as user_pseudo_id,
+          event.user_id,
+          event.session_id,
+          event.screen_view_screen_name,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          shop.shop.clickstream_event_view_v3 as event
+        where
+          CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)::DATE <= date '2025-10-10'
+          and event.event_name in ('_screen_view', '_page_view')
+      ),
+      mid_table_1 as (
+        select
+          event_name,
+          day as event_date,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          session_id
+        from
+          base_data
+      ),
+      mid_table_2 as (
+        select
+          base_data.event_timestamp,
+          base_data.event_id,
+          max(screen_view_screen_name) as node
+        from
+          base_data
+        group by
+          1,
+          2
+      ),
+      mid_table as (
+        select
+          mid_table_1.*,
+          mid_table_2.node
+        from
+          mid_table_1
+          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+      ),
+      data as (
+        select
+          event_name,
+          event_date,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          session_id,
+          node,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          mid_table
+      ),
+      step_table_1 as (
+        select
+          user_pseudo_id,
+          session_id,
+          min(step_1) min_step
+        from
+          data
+        where
+          node = 'LoginActivity'
+        group by
+          user_pseudo_id,
+          session_id
+      ),
+      step_table_2 as (
+        select
+          data.*
+        from
+          data
+          join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
+          and data.session_id = step_table_1.session_id
+          and data.step_1 >= step_table_1.min_step
+      ),
+      data_final as (
+        select
+          event_name,
+          event_date,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          session_id,
+          node,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) + 1 as step_2
+        from
+          step_table_2
+      )
+    select
+      a.event_date event_date,
+      a.node || '_' || a.step_1 as source,
+      CASE
+        WHEN b.node is not null THEN b.node || '_' || a.step_2
+        ELSE 'lost_' || a.step_2
+      END as target,
+      a.user_pseudo_id as x_id
+    from
+      data_final a
+      left join data_final b on a.user_pseudo_id = b.user_pseudo_id
+      and a.session_id = b.session_id
+      and a.step_2 = b.step_1
+    where
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
   });
@@ -2110,7 +2296,7 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.session_id,
-          event.screen_name,
+          event.screen_view_screen_name,
           TO_CHAR(
             CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
             'YYYY-MM'
@@ -2152,7 +2338,7 @@ describe('SQL Builder test', () => {
         select
           base_data.event_timestamp,
           base_data.event_id,
-          max(screen_name) as node
+          max(screen_view_screen_name) as node
         from
           base_data
         group by
@@ -2278,7 +2464,7 @@ describe('SQL Builder test', () => {
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -2287,7 +2473,7 @@ describe('SQL Builder test', () => {
       and a.session_id = b.session_id
       and a.step_2 = b.step_1
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
   });
@@ -2326,7 +2512,7 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.session_id,
-          event.screen_name,
+          event.screen_view_screen_name,
           TO_CHAR(
             CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
             'YYYY-MM'
@@ -2368,7 +2554,7 @@ describe('SQL Builder test', () => {
         select
           base_data.event_timestamp,
           base_data.event_id,
-          max(screen_name) as node
+          max(screen_view_screen_name) as node
         from
           base_data
         group by
@@ -2479,7 +2665,7 @@ describe('SQL Builder test', () => {
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -2488,7 +2674,7 @@ describe('SQL Builder test', () => {
       and a.session_id = b.session_id
       and a.step_2 = b.step_1
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
   });
@@ -2523,7 +2709,7 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          event.screen_name,
+          event.screen_view_screen_name,
           TO_CHAR(
             CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
             'YYYY-MM'
@@ -2564,7 +2750,7 @@ describe('SQL Builder test', () => {
         select
           base_data.event_timestamp,
           base_data.event_id,
-          max(screen_name) as node
+          max(screen_view_screen_name) as node
         from
           base_data
         group by
@@ -2727,7 +2913,7 @@ describe('SQL Builder test', () => {
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -2736,7 +2922,7 @@ describe('SQL Builder test', () => {
       and a.group_id = b.group_id
       and a.step_2 = b.step_1
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
   });
@@ -2772,7 +2958,7 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          event.screen_name,
+          event.screen_view_screen_name,
           TO_CHAR(
             CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
             'YYYY-MM'
@@ -2813,7 +2999,7 @@ describe('SQL Builder test', () => {
         select
           base_data.event_timestamp,
           base_data.event_id,
-          max(screen_name) as node
+          max(screen_view_screen_name) as node
         from
           base_data
         group by
@@ -2996,7 +3182,7 @@ describe('SQL Builder test', () => {
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -3005,7 +3191,7 @@ describe('SQL Builder test', () => {
       and a.group_id = b.group_id
       and a.step_2 = b.step_1
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
   });
@@ -3040,7 +3226,7 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          event.screen_name,
+          event.screen_view_screen_name,
           TO_CHAR(
             CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
             'YYYY-MM'
@@ -3081,7 +3267,7 @@ describe('SQL Builder test', () => {
         select
           base_data.event_timestamp,
           base_data.event_id,
-          max(screen_name) as node
+          max(screen_view_screen_name) as node
         from
           base_data
         group by
@@ -3251,7 +3437,7 @@ describe('SQL Builder test', () => {
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -3260,7 +3446,7 @@ describe('SQL Builder test', () => {
       and a.group_id = b.group_id
       and a.step_2 = b.step_1
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
   });
@@ -5872,7 +6058,7 @@ describe('SQL Builder test', () => {
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -5881,7 +6067,264 @@ describe('SQL Builder test', () => {
       and a.session_id = b.session_id
       and a.user_pseudo_id = b.user_pseudo_id
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
+    `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('buildEventPathAnalysisView - start from', () => {
+
+    const sql = buildEventPathAnalysisView({
+      dbName: 'shop',
+      timezone: 'Asia/Shanghai',
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'platform',
+            operator: '=',
+            value: ['Android'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'geo_country',
+            operator: '=',
+            value: ['China'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER,
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: [1686532526770],
+            dataType: MetadataValueType.INTEGER,
+          },
+          {
+            category: ConditionCategory.USER,
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: [1686532526780],
+            dataType: MetadataValueType.INTEGER,
+          },
+        ],
+      },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'geo_country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526780],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+      ],
+      pathAnalysis: {
+        sessionType: ExplorePathSessionDef.SESSION,
+        nodeType: ExplorePathNodeType.EVENT,
+        includingOtherEvents: true,
+      },
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      base_data as (
+        select
+          event.event_id,
+          event.event_name,
+          event.event_timestamp,
+          event.merged_user_id as user_pseudo_id,
+          event.user_id,
+          event.platform,
+          event.geo_country,
+          event.session_id,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          shop.shop.clickstream_event_view_v3 as event
+        where
+          CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)::DATE <= date '2025-10-10'
+          and event.event_name not in (
+            '_session_start',
+            '_session_stop',
+            '_screen_view',
+            '_app_exception',
+            '_app_update',
+            '_first_open',
+            '_os_update',
+            '_user_engagement',
+            '_profile_set',
+            '_page_view',
+            '_app_start',
+            '_scroll',
+            '_search',
+            '_click',
+            '_clickstream_error',
+            '_mp_share',
+            '_mp_favorite',
+            '_app_end'
+          )
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and u__user_first_touch_timestamp > 1686532526770
+            and u__user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      mid_table as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          day as event_date,
+          session_id
+        from
+          base_data
+      ),
+      data as (
+        select
+          *,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          mid_table
+      ),
+      step_table_1 as (
+        select
+          data.user_pseudo_id user_pseudo_id,
+          data.session_id session_id,
+          min(step_1) min_step
+        from
+          data
+        where
+          event_name = 'view_item'
+        group by
+          user_pseudo_id,
+          session_id
+      ),
+      step_table_2 as (
+        select
+          data.*
+        from
+          data
+          join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
+          and data.session_id = step_table_1.session_id
+          and data.step_1 >= step_table_1.min_step
+      ),
+      data_final as (
+        select
+          event_name,
+          event_date,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          session_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) + 1 as step_2
+        from
+          step_table_2
+      )
+    select
+      a.event_date,
+      a.event_name || '_' || a.step_1 as source,
+      CASE
+        WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
+        ELSE 'lost_' || a.step_2
+      END as target,
+      a.user_pseudo_id as x_id
+    from
+      data_final a
+      left join data_final b on a.step_2 = b.step_1
+      and a.session_id = b.session_id
+      and a.user_pseudo_id = b.user_pseudo_id
+    where
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
 
@@ -6235,7 +6678,7 @@ describe('SQL Builder test', () => {
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -6244,7 +6687,7 @@ describe('SQL Builder test', () => {
       and a.group_id = b.group_id
       and a.user_pseudo_id = b.user_pseudo_id
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
 
@@ -6673,7 +7116,7 @@ describe('SQL Builder test', () => {
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -6682,7 +7125,7 @@ describe('SQL Builder test', () => {
       and a.session_id = b.session_id
       and a.user_pseudo_id = b.user_pseudo_id
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
 
@@ -7126,7 +7569,7 @@ describe('SQL Builder test', () => {
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -7135,7 +7578,7 @@ describe('SQL Builder test', () => {
       and a.group_id = b.group_id
       and a.user_pseudo_id = b.user_pseudo_id
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
 
@@ -7289,7 +7732,7 @@ describe('SQL Builder test', () => {
           event.platform,
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
-          event.screen_name,
+          event.screen_view_screen_name,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(
             CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
@@ -7337,7 +7780,7 @@ describe('SQL Builder test', () => {
         select
           base_data.event_timestamp,
           base_data.event_id,
-          max(screen_name) as node
+          max(screen_view_screen_name) as node
         from
           base_data
         group by
@@ -7500,7 +7943,7 @@ describe('SQL Builder test', () => {
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -7509,7 +7952,7 @@ describe('SQL Builder test', () => {
       and a.group_id = b.group_id
       and a.step_2 = b.step_1
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `;
     expect(sql.trim().replace(/ /g, '')).toEqual(expectResult.trim().replace(/ /g, ''));
 
@@ -12491,7 +12934,7 @@ describe('SQL Builder test', () => {
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.event_id as x_id
     from
@@ -12500,7 +12943,7 @@ describe('SQL Builder test', () => {
       and a.session_id = b.session_id
       and a.user_pseudo_id = b.user_pseudo_id
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
 
@@ -12662,7 +13105,7 @@ describe('SQL Builder test', () => {
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.event_id as x_id
     from
@@ -12671,7 +13114,7 @@ describe('SQL Builder test', () => {
       and a.session_id = b.session_id
       and a.user_pseudo_id = b.user_pseudo_id
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
 
@@ -12825,7 +13268,7 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
-          event.screen_name,
+          event.screen_view_screen_name,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(
             CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
@@ -12874,7 +13317,7 @@ describe('SQL Builder test', () => {
         select
           base_data.event_timestamp,
           base_data.event_id,
-          max(screen_name) as node
+          max(screen_view_screen_name) as node
         from
           base_data
         group by
@@ -12978,7 +13421,7 @@ describe('SQL Builder test', () => {
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.user_pseudo_id as x_id
     from
@@ -12987,7 +13430,7 @@ describe('SQL Builder test', () => {
       and a.session_id = b.session_id
       and a.step_2 = b.step_1
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
 
@@ -13972,7 +14415,7 @@ describe('SQL Builder test', () => {
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       a.event_id as x_id
     from
@@ -13981,7 +14424,7 @@ describe('SQL Builder test', () => {
       and a.session_id = b.session_id
       and a.user_pseudo_id = b.user_pseudo_id
     where
-      a.step_2 <= 10
+      a.step_2 <= 5
     `.trim().replace(/ /g, ''),
     );
 

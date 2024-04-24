@@ -248,9 +248,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     label: defaultStr(t('analytics:options.dayTimeGranularity')),
   });
 
-  const [includingOtherEvents, setIncludingOtherEvents] = React.useState(false);
+  const [includingOtherEvents, setIncludingOtherEvents] = React.useState(true);
   const [mergeConsecutiveEvents, setMergeConsecutiveEvents] =
-    React.useState(false);
+    React.useState(true);
 
   const resetConfig = async () => {
     setLoadingData(true);
