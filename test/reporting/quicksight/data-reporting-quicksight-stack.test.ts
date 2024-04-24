@@ -930,7 +930,7 @@ describe('DataReportingQuickSightStack resource test', () => {
         dataSets: [
           {
             tableName: 'Event_View',
-            importMode: 'DIRECT_QUERY',
+            useSpice: 'no',
             customSql: "\n          select \n            \n    *, \n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n          from {{schema}}.clickstream_event_view_v3\n          where DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) >= <<$startDate01>>\n          and DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))\n        ",
             columns: [
               {
@@ -1629,7 +1629,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Day_User_View',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_day_user_view_cnt_mv where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))",
             columns: [
               {
@@ -1673,7 +1675,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Day_Traffic_Source_User',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_day_traffic_source_user where event_date >= <<$startDate05>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate05>>))",
             columns: [
               {
@@ -1717,7 +1721,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Day_User_Acquisition',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_day_user_acquisition where event_date >= <<$startDate07>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate07>>))",
             columns: [
               {
@@ -1791,7 +1797,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Country_New_User',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_country_new_user where event_date >= <<$startDate08>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate08>>))",
             columns: [
               {
@@ -1849,7 +1857,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Intra_Day_User',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_intra_day_user_mv where event_date >= date_trunc('day', <<$endDate23>>) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))",
             columns: [
               {
@@ -1884,7 +1894,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Day_User_View_Engagement',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_engagement_day_user_view where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))",
             columns: [
               {
@@ -1923,7 +1935,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Engagement_KPI',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_engagement_kpi where event_date >= <<$startDate10>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate10>>))",
             columns: [
               {
@@ -1967,7 +1981,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Page_Screen_View',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_engagement_page_screen_view where event_date >= <<$startDate11>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate11>>))",
             columns: [
               {
@@ -2011,7 +2027,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Page_Screen_View_Detail',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_engagement_page_screen_view_detail where event_date >= <<$startDate12>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate12>>))",
             columns: [
               {
@@ -2065,7 +2083,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Entrance',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_engagement_entrance where event_date >= <<$startDate13>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate13>>))",
             columns: [
               {
@@ -2109,7 +2129,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Exit',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_engagement_exit where event_date >= <<$startDate14>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate14>>))",
             columns: [
               {
@@ -2153,7 +2175,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Event_Name',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_engagement_event_name where event_date >= <<$startDate22>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate22>>))",
             columns: [
               {
@@ -2202,7 +2226,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'User_New_Return',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_retention_user_new_return where event_date >= <<$startDate15>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate15>>))",
             columns: [
               {
@@ -2241,7 +2267,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Event_Overtime',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_retention_event_overtime where event_date >= <<$startDate16>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate16>>))",
             columns: [
               {
@@ -2275,7 +2303,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'DAU_WAU',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_retention_dau_wau where event_date >= <<$startDate17>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate17>>))",
             columns: [
               {
@@ -2309,7 +2339,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Retention_View',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_retention_view_v3 where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))",
             columns: [
               {
@@ -2353,7 +2385,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Lifecycle_Weekly_View',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v3 where time_period >= <<$startDate20>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate20>>))",
             columns: [
               {
@@ -2392,7 +2426,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Crash_Rate',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_device_crash_rate where event_date >= <<$startDate18>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate18>>))",
             columns: [
               {
@@ -2436,7 +2472,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             tableName: 'Device',
-            importMode: 'DIRECT_QUERY',
+            useSpice: {
+              Ref: 'QuickSightUseSpiceParam',
+            },
             customSql: "SELECT * FROM {{schema}}.clickstream_device_user_device where event_date >= <<$startDate21>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate21>>))",
             columns: [
               {

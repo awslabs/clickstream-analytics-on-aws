@@ -39,6 +39,7 @@ import {
   SharingModel,
   ResourceExistsException,
   ResourcePermission,
+  DataSetImportMode,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -843,7 +844,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
       Permissions: getDataSetPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
       DatasetParameters: datasetParameters,
-      ImportMode: props.importMode,
+      ImportMode: props.useSpice === 'yes' ? DataSetImportMode.SPICE : DataSetImportMode.DIRECT_QUERY,
       PhysicalTableMap: {
         PhyTable1: {
           CustomSql: {
@@ -1108,8 +1109,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
       Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
-
-      ImportMode: props.importMode,
+      ImportMode: props.useSpice === 'yes' ? DataSetImportMode.SPICE : DataSetImportMode.DIRECT_QUERY,
       PhysicalTableMap: {
         PhyTable1: {
           CustomSql: {

@@ -98,6 +98,15 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Dashboard Timezone Setting',
   };
 
+  const quickSightUseSpiceParam = new CfnParameter(scope, 'QuickSightUseSpiceParam', {
+    description: 'Use SPICE to import data set or not.',
+    type: 'String',
+    default: 'yes',
+  });
+  labels[quickSightUseSpiceParam.logicalId] = {
+    default: 'Enable QuickSight SPICE Import Mode',
+  };
+
   const redshiftDBParam = new CfnParameter(scope, 'RedshiftDBParam', {
     description: 'Redshift database name.',
     type: 'String',
@@ -152,6 +161,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       quickSightOwnerPrincipalParam.logicalId,
       quickSightTemplateArnParam.logicalId,
       quickSightTimezoneParam.logicalId,
+      quickSightUseSpiceParam.logicalId,
     ],
   });
 
@@ -174,6 +184,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     quickSightOwnerPrincipalParam,
     quickSightTemplateArnParam,
     quickSightTimezoneParam,
+    quickSightUseSpiceParam,
     redshiftEndpointParam,
     redshiftDBParam,
     redShiftDBSchemaParam,

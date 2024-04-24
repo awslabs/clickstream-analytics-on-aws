@@ -52,6 +52,7 @@ import {
   GeoSpatialDataRole,
   SimpleNumericalAggregationFunction,
   InputColumnDataType,
+  DataSetImportMode,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
@@ -387,7 +388,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
       Name: datasetId,
-      ImportMode: props.importMode,
+      ImportMode: props.useSpice === 'yes' ? DataSetImportMode.SPICE : DataSetImportMode.DIRECT_QUERY,
       Permissions: requestAction === ExploreRequestAction.PUBLISH ? datasetPermissionActions : undefined,
       PhysicalTableMap: {
         PhyTable1: {

@@ -108,7 +108,7 @@ export function createQuicksightCustomResource(
       //Base View
       {
         tableName: CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
+        useSpice: 'no',
         customSql: `
           select 
             ${eventViewColumns} 
@@ -159,8 +159,8 @@ export function createQuicksightCustomResource(
       //Acquisition Sheet
       {
         tableName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV} where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV} `,
         columns: [
           {
             Name: 'event_date',
@@ -205,8 +205,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER} where event_date >= <<$startDate05>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate05>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER} `,
         columns: [
           {
             Name: 'event_date',
@@ -251,8 +251,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION} where event_date >= <<$startDate07>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate07>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION} `,
         columns: [
           {
             Name: 'event_date',
@@ -327,8 +327,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER} where event_date >= <<$startDate08>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate08>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER}`,
         columns: [
           {
             Name: 'event_date',
@@ -383,8 +383,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} where event_date >= date_trunc('day', <<$endDate23>>) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} `,
         columns: [
           {
             Name: 'event_date',
@@ -421,8 +421,8 @@ export function createQuicksightCustomResource(
       //Engagement Sheet
       {
         tableName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW} where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW} `,
         columns: [
           {
             Name: 'event_date',
@@ -462,8 +462,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_KPI} where event_date >= <<$startDate10>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate10>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_KPI} `,
         columns: [
           {
             Name: 'event_date',
@@ -508,8 +508,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW} where event_date >= <<$startDate11>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate11>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW} `,
         columns: [
           {
             Name: 'event_date',
@@ -554,8 +554,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL} where event_date >= <<$startDate12>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate12>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL} `,
         columns: [
           {
             Name: 'event_date',
@@ -610,8 +610,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_ENGAGEMENT_ENTRANCE_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_ENTRANCE} where event_date >= <<$startDate13>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate13>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_ENTRANCE} `,
         columns: [
           {
             Name: 'event_date',
@@ -656,8 +656,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_ENGAGEMENT_EXIT_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EXIT} where event_date >= <<$startDate14>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate14>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EXIT} `,
         columns: [
           {
             Name: 'event_date',
@@ -702,8 +702,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_ENGAGEMENT_EVENT_NAME_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EVENT_NAME} where event_date >= <<$startDate22>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate22>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EVENT_NAME} `,
         columns: [
           {
             Name: 'event_date',
@@ -755,8 +755,8 @@ export function createQuicksightCustomResource(
       //Retention Sheet
       {
         tableName: CLICKSTREAM_RETENTION_USER_NEW_RETURN_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_USER_NEW_RETURN} where event_date >= <<$startDate15>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate15>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_USER_NEW_RETURN} `,
         columns: [
           {
             Name: 'event_date',
@@ -796,8 +796,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_RETENTION_EVENT_OVERTIME_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_EVENT_OVERTIME} where event_date >= <<$startDate16>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate16>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_EVENT_OVERTIME} `,
         columns: [
           {
             Name: 'event_date',
@@ -832,8 +832,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_RETENTION_DAU_WAU_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_DAU_WAU} where event_date >= <<$startDate17>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate17>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_DAU_WAU} `,
         columns: [
           {
             Name: 'event_date',
@@ -868,8 +868,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} `,
         columns: [
           {
             Name: 'platform',
@@ -914,8 +914,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} where time_period >= <<$startDate20>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate20>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} `,
         columns: [
           {
             Name: 'time_period',
@@ -957,8 +957,8 @@ export function createQuicksightCustomResource(
       //Device Sheet
       {
         tableName: CLICKSTREAM_DEVICE_CRASH_RATE_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_CRASH_RATE} where event_date >= <<$startDate18>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate18>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_CRASH_RATE} `,
         columns: [
           {
             Name: 'event_date',
@@ -1003,8 +1003,8 @@ export function createQuicksightCustomResource(
       },
       {
         tableName: CLICKSTREAM_DEVICE_USER_DEVICE_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_USER_DEVICE} where event_date >= <<$startDate21>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate21>>))`,
+        useSpice: props.useSpice,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_USER_DEVICE} `,
         columns: [
           {
             Name: 'event_date',

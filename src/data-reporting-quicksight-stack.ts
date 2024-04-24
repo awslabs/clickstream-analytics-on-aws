@@ -160,6 +160,7 @@ export class DataReportingQuickSightStack extends Stack {
       dataSourceArn: dataSource.attrArn,
       databaseName: stackParams.redshiftDBParam.valueAsString,
       timezone: stackParams.quickSightTimezoneParam.valueAsString,
+      useSpice: stackParams.quickSightUseSpiceParam.valueAsString,
       quickSightProps: {
         userName: stackParams.quickSightUserParam.valueAsString,
         namespace: stackParams.quickSightNamespaceParam.valueAsString,
