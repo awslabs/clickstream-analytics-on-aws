@@ -1240,6 +1240,52 @@ describe('Data Processing job submitter', () => {
 
           {
             Action: [
+              's3:GetObject*',
+              's3:GetBucket*',
+              's3:List*',
+              's3:DeleteObject*',
+              's3:PutObject',
+              's3:PutObjectLegalHold',
+              's3:PutObjectRetention',
+              's3:PutObjectTagging',
+              's3:PutObjectVersionTagging',
+              's3:Abort*',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':s3:::',
+                    Match.anyValue(),
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':s3:::',
+                    Match.anyValue(),
+                    '/clickstream/',
+                    Match.anyValue(),
+                    '/rules',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
               'xray:PutTraceSegments',
               'xray:PutTelemetryRecords',
             ],
@@ -1366,7 +1412,7 @@ test('Nested stack has CreateEMRServerlessApplicationCustomResource', () => {
   });
 });
 
-test.only('CreateEMRServerlessApplicationLambdaRole policy is set correctly', () => {
+test('CreateEMRServerlessApplicationLambdaRole policy is set correctly', () => {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::IAM::Policy', {
     PolicyDocument: {
