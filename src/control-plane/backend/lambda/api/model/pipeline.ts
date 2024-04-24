@@ -347,8 +347,8 @@ export class CPipeline {
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this._setExecution(executionName);
     this.pipeline.workflow = await this.generateWorkflow();
-    const executionArn = await this.stackManager.execute(this.pipeline.workflow, executionName);
-    this._setExecution(executionArn);
+    // const executionArn = await this.stackManager.execute(this.pipeline.workflow, executionName);
+    // this._setExecution(executionArn);
     this.pipeline.stackDetails = [];
     this.pipeline.statusType = PipelineStatusType.CREATING;
     // bind plugin

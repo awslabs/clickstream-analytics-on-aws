@@ -212,10 +212,9 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
     if (pipelineInfo?.selectedTransformPlugins) {
       // Create Pipeline
       renderTransformPlugins = pipelineInfo?.selectedTransformPlugins;
-    } else {
+    } else if (pipelineInfo?.dataProcessing?.transformPlugin) {
       // Pipeline detail
-      renderTransformPlugins =
-        pipelineInfo?.dataProcessing?.transformPlugin || [];
+      renderTransformPlugins = [pipelineInfo?.dataProcessing?.transformPlugin];
     }
     if (renderTransformPlugins.length > 0) {
       const returnElement = renderTransformPlugins.map((element: IPlugin) => {
