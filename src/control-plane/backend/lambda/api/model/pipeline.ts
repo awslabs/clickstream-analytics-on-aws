@@ -347,8 +347,8 @@ export class CPipeline {
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this._setExecution(executionName);
     this.pipeline.workflow = await this.generateWorkflow();
-    // const executionArn = await this.stackManager.execute(this.pipeline.workflow, executionName);
-    // this._setExecution(executionArn);
+    const executionArn = await this.stackManager.execute(this.pipeline.workflow, executionName);
+    this._setExecution(executionArn);
     this.pipeline.stackDetails = [];
     this.pipeline.statusType = PipelineStatusType.CREATING;
     // bind plugin
@@ -1300,10 +1300,13 @@ export class CPipeline {
         plugins: plugins,
       };
     }
-    const transformPlugins = this.resources.plugins?.filter(plugin => plugin.id === this.pipeline.dataProcessing?.transformPlugin);
+    let transformPlugin = this.resources.plugins?.find(plugin => plugin.id === 'BUILT-IN-1');
+    if (this.pipeline.dataProcessing?.transformPlugin) {
+      transformPlugin = this.resources.plugins?.find(plugin => plugin.id === this.pipeline.dataProcessing?.transformPlugin);
+    }
     const enrichPlugin = this.resources.plugins?.filter(plugin => this.pipeline.dataProcessing?.enrichPlugin?.includes(plugin.id));
     return {
-      transformPlugin: transformPlugins?.length === 1? transformPlugins[0] : null,
+      transformPlugin,
       enrichPlugin,
     };
   };
