@@ -37,6 +37,11 @@ export type ResetEventData = {
   disabled?: boolean;
 };
 
+export type ResetPathStartEventData = {
+  type: 'resetPathStartEventData';
+  data: IEventAnalyticsItem;
+};
+
 export type UpdateEventData = {
   type: 'updateEventData';
   eventData: IEventAnalyticsItem[];
@@ -113,6 +118,7 @@ export type ChangeCurRelationShip = {
 export type AnalyticsFilterAction =
   | UpdateEventData
   | ResetEventData
+  | ResetPathStartEventData
   | AddNewEventAnalyticsItem
   | RemoveEventItem
   | AddNewConditionItem
@@ -134,6 +140,13 @@ export const analyticsEventSelectReducer = (
   switch (action.type) {
     case 'updateEventData': {
       return [...action.eventData];
+    }
+    case 'resetPathStartEventData': {
+      return [
+        {
+          ...action.data,
+        },
+      ];
     }
     case 'resetEventData': {
       return [
