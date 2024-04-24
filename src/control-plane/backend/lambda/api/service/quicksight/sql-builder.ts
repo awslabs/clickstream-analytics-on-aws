@@ -590,6 +590,12 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
   });
 }
 
+export function isStartFromPathAnalysis(sqlParameters: SQLParameters, analyticsType: ExploreAnalyticsType) : boolean {
+  return (analyticsType === ExploreAnalyticsType.EVENT_PATH && sqlParameters.eventAndConditions?.length === 1)
+  || (analyticsType === ExploreAnalyticsType.NODE_PATH && sqlParameters.pathAnalysis?.nodes?.length === 1);
+  ;
+}
+
 export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : string {
 
   const eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
@@ -650,14 +656,14 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
     from data_final a left join data_final b 
       on a.step_2 = b.step_1 
       and a.session_id = b.session_id
       and a.user_pseudo_id = b.user_pseudo_id
-    where a.step_2 <= ${sqlParameters.maxStep ?? 10}
+    where a.step_2 <= ${sqlParameters.maxStep ?? 5}
     `;
 
   } else {
@@ -755,14 +761,14 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
     from data_final a left join data_final b 
       on a.step_2 = b.step_1 
       and a.group_id = b.group_id 
       and a.user_pseudo_id = b.user_pseudo_id
-    where a.step_2 <= ${sqlParameters.maxStep ?? 10}
+    where a.step_2 <= ${sqlParameters.maxStep ?? 5}
     `;
   }
 
@@ -782,6 +788,21 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
   let dataTableSql = '';
 
   const includingOtherEvents = sqlParameters.pathAnalysis?.includingOtherEvents ? true: false;
+
+  const isStartFrom = isStartFromPathAnalysis(sqlParameters, ExploreAnalyticsType.NODE_PATH);
+  let caseWhenSql = '';
+  if (isStartFrom) {
+    caseWhenSql = `
+        node,
+      `;
+  } else {
+    caseWhenSql = `
+        case 
+          when node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}') then node 
+          else 'other'
+        end as node,
+      `;
+  }
 
   if (sqlParameters.pathAnalysis!.sessionType === ExplorePathSessionDef.SESSION ) {
     midTableSql = `
@@ -807,10 +828,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         event_id,
         event_timestamp,
         session_id,
-        case 
-          when node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}') then node 
-          else 'other'
-        end as node,
+        ${caseWhenSql}
         ROW_NUMBER() OVER (
           PARTITION BY
             user_pseudo_id,
@@ -827,7 +845,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         ) + 1 as step_2
         from
           mid_table
-        ${!includingOtherEvents ? `where node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')` : ''}
+        ${!includingOtherEvents && !isStartFromPathAnalysis(sqlParameters, ExploreAnalyticsType.NODE_PATH) ? `where node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')` : ''}
       ),
     `;
     dataTableSql = `step_table_1 as (
@@ -884,14 +902,14 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       a.node || '_' || a.step_1 as source,
       CASE 
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
     from data_final a left join data_final b 
       on a.user_pseudo_id = b.user_pseudo_id 
       and a.session_id = b.session_id
       and a.step_2 = b.step_1
-    where a.step_2 <= ${sqlParameters.maxStep ?? 10}
+    where a.step_2 <= ${sqlParameters.maxStep ?? 5}
     `;
 
   } else {
@@ -917,14 +935,11 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         event_id,
         event_date,
         event_timestamp,
-        case 
-          when node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}') then node 
-          else 'other'
-        end as node,
+        ${caseWhenSql}
         ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) as step_1,
         ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) + 1 as step_2
       from mid_table
-      ${!includingOtherEvents ? `where node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')` : ''}
+      ${!includingOtherEvents && !isStartFrom ? `where node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')` : ''}
     ),
     data_2 as (
       select 
@@ -1022,14 +1037,14 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       a.node || '_' || a.step_1 as source,
       CASE 
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost'
+        ELSE 'lost_' || a.step_2
       END as target,
       ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
     from data_final a left join data_final b 
       on a.user_pseudo_id = b.user_pseudo_id 
       and a.group_id = b.group_id
       and a.step_2 = b.step_1
-    where a.step_2 <= ${sqlParameters.maxStep ?? 10}
+    where a.step_2 <= ${sqlParameters.maxStep ?? 5}
     `;
   }
 
@@ -1563,7 +1578,8 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
   return sql;
 };
 
-function _getUnionBaseDataForEventPathAnalysis(eventNames: string[], sqlParameters: SQLParameters, isSessionJoin: boolean = false) {
+function _getUnionBaseDataForEventPathAnalysis(eventNames: string[], sqlParameters: SQLParameters,
+  isSessionJoin: boolean = false, isStartFrom: boolean = false) {
   let sql = 'union_base_data as (';
   for (const [index, eventCondition] of sqlParameters.eventAndConditions!.entries()) {
     const eventName = eventCondition.eventName;
@@ -1573,12 +1589,23 @@ function _getUnionBaseDataForEventPathAnalysis(eventNames: string[], sqlParamete
       sql += 'union all';
     }
 
+    let eventNameClause = '';
+    if (isStartFrom) {
+      eventNameClause = `
+        event_name,
+      `;
+    } else {
+      eventNameClause = `
+        CASE
+          WHEN event_name in ('${eventNames.join('\',\'')}')  THEN '${index+1}_' || event_name 
+          ELSE 'other'
+        END as event_name,
+      `;
+    }
+
     sql += `
     select 
-      CASE 
-        WHEN event_name in ('${eventNames.join('\',\'')}')  THEN '${index+1}_' || event_name 
-        ELSE 'other' 
-      END as event_name,
+      ${eventNameClause}
       user_pseudo_id,
       event_id,
       event_timestamp,
@@ -1600,14 +1627,23 @@ function _getMidTableForEventPathAnalysis(eventNames: string[], sqlParameters: S
   let unionTableSql = '';
   let prefix = '';
   let midTableSql = '';
-  let eventNameClause = `
-    CASE
-      WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
-      ELSE 'other'
-    END as event_name,
-  `;
+  const isStartFrom = isStartFromPathAnalysis(sqlParameters, ExploreAnalyticsType.EVENT_PATH);
+  let eventNameClause = '';
+  if (isStartFrom) {
+    eventNameClause = `
+      event_name,
+    `;
+  } else {
+    eventNameClause = `
+      CASE
+        WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
+        ELSE 'other'
+      END as event_name,
+    `;
+  }
+
   if (eventNames.length < sqlParameters.eventAndConditions!.length) {//has same event
-    unionTableSql = _getUnionBaseDataForEventPathAnalysis(eventNames, sqlParameters, isSessionJoin);
+    unionTableSql = _getUnionBaseDataForEventPathAnalysis(eventNames, sqlParameters, isSessionJoin, isStartFrom);
     baseTable = 'union_base_data';
     eventNameClause = 'event_name,';
     prefix = '1_';
@@ -1867,7 +1903,7 @@ function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameter
     return `
     and ${prefix}event_name in ('_screen_view', '_page_view')
     `;
-  } else if (isEventPathAnalysis && includingOtherEvents) {
+  } else if (isEventPathAnalysis && (includingOtherEvents || sqlParameters.eventAndConditions!.length === 1)) {
     return `and ${prefix}event_name not in ('${BUILTIN_EVENTS.filter(event => !eventNames.includes(event)).join('\',\'')}')`;
   }
 
