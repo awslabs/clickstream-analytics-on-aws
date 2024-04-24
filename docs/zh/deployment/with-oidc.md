@@ -6,7 +6,8 @@
 
 !!! info "重要提示"
     {{ solution_name }} 控制台是通过 CloudFront 分发提供的，它被视为一项互联网信息服务。
-    如果您在 **AWS 中国区域** 部署解决方案，域名必须具有有效的 [ICP 备案][icp]。
+
+    如果您在 **AWS 中国区域**部署解决方案,需要有效的[ICP备案][icp]。请查看[此文档][china-prerequisites]了解更多先决条件。
 
 * 域名。您将使用该域名访问 {{ solution_name }} 控制台。对于 AWS 中国区域，这是必需的，而对于 AWS 区域则是可选的。
 * 在 AWS IAM 中的 SSL 证书。SSL 必须与给定的域名关联。按照 [此指南](../resources/upload-ssl-certificate.md) 将 SSL 证书上传到 IAM。这仅适用于 AWS 中国区域。
@@ -277,3 +278,4 @@
 [cloudformation]: https://console.aws.amazon.com/cloudformation/
 [create-project]: ../getting-started/1.create-project.md
 [iam-list-cert]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html#list-server-certificates
+[china-prerequisites]: ../resources/aws-china-prerequisites.md
