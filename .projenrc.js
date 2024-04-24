@@ -353,6 +353,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   },
 });
 
+project.setScript('test:local', 'export LOCAL_TESTING=true && pnpm dlx projen test');
 project.preCompileTask.exec('pnpm nx build @aws/clickstream-base-lib', {
 });
 
