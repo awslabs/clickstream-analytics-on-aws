@@ -147,18 +147,14 @@ public class SensorsEventParserTest extends BaseTest {
 
 
     @Test
-    void test_sensors_parseLineToDBRow_test_data() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_sensors_parseLineToDBRow_test_data
+    void test_sensors_parseLineToDBRow_non_zip_data() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_sensors_parseLineToDBRow_non_zip_data
 
-        String lines = resourceFileContent("/sensors-data/test.json");
-
+        String lines = resourceFileContent("/sensors-data/web-non-gzip-data.json");
         String firstLine = lines.split("\n")[0];
-
         SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
-        ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "test.json");
-
-        rowResult.getClickstreamEventList().forEach(event -> {
-            System.out.println(event.toJson());
-        });
+        ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "web-non-gzip-data.json");
+        Assertions.assertEquals(1, rowResult.getClickstreamEventList().size(), "test_sensors_parseLineToDBRow_non_zip_data");
     }
+
 }
