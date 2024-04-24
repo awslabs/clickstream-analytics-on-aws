@@ -24,6 +24,7 @@ import {
 import { Tag } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { EditedPath, getDiff } from 'json-difference';
+import { truncate } from 'lodash';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
@@ -367,7 +368,11 @@ export class CPipeline {
     if (!listenStackQueueArn) {
       throw new ClickStreamBadRequestError('Queue ARN not found. Please check and try again.');
     }
-    const topicName = `${CFN_TOPIC_PREFIX}-${this.pipeline.pipelineId}`;
+    const topicName = truncate(`${CFN_TOPIC_PREFIX}-${this.pipeline.pipelineId}`, {
+      length: 255,
+      omission: '',
+    });
+    console.log(`Creating topic ${topicName}`);
     const topicArn = await createTopicAndSubscribeSQSQueue(
       this.pipeline.region,
       this.pipeline.projectId,
@@ -381,7 +386,10 @@ export class CPipeline {
     const ruleArn = await createRuleAndAddTargets(
       this.pipeline.region,
       this.pipeline.projectId,
-      `${CFN_RULE_PREFIX}-${this.pipeline.id}`,
+      truncate(`${CFN_RULE_PREFIX}-${this.pipeline.id}`, {
+        length: 64,
+        omission: '',
+      }),
       `{\"source\":[\"aws.cloudformation\"],\"resources\":[{\"wildcard\":\"${cfnRulePatternResourceArn}\"}],\"detail-type\":[\"CloudFormation Stack Status Change\"]}`,
       topicArn,
     );
