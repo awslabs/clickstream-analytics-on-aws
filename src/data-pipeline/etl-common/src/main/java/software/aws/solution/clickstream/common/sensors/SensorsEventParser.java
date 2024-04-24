@@ -14,6 +14,7 @@
 package software.aws.solution.clickstream.common.sensors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
@@ -31,9 +32,11 @@ import software.aws.solution.clickstream.common.model.ValueType;
 import software.aws.solution.clickstream.common.sensors.event.Item;
 import software.aws.solution.clickstream.common.sensors.event.SensorsEvent;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,12 +47,14 @@ import static software.aws.solution.clickstream.common.ClickstreamEventParser.EV
 import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringEventPropMap;
 import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringUserPropMap;
 import static software.aws.solution.clickstream.common.Util.deCodeUri;
+import static software.aws.solution.clickstream.common.Util.decompress;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 import static software.aws.solution.clickstream.common.enrich.UAEnrichHelper.UA_STRING;
 
 
 @Slf4j
 public final class SensorsEventParser extends BaseEventParser {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
     private static final String GZIP_DATA_LIST = "data_list=";
     private static final String GZIP_DATA = "data=";
@@ -125,24 +130,41 @@ public final class SensorsEventParser extends BaseEventParser {
     }
 
     @Override
-    public String getGzipData(final String data) {
-        String gzData = null;
+    public JsonNode getData(final String ingestDataField) throws JsonProcessingException {
+        String rawStringData = ingestDataField;
+        if (!rawStringData.startsWith("[") && !rawStringData.startsWith("{")) {
+            log.debug("gzipData: " + true);
+            String base64Data = getBase64Data(rawStringData);
+
+            byte[] bytes = Base64.getDecoder().decode(base64Data);
+            try {
+                rawStringData = decompress(bytes);
+            } catch (Exception e) {
+                rawStringData = new String(bytes, StandardCharsets.UTF_8);
+            }
+        }
+        return OBJECT_MAPPER.readTree(rawStringData);
+    }
+
+    public String getBase64Data(final String data) {
+        String b64Data = null;
 
         for (String dataItem : data.split("&")) {
             if (dataItem.startsWith(GZIP_DATA_LIST)) {
-                gzData = Util.deCodeUri(dataItem.substring(GZIP_DATA_LIST.length()));
-                break;
+                b64Data = Util.deCodeUri(dataItem.substring(GZIP_DATA_LIST.length()));
             }
             if (dataItem.startsWith(GZIP_DATA)) {
-                gzData = Util.deCodeUri(dataItem.substring(GZIP_DATA.length()));
+                b64Data = Util.deCodeUri(dataItem.substring(GZIP_DATA.length()));
+            }
+            if (b64Data != null) {
                 break;
             }
         }
 
-        if (gzData == null) {
+        if (b64Data == null) {
             log.warn("No gzip data " + GZIP_DATA_LIST + " or " +GZIP_DATA_LIST + " found in the input data: " + data);
         }
-        return gzData;
+        return b64Data;
     }
 
     private ClickstreamEvent getClickstreamEvent(final SensorsEvent sensorsEvent, final int index, final ExtraParams extraParams) throws JsonProcessingException {
