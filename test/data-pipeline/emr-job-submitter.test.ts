@@ -125,9 +125,6 @@ process.env.JOB_NAME = 'test-job-name-123456';
 process.env.SAVE_INFO_TO_WAREHOUSE = '1';
 process.env.USER_KEEP_DAYS = '10';
 process.env.ITEM_KEEP_DAYS = '12';
-// RULE_CONFIG_DIR
-process.env.RULE_CONFIG_DIR = 's3://test_config_bucket/test_proj_001/rules/';
-
 
 describe('Data Process -- EMR Serverless job submitter function', () => {
 
@@ -209,7 +206,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             '10',
             '10',
             '12',
-            's3://test_config_bucket/test_proj_001/rules/',
+            's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/rules/',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
@@ -291,7 +288,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             '90',
             '10',
             '12',
-            's3://test_config_bucket/test_proj_001/rules/',
+            's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/rules/',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
@@ -477,14 +474,45 @@ describe('Data Process -- EMR Serverless job submitter function rule files do no
     });
     expect(isObjectExistFalseMock.mock.calls.length).toEqual(4);
     expect(putStringToS3Mock.mock.calls[0][0]).toContain('b.hatena.ne.jp');
-    expect(putStringToS3Mock.mock.calls[0][1]).toEqual('test_config_bucket');
-    expect(putStringToS3Mock.mock.calls[0][2]).toEqual('test_proj_001/rules/app1/traffic_source_category_rule_v1.json');
+    expect(putStringToS3Mock.mock.calls[0][1]).toEqual('test-pipe-line-bucket');
+    expect(putStringToS3Mock.mock.calls[0][2]).toEqual('pipeline-prefix/test_proj_001/rules/app1/traffic_source_category_rule_v1.json');
 
     expect(putStringToS3Mock.mock.calls[1][0]).toContain('__empty__');
-    expect(putStringToS3Mock.mock.calls[1][2]).toEqual('test_proj_001/rules/app1/traffic_source_channel_rule_v1.json');
+    expect(putStringToS3Mock.mock.calls[1][2]).toEqual('pipeline-prefix/test_proj_001/rules/app1/traffic_source_channel_rule_v1.json');
 
-    expect(putStringToS3Mock.mock.calls[2][2]).toEqual('test_proj_001/rules/app2/traffic_source_category_rule_v1.json');
-    expect(putStringToS3Mock.mock.calls[3][2]).toEqual('test_proj_001/rules/app2/traffic_source_channel_rule_v1.json');
+    expect(putStringToS3Mock.mock.calls[2][2]).toEqual('pipeline-prefix/test_proj_001/rules/app2/traffic_source_category_rule_v1.json');
+    expect(putStringToS3Mock.mock.calls[3][2]).toEqual('pipeline-prefix/test_proj_001/rules/app2/traffic_source_channel_rule_v1.json');
+
+  });
+
+
+  test('start data processing job with PIPELINE_S3_PREFIX=clickstream/project_id', async () => {
+    process.env.PIPELINE_S3_PREFIX = 'clickstream/test_proj_001/';
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
+    const jobInfo = await EMRServerlessUtil.start({
+      startTimestamp,
+      endTimestamp,
+    }, context);
+    expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
+    expect(jobInfo).toEqual({
+      jobRunId: 'jobId007',
+      objectsInfo: {
+        objectCount: 4,
+        sizeTotal: 43008,
+      },
+    });
+    expect(isObjectExistFalseMock.mock.calls.length).toEqual(4);
+    expect(putStringToS3Mock.mock.calls[0][0]).toContain('b.hatena.ne.jp');
+    expect(putStringToS3Mock.mock.calls[0][1]).toEqual('test-pipe-line-bucket');
+    expect(putStringToS3Mock.mock.calls[0][2]).toEqual('clickstream/test_proj_001/rules/app1/traffic_source_category_rule_v1.json');
+
+    expect(putStringToS3Mock.mock.calls[1][0]).toContain('__empty__');
+    expect(putStringToS3Mock.mock.calls[1][2]).toEqual('clickstream/test_proj_001/rules/app1/traffic_source_channel_rule_v1.json');
+
+    expect(putStringToS3Mock.mock.calls[2][2]).toEqual('clickstream/test_proj_001/rules/app2/traffic_source_category_rule_v1.json');
+    expect(putStringToS3Mock.mock.calls[3][2]).toEqual('clickstream/test_proj_001/rules/app2/traffic_source_channel_rule_v1.json');
+
+    process.env.PIPELINE_S3_PREFIX = 'pipeline-prefix/';
 
   });
 });
