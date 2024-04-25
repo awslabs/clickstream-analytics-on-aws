@@ -68,10 +68,23 @@ public final class GTMEventParser extends BaseEventParser {
     }
     @Override
     public ParseDataResult parseData(final String dataString, final ExtraParams extraParams, final int index) throws JsonProcessingException {
+        ParseDataResult parseDataResult = new ParseDataResult();
+        List<ClickstreamEvent> clickstreamEventList = new ArrayList<>();
+        parseDataResult.setClickstreamEventList(clickstreamEventList);
+        parseDataResult.setClickstreamItemList(new ArrayList<>());
+
+        log.debug("Parsing data: " + dataString);
+        if (dataString == null || dataString.isEmpty()) {
+            log.warn("Data field is empty, skipping the row");
+            return parseDataResult;
+        }
         GTMEvent gtmEvent = ingestDataToEvent(dataString);
+        if (gtmEvent.getEventName() == null || gtmEvent.getEventName().isEmpty()) {
+            log.warn("Event name is empty, skipping the row, dataString:" + dataString);
+            return parseDataResult;
+        }
 
         ClickstreamEvent clickstreamEvent = getClickstreamEvent(gtmEvent, index, extraParams);
-        List<ClickstreamEvent> clickstreamEventList = new ArrayList<>();
         clickstreamEventList.add(clickstreamEvent);
 
         String eventId = clickstreamEvent.getEventId();
@@ -107,7 +120,6 @@ public final class GTMEventParser extends BaseEventParser {
 
         List<ClickstreamItem> clickstreamItemList = getClickstreamItemList(gtmEvent, clickstreamEvent);
 
-        ParseDataResult parseDataResult = new ParseDataResult();
         parseDataResult.setClickstreamEventList(clickstreamEventList);
         parseDataResult.setClickstreamUser(clickstreamUser);
         parseDataResult.setClickstreamItemList(clickstreamItemList);

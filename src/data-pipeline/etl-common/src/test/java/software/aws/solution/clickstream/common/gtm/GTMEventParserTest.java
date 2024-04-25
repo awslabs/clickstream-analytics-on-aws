@@ -22,6 +22,7 @@ import software.aws.solution.clickstream.common.*;
 import software.aws.solution.clickstream.common.gtm.event.*;
 import software.aws.solution.clickstream.common.ingest.*;
 import software.aws.solution.clickstream.common.model.*;
+import software.aws.solution.clickstream.common.sensors.SensorsEventParser;
 
 import java.io.*;
 
@@ -163,6 +164,29 @@ public class GTMEventParserTest extends BaseTest {
         String expectedJson = this.resourceFileAsString("/gtm-server/expected/test_gtm_parseLineToDBRow_user_login.json");
         Assertions.assertEquals(expectedJson, prettyJson(csUser.toJson()), "test_gtm_parseLineToDBRow_user_login");
 
+    }
+
+    @Test
+    void test_parse_empty_data() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_parse_empty_data
+
+        GTMEventParser eventParser = GTMEventParser.getInstance();
+        ExtraParams extraParams = ExtraParams.builder().build();
+        ParseDataResult r = eventParser.parseData("", extraParams, 0);
+        Assertions.assertEquals(0, r.getClickstreamEventList().size());
+        Assertions.assertEquals(0, r.getClickstreamItemList().size());
+        Assertions.assertNull(r.getClickstreamUser());
+
+        r = eventParser.parseData("", extraParams, 0);
+        Assertions.assertEquals(0, r.getClickstreamEventList().size());
+        Assertions.assertEquals(0, r.getClickstreamItemList().size());
+        Assertions.assertNull(r.getClickstreamUser());
+
+
+        r = eventParser.parseData("{\"invalid_name\": \"Test\"}", extraParams, 0);
+        Assertions.assertEquals(0, r.getClickstreamEventList().size());
+        Assertions.assertEquals(0, r.getClickstreamItemList().size());
+        Assertions.assertNull(r.getClickstreamUser());
     }
 
 }
