@@ -165,6 +165,60 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
+  it('Create rule with rule name too long', async () => {
+    tokenMock(ddbMock, false);
+    const longId = Array(25).join('long');
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: longId,
+        type: `METADATA#${longId}`,
+      },
+    }).resolves({
+      Item: {
+        id: longId,
+        deleted: false,
+      },
+    });
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: longId,
+        type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
+      },
+    }).resolves({
+      Item: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        id: longId,
+        statusType: PipelineStatusType.ACTIVE,
+        executionDetail: {
+          name: MOCK_EXECUTION_ID,
+          status: ExecutionStatus.FAILED,
+        },
+      },
+    });
+    snsMock.on(CreateTopicCommand).resolves({
+      TopicArn: 'arn:aws:sns:us-west-2:123456789012:ClickstreamTopicForCFN',
+    });
+    cloudWatchEventsMock.on(PutRuleCommand).resolves({
+      RuleArn: 'arn:aws:events:us-west-2:123456789012:rule/ClickstreamTopicForCFN',
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    const res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/retry?pid=${longId}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandWith(PutRuleCommand, {
+      EventPattern: '{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:undefined:cloudformation:ap-southeast-1:555555555555:stack/test-prefix-Clickstream*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}',
+      Name: 'ClickstreamRuleForCFN-longlonglonglonglonglonglonglonglonglonglo',
+    });
+    expect(snsMock).toHaveReceivedCommandWith(CreateTopicCommand, {
+      Name: `ClickstreamTopicForCFN-${MOCK_PIPELINE_ID}`,
+    });
+  });
   it('Check callback bucket when create pipeline without execution info', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
