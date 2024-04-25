@@ -105,7 +105,7 @@ public abstract class BaseTransformerV3 implements TransformerInterfaceV3 {
 
         Dataset<Row> eventDataset = extractEvent(convertedDataset);
         Dataset<Row> itemDataset = extractItem(convertedDataset);
-        Dataset<Row> userDataset = extractUser(eventDataset, convertedDataset);
+        Dataset<Row> userDataset = extractUser(eventDataset, convertedDataset).filter(col(Constant.USER_PSEUDO_ID).isNotNull());
         Dataset<Row> sessionDataset = extractSessionFromEvent(eventDataset);
 
         log.info("eventDataset count:" + eventDataset.count());

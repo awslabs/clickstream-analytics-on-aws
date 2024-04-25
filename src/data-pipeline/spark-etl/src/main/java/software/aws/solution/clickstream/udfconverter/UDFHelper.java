@@ -27,6 +27,7 @@ import software.aws.solution.clickstream.common.ParseDataResult;
 import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.common.model.ClickstreamItem;
+import software.aws.solution.clickstream.common.model.ClickstreamUser;
 import software.aws.solution.clickstream.rowconv.ItemGenericRowConverter;
 import software.aws.solution.clickstream.rowconv.UserGenericRowConverter;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
@@ -92,6 +93,10 @@ public final class UDFHelper {
     public static List<GenericRow> getGenericRowList(final String rawDataString, final ExtraParams extraParams, final EventParser eventParser) throws JsonProcessingException {
         JsonNode jsonNode = eventParser.getData(rawDataString);
         List<GenericRow> rows = new ArrayList<>();
+        if (jsonNode == null) {
+            log.warn("Cannot parse data: " + rawDataString);
+            return rows;
+        }
         int index = 0;
         if (jsonNode.isArray()) {
             for (Iterator<JsonNode> elementsIt = jsonNode.elements(); elementsIt.hasNext(); ) {
@@ -116,7 +121,9 @@ public final class UDFHelper {
         for (ClickstreamItem item : result.getClickstreamItemList()) {
             itemRows.add(ItemGenericRowConverter.toGenericRow(item));
         }
-        return new GenericRow(new Object[]{null, eventRows, UserGenericRowConverter.toGenericRow(result.getClickstreamUser()), itemRows});
+        ClickstreamUser user = result.getClickstreamUser();
+        GenericRow userRow = user == null || user.getUserPseudoId() == null ? null : UserGenericRowConverter.toGenericRow(user);
+        return new GenericRow(new Object[]{null, eventRows, userRow, itemRows});
     }
 
     public static ArrayType getUdfOutput() {

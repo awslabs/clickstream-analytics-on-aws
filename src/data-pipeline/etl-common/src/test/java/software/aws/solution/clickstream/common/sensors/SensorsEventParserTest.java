@@ -19,6 +19,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.BaseTest;
+import software.aws.solution.clickstream.common.ClickstreamEventParser;
+import software.aws.solution.clickstream.common.ExtraParams;
+import software.aws.solution.clickstream.common.ParseDataResult;
 import software.aws.solution.clickstream.common.ParseRowResult;
 import software.aws.solution.clickstream.common.ingest.ClickstreamIngestRow;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
@@ -155,6 +158,51 @@ public class SensorsEventParserTest extends BaseTest {
         SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
         ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "web-non-gzip-data.json");
         Assertions.assertEquals(1, rowResult.getClickstreamEventList().size(), "test_sensors_parseLineToDBRow_non_zip_data");
+    }
+
+
+    @Test
+    void test_sensors_parseLineToDBRow_web_empty_data() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_sensors_parseLineToDBRow_web_empty_data
+
+        String lines = resourceFileContent("/sensors-data/sensors-web-data-empty.json");
+        int eventCount = 0;
+        int userCount = 0;
+        int itemCount = 0;
+        for (String line : lines.split("\n")) {
+            SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+            ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(line, "test_project_id", "/sensors-web-data-empty.json");
+            eventCount += rowResult.getClickstreamEventList().size();
+            userCount += rowResult.getClickstreamUserList().size();
+            itemCount += rowResult.getClickstreamItemList().size();
+        }
+        System.out.println("eventCount: " + eventCount + ", userCount: " + userCount + ", itemCount: " + itemCount);
+
+        Assertions.assertEquals(0, eventCount);
+        Assertions.assertEquals(0, userCount);
+        Assertions.assertEquals(0, itemCount);
+    }
+
+    @Test
+    void test_parse_empty_data() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_parse_empty_data
+
+        SensorsEventParser eventParser = SensorsEventParser.getInstance();
+        ExtraParams extraParams = ExtraParams.builder().build();
+        ParseDataResult r = eventParser.parseData("", extraParams, 0);
+        Assertions.assertEquals(0, r.getClickstreamEventList().size());
+        Assertions.assertEquals(0, r.getClickstreamItemList().size());
+        Assertions.assertNull(r.getClickstreamUser());
+
+        r = eventParser.parseData("", extraParams, 0);
+        Assertions.assertEquals(0, r.getClickstreamEventList().size());
+        Assertions.assertEquals(0, r.getClickstreamItemList().size());
+        Assertions.assertNull(r.getClickstreamUser());
+
+        r = eventParser.parseData("{\"invalid_name\": \"Test\"}", extraParams, 0);
+        Assertions.assertEquals(0, r.getClickstreamEventList().size());
+        Assertions.assertEquals(0, r.getClickstreamItemList().size());
+        Assertions.assertNull(r.getClickstreamUser());
     }
 
 }
