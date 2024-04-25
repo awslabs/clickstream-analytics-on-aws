@@ -53,15 +53,11 @@ public abstract class BaseEventParser implements EventParser {
         String rawStringData = ingestDataField;
         if (!rawStringData.startsWith("[") && !rawStringData.startsWith("{")) {
             log.debug("gzipData: " + true);
-            String gzipData = getGzipData(rawStringData);
+            String gzipData = rawStringData;
             rawStringData = decompress(Base64.getDecoder().decode(gzipData));
         }
         return OBJECT_MAPPER.readTree(rawStringData);
     }
-    public String getGzipData(final String data) {
-        return data;
-    }
-
     @Override
     public ParseRowResult parseLineToDBRow(final String ingestLine, final String projectId, final String fileName) throws JsonProcessingException {
         ClickstreamIngestRow clickstreamIngestRow = ingestLineToRow(ingestLine);

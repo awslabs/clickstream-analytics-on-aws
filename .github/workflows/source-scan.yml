@@ -8,10 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout git-secrets repo
+        uses: actions/checkout@v4
+        with:
+          repository: awslabs/git-secrets
+          path: git-secrets
       - name: Install git-secrets
         run: |-
-          sudo apt update
-          sudo apt install -y git git-secrets
+          cd git-secrets && sudo make install
       - name: Git secrets scan
         run: |-
           git secrets --register-aws
