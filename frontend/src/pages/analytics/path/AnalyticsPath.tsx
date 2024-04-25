@@ -30,6 +30,7 @@ import {
   DateRangePickerProps,
   Header,
   Input,
+  RadioGroup,
   Select,
   SelectProps,
   SpaceBetween,
@@ -66,6 +67,7 @@ import {
   getEventParameters,
   getUserInfoFromLocalStorage,
   isAnalystAuthorRole,
+  ternary,
 } from 'ts/utils';
 import {
   getDashboardCreateParameters,
@@ -251,6 +253,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   const [includingOtherEvents, setIncludingOtherEvents] = React.useState(true);
   const [mergeConsecutiveEvents, setMergeConsecutiveEvents] =
     React.useState(true);
+  const [specifyNodes, setSpecifyNodes] = React.useState<string>('all');
 
   const resetConfig = async () => {
     setLoadingData(true);
@@ -715,64 +718,81 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   });
                 }}
               />
-              <InfoTitle
-                title={t('analytics:labels.participateNodes')}
-                popoverDescription={t(
-                  'analytics:information.pathNodeSelectionInfo'
-                )}
-              />
-
-              <AnalyticsEventSelect
-                eventPlaceholder={t('analytics:labels.nodeSelectPlaceholder')}
-                loading={loadingEvents}
-                disableAddCondition={disableAddCondition}
-                eventDataState={eventDataState}
-                eventDataDispatch={eventDataDispatch}
-                addEventButtonLabel={t('common:button.addNode')}
-                eventOptionList={categoryEventsData}
-                defaultComputeMethodOption={defaultComputeMethodOption}
-                builtInMetadata={builtInMetadata}
-                metadataEvents={metadataEvents}
-                metadataEventParameters={metadataEventParameters}
-                metadataUserAttributes={metadataUserAttributes}
-                isMultiSelect={false}
-                enableChangeRelation={true}
-                enableChangeMultiSelect={MultiSelectType.BASE}
-              />
-
-              <div className="cs-analytics-config">
-                <SpaceBetween direction="vertical" size="xs">
-                  <InfoTitle
-                    title={t('analytics:labels.includingOtherEvents')}
-                    popoverDescription={t(
-                      'analytics:information.pathIncludeOtherInfo'
-                    )}
-                  />
-                  <Toggle
-                    onChange={({ detail }) =>
-                      setIncludingOtherEvents(detail.checked)
+              <div className="flex gap-10">
+                <RadioGroup
+                  onChange={({ detail }) => {
+                    if (detail.value === 'all') {
+                      eventDataDispatch({
+                        type: 'resetPathStartEventData',
+                        data: eventDataState[0],
+                      });
                     }
-                    checked={includingOtherEvents}
-                  >
-                    {includingOtherEvents ? t('yes') : t('no')}
-                  </Toggle>
-                </SpaceBetween>
-                <SpaceBetween direction="vertical" size="xs">
-                  <InfoTitle
-                    title={t('analytics:labels.mergeConsecutiveEvents')}
-                    popoverDescription={t(
-                      'analytics:information.pathMergeNodeInfo'
+                    setSpecifyNodes(detail.value);
+                  }}
+                  value={specifyNodes}
+                  items={[
+                    { value: 'all', label: t('analytics:labels.showAllNodes') },
+                    {
+                      value: 'specify',
+                      label: t('analytics:labels.specifyNodes'),
+                    },
+                  ]}
+                />
+              </div>
+              {specifyNodes === 'specify' ? (
+                <>
+                  <AnalyticsEventSelect
+                    eventPlaceholder={t(
+                      'analytics:labels.nodeSelectPlaceholder'
                     )}
+                    loading={loadingEvents}
+                    disableAddCondition={disableAddCondition}
+                    eventDataState={eventDataState}
+                    eventDataDispatch={eventDataDispatch}
+                    addEventButtonLabel={t('common:button.addNode')}
+                    eventOptionList={categoryEventsData}
+                    defaultComputeMethodOption={defaultComputeMethodOption}
+                    builtInMetadata={builtInMetadata}
+                    metadataEvents={metadataEvents}
+                    metadataEventParameters={metadataEventParameters}
+                    metadataUserAttributes={metadataUserAttributes}
+                    isMultiSelect={false}
+                    enableChangeRelation={true}
+                    enableChangeMultiSelect={MultiSelectType.BASE}
                   />
-                  <Toggle
-                    onChange={({ detail }) =>
-                      setMergeConsecutiveEvents(detail.checked)
-                    }
-                    checked={mergeConsecutiveEvents}
-                  >
-                    {mergeConsecutiveEvents ? t('yes') : t('no')}
-                  </Toggle>
-                </SpaceBetween>
+                </>
+              ) : null}
+              <div className="flex gap-10">
+                <InfoTitle
+                  title={t('analytics:labels.includingOtherEvents')}
+                  popoverDescription={t(
+                    'analytics:information.pathIncludeOtherInfo'
+                  )}
+                />
+                <Toggle
+                  onChange={({ detail }) =>
+                    setIncludingOtherEvents(detail.checked)
+                  }
+                  checked={includingOtherEvents}
+                >
+                  {ternary(includingOtherEvents, t('yes'), t('no'))}
+                </Toggle>
+              </div>
+              <div className="flex gap-10">
+                <InfoTitle
+                  title={t('analytics:labels.mergeConsecutiveEvents')}
+                  popoverDescription={t(
+                    'analytics:information.pathMergeNodeInfo'
+                  )}
+                />
+                <Toggle
+                  onChange={({ detail }) =>
+                    setMergeConsecutiveEvents(detail.checked)
+                  }
+                  checked={mergeConsecutiveEvents}
+                >
+                  {ternary(mergeConsecutiveEvents, t('yes'), t('no'))}
+                </Toggle>
               </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
