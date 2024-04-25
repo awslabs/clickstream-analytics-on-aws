@@ -599,10 +599,12 @@ export class ReportingService {
       let visualArray: VisualProps[] = [];
       let tableVisualId = uuidv4();
 
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
       //QuickSight does not support multi colums as SmallMultiples
       if (!sqlParameters.groupCondition || sqlParameters.groupCondition?.conditions.length <= 1) {
 
         const visualId = uuidv4();
+        visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(visualId);
         const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, groupCondition);
         const visualProps = {
           sheetId: sheetId,
@@ -616,8 +618,7 @@ export class ReportingService {
         };
 
         visualArray.push(visualProps);
-        visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(visualId);
-
+        
         const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, groupCondition);
         const tableVisualProps = {
           sheetId: sheetId,
@@ -628,8 +629,6 @@ export class ReportingService {
         };
 
         visualArray.push(tableVisualProps);
-
-        visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
       } else {
 
         const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, groupCondition);
@@ -644,9 +643,7 @@ export class ReportingService {
           filterGroup: visualRelatedParams.filterGroup,
         };
 
-        visualArray.push(tableVisualProps);
-
-        visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
+        visualArray.push(tableVisualProps); 
       }
 
       const result: CreateDashboardResult = await this.createDashboardVisuals(
