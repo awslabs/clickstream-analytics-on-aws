@@ -392,8 +392,34 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         Assertions.assertEquals(expectedData, replaceProcessInfo(sessionDataset.first().prettyJson()), "session is correct");
     }
 
-    String getUserPropTableName() {
-        return "etl_gtm_server_data_user_props";
+
+    @Test
+    void test_transform_data_invalid_data() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2Test.test_transform_data_invalid_data
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_invalid_data/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
+
+        Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-invalid-data.json")).getPath());
+
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        long eventCount = datasetMap.get(TableName.EVENT_V2).count();
+        long itemCount = datasetMap.get(TableName.ITEM_V2).count();
+        long userCount = datasetMap.get(TableName.USER_V2).count();
+        long sessionCount = datasetMap.get(TableName.SESSION).count();
+
+        Assertions.assertEquals(0, eventCount);
+        Assertions.assertEquals(0, itemCount);
+        Assertions.assertEquals(0, userCount);
+        Assertions.assertEquals(0, sessionCount);
+
     }
+
+
+    String getUserPropTableName() {
+    return "etl_gtm_server_data_user_props";
+}
 
 }

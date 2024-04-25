@@ -14,6 +14,8 @@
 package software.aws.solution.clickstream.common.gtm;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.*;
 import software.aws.solution.clickstream.common.*;
 import software.aws.solution.clickstream.common.gtm.event.*;
@@ -38,6 +40,7 @@ import static software.aws.solution.clickstream.common.Util.deCodeUri;
 public final class GTMEventParser extends BaseEventParser {
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
     private static GTMEventParser instance;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final Map<String, RuleConfig> appRuleConfig;
     private GTMEventParser(final Map<String, RuleConfig> appRuleConfig) {
@@ -65,6 +68,14 @@ public final class GTMEventParser extends BaseEventParser {
     }
     public GTMEvent ingestDataToEvent(final String inputJson) throws JsonProcessingException {
         return getObjectMapper().readValue(inputJson, GTMEvent.class);
+    }
+
+    @Override
+    public JsonNode getData(final String ingestDataField) throws JsonProcessingException {
+        if (ingestDataField == null || ingestDataField.trim().isEmpty()) {
+            return null;
+        }
+        return OBJECT_MAPPER.readTree(ingestDataField);
     }
     @Override
     public ParseDataResult parseData(final String dataString, final ExtraParams extraParams, final int index) throws JsonProcessingException {

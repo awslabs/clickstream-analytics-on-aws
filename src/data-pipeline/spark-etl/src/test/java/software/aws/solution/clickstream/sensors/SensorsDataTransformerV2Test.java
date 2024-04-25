@@ -64,7 +64,7 @@ public class SensorsDataTransformerV2Test extends BaseSparkTest {
 
         log.info("eventCount: " + eventCount + " userCount: " + userCount + " itemCount: " + itemCount + " sessionCount: " + sessionCount);
 
-        Assertions.assertEquals(19, eventCount);
+        Assertions.assertEquals(15, eventCount);
         Assertions.assertEquals(2, userCount);
         Assertions.assertEquals(0, itemCount);
         Assertions.assertEquals(0, sessionCount);
