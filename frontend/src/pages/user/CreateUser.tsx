@@ -81,6 +81,7 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
         curUser
       );
       if (success && data.id) {
+        cleanData();
         closeModel();
         refreshPage();
       }
@@ -90,9 +91,16 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
     }
   };
 
+  const cleanData = () => {
+    setCurUser(defaultUser);
+    setUserEmailRequiredError(false);
+    setSelectedRoleOptions([]);
+  };
+
   return (
     <Modal
       onDismiss={() => {
+        cleanData();
         closeModel();
       }}
       visible={visible}
@@ -102,6 +110,7 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
             <Button
               variant="link"
               onClick={() => {
+                cleanData();
                 closeModel();
               }}
             >
