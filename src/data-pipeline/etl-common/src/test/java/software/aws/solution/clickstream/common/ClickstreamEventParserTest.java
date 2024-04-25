@@ -303,6 +303,28 @@ public class ClickstreamEventParserTest extends BaseTest {
         setEnableEventTimeShift(true);
     }
 
+    @Test
+    void test_parse_empty_data() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_empty_data
+
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ExtraParams extraParams = ExtraParams.builder().build();
+        ParseDataResult r = clickstreamEventParser.parseData("", extraParams, 0);
+        Assertions.assertEquals(0, r.getClickstreamEventList().size());
+        Assertions.assertEquals(0, r.getClickstreamItemList().size());
+        Assertions.assertNull(r.getClickstreamUser());
+
+        r = clickstreamEventParser.parseData("", extraParams, 0);
+        Assertions.assertEquals(0, r.getClickstreamEventList().size());
+        Assertions.assertEquals(0, r.getClickstreamItemList().size());
+        Assertions.assertNull(r.getClickstreamUser());
+
+        r = clickstreamEventParser.parseData("{\"invalid_name\": \"Test\"}", extraParams, 0);
+        Assertions.assertEquals(0, r.getClickstreamEventList().size());
+        Assertions.assertEquals(0, r.getClickstreamItemList().size());
+        Assertions.assertNull(r.getClickstreamUser());
+    }
+
 
     @Test
     void testGetSetForTimeShiftInfo() {
