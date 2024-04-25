@@ -70,3 +70,4 @@ process.env.IS_SKIP_VPC_CONNECTION_FORCE_WAITING = 'true'
 
 // env variables for ingestion stack
 process.env.PING_PATH = '/ping'
+

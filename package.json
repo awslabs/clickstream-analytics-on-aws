@@ -22,7 +22,8 @@
     "test:watch": "pnpm dlx projen test:watch",
     "upgrade": "pnpm dlx projen upgrade",
     "watch": "pnpm dlx projen watch",
-    "projen": "pnpm dlx projen"
+    "projen": "pnpm dlx projen",
+    "test:local": "export LOCAL_TESTING=true && pnpm dlx projen test"
   },
   "devDependencies": {
     "@nrwl/devkit": "^15",

@@ -369,7 +369,7 @@ export class ClickStreamApiConstruct extends Construct {
   }
 
   private getLambdaCode() {
-    if (process.env.CI !== 'true') {
+    if (process.env.LOCAL_TESTING === 'true') {
       return Code.fromAsset('./src/control-plane/backend/lambda/api/');
     } else {
       return Code.fromDockerBuild(path.join(__dirname, '../../../'), {
