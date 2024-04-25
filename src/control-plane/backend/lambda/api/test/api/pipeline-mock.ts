@@ -698,7 +698,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE: IPipeline = {
       name: 'EXAMPLE_BUCKET',
       prefix: '',
     },
-    transformPlugin: 'BUILT-IN-1',
+    transformPlugin: undefined,
     enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
   },
   dataModeling: {
