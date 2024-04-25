@@ -2915,6 +2915,26 @@ describe('Should set metrics widgets', () => {
         'Fn::Join': [
           '',
           [
+            'Refresh materialized views workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'mvRefreshIntervalSeconds',
+        ],
+      },
+    });
+
+    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
             'Max file age more than ',
             {
               'Fn::GetAtt': [
@@ -2996,6 +3016,26 @@ describe('Should set metrics widgets', () => {
       },
     });
 
+    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Refresh materialized views workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'mvRefreshIntervalSeconds',
+        ],
+      },
+    });
+
     existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: {
         'Fn::Join': [
@@ -3043,8 +3083,39 @@ describe('Should set metrics widgets', () => {
                 Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
                 Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
                 Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
+                Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
               ]),
               title: Match.anyValue(),
+            },
+          }),
+          Match.objectLike({
+            type: 'metric',
+            properties: {
+              title: "'Load data to redshift tables' workflow",
+            },
+          }),
+          Match.objectLike({
+            type: 'metric',
+            properties: {
+              title: "'Refresh materialized views' workflow",
+            },
+          }),
+          Match.objectLike({
+            type: 'metric',
+            properties: {
+              title: "'Clear expired events' workflow",
+            },
+          }),
+          Match.objectLike({
+            type: 'metric',
+            properties: {
+              title: "'Scan metadata' workflow",
+            },
+          }),
+          Match.objectLike({
+            type: 'metric',
+            properties: {
+              title: "'SQL execution' workflow",
             },
           }),
         ]),
@@ -3072,7 +3143,7 @@ describe('Should set metrics widgets', () => {
     });
 
 
-    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+    provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: {
         'Fn::Join': [
           '',
@@ -3088,6 +3159,26 @@ describe('Should set metrics widgets', () => {
         'Fn::GetAtt': [
           Match.anyValue(),
           'scanWorkflowMinIntervalSeconds',
+        ],
+      },
+    });
+
+    provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Refresh materialized views workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'mvRefreshIntervalSeconds',
         ],
       },
     });
