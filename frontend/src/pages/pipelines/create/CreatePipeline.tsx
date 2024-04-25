@@ -894,7 +894,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
     // set plugin value
     createPipelineObj.dataProcessing.transformPlugin = defaultStr(
-      pipelineInfo.selectedTransformPlugins?.[0]?.id,
+      pipelineInfo.selectedTransformPlugins?.[0]?.id
     );
     createPipelineObj.dataProcessing.enrichPlugin =
       pipelineInfo.selectedEnrichPlugins.map((element) => element.id);
