@@ -318,7 +318,8 @@ export class StackManager {
   private _getRetryState(
     state: WorkflowState, stackDetails: PipelineStatusDetail[], retryStackNames: string[],
     lastAction: string): WorkflowState {
-    if (state.Data?.Input.StackName && retryStackNames.includes(state.Data.Input.StackName)) {
+    if (state.Data?.Input.StackName &&
+      (retryStackNames.includes(state.Data.Input.StackName) || lastAction === 'Delete')) {
       const status = this.getStackStatusByName(state.Data?.Input.StackName, stackDetails);
       state.Data.Input.Action = this._getRetryAction(lastAction, status);
     } else {

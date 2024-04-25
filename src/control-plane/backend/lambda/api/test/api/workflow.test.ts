@@ -48,6 +48,7 @@ import {
   dictionaryMock,
 } from './ddb-mock';
 import {
+  BASE_STATUS,
   KAFKA_INGESTION_PIPELINE,
   KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
@@ -108,6 +109,7 @@ import { getStackPrefix } from '../../common/utils';
 import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
+import { StackStatus } from '@aws-sdk/client-cloudformation';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
@@ -3399,6 +3401,161 @@ describe('Workflow test', () => {
                 },
                 End: true,
                 Type: 'Pass',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(stackManager.getExecWorkflow()).toEqual(expected);
+  });
+  it('Generate Retry Workflow when delete failed', async () => {
+    dictionaryMock(ddbMock);
+    // KafkaConnector, DataModelingRedshift Failed
+    // Reporting Miss
+    const stackManager: StackManager = new StackManager({
+      ...RETRY_PIPELINE_WITH_WORKFLOW,
+      stackDetails: [
+        {
+          ...BASE_STATUS.stackDetails[0],
+          stackStatus: StackStatus.DELETE_FAILED,
+        },
+        BASE_STATUS.stackDetails[1],
+        BASE_STATUS.stackDetails[2],
+        {
+          ...BASE_STATUS.stackDetails[3],
+          stackStatus: StackStatus.DELETE_FAILED,
+        },
+        BASE_STATUS.stackDetails[4],
+        BASE_STATUS.stackDetails[5],
+      ],
+    });
+    stackManager.retryWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Delete',
+                    Region: 'ap-southeast-1',
+                    Parameters: [],
+                    StackName: `${getStackPrefix()}-Ingestion-kafka-6666-6666`,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                  },
+                },
+                Next: 'KafkaConnector',
+                Type: 'Stack',
+              },
+              KafkaConnector: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Delete',
+                    Region: 'ap-southeast-1',
+                    Parameters: [],
+                    StackName: `${getStackPrefix()}-KafkaConnector-6666-6666`,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Delete',
+                    Region: 'ap-southeast-1',
+                    Parameters: [],
+                    StackName: `${getStackPrefix()}-DataProcessing-6666-6666`,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                  },
+                },
+                Next: 'DataModeling',
+                Type: 'Stack',
+              },
+              Reporting: {
+                Type: 'Stack',
+                Data: {
+                  Input: {
+                    Region: 'ap-southeast-1',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                    Action: 'Delete',
+                    Parameters: [],
+                    StackName: `${getStackPrefix()}-Reporting-6666-6666`,
+                  },
+                  Callback: {
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                  },
+                },
+                End: true,
+              },
+              DataModeling: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Delete',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'DataProcessingCronOrRateExpression',
+                        ParameterValue: 'rate(16 minutes)',
+                      },
+                    ],
+                    StackName: `${getStackPrefix()}-DataModelingRedshift-6666-6666`,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                  },
+                },
+                Next: 'Reporting',
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Delete',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: `${getStackPrefix()}-Metrics-6666-6666`,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
               },
             },
           },
