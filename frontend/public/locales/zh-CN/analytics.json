@@ -355,7 +355,7 @@
     "analyticsStudioNotAvailable": "分析工作坊不可用",
     "setStartNode": "设置起始节点",
     "showAllNodes": "显示所有节点",
-    "specifyNodes": "指定节点",
+    "specifyNodes": "显示指定节点",
     "participateNodes": "选择参与分析的节点",
     "includingOtherEvents": "包括其他事件",
     "mergeConsecutiveEvents": "合并连续事件",

@@ -67,6 +67,7 @@ import {
   getEventParameters,
   getUserInfoFromLocalStorage,
   isAnalystAuthorRole,
+  ternary,
 } from 'ts/utils';
 import {
   getDashboardCreateParameters,
@@ -774,7 +775,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   }
                   checked={includingOtherEvents}
                 >
-                  {includingOtherEvents ? t('yes') : t('no')}
+                  {ternary(includingOtherEvents, t('yes'), t('no'))}
                 </Toggle>
               </div>
               <div className="flex gap-10">
@@ -790,7 +791,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   }
                   checked={mergeConsecutiveEvents}
                 >
-                  {mergeConsecutiveEvents ? t('yes') : t('no')}
+                  {ternary(mergeConsecutiveEvents, t('yes'), t('no'))}
                 </Toggle>
               </div>
             </SpaceBetween>
