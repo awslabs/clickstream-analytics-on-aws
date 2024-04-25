@@ -33,15 +33,23 @@ public final class UAEnrichHelper {
     }
     public static ClickstreamUA parserUA(final String userAgent) {
         ClickstreamUA clickstreamUA = new ClickstreamUA();
+        if (userAgent == null || userAgent.isEmpty()) {
+            return clickstreamUA;
+        }
         Client client = UA_PARSER.parse(userAgent);
-        clickstreamUA.setUaBrowser(client.userAgent.family);
-        clickstreamUA.setUaBrowserVersion(getVersion(client.userAgent.major, client.userAgent.minor, client.userAgent.patch));
+        if (client.userAgent != null) {
+            clickstreamUA.setUaBrowser(client.userAgent.family);
+            clickstreamUA.setUaBrowserVersion(getVersion(client.userAgent.major, client.userAgent.minor, client.userAgent.patch));
+        }
+        if (client.os != null) {
+            clickstreamUA.setUaOs(client.os.family);
+            clickstreamUA.setUaOsVersion(getVersion(client.os.major, client.os.minor, client.os.patch));
+        }
+        if (client.device != null) {
+            clickstreamUA.setUaDevice(client.device.family);
+            clickstreamUA.setUaDeviceCategory(getCategory(client.device.family));
+        }
 
-        clickstreamUA.setUaOs(client.os.family);
-        clickstreamUA.setUaOsVersion(getVersion(client.os.major, client.os.minor, client.os.patch));
-
-        clickstreamUA.setUaDevice(client.device.family);
-        clickstreamUA.setUaDeviceCategory(getCategory(client.device.family));
         Map<String, Object> uaMap = new HashMap<>();
 
         try {
