@@ -44,6 +44,9 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     'StateMachineArn', props.loadDataWorkflow.stateMachineArn,
   ];
 
+  const refreshMaterializedViewsWorkflowDimension = [
+    'StateMachineArn', props.refreshMaterializedViewsWorkflow.stateMachineArn,
+  ];
 
   const scanMetadataWorkflowDimension = [
     'StateMachineArn', props.scanMetadataWorkflow.stateMachineArn,
@@ -127,6 +130,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
           loadDataWorkflowAlarm.alarmArn,
           newFilesCountAlarm.alarmArn,
           scanMetadataWorkflowAlarm.alarmArn,
+          refreshMaterializedViewsWorkflowAlarm.alarmArn,
         ],
         title: 'Data Modeling Alarms',
       },
@@ -136,6 +140,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
 
   const workflowExecMetrics: MetricWidgetElement[] = [
     [loadDataWorkflowDimension, 'Load data to redshift tables'],
+    [refreshMaterializedViewsWorkflowDimension, 'Refresh materialized views'],
     [clearExpiredEventsWorkflowDimension, 'Clear expired events'],
     [scanMetadataWorkflowDimension, 'Scan metadata'],
     [sqlExecutionWorkflowDimension, 'SQL execution'],
