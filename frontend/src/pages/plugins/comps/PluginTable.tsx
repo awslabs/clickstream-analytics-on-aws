@@ -83,13 +83,9 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     if (pipelineInfo?.transformPluginChanged) {
       setSelectedItems(pipelineInfo.selectedTransformPlugins);
     } else {
-      if (selectBuitInPlugins) {
-        setSelectedItems(
-          resultDataItem.filter((item) => item.builtIn === true)
-        );
-        changePluginSeletedItems?.(
-          resultDataItem.filter((item) => item.builtIn === true)
-        );
+      if (selectBuitInPlugins && resultDataItem.length > 0) {
+        setSelectedItems([resultDataItem[0]]);
+        changePluginSeletedItems?.([resultDataItem[0]]);
       }
     }
   };
