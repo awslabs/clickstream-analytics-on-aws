@@ -37,15 +37,15 @@ public final class UAEnrichHelper {
             return clickstreamUA;
         }
         Client client = UA_PARSER.parse(userAgent);
-        if (client.userAgent != null ) {
+        if (client.userAgent != null) {
             clickstreamUA.setUaBrowser(client.userAgent.family);
             clickstreamUA.setUaBrowserVersion(getVersion(client.userAgent.major, client.userAgent.minor, client.userAgent.patch));
         }
-        if (client.os != null ) {
+        if (client.os != null) {
             clickstreamUA.setUaOs(client.os.family);
             clickstreamUA.setUaOsVersion(getVersion(client.os.major, client.os.minor, client.os.patch));
         }
-        if (client.device != null ) {
+        if (client.device != null) {
             clickstreamUA.setUaDevice(client.device.family);
             clickstreamUA.setUaDeviceCategory(getCategory(client.device.family));
         }
