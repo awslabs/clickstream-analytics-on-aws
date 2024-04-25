@@ -75,8 +75,9 @@ npx cdk deploy ingestion-server-s3-stack --parameters ...
 # update the existing data modeling Redshift stack Clickstream-DataModelingRedshift-xxx
 bash e2e-deploy.sh -n modelRedshiftStackName -s Clickstream-DataModelingRedshift-xxx
 # update the existing web console
-bash e2e-deploy.sh -n standardControlPlaneStackName -s <stack name of existing web console> -c
+bash e2e-deploy.sh -n standardControlPlaneStackName -s <stack name of existing web console>
 ```
+See [this file][context-stack-keys] for complete stack names.
 
 ## Test
 
@@ -209,3 +210,4 @@ Upon successfully cloning the repository into your local development environment
 [doc-arch]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/architecture-overview.html
 [doc-deployment]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/deployment.html
 [sdk-samples]: https://github.com/aws-samples/clickstream-sdk-samples
+[context-stack-keys]: https://github.com/awslabs/clickstream-analytics-on-aws/blob/461878b657a65583186abfa2590f9480ad95f873/src/main.ts#L37
