@@ -1273,7 +1273,7 @@ describe('Data Processing job submitter', () => {
                     Match.anyValue(),
                     '/clickstream/',
                     Match.anyValue(),
-                    '/rules',
+                    '/rules/*',
                   ],
                 ],
               },
