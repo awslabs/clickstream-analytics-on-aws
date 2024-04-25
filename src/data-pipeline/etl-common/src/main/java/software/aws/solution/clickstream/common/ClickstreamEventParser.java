@@ -69,12 +69,25 @@ public final class ClickstreamEventParser extends BaseEventParser {
 
     @Override
     public ParseDataResult parseData(final String dataString, final ExtraParams extraParams, final int index) throws JsonProcessingException {
+        ParseDataResult parseDataResult = new ParseDataResult();
+        List<ClickstreamEvent> clickstreamEventList = new ArrayList<>();
+        parseDataResult.setClickstreamEventList(clickstreamEventList);
+        parseDataResult.setClickstreamItemList(new ArrayList<>());
+
+        log.debug("Parsing data: " + dataString);
+        if (dataString == null || dataString.isEmpty()) {
+            log.warn("Data field is empty, skipping the row");
+            return parseDataResult;
+        }
         Event ingestEvent = ingestDataToEvent(dataString);
+        if (ingestEvent.getEventName() == null || ingestEvent.getEventName().isEmpty()) {
+            log.warn("Event name is empty, skipping the row, dataString:" + dataString);
+            return parseDataResult;
+        }
 
         TimeShiftInfo timeShiftInfo = getEventTimeShiftInfo(ingestEvent, extraParams);
 
         ClickstreamEvent clickstreamEvent = getClickstreamEvent(ingestEvent, index, extraParams, timeShiftInfo);
-        List<ClickstreamEvent> clickstreamEventList = new ArrayList<>();
         clickstreamEventList.add(clickstreamEvent);
 
         // User
@@ -82,7 +95,6 @@ public final class ClickstreamEventParser extends BaseEventParser {
         // Items
         List<ClickstreamItem> clickstreamItemList = getClickstreamItemList(ingestEvent, clickstreamEvent);
 
-        ParseDataResult parseDataResult = new ParseDataResult();
         parseDataResult.setClickstreamEventList(clickstreamEventList);
         parseDataResult.setClickstreamUser(clickstreamUser);
         parseDataResult.setClickstreamItemList(clickstreamItemList);

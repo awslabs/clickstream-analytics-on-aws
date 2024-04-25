@@ -48,6 +48,7 @@ import static software.aws.solution.clickstream.common.Util.convertStringObjectM
 import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringUserPropMap;
 import static software.aws.solution.clickstream.common.Util.deCodeUri;
 import static software.aws.solution.clickstream.common.Util.decompress;
+import static software.aws.solution.clickstream.common.Util.getStackTrace;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 import static software.aws.solution.clickstream.common.enrich.UAEnrichHelper.UA_STRING;
 
@@ -90,17 +91,42 @@ public final class SensorsEventParser extends BaseEventParser {
         return EVENT_NAME_MAP.getOrDefault(sensorsEvent.getEvent(), sensorsEvent.getEvent());
     }
 
+    private static String tryDecompress(final byte[] bytes) {
+        String rawStringData = null;
+        char firstC = (char) bytes[0];
+        char lastC = (char) bytes[bytes.length - 1];
+        if ((firstC == '[' && lastC == ']') || (firstC == '{' && lastC == '}')) {
+            rawStringData = new String(bytes, StandardCharsets.UTF_8);
+        } else {
+            rawStringData = decompress(bytes);
+        }
+        return rawStringData;
+    }
+
     public SensorsEvent ingestDataToEvent(final String inputJson) throws JsonProcessingException {
         return getObjectMapper().readValue(inputJson, SensorsEvent.class);
     }
 
     @Override
     public ParseDataResult parseData(final String dataString, final ExtraParams extraParams, final int index) throws JsonProcessingException {
+        ParseDataResult parseDataResult = new ParseDataResult();
+        List<ClickstreamEvent> clickstreamEventList = new ArrayList<>();
+        parseDataResult.setClickstreamEventList(clickstreamEventList);
+        parseDataResult.setClickstreamItemList(new ArrayList<>());
+
         log.debug("Parsing data: " + dataString);
+        if (dataString == null || dataString.isEmpty()) {
+            log.warn("Data field is empty, skipping the row");
+            return parseDataResult;
+        }
         SensorsEvent sensorsEvent = ingestDataToEvent(dataString);
+        if (sensorsEvent.getEvent() == null || sensorsEvent.getEvent().isEmpty()) {
+            log.warn("Event name is empty, skipping the row, dataString:" + dataString);
+            return parseDataResult;
+        }
 
         ClickstreamEvent clickstreamEvent = getClickstreamEvent(sensorsEvent, index, extraParams);
-        List<ClickstreamEvent> clickstreamEventList = new ArrayList<>();
+
         clickstreamEventList.add(clickstreamEvent);
 
         String eventId = clickstreamEvent.getEventId();
@@ -122,7 +148,6 @@ public final class SensorsEventParser extends BaseEventParser {
 
         List<ClickstreamItem> clickstreamItemList = getClickstreamItemList(sensorsEvent, clickstreamEvent);
 
-        ParseDataResult parseDataResult = new ParseDataResult();
         parseDataResult.setClickstreamEventList(clickstreamEventList);
         parseDataResult.setClickstreamUser(clickstreamUser);
         parseDataResult.setClickstreamItemList(clickstreamItemList);
@@ -131,19 +156,18 @@ public final class SensorsEventParser extends BaseEventParser {
 
     @Override
     public JsonNode getData(final String ingestDataField) throws JsonProcessingException {
-        String rawStringData = ingestDataField;
-        if (!rawStringData.startsWith("[") && !rawStringData.startsWith("{")) {
-            log.debug("gzipData: " + true);
-            String base64Data = getBase64Data(rawStringData);
-
-            byte[] bytes = Base64.getDecoder().decode(base64Data);
-            try {
-                rawStringData = decompress(bytes);
-            } catch (Exception e) {
-                rawStringData = new String(bytes, StandardCharsets.UTF_8);
+        try {
+            String rawStringData = ingestDataField.trim();
+            if (!rawStringData.startsWith("[") && !rawStringData.startsWith("{")) {
+                String base64Data = getBase64Data(rawStringData);
+                byte[] bytes = Base64.getDecoder().decode(base64Data);
+                rawStringData = tryDecompress(bytes);
             }
+            return OBJECT_MAPPER.readTree(rawStringData);
+        } catch (Exception e) {
+            log.error("Failed to parse data: " + ingestDataField + ", error:" + getStackTrace(e));
+            return null;
         }
-        return OBJECT_MAPPER.readTree(rawStringData);
     }
 
     public String getBase64Data(final String data) {
@@ -162,7 +186,7 @@ public final class SensorsEventParser extends BaseEventParser {
         }
 
         if (b64Data == null) {
-            log.warn("No gzip data " + GZIP_DATA_LIST + " or " +GZIP_DATA_LIST + " found in the input data: " + data);
+            log.warn("No gzip data " + GZIP_DATA_LIST + " or " + GZIP_DATA_LIST + " found in the input data: " + data);
         }
         return b64Data;
     }

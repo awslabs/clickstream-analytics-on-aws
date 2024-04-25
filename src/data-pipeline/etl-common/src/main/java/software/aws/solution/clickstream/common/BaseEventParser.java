@@ -60,11 +60,19 @@ public abstract class BaseEventParser implements EventParser {
     }
     @Override
     public ParseRowResult parseLineToDBRow(final String ingestLine, final String projectId, final String fileName) throws JsonProcessingException {
+        ParseRowResult rowResult = new ParseRowResult();
         ClickstreamIngestRow clickstreamIngestRow = ingestLineToRow(ingestLine);
         String dataField = clickstreamIngestRow.getData();
+        if (dataField == null || dataField.isEmpty()) {
+            log.warn("Data field is empty, skipping the row");
+            return rowResult;
+        }
         JsonNode dataNode = getData(dataField);
+        if (dataNode == null) {
+            log.warn("getData is empty, skipping the row");
+            return rowResult;
+        }
 
-        ParseRowResult rowResult = new ParseRowResult();
         ExtraParams extraParams = ExtraParams.builder()
                 .ua(clickstreamIngestRow.getUa())
                 .ip(clickstreamIngestRow.getIp())
