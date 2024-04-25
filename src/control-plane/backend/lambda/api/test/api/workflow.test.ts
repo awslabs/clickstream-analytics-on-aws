@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
 import { EC2Client } from '@aws-sdk/client-ec2';
 import {
@@ -109,7 +110,6 @@ import { getStackPrefix } from '../../common/utils';
 import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
-import { StackStatus } from '@aws-sdk/client-cloudformation';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
