@@ -2896,6 +2896,22 @@ describe('Should set metrics widgets', () => {
     });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Sql execution to create schema failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: 86400,
+    });
+
+    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: {
         'Fn::Join': [
           '',
@@ -3000,6 +3016,21 @@ describe('Should set metrics widgets', () => {
       },
     });
 
+    existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Sql execution to create schema failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: 86400,
+    });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: {
@@ -3089,6 +3120,7 @@ describe('Should set metrics widgets', () => {
                 Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
                 Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
                 Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
+                Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
               ]),
               title: Match.anyValue(),
             },
@@ -3147,6 +3179,21 @@ describe('Should set metrics widgets', () => {
       },
     });
 
+    provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Sql execution to create schema failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: 86400,
+    });
 
     provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: {

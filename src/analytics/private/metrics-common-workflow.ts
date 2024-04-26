@@ -99,6 +99,16 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   });
   (scanMetadataWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getScanWorkflowMinIntervalSeconds());
 
+  const sqlExecutionWorkflowAlarm = new Alarm(scope, id + 'SqlExecutionWorkflowAlarm', {
+    comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    threshold: 1,
+    evaluationPeriods: 1,
+    treatMissingData: TreatMissingData.NOT_BREACHING,
+    metric: props.sqlExecutionWorkflow.metricFailed({ period: Duration.hours(24) }),
+    alarmDescription: `Sql execution to create schema failed, projectId: ${props.projectId}`,
+    alarmName: getAlarmName(scope, props.projectId, 'Sql Execution Workflow'),
+  });
+
   const newFilesCountAlarm = new Alarm(scope, id + 'MaxFileAgeAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1800, // place-holder value here, Override by addPropertyOverride below
@@ -120,7 +130,13 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Threshold', processingJobInterval.getIntervalSeconds());
 
-  setCfnNagForAlarms([loadDataWorkflowAlarm, newFilesCountAlarm, scanMetadataWorkflowAlarm, refreshMaterializedViewsWorkflowAlarm]);
+  setCfnNagForAlarms([
+    loadDataWorkflowAlarm,
+    newFilesCountAlarm,
+    scanMetadataWorkflowAlarm,
+    refreshMaterializedViewsWorkflowAlarm,
+    sqlExecutionWorkflowAlarm,
+  ]);
 
   const workflowAlarms: (MetricWidgetElement | AlarmsWidgetElement)[] = [
     {
@@ -131,6 +147,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
           newFilesCountAlarm.alarmArn,
           scanMetadataWorkflowAlarm.alarmArn,
           refreshMaterializedViewsWorkflowAlarm.alarmArn,
+          sqlExecutionWorkflowAlarm.alarmArn,
         ],
         title: 'Data Modeling Alarms',
       },
