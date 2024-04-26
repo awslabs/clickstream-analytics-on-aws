@@ -96,6 +96,13 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
+  test('Should has Parameter redshiftServerlessIAMRole', () => {
+    template.hasParameter('RedshiftServerlessIAMRole', {
+      Type: 'String',
+      Default: '',
+    });
+  });
+
   test('QuickSightUserParam pattern', () => {
     const param = template.toJSON().Parameters.QuickSightUserParam;
     const pattern = param.AllowedPattern;
@@ -321,6 +328,34 @@ describe('DataReportingQuickSightStack parameter test', () => {
       Type: 'String',
     });
   });
+
+  test('RedshiftServerlessIAMRole allowedPattern', () => {
+    const param = template.toJSON().Parameters.RedshiftServerlessIAMRole;
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'arn:aws:iam::000000000000:role/redshift-serverless-role',
+      'arn:aws-cn:iam::000000000000:role/redshift-serverless-role',
+      '',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      'arn:aws:iam::xxxxxxxxxxxx:role/redshift-serverless-role',
+      'arn:aws:iam::1234:role/redshift-serverless-role',
+      'b1.test.com:abc',
+      'b-1.test.com:9092,b-2.test.com:9092',
+      'b1.test.com:9092',
+      'b_1.test.com',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
 });
 
 describe('DataReportingQuickSightStack resource test', () => {

@@ -142,6 +142,11 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Parameter Key Name',
   };
 
+  const redshiftServerlessIAMRoleParam = Parameters.createRedshiftServerlessDataRoleParameter(scope);
+  labels[redshiftServerlessIAMRoleParam.logicalId] = {
+    default: 'Redshift Serverless Data API Role ARN',
+  };
+
   groups.push({
     Label: { default: 'QuickSight Information' },
     Parameters: [
@@ -163,6 +168,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       redShiftDBSchemaParam.logicalId,
       redshiftPortParam.logicalId,
       redshiftParameterKeyParam.logicalId,
+      redshiftServerlessIAMRoleParam.logicalId,
     ],
   });
 
@@ -179,6 +185,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     redShiftDBSchemaParam,
     redshiftPortParam,
     redshiftParameterKeyParam,
+    redshiftServerlessIAMRoleParam,
     paramLabels: labels,
     paramGroups: groups,
   };

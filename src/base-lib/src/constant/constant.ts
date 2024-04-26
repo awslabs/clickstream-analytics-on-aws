@@ -362,6 +362,9 @@ export const OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN =
 export const OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS =
   'Dashboards';
 
+export const OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN =
+  'RedshiftDataApiRoleArn';
+
 export const OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME =
   'ObservabilityDashboardName';
 export const OUTPUT_METRICS_SNS_TOPIC_ARN_NAME = 'ObservabilityTopicArn';
