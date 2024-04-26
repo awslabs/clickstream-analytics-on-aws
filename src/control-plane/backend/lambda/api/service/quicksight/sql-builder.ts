@@ -223,7 +223,7 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   sql = sql.concat(`
     select 
       ${sqlParameters.groupColumn}
-      ${appendGroupingCol ? `, ${colNameAndAlias?.ColNameWithAlias.join(',')}` : ''}
+      ${appendGroupingCol ? `, ${colNameAndAlias?.colNames.join(',')}` : ''}
       ${resultCntSQL}
     from join_table
     group by 
@@ -782,6 +782,26 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
   });
 }
 
+function _buildWhereclauseForNodePathAnalysis(sqlParameters: SQLParameters) : string {
+  const includingOtherEvents = sqlParameters.pathAnalysis?.includingOtherEvents ? true: false;
+  return !includingOtherEvents && !isStartFromPathAnalysis(sqlParameters, ExploreAnalyticsType.NODE_PATH) ? `where node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')` : '';
+}
+
+function _buildNodeFieldSqlForNodePathAnalysis(isStartFrom: boolean, sqlParameters: SQLParameters) : string {
+  if (isStartFrom) {
+    return `
+        node,
+      `;
+  } else {
+    return `
+        case 
+          when node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}') then node 
+          else 'other'
+        end as node,
+      `;
+  }
+}
+
 export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string {
 
   let midTableSql = '';
@@ -790,19 +810,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
   const includingOtherEvents = sqlParameters.pathAnalysis?.includingOtherEvents ? true: false;
 
   const isStartFrom = isStartFromPathAnalysis(sqlParameters, ExploreAnalyticsType.NODE_PATH);
-  let caseWhenSql = '';
-  if (isStartFrom) {
-    caseWhenSql = `
-        node,
-      `;
-  } else {
-    caseWhenSql = `
-        case 
-          when node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}') then node 
-          else 'other'
-        end as node,
-      `;
-  }
+  let caseWhenSql = _buildNodeFieldSqlForNodePathAnalysis(isStartFrom, sqlParameters);
 
   if (sqlParameters.pathAnalysis!.sessionType === ExplorePathSessionDef.SESSION ) {
     midTableSql = `
@@ -845,7 +853,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         ) + 1 as step_2
         from
           mid_table
-        ${!includingOtherEvents && !isStartFromPathAnalysis(sqlParameters, ExploreAnalyticsType.NODE_PATH) ? `where node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')` : ''}
+        ${_buildWhereclauseForNodePathAnalysis(sqlParameters)}
       ),
     `;
     dataTableSql = `step_table_1 as (

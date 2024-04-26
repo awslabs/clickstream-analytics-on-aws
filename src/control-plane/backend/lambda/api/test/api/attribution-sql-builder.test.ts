@@ -391,12 +391,12 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_view_item' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_view_item'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -847,12 +847,12 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_view_item' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_view_item'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -1101,12 +1101,12 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_view_item' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_view_item'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -1550,12 +1550,12 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_view_item' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_view_item'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -1998,12 +1998,12 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_view_item' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_view_item'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -2417,12 +2417,12 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_view_item' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_view_item'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -2845,12 +2845,12 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_view_item' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_view_item'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -3305,20 +3305,20 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_view_item' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_view_item'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
         union all
         select
-          '3_view_cart' as origin_name,
-          '3_view_cart' as custom_touch_point_name
+          '3_view_cart'::varchar as origin_name,
+          '3_view_cart'::varchar as custom_touch_point_name
         union all
         select
-          '4_check_out' as origin_name,
-          '4_check_out' as custom_touch_point_name
+          '4_check_out'::varchar as origin_name,
+          '4_check_out'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -3776,12 +3776,12 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_view_item' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_view_item'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -4230,12 +4230,12 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_test_name' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_test_name'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -4681,20 +4681,20 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_test_name' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_test_name'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_test_name' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_test_name'::varchar as custom_touch_point_name
         union all
         select
-          '3_view_cart' as origin_name,
-          '3_view_cart' as custom_touch_point_name
+          '3_view_cart'::varchar as origin_name,
+          '3_view_cart'::varchar as custom_touch_point_name
         union all
         select
-          '4_begin_checkout' as origin_name,
-          '4_begin_checkout' as custom_touch_point_name
+          '4_begin_checkout'::varchar as origin_name,
+          '4_begin_checkout'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
@@ -5148,12 +5148,12 @@ describe('Attribution SQL Builder test', () => {
       ),
       touch_point_names as (
         select
-          '1_view_item' as origin_name,
-          '1_view_item' as custom_touch_point_name
+          '1_view_item'::varchar as origin_name,
+          '1_view_item'::varchar as custom_touch_point_name
         union all
         select
-          '2_add_to_cart' as origin_name,
-          '2_add_to_cart' as custom_touch_point_name
+          '2_add_to_cart'::varchar as origin_name,
+          '2_add_to_cart'::varchar as custom_touch_point_name
       ),
       model_base_data as (
         select
