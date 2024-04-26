@@ -36,7 +36,7 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
     @BeforeEach
     void setUpTransformer() {
         transformer = new GTMServerDataTransformerV2();
-        transformer.config(getTestTransformConfig("testApp"));
+        transformer.config(getTestTransformConfig(true,"testApp"));
     }
     @Test
     void test_convert_event_v2() throws IOException {

@@ -20,7 +20,7 @@ import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.functions;
 import org.apache.spark.sql.types.DataTypes;
-import software.aws.solution.clickstream.transformer.AppRuleConfigurable;
+import software.aws.solution.clickstream.transformer.TransformConfigurable;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 import software.aws.solution.clickstream.util.DatasetUtil;
 
@@ -38,7 +38,7 @@ import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.util.DatasetUtil.DATA_OUT;
 import static software.aws.solution.clickstream.util.DatasetUtil.hasColumn;
 
-public abstract class BaseDataConverter implements DatasetConverter, AppRuleConfigurable {
+public abstract class BaseDataConverter implements DatasetConverter, TransformConfigurable {
 
     public static final String INGEST_APPID = "appId";
 
@@ -63,7 +63,7 @@ public abstract class BaseDataConverter implements DatasetConverter, AppRuleConf
     }
 
     public Dataset<Row> convertByUDF(final Dataset<Row> dataset) {
-        UserDefinedFunction convertGTMServerDataUdf = udf(UDFHelper.getConvertDataUdf(this.getName(), this.getAppRuleConfig()), UDFHelper.getUdfOutput());
+        UserDefinedFunction convertGTMServerDataUdf = udf(UDFHelper.getConvertDataUdf(this.getName(), this.getTransformConfig()), UDFHelper.getUdfOutput());
         return filterEmptyAppId(dataset)
                 .withColumn(DATA_OUT, explode(convertGTMServerDataUdf.apply(
                                 getUDFParamsColumns(dataset)
@@ -92,7 +92,7 @@ public abstract class BaseDataConverter implements DatasetConverter, AppRuleConf
     }
 
     public UserDefinedFunction getConvertUdf() {
-        return functions.udf(UDFHelper.getConvertDataUdf(this.getName(), this.getAppRuleConfig()), UDFHelper.getUdfOutput());
+        return functions.udf(UDFHelper.getConvertDataUdf(this.getName(), this.getTransformConfig()), UDFHelper.getUdfOutput());
     }
 
     public static Dataset<Row> filterEmptyAppId(final Dataset<Row> dataset) {

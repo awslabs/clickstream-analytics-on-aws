@@ -37,7 +37,7 @@ public class SensorsDataTransformerV2Test extends BaseSparkTest {
     @BeforeEach
     void setupTransformer() {
         this.transformer = new SensorsDataTransformerV2();
-        this.transformer.config(getTestTransformConfig("sensorTest"));
+        this.transformer.config(getTestTransformConfig(true,"sensorTest"));
     }
 
     @Test

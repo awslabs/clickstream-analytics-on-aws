@@ -17,7 +17,8 @@ package software.aws.solution.clickstream;
 import com.clearspring.analytics.util.*;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
-import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
+import software.aws.solution.clickstream.transformer.TransformConfigImpl;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.*;

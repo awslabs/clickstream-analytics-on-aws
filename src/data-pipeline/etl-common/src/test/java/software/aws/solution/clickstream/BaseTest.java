@@ -19,12 +19,15 @@ import org.apache.logging.log4j.*;
 import org.apache.logging.log4j.core.config.*;
 import org.junit.jupiter.api.*;
 import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.common.Util;
 
 import java.io.*;
 import java.nio.charset.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BaseTest {
     @BeforeAll
@@ -65,6 +68,26 @@ public class BaseTest {
         ruleConfig.setOptCategoryRuleJson(Util.readResourceFile(categoryRuleFile));
         ruleConfig.setOptChannelRuleJson(Util.readResourceFile(channelRuleFile));
         return ruleConfig;
+    }
+
+    public TransformConfig getTransformConfig(final String appId, final boolean trafficSourceEnabled) {
+       return new TransformConfig() {
+            @Override
+            public Map<String, RuleConfig> getAppRuleConfig() {
+                Map<String, RuleConfig> ruleConfigMap = new HashMap<>();
+                try {
+                    ruleConfigMap.put(appId, getRuleConfigV0());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return ruleConfigMap;
+            }
+
+            @Override
+            public boolean isEnableTrafficSource() {
+                return trafficSourceEnabled;
+            }
+        };
     }
 
 }

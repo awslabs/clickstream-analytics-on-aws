@@ -21,6 +21,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import software.aws.solution.clickstream.common.Constant;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 import software.aws.solution.clickstream.model.ModelV2;
@@ -28,7 +29,7 @@ import software.aws.solution.clickstream.transformer.BaseTransformerV3;
 import software.aws.solution.clickstream.transformer.Cleaner;
 import software.aws.solution.clickstream.udfconverter.ClickstreamDataConverterV3;
 import software.aws.solution.clickstream.udfconverter.DatasetConverter;
-import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.transformer.TransformConfigImpl;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 import software.aws.solution.clickstream.util.ContextUtil;
 import software.aws.solution.clickstream.util.DatasetUtil;
@@ -83,7 +84,7 @@ public class TransformerV3 extends BaseTransformerV3 {
     public TransformerV3() {
     }
 
-    public TransformerV3(final TransformConfig transformConfig) {
+    public TransformerV3(final TransformConfigImpl transformConfig) {
         config(transformConfig);
     }
 
@@ -262,7 +263,7 @@ public class TransformerV3 extends BaseTransformerV3 {
         if (this.getTransformConfig() == null) {
             throw new ExecuteTransformerException("Transform config is not set");
         }
-        return new ClickstreamDataConverterV3(this.transformConfig.getAppRuleConfig());
+        return new ClickstreamDataConverterV3(this.transformConfig);
     }
 
 

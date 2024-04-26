@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.common.RuleConfig;
-import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.transformer.TransformConfigImpl;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.*;
@@ -128,6 +128,8 @@ public class BaseSparkTest extends BaseTest {
         System.setProperty(DATABASE_PROP, dbName);
         System.setProperty(USER_KEEP_DAYS_PROP, String.valueOf(365 * 100));
         System.setProperty(ITEM_KEEP_DAYS_PROP, String.valueOf(365 * 100));
+        System.setProperty(ENABLE_TRAFFIC_SOURCE_PROP, "true");
+        System.setProperty(ENABLE_MAX_LENGTH_CHECK_PROP, "true");
 
         spark = SparkSession.builder()
                 .appName("Test Spark App")
@@ -206,7 +208,7 @@ public class BaseSparkTest extends BaseTest {
         return testWarehouseDir;
     }
 
-    public TransformConfig getTestTransformConfig(String... appIds) {
+    public TransformConfigImpl getTestTransformConfig(boolean enableTs, String... appIds) {
         Path ruleConfigDir = null;
         try {
             ruleConfigDir = Paths.get(Objects.requireNonNull(getClass().getResource("/rule_config/")).toURI());
@@ -259,8 +261,9 @@ public class BaseSparkTest extends BaseTest {
             appRuleConfig.put(appId, appRuleConfig.get("app1"));
         }
 
-        TransformConfig transformRuleConfig = new TransformConfig();
+        TransformConfigImpl transformRuleConfig = new TransformConfigImpl();
         transformRuleConfig.setAppRuleConfig(appRuleConfig);
+        transformRuleConfig.setEnableTrafficSource(enableTs);
         return transformRuleConfig;
     }
 }

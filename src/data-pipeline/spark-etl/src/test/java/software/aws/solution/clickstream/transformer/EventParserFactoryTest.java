@@ -31,19 +31,27 @@ public class EventParserFactoryTest {
 
     @Test
     public void shouldReturnGTMEventParser() {
-        EventParser parser = EventParserFactory.getEventParser(GTM_SERVER_DATA, new HashMap<>());
+        TransformConfigImpl transformConfig = new TransformConfigImpl();
+        transformConfig.setAppRuleConfig(new HashMap<>());
+
+        EventParser parser = EventParserFactory.getEventParser(GTM_SERVER_DATA,transformConfig);
         assertTrue(parser instanceof GTMEventParser);
     }
 
     @Test
     public void shouldReturnFakeSensorEventParser() {
-        EventParser parser = EventParserFactory.getEventParser(SENSORS_DATA, new HashMap<>());
+        TransformConfigImpl transformConfig = new TransformConfigImpl();
+        transformConfig.setAppRuleConfig(new HashMap<>());
+        EventParser parser = EventParserFactory.getEventParser(SENSORS_DATA, transformConfig);
         assertTrue(parser instanceof SensorsEventParser);
     }
 
     @Test
     public void shouldReturnClickstreamEventParser() {
-        EventParser parser = EventParserFactory.getEventParser(CLICKSTREAM, new HashMap<>());
+        TransformConfigImpl transformConfig = new TransformConfigImpl();
+        transformConfig.setAppRuleConfig(new HashMap<>());
+
+        EventParser parser = EventParserFactory.getEventParser(CLICKSTREAM, transformConfig);
         assertTrue(parser instanceof ClickstreamEventParser);
     }
 }

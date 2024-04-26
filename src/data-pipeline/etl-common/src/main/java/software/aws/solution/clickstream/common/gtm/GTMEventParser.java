@@ -42,18 +42,14 @@ public final class GTMEventParser extends BaseEventParser {
     private static GTMEventParser instance;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private final Map<String, RuleConfig> appRuleConfig;
-    private GTMEventParser(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
-    }
-    public static GTMEventParser getInstance() {
-        // use default config rule in java resource file
-        return getInstance(null);
+    private final TransformConfig transformConfig;
+    private GTMEventParser(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
-    public static GTMEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+    public static GTMEventParser getInstance(final TransformConfig transformConfig) {
         if (instance == null) {
-            instance = new GTMEventParser(appRuleConfig);
+            instance = new GTMEventParser(transformConfig);
         }
         return instance;
     }
@@ -105,13 +101,13 @@ public final class GTMEventParser extends BaseEventParser {
             String fv = gtmEvent.getXGaSystemProperties().getFv();
             isFirstVisit = fv != null && !"0".equals(fv) && !"false".equalsIgnoreCase(fv);
         }
-        log.info("isFirstVisit: " + isFirstVisit);
+        log.debug("isFirstVisit: " + isFirstVisit);
 
         boolean isSessionStart = false;
         if (gtmEvent.getXGaSystemProperties() != null) {
             isSessionStart = "1".equals(gtmEvent.getXGaSystemProperties().getSs());
         }
-        log.info("isSessionStart: " + isSessionStart);
+        log.debug("isSessionStart: " + isSessionStart);
 
         if (isFirstVisit) {
             ClickstreamEvent firstVisitEvent = ClickstreamEvent.deepCopy(clickstreamEvent);
@@ -192,7 +188,9 @@ public final class GTMEventParser extends BaseEventParser {
         clickstreamEvent.setCustomParameters(customParameters);
 
         // set traffic source
-        setTrafficSourceBySourceParser(clickstreamEvent);
+        if (isEnableTrafficSource()) {
+            setTrafficSourceBySourceParser(clickstreamEvent);
+        }
 
         Map<String, String> processInfo = new HashMap<>();
         processInfo.put("rid", extraParams.getRid());
@@ -404,7 +402,11 @@ public final class GTMEventParser extends BaseEventParser {
     }
 
     @Override
-    protected Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
+    protected Optional<TransformConfig> getTransformConfig() {
+        if (this.transformConfig != null) {
+            return Optional.of(this.transformConfig);
+        } else {
+            return Optional.empty();
+        }
     }
 }

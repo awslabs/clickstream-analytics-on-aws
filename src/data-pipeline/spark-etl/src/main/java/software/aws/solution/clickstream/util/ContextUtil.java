@@ -36,10 +36,10 @@ public final class ContextUtil {
     public static final String PROJECT_ID_PROP = "project.id";
     public static final String JOB_DATA_DIR_PROP = "job.data.dir";
     public static final String DATABASE_PROP = "database";
-
     public static final String USER_KEEP_DAYS_PROP = "keep.user.days";
-
     public static final String ITEM_KEEP_DAYS_PROP =  "keep.item.days";
+    public static final String ENABLE_MAX_LENGTH_CHECK_PROP =  "enable.max.length.check";
+    public static final String ENABLE_TRAFFIC_SOURCE_PROP =  "enable.traffic.source";
 
     private static Dataset<Row> datasetCached;
 
@@ -62,17 +62,26 @@ public final class ContextUtil {
     }
 
     public static void setContextProperties(final ETLRunnerConfig config) {
-        System.setProperty(DATABASE_PROP, config.getDatabase());
-        System.setProperty(JOB_DATA_DIR_PROP, config.getJobDataDir());
-        System.setProperty(PROJECT_ID_PROP, config.getProjectId());
-        System.setProperty(APP_IDS_PROP, config.getValidAppIds());
-        System.setProperty(SOURCE_PATH_PROP, config.getSourcePath());
-        System.setProperty(OUTPUT_PATH_PROP, config.getOutputPath());
-        System.setProperty(DATA_FRESHNESS_HOUR_PROP, String.valueOf(config.getDataFreshnessInHour()));
-        System.setProperty(OUTPUT_COALESCE_PARTITIONS_PROP, String.valueOf(config.getOutPartitions()));
-        System.setProperty(SAVE_INFO_TO_WAREHOUSE_PROP, String.valueOf(config.isSaveInfoToWarehouse()));
-        System.setProperty(USER_KEEP_DAYS_PROP, String.valueOf(config.getUserKeepDays()));
-        System.setProperty(ITEM_KEEP_DAYS_PROP, String.valueOf(config.getItemKeepDays()));
+        boolean overwrite = true;
+        setContextProperty(DATABASE_PROP, config.getDatabase(), overwrite);
+        setContextProperty(JOB_DATA_DIR_PROP, config.getJobDataDir(), overwrite);
+        setContextProperty(PROJECT_ID_PROP, config.getProjectId(), overwrite);
+        setContextProperty(APP_IDS_PROP, config.getValidAppIds(), overwrite);
+        setContextProperty(SOURCE_PATH_PROP, config.getSourcePath(), overwrite);
+        setContextProperty(OUTPUT_PATH_PROP, config.getOutputPath(), overwrite);
+        setContextProperty(DATA_FRESHNESS_HOUR_PROP, String.valueOf(config.getDataFreshnessInHour()), overwrite);
+        setContextProperty(OUTPUT_COALESCE_PARTITIONS_PROP, String.valueOf(config.getOutPartitions()), overwrite);
+        setContextProperty(SAVE_INFO_TO_WAREHOUSE_PROP, String.valueOf(config.isSaveInfoToWarehouse()), overwrite);
+        setContextProperty(USER_KEEP_DAYS_PROP, String.valueOf(config.getUserKeepDays()), overwrite);
+        setContextProperty(ITEM_KEEP_DAYS_PROP, String.valueOf(config.getItemKeepDays()), overwrite);
+        setContextProperty(ENABLE_MAX_LENGTH_CHECK_PROP, config.getEnableMaxLengthCheck(), overwrite);
+        setContextProperty(ENABLE_TRAFFIC_SOURCE_PROP, config.getEnableTrafficSource(), overwrite);
+    }
+
+    public static void setContextProperty(final String key, final String value, final boolean overwrite) {
+        if (overwrite || System.getProperty(key) == null) {
+            System.setProperty(key, value);
+        }
     }
 
     public static void setJobAndWarehouseInfo(final String jobDataDir) {
@@ -107,5 +116,11 @@ public final class ContextUtil {
 
     public static void setEnableEventTimeShift(final boolean enableEventTimeShift) {
         System.setProperty(ENABLE_EVENT_TIME_SHIFT_PROP, String.valueOf(enableEventTimeShift));
+    }
+    public static boolean isEnableTrafficSource() {
+        return Boolean.parseBoolean(System.getProperty(ENABLE_TRAFFIC_SOURCE_PROP));
+    }
+    public static boolean isEnableMaxLengthCheck() {
+        return Boolean.parseBoolean(System.getProperty(ENABLE_MAX_LENGTH_CHECK_PROP));
     }
 }

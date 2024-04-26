@@ -40,7 +40,7 @@ class TransformerV3Test extends BaseSparkTest {
     private TransformerV3 transformer;
     @BeforeEach
     void setupTransformer() {
-        this.transformer = new TransformerV3(getTestTransformConfig("uba-app"));
+        this.transformer = new TransformerV3(getTestTransformConfig(true,"uba-app"));
     }
 
     public String getUserPropsTableName(String name) {
@@ -289,5 +289,46 @@ class TransformerV3Test extends BaseSparkTest {
         String expectedJson2 = this.resourceFileAsString("/event_v2/expected/transform_v3_user_max_len.json");
         Assertions.assertEquals(expectedJson2, replaceDynData(datasetUser.first().prettyJson()), "transform_v3_user_max_len");
 
+    }
+
+    @Test
+    void test_transform_with_max_len_check_disable() {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV3Test.test_transform_with_max_len_check_disable
+
+        System.setProperty(ENABLE_TRAFFIC_SOURCE_PROP, "true");
+        System.setProperty(ENABLE_MAX_LENGTH_CHECK_PROP, "false");
+
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        String testWarehouseDir = "/tmp/warehouse/test_transform_with_max_len_check_disable/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
+        Map<TableName, Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetEvent = transformedDatasets.get(TableName.EVENT_V2);
+        Assertions.assertTrue(datasetEvent.first().prettyJson().contains("event_name"));
+    }
+
+    @Test
+    void test_transform_with_traffic_source_disable() {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV3Test.test_transform_with_traffic_source_disable
+
+        System.setProperty(ENABLE_TRAFFIC_SOURCE_PROP, "false");
+        System.setProperty(ENABLE_MAX_LENGTH_CHECK_PROP, "false");
+
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        String testWarehouseDir = "/tmp/warehouse/test_transform_with_traffic_source_disable/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
+
+        TransformerV3 transformer = new TransformerV3(getTestTransformConfig(false,"uba-app"));
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
+        Map<TableName, Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetEvent = transformedDatasets.get(TableName.EVENT_V2);
+        Assertions.assertTrue(datasetEvent.first().prettyJson().contains("\"traffic_source_channel_group\" : null,"));
+        Assertions.assertTrue(datasetEvent.first().prettyJson().contains("\"traffic_source_category\" : null,"));
     }
 }

@@ -207,6 +207,8 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             '10',
             '12',
             's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/rules/',
+            'true',
+            'true',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
@@ -289,6 +291,8 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             '10',
             '12',
             's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/rules/',
+            'true',
+            'true',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \

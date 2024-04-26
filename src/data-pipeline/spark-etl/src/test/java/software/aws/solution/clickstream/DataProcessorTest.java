@@ -47,6 +47,8 @@ public class DataProcessorTest extends BaseSparkTest{
         String nUserKeepDays = "10";
         String nItemKeepDays = "20";
         String configDirPath = Paths.get(getClass().getResource("/rule_config/").getPath()).toString();
+        String enableTrafficSource = "true";
+        String enableMaxLengthCheck = "false";;
 
         DataProcessor.runWithSpark(
                 new String[] {
@@ -67,10 +69,14 @@ public class DataProcessorTest extends BaseSparkTest{
                         rePartitions,//String rePartitions = args[14];
                         nUserKeepDays, //String nUserKeepDays = args[15];
                         nItemKeepDays, //String nItemKeepDays = args[16];
-                        configDirPath
+                        configDirPath,
+                        enableTrafficSource,
+                        enableMaxLengthCheck
                 },
                 spark
         );
         Assertions.assertEquals("jobName0001", ContextUtil.getJobName());
+        Assertions.assertTrue(ContextUtil.isEnableTrafficSource());
+        Assertions.assertFalse(ContextUtil.isEnableMaxLengthCheck());
     }
 }

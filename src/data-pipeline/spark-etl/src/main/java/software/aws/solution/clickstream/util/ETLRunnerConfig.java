@@ -59,8 +59,9 @@ public class ETLRunnerConfig {
 
     @NotNull
     private final int itemKeepDays;
-
     private final String configRuleDir;
+    private final String enableTrafficSource;
+    private final String enableMaxLengthCheck;
 
     public ETLRunnerConfig(
             @NotNull final TransformationConfig transformationConfig,
@@ -86,6 +87,8 @@ public class ETLRunnerConfig {
         this.userKeepDays = transformationConfig.getUserKeepDays();
         this.itemKeepDays = transformationConfig.getItemKeepDays();
         this.configRuleDir = transformationConfig.getConfigRuleDir();
+        this.enableMaxLengthCheck = transformationConfig.getEnableMaxLengthCheck();
+        this.enableTrafficSource = transformationConfig.getEnableTrafficSource();
     }
 
     public boolean isSaveInfoToWarehouse() {
@@ -160,6 +163,12 @@ public class ETLRunnerConfig {
         return configRuleDir;
     }
 
+    public String getEnableTrafficSource() {
+        return enableTrafficSource;
+    }
+    public String getEnableMaxLengthCheck() {
+        return enableMaxLengthCheck;
+    }
     @AllArgsConstructor
     @Getter
     public static class PartitionConfig {
@@ -214,6 +223,10 @@ public class ETLRunnerConfig {
         final Integer itemKeepDays;
         @NotNull
         final String configRuleDir;
+        @NotNull
+        final String enableTrafficSource;
+        @NotNull
+        final String enableMaxLengthCheck;
     }
 }
 

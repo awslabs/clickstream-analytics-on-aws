@@ -45,21 +45,15 @@ public final class ClickstreamEventParser extends BaseEventParser {
     public static final String EVENT_SESSION_START = "_session_start";
     public static final String EVENT_USER_ENGAGEMENT = "_user_engagement";
     public static final String EVENT_SCROLL = "_scroll";
+    private TransformConfig transformConfig;
 
-    private Map<String, RuleConfig> appRuleConfig;
-
-    private ClickstreamEventParser(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    private ClickstreamEventParser(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
-    public static ClickstreamEventParser getInstance() {
-        // use default config rule in java resource file
-        return getInstance(null);
-    }
-
-    public static ClickstreamEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+    public static ClickstreamEventParser getInstance(final TransformConfig transformConfig) {
         if (instance == null) {
-            instance = new ClickstreamEventParser(appRuleConfig);
+            instance = new ClickstreamEventParser(transformConfig);
         }
          return instance;
     }
@@ -431,12 +425,16 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setTrafficSourceChannelGroup(clientTsInfo.getChannel());
         clickstreamEvent.setTrafficSourceCategory(clientTsInfo.getCategory());
 
-        log.info("setTrafficSource() platform: {}, source: {}", clickstreamEvent.getPlatform(), clientTsInfo.getSource());
+        if (!isEnableTrafficSource()) {
+            return;
+        }
+
+        log.debug("setTrafficSource() platform: {}, source: {}", clickstreamEvent.getPlatform(), clientTsInfo.getSource());
 
         // TrafficSource is set by SDK, but category or channel not set
         if (clientTsInfo.getSource() != null && (clientTsInfo.getCategory() == null || clientTsInfo.getChannel() == null)) {
             String appId = clickstreamEvent.getAppId();
-            RuleConfig ruleConfig = getAppRuleConfig() != null ? getAppRuleConfig().get(appId) : null;
+            RuleConfig ruleConfig = getTransformConfig().map(c -> c.getAppRuleConfig().get(appId)).orElse(null);
             if (ruleConfig == null) {
                 log.warn("RuleConfig is not set for appId: " + appId);
             }
@@ -535,13 +533,13 @@ public final class ClickstreamEventParser extends BaseEventParser {
     }
 
     @Override
-    public Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
+    protected Optional<TransformConfig> getTransformConfig() {
+        if (this.transformConfig != null) {
+            return Optional.of(this.transformConfig);
+        } else {
+            return Optional.empty();
+        }
     }
-    public void setAppRuleConfig(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
-    }
-
     private boolean isEnableEventTimeShift() {
         if (System.getProperty(ENABLE_EVENT_TIME_SHIFT_PROP) == null) {
             return false;

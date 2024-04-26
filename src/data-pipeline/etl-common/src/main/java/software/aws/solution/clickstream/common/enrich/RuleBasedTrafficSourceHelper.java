@@ -159,7 +159,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             }
         }
 
-        log.info("clidMap: {}", clidMap);
+        log.debug("clidMap: {}", clidMap);
         return clidMap;
     }
 
@@ -170,10 +170,13 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
     @Override
     public CategoryTrafficSource parse(final String pageUrl, final String pageReferrer, final String latestReferrer, final String latestReferrerHost) {
-        log.info("parser() enter pageUrl: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
-
+        log.debug("parser() enter pageUrl: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
         TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
 
+        if (isEmpty(pageUrl) && isEmpty(pageReferrer) && isEmpty(latestReferrer)) {
+            trafficSourceUtm.setCampaign(DIRECT);
+            return new CategoryTrafficSource(trafficSourceUtm, null, DIRECT);
+        }
         if (pageUrl != null && !pageUrl.isEmpty()) {
             trafficSourceUtm = getUtmSourceFromUrl(pageUrl);
         }
@@ -205,7 +208,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         String utmCampaign = getFirst(params.get("utm_campaign"));
         String utmSourcePlatform = getFirst(params.get("utm_source_platform"));
 
-        log.info("utmSource: {}, utmMedium: {}, utmContent: {}, utmTerm: {}, utmCampaign: {}, utmId: {}, utmSourcePlatform: {}, gclid: {}",
+        log.debug("utmSource: {}, utmMedium: {}, utmContent: {}, utmTerm: {}, utmCampaign: {}, utmId: {}, utmSourcePlatform: {}, gclid: {}",
                 utmSource, utmMedium, utmContent, utmTerm, utmCampaign, utmId, utmSourcePlatform, gclid);
 
         Map<String, String> clidMap = createClidTypeValueMap(gclid, params);
@@ -237,7 +240,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
 
     public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String theReferrer, final String theReferrerHost) {
-        log.info("trafficSourceUtmInput: {}, theReferrer: {}, theReferrerHost: {}", trafficSourceUtmInput, theReferrer, theReferrerHost);
+        log.debug("trafficSourceUtmInput: {}, theReferrer: {}, theReferrerHost: {}", trafficSourceUtmInput, theReferrer, theReferrerHost);
         TrafficSourceUtm trafficSourceUtm = normEmptyInTrafficSourceUtm(trafficSourceUtmInput);
 
         SourceCategoryAndTerms sourceCategoryAndTerms = this.categoryListEvaluator.evaluate(theReferrer);
@@ -246,7 +249,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         String terms = sourceCategoryAndTerms.getTerms();
         String category = sourceCategoryAndTerms.getCategory();
 
-        log.info("categoryListEvaluator source: {}, terms: {}, category: {}", source, terms, category);
+        log.debug("categoryListEvaluator source: {}, terms: {}, category: {}", source, terms, category);
 
         if (trafficSourceUtm.getSource() == null) {
             trafficSourceUtm.setSource(source);
@@ -262,7 +265,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
         if (trafficSourceUtm.getSource() != null && categoryForEval == null) {
             category = this.categoryListEvaluator.getCategoryBySource(trafficSourceUtm.getSource());
-            log.info("category is null/UNASSIGNED, trying to get category from source: {} -> category: {}", trafficSourceUtm.getSource(), category);
+            log.debug("category is null/UNASSIGNED, trying to get category from source: {} -> category: {}", trafficSourceUtm.getSource(), category);
         }
 
         ChannelRuleEvaluatorInput evalInput = ChannelRuleEvaluatorInput.from(trafficSourceUtm, categoryForEval, theReferrer, theReferrerHost);
@@ -277,14 +280,19 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
                 categoryTrafficSource.setCampaign(DIRECT);
             }
         }
-        log.info("return categoryTrafficSource: {}", categoryTrafficSource);
+        log.debug("return categoryTrafficSource: {}", categoryTrafficSource);
         return categoryTrafficSource;
 
     }
 
     @Override
     public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String pageReferrer, final String latestReferrer, final String latestReferrerHost) {
-        log.info("parser() enter trafficSourceUtm: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", trafficSourceUtmInput, pageReferrer, latestReferrer, latestReferrerHost);
+        log.debug("parser() enter trafficSourceUtm: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", trafficSourceUtmInput, pageReferrer, latestReferrer, latestReferrerHost);
+
+        if (isEmpty(trafficSourceUtmInput) && isEmpty(pageReferrer) && isEmpty(latestReferrer)) {
+            trafficSourceUtmInput.setCampaign(DIRECT);
+            return new CategoryTrafficSource(trafficSourceUtmInput, null, DIRECT);
+        }
 
         TrafficSourceUtm trafficSourceUtm = normEmptyInTrafficSourceUtm(trafficSourceUtmInput);
 
@@ -324,13 +332,25 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         return categoryTrafficSource;
     }
 
+    private static boolean isEmpty(final TrafficSourceUtm trafficSourceUtm) {
+        TrafficSourceUtm trafficSourceUtmInput = normEmptyInTrafficSourceUtm(trafficSourceUtm);
+        return isEmpty(trafficSourceUtmInput.getSource())
+                && isEmpty(trafficSourceUtmInput.getMedium())
+                && isEmpty(trafficSourceUtmInput.getCampaign())
+                && isEmpty(trafficSourceUtmInput.getContent())
+                && isEmpty(trafficSourceUtmInput.getTerm())
+                && isEmpty(trafficSourceUtmInput.getCampaignId())
+                && isEmpty(trafficSourceUtmInput.getClidPlatform())
+                && isEmpty(trafficSourceUtmInput.getClid());
+    }
+
     private static boolean isEmpty(final String v, final String emtpyValue) {
         return v == null || v.isEmpty() || v.equalsIgnoreCase(emtpyValue);
     }
     private static boolean isEmpty(final String v) {
         return v == null || v.isEmpty();
     }
-    private TrafficSourceUtm normEmptyInTrafficSourceUtm(final TrafficSourceUtm trafficSourceUtmInput) {
+    private static TrafficSourceUtm normEmptyInTrafficSourceUtm(final TrafficSourceUtm trafficSourceUtmInput) {
 
         TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
         if (trafficSourceUtmInput == null) {

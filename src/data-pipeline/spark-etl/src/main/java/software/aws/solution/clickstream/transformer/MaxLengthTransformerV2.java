@@ -13,20 +13,28 @@
 
 package software.aws.solution.clickstream.transformer;
 
-import lombok.*;
-import lombok.extern.slf4j.*;
-import org.apache.spark.sql.*;
-import org.apache.spark.sql.api.java.*;
-import org.apache.spark.sql.expressions.*;
-import org.apache.spark.sql.types.*;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.api.java.UDF2;
+import org.apache.spark.sql.expressions.UserDefinedFunction;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
 import software.aws.solution.clickstream.common.Constant;
-import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.model.ModelV2;
+import software.aws.solution.clickstream.util.ContextUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import static org.apache.spark.sql.functions.*;
-import static software.aws.solution.clickstream.util.DatasetUtil.*;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.expr;
+import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.model.ModelV2.toColumnArray;
+import static software.aws.solution.clickstream.util.DatasetUtil.TRUNCATED;
 
 @Slf4j
 public class MaxLengthTransformerV2 {
@@ -36,10 +44,17 @@ public class MaxLengthTransformerV2 {
     private static final int MAX_STRING_VALUE_LEN_2K = 2048;
 
     private static UDF2<String, Integer, Row> truncateWithMaxByteLength() {
-      return MaxLengthTransformer.truncateWithMaxByteLength();
+        return MaxLengthTransformer.truncateWithMaxByteLength();
     }
 
     public static Dataset<Row> runMaxLengthTransformerForItemV2(final Dataset<Row> newItemsDataset1) {
+        if (!ContextUtil.isEnableMaxLengthCheck()) {
+            log.info("runMaxLengthTransformerForItemV2 is disabled");
+            return newItemsDataset1.select(
+                    toColumnArray(ModelV2.getItemFields())
+            );
+        }
+
         List<ColumnsMaxLength> columnsMaxLengthList = new ArrayList<>();
         columnsMaxLengthList.add(
                 new ColumnsMaxLength(Arrays.asList(
@@ -63,7 +78,7 @@ public class MaxLengthTransformerV2 {
                 ), MAX_STRING_VALUE_LEN_255)
         );
 
-        columnsMaxLengthList.add(new ColumnsMaxLength(Arrays.asList(Constant.CUSTOM_PARAMETERS_JSON_STR), MAX_STRING_VALUE_LEN_255));
+        columnsMaxLengthList.add(new ColumnsMaxLength(List.of(Constant.CUSTOM_PARAMETERS_JSON_STR), MAX_STRING_VALUE_LEN_255));
 
         Dataset<Row> newItemsDataset2 = new MaxLengthTransformerV2().transform(newItemsDataset1, columnsMaxLengthList);
         return newItemsDataset2.select(
@@ -72,6 +87,12 @@ public class MaxLengthTransformerV2 {
     }
 
     public static Dataset<Row> runMaxLengthTransformerForUserV2(final Dataset<Row> userDataset) {
+        if (!ContextUtil.isEnableMaxLengthCheck()) {
+            log.info("runMaxLengthTransformerForUserV2 is disabled");
+            return userDataset.select(
+                    toColumnArray(ModelV2.getUserFields())
+            );
+        }
         List<ColumnsMaxLength> columnsMaxLengthList = new ArrayList<>();
         columnsMaxLengthList.add(
                 new ColumnsMaxLength(Arrays.asList(
@@ -109,9 +130,15 @@ public class MaxLengthTransformerV2 {
     }
 
     public static Dataset<Row> runMaxLengthTransformerForEventV2(final Dataset<Row> eventDataset) {
+        if (!ContextUtil.isEnableMaxLengthCheck()) {
+            log.info("runMaxLengthTransformerForEventV2 is disabled");
+            return eventDataset.select(
+                    toColumnArray(ModelV2.getEventFields())
+            );
+        }
         List<ColumnsMaxLength> columnsMaxLengthList = new ArrayList<>();
         columnsMaxLengthList.add(
-                new ColumnsMaxLength(Arrays.asList(
+                new ColumnsMaxLength(List.of(
                         Constant.EVENT_VALUE_CURRENCY
                 ), MAX_STRING_VALUE_LEN_32)
         );

@@ -11,12 +11,12 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.transformer;
 
-import software.aws.solution.clickstream.common.RuleConfig;
+package software.aws.solution.clickstream.common;
 
 import java.util.Map;
 
-public interface AppRuleConfigurable {
+public interface TransformConfig {
     Map<String, RuleConfig> getAppRuleConfig();
+    boolean isEnableTrafficSource();
 }

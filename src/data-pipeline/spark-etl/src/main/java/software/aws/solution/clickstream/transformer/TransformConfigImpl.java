@@ -11,17 +11,22 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream;
+package software.aws.solution.clickstream.transformer;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.TransformConfig;
-import software.aws.solution.clickstream.util.TableName;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public interface TransformerInterfaceV3 {
-    void config(TransformConfig transformConfig);
-    Map<TableName, Dataset<Row>> transform(Dataset<Row> dataset);
-    Dataset<Row> postTransform(Dataset<Row> dataset);
+@Getter
+@Setter
+@ToString
+public class TransformConfigImpl implements Serializable, TransformConfig {
+    private static final long serialVersionUID = 1L;
+    private Map<String, RuleConfig> appRuleConfig; // NOSONAR
+    private boolean enableTrafficSource; // NOSONAR
 }

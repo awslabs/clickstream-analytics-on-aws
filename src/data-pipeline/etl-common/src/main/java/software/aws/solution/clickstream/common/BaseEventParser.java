@@ -25,7 +25,7 @@ import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 
 import java.util.Base64;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.Optional;
 
 import static software.aws.solution.clickstream.common.Util.deCodeUri;
 import static software.aws.solution.clickstream.common.Util.decompress;
@@ -106,7 +106,8 @@ public abstract class BaseEventParser implements EventParser {
 
     protected void setTrafficSourceBySourceParser(final ClickstreamEvent clickstreamEvent) {
         String appId = clickstreamEvent.getAppId();
-        RuleConfig ruleConfig = getAppRuleConfig() !=null ? getAppRuleConfig().get(appId) : null;
+        RuleConfig ruleConfig = getTransformConfig().map(c -> c.getAppRuleConfig().get(appId)).orElse(null);
+
         if (ruleConfig == null) {
             log.warn("RuleConfig is not set for appId: " + appId);
         }
@@ -147,6 +148,11 @@ public abstract class BaseEventParser implements EventParser {
         }
     }
 
-    protected abstract Map<String, RuleConfig> getAppRuleConfig();
+    protected abstract Optional<TransformConfig> getTransformConfig();
 
+    protected boolean isEnableTrafficSource() {
+        boolean b = getTransformConfig().map(TransformConfig::isEnableTrafficSource).orElse(true);
+        log.debug("isEnableTrafficSource: " + b);
+        return b;
+    }
 }

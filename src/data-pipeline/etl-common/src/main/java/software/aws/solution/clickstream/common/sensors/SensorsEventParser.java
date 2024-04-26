@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.clickstream.common.BaseEventParser;
 import software.aws.solution.clickstream.common.ExtraParams;
 import software.aws.solution.clickstream.common.ParseDataResult;
-import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.common.Util;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.common.model.ClickstreamEventPropValue;
@@ -40,6 +40,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static software.aws.solution.clickstream.common.ClickstreamEventParser.EVENT_PAGE_VIEW;
 import static software.aws.solution.clickstream.common.ClickstreamEventParser.EVENT_PROFILE_SET;
@@ -60,19 +61,15 @@ public final class SensorsEventParser extends BaseEventParser {
     private static final String GZIP_DATA_LIST = "data_list=";
     private static final String GZIP_DATA = "data=";
     private static SensorsEventParser instance;
-    private final Map<String, RuleConfig> appRuleConfig;
+    private final TransformConfig transformConfig;
 
-    private SensorsEventParser(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    private SensorsEventParser(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
-    public static SensorsEventParser getInstance() {
-        return getInstance(null);
-    }
-
-    public static SensorsEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+    public static SensorsEventParser getInstance(final TransformConfig transformConfig) {
         if (instance == null) {
-            instance = new SensorsEventParser(appRuleConfig);
+            instance = new SensorsEventParser(transformConfig);
         }
         return instance;
     }
@@ -239,7 +236,9 @@ public final class SensorsEventParser extends BaseEventParser {
         clickstreamEvent.setCustomParameters(customParameters);
 
         // set traffic source
-        setTrafficSourceBySourceParser(clickstreamEvent);
+        if (isEnableTrafficSource()) {
+            setTrafficSourceBySourceParser(clickstreamEvent);
+        }
 
         Map<String, String> processInfo = new HashMap<>();
         processInfo.put("rid", extraParams.getRid());
@@ -399,7 +398,11 @@ public final class SensorsEventParser extends BaseEventParser {
     }
 
     @Override
-    protected Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
+    protected Optional<TransformConfig> getTransformConfig() {
+        if (this.transformConfig != null) {
+            return Optional.of(this.transformConfig);
+        } else {
+            return Optional.empty();
+        }
     }
 }

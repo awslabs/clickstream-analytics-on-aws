@@ -26,13 +26,13 @@ public class TransformConfigTest {
 
     @Test
     public void shouldInitializeEmptyAppRuleConfig() {
-        TransformConfig transformConfig = new TransformConfig();
+        TransformConfigImpl transformConfig = new TransformConfigImpl();
         assertNull(transformConfig.getAppRuleConfig());
     }
 
     @Test
     public void shouldSetAndGetAppRuleConfig() {
-        TransformConfig transformConfig = new TransformConfig();
+        TransformConfigImpl transformConfig = new TransformConfigImpl();
         HashMap<String, RuleConfig> ruleConfigMap = new HashMap<>();
         RuleConfig ruleConfig = new RuleConfig();
         ruleConfigMap.put("testRule", ruleConfig);
@@ -46,7 +46,7 @@ public class TransformConfigTest {
 
     @Test
     public void shouldReturnNullForNonExistentRule() {
-        TransformConfig transformConfig = new TransformConfig();
+        TransformConfigImpl transformConfig = new TransformConfigImpl();
         HashMap<String, RuleConfig> ruleConfigMap = new HashMap<>();
         RuleConfig ruleConfig = new RuleConfig();
         ruleConfigMap.put("testRule", ruleConfig);

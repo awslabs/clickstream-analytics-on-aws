@@ -30,8 +30,9 @@ import org.apache.spark.sql.types.StructType;
 import org.sparkproject.guava.annotations.VisibleForTesting;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
-import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.transformer.TransformConfigImpl;
 import software.aws.solution.clickstream.util.*;
 
 import javax.validation.constraints.NotEmpty;
@@ -51,6 +52,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.apache.ivy.util.StringUtils.getStackTrace;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.decode;
 import static org.apache.spark.sql.functions.input_file_name;
@@ -133,8 +135,10 @@ public class ETLRunner {
 
         showConfigInfo(appRuleConfig, runConfig.getValidAppIds());
 
-        TransformConfig transformRuleConfig = new TransformConfig();
+        TransformConfigImpl transformRuleConfig = new TransformConfigImpl();
         transformRuleConfig.setAppRuleConfig(appRuleConfig);
+        transformRuleConfig.setEnableTrafficSource(ContextUtil.isEnableTrafficSource());
+        log.info("transformRuleConfig: " + transformRuleConfig);
 
         this.transformConfig = transformRuleConfig;
     }
@@ -378,7 +382,7 @@ public class ETLRunner {
             return eventDataset;
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException
                  | IllegalAccessException | NoSuchMethodException e) {
-            log.error(e.getMessage());
+            log.error(getStackTrace(e));
             throw new ExecuteTransformerException(e);
         }
     }
