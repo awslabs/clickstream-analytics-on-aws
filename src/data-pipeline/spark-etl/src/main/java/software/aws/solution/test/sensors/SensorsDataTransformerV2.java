@@ -15,7 +15,7 @@ package software.aws.solution.test.sensors;
 
 import software.aws.solution.test.exception.ExecuteTransformerException;
 import software.aws.solution.test.transformer.BaseThirdPartyTransformer;
-import software.aws.solution.test.transformer.TransformConfig;
+import software.aws.solution.transformer.TransformConfig;
 import software.aws.solution.test.transformer.TransformerNameEnum;
 import software.aws.solution.test.udfconverter.DatasetConverter;
 

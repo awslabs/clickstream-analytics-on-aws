@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.test.transformer;
+package software.aws.solution.transformer;
 
 import lombok.Getter;
 import lombok.Setter;

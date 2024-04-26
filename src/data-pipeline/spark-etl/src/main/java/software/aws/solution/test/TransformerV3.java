@@ -28,7 +28,7 @@ import software.aws.solution.test.transformer.BaseTransformerV3;
 import software.aws.solution.test.transformer.Cleaner;
 import software.aws.solution.test.udfconverter.ClickstreamDataConverterV3;
 import software.aws.solution.test.udfconverter.DatasetConverter;
-import software.aws.solution.test.transformer.TransformConfig;
+import software.aws.solution.transformer.TransformConfig;
 import software.aws.solution.test.transformer.TransformerNameEnum;
 import software.aws.solution.test.util.ContextUtil;
 import software.aws.solution.test.util.DatasetUtil;

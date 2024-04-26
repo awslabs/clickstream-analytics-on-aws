@@ -31,7 +31,7 @@ import org.sparkproject.guava.annotations.VisibleForTesting;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.test.exception.ExecuteTransformerException;
-import software.aws.solution.test.transformer.TransformConfig;
+import software.aws.solution.transformer.TransformConfig;
 import software.aws.solution.test.util.ContextUtil;
 import software.aws.solution.test.util.ETLMetric;
 import software.aws.solution.test.util.ETLRunnerConfig;

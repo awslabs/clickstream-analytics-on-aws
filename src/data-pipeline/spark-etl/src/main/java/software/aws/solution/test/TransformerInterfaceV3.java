@@ -15,7 +15,7 @@ package software.aws.solution.test;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import software.aws.solution.test.transformer.TransformConfig;
+import software.aws.solution.transformer.TransformConfig;
 import software.aws.solution.test.util.TableName;
 
 import java.util.Map;

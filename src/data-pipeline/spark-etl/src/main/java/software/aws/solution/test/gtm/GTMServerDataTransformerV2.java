@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.test.exception.ExecuteTransformerException;
 import software.aws.solution.test.transformer.BaseThirdPartyTransformer;
 import software.aws.solution.test.udfconverter.DatasetConverter;
-import software.aws.solution.test.transformer.TransformConfig;
+import software.aws.solution.transformer.TransformConfig;
 import software.aws.solution.test.transformer.TransformerNameEnum;
 
 
