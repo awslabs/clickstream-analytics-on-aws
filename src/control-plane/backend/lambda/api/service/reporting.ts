@@ -33,7 +33,7 @@ import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummar
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
 import { PipelineServ } from './pipeline';
-import { DataSetProps } from './quicksight/dashboard-ln';
+import { DataSetProps, waitForDashboardChangeCompleted } from './quicksight/dashboard-ln';
 import {
   createDataSet,
   funnelVisualColumns,
@@ -922,6 +922,16 @@ export class ReportingService {
     }
   };
 
+  private _getSheetId(query: any) : string {
+    let sheetId;
+    if (!query.dashboardId) {
+      sheetId = uuidv4();
+    } else {
+      sheetId = query.sheetId;
+    }
+    return sheetId;
+  };
+
   async createRetentionVisual(req: any, res: any, next: any) {
     try {
       logger.info('start to create retention analysis visuals', { request: req.body });
@@ -986,16 +996,7 @@ export class ReportingService {
         projectedColumns,
       });
 
-      let sheetId;
-      if (!query.dashboardId) {
-        sheetId = uuidv4();
-      } else {
-        if (!query.sheetId) {
-          return res.status(400).send(new ApiFail('missing required parameter sheetId'));
-        }
-        sheetId = query.sheetId;
-      }
-
+      const sheetId = this._getSheetId(query);
       const titleProps = await getDashboardTitleProps(AnalysisType.RETENTION, query);
       const locale = query.locale ?? ExploreLocales.EN_US;
       const quickSightChartType = query.chartType;
@@ -1065,12 +1066,19 @@ export class ReportingService {
         visualPropsArray.push(tableVisualProps);
       }
 
-      const result: CreateDashboardResult = await this.createDashboardVisuals(
-        sheetId, viewName, query, pipeline, datasetPropsArray, visualPropsArray);
+      let result: CreateDashboardResult | undefined = undefined;
+      try {
+        result = await this.createDashboardVisuals(
+          sheetId, viewName, query, pipeline, datasetPropsArray, visualPropsArray);
 
-      if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+          return res.status(500).json(new ApiFail('Dashboard embed url is empty.'));
+        }
+      } catch (error) {
+        logger.error('Failed to create dashboard', { error });
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
       }
+
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -1181,6 +1189,9 @@ export class ReportingService {
         Name: dashboardName,
         Definition: dashboard,
       });
+
+      await waitForDashboardChangeCompleted(props.quickSight, awsAccountId!, props.query.dashboardId);
+
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
 
       // publish new version
