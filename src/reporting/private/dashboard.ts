@@ -59,6 +59,7 @@ export interface QuicksightCustomResourceLambdaProps {
   readonly quickSightOwnerPrincipalArn: string;
   readonly schemas: string;
   readonly dashboardDefProps: QuickSightDashboardDefProps;
+  readonly useSpice: string;
 };
 
 export interface TagColumnOperationProps {

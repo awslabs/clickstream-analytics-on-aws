@@ -90,12 +90,12 @@ export class DataReportingQuickSightStack extends Stack {
     });
     interfaceCheckCR.node.addDependency(vPCConnectionResource);
 
-    const useTemplateArnCondition = new CfnCondition(
+    const useSpiceCondition = new CfnCondition(
       this,
-      'useTemplateArnCondition',
+      'useSpiceCondition',
       {
         expression:
-          Fn.conditionNot(Fn.conditionEquals(stackParams.quickSightTemplateArnParam.valueAsString, '')),
+          Fn.conditionEquals(stackParams.quickSightUseSpiceParam.valueAsString, 'yes'),
       },
     );
 
@@ -114,14 +114,8 @@ export class DataReportingQuickSightStack extends Stack {
         ],
       }],
 
-      sourceEntity: Fn.conditionIf(useTemplateArnCondition.logicalId, {
-        SourceTemplate: {
-          Arn: stackParams.quickSightTemplateArnParam.valueAsString,
-        },
-      }, Aws.NO_VALUE),
-
-      definition: Fn.conditionIf(useTemplateArnCondition.logicalId,
-        Aws.NO_VALUE,
+      definition: Fn.conditionIf(useSpiceCondition.logicalId,
+        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-spice.json'), 'utf-8')),
         JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json'), 'utf-8')),
       ),
     });

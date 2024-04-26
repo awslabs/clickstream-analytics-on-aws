@@ -99,9 +99,9 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   };
 
   const quickSightUseSpiceParam = new CfnParameter(scope, 'QuickSightUseSpiceParam', {
-    description: 'Use SPICE to import data set or not.',
+    description: 'Use SPICE to import data set or not (yes/no).',
     type: 'String',
-    default: 'yes',
+    default: 'no',
   });
   labels[quickSightUseSpiceParam.logicalId] = {
     default: 'Enable QuickSight SPICE Import Mode',
