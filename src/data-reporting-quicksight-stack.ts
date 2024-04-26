@@ -193,7 +193,7 @@ export class DataReportingQuickSightStack extends Stack {
 
     new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, {
       description: 'Redshift data api role arn.',
-      value: stackParams.redshiftServerlessIAMRoleParam.valueAsString,
+      value: stackParams.redshiftIAMRoleParam.valueAsString,
     }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN);
 
     addCfnNag(this);

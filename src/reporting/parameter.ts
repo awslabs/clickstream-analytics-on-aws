@@ -142,9 +142,14 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Parameter Key Name',
   };
 
-  const redshiftServerlessIAMRoleParam = Parameters.createRedshiftServerlessDataRoleParameter(scope);
-  labels[redshiftServerlessIAMRoleParam.logicalId] = {
-    default: 'Redshift Serverless Data API Role ARN',
+  const redshiftIAMRoleParam = new CfnParameter(scope, 'RedshiftIAMRoleParam', {
+    description: 'The ARN of IAM role used by Redshift Data API.',
+    type: 'String',
+    default: '',
+    allowedPattern: '^(arn:aws(-cn|-us-gov)?:iam::[0-9]{12}:role/.*)?$',
+  });
+  labels[redshiftIAMRoleParam.logicalId] = {
+    default: 'Redshift Data API Role ARN',
   };
 
   groups.push({
@@ -168,7 +173,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       redShiftDBSchemaParam.logicalId,
       redshiftPortParam.logicalId,
       redshiftParameterKeyParam.logicalId,
-      redshiftServerlessIAMRoleParam.logicalId,
+      redshiftIAMRoleParam.logicalId,
     ],
   });
 
@@ -185,7 +190,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     redShiftDBSchemaParam,
     redshiftPortParam,
     redshiftParameterKeyParam,
-    redshiftServerlessIAMRoleParam,
+    redshiftIAMRoleParam,
     paramLabels: labels,
     paramGroups: groups,
   };

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '@aws/clickstream-base-lib';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataReportingQuickSightStack } from '../../../src/data-reporting-quicksight-stack';
@@ -36,6 +36,10 @@ describe('DataReportingQuickSightStack parameter test', () => {
 
   test('Has Dashboards output', () => {
     template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, {});
+  });
+
+  test('Has Redshift data api role output', () => {
+    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, {});
   });
 
   test('Should has Parameter quickSightUserParam', () => {
@@ -96,8 +100,8 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
-  test('Should has Parameter redshiftServerlessIAMRole', () => {
-    template.hasParameter('RedshiftServerlessIAMRole', {
+  test('Should has Parameter redshiftIAMRoleParam', () => {
+    template.hasParameter('RedshiftIAMRoleParam', {
       Type: 'String',
       Default: '',
     });
@@ -329,8 +333,8 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
-  test('RedshiftServerlessIAMRole allowedPattern', () => {
-    const param = template.toJSON().Parameters.RedshiftServerlessIAMRole;
+  test('RedshiftIAMRole allowedPattern', () => {
+    const param = template.toJSON().Parameters.RedshiftIAMRoleParam;
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
     const validValues = [
