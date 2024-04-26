@@ -16,6 +16,7 @@ import { EventBridgeEvent, SQSEvent } from 'aws-lambda';
 import { CloudFormationStackStatusChangeNotificationEventDetail, describeStack, getNewStackDetails, getPipeline, getPipelineIdFromStackName, getWorkflowStacks, stackPrefix, updatePipelineStackStatus } from './listen-tools';
 
 export const handler = async (event: SQSEvent): Promise<void> => {
+  logger.debug('Event: ', { event });
   const eventBody = event.Records[0].body;
   const eventBridgeEvent = JSON.parse(eventBody) as EventBridgeEvent<'CloudFormation Stack Status Change', CloudFormationStackStatusChangeNotificationEventDetail>;
   const eventDetail = eventBridgeEvent.detail;

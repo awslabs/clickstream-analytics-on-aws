@@ -22,6 +22,8 @@ import { BuiltInTagKeys, ExecutionDetail, PipelineStackType, PipelineStatusDetai
 import { CFN_TOPIC_PREFIX } from '../api/common/constants';
 import { WorkflowParallelBranch, WorkflowState, WorkflowStateType } from '../api/common/types';
 import { getStackPrefix } from '../api/common/utils';
+import { IPipeline } from '../api/model/pipeline';
+import { getStacksDetailsByNames } from '../api/store/aws/cloudformation';
 
 const MAX_RETRY_COUNT = 3;
 
@@ -69,8 +71,8 @@ export async function describeStack(stackId: string, region: string): Promise<St
     }
     return;
   } catch (error) {
-    logger.error('Failed to describe stack: ', { stackId, region, error });
-    throw error;
+    logger.warn('Failed to describe stack: ', { stackId, region, error });
+    return;
   }
 }
 
@@ -106,7 +108,7 @@ export async function getPipeline(pipelineId: string): Promise<any> {
   }
 }
 
-async function updateStackStatusWithOptimisticLocking(
+export async function updateStackStatusWithOptimisticLocking(
   projectId: string, pipelineId:string, stackDetails: PipelineStatusDetail[], updateAt: number): Promise<boolean> {
   try {
     const input: UpdateCommandInput = {
@@ -138,11 +140,36 @@ async function updateStackStatusWithOptimisticLocking(
   }
 }
 
+export async function updatePipelineAllStackStatus(
+  projectId: string, pipelineId:string, stackDetails: PipelineStatusDetail[], updateAt: number): Promise<void> {
+  try {
+    let retryCount = 0;
+    let success = await updateStackStatusWithOptimisticLocking(projectId, pipelineId, stackDetails, updateAt);
+    logger.debug('updateStackStatusWithOptimisticLocking details: ', { projectId, pipelineId, retryCount, success, stackDetails, updateAt });
+    while (!success && retryCount < MAX_RETRY_COUNT) {
+      logger.warn('Failed to update pipeline all stack status with optimistic locking: ', { projectId, pipelineId, retryCount });
+      const pipeline = await getPipeline(pipelineId);
+      if (!pipeline) {
+        logger.error('Failed to get pipeline: ', { projectId, pipelineId });
+        throw new Error('Failed to get pipeline');
+      }
+      const newStackDetails = await fetchAllStackDetails(pipeline);
+      success = await updateStackStatusWithOptimisticLocking(projectId, pipelineId, newStackDetails, pipeline.updateAt);
+      retryCount += 1;
+      logger.debug('updateStackStatusWithOptimisticLocking details: ', { projectId, pipelineId, retryCount, success, newStackDetails, updateAt });
+    }
+  } catch (err) {
+    logger.error('Failed to update pipeline all stack status: ', { projectId, pipelineId, err });
+    throw err;
+  }
+}
+
 export async function updatePipelineStackStatus(
   projectId: string, pipelineId:string, curStackDetail: Stack, stackDetails: PipelineStatusDetail[], updateAt: number): Promise<void> {
   try {
     let retryCount = 0;
     let success = await updateStackStatusWithOptimisticLocking(projectId, pipelineId, stackDetails, updateAt);
+    logger.debug('updateStackStatusWithOptimisticLocking details: ', { projectId, pipelineId, retryCount, success, stackDetails, updateAt });
     while (!success && retryCount < MAX_RETRY_COUNT) {
       logger.warn('Failed to update pipeline stack status with optimistic locking: ', { projectId, pipelineId, retryCount });
       const pipeline = await getPipeline(pipelineId);
@@ -154,6 +181,7 @@ export async function updatePipelineStackStatus(
       const newStackDetails = getNewStackDetails(curStackDetail, pipeline.stackDetails ?? [], stackNames);
       success = await updateStackStatusWithOptimisticLocking(projectId, pipelineId, newStackDetails, pipeline.updateAt);
       retryCount += 1;
+      logger.debug('updateStackStatusWithOptimisticLocking details: ', { projectId, pipelineId, retryCount, success, newStackDetails, updateAt });
     }
   } catch (err) {
     logger.error('Failed to update pipeline stack status: ', { projectId, pipelineId, err });
@@ -206,8 +234,11 @@ export function getVersionFromTags(tags: Tag[] | undefined) {
   return version;
 }
 
-export function getWorkflowStacks(state: WorkflowState): string[] {
+export function getWorkflowStacks(state: WorkflowState | undefined): string[] {
   let res: string[] = [];
+  if (!state) {
+    return res;
+  }
   if (state.Type === WorkflowStateType.PARALLEL) {
     for (let branch of state.Branches as WorkflowParallelBranch[]) {
       for (let key of Object.keys(branch.States)) {
@@ -449,4 +480,23 @@ const unsubscribeTopic = async (region: string, topicArn: string) => {
     logger.error('Error in unsubscribe topic', { error });
     throw error;
   }
+};
+
+export const fetchAllStackDetails = async (
+  pipeline: IPipeline,
+) => {
+  const stackNames = getWorkflowStacks(pipeline.workflow?.Workflow);
+  const stackDetails = pipeline.stackDetails ?? [];
+  logger.debug('fetchAllStackDetails', { stackNames, stackDetails });
+  const stackIds: string[] = [];
+  for (let stackName of stackNames) {
+    const detail = stackDetails.find(s => s.stackName === stackName);
+    if (detail?.stackId) {
+      stackIds.push(detail?.stackId);
+    } else {
+      stackIds.push(stackName);
+    }
+  }
+  const stackStatusDetails: PipelineStatusDetail[] = await getStacksDetailsByNames(pipeline.region, stackIds);
+  return stackStatusDetails;
 };
