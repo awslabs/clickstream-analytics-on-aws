@@ -12,10 +12,12 @@
  */
 
 import {
+  AlreadyExistsException,
   Capability,
   CloudFormationClient,
   CloudFormationServiceException,
   CreateStackCommand,
+  DeleteStackCommand,
   DescribeStacksCommand, StackDriftStatus, StackStatus, UpdateStackCommand, UpdateTerminationProtectionCommand,
 } from '@aws-sdk/client-cloudformation';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -91,6 +93,26 @@ describe('SFN Action Lambda Function', () => {
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
   });
 
+  test('Create stack with resource already exists', async () => {
+    const event: SfnStackEvent = {
+      ...baseStackActionEvent,
+      Action: StackAction.CREATE,
+    };
+    cloudFormationMock.on(CreateStackCommand).rejects(new AlreadyExistsException({
+      $metadata: {
+        httpStatusCode: 200,
+        requestId: 'abcdefg',
+      },
+      message: 'Stack with id Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf already exists',
+    }));
+    const resp = await handler(event, context) as CdkCustomResourceResponse;
+    expect(resp.Action).toEqual(StackAction.DESCRIBE);
+    expect(resp.Result.StackName).toEqual('Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf');
+    expect(resp.Result.StackStatus).toEqual(StackStatus.CREATE_IN_PROGRESS);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(CreateStackCommand, 1);
+    expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+  });
+
   test('Update stack', async () => {
     const event: SfnStackEvent = {
       ...baseStackActionEvent,
@@ -102,6 +124,47 @@ describe('SFN Action Lambda Function', () => {
     const resp = await handler(event, context) as CdkCustomResourceResponse;
     expect(resp.Action).toEqual(StackAction.DESCRIBE);
     expect(resp.Result.StackId).toEqual('arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60');
+    expect(resp.Result.StackName).toEqual('Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf');
+    expect(resp.Result.StackStatus).toEqual(StackStatus.UPDATE_IN_PROGRESS);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(UpdateStackCommand, 1);
+    expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, UpdateStackCommand, {
+      StackName: event.Input.StackName,
+      Parameters: event.Input.Parameters,
+      DisableRollback: false,
+      UsePreviousTemplate: true,
+      Capabilities: [
+        Capability.CAPABILITY_IAM,
+        Capability.CAPABILITY_NAMED_IAM,
+        Capability.CAPABILITY_AUTO_EXPAND,
+      ],
+      Tags: event.Input.Tags,
+    });
+    expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+  });
+
+  test('Update stack when status is updating', async () => {
+    const event: SfnStackEvent = {
+      ...baseStackActionEvent,
+      Action: StackAction.UPDATE,
+    };
+    const mockValidationError = new CloudFormationServiceException({
+      $metadata: {
+        httpStatusCode: 200,
+        requestId: 'abcdefg',
+      },
+      $fault: 'client',
+      name: 'ValidationError',
+      message: 'Stack xxxx is in UPDATE_IN_PROGRESS state and can not be updated',
+    });
+
+    cloudFormationMock.on(UpdateStackCommand)
+      .rejectsOnce(mockValidationError)
+      .resolves({
+        StackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+      });
+    const resp = await handler(event, context) as CdkCustomResourceResponse;
+    expect(resp.Action).toEqual(StackAction.DESCRIBE);
+    expect(resp.Result.StackId).toEqual('');
     expect(resp.Result.StackName).toEqual('Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf');
     expect(resp.Result.StackStatus).toEqual(StackStatus.UPDATE_IN_PROGRESS);
     expect(cloudFormationMock).toHaveReceivedCommandTimes(UpdateStackCommand, 1);
@@ -316,6 +379,57 @@ describe('SFN Action Lambda Function', () => {
     });
     expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, UpdateTerminationProtectionCommand, {
       EnableTerminationProtection: false,
+      StackName: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+    });
+    expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+  });
+
+  test('Delete stack when status is deleting', async () => {
+    const event: SfnStackEvent = {
+      ...baseStackActionEvent,
+      Action: StackAction.DELETE,
+      Result: {
+        ...stackResult,
+        StackStatus: StackStatus.CREATE_COMPLETE,
+      },
+    };
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          ...stackResult,
+          StackStatus: StackStatus.CREATE_COMPLETE,
+        },
+      ],
+    });
+    cloudFormationMock.on(UpdateTerminationProtectionCommand).resolves({
+      StackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+    });
+
+    const mockValidationError = new CloudFormationServiceException({
+      $metadata: {
+        httpStatusCode: 200,
+        requestId: 'abcdefg',
+      },
+      $fault: 'client',
+      name: 'ValidationError',
+      message: 'Termination protection cannot be updated due to stack',
+    });
+
+    cloudFormationMock.on(DeleteStackCommand)
+      .rejectsOnce(mockValidationError);
+    const resp = await handler(event, context) as CdkCustomResourceResponse;
+    expect(resp.Action).toEqual(StackAction.DESCRIBE);
+    expect(resp.Result.StackId).toEqual('arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60');
+    expect(resp.Result.StackName).toEqual('Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf');
+    expect(resp.Result.StackStatus).toEqual(StackStatus.DELETE_IN_PROGRESS);
+    expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, DescribeStacksCommand, {
+      StackName: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+    });
+    expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, UpdateTerminationProtectionCommand, {
+      EnableTerminationProtection: false,
+      StackName: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+    });
+    expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, DeleteStackCommand, {
       StackName: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
     });
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
