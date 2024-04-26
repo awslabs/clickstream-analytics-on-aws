@@ -12044,7 +12044,7 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      e_category as category,
+      e_category,
       count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
@@ -12339,7 +12339,7 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      e_category as category,
+      e_category,
       count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
@@ -20534,8 +20534,8 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      e_category as category,
-      geo_country as geo_country,
+      e_category,
+      geo_country,
       count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
@@ -20837,8 +20837,8 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      e_category as category,
-      geo_country as geo_country,
+      e_category,
+      geo_country,
       count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
