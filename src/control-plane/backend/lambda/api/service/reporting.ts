@@ -618,7 +618,7 @@ export class ReportingService {
         };
 
         visualArray.push(visualProps);
-        
+
         const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, groupCondition);
         const tableVisualProps = {
           sheetId: sheetId,
@@ -643,7 +643,7 @@ export class ReportingService {
           filterGroup: visualRelatedParams.filterGroup,
         };
 
-        visualArray.push(tableVisualProps); 
+        visualArray.push(tableVisualProps);
       }
 
       const result: CreateDashboardResult = await this.createDashboardVisuals(
