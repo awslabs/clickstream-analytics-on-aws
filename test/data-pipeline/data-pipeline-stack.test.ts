@@ -1407,7 +1407,7 @@ test('Nested stack has CreateEMRServerlessApplicationCustomResource', () => {
   });
 });
 
-test('CreateEMRServerlessApplicationLambdaRole policy is set correctly', () => {
+test.only('CreateEMRServerlessApplicationLambdaRole policy is set correctly', () => {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::IAM::Policy', {
     PolicyDocument: {
@@ -1436,6 +1436,8 @@ test('CreateEMRServerlessApplicationLambdaRole policy is set correctly', () => {
           Action: [
             'emr-serverless:CreateApplication',
             'emr-serverless:DeleteApplication',
+            'emr-serverless:TagResource',
+            'emr-serverless:UntagResource',
           ],
           Effect: 'Allow',
           Resource: {
