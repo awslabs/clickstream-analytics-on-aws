@@ -27,6 +27,7 @@ import {
   UpdateStackCommandInput,
   UpdateStackCommandOutput,
   Capability,
+  AlreadyExistsException,
 } from '@aws-sdk/client-cloudformation';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
@@ -61,6 +62,7 @@ interface SfnStackCallback {
 }
 
 export const handler = async (event: SfnStackEvent, _context: any): Promise<any> => {
+  logger.debug('Event received', { event: event });
   if (event.Action === StackAction.CREATE) {
     return createStack(event);
   } else if (event.Action === StackAction.UPDATE) {
@@ -109,6 +111,19 @@ export const createStack = async (event: SfnStackEvent) => {
       } as Stack,
     } as SfnStackEvent;
   } catch (err) {
+    if (err instanceof AlreadyExistsException) {
+      logger.warn((err as Error).message, { error: err, metadata: err.$metadata });
+      return {
+        Action: StackAction.DESCRIBE,
+        Input: event.Input,
+        Callback: event.Callback,
+        Result: {
+          StackName: event.Input.StackName,
+          StackStatus: StackStatus.CREATE_IN_PROGRESS,
+          CreationTime: new Date(),
+        } as Stack,
+      } as SfnStackEvent;
+    }
     logger.error((err as Error).message, { error: err, event: event });
     throw Error((err as Error).message);
   }
@@ -174,17 +189,16 @@ export const upgradeStack = async (event: SfnStackEvent) => {
 };
 
 export const deleteStack = async (event: SfnStackEvent) => {
+  const stackName = event.Result?.StackId ? event.Result?.StackId : event.Input.StackName;
+  const stack = await describe(event.Input.Region, stackName);
+  if (!stack || stack.StackStatus === StackStatus.DELETE_COMPLETE) {
+    // If stack does not exist
+    return {
+      Action: StackAction.END,
+      Input: event.Input,
+    } as SfnStackEvent;
+  }
   try {
-    const stackName = event.Result?.StackId ? event.Result?.StackId : event.Input.StackName;
-    const stack = await describe(event.Input.Region, stackName);
-    if (!stack || stack.StackStatus === StackStatus.DELETE_COMPLETE) {
-      // If stack does not exist
-      return {
-        Action: StackAction.END,
-        Input: event.Input,
-      } as SfnStackEvent;
-    }
-
     const cloudFormationClient = new CloudFormationClient({
       ...aws_sdk_client_common_config,
       region: event.Input.Region,
@@ -210,6 +224,22 @@ export const deleteStack = async (event: SfnStackEvent) => {
       } as Stack,
     } as SfnStackEvent;
   } catch (err) {
+    if (err instanceof CloudFormationServiceException &&
+      err.name === 'ValidationError' &&
+      err.message.includes('Termination protection cannot be updated')) {
+      logger.warn('Termination protection cannot be updated.', { error: err, metadata: err.$metadata });
+      return {
+        Action: StackAction.DESCRIBE,
+        Input: event.Input,
+        Callback: event.Callback,
+        Result: {
+          StackId: stack.StackId,
+          StackName: event.Input.StackName,
+          StackStatus: StackStatus.DELETE_IN_PROGRESS,
+          CreationTime: new Date(),
+        } as Stack,
+      } as SfnStackEvent;
+    }
     logger.error((err as Error).message, { error: err, event: event });
     throw Error((err as Error).message);
   }
@@ -310,9 +340,11 @@ export const doUpdate = async (region: string, input: UpdateStackCommandInput): 
         RetainExceptOnCreate: true,
       };
       return doUpdate(region, rollbackInput);
-    } else if (err instanceof Error &&
+    } else if (err instanceof CloudFormationServiceException &&
       err.name === 'ValidationError' &&
-      err.message.includes('No updates are to be performed.')) {
+      (err.message.includes('No updates are to be performed.') || err.message.includes('can not be updated'))
+    ) {
+      logger.warn('No updates are to be performed.', { error: err, metadata: err.$metadata });
       return {
         $metadata: {},
         StackId: '',
