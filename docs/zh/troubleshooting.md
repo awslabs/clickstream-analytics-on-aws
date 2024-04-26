@@ -155,6 +155,10 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
 
 增加 Redshift 的计算资源（例如，Redshift Serverless 的 RPU）或者减少[数据处理间隔][data-processing-param]。然后，[重新启动数据加载工作流][restart-loading-workflow]。
 
+## 问题: 在分析工作坊查看仪表板时，收到错误"Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors."
+
+仪表板可能正在使用尚未在 Redshift 中就绪的视图或物化视图。本解决方案在创建或更新项目的管道时异步创建或更新仪表板使用的视图和物化视图。创建或更新的持续时间取决于 Redshift 集群的工作负载、已有数据量，完成更新可能需要几分钟到几小时。您可以在管道详情页面的**数据处理和建模**选项卡中的 **Redshift Schemas** 部分跟踪进度。如果后期配置作业失败，您可以通过其链接访问工作流的执行，并通过**操作 - 重启**或**新执行**(输入保持不变)来重新运行作业。
+
 [log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL
 [data-processing-param]: ./pipeline-mgmt/data-processing/configure-execution-para.md#_2
 [restart-loading-workflow]: ./faq.md#_7
