@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { aws_sdk_client_common_config, logger, parseDynamoDBTableARN } from '@aws/clickstream-base-lib';
+import { aws_sdk_client_common_config, logger, parseDynamoDBTableARN, METADATA_V3_VERSION } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   BatchWriteCommand,
@@ -238,6 +238,7 @@ async function checkLatestMonthWithDDB(id: string, currentMonth: string, markedL
       // update ddb latest month to its origin month
       item.month = existingDDBItemOriginMonth;
       item.updateTimestamp = Date.now();
+      item.version = METADATA_V3_VERSION;
       const params = {
         TableName: ddbTableName,
         Item: item,
@@ -421,6 +422,7 @@ async function updateEventParameterItem(itemsMap: Map<string, any>, key: string,
     addSetIntoAnotherSet(eventNameSet, convertToSet(record[7].stringValue));
     item.summary.associatedEvents = Array.from(eventNameSet);
   }
+  item.version = METADATA_V3_VERSION;
 }
 
 async function createEventParameterItem(record: any, itemsMap: Map<string, any>, markedLatestMonthMap: Map<string, any>) {
@@ -447,6 +449,7 @@ async function createEventParameterItem(record: any, itemsMap: Map<string, any>,
       valueEnum: [{ value: record[10].stringValue, count: record[11].longValue }],
       associatedEvents: Array.from(convertToSet(record[7].stringValue)),
     },
+    version: METADATA_V3_VERSION,
   };
 }
 
@@ -495,6 +498,7 @@ async function updateEventItem(itemsMap: Map<string, any>, key: string, record: 
   };
   item.month = await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap);
   item.updateTimestamp = Date.now();
+  item.version = METADATA_V3_VERSION;
 }
 
 async function createEventItem(record: any, itemsMap: Map<string, any>, markedLatestMonthMap: Map<string, any>) {
@@ -522,6 +526,7 @@ async function createEventItem(record: any, itemsMap: Map<string, any>, markedLa
       sdkName: Array.from(convertToSet(record[10].stringValue)),
       associatedParameters: [],
     },
+    version: METADATA_V3_VERSION,
   };
 }
 
@@ -583,6 +588,7 @@ async function updateUserPropertiesItem(itemsMap: Map<string, any>, key: string,
   };
   item.month = await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap);
   item.updateTimestamp = Date.now();
+  item.version = METADATA_V3_VERSION;
 }
 
 async function createUserPropertiesItem(record: any, itemsMap: Map<string, any>, markedLatestMonthMap: Map<string, any>) {
@@ -606,6 +612,7 @@ async function createUserPropertiesItem(record: any, itemsMap: Map<string, any>,
       hasData: true,
       valueEnum: convertValueEnumToDDBList(record[9].stringValue),
     },
+    version: METADATA_V3_VERSION,
   };
 }
 

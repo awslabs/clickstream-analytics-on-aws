@@ -411,6 +411,8 @@ export const CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME = 'segment_000.csv';
 export const CLICKSTREAM_SEGMENTS_JOB_OUTPUT_SUMMARY_FILENAME = 'segment-summary_000.csv';
 export const REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX = 'RefreshMaterializedViewsWorkflow';
 
+export const METADATA_V3_VERSION = 'v3';
+
 export const DATASET_READER_PERMISSION_ACTIONS = [
   'quicksight:DescribeDataSet',
   'quicksight:DescribeDataSetPermissions',

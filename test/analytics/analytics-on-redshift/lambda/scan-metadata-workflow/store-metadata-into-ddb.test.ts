@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { METADATA_V3_VERSION } from '@aws/clickstream-base-lib';
 import { GetStatementResultCommand, DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { BatchWriteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -1229,6 +1230,7 @@ function genParameterItemExpect(month: string, dayNumberList: number[], inputMon
     associatedEvents: associatedEvents,
     valueEnum: valueEnum,
   };
+  item.version = METADATA_V3_VERSION;
 
   return item;
 }
@@ -1281,6 +1283,7 @@ function genEventItemExpect(month: string, dayNumberList: number[], inputMonth: 
     associatedParameters: associatedParameters,
     hasData: true,
   };
+  item.version = METADATA_V3_VERSION;
 
   return item;
 }
@@ -1332,5 +1335,6 @@ function genUserAttributeItemExpect(month: string, dayNumber: number, inputMonth
       },
     ],
   };
+  item.version = METADATA_V3_VERSION;
   return item;
 }
