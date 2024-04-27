@@ -15,7 +15,6 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import {
   DASHBOARD_READER_PERMISSION_ACTIONS,
-  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX,
   ExploreLocales,
@@ -28,6 +27,7 @@ import {
   ExploreComputeMethod,
   sleep,
   SolutionVersion,
+  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
 } from '@aws/clickstream-base-lib';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
@@ -1307,16 +1307,6 @@ export class ReportingService {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
       const region = latestPipeline.region;
-      const dataApiRole = getStackOutputFromPipelineStatus(
-        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-        PipelineStackType.DATA_MODELING_REDSHIFT,
-        OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX);
-      const redshiftDataClient = sdkClient.RedshiftDataClient(
-        {
-          region: region,
-        },
-        dataApiRole,
-      );
       const quickSight = sdkClient.QuickSight({ region: region });
 
       //warmup principal
@@ -1327,6 +1317,20 @@ export class ReportingService {
 
       //warm up redshift serverless
       if (latestPipeline.dataModeling?.redshift?.newServerless) {
+        const dataApiRole = getStackOutputFromPipelineStatus(
+          latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.REPORTING,
+          OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN);
+        if (!dataApiRole) {
+          logger.warn('Data Api Role not found');
+          return res.status(201).json(new ApiSuccess('Data Api Role not found'));
+        }
+        const redshiftDataClient = sdkClient.RedshiftDataClient(
+          {
+            region: region,
+          },
+          dataApiRole,
+        );
         const workgroupName = getStackOutputFromPipelineStatus(
           latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
           PipelineStackType.DATA_MODELING_REDSHIFT,

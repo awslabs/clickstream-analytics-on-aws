@@ -2126,7 +2126,7 @@ describe('reporting test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(GenerateEmbedUrlForRegisteredUserCommand, 1);
   });
 
-  it('warmup', async () => {
+  it('warmup redshift serverless', async () => {
     redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
     });
     redshiftClientMock.on(DescribeStatementCommand).resolves({
@@ -2138,7 +2138,17 @@ describe('reporting test', () => {
         Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       }],
     });
-
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        timezone: [
+          {
+            timezone: 'Asia/Singapore',
+            appId: 'app1',
+          },
+        ],
+      }],
+    });
     const res = await request(app)
       .post('/api/reporting/warmup')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -2157,6 +2167,71 @@ describe('reporting test', () => {
     expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
       Sqls: expect.arrayContaining([`select * from app1.${EVENT_USER_VIEW} limit 1`]),
     });
+  });
+
+  it('warmup redshift provisioned', async () => {
+    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
+    });
+    redshiftClientMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.FINISHED,
+    });
+
+    quickSightMock.on(ListDashboardsCommand).resolves({
+      DashboardSummaryList: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      }],
+    });
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+
+        dataModeling: {
+          ods: {
+            bucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: '',
+            },
+            fileSuffix: '.snappy.parquet',
+          },
+          athena: false,
+          redshift: {
+            dataRange: 259200,
+            provisioned: {
+              clusterIdentifier: 'redshift-cluster-111111',
+              dbUser: 'clickstream_111111',
+            },
+          },
+          loadWorkflow: {
+            bucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: '',
+            },
+            maxFilesLimit: 50,
+          },
+        },
+        timezone: [
+          {
+            timezone: 'Asia/Singapore',
+            appId: 'app1',
+          },
+        ],
+      }],
+    });
+    const res = await request(app)
+      .post('/api/reporting/warmup')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: 'project01_wvzh',
+        appId: 'app1',
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data).toEqual('OK');
+    expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 0);
+    expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
+    expect(quickSightMock).toHaveReceivedCommandTimes(ListDashboardsCommand, 1);
   });
 
   it('warmup with error id', async () => {

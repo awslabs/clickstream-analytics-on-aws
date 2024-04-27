@@ -610,7 +610,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW: IPipelin
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              Next: 'DataModeling',
+              Next: 'DataModelingRedshift',
             },
             Reporting: {
               Type: WorkflowStateType.STACK,
@@ -629,7 +629,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW: IPipelin
               },
               End: true,
             },
-            DataModeling: {
+            DataModelingRedshift: {
               Type: WorkflowStateType.STACK,
               Data: {
                 Input: {
@@ -1003,6 +1003,10 @@ export const BASE_STATUS = {
           OutputKey: 'Dashboards',
           OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
         },
+        {
+          OutputKey: 'RedshiftDataApiRoleArn',
+          OutputValue: 'arn:aws:iam::111122223333:role/RedshiftDataApiRole',
+        },
       ],
     },
     {
@@ -1129,7 +1133,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              Next: 'DataModeling',
+              Next: 'DataModelingRedshift',
             },
             Reporting: {
               Type: WorkflowStateType.STACK,
@@ -1148,7 +1152,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
               },
               End: true,
             },
-            DataModeling: {
+            DataModelingRedshift: {
               Type: WorkflowStateType.STACK,
               Data: {
                 Input: {
@@ -1267,7 +1271,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              Next: 'DataModeling',
+              Next: 'DataModelingRedshift',
             },
             Reporting: {
               Type: WorkflowStateType.STACK,
@@ -1286,7 +1290,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
               },
               End: true,
             },
-            DataModeling: {
+            DataModelingRedshift: {
               Type: WorkflowStateType.STACK,
               Data: {
                 Input: {
@@ -1314,7 +1318,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
         {
           States: {
           },
-          StartAt: 'DataModeling',
+          StartAt: 'DataModelingRedshift',
         },
         {
           StartAt: 'Metrics',
@@ -1410,7 +1414,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              Next: 'DataModeling',
+              Next: 'DataModelingRedshift',
             },
             Reporting: {
               Type: WorkflowStateType.STACK,
@@ -1429,7 +1433,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
               },
               End: true,
             },
-            DataModeling: {
+            DataModelingRedshift: {
               Type: WorkflowStateType.STACK,
               Data: {
                 Input: {
@@ -1546,7 +1550,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              Next: 'DataModeling',
+              Next: 'DataModelingRedshift',
             },
             Reporting: {
               Type: WorkflowStateType.STACK,
@@ -1574,7 +1578,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
               },
               End: true,
             },
-            DataModeling: {
+            DataModelingRedshift: {
               Type: WorkflowStateType.STACK,
               Data: {
                 Input: {
@@ -1759,7 +1763,7 @@ const BASE_RETRY_PIPELINE: IPipeline = {
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              Next: 'DataModeling',
+              Next: 'DataModelingRedshift',
             },
             Reporting: {
               Type: WorkflowStateType.STACK,
@@ -1778,7 +1782,7 @@ const BASE_RETRY_PIPELINE: IPipeline = {
               },
               End: true,
             },
-            DataModeling: {
+            DataModelingRedshift: {
               Type: WorkflowStateType.STACK,
               Data: {
                 Input: {
