@@ -25,6 +25,11 @@ const Footer: React.FC = () => {
           © {new Date().getFullYear()}, {t('footer.copyRight')}
         </li>
       </ul>
+      {appConfig?.solution_region && (
+        <span className="version">
+          {t('controlPlaneRegion')}: {appConfig.solution_region}
+        </span>
+      )}
       {appConfig?.solution_version && (
         <span className="version">
           {t('version')}: {appConfig.solution_version}
