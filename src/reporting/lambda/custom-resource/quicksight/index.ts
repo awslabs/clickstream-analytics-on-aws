@@ -103,7 +103,7 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   }
   const timezoneDict = timezoneJsonArrayToDict(JSON.parse(timezone));
 
-  logger.info('dataset info', { 
+  logger.info('dataset info', {
     useSpice: props.useSpice,
     dataSets: props.dashboardDefProps.dataSets,
     timezoneDict: timezoneDict,
