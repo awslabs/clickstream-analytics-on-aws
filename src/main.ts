@@ -257,7 +257,7 @@ stackSuppressions(getContextStackInfo(app.node, StackContextName.Streaming_Inges
 stackSuppressions(getContextStackInfo(app.node, StackContextName.Reporting).isEnabled ? [
   new DataReportingQuickSightStack(app, getContextStackInfo(app.node, StackContextName.Reporting).stackName ?? 'data-reporting-quicksight-stack', {
     synthesizer: synthesizer(),
-    suppressTemplateIndentation: true
+    suppressTemplateIndentation: true,
   }),
 ] : [], commonCdkNagRules);
 
