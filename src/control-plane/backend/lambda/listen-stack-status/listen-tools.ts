@@ -486,17 +486,6 @@ export const fetchAllStackDetails = async (
   pipeline: IPipeline,
 ) => {
   const stackNames = getWorkflowStacks(pipeline.workflow?.Workflow);
-  const stackDetails = pipeline.stackDetails ?? [];
-  logger.debug('fetchAllStackDetails', { stackNames, stackDetails });
-  const stackIds: string[] = [];
-  for (let stackName of stackNames) {
-    const detail = stackDetails.find(s => s.stackName === stackName);
-    if (detail?.stackId) {
-      stackIds.push(detail?.stackId);
-    } else {
-      stackIds.push(stackName);
-    }
-  }
-  const stackStatusDetails: PipelineStatusDetail[] = await getStacksDetailsByNames(pipeline.region, stackIds);
+  const stackStatusDetails: PipelineStatusDetail[] = await getStacksDetailsByNames(pipeline.region, stackNames);
   return stackStatusDetails;
 };
