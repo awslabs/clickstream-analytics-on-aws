@@ -159,6 +159,7 @@ export class BackendEventBus extends Construct {
       handler: 'handler',
       tracing: Tracing.ACTIVE,
       role: createLambdaRole(this, 'ListenStateFuncRole', true, [
+        ...this.getDescribeStackPolicyStatements(props),
         ...this.getDeleteRulePolicyStatements(),
         ...this.getDeleteTopicPolicyStatements(),
       ]),
