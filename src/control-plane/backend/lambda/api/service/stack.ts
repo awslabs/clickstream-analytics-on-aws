@@ -303,6 +303,7 @@ export class StackManager {
     retryActionMap.set('Delete+FAILED', 'Delete');
     retryActionMap.set('Delete+COMPLETE', 'Delete');
     retryActionMap.set('Delete+ROLLBACK_COMPLETE', 'Delete');
+    retryActionMap.set('Delete+EMPTY', 'Delete');
 
     let shortStatus = 'EMPTY';
     if (status?.endsWith('FAILED')) {
