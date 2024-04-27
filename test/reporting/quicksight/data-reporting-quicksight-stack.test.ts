@@ -75,7 +75,7 @@ describe('DataReportingQuickSightStack parameter test', () => {
     template.hasParameter('QuickSightUseSpiceParam', {
       Type: 'String',
       Default: 'no',
-      AllowedValues: ['yes', 'no'],
+      AllowedValues: ['no', 'yes'],
     });
   });
 
