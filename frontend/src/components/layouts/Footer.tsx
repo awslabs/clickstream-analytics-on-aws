@@ -11,13 +11,17 @@
  *  and limitations under the License.
  */
 
+import { Button } from '@cloudscape-design/components';
 import { AppContext } from 'context/AppContext';
+import { SystemInfoContext } from 'context/SystemInfoContext';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import { buildCloudFormationStackLink } from 'ts/url';
 
 const Footer: React.FC = () => {
   const { t } = useTranslation();
   const appConfig = useContext(AppContext);
+  const systemInfo = useContext(SystemInfoContext);
   return (
     <footer id="f" className="flex">
       <ul>
@@ -25,9 +29,21 @@ const Footer: React.FC = () => {
           © {new Date().getFullYear()}, {t('footer.copyRight')}
         </li>
       </ul>
-      {appConfig?.solution_region && (
+      {appConfig?.solution_region && systemInfo?.stackId && (
         <span className="version">
-          {t('controlPlaneRegion')}: {appConfig.solution_region}
+          {t('controlPlaneRegion')}:{' '}
+          <Button
+            href={buildCloudFormationStackLink(
+              appConfig?.solution_region,
+              systemInfo?.stackId
+            )}
+            variant="link"
+            iconAlign="right"
+            iconName="external"
+            target="_blank"
+          >
+            {appConfig.solution_region}
+          </Button>
         </span>
       )}
       {appConfig?.solution_version && (
