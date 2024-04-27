@@ -97,13 +97,13 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   labels[quickSightTimezoneParam.logicalId] = {
     default: 'Dashboard Timezone Setting',
   };
-  
+
   const allowedValues = ['yes', 'no'];
   const quickSightUseSpiceParam = new CfnParameter(scope, 'QuickSightUseSpiceParam', {
-    description: 'Use SPICE to import data set or not (yes/no).',
+    description: 'Use SPICE to import data set or not.',
     type: 'String',
     allowedValues: allowedValues,
-    default: allowedValues[0],
+    default: allowedValues[1],
   });
   labels[quickSightUseSpiceParam.logicalId] = {
     default: 'Enable QuickSight SPICE Import Mode',

@@ -595,7 +595,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
   dashboardDef: QuickSightDashboardDefProps,
   oldDashboardDef: QuickSightDashboardDefProps,
   createdQuickSightResources: CreatedQuickSightResources,
-  useSpice: string
+  useSpice: string,
 )
 : Promise<UpdateDashboardCommandOutput|undefined> => {
 

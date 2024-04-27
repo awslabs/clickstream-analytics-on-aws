@@ -212,10 +212,10 @@ function _getDataSetDefs(
       ],
       projectedColumns: [...eventViewProjectedColumns, 'event_timestamp_local', 'event_date'],
     },
-  )
+  );
 
   let datasets: DataSetProps[] = [];
-  if(useSpice === 'yes') {
+  if (useSpice === 'yes') {
     datasets = [
       //Acquisition Sheet
       {
@@ -906,7 +906,7 @@ function _getDataSetDefs(
         ],
       },
 
-    ]
+    ];
     dataSetProps.push(...datasets);
 
   } else {
@@ -1823,7 +1823,7 @@ function _getDataSetDefs(
         ],
       },
 
-    ]
+    ];
 
     dataSetProps.push(...datasets);
   }
