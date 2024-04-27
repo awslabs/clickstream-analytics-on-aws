@@ -103,8 +103,11 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   }
   const timezoneDict = timezoneJsonArrayToDict(JSON.parse(timezone));
 
-  logger.info('useSpice:', props.useSpice);
-  logger.info('dataSets:', JSON.stringify(props.dashboardDefProps.dataSets) );
+  logger.info('dataset info', { 
+    useSpice: props.useSpice,
+    dataSets: props.dashboardDefProps.dataSets,
+    timezoneDict: timezoneDict,
+  });
 
   if (event.RequestType === 'Create') {
     return _onCreate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event, timezoneDict);
