@@ -104,9 +104,11 @@ export function createQuicksightCustomResource(
     templateId: props.templateId,
     dataSourceArn: props.dataSourceArn,
     databaseName: databaseName,
-    dataSets: _getDataSetDefs(props.useSpice, eventViewColumns, eventViewProjectedColumns, tenYearsAgo, futureDate),
+    dataSets: _getDataSetDefs('no', eventViewColumns, eventViewProjectedColumns, tenYearsAgo, futureDate),
+    dataSetsSpice: _getDataSetDefs('yes', eventViewColumns, eventViewProjectedColumns, tenYearsAgo, futureDate),
   };
 
+  console.log('props.useSpice:', props.useSpice);
   const cr = new CustomResource(scope, 'QuicksightCustomResource', {
     serviceToken: provider.serviceToken,
     properties: {

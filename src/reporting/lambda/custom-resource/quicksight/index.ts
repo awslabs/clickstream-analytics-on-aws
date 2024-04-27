@@ -103,6 +103,9 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   }
   const timezoneDict = timezoneJsonArrayToDict(JSON.parse(timezone));
 
+  logger.info('useSpice:', props.useSpice);
+  logger.info('dataSets:', JSON.stringify(props.dashboardDefProps.dataSets) );
+
   if (event.RequestType === 'Create') {
     return _onCreate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event, timezoneDict);
   } else if (event.RequestType === 'Update' ) {
@@ -256,7 +259,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
 
       const dashboard = await updateQuickSightDashboard(quickSight, commonParams,
         dashboardDefProps, oldDashboardDefProps,
-        createdQuickSightResources);
+        createdQuickSightResources, props.useSpice);
 
       dashboards.push({
         appId: schemaName,
@@ -592,12 +595,14 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
   dashboardDef: QuickSightDashboardDefProps,
   oldDashboardDef: QuickSightDashboardDefProps,
   createdQuickSightResources: CreatedQuickSightResources,
+  useSpice: string
 )
 : Promise<UpdateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
   const dataSets = dashboardDef.dataSets;
   const oldDataSets = oldDashboardDef.dataSets;
+  const dataSetsSpice = dashboardDef.dataSetsSpice;
   const databaseName = dashboardDef.databaseName;
 
   await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn,
@@ -623,7 +628,8 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
     needUpdateDataSetTableNames: needUpdateDataSetTableNames,
   });
 
-  for ( const dataSet of dataSets) {
+  const targetDataSet = useSpice === 'yes' ? dataSetsSpice : dataSets;
+  for ( const dataSet of targetDataSet) {
     let createdDataset;
     if (needUpdateDataSetTableNames.includes(dataSet.tableName)) {
       logger.info(`update data set : ${dataSet.tableName}`);

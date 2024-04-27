@@ -21,6 +21,7 @@ import { ReportingService } from './reporting';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { IPipeline } from '../model/pipeline';
+import { DataSetImportMode } from '@aws-sdk/client-quicksight';
 
 const pipelineServ: PipelineServ = new PipelineServ();
 
@@ -119,7 +120,7 @@ export class AttributionAnalysisService {
     datasetPropsArray.push({
       tableName: viewName,
       columns: attributionVisualColumns,
-      useSpice: 'no',
+      importMode: DataSetImportMode.DIRECT_QUERY,
       customSql: visualSql,
       projectedColumns: [
         'Trigger Count',

@@ -97,6 +97,7 @@ export interface QuickSightDashboardDefProps {
   dataSourceArn: string;
   databaseName: string;
   dataSets: DataSetProps[];
+  dataSetsSpice: DataSetProps[];
 };
 
 export function sleep(ms: number) {
