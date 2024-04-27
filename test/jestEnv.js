@@ -34,6 +34,8 @@ process.env.IAM_ROLE_PREFIX = 'test-prefix'
 process.env.IAM_ROLE_BOUNDARY_ARN = ''
 process.env.TEMPLATE_FILE = 'cloudfront-s3-control-plane-stack-global.template.json'
 process.env.SOLUTION_VERSION = 'v1.1.5-202403071513'
+process.env.LOG_LEVEL = 'ERROR'
+
 
 // web console bundling
 process.env.IS_SKIP_ASSET_BUNDLE = 'true'

@@ -1462,7 +1462,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 'Arn',
               ],
             },
-            '","Payload.$":"$"}},"End?":{"Type":"Choice","Choices":[{"Variable":"$.Action","StringEquals":"End","Next":"EndState"}],"Default":"Wait 15 Seconds"},"Wait 15 Seconds":{"Type":"Wait","Seconds":15,"Next":"Describe Stack"},"Stack in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds"}],"Default":"Callback Task"},"Describe Stack":{"Next":"Stack in progress?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
+            '","Payload.$":"$"}},"End?":{"Type":"Choice","Choices":[{"Variable":"$.Action","StringEquals":"End","Next":"EndState"}],"Default":"Wait 30 Seconds"},"Wait 30 Seconds":{"Type":"Wait","Seconds":30,"Next":"Describe Stack"},"Stack in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 30 Seconds"}],"Default":"Callback Task"},"Describe Stack":{"Next":"Stack in progress?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -2040,7 +2040,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                 'Arn',
               ],
             },
-            '","Payload.$":"$"}},"End?":{"Type":"Choice","Choices":[{"Variable":"$.Action","StringEquals":"End","Next":"EndState"}],"Default":"Wait 15 Seconds"},"Wait 15 Seconds":{"Type":"Wait","Seconds":15,"Next":"Describe Stack"},"Stack in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 15 Seconds"}],"Default":"Callback Task"},"Describe Stack":{"Next":"Stack in progress?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
+            '","Payload.$":"$"}},"End?":{"Type":"Choice","Choices":[{"Variable":"$.Action","StringEquals":"End","Next":"EndState"}],"Default":"Wait 30 Seconds"},"Wait 30 Seconds":{"Type":"Wait","Seconds":30,"Next":"Describe Stack"},"Stack in progress?":{"Type":"Choice","Choices":[{"Variable":"$.Result.StackStatus","StringMatches":"*_IN_PROGRESS","Next":"Wait 30 Seconds"}],"Default":"Callback Task"},"Describe Stack":{"Next":"Stack in progress?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
