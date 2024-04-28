@@ -407,6 +407,8 @@ export const CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX = 'ClickstreamUserSegmentsWork
 export const CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX = 'Clickstream-SegmentJobRule-';
 export const REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX = 'RefreshMaterializedViewsWorkflow';
 
+export const METADATA_V3_VERSION = 'v3';
+
 export const DATASET_READER_PERMISSION_ACTIONS = [
   'quicksight:DescribeDataSet',
   'quicksight:DescribeDataSetPermissions',
