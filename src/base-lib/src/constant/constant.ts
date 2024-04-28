@@ -268,7 +268,7 @@ export const SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN = 'arn:aws(-cn|-us-gov)?:se
 export const S3_BUCKET_ARN_PATTERN = 'arn:aws(-cn|-us-gov)?:s3:::[a-z0-9\\.\\-]{3,63}';
 export const KINESIS_DATA_STREAM_ARN_PATTERN = '^arn:aws(-cn|-us-gov)?:kinesis:[a-z0-9-]+:[0-9]{12}:stream/[a-zA-Z0-9_.-]{1,128}$';
 export const KMS_KEY_ARN_PATTERN = '^arn:aws(-cn|-us-gov)?:kms:[a-z0-9-]+:[0-9]{12}:key/([a-zA-Z0-9-_]+)$';
-export const IAM_ROLE_ARN_PATTERN = '^arn:aws(-cn|-us-gov)?:iam:[a-z0-9-]+:[0-9]{12}:role/([a-zA-Z0-9-_]+)$';
+export const IAM_ROLE_ARN_PATTERN = '^arn:aws(-cn|-us-gov)?:iam::[0-9]{12}:role\/[a-zA-Z0-9-_]+$';
 export const SCHEDULE_EXPRESSION_PATTERN =
   '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$';
 
