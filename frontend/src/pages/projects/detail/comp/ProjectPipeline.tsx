@@ -123,7 +123,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
 
   const renderAppTimezone = (appId: string) => {
     const app = pipelineInfo.timezone?.find((e) => e.appId === appId);
-    return app?.timezone;
+    return defaultStr(app?.timezone);
   };
 
   useEffect(() => {
