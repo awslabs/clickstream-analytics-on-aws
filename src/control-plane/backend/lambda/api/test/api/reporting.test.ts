@@ -2132,12 +2132,6 @@ describe('reporting test', () => {
     redshiftClientMock.on(DescribeStatementCommand).resolves({
       Status: StatusString.FINISHED,
     });
-
-    quickSightMock.on(ListDashboardsCommand).resolves({
-      DashboardSummaryList: [{
-        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
-      }],
-    });
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
@@ -2163,7 +2157,6 @@ describe('reporting test', () => {
     expect(res.body.data).toEqual('OK');
     expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 1);
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
-    expect(quickSightMock).toHaveReceivedCommandTimes(ListDashboardsCommand, 1);
     expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
       Sqls: expect.arrayContaining([`select * from app1.${EVENT_USER_VIEW} limit 1`]),
     });
@@ -2174,12 +2167,6 @@ describe('reporting test', () => {
     });
     redshiftClientMock.on(DescribeStatementCommand).resolves({
       Status: StatusString.FINISHED,
-    });
-
-    quickSightMock.on(ListDashboardsCommand).resolves({
-      DashboardSummaryList: [{
-        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
-      }],
     });
     ddbMock.on(QueryCommand).resolves({
       Items: [{
@@ -2231,7 +2218,6 @@ describe('reporting test', () => {
     expect(res.body.data).toEqual('OK');
     expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 0);
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
-    expect(quickSightMock).toHaveReceivedCommandTimes(ListDashboardsCommand, 1);
   });
 
   it('warmup with error id', async () => {

@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, SolutionInfo } from '@aws/clickstream-base-lib';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   Aspects,
   Aws,
@@ -191,10 +191,16 @@ export class DataReportingQuickSightStack extends Stack {
       value: dataSource.attrArn,
     }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN);
 
-    new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, {
-      description: 'Redshift data api role arn.',
+    new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN, {
+      description: 'Redshift serverless data api role arn.',
       value: stackParams.redshiftIAMRoleParam.valueAsString,
-    }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN);
+    }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN);
+
+    new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME, {
+      description: 'Redshift serverless workgroup name.',
+      value: stackParams.redshiftEndpointParam.valueAsString.split('.')[0],
+    }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
+
 
     addCfnNag(this);
 

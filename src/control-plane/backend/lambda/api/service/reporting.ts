@@ -15,7 +15,6 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import {
   DASHBOARD_READER_PERMISSION_ACTIONS,
-  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX,
   ExploreLocales,
   AnalysisType,
@@ -27,7 +26,8 @@ import {
   ExploreComputeMethod,
   sleep,
   SolutionVersion,
-  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
+  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN,
+  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
 } from '@aws/clickstream-base-lib';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
@@ -1307,7 +1307,6 @@ export class ReportingService {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
       const region = latestPipeline.region;
-      const quickSight = sdkClient.QuickSight({ region: region });
 
       //warmup principal
       await getClickstreamUserArn(
@@ -1320,10 +1319,14 @@ export class ReportingService {
         const dataApiRole = getStackOutputFromPipelineStatus(
           latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
           PipelineStackType.REPORTING,
-          OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN);
-        if (!dataApiRole) {
-          logger.warn('Data Api Role not found');
-          return res.status(201).json(new ApiSuccess('Data Api Role not found'));
+          OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN);
+        const workgroupName = getStackOutputFromPipelineStatus(
+          latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.REPORTING,
+          OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
+        if (!dataApiRole || !workgroupName) {
+          logger.warn('Data Api Role or Workgroup Name not found');
+          return res.status(201).json(new ApiSuccess('Data Api Role or Workgroup Name not found'));
         }
         const redshiftDataClient = sdkClient.RedshiftDataClient(
           {
@@ -1331,10 +1334,6 @@ export class ReportingService {
           },
           dataApiRole,
         );
-        const workgroupName = getStackOutputFromPipelineStatus(
-          latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-          PipelineStackType.DATA_MODELING_REDSHIFT,
-          OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
         const input = {
           Sqls: [`select * from ${appId}.${EVENT_USER_VIEW} limit 1`],
           WorkgroupName: workgroupName,
@@ -1364,11 +1363,6 @@ export class ReportingService {
           });
         }
       }
-
-      //warm up quicksight
-      await quickSight.listDashboards({
-        AwsAccountId: awsAccountId,
-      });
 
       logger.info('end of warm up reporting service');
       return res.status(201).json(new ApiSuccess('OK'));
