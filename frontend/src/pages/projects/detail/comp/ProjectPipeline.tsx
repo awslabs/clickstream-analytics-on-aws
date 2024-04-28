@@ -121,6 +121,11 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
     }
   };
 
+  const renderAppTimezone = (appId: string) => {
+    const app = pipelineInfo.timezone?.find((e) => e.appId === appId);
+    return app?.timezone;
+  };
+
   useEffect(() => {
     listApplicationByProject();
   }, [currentPage]);
@@ -255,6 +260,11 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
             id: 'desc',
             header: t('project:pipeline.appDesc'),
             cell: (e) => e.description,
+          },
+          {
+            id: 'timezone',
+            header: t('application:appTimezone'),
+            cell: (e) => renderAppTimezone(e.appId),
           },
           {
             id: 'time',

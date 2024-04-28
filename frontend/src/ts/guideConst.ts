@@ -149,7 +149,7 @@ export const WEB_INSTALL_GUIDE = `// npm
 npm install @aws/clickstream-web
 
 // Or yarn
-yarn install @aws/clickstream-web`;
+yarn add @aws/clickstream-web`;
 
 export const WEB_INIT_SDK_TEXT = `import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
@@ -219,13 +219,15 @@ export const REACT_NATIVE_INSTALL_GUIDE = `// npm
 npm install @aws/clickstream-react-native
 
 // Or yarn
-yarn install @aws/clickstream-react-native`;
+yarn add @aws/clickstream-react-native`;
+
+export const REACT_NATIVE_POD_GUIDE = `cd ios && pod install`;
 
 export const REACT_NATIVE_INIT_SDK_TEXT = `import { ClickstreamAnalytics } from '@aws/clickstream-react-native';
 
 ClickstreamAnalytics.init({
-    appId: 'your appId',
-    endpoint: 'https://example.com/collect',
+  appId: "${TEMPLATE_APP_ID}", // Your application ID
+  endpoint: "${TEMPLATE_SERVER_ENDPOINT}" // Your server endpoint
 });
 `;
 
