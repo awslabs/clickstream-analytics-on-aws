@@ -27,6 +27,7 @@ import {
   REACT_NATIVE_INIT_SDK_TEXT,
   REACT_NATIVE_RECORD_EVENT,
   REACT_NATIVE_ADD_USER_ATTR,
+  REACT_NATIVE_POD_GUIDE,
 } from 'ts/guideConst';
 import { buildDocumentLink } from 'ts/url';
 import { defaultStr } from 'ts/utils';
@@ -53,6 +54,15 @@ const ConfigReactNativeSDK: React.FC<ConfigSDKProps> = (
         <div className="mt-10">
           <FormField>
             <CopyCode code={REACT_NATIVE_INSTALL_GUIDE} />
+          </FormField>
+        </div>
+        <Header
+          variant="h3"
+          description={t('application:sdkGuide.reactNativeSDKPodDesc')}
+        ></Header>
+        <div className="mt-10">
+          <FormField>
+            <CopyCode code={REACT_NATIVE_POD_GUIDE} />
           </FormField>
         </div>
       </div>
