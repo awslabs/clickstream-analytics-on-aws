@@ -25,6 +25,7 @@ import {
   MetadataValueType,
   SolutionInfo,
   SolutionVersion,
+  METADATA_V3_VERSION,
 } from '@aws/clickstream-base-lib';
 import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
@@ -747,7 +748,7 @@ function groupAssociatedEventsByName(parameters: IMetadataEventParameter[]): IMe
         projectId: parameter.projectId,
         appId: parameter.appId,
         name: parameter.eventName,
-        prefix: `EVENT#${parameter.projectId}#${parameter.appId}`,
+        prefix: `EVENT#${parameter.projectId}#${parameter.appId}#${METADATA_V3_VERSION}`,
       } as IMetadataEvent);
     }
   }
@@ -906,7 +907,7 @@ function summaryToEventParameter(projectId: string, appId: string, metadataArray
     const parameter: IMetadataEventParameter = {
       id: `${projectId}#${appId}#${category}#${meta.name}#${valueType}`,
       month: 'latest',
-      prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+      prefix: `EVENT_PARAMETER#${projectId}#${appId}#${METADATA_V3_VERSION}`,
       projectId: projectId,
       appId: appId,
       name: meta.name,
@@ -928,7 +929,7 @@ function summaryToEvent(projectId: string, appId: string, associatedEvents: stri
     const event: IMetadataEvent = {
       id: `${projectId}#${appId}#${associated}`,
       month: 'latest',
-      prefix: `EVENT#${projectId}#${appId}`,
+      prefix: `EVENT#${projectId}#${appId}#${METADATA_V3_VERSION}`,
       projectId: projectId,
       appId: appId,
       name: associated,
@@ -1002,7 +1003,7 @@ IMetadataEventParameter | undefined {
         projectId: meta.projectId,
         appId: meta.appId,
         name: meta.eventName,
-        prefix: `EVENT#${meta.projectId}#${meta.appId}`,
+        prefix: `EVENT#${meta.projectId}#${meta.appId}#${METADATA_V3_VERSION}`,
       } as IMetadataEvent);
     }
   }

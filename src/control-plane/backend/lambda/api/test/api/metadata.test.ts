@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, ExplorePathNodeType, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType, ConditionCategoryFrontend } from '@aws/clickstream-base-lib';
+import { ConditionCategory, ExplorePathNodeType, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType, ConditionCategoryFrontend, METADATA_V3_VERSION } from '@aws/clickstream-base-lib';
 import {
   SFNClient, StartExecutionCommand,
 } from '@aws-sdk/client-sfn';
@@ -25,7 +25,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock } from './ddb-mock';
-import { MOCK_EVENT, MOCK_EVENT_PARAMETER, MOCK_EVENT_PARAMETER_V2, MOCK_EVENT_V2, MOCK_USER_ATTRIBUTE, MOCK_USER_ATTRIBUTE_V2, displayDataMock, getAllEventParametersInput, mockPipeline } from './metadata-mock';
+import { MOCK_EVENT, MOCK_EVENT_PARAMETER, MOCK_EVENT_PARAMETER_V3, MOCK_EVENT_V3, MOCK_USER_ATTRIBUTE, MOCK_USER_ATTRIBUTE_V3, displayDataMock, getAllEventParametersInput, mockPipeline } from './metadata-mock';
 import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constants';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -210,7 +210,7 @@ describe('Metadata Event test', () => {
       name: MOCK_EVENT_PARAMETER_NAME,
       parameterType: MetadataParameterType.PUBLIC,
       platform: [],
-      prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
       projectId: MOCK_PROJECT_ID,
       valueType: MetadataValueType.STRING,
       values: [],
@@ -691,7 +691,7 @@ describe('Metadata Event test V2', () => {
         '#name': 'name',
       },
     }).resolves({
-      Item: { ...MOCK_EVENT_V2 },
+      Item: { ...MOCK_EVENT_V3 },
     });
     const res = await request(app)
       .get(`/api/metadata/event/${MOCK_EVENT_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
@@ -702,13 +702,13 @@ describe('Metadata Event test V2', () => {
       message: '',
       data: {
         id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-        prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
         month: 'latest',
         associatedParameters: [
           {
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
             month: 'latest',
-            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             category: ConditionCategory.EVENT,
@@ -774,7 +774,7 @@ describe('Metadata Event test V2', () => {
     expect(res.body.data.associatedParameters).toContainEqual({
       id: `project_8888_8888#app_7777_7777#${ConditionCategoryFrontend.APP_INFO}#install_source#string`,
       month: 'latest',
-      prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
       projectId: MOCK_PROJECT_ID,
       appId: MOCK_APP_ID,
       name: MOCK_EVENT_PARAMETER_NAME,
@@ -816,23 +816,23 @@ describe('Metadata Event test V2', () => {
         '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':prefix': `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        ':prefix': `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
         ':month': 'latest',
       },
       ScanIndexForward: false,
     }).resolves({
       Items: [
         {
-          ...MOCK_EVENT_V2,
+          ...MOCK_EVENT_V3,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
           name: `${MOCK_EVENT_NAME}1`,
         },
         {
-          ...MOCK_EVENT_V2,
+          ...MOCK_EVENT_V3,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
           name: `${MOCK_EVENT_NAME}2`,
           summary: {
-            ...MOCK_EVENT_V2.summary,
+            ...MOCK_EVENT_V3.summary,
             platform: [MetadataPlatform.WEB],
             latestCount: 0,
           },
@@ -851,7 +851,7 @@ describe('Metadata Event test V2', () => {
           {
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
             month: 'latest',
-            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: `${MOCK_EVENT_NAME}1`,
@@ -874,7 +874,7 @@ describe('Metadata Event test V2', () => {
           {
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
             month: 'latest',
-            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: `${MOCK_EVENT_NAME}2`,
@@ -912,7 +912,7 @@ describe('Metadata Event test V2', () => {
         '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':prefix': `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        ':prefix': `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
         ':month': 'latest',
       },
       ScanIndexForward: false,
@@ -1005,7 +1005,7 @@ describe('Metadata Event Attribute test', () => {
         associatedEvents: [
           {
             name: MOCK_EVENT_NAME,
-            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
@@ -1021,7 +1021,7 @@ describe('Metadata Event Attribute test', () => {
           },
           {
             name: `${MOCK_EVENT_NAME}1`,
-            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
@@ -1102,7 +1102,7 @@ describe('Metadata Event Attribute test', () => {
       metadataSource: MetadataSource.PRESET,
       name: '_session_start',
       appId: MOCK_APP_ID,
-      prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
       projectId: MOCK_PROJECT_ID,
     });
     expect(res.body.data.metadataSource).toEqual(MetadataSource.PRESET);
@@ -1486,7 +1486,7 @@ describe('Metadata Event Attribute test V2', () => {
     ddbMock.on(GetCommand, {
       TableName: analyticsMetadataTable,
       Key: {
-        id: `${MOCK_EVENT_PARAMETER_V2.id}`,
+        id: `${MOCK_EVENT_PARAMETER_V3.id}`,
         month: 'latest',
       },
       ProjectionExpression: '#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, summary',
@@ -1498,7 +1498,7 @@ describe('Metadata Event Attribute test V2', () => {
       },
     }).resolves({
       Item: {
-        ...MOCK_EVENT_PARAMETER_V2,
+        ...MOCK_EVENT_PARAMETER_V3,
       },
     });
     const res = await request(app)
@@ -1513,7 +1513,7 @@ describe('Metadata Event Attribute test V2', () => {
           {
             name: MOCK_EVENT_NAME,
             month: 'latest',
-            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
@@ -1535,7 +1535,7 @@ describe('Metadata Event Attribute test V2', () => {
         ],
         id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
         month: 'latest',
-        prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_PARAMETER_NAME,
@@ -1575,22 +1575,22 @@ describe('Metadata Event Attribute test V2', () => {
         '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
         ':month': 'latest',
       },
       ScanIndexForward: false,
     }).resolves({
       Items: [
         {
-          ...MOCK_EVENT_PARAMETER_V2,
+          ...MOCK_EVENT_PARAMETER_V3,
         },
         {
-          ...MOCK_EVENT_PARAMETER_V2,
+          ...MOCK_EVENT_PARAMETER_V3,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}1#${MetadataValueType.FLOAT}`,
           name: `${MOCK_EVENT_PARAMETER_NAME}1`,
           valueType: MetadataValueType.FLOAT,
           summary: {
-            ...MOCK_EVENT_PARAMETER_V2.summary,
+            ...MOCK_EVENT_PARAMETER_V3.summary,
             associatedEvents: [`${MOCK_EVENT_NAME}1`],
             platform: [
               'Android',
@@ -1620,7 +1620,7 @@ describe('Metadata Event Attribute test V2', () => {
             associatedEvents: [],
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
             month: 'latest',
-            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: MOCK_EVENT_PARAMETER_NAME,
@@ -1649,7 +1649,7 @@ describe('Metadata Event Attribute test V2', () => {
             associatedEvents: [],
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}1#${MetadataValueType.FLOAT}`,
             month: 'latest',
-            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: `${MOCK_EVENT_PARAMETER_NAME}1`,
@@ -1676,7 +1676,7 @@ describe('Metadata Event Attribute test V2', () => {
             associatedEvents: [],
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT_OUTER}#is_first_day_event#${MetadataValueType.STRING}`,
             month: 'latest',
-            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: 'is_first_day_event',
@@ -1717,7 +1717,7 @@ describe('Metadata Event Attribute test V2', () => {
         '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
         ':month': 'latest',
       },
       ScanIndexForward: false,
@@ -1743,18 +1743,18 @@ describe('Metadata Event Attribute test V2', () => {
         '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
         ':month': 'latest',
       },
       ScanIndexForward: false,
     }).resolves({
       Items: [
         {
-          ...MOCK_EVENT_PARAMETER_V2,
+          ...MOCK_EVENT_PARAMETER_V3,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${ExplorePathNodeType.PAGE_TITLE}#${MetadataValueType.STRING}`,
           name: ExplorePathNodeType.PAGE_TITLE,
           summary: {
-            ...MOCK_EVENT_PARAMETER_V2.summary,
+            ...MOCK_EVENT_PARAMETER_V3.summary,
             associatedEvents: ['_page_view', '_page_view1'],
             valueEnum: [
               {
@@ -1773,11 +1773,11 @@ describe('Metadata Event Attribute test V2', () => {
           },
         },
         {
-          ...MOCK_EVENT_PARAMETER_V2,
+          ...MOCK_EVENT_PARAMETER_V3,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${ExplorePathNodeType.PAGE_URL}#${MetadataValueType.STRING}`,
           name: ExplorePathNodeType.PAGE_URL,
           summary: {
-            ...MOCK_EVENT_PARAMETER_V2.summary,
+            ...MOCK_EVENT_PARAMETER_V3.summary,
             associatedEvents: ['_page_view', '_page_view1'],
             valueEnum: [
               {
@@ -1792,11 +1792,11 @@ describe('Metadata Event Attribute test V2', () => {
           },
         },
         {
-          ...MOCK_EVENT_PARAMETER_V2,
+          ...MOCK_EVENT_PARAMETER_V3,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${ExplorePathNodeType.SCREEN_NAME}#${MetadataValueType.STRING}`,
           name: ExplorePathNodeType.SCREEN_NAME,
           summary: {
-            ...MOCK_EVENT_PARAMETER_V2.summary,
+            ...MOCK_EVENT_PARAMETER_V3.summary,
             associatedEvents: ['_screen_view', '_screen_view1'],
             valueEnum: [
               {
@@ -1811,11 +1811,11 @@ describe('Metadata Event Attribute test V2', () => {
           },
         },
         {
-          ...MOCK_EVENT_PARAMETER_V2,
+          ...MOCK_EVENT_PARAMETER_V3,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${ExplorePathNodeType.SCREEN_ID}#${MetadataValueType.STRING}`,
           name: ExplorePathNodeType.SCREEN_ID,
           summary: {
-            ...MOCK_EVENT_PARAMETER_V2.summary,
+            ...MOCK_EVENT_PARAMETER_V3.summary,
             associatedEvents: ['_screen_view', '_screen_view1'],
             valueEnum: [
               {
@@ -2077,22 +2077,22 @@ describe('Metadata User Attribute test V2', () => {
         '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':prefix': `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        ':prefix': `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
         ':month': 'latest',
       },
       ScanIndexForward: false,
     }).resolves({
       Items: [
         {
-          ...MOCK_USER_ATTRIBUTE_V2,
+          ...MOCK_USER_ATTRIBUTE_V3,
         },
         {
-          ...MOCK_USER_ATTRIBUTE_V2,
+          ...MOCK_USER_ATTRIBUTE_V3,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}1#${MetadataValueType.FLOAT}`,
           name: `${MOCK_USER_ATTRIBUTE_NAME}1`,
           valueType: MetadataValueType.FLOAT,
           summary: {
-            ...MOCK_USER_ATTRIBUTE_V2.summary,
+            ...MOCK_USER_ATTRIBUTE_V3.summary,
             valueEnum: [
               {
                 count: 555,
@@ -2115,7 +2115,7 @@ describe('Metadata User Attribute test V2', () => {
           {
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
             month: 'latest',
-            prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: MOCK_USER_ATTRIBUTE_NAME,
@@ -2139,7 +2139,7 @@ describe('Metadata User Attribute test V2', () => {
           {
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}1#${MetadataValueType.FLOAT}`,
             month: 'latest',
-            prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: `${MOCK_USER_ATTRIBUTE_NAME}1`,
@@ -2176,7 +2176,7 @@ describe('Metadata User Attribute test V2', () => {
         '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':prefix': `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        ':prefix': `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
         ':month': 'latest',
       },
       ScanIndexForward: false,
