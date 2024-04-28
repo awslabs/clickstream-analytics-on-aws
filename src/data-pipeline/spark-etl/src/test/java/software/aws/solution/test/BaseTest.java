@@ -18,7 +18,7 @@ import com.google.common.io.*;
 import org.apache.logging.log4j.*;
 import org.apache.logging.log4j.core.config.*;
 import org.junit.jupiter.api.*;
-import software.aws.solution.test.util.ContextUtil;
+import software.aws.solution.clickstream.util.ContextUtil;
 
 import java.io.*;
 import java.nio.charset.*;

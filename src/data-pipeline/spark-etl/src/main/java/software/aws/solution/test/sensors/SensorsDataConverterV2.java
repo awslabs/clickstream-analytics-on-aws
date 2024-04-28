@@ -14,18 +14,17 @@
 package software.aws.solution.test.sensors;
 
 import lombok.extern.slf4j.Slf4j;
-import software.aws.solution.clickstream.common.RuleConfig;
-import software.aws.solution.test.udfconverter.BaseDataConverter;
-import software.aws.solution.test.transformer.TransformerNameEnum;
+import software.aws.solution.clickstream.common.TransformConfig;
+import software.aws.solution.clickstream.udfconverter.BaseDataConverter;
+import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 
-import java.util.Map;
 
 @Slf4j
 public class SensorsDataConverterV2 extends BaseDataConverter {
-    private final Map<String, RuleConfig> appRuleConfig;
+    private final TransformConfig transformConfig;
 
-    public SensorsDataConverterV2(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    public SensorsDataConverterV2(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
     @Override
@@ -34,7 +33,8 @@ public class SensorsDataConverterV2 extends BaseDataConverter {
     }
 
     @Override
-    public Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
+    public TransformConfig getTransformConfig() {
+        return this.transformConfig;
     }
+
 }

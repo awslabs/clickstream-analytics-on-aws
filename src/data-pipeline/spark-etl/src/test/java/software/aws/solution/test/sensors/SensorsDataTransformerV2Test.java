@@ -20,16 +20,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.test.BaseSparkTest;
-import software.aws.solution.test.util.TableName;
+import software.aws.solution.clickstream.util.TableName;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
-import static software.aws.solution.test.util.ContextUtil.APP_IDS_PROP;
-import static software.aws.solution.test.util.ContextUtil.PROJECT_ID_PROP;
-import static software.aws.solution.test.util.ContextUtil.WAREHOUSE_DIR_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.APP_IDS_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 
 @Slf4j
 public class SensorsDataTransformerV2Test extends BaseSparkTest {

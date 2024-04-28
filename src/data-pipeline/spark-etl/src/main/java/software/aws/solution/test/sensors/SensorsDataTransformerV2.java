@@ -13,11 +13,11 @@
 
 package software.aws.solution.test.sensors;
 
-import software.aws.solution.test.exception.ExecuteTransformerException;
-import software.aws.solution.test.transformer.BaseThirdPartyTransformer;
-import software.aws.solution.transformer.TransformConfig;
-import software.aws.solution.test.transformer.TransformerNameEnum;
-import software.aws.solution.test.udfconverter.DatasetConverter;
+import software.aws.solution.clickstream.common.TransformConfig;
+import software.aws.solution.clickstream.exception.ExecuteTransformerException;
+import software.aws.solution.clickstream.transformer.BaseThirdPartyTransformer;
+import software.aws.solution.clickstream.transformer.TransformerNameEnum;
+import software.aws.solution.clickstream.udfconverter.DatasetConverter;
 
 public class SensorsDataTransformerV2 extends BaseThirdPartyTransformer {
     private TransformConfig transformConfig;
@@ -32,7 +32,7 @@ public class SensorsDataTransformerV2 extends BaseThirdPartyTransformer {
         if (this.transformConfig == null) {
             throw new ExecuteTransformerException("Transform config is not set");
         }
-        return new SensorsDataConverterV2(this.transformConfig.getAppRuleConfig());
+        return new SensorsDataConverterV2(this.transformConfig);
     }
 
     @Override

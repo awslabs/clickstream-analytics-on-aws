@@ -26,9 +26,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.common.RuleConfig;
-import software.aws.solution.transformer.TransformConfig;
-import software.aws.solution.test.util.ContextUtil;
-import software.aws.solution.test.util.PathContent;
+import software.aws.solution.clickstream.common.TransformConfig;
+import software.aws.solution.clickstream.util.ContextUtil;
+import software.aws.solution.clickstream.util.PathContent;
 
 import java.io.*;
 import java.net.URISyntaxException;
