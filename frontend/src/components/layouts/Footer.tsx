@@ -11,13 +11,46 @@
  *  and limitations under the License.
  */
 
+import { Link } from '@cloudscape-design/components';
 import { AppContext } from 'context/AppContext';
+import { SystemInfoContext } from 'context/SystemInfoContext';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import { buildCloudFormationStackLink } from 'ts/url';
 
 const Footer: React.FC = () => {
   const { t } = useTranslation();
   const appConfig = useContext(AppContext);
+  const systemInfo = useContext(SystemInfoContext);
+
+  const versionLinkRender = () => {
+    if (!appConfig?.solution_version) {
+      return null;
+    }
+    if (appConfig?.solution_region && systemInfo?.stackId) {
+      return (
+        <span className="version">
+          {t('version')}:{' '}
+          <Link
+            href={buildCloudFormationStackLink(
+              appConfig?.solution_region,
+              systemInfo?.stackId
+            )}
+            external
+          >
+            {appConfig.solution_version}
+          </Link>
+        </span>
+      );
+    } else {
+      return (
+        <span className="version">
+          {t('version')}: {appConfig.solution_version}
+        </span>
+      );
+    }
+  };
+
   return (
     <footer id="f" className="flex">
       <ul>
@@ -25,11 +58,7 @@ const Footer: React.FC = () => {
           © {new Date().getFullYear()}, {t('footer.copyRight')}
         </li>
       </ul>
-      {appConfig?.solution_version && (
-        <span className="version">
-          {t('version')}: {appConfig.solution_version}
-        </span>
-      )}
+      {versionLinkRender()}
     </footer>
   );
 };
