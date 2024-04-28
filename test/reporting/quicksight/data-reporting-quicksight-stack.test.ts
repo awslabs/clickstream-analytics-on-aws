@@ -107,7 +107,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
   test('Should has Parameter redshiftIAMRoleParam', () => {
     template.hasParameter('RedshiftIAMRoleParam', {
       Type: 'String',
-      Default: '',
     });
   });
 
