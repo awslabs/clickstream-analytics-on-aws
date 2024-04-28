@@ -191,7 +191,14 @@ fs.readdirSync(global_s3_assets).forEach(file => {
 
 
   // Output modified template file
-  const output_template = JSON.stringify(template, null, 2);
+  let output_template;
+  //minification reporting stack
+  if(file.includes('reporting-quicksight-stack')){
+    output_template = JSON.stringify(template, null);
+  } else {
+    output_template = JSON.stringify(template, null, 2);
+  }
+  
   fs.writeFileSync(`${global_s3_assets}/${file}`, output_template);
 });
 
