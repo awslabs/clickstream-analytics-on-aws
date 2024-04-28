@@ -2677,10 +2677,6 @@ def parse_utm_from_url(page_url, referrer, latest_referrer):
         return
         # end def get_info_from_page_referer()
 
-    if utm_source is None and referrer is not None:
-        print("LOG::check referrer: {}".format(referrer))
-        get_umt_from_url(referrer, "referrer")
-        get_info_from_page_referer(referrer, "referrer")
 
     if utm_source is None and latest_referrer is not None:
         print(
@@ -2690,12 +2686,25 @@ def parse_utm_from_url(page_url, referrer, latest_referrer):
         )
         get_umt_from_url(latest_referrer, "latest_referrer")
         get_info_from_page_referer(latest_referrer, "latest_referrer")
-
+    
+    if utm_source is None and referrer is not None:
+        print("LOG::check referrer: {}".format(referrer))
+        get_umt_from_url(referrer, "referrer")
+        get_info_from_page_referer(referrer, "referrer")
+  
     if channel_group is None and utm_source is not None:
         channel_group = "Unassigned"
 
     if source_category is None and utm_source is not None:
         source_category = "Unassigned"
+
+    if utm_source is None:
+        utm_source = "Driect"
+        channel_group = "Direct"
+        source_category = "Direct"
+    
+    if utm_medium is None:
+        utm_medium = channel_group
 
     # Create a dictionary with the extracted values
 

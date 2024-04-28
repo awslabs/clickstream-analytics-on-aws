@@ -167,6 +167,13 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         return list != null && !list.isEmpty() ? list.get(0) : null;
     }
 
+    private static boolean isEmpty(final String v, final String emtpyValue) {
+        return v == null || v.isEmpty() || v.equalsIgnoreCase(emtpyValue);
+    }
+
+    private static boolean isEmpty(final String v) {
+        return v == null || v.isEmpty();
+    }
 
     @Override
     public CategoryTrafficSource parse(final String pageUrl, final String pageReferrer, final String latestReferrer, final String latestReferrerHost) {
@@ -181,8 +188,6 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         return parse(trafficSourceUtm, pageReferrer, latestReferrer, latestReferrerHost);
 
     }
-
-
 
     private TrafficSourceUtm getUtmSourceFromUrl(final String urlIput) {
         TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
@@ -234,7 +239,6 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         }
         return trafficSourceUtm;
     }
-
 
     public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String theReferrer, final String theReferrerHost) {
         log.info("trafficSourceUtmInput: {}, theReferrer: {}, theReferrerHost: {}", trafficSourceUtmInput, theReferrer, theReferrerHost);
@@ -289,11 +293,11 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         TrafficSourceUtm trafficSourceUtm = normEmptyInTrafficSourceUtm(trafficSourceUtmInput);
 
         if (trafficSourceUtm.getSource() == null) {
-            trafficSourceUtm = getUtmSourceFromUrl(pageReferrer);
+            trafficSourceUtm = getUtmSourceFromUrl(latestReferrer);
         }
 
         if (trafficSourceUtm.getSource() == null) {
-            trafficSourceUtm = getUtmSourceFromUrl(latestReferrer);
+            trafficSourceUtm = getUtmSourceFromUrl(pageReferrer);
         }
 
         String theReferrer = null;
@@ -303,13 +307,13 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (latestReferrer != null && !latestReferrer.isEmpty()) {
             theReferrer = latestReferrer;
             theReferrerHost = latestReferrerHost;
-        }
-        categoryTrafficSource = parse(trafficSourceUtm, theReferrer, theReferrerHost);
-
-        if (categoryTrafficSource.getSource() == null && pageReferrer != null && !pageReferrer.isEmpty()) {
+            categoryTrafficSource = parse(trafficSourceUtm, theReferrer, theReferrerHost);
+        } else if (pageReferrer != null && !pageReferrer.isEmpty()) {
             theReferrer = pageReferrer;
             theReferrerHost = parseUrl(theReferrer).getHostName();
             categoryTrafficSource = parse(trafficSourceUtm, theReferrer, theReferrerHost);
+        } else {
+            categoryTrafficSource = parse(trafficSourceUtm, null, null);
         }
 
         if (categoryTrafficSource.getSource() != null) {
@@ -321,15 +325,19 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             }
         }
 
+        if (categoryTrafficSource.getSource() == null) {
+            categoryTrafficSource.setSource(DIRECT);
+            categoryTrafficSource.setCategory(DIRECT);
+            categoryTrafficSource.setChannelGroup(DIRECT);
+        }
+
+        if (categoryTrafficSource.getMedium() == null) {
+            categoryTrafficSource.setMedium(categoryTrafficSource.getChannelGroup());
+        }
+
         return categoryTrafficSource;
     }
 
-    private static boolean isEmpty(final String v, final String emtpyValue) {
-        return v == null || v.isEmpty() || v.equalsIgnoreCase(emtpyValue);
-    }
-    private static boolean isEmpty(final String v) {
-        return v == null || v.isEmpty();
-    }
     private TrafficSourceUtm normEmptyInTrafficSourceUtm(final TrafficSourceUtm trafficSourceUtmInput) {
 
         TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
@@ -340,7 +348,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (!isEmpty(trafficSourceUtmInput.getSource(), DIRECT)) {
             trafficSourceUtm.setSource(trafficSourceUtmInput.getSource());
         }
-        if (!isEmpty(trafficSourceUtmInput.getMedium())) {
+        if (!isEmpty(trafficSourceUtmInput.getMedium(), DIRECT)) {
             trafficSourceUtm.setMedium(trafficSourceUtmInput.getMedium());
         }
         if (!isEmpty(trafficSourceUtmInput.getCampaign(), DIRECT)) {
