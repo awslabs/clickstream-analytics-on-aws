@@ -1043,7 +1043,7 @@ function genGetCommandParameterItemFromDDB(originMonth: string, dayNumber: numbe
     id: 'projectId#appId#category#propertyName#valueType',
     month: inputMonth,
     originMonth: originMonth,
-    prefix: 'EVENT_PARAMETER#projectId#appId',
+    prefix: `EVENT_PARAMETER#projectId#appId#${METADATA_V3_VERSION}`,
     projectId: 'projectId',
     appId: 'appId',
     name: 'propertyName',
@@ -1092,7 +1092,7 @@ function genGetCommandEventItemFromDDB(originMonth: string, dayNumber: number, i
     id: 'projectId#appId#eventName',
     month: inputMonth,
     originMonth: originMonth,
-    prefix: 'EVENT#projectId#appId',
+    prefix: `EVENT#projectId#appId#${METADATA_V3_VERSION}`,
     projectId: 'projectId',
     appId: 'appId',
     name: 'eventName',
@@ -1131,7 +1131,7 @@ function genGetCommandUserAttributeItemFromDDB(originMonth: string, dayNumber: n
     id: 'projectId#appId#userattributeName#valueType',
     month: 'latest',
     originMonth: originMonth,
-    prefix: 'USER_ATTRIBUTE#projectId#appId',
+    prefix: `USER_ATTRIBUTE#projectId#appId#${METADATA_V3_VERSION}`,
     projectId: 'projectId',
     appId: 'appId',
     name: 'userattributename',
@@ -1165,7 +1165,7 @@ function genParameterItemExpect(month: string, dayNumberList: number[], inputMon
   item.id = 'projectId#appId#category#propertyName#valueType';
   item.month = inputMonth;
   item.originMonth = month;
-  item.prefix = 'EVENT_PARAMETER#projectId#appId';
+  item.prefix = `EVENT_PARAMETER#projectId#appId#${METADATA_V3_VERSION}`;
   item.projectId = 'projectId';
   item.createTimestamp = 1704067200000;
   item.updateTimestamp = 1704067200000;
@@ -1230,7 +1230,6 @@ function genParameterItemExpect(month: string, dayNumberList: number[], inputMon
     associatedEvents: associatedEvents,
     valueEnum: valueEnum,
   };
-  item.version = METADATA_V3_VERSION;
 
   return item;
 }
@@ -1240,7 +1239,7 @@ function genEventItemExpect(month: string, dayNumberList: number[], inputMonth: 
   item.id = 'projectId#appId#eventName';
   item.month = inputMonth;
   item.originMonth = month;
-  item.prefix = 'EVENT#projectId#appId';
+  item.prefix = `EVENT#projectId#appId#${METADATA_V3_VERSION}`;
   item.projectId = 'projectId';
   item.createTimestamp = 1704067200000;
   item.updateTimestamp = 1704067200000;
@@ -1283,7 +1282,6 @@ function genEventItemExpect(month: string, dayNumberList: number[], inputMonth: 
     associatedParameters: associatedParameters,
     hasData: true,
   };
-  item.version = METADATA_V3_VERSION;
 
   return item;
 }
@@ -1293,7 +1291,7 @@ function genUserAttributeItemExpect(month: string, dayNumber: number, inputMonth
   item.id = 'projectId#appId#userattributeName#valueType';
   item.month = inputMonth;
   item.originMonth = month;
-  item.prefix = 'USER_ATTRIBUTE#projectId#appId';
+  item.prefix = `USER_ATTRIBUTE#projectId#appId#${METADATA_V3_VERSION}`;
   item.projectId = 'projectId';
   item.createTimestamp = 1704067200000;
   item.updateTimestamp = 1704067200000;
@@ -1335,6 +1333,5 @@ function genUserAttributeItemExpect(month: string, dayNumber: number, inputMonth
       },
     ],
   };
-  item.version = METADATA_V3_VERSION;
   return item;
 }
