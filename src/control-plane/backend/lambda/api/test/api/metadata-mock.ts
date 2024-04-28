@@ -10,7 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { ConditionCategory, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, METADATA_V3_VERSION, MetadataValueType } from '@aws/clickstream-base-lib';
 import {
   QueryCommand,
   QueryCommandInput,
@@ -72,6 +72,11 @@ export const MOCK_EVENT_V2 = {
       },
     ],
   },
+};
+
+export const MOCK_EVENT_V3 = {
+  ...MOCK_EVENT_V2,
+  prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
 };
 
 export const MOCK_EVENT_PARAMETER = {
@@ -145,6 +150,11 @@ export const MOCK_EVENT_PARAMETER_V2 = {
   },
 };
 
+export const MOCK_EVENT_PARAMETER_V3 = {
+  ...MOCK_EVENT_PARAMETER_V2,
+  prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
+};
+
 export const MOCK_USER_ATTRIBUTE = {
   id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
   month: '#202301',
@@ -198,6 +208,11 @@ export const MOCK_USER_ATTRIBUTE = {
 export const MOCK_USER_ATTRIBUTE_V2 = {
   ...MOCK_USER_ATTRIBUTE,
   month: 'latest',
+};
+
+export const MOCK_USER_ATTRIBUTE_V3 = {
+  ...MOCK_USER_ATTRIBUTE_V2,
+  prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${METADATA_V3_VERSION}`,
 };
 
 export function displayDataMock(m: any) {

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, METADATA_V3_VERSION, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '@aws/clickstream-base-lib';
 import {
   UpdateCommand,
   QueryCommandInput,
@@ -23,7 +23,7 @@ import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constan
 import { docClient, query, memoizedQuery } from '../../common/dynamodb-client';
 import { MetadataVersionType } from '../../common/model-ln';
 import { KeyVal } from '../../common/types';
-import { getCurMonthStr, getDataFromYesterday, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType, isEmpty, rawToAttribute, rawToEvent, rawToParameter, readMetadataFromSqlFile } from '../../common/utils';
+import { getCurMonthStr, getDataFromYesterday, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType, rawToAttribute, rawToEvent, rawToParameter, readMetadataFromSqlFile } from '../../common/utils';
 import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList, IMetadataDisplayNameAndDescription, ISummaryEventParameter } from '../../model/metadata';
 import { ClickStreamStore } from '../click-stream-store';
 import { MetadataStore } from '../metadata-store';
@@ -87,7 +87,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     };
     const record = await docClient.send(new GetCommand(input));
     let raw = record.Item as IMetadataRaw;
-    if (isEmpty(record.Item)) {
+    if (!raw || !raw.prefix?.endsWith(`#${METADATA_V3_VERSION}`)) {
       const builtInEvents = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT', version);
       const event = builtInEvents.find(r => r.name === eventName);
       if (!event) {
@@ -133,7 +133,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
         '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':prefix': `EVENT#${projectId}#${appId}`,
+        ':prefix': `EVENT#${projectId}#${appId}#${METADATA_V3_VERSION}`,
         ':month': 'latest',
       },
       ScanIndexForward: false,
@@ -174,7 +174,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     };
     const record = await docClient.send(new GetCommand(input));
     let raw = record.Item as IMetadataRaw;
-    if (isEmpty(record.Item)) {
+    if (!raw || !raw.prefix?.endsWith(`#${METADATA_V3_VERSION}`)) {
       const builtInEventParameters = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT_PARAMETER', version);
       const parameter = builtInEventParameters.find(r => r.name === parameterName && r.category === category && r.valueType === valueType);
       if (!parameter) {
@@ -204,7 +204,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
         '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':prefix': `EVENT_PARAMETER#${projectId}#${appId}`,
+        ':prefix': `EVENT_PARAMETER#${projectId}#${appId}#${METADATA_V3_VERSION}`,
         ':month': 'latest',
       },
       ScanIndexForward: false,
@@ -218,7 +218,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     parameters.push({
       id: `${projectId}#${appId}#${ConditionCategory.EVENT_OUTER}#is_first_day_event#${MetadataValueType.STRING}`,
       month: 'latest',
-      prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+      prefix: `EVENT_PARAMETER#${projectId}#${appId}#${METADATA_V3_VERSION}`,
       projectId: projectId,
       appId: appId,
       name: 'is_first_day_event',
@@ -309,7 +309,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
         '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':prefix': `USER_ATTRIBUTE#${projectId}#${appId}`,
+        ':prefix': `USER_ATTRIBUTE#${projectId}#${appId}#${METADATA_V3_VERSION}`,
         ':month': 'latest',
       },
       ScanIndexForward: false,
@@ -413,7 +413,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       const raw: IMetadataRaw = {
         id: `${projectId}#${appId}#${eventName}`,
         month: getCurMonthStr(),
-        prefix: `EVENT#${projectId}#${appId}`,
+        prefix: `EVENT#${projectId}#${appId}#${METADATA_V3_VERSION}`,
         projectId: projectId,
         appId: appId,
         name: eventName,
@@ -456,7 +456,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       const data: IMetadataRaw = {
         id: `${projectId}#${appId}#${e.name}`,
         month: getCurMonthStr(),
-        prefix: `EVENT#${projectId}#${appId}`,
+        prefix: `EVENT#${projectId}#${appId}#${METADATA_V3_VERSION}`,
         projectId: projectId,
         appId: appId,
         name: e.name,
@@ -496,7 +496,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
           const raw: IMetadataRaw = {
             id: `${projectId}#${appId}#${e.name}#${preset.category}#${preset.name}#${preset.dataType}`,
             month: getCurMonthStr(),
-            prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+            prefix: `EVENT_PARAMETER#${projectId}#${appId}#${METADATA_V3_VERSION}`,
             projectId: projectId,
             appId: appId,
             name: preset.name,
@@ -514,7 +514,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
         const raw: IMetadataRaw = {
           id: `${projectId}#${appId}#${preset.eventName}#${preset.category}#${preset.name}#${preset.dataType}`,
           month: getCurMonthStr(),
-          prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+          prefix: `EVENT_PARAMETER#${projectId}#${appId}#${METADATA_V3_VERSION}`,
           projectId: projectId,
           appId: appId,
           name: preset.name,
@@ -535,7 +535,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
         const raw: IMetadataRaw = {
           id: `${projectId}#${appId}#${e.name}#${pub.category}#${pub.name}#${pub.dataType}`,
           month: getCurMonthStr(),
-          prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+          prefix: `EVENT_PARAMETER#${projectId}#${appId}#${METADATA_V3_VERSION}`,
           projectId: projectId,
           appId: appId,
           name: pub.name,
@@ -561,7 +561,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       const data: IMetadataRaw = {
         id: `${projectId}#${appId}#${preset.category}#${preset.name}#${preset.dataType}`,
         month: 'latest',
-        prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+        prefix: `EVENT_PARAMETER#${projectId}#${appId}#${METADATA_V3_VERSION}`,
         projectId: projectId,
         appId: appId,
         name: preset.name,
@@ -602,7 +602,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       const raw: IMetadataRaw = {
         id: `${projectId}#${appId}#${pub.category}#${pub.name}#${pub.dataType}`,
         month: 'latest',
-        prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+        prefix: `EVENT_PARAMETER#${projectId}#${appId}#${METADATA_V3_VERSION}`,
         projectId: projectId,
         appId: appId,
         name: pub.name,
@@ -626,7 +626,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       const data: IMetadataRaw = {
         id: `${projectId}#${appId}#${attr.category}#${attr.name}#${attr.dataType}`,
         month: getCurMonthStr(),
-        prefix: `USER_ATTRIBUTE#${projectId}#${appId}`,
+        prefix: `USER_ATTRIBUTE#${projectId}#${appId}#${METADATA_V3_VERSION}`,
         projectId: projectId,
         appId: appId,
         name: attr.name,

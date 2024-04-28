@@ -238,7 +238,7 @@ async function checkLatestMonthWithDDB(id: string, currentMonth: string, markedL
       // update ddb latest month to its origin month
       item.month = existingDDBItemOriginMonth;
       item.updateTimestamp = Date.now();
-      item.version = METADATA_V3_VERSION;
+      item.prefix = addVersionToPrefix(item.prefix);
       const params = {
         TableName: ddbTableName,
         Item: item,
@@ -422,7 +422,7 @@ async function updateEventParameterItem(itemsMap: Map<string, any>, key: string,
     addSetIntoAnotherSet(eventNameSet, convertToSet(record[7].stringValue));
     item.summary.associatedEvents = Array.from(eventNameSet);
   }
-  item.version = METADATA_V3_VERSION;
+  item.prefix = addVersionToPrefix(record[2].stringValue);
 }
 
 async function createEventParameterItem(record: any, itemsMap: Map<string, any>, markedLatestMonthMap: Map<string, any>) {
@@ -430,7 +430,7 @@ async function createEventParameterItem(record: any, itemsMap: Map<string, any>,
     id: record[0].stringValue,
     month: await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap),
     originMonth: record[1].stringValue,
-    prefix: record[2].stringValue,
+    prefix: addVersionToPrefix(record[2].stringValue),
     projectId: record[3].stringValue,
     appId: record[4].stringValue,
     name: record[8].stringValue,
@@ -449,7 +449,6 @@ async function createEventParameterItem(record: any, itemsMap: Map<string, any>,
       valueEnum: [{ value: record[10].stringValue, count: record[11].longValue }],
       associatedEvents: Array.from(convertToSet(record[7].stringValue)),
     },
-    version: METADATA_V3_VERSION,
   };
 }
 
@@ -498,7 +497,7 @@ async function updateEventItem(itemsMap: Map<string, any>, key: string, record: 
   };
   item.month = await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap);
   item.updateTimestamp = Date.now();
-  item.version = METADATA_V3_VERSION;
+  item.prefix = addVersionToPrefix(record[2].stringValue);
 }
 
 async function createEventItem(record: any, itemsMap: Map<string, any>, markedLatestMonthMap: Map<string, any>) {
@@ -506,7 +505,7 @@ async function createEventItem(record: any, itemsMap: Map<string, any>, markedLa
     id: record[0].stringValue,
     month: await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap),
     originMonth: record[1].stringValue,
-    prefix: record[2].stringValue,
+    prefix: addVersionToPrefix(record[2].stringValue),
     projectId: record[3].stringValue,
     appId: record[4].stringValue,
     name: record[7].stringValue,
@@ -526,7 +525,6 @@ async function createEventItem(record: any, itemsMap: Map<string, any>, markedLa
       sdkName: Array.from(convertToSet(record[10].stringValue)),
       associatedParameters: [],
     },
-    version: METADATA_V3_VERSION,
   };
 }
 
@@ -588,7 +586,7 @@ async function updateUserPropertiesItem(itemsMap: Map<string, any>, key: string,
   };
   item.month = await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap);
   item.updateTimestamp = Date.now();
-  item.version = METADATA_V3_VERSION;
+  item.prefix = addVersionToPrefix(record[2].stringValue);
 }
 
 async function createUserPropertiesItem(record: any, itemsMap: Map<string, any>, markedLatestMonthMap: Map<string, any>) {
@@ -596,7 +594,7 @@ async function createUserPropertiesItem(record: any, itemsMap: Map<string, any>,
     id: record[0].stringValue,
     month: await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap),
     originMonth: record[1].stringValue,
-    prefix: record[2].stringValue,
+    prefix: addVersionToPrefix(record[2].stringValue),
     projectId: record[3].stringValue,
     appId: record[4].stringValue,
     name: record[7].stringValue,
@@ -612,8 +610,14 @@ async function createUserPropertiesItem(record: any, itemsMap: Map<string, any>,
       hasData: true,
       valueEnum: convertValueEnumToDDBList(record[9].stringValue),
     },
-    version: METADATA_V3_VERSION,
   };
+}
+
+function addVersionToPrefix(prefix: string) {
+  if (!prefix.endsWith(`#${METADATA_V3_VERSION}`)) {
+    return `${prefix}#${METADATA_V3_VERSION}`;
+  }
+  return prefix;
 }
 
 
