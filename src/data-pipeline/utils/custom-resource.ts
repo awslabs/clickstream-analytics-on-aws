@@ -15,7 +15,7 @@
 import { join } from 'path';
 import { Arn, ArnFormat, Aws, CfnResource, CustomResource, Duration, Fn, Stack } from 'aws-cdk-lib';
 
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
@@ -187,7 +187,7 @@ export interface EMRServerlessApplicationProps {
 function createEMRServerlessApplicationLambda(
   scope: Construct,
   props: EMRServerlessApplicationProps,
-): SolutionNodejsFunction {
+): {fn: SolutionNodejsFunction; policy: Policy} {
 
   const ermAppArn = Arn.format(
     {
@@ -253,8 +253,9 @@ function createEMRServerlessApplicationLambda(
 
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
     rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('CDK'));
-  attachListTagsPolicyForFunction(scope, 'CreateEMRServerlessApplicationLambdaFn', fn);
-  return fn;
+  const policy = attachListTagsPolicyForFunction(scope, 'CreateEMRServerlessApplicationLambdaFn', fn);
+
+  return { fn, policy };
 }
 
 
@@ -263,7 +264,7 @@ export function createEMRServerlessApplicationCustomResource(
   props: EMRServerlessApplicationProps,
 ): CustomResource {
 
-  const fn = createEMRServerlessApplicationLambda(scope, props);
+  const { fn, policy } = createEMRServerlessApplicationLambda(scope, props);
 
   const provider = new Provider(
     scope,
@@ -287,5 +288,6 @@ export function createEMRServerlessApplicationCustomResource(
       architecture: props.architecture,
     },
   });
+  cr.node.addDependency(policy);
   return cr;
 }

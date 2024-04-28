@@ -1370,6 +1370,19 @@ test('Plugins nested stack has CopyAssetsCustomResource', () => {
   });
 });
 
+test('DependsOn of NestedStackCreateEMRServelsssApplicationCustomResource is set', () => {
+  const template = nestedTemplates[0];
+  const createEMRServerlessApplicationCustomResource = findFirstResourceByKeyPrefix(template,
+    'AWS::CloudFormation::CustomResource',
+    'NestedStackCreateEMRServelsssApplicationCustomResource');
+
+  expect(createEMRServerlessApplicationCustomResource.resource.DependsOn).toEqual(
+    [
+      'NestedStackCreateEMRServerlessApplicationLambdaFnlistTagsPolicyDFABCE42',
+    ],
+  );
+});
+
 test('Nested stack has CreateEMRServerlessApplicationCustomResource', () => {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
