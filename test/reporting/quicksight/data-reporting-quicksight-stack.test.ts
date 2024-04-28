@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME } from '@aws/clickstream-base-lib';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataReportingQuickSightStack } from '../../../src/data-reporting-quicksight-stack';
@@ -39,11 +39,11 @@ describe('DataReportingQuickSightStack parameter test', () => {
   });
 
   test('Has Redshift serverless data api role output', () => {
-    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN, {});
+    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, {});
   });
 
   test('Has Redshift serverless workgroup name', () => {
-    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME, {});
+    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS, {});
   });
 
   test('Should has Parameter quickSightUserParam', () => {
