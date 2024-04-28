@@ -189,19 +189,19 @@ export class StackActionStateMachine extends Construct {
 
     const endState = new Pass(this, 'EndState');
 
-    const wait15 = new Wait(this, 'Wait 15 Seconds', {
-      time: WaitTime.duration(Duration.seconds(15)),
+    const wait30 = new Wait(this, 'Wait 30 Seconds', {
+      time: WaitTime.duration(Duration.seconds(30)),
     });
 
     const endChoice = new Choice(this, 'End?')
       .when(Condition.stringEquals('$.Action', 'End'), endState)
-      .otherwise(wait15);
+      .otherwise(wait30);
 
     executeTask.next(endChoice);
-    wait15.next(describeStack);
+    wait30.next(describeStack);
 
     const progressChoice = new Choice(this, 'Stack in progress?')
-      .when(Condition.stringMatches('$.Result.StackStatus', '*_IN_PROGRESS'), wait15)
+      .when(Condition.stringMatches('$.Result.StackStatus', '*_IN_PROGRESS'), wait30)
       .otherwise(callbackTask);
 
     describeStack.next(progressChoice);

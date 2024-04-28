@@ -46,6 +46,7 @@ interface SfnStackCallback {
 }
 
 export const handler = async (event: any): Promise<any> => {
+  logger.debug('Event received', { event: event });
   try {
     const eventData = event.MapRun? event.Data: event;
     if (eventData.Type === 'Pass') {

@@ -32,6 +32,7 @@ export const describeStack = async (region: string, stackName: string) => {
     }
     return undefined;
   } catch (error) {
+    logger.warn('Describe AWS CloudFormation Stack Error', { error });
     return undefined;
   }
 };
@@ -55,6 +56,7 @@ export const getStacksDetailsByNames = async (region: string, stackNames: string
     }
     return stackDetails;
   } catch (error) {
+    logger.warn('Get AWS CloudFormation Stacks Details Error', { error });
     return [];
   }
 };
@@ -71,7 +73,7 @@ export const describeType = async (region: string, typeName: string) => {
     });
     return await cloudFormationClient.send(params);
   } catch (error) {
-    logger.error('Describe AWS Resource Types Error', { error });
+    logger.warn('Describe AWS Resource Types Error', { error });
     return undefined;
   }
 };

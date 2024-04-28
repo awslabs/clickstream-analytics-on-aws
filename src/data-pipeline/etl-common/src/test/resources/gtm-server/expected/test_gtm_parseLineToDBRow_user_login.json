@@ -47,8 +47,8 @@
   "first_touch_time_msec" : 1693281865635,
   "first_visit_date" : 1693281865635,
   "first_referrer" : null,
-  "first_traffic_source" : null,
-  "first_traffic_medium" : null,
+  "first_traffic_source" : "Direct",
+  "first_traffic_medium" : "Direct",
   "first_traffic_campaign" : "Direct",
   "first_traffic_content" : null,
   "first_traffic_term" : null,
@@ -56,7 +56,7 @@
   "first_traffic_clid_platform" : null,
   "first_traffic_clid" : null,
   "first_traffic_channel_group" : "Direct",
-  "first_traffic_category" : null,
+  "first_traffic_category" : "Direct",
   "first_app_install_source" : null,
   "process_info" : null
 }

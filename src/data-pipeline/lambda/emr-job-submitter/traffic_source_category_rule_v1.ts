@@ -948,7 +948,7 @@ export const CATEGORY_RULE = [
   },
   {
     url: 'google.com',
-    source: 'google',
+    source: 'Google',
     category: 'Search',
     params: [],
   },

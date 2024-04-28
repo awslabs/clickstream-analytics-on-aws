@@ -39,7 +39,7 @@
   "geo_city" : null,
   "geo_locale" : null,
   "traffic_source_source" : "www.example.com",
-  "traffic_source_medium" : null,
+  "traffic_source_medium" : "Referral",
   "traffic_source_campaign" : null,
   "traffic_source_content" : null,
   "traffic_source_term" : null,

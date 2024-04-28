@@ -70,17 +70,17 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 null, null, null);
 
         String expectedValue = "{\n" +
-                "      \"source\" : \"google\",\n" +
-                "      \"medium\" : \"cpc\",\n" +
-                "      \"campaign\" : \"shopping\",\n" +
-                "      \"content\" : \"content\",\n" +
-                "      \"term\" : null,\n" +
-                "      \"campaignId\" : \"shopping_id\",\n" +
-                "      \"clidPlatform\" : \"clidPlatform\",\n" +
-                "      \"clid\" : \"{\\\"type\\\":\\\"gclid\\\",\\\"value\\\":\\\"gcidxxxx\\\"}\",\n" +
-                "      \"channelGroup\" : \"Organic Shopping\",\n" +
-                "      \"category\" : \"Search\"\n" +
-                "    }";
+                "  \"source\" : \"google\",\n" +
+                "  \"medium\" : \"cpc\",\n" +
+                "  \"campaign\" : \"shopping\",\n" +
+                "  \"content\" : \"content\",\n" +
+                "  \"term\" : null,\n" +
+                "  \"campaignId\" : \"shopping_id\",\n" +
+                "  \"clidPlatform\" : \"clidPlatform\",\n" +
+                "  \"clid\" : \"{\\\"type\\\":\\\"gclid\\\",\\\"value\\\":\\\"gcidxxxx\\\"}\",\n" +
+                "  \"channelGroup\" : \"Organic Shopping\",\n" +
+                "  \"category\" : \"Search\"\n" +
+                "}";
         String value = prettyJson(Util.objectToJsonString(trafficSource));
 
         Assertions.assertEquals(prettyJson(expectedValue), value);
@@ -120,17 +120,17 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         CategoryTrafficSource trafficSource = parser.parse(url, null, null, null);
 
         String expectedValue = "{\n" +
-                "      \"source\" : null,\n" +
-                "      \"medium\" : null,\n" +
-                "      \"campaign\" : \"Direct\",\n" +
-                "      \"content\" : null,\n" +
-                "      \"term\" : null,\n" +
-                "      \"campaignId\" : null,\n" +
-                "      \"clidPlatform\" : null,\n" +
-                "      \"clid\" : null,\n" +
-                "      \"channelGroup\" : \"Direct\",\n" +
-                "      \"category\" : null\n" +
-                "    }";
+                "  \"source\" : \"Direct\",\n" +
+                "  \"medium\" : \"Direct\",\n" +
+                "  \"campaign\" : \"Direct\",\n" +
+                "  \"content\" : null,\n" +
+                "  \"term\" : null,\n" +
+                "  \"campaignId\" : null,\n" +
+                "  \"clidPlatform\" : null,\n" +
+                "  \"clid\" : null,\n" +
+                "  \"channelGroup\" : \"Direct\",\n" +
+                "  \"category\" : \"Direct\"\n" +
+                "}";
         String value = prettyJson(Util.objectToJsonString(trafficSource));
 
         Assertions.assertEquals(prettyJson(expectedValue), value);
@@ -143,17 +143,17 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", null);
         CategoryTrafficSource trafficSource = parser.parse("", "", "", "");
         String expectedValue = "{\n" +
-                "      \"source\" : null,\n" +
-                "      \"medium\" : null,\n" +
-                "      \"campaign\" : \"Direct\",\n" +
-                "      \"content\" : null,\n" +
-                "      \"term\" : null,\n" +
-                "      \"campaignId\" : null,\n" +
-                "      \"clidPlatform\" : null,\n" +
-                "      \"clid\" : null,\n" +
-                "      \"channelGroup\" : \"Direct\",\n" +
-                "      \"category\" : null\n" +
-                "    }";
+                "  \"source\" : \"Direct\",\n" +
+                "  \"medium\" : \"Direct\",\n" +
+                "  \"campaign\" : \"Direct\",\n" +
+                "  \"content\" : null,\n" +
+                "  \"term\" : null,\n" +
+                "  \"campaignId\" : null,\n" +
+                "  \"clidPlatform\" : null,\n" +
+                "  \"clid\" : null,\n" +
+                "  \"channelGroup\" : \"Direct\",\n" +
+                "  \"category\" : \"Direct\"\n" +
+                "}\n";
         String value = prettyJson(Util.objectToJsonString(trafficSource));
         Assertions.assertEquals(prettyJson(expectedValue), value);
     }
@@ -166,7 +166,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "https://google.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"google\",\n" +
-                "  \"medium\" : null,\n" +
+                "  \"medium\" : \"Organic Search\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : null,\n" +
@@ -188,7 +188,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 null, "https://video.google.com/search?q=flowers&q=football&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"Google Video\",\n" +
-                "  \"medium\" : null,\n" +
+                "  \"medium\" : \"Organic Search\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,football\",\n" +
@@ -216,7 +216,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
         String expectedValue = "{\n" +
                 "  \"source\" : \"Google Video\",\n" +
-                "  \"medium\" : null,\n" +
+                "  \"medium\" : \"Organic Search\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers2,football2\",\n" +
@@ -246,7 +246,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "https://search.imesh.com/search?q=flowers&si=foo&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"iMesh\",\n" +
-                "  \"medium\" : null,\n" +
+                "  \"medium\" : \"Organic Search\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,foo\",\n" +
@@ -269,7 +269,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "https://search.imesh.com/search?q=flowers&si=foo&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"iMesh\",\n" +
-                "  \"medium\" : null,\n" +
+                "  \"medium\" : \"Organic Search\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,foo\",\n" +

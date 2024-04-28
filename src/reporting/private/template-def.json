@@ -7930,6 +7930,9 @@
                                                                     "Visibility": "VISIBLE"
                                                                 }
                                                             },
+                                                            "DecimalPlacesConfiguration": {
+                                                                "DecimalPlaces": 4
+                                                            },
                                                             "NegativeValueConfiguration": {
                                                                 "DisplayMode": "NEGATIVE"
                                                             },

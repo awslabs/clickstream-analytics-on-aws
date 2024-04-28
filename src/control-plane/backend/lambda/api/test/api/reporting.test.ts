@@ -373,6 +373,7 @@ describe('reporting test', () => {
   it('funnel visual - publish', async () => {
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
+      ResourceStatus: 'CREATION_SUCCESSFUL',
     });
 
     quickSightMock.on(UpdateAnalysisCommand).resolves({
@@ -769,6 +770,7 @@ describe('reporting test', () => {
   it('event visual - publish', async () => {
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
+      ResourceStatus: 'UPDATE_SUCCESSFUL',
     });
 
     quickSightMock.on(UpdateAnalysisCommand).resolves({
@@ -930,6 +932,7 @@ describe('reporting test', () => {
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
       Name: 'dashboard-test',
+      ResourceStatus: 'UPDATE_SUCCESSFUL',
     });
 
     quickSightMock.on(UpdateAnalysisCommand).resolves({
@@ -1019,6 +1022,7 @@ describe('reporting test', () => {
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
       Name: 'dashboard-test',
+      ResourceStatus: 'UPDATE_SUCCESSFUL',
     });
 
     quickSightMock.on(UpdateAnalysisCommand).resolves({
@@ -1373,6 +1377,7 @@ describe('reporting test', () => {
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
       Name: 'dashboard-test',
+      ResourceStatus: 'UPDATE_SUCCESSFUL',
     });
 
     quickSightMock.on(UpdateAnalysisCommand).resolves({
@@ -1600,7 +1605,7 @@ describe('reporting test', () => {
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(1);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 1);
-    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 2);
     expect(quickSightMock).toHaveReceivedCommandTimes(UpdateAnalysisCommand, 0);
     expect(quickSightMock).toHaveReceivedCommandTimes(UpdateDashboardCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(UpdateDashboardPublishedVersionCommand, 1);
@@ -3445,6 +3450,7 @@ describe('reporting test', () => {
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
       Name: 'dashboard-test',
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
     });
 
     quickSightMock.on(UpdateAnalysisCommand).resolves({
@@ -3640,6 +3646,7 @@ describe('reporting test', () => {
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
       Name: 'dashboard-test',
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
     });
 
     quickSightMock.on(UpdateAnalysisCommand).resolves({

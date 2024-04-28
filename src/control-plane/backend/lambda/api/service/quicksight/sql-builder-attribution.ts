@@ -492,8 +492,8 @@ function getCustomTouchPointNamesSql(params: AttributionSQLParameters) {
     touchPointNamesSql = touchPointNamesSql.concat(`
       ${index !== 0 ? 'union all' : ''} 
       select 
-        '${index+1}_${eventAndCondition.eventName}' as origin_name
-        ,'${name}' as custom_touch_point_name
+        '${index+1}_${eventAndCondition.eventName}'::varchar as origin_name
+        ,'${name}'::varchar as custom_touch_point_name
     `);
   }
 

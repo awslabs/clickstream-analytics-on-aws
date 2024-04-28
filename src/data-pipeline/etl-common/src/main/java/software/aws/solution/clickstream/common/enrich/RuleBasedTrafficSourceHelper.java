@@ -167,6 +167,58 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         return list != null && !list.isEmpty() ? list.get(0) : null;
     }
 
+    private static boolean isEmpty(final TrafficSourceUtm trafficSourceUtm) {
+        TrafficSourceUtm trafficSourceUtmInput = normEmptyInTrafficSourceUtm(trafficSourceUtm);
+        return isEmpty(trafficSourceUtmInput.getSource())
+                && isEmpty(trafficSourceUtmInput.getMedium())
+                && isEmpty(trafficSourceUtmInput.getCampaign())
+                && isEmpty(trafficSourceUtmInput.getContent())
+                && isEmpty(trafficSourceUtmInput.getTerm())
+                && isEmpty(trafficSourceUtmInput.getCampaignId())
+                && isEmpty(trafficSourceUtmInput.getClidPlatform())
+                && isEmpty(trafficSourceUtmInput.getClid());
+    }
+
+    private static boolean isEmpty(final String v, final String emtpyValue) {
+        return v == null || v.isEmpty() || v.equalsIgnoreCase(emtpyValue);
+    }
+
+    private static boolean isEmpty(final String v) {
+        return v == null || v.isEmpty();
+    }
+
+    private static TrafficSourceUtm normEmptyInTrafficSourceUtm(final TrafficSourceUtm trafficSourceUtmInput) {
+        TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
+        if (trafficSourceUtmInput == null) {
+            return trafficSourceUtm;
+        }
+
+        if (!isEmpty(trafficSourceUtmInput.getSource(), DIRECT)) {
+            trafficSourceUtm.setSource(trafficSourceUtmInput.getSource());
+        }
+        if (!isEmpty(trafficSourceUtmInput.getMedium(), DIRECT)) {
+            trafficSourceUtm.setMedium(trafficSourceUtmInput.getMedium());
+        }
+        if (!isEmpty(trafficSourceUtmInput.getCampaign(), DIRECT)) {
+            trafficSourceUtm.setCampaign(trafficSourceUtmInput.getCampaign());
+        }
+        if (!isEmpty(trafficSourceUtmInput.getContent())) {
+            trafficSourceUtm.setContent(trafficSourceUtmInput.getContent());
+        }
+        if (!isEmpty(trafficSourceUtmInput.getTerm())) {
+            trafficSourceUtm.setTerm(trafficSourceUtmInput.getTerm());
+        }
+        if (!isEmpty(trafficSourceUtmInput.getCampaignId())) {
+            trafficSourceUtm.setCampaignId(trafficSourceUtmInput.getCampaignId());
+        }
+        if (!isEmpty(trafficSourceUtmInput.getClidPlatform())) {
+            trafficSourceUtm.setClidPlatform(trafficSourceUtmInput.getClidPlatform());
+        }
+        if (!isEmpty(trafficSourceUtmInput.getClid(), "{}")) {
+            trafficSourceUtm.setClid(trafficSourceUtmInput.getClid());
+        }
+        return trafficSourceUtm;
+    }
 
     @Override
     public CategoryTrafficSource parse(final String pageUrl, final String pageReferrer, final String latestReferrer, final String latestReferrerHost) {
@@ -175,7 +227,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
         if (isEmpty(pageUrl) && isEmpty(pageReferrer) && isEmpty(latestReferrer)) {
             trafficSourceUtm.setCampaign(DIRECT);
-            return new CategoryTrafficSource(trafficSourceUtm, null, DIRECT);
+            return postCheck(new CategoryTrafficSource(trafficSourceUtm, null, null));
         }
         if (pageUrl != null && !pageUrl.isEmpty()) {
             trafficSourceUtm = getUtmSourceFromUrl(pageUrl);
@@ -184,8 +236,6 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         return parse(trafficSourceUtm, pageReferrer, latestReferrer, latestReferrerHost);
 
     }
-
-
 
     private TrafficSourceUtm getUtmSourceFromUrl(final String urlIput) {
         TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
@@ -237,7 +287,6 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         }
         return trafficSourceUtm;
     }
-
 
     public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String theReferrer, final String theReferrerHost) {
         log.debug("trafficSourceUtmInput: {}, theReferrer: {}, theReferrerHost: {}", trafficSourceUtmInput, theReferrer, theReferrerHost);
@@ -291,17 +340,17 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
         if (isEmpty(trafficSourceUtmInput) && isEmpty(pageReferrer) && isEmpty(latestReferrer)) {
             trafficSourceUtmInput.setCampaign(DIRECT);
-            return new CategoryTrafficSource(trafficSourceUtmInput, null, DIRECT);
+            return postCheck(new CategoryTrafficSource(trafficSourceUtmInput, null, null));
         }
 
         TrafficSourceUtm trafficSourceUtm = normEmptyInTrafficSourceUtm(trafficSourceUtmInput);
 
         if (trafficSourceUtm.getSource() == null) {
-            trafficSourceUtm = getUtmSourceFromUrl(pageReferrer);
+            trafficSourceUtm = getUtmSourceFromUrl(latestReferrer);
         }
 
         if (trafficSourceUtm.getSource() == null) {
-            trafficSourceUtm = getUtmSourceFromUrl(latestReferrer);
+            trafficSourceUtm = getUtmSourceFromUrl(pageReferrer);
         }
 
         String theReferrer = null;
@@ -311,15 +360,18 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (latestReferrer != null && !latestReferrer.isEmpty()) {
             theReferrer = latestReferrer;
             theReferrerHost = latestReferrerHost;
-        }
-        categoryTrafficSource = parse(trafficSourceUtm, theReferrer, theReferrerHost);
-
-        if (categoryTrafficSource.getSource() == null && pageReferrer != null && !pageReferrer.isEmpty()) {
+            categoryTrafficSource = parse(trafficSourceUtm, theReferrer, theReferrerHost);
+        } else if (pageReferrer != null && !pageReferrer.isEmpty()) {
             theReferrer = pageReferrer;
             theReferrerHost = parseUrl(theReferrer).getHostName();
             categoryTrafficSource = parse(trafficSourceUtm, theReferrer, theReferrerHost);
+        } else {
+            categoryTrafficSource = parse(trafficSourceUtm, null, null);
         }
+        return postCheck(categoryTrafficSource);
+    }
 
+    private static CategoryTrafficSource postCheck(CategoryTrafficSource categoryTrafficSource) {
         if (categoryTrafficSource.getSource() != null) {
             if (categoryTrafficSource.getCategory() == null) {
                 categoryTrafficSource.setCategory(CategoryListEvaluator.UNASSIGNED);
@@ -329,59 +381,16 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             }
         }
 
+        if (categoryTrafficSource.getSource() == null) {
+            categoryTrafficSource.setSource(DIRECT);
+            categoryTrafficSource.setCategory(DIRECT);
+            categoryTrafficSource.setChannelGroup(DIRECT);
+        }
+
+        if (categoryTrafficSource.getMedium() == null) {
+            categoryTrafficSource.setMedium(categoryTrafficSource.getChannelGroup());
+        }
         return categoryTrafficSource;
-    }
-
-    private static boolean isEmpty(final TrafficSourceUtm trafficSourceUtm) {
-        TrafficSourceUtm trafficSourceUtmInput = normEmptyInTrafficSourceUtm(trafficSourceUtm);
-        return isEmpty(trafficSourceUtmInput.getSource())
-                && isEmpty(trafficSourceUtmInput.getMedium())
-                && isEmpty(trafficSourceUtmInput.getCampaign())
-                && isEmpty(trafficSourceUtmInput.getContent())
-                && isEmpty(trafficSourceUtmInput.getTerm())
-                && isEmpty(trafficSourceUtmInput.getCampaignId())
-                && isEmpty(trafficSourceUtmInput.getClidPlatform())
-                && isEmpty(trafficSourceUtmInput.getClid());
-    }
-
-    private static boolean isEmpty(final String v, final String emtpyValue) {
-        return v == null || v.isEmpty() || v.equalsIgnoreCase(emtpyValue);
-    }
-    private static boolean isEmpty(final String v) {
-        return v == null || v.isEmpty();
-    }
-    private static TrafficSourceUtm normEmptyInTrafficSourceUtm(final TrafficSourceUtm trafficSourceUtmInput) {
-
-        TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
-        if (trafficSourceUtmInput == null) {
-            return trafficSourceUtm;
-        }
-
-        if (!isEmpty(trafficSourceUtmInput.getSource(), DIRECT)) {
-            trafficSourceUtm.setSource(trafficSourceUtmInput.getSource());
-        }
-        if (!isEmpty(trafficSourceUtmInput.getMedium())) {
-            trafficSourceUtm.setMedium(trafficSourceUtmInput.getMedium());
-        }
-        if (!isEmpty(trafficSourceUtmInput.getCampaign(), DIRECT)) {
-            trafficSourceUtm.setCampaign(trafficSourceUtmInput.getCampaign());
-        }
-        if (!isEmpty(trafficSourceUtmInput.getContent())) {
-            trafficSourceUtm.setContent(trafficSourceUtmInput.getContent());
-        }
-        if (!isEmpty(trafficSourceUtmInput.getTerm())) {
-            trafficSourceUtm.setTerm(trafficSourceUtmInput.getTerm());
-        }
-        if (!isEmpty(trafficSourceUtmInput.getCampaignId())) {
-            trafficSourceUtm.setCampaignId(trafficSourceUtmInput.getCampaignId());
-        }
-        if (!isEmpty(trafficSourceUtmInput.getClidPlatform())) {
-            trafficSourceUtm.setClidPlatform(trafficSourceUtmInput.getClidPlatform());
-        }
-        if (!isEmpty(trafficSourceUtmInput.getClid(), "{}")) {
-            trafficSourceUtm.setClid(trafficSourceUtmInput.getClid());
-        }
-        return trafficSourceUtm;
     }
 
 }

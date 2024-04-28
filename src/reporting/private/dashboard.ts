@@ -208,17 +208,19 @@ export async function waitForTemplateChangeCompleted(quickSight: QuickSight, acc
 export async function waitForDashboardChangeCompleted(quickSight: QuickSight, accountId: string, dashboardId: string) {
   for (const _i of Array(60).keys()) {
     try {
-      const analysis = await quickSight.describeDashboardDefinition({
+      const dashboard = await quickSight.describeDashboardDefinition({
         AwsAccountId: accountId,
         DashboardId: dashboardId,
       });
 
-      if ( analysis.ResourceStatus === ResourceStatus.UPDATE_SUCCESSFUL
-        || analysis.ResourceStatus === ResourceStatus.CREATION_SUCCESSFUL) {
+      logger.info(`dashboard status: ${dashboard.ResourceStatus}`);
+
+      if ( dashboard.ResourceStatus === ResourceStatus.UPDATE_SUCCESSFUL
+        || dashboard.ResourceStatus === ResourceStatus.CREATION_SUCCESSFUL) {
         return;
-      } else if ( analysis.ResourceStatus === ResourceStatus.UPDATE_FAILED ) {
+      } else if ( dashboard.ResourceStatus === ResourceStatus.UPDATE_FAILED ) {
         throw new Error('Dashboard update failed.');
-      } else if ( analysis.ResourceStatus === ResourceStatus.CREATION_FAILED ) {
+      } else if ( dashboard.ResourceStatus === ResourceStatus.CREATION_FAILED ) {
         throw new Error('Dashboard create failed.');
       }
       logger.info('DashboardUpdate: sleep 1 second');

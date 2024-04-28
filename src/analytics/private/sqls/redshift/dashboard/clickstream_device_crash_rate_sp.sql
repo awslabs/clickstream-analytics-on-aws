@@ -19,7 +19,7 @@ select
   platform,
   app_version,
   merged_user_id,
-  case when event_name = '_app_exeption' then merged_user_id else null end as crashed_user_id
+  case when event_name = '_app_exception' then merged_user_id else null end as crashed_user_id
 from {{database_name}}.{{schema}}.{{baseView}}
 where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
 group by 1, 2, 3, 4, 5

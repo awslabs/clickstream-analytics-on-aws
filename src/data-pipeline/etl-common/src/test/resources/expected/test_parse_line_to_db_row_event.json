@@ -39,7 +39,7 @@
   "geo_city" : null,
   "geo_locale" : "zh_CN_#Hans",
   "traffic_source_source" : "Baidu",
-  "traffic_source_medium" : null,
+  "traffic_source_medium" : "Organic Search",
   "traffic_source_campaign" : null,
   "traffic_source_content" : null,
   "traffic_source_term" : null,

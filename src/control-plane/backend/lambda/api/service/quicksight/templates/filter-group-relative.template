@@ -25,7 +25,7 @@
               {
                   "SheetId": "{{sheetId}}",
                   "Scope": "SELECTED_VISUALS",
-                  "VisualIds": [{{{visualIds}}}]
+                  "VisualIds": []
               }
           ]
       }

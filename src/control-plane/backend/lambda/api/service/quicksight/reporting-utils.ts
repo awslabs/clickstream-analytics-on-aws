@@ -208,7 +208,6 @@ export type MustacheRetentionAnalysisType = MustacheBaseType & {
 }
 
 export type MustacheFilterGroupType = {
-  visualIds: string;
   dataSetIdentifier: string;
   sheetId: string;
   filterGroupId: string;
@@ -216,7 +215,6 @@ export type MustacheFilterGroupType = {
 }
 
 export type MustacheRelativeDateFilterGroupType = {
-  visualIds: string;
   dataSetIdentifier: string;
   sheetId: string;
   filterGroupId: string;
@@ -816,7 +814,6 @@ export async function getVisualRelatedDefs(props: VisualRelatedDefProps, locale:
 
     const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group.template'), 'utf8');
     const mustacheFilterGroupType: MustacheFilterGroupType = {
-      visualIds: `"${props.visualId}"`,
       sheetId: props.sheetId,
       dataSetIdentifier: props.viewName,
       filterGroupId: uuidv4(),
@@ -849,7 +846,6 @@ export async function getVisualRelatedDefs(props: VisualRelatedDefProps, locale:
 
     const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group-relative.template'), 'utf8');
     const mustacheRelativeDateFilterGroupType: MustacheRelativeDateFilterGroupType = {
-      visualIds: `"${props.visualId}"`,
       sheetId: props.sheetId,
       dataSetIdentifier: props.viewName,
       filterGroupId: uuidv4(),
