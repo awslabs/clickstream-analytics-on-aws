@@ -32,7 +32,7 @@
   "first_visit_date" : 1667877267895,
   "first_referrer" : "www.google.com",
   "first_traffic_source" : "Baidu",
-  "first_traffic_medium" : null,
+  "first_traffic_medium" : "Organic Search",
   "first_traffic_campaign" : null,
   "first_traffic_content" : null,
   "first_traffic_term" : null,

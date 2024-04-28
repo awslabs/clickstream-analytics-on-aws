@@ -20,6 +20,8 @@ import software.aws.solution.clickstream.common.Util;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class CategoryListEvaluatorTest extends BaseTest {
 
@@ -151,6 +153,36 @@ public class CategoryListEvaluatorTest extends BaseTest {
         Assertions.assertThrows(FileNotFoundException.class, ()  -> {
             CategoryListEvaluator.fromJsonFile("_not_exist_file.json");} );
 
+    }
+
+    @Test
+    void testGetCandidateUrls() {
+        //  ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.ts.rule.CategoryListEvaluatorTest.testGetCandidateUrls
+        String url = "https://www.google.com.hk/search?q=hello&query=world";
+        List<String> urls = CategoryListEvaluator.getCandidateUrls(url, "www.google.com", "/search");
+        List<String> expectedStrList = Arrays.asList(
+        "www.google.com.hk/search?q=hello&query=world",
+        "www.google.com/search",
+        "google.com/search",
+        "www.google.com",
+        "google.com"
+        );
+        Assertions.assertEquals(expectedStrList, urls);
+    }
+
+    @Test
+    void testGetCandidateUrls2() {
+        //  ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.ts.rule.CategoryListEvaluatorTest.testGetCandidateUrls2
+        String url = "https://www.googlex.com.abc/search?q=hello&query=world";
+        List<String> urls = CategoryListEvaluator.getCandidateUrls(url, "www.googlex.com.abc", "search");
+        List<String> expectedStrList = Arrays.asList(
+                "www.googlex.com.abc/search?q=hello&query=world",
+                "www.googlex.com.abc/search",
+                "googlex.com.abc/search",
+                "www.googlex.com.abc",
+                "googlex.com.abc"
+        );
+        Assertions.assertEquals(expectedStrList, urls);
     }
 
 }
