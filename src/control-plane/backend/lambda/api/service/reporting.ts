@@ -26,8 +26,8 @@ import {
   ExploreComputeMethod,
   sleep,
   SolutionVersion,
-  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN,
-  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
+  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
+  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
 } from '@aws/clickstream-base-lib';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
@@ -1319,11 +1319,13 @@ export class ReportingService {
         const dataApiRole = getStackOutputFromPipelineStatus(
           latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
           PipelineStackType.REPORTING,
-          OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN);
-        const workgroupName = getStackOutputFromPipelineStatus(
+          OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN);
+        const redshiftEndpoint = getStackOutputFromPipelineStatus(
           latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
           PipelineStackType.REPORTING,
-          OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
+          OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS);
+        logger.debug(`Data Api Role: ${dataApiRole}, Redshift Endpoint: ${redshiftEndpoint}`);
+        const workgroupName = redshiftEndpoint?.split('.')[0];
         if (!dataApiRole || !workgroupName) {
           logger.warn('Data Api Role or Workgroup Name not found');
           return res.status(201).json(new ApiSuccess('Data Api Role or Workgroup Name not found'));

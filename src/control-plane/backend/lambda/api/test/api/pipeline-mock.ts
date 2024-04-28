@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME } from '@aws/clickstream-base-lib';
+import { OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS } from '@aws/clickstream-base-lib';
 import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION } from './ddb-mock';
@@ -1005,12 +1005,12 @@ export const BASE_STATUS = {
           OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
         },
         {
-          OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_DATA_API_ROLE_ARN,
+          OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
           OutputValue: 'arn:aws:iam::111122223333:role/RedshiftDataApiRole',
         },
         {
-          OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-          OutputValue: 'clickstream_workgroup',
+          OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
+          OutputValue: 'redshift-cluster-1.cjvqjvqjvqjv.ap-southeast-1.redshift.amazonaws.com',
         },
       ],
     },
