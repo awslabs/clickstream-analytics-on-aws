@@ -12,7 +12,6 @@
  */
 
 // Imports
-const { logger } = require('@aws/clickstream-base-lib');
 const fs = require('fs');
 const _regex = /[\w]*AssetParameters/g; //this regular express also takes into account lambda functions defined in nested stacks
 
@@ -190,17 +189,9 @@ fs.readdirSync(global_s3_assets).forEach(file => {
     rules.CheckBootstrapVersion = undefined
   }
 
-
-  // Output modified template file
-  let output_template;
   //minification reporting stack
-  logger.info(`Processing file: ${file}`);
-  if(file.includes('reporting-quicksight-stack')){
-    logger.info(`Processing quicksight stack: ${file}`);
-    output_template = JSON.stringify(template, null);
-  } else {
-    output_template = JSON.stringify(template, null, 2);
-  }
+  const indent = file.includes('reporting-quicksight-stack') ? undefined : 1;
+  const output_template = JSON.stringify(template, null, indent);
   
   fs.writeFileSync(`${global_s3_assets}/${file}`, output_template);
 });
