@@ -26,11 +26,8 @@ import {
   ExploreComputeMethod,
   sleep,
   SolutionVersion,
-  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
-  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
 } from '@aws/clickstream-base-lib';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
-import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
 import { PipelineServ } from './pipeline';
 import { DataSetProps, waitForDashboardChangeCompleted } from './quicksight/dashboard-ln';
@@ -68,14 +65,13 @@ import {
   getTimezoneByAppId,
   isValidGroupingCondition,
   getQuickSightDataType,
+  warmupRedshift,
 } from './quicksight/reporting-utils';
-import { EVENT_USER_VIEW, EventAndCondition, EventComputeMethodsProps, ExploreAnalyticsType, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
+import { EventAndCondition, EventComputeMethodsProps, ExploreAnalyticsType, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
 import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
-import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
 import { QuickSightUserArns, deleteExploreUser, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -1300,7 +1296,6 @@ export class ReportingService {
       logger.info('start to warm up reporting service', { request: req.body });
 
       const projectId = req.body.projectId;
-      const appId = req.body.appId;
 
       const latestPipeline = await pipelineServ.getPipelineByProjectId(projectId);
       if (!latestPipeline) {
@@ -1311,8 +1306,6 @@ export class ReportingService {
         return res.status(201).json(new ApiSuccess('Skip warm up'));
       }
 
-      const region = latestPipeline.region;
-
       //warmup principal
       await getClickstreamUserArn(
         SolutionVersion.Of(latestPipeline.templateVersion ?? FULL_SOLUTION_VERSION),
@@ -1320,59 +1313,8 @@ export class ReportingService {
       );
 
       //warm up redshift serverless
-      const dataApiRole = getStackOutputFromPipelineStatus(
-        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-        PipelineStackType.REPORTING,
-        OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN);
-      const redshiftEndpoint = getStackOutputFromPipelineStatus(
-        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-        PipelineStackType.REPORTING,
-        OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS);
-      logger.debug(`Data Api Role: ${dataApiRole}, Redshift Endpoint: ${redshiftEndpoint}`);
-      const workgroupName = redshiftEndpoint?.split('.')[0];
-      if (!dataApiRole || !workgroupName) {
-        logger.warn('Data Api Role or Workgroup Name not found');
-        return res.status(201).json(new ApiSuccess('Data Api Role or Workgroup Name not found'));
-      }
-      const redshiftType = redshiftEndpoint?.split('.')[3];
-      if (redshiftType === 'redshift-serverless') {
-        const redshiftDataClient = sdkClient.RedshiftDataClient(
-          {
-            region: region,
-          },
-          dataApiRole,
-        );
-        const input = {
-          Sqls: [`select * from ${appId}.${EVENT_USER_VIEW} limit 1`],
-          WorkgroupName: workgroupName,
-          Database: projectId,
-          WithEvent: false,
-        };
+      await warmupRedshift(latestPipeline, req.body.appId);
 
-        const params = new BatchExecuteStatementCommand(input);
-        const executeResponse = await redshiftDataClient.send(params);
-
-        const checkParams = new DescribeStatementCommand({
-          Id: executeResponse.Id,
-        });
-        let resp = await redshiftDataClient.send(checkParams);
-        logger.debug(`Get statement status: ${resp.Status}`);
-        let count = 0;
-        while (resp.Status != StatusString.FINISHED && resp.Status != StatusString.FAILED && count < 60) {
-          await sleep(500);
-          count++;
-          resp = await redshiftDataClient.send(checkParams);
-          logger.debug(`Get statement status: ${resp.Status}`);
-        }
-        if (resp.Status == StatusString.FAILED) {
-          logger.warn('Warmup redshift serverless with error,', {
-            status: resp.Status,
-            response: resp,
-          });
-        }
-      }
-
-      logger.debug('end of warm up reporting service');
       return res.status(201).json(new ApiSuccess('OK'));
     } catch (error) {
       logger.warn(`Warmup redshift serverless with error: ${error}`);
