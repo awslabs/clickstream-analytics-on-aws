@@ -634,7 +634,7 @@ export function createStackParameters(scope: Construct): {
     default: 365,
   });
 
-  const dataFreshnessInHourParam = Parameters.createDataFreshnessInHourParameter(scope);
+  const dataFreshnessInHourParam = Parameters.createDataFreshnessInHourParameter(scope, 24);
 
   const timezoneWithAppIdParam = new CfnParameter(scope, 'TimeZoneWithAppId', {
     description: 'The time zone with app id as json string',

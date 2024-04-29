@@ -699,10 +699,10 @@ export class Parameters {
     });
   }
 
-  public static createDataFreshnessInHourParameter(scope: Construct) {
+  public static createDataFreshnessInHourParameter(scope: Construct, hour: number = 72) {
     return new CfnParameter(scope, 'DataFreshnessInHour', {
-      description: 'Data Freshness in hour, default is 72 hours (3 days)',
-      default: 72,
+      description: `Data Freshness in hour, default is ${hour.toString()} hours`,
+      default: hour,
       type: 'Number',
     });
   }
