@@ -104,7 +104,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
     <div>
       <Modal
         onDismiss={() => {
-          closeModel();
+          if (!loadingCreate) {
+            closeModel();
+          }
         }}
         visible={visible}
         footer={
@@ -115,6 +117,7 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
                 onClick={() => {
                   closeModel();
                 }}
+                disabled={loadingCreate}
               >
                 {t('button.cancel')}
               </Button>

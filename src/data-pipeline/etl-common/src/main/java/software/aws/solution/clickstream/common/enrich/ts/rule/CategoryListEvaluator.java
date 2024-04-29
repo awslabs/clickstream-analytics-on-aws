@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static software.aws.solution.clickstream.common.Util.readResourceFile;
 import static software.aws.solution.clickstream.common.Util.readTextFile;
@@ -39,6 +41,8 @@ import static software.aws.solution.clickstream.common.Util.readTextFile;
 @Slf4j
 @Getter
 public final class CategoryListEvaluator {
+    public static  final  Pattern HOST_NAME_AND_CONNTRY_PATTERN = Pattern.compile("(.*\\.[a-z]{2,3})\\.[a-z]{2}");
+
     public static final String UNASSIGNED = "Unassigned";
     @Setter
     Map<String, CategoryItem> categoryMap;
@@ -144,15 +148,19 @@ public final class CategoryListEvaluator {
         return categoryAndTerms;
     }
 
-    private List<String> getCandidateUrls(final String theReferrerUrl, final String hostName, final String path) {
+   static List<String> getCandidateUrls(final String theReferrerUrl, final String hostName, final String pathInput) {
         List<String> candidateUrls = new ArrayList<>();
-
-        candidateUrls.add(theReferrerUrl);
-
         if (theReferrerUrl.contains("://")) {
             candidateUrls.add(theReferrerUrl.split("://")[1]);
+        } else {
+            candidateUrls.add(theReferrerUrl);
         }
-        boolean hasPath = path != null && !path.isEmpty() && !path.equals("/");
+        boolean hasPath = pathInput != null && !pathInput.isEmpty() && !pathInput.equals("/");
+        String path = pathInput;
+
+        if (hasPath && !path.startsWith("/")){
+            path = "/" + path; // NOSONAR
+        }
         if (hasPath){
             String hostNameAndPath = hostName + path;
             candidateUrls.add(hostNameAndPath);
@@ -166,7 +174,19 @@ public final class CategoryListEvaluator {
                 candidateUrls.add(hostNameWithout3wAndPath);
             }
         }
-        return candidateUrls;
+        Matcher m = HOST_NAME_AND_CONNTRY_PATTERN.matcher(hostName);
+        if (m.matches()) {
+            candidateUrls.add(m.group(1));
+        }
+        if (hostName.startsWith("www.")) {
+            Matcher m2 = HOST_NAME_AND_CONNTRY_PATTERN.matcher(hostName.substring(4));
+            if (m2.matches()) {
+                candidateUrls.add(m2.group(1));
+            }
+        }
+        List<String> resultList = new ArrayList<>(new HashSet<>(candidateUrls));
+        resultList.sort((o1, o2) -> o2.length() - o1.length());
+        return resultList;
     }
 
 }

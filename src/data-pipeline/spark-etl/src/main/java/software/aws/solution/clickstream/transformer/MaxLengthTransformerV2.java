@@ -220,6 +220,10 @@ public class MaxLengthTransformerV2 {
     }
 
     public Dataset<Row> transform(final Dataset<Row> dataset, final List<ColumnsMaxLength> columnsMaxLengthList) {
+        if (System.getenv("DISABLE_MAX_LEN_CHECK") != null
+                && System.getenv("DISABLE_MAX_LEN_CHECK").equals("true")){
+            return dataset;
+        }
 
         UserDefinedFunction truncateWithMaxByteLengthUdf = udf(truncateWithMaxByteLength(), DataTypes.createStructType(
                 new StructField[]{

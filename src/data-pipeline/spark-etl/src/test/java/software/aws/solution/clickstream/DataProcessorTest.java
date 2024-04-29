@@ -47,6 +47,7 @@ public class DataProcessorTest extends BaseSparkTest{
         String nUserKeepDays = "10";
         String nItemKeepDays = "20";
         String configDirPath = Paths.get(getClass().getResource("/rule_config/").getPath()).toString();
+        String filterBotByUA = "true";
 
         DataProcessor.runWithSpark(
                 new String[] {
@@ -67,7 +68,8 @@ public class DataProcessorTest extends BaseSparkTest{
                         rePartitions,//String rePartitions = args[14];
                         nUserKeepDays, //String nUserKeepDays = args[15];
                         nItemKeepDays, //String nItemKeepDays = args[16];
-                        configDirPath
+                        configDirPath,
+                        filterBotByUA,
                 },
                 spark
         );

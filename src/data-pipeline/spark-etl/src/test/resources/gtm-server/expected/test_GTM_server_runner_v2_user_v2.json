@@ -6,6 +6,7 @@
   "first_traffic_campaign" : null,
   "first_traffic_category" : "Unassigned",
   "first_traffic_channel_group" : "Referral",
+  "first_traffic_medium" : "Referral",
   "first_traffic_source" : "www.example.com",
   "first_visit_date" : "2023-09-21",
   "process_info" : {
