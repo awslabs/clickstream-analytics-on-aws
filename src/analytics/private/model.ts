@@ -213,4 +213,16 @@ export type MustacheParamType = {
   user_bi?: string;
   baseView?: string;
   timezone?: string;
+  category_device: string;
+  category_geo: string;
+  category_traffic_source: string;
+  category_app_info: string;
+  category_event_outer: string;
+  category_screen_view: string;
+  category_page_view: string;
+  category_upgrade: string;
+  category_search: string;
+  category_outbound: string;
+  category_session: string;
+  category_sdk: string;
 }
