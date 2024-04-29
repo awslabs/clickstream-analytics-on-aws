@@ -69,8 +69,8 @@ public class SensorsDataTransformerV2Test extends BaseSparkTest {
         Assertions.assertEquals(0, itemCount);
         Assertions.assertEquals(0, sessionCount);
 
-        log.info( transformedDatasets.get(TableName.EVENT_V2).first().prettyJson());
-
+        String expectedJson = this.resourceFileAsString("/sensordata/sensors_should_transform_event.json");
+        Assertions.assertEquals(expectedJson, replaceDynData(transformedDatasets.get(TableName.EVENT_V2).first().prettyJson()));
 
     }
 

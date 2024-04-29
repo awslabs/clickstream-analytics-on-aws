@@ -39,14 +39,8 @@ public class SensorsEvent {
     @JsonProperty("type")
     private String type;
 
-    @JsonProperty("crc")
-    private String crc;
-
     @JsonProperty("distinct_id")
     private String distinctId;
-
-    @JsonProperty("original_id")
-    private String originalId;
 
     @JsonProperty("anonymous_id")
     private String anonymousId;
@@ -56,12 +50,6 @@ public class SensorsEvent {
 
     @JsonProperty("event")
     private String event;
-
-    @JsonProperty("project")
-    private String project;
-
-    @JsonProperty("time_free")
-    private boolean timeFree;
 
     @JsonProperty("lib")
     private Lib lib;
