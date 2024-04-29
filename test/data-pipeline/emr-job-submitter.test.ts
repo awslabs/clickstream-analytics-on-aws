@@ -125,6 +125,7 @@ process.env.JOB_NAME = 'test-job-name-123456';
 process.env.SAVE_INFO_TO_WAREHOUSE = '1';
 process.env.USER_KEEP_DAYS = '10';
 process.env.ITEM_KEEP_DAYS = '12';
+process.env.FILTER_BOT_EVENT = 'true';
 
 describe('Data Process -- EMR Serverless job submitter function', () => {
 
@@ -207,6 +208,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             '10',
             '12',
             's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/rules/',
+            'true',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
@@ -289,6 +291,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             '10',
             '12',
             's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/rules/',
+            'true',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \

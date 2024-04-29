@@ -26,6 +26,7 @@ import software.aws.solution.clickstream.util.*;
 
 import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringStringMap;
+import static software.aws.solution.clickstream.util.ContextUtil.FILTER_BOT_BY_UA_PROP;
 import static software.aws.solution.clickstream.util.DatasetUtil.UA_ENRICH;
 import static software.aws.solution.clickstream.ETLRunner.*;
 import static software.aws.solution.clickstream.model.ModelV2.STR_TO_STR_MAP_TYPE;
@@ -78,7 +79,15 @@ public class UAEnrichmentV2 {
         if (ContextUtil.isDebugLocal()) {
             enrichedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/enrich-ua-v2-Dataset/");
         }
-        return enrichedDataset;
+        Dataset<Row> enrichedDatasetFiltered = enrichedDataset;
+        String filterBotByUAStr = System.getProperty(FILTER_BOT_BY_UA_PROP);
+        if (Boolean.parseBoolean(filterBotByUAStr)) {
+            enrichedDatasetFiltered = enrichedDataset.filter(
+                    col(Constant.DEVICE_UA_DEVICE_CATEGORY).notEqual(UAEnrichHelper.BOT)
+            );
+            log.info("UA Enriched enrichedDatasetFiltered(BOT) count: {}", enrichedDatasetFiltered.count());
+        }
+        return enrichedDatasetFiltered;
     }
 
 }

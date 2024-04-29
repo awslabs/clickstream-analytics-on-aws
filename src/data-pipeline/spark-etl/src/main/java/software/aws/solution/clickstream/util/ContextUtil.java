@@ -41,6 +41,8 @@ public final class ContextUtil {
 
     public static final String ITEM_KEEP_DAYS_PROP =  "keep.item.days";
 
+    public static final String FILTER_BOT_BY_UA_PROP = "filter.bot.by.ua";
+
     private static Dataset<Row> datasetCached;
 
     private ContextUtil() {
@@ -73,6 +75,7 @@ public final class ContextUtil {
         System.setProperty(SAVE_INFO_TO_WAREHOUSE_PROP, String.valueOf(config.isSaveInfoToWarehouse()));
         System.setProperty(USER_KEEP_DAYS_PROP, String.valueOf(config.getUserKeepDays()));
         System.setProperty(ITEM_KEEP_DAYS_PROP, String.valueOf(config.getItemKeepDays()));
+        System.setProperty(FILTER_BOT_BY_UA_PROP, config.getFilterBotByUa());
     }
 
     public static void setJobAndWarehouseInfo(final String jobDataDir) {

@@ -19,6 +19,7 @@ import software.aws.solution.clickstream.common.Constant;
 import java.io.*;
 
 import static java.util.Objects.requireNonNull;
+import static software.aws.solution.clickstream.util.ContextUtil.FILTER_BOT_BY_UA_PROP;
 
 public class UAEnrichmentV2Test extends BaseSparkTest {
     UAEnrichmentV2 converter = new UAEnrichmentV2();
@@ -40,6 +41,18 @@ public class UAEnrichmentV2Test extends BaseSparkTest {
                 Constant.DEVICE_UA_DEVICE_CATEGORY,
                 Constant.DEVICE_UA
         ).first().prettyJson());
+    }
+
+
+    @Test
+    void test_enrich_UA_filter_v2() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.UAEnrichmentV2Test.test_enrich_UA_filter_v2
+        System.setProperty(FILTER_BOT_BY_UA_PROP, "true");
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/event_v2/transformed_data_event_bot_v2.json")).getPath());
+        Dataset<Row> outDataset = converter.transform(dataset);
+
+        Assertions.assertEquals(0, outDataset.count());
     }
 
 }
