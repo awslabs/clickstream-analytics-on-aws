@@ -50,6 +50,7 @@ interface Props {
   readonly outputFormat: 'json' | 'parquet';
   readonly userKeepDays: number;
   readonly itemKeepDays: number;
+  readonly filterBotEvent: 'true' | 'false';
 }
 
 const functionSettings = {
@@ -175,6 +176,7 @@ export class LambdaUtil {
         OUTPUT_FORMAT: this.props.outputFormat,
         USER_KEEP_DAYS: this.props.userKeepDays + '',
         ITEM_KEEP_DAYS: this.props.itemKeepDays + '',
+        FILTER_BOT_EVENT: this.props.filterBotEvent,
       },
       ...functionSettings,
       memorySize: 1024,

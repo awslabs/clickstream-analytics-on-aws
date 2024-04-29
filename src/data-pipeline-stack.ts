@@ -75,6 +75,7 @@ export class DataPipelineStack extends Stack {
         userKeepDaysParam,
         itemKeepDaysParam,
         emrApplicationArchitectureParam,
+        filterBotEventParam,
       },
     } = createStackParameters(this);
 
@@ -156,6 +157,7 @@ export class DataPipelineStack extends Stack {
       userKeepDays: userKeepDaysParam.valueAsNumber,
       itemKeepDays: itemKeepDaysParam.valueAsNumber,
       emrApplicationArchitecture: emrApplicationArchitectureParam.valueAsString as EmrApplicationArchitectureType,
+      filterBotEvent: filterBotEventParam.valueAsString as 'true' | 'false',
     });
 
     (dataPipelineStackWithCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withCustomPluginsCondition;
@@ -212,6 +214,7 @@ export class DataPipelineStack extends Stack {
       userKeepDays: userKeepDaysParam.valueAsNumber,
       itemKeepDays: itemKeepDaysParam.valueAsNumber,
       emrApplicationArchitecture: emrApplicationArchitectureParam.valueAsString as EmrApplicationArchitectureType,
+      filterBotEvent: filterBotEventParam.valueAsString as 'true' | 'false',
     });
 
     (dataPipelineStackWithoutCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withoutCustomPluginsCondition;
