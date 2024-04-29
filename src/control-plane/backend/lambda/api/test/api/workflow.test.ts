@@ -2946,7 +2946,7 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
-                Next: 'DataModeling',
+                Next: 'DataModelingRedshift',
                 Type: 'Pass',
               },
               Reporting: {
@@ -2966,7 +2966,7 @@ describe('Workflow test', () => {
                 },
                 End: true,
               },
-              DataModeling: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -3083,7 +3083,7 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
-                Next: 'DataModeling',
+                Next: 'DataModelingRedshift',
                 Type: 'Pass',
               },
               Reporting: {
@@ -3103,7 +3103,7 @@ describe('Workflow test', () => {
                 },
                 End: true,
               },
-              DataModeling: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -3221,7 +3221,7 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
-                Next: 'DataModeling',
+                Next: 'DataModelingRedshift',
                 Type: 'Pass',
               },
               Reporting: {
@@ -3241,7 +3241,7 @@ describe('Workflow test', () => {
                 },
                 End: true,
               },
-              DataModeling: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -3376,7 +3376,7 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
-                Next: 'DataModeling',
+                Next: 'DataModelingRedshift',
                 Type: 'Stack',
               },
               Reporting: {
@@ -3396,7 +3396,7 @@ describe('Workflow test', () => {
                 },
                 End: true,
               },
-              DataModeling: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -3521,7 +3521,7 @@ describe('Workflow test', () => {
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-pipeline-stack.template.json`,
                   },
                 },
-                Next: 'DataModeling',
+                Next: 'DataModelingRedshift',
                 Type: 'Stack',
               },
               Reporting: {
@@ -3541,7 +3541,7 @@ describe('Workflow test', () => {
                 },
                 End: true,
               },
-              DataModeling: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -3660,7 +3660,7 @@ describe('Workflow test', () => {
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-pipeline-stack.template.json`,
                   },
                 },
-                Next: 'DataModeling',
+                Next: 'DataModelingRedshift',
                 Type: 'Stack',
               },
               Reporting: {
@@ -3680,7 +3680,7 @@ describe('Workflow test', () => {
                 },
                 End: true,
               },
-              DataModeling: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -3810,9 +3810,9 @@ describe('Workflow test', () => {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
                   },
                 },
-                Next: 'DataModeling',
+                Next: 'DataModelingRedshift',
               },
-              DataModeling: {
+              DataModelingRedshift: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -4723,7 +4723,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'DataModeling',
             States: {
-              DataModeling: {
+              DataModelingRedshift: {
                 Type: WorkflowStateType.STACK,
                 Data: {
                   Input: {

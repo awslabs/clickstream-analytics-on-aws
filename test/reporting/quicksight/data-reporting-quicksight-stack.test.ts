@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '@aws/clickstream-base-lib';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataReportingQuickSightStack } from '../../../src/data-reporting-quicksight-stack';
@@ -31,6 +31,14 @@ describe('DataReportingQuickSightStack parameter test', () => {
 
   test('Has Dashboards output', () => {
     template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, {});
+  });
+
+  test('Has Redshift serverless data api role output', () => {
+    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, {});
+  });
+
+  test('Has Redshift serverless workgroup name', () => {
+    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS, {});
   });
 
   test('Should has Parameter quickSightUserParam', () => {
@@ -88,6 +96,12 @@ describe('DataReportingQuickSightStack parameter test', () => {
   test('Should has Parameter redshiftPortParam', () => {
     template.hasParameter('RedshiftPortParam', {
       Type: 'Number',
+    });
+  });
+
+  test('Should has Parameter redshiftIAMRoleParam', () => {
+    template.hasParameter('RedshiftIAMRoleParam', {
+      Type: 'String',
     });
   });
 
@@ -316,6 +330,34 @@ describe('DataReportingQuickSightStack parameter test', () => {
       Type: 'String',
     });
   });
+
+  test('RedshiftIAMRole allowedPattern', () => {
+    const param = template.toJSON().Parameters.RedshiftIAMRoleParam;
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'arn:aws:iam::000000000000:role/redshift-serverless-role',
+      'arn:aws-cn:iam::000000000000:role/redshift-serverless-role',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      'arn:aws:iam::xxxxxxxxxxxx:role/redshift-serverless-role',
+      'arn:aws:iam::1234:role/redshift-serverless-role',
+      'b1.test.com:abc',
+      'b-1.test.com:9092,b-2.test.com:9092',
+      'b1.test.com:9092',
+      'b_1.test.com',
+      '',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
 });
 
 describe('DataReportingQuickSightStack resource test', () => {
