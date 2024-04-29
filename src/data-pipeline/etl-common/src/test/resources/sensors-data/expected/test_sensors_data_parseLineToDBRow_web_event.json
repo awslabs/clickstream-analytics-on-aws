@@ -1,6 +1,6 @@
 {
   "event_timestamp" : 1690779794000,
-  "event_id" : "efffb319dd330d245578652724a0f0dd-0-9113946abd821d52-x",
+  "event_id" : "efffb319dd330d245578652724a0f0dd-0-9113946abd821d52",
   "event_time_msec" : 1690779794000,
   "event_name" : "$AppViewScreen",
   "event_value" : null,
@@ -27,8 +27,8 @@
   "device_ua" : null,
   "device_screen_width" : 1080,
   "device_screen_height" : 2400,
-  "device_viewport_width" : null,
-  "device_viewport_height" : null,
+  "device_viewport_width" : 0,
+  "device_viewport_height" : 0,
   "geo_continent" : null,
   "geo_sub_continent" : null,
   "geo_country" : null,
@@ -88,7 +88,7 @@
   "user_engagement_time_msec" : 0,
   "user_id" : "9113946abd821d52",
   "user_pseudo_id" : "9113946abd821d52",
-  "session_id" : null,
+  "session_id" : "tid--1231263868",
   "session_start_time_msec" : 1689819428756,
   "session_duration" : null,
   "session_number" : null,
@@ -100,8 +100,23 @@
   "app_exception_message" : null,
   "app_exception_stack" : null,
   "custom_parameters" : {
+    "_track_id" : "-1231263868",
+    "identities" : {
+      "$identity_android_id" : "9113946abd821d52",
+      "$identity_login_id" : null
+    },
+    "lib" : {
+      "$lib_method" : "autoTrack",
+      "$lib" : "Android",
+      "$lib_version" : "6.7.2",
+      "$app_version" : "3.0.3",
+      "$lib_detail" : "com.farmerbb.notepad.android.NotepadActivity######"
+    },
     "distinct_id" : "9113946abd821d52",
+    "anonymous_id" : "9113946abd821d52",
+    "_flush_time" : 1689819493590,
     "screen_resolution" : "1080x2400",
+    "type" : "track",
     "user_agent" : null,
     "properties" : {
       "$is_login_id" : false,
@@ -123,6 +138,8 @@
       "$app_version" : "3.0.3",
       "$screen_width" : 1080,
       "$screen_height" : 2400,
+      "viewport_height" : 0,
+      "viewport_width" : 0,
       "$carrier" : "T-Mobile",
       "$timezone_offset" : -480,
       "$app_id" : "com.farmerbb.notepad",
@@ -149,6 +166,11 @@
       "$browser" : null,
       "$browser_language" : null,
       "$browser_version" : null,
+      "$latest_traffic_source_type" : null,
+      "$latest_search_keyword" : null,
+      "$latest_referrer" : null,
+      "value" : null,
+      "currency" : null,
       "$lib_version" : "6.7.2"
     }
   },

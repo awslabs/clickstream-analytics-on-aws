@@ -87,6 +87,12 @@ public class Properties {
     @JsonProperty("$screen_height")
     private int screenHeight;
 
+    @JsonProperty("$viewport_height")
+    private int viewportWidth;
+
+    @JsonProperty("$viewport_width")
+    private int viewportHeight;
+
     @JsonProperty("$carrier")
     private String carrier;
 
@@ -164,6 +170,21 @@ public class Properties {
 
     @JsonProperty("$browser_version")
     private String browserVersion;
+
+    @JsonProperty("$latest_traffic_source_type")
+    private String latestTrafficSourceType;
+
+    @JsonProperty("$latest_search_keyword")
+    private String latestSearchKeyword;
+
+    @JsonProperty("$latest_referrer")
+    private String latestReferrer;
+
+    @JsonProperty("value")
+    private Double value;
+
+    @JsonProperty("currency")
+    private String currency;
 
     @JsonAnySetter
     public void setUnknownProperty(final String name, final Object value) {

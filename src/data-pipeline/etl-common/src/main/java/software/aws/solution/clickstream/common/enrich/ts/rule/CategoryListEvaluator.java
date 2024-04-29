@@ -101,6 +101,10 @@ public final class CategoryListEvaluator {
 
         UrlParseResult r = Util.parseUrl(theReferrerUrl);
         String hostName = r.getHostName();
+        if (hostName == null) {
+            log.warn("Invalid url: {}", theReferrerUrl);
+            return categoryAndTerms;
+        }
         String path = r.getPath();
         Map<String, List<String>> urlParams = r.getQueryParameters();
 
