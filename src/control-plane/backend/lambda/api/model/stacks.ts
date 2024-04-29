@@ -19,6 +19,7 @@ import {
   MULTI_EMAIL_PATTERN,
   MULTI_SECURITY_GROUP_PATTERN,
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
@@ -1266,14 +1267,6 @@ export class CDataModelingStack extends JSONObject {
   @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
     TimeZoneWithAppId?: string;
 
-  @JSONObject.optional(72)
-  @JSONObject.gt(0)
-  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:any) => {
-    return stack._pipeline?.dataProcessing?.dataFreshnessInHour ?? 72;
-  })
-  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
-    DataFreshnessInHour?: number;
-
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
@@ -1319,6 +1312,7 @@ export class CReportingStack extends JSONObject {
       'RedShiftDBSchemaParam',
       'QuickSightVpcConnectionSubnetParam',
       'RedshiftParameterKeyParam',
+      'RedshiftIAMRoleParam',
       'QuickSightPrincipalParam',
       'QuickSightOwnerPrincipalParam',
       'QuickSightTimezoneParam',
@@ -1438,6 +1432,20 @@ export class CReportingStack extends JSONObject {
     );;
   })
     RedshiftParameterKeyParam?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
+    if (!stack._pipeline) {
+      return '';
+    }
+    return getValueFromStackOutputSuffix(
+      stack._pipeline,
+      PipelineStackType.DATA_MODELING_REDSHIFT,
+      OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+    );;
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+    RedshiftIAMRoleParam?: string;
 
   @JSONObject.optional('')
   @JSONObject.custom( (stack :CReportingStack, _key:string, _value:any) => {

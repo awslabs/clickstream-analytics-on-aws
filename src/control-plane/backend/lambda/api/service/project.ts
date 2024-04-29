@@ -14,6 +14,7 @@
 import { DEFAULT_DASHBOARD_NAME, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, SolutionVersion, aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
+import { warmupRedshift } from './quicksight/reporting-utils';
 import { FULL_SOLUTION_VERSION } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -134,6 +135,9 @@ export class ProjectServ {
       if (!pipeline) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
+      //warm up redshift serverless
+      await warmupRedshift(pipeline, appId);
+
       const dashboard = await getDashboardDetail(pipeline.region, projectId, appId, dashboardId);
       if (!dashboard) {
         return res.status(404).json(new ApiFail('Dashboard not found.'));

@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, SolutionInfo } from '@aws/clickstream-base-lib';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   Aspects,
   Aws,
@@ -90,12 +90,12 @@ export class DataReportingQuickSightStack extends Stack {
     });
     interfaceCheckCR.node.addDependency(vPCConnectionResource);
 
-    const useTemplateArnCondition = new CfnCondition(
+    const useSpiceCondition = new CfnCondition(
       this,
-      'useTemplateArnCondition',
+      'useSpiceCondition',
       {
         expression:
-          Fn.conditionNot(Fn.conditionEquals(stackParams.quickSightTemplateArnParam.valueAsString, '')),
+          Fn.conditionEquals(stackParams.quickSightUseSpiceParam.valueAsString, 'yes'),
       },
     );
 
@@ -114,14 +114,8 @@ export class DataReportingQuickSightStack extends Stack {
         ],
       }],
 
-      sourceEntity: Fn.conditionIf(useTemplateArnCondition.logicalId, {
-        SourceTemplate: {
-          Arn: stackParams.quickSightTemplateArnParam.valueAsString,
-        },
-      }, Aws.NO_VALUE),
-
-      definition: Fn.conditionIf(useTemplateArnCondition.logicalId,
-        Aws.NO_VALUE,
+      definition: Fn.conditionIf(useSpiceCondition.logicalId,
+        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-spice.json'), 'utf-8')),
         JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json'), 'utf-8')),
       ),
     });
@@ -160,6 +154,7 @@ export class DataReportingQuickSightStack extends Stack {
       dataSourceArn: dataSource.attrArn,
       databaseName: stackParams.redshiftDBParam.valueAsString,
       timezone: stackParams.quickSightTimezoneParam.valueAsString,
+      useSpice: stackParams.quickSightUseSpiceParam.valueAsString,
       quickSightProps: {
         userName: stackParams.quickSightUserParam.valueAsString,
         namespace: stackParams.quickSightNamespaceParam.valueAsString,
@@ -190,6 +185,17 @@ export class DataReportingQuickSightStack extends Stack {
       description: 'The QuickSight data source arn',
       value: dataSource.attrArn,
     }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN);
+
+    new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, {
+      description: 'Redshift data api role arn.',
+      value: stackParams.redshiftIAMRoleParam.valueAsString,
+    }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN);
+
+    new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS, {
+      description: 'Redshift workgroup name.',
+      value: stackParams.redshiftEndpointParam.valueAsString,
+    }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS);
+
 
     addCfnNag(this);
 

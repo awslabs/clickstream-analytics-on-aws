@@ -839,10 +839,6 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterKey: 'TimeZoneWithAppId',
     ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
   },
-  {
-    ParameterKey: 'DataFreshnessInHour',
-    ParameterValue: '7',
-  },
 ];
 
 export const DATA_PROCESSING_NEW_SERVERLESS_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(
@@ -1002,6 +998,10 @@ const BASE_REPORTING_PARAMETERS = [
     ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserCredentialParameterName`,
   },
   {
+    ParameterKey: 'RedshiftIAMRoleParam.#',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.RedshiftDataApiRoleArn`,
+  },
+  {
     ParameterKey: 'QuickSightTimezoneParam',
     ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
   },
@@ -1068,6 +1068,10 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   {
     ParameterKey: 'RedshiftParameterKeyParam.#',
     ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserCredentialParameterName`,
+  },
+  {
+    ParameterKey: 'RedshiftIAMRoleParam.#',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.RedshiftDataApiRoleArn`,
   },
   {
     ParameterKey: 'QuickSightTimezoneParam',

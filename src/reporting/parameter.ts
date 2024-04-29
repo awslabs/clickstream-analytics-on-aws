@@ -20,6 +20,7 @@ import {
   SECURITY_GROUP_PATTERN,
   SUBNETS_PATTERN,
   QUICKSIGHT_USER_ARN_PATTERN,
+  IAM_ROLE_ARN_PATTERN,
 } from '@aws/clickstream-base-lib';
 import { CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -98,6 +99,17 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Dashboard Timezone Setting',
   };
 
+  const allowedValues = ['no', 'yes'];
+  const quickSightUseSpiceParam = new CfnParameter(scope, 'QuickSightUseSpiceParam', {
+    description: 'Use SPICE to import data set or not.',
+    type: 'String',
+    allowedValues: allowedValues,
+    default: allowedValues[0],
+  });
+  labels[quickSightUseSpiceParam.logicalId] = {
+    default: 'Enable QuickSight SPICE Import Mode',
+  };
+
   const redshiftDBParam = new CfnParameter(scope, 'RedshiftDBParam', {
     description: 'Redshift database name.',
     type: 'String',
@@ -142,6 +154,15 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Parameter Key Name',
   };
 
+  const redshiftIAMRoleParam = new CfnParameter(scope, 'RedshiftIAMRoleParam', {
+    description: 'The ARN of IAM role used by Redshift Data API.',
+    type: 'String',
+    allowedPattern: IAM_ROLE_ARN_PATTERN,
+  });
+  labels[redshiftIAMRoleParam.logicalId] = {
+    default: 'Redshift Data API Role ARN',
+  };
+
   groups.push({
     Label: { default: 'QuickSight Information' },
     Parameters: [
@@ -152,6 +173,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       quickSightOwnerPrincipalParam.logicalId,
       quickSightTemplateArnParam.logicalId,
       quickSightTimezoneParam.logicalId,
+      quickSightUseSpiceParam.logicalId,
     ],
   });
 
@@ -163,6 +185,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       redShiftDBSchemaParam.logicalId,
       redshiftPortParam.logicalId,
       redshiftParameterKeyParam.logicalId,
+      redshiftIAMRoleParam.logicalId,
     ],
   });
 
@@ -174,11 +197,13 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     quickSightOwnerPrincipalParam,
     quickSightTemplateArnParam,
     quickSightTimezoneParam,
+    quickSightUseSpiceParam,
     redshiftEndpointParam,
     redshiftDBParam,
     redShiftDBSchemaParam,
     redshiftPortParam,
     redshiftParameterKeyParam,
+    redshiftIAMRoleParam,
     paramLabels: labels,
     paramGroups: groups,
   };
