@@ -119,7 +119,7 @@ export class AttributionAnalysisService {
     datasetPropsArray.push({
       tableName: viewName,
       columns: attributionVisualColumns,
-      importMode: 'DIRECT_QUERY',
+      useSpice: 'no',
       customSql: visualSql,
       projectedColumns: [
         'Trigger Count',

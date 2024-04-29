@@ -83,7 +83,8 @@ function processTemplate(d, file_name) {
     updateECRImagesForLambda(template_file, template);
 
     // Output modified template file
-    const output_template = JSON.stringify(template, null, 2);
+    const indent = file_name.includes('reporting-quicksight-stack') ? undefined : 1;
+    const output_template = JSON.stringify(template, null, indent);
     const output_template_file = template_file;
 
     fs.writeFileSync(`${output_template_file}`, output_template);
