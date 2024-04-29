@@ -12,6 +12,8 @@
  */
 
 import { randomInt } from 'crypto';
+import Mustache from 'mustache';
+import { MUSTACHE_RENDER_CATEGORIES } from '../constant';
 
 export function isEmpty(a: any): boolean {
   if (a === '') return true; //Verify empty string
@@ -82,3 +84,8 @@ export function timezoneJsonArrayToDict(jsonArray: TimezoneInfo[]): { [key: stri
   return dict;
 }
 
+export function renderCategoryInSql(sqlTemplate: string) {
+  return Mustache.render(sqlTemplate, {
+    ...MUSTACHE_RENDER_CATEGORIES,
+  });
+}

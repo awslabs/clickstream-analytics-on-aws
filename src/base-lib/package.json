@@ -32,6 +32,7 @@
     "hpagent": "^1.2.0",
     "jsonwebtoken": "^9.0.0",
     "jwks-rsa": "^3.0.1",
+    "mustache": "^4.2.0",
     "node-cache": "^5.1.2",
     "node-fetch": "^2.6.4"
   },
