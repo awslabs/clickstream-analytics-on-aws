@@ -11,8 +11,6 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategoryFrontend } from './explore-types';
-
 /**
  * check mapping from doc https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
  */
@@ -491,18 +489,3 @@ export const DATA_SOURCE_OWNER_PERMISSION_ACTIONS = [
 export const DEFAULT_TIMEZONE = 'UTC';
 export const TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME = 'traffic_source_category_rule_v1.json';
 export const TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME = 'traffic_source_channel_rule_v1.json';
-
-export const MUSTACHE_RENDER_CATEGORIES = {
-  category_device: ConditionCategoryFrontend.DEVICE,
-  category_geo: ConditionCategoryFrontend.GEO,
-  category_traffic_source: ConditionCategoryFrontend.TRAFFIC_SOURCE,
-  category_app_info: ConditionCategoryFrontend.APP_INFO,
-  category_event_outer: ConditionCategoryFrontend.EVENT_OUTER,
-  category_screen_view: ConditionCategoryFrontend.SCREEN_VIEW,
-  category_page_view: ConditionCategoryFrontend.PAGE_VIEW,
-  category_upgrade: ConditionCategoryFrontend.UPGRADE,
-  category_search: ConditionCategoryFrontend.SEARCH,
-  category_outbound: ConditionCategoryFrontend.OUTBOUND,
-  category_session: ConditionCategoryFrontend.SESSION,
-  category_sdk: ConditionCategoryFrontend.SDK,
-};
