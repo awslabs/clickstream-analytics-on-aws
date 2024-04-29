@@ -3201,19 +3201,29 @@
 </thead>
 <tbody>
 <tr>
-<td>OIDCClientId</td>
+<td>OpenID Connector Client Id (<code>OIDCClientId</code>)</td>
 <td><code>&lt;输入&gt;</code></td>
 <td>OpenID Connect 客户端 ID。</td>
 </tr>
 <tr>
-<td>OIDCProvider</td>
+<td>OpenID Connector Issuer (<code>OIDCProvider</code>)</td>
 <td><code>&lt;输入&gt;</code></td>
 <td>OpenID Connect 提供程序发行方。发行方必须以 <code>https://</code> 开头</td>
 </tr>
 <tr>
-<td>Email</td>
+<td>Admin User Email (<code>Email</code>)</td>
 <td><code>&lt;需要输入&gt;</code></td>
-<td>指定管理员的电子邮件地址。</td>
+<td>指定管理员的电子邮件地址。此电子邮件地址将收到一个临时密码，用于访问 亚马逊云科技点击流分析 Web 控制台。您可以在启动解决方案后直接在配置的 Cognito 用户池中创建更多用户。</td>
+</tr>
+<tr>
+<td>IAM Role Prefix (<code>IamRolePrefix</code>)</td>
+<td><code>&lt;可选输入&gt;</code></td>
+<td>指定在解决方案中创建的 IAM 角色名称的前缀。</td>
+</tr>
+<tr>
+<td>IAM Role Boundary ARN (<code>IamRoleBoundaryArn</code>)</td>
+<td><code>&lt;可选输入&gt;</code></td>
+<td>指定在解决方案中创建的<a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html">IAM 角色的权限边界</a>。</td>
 </tr>
 </tbody>
 </table>
@@ -3245,19 +3255,19 @@
 </thead>
 <tbody>
 <tr>
-<td>Hosted Zone ID</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>选择 Amazon Route 53 的公共托管区域的 ID。</td>
+<td>Host Zone ID (<code>HostedZoneId</code>)</td>
+<td><code>&lt;需要输入&gt;</code></td>
+<td>选择 Amazon Route 53 的公共托管区域 ID。</td>
 </tr>
 <tr>
-<td>Hosted Zone Name</td>
-<td><code>&lt;输入&gt;</code></td>
+<td>Host Zone Name (<code>HostedZoneName</code>)</td>
+<td><code>&lt;需要输入&gt;</code></td>
 <td>公共托管区域的域名，例如 <code>example.com</code>。</td>
 </tr>
 <tr>
-<td>Record Name</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>控制台的子名称（在 R53 中称为记录名称）。例如，如果您想为控制台使用自定义域名 <code>clickstream.example.com</code>，则输入 <code>clickstream</code>。</td>
+<td>Record Name (<code>RecordName</code>)</td>
+<td><code>&lt;需要输入&gt;</code></td>
+<td>控制台的域名的子名称（在 R53 中称为记录名称）。例如，如果您要为控制台使用自定义域 <code>clickstream.example.com</code>，请输入 <code>clickstream</code>。</td>
 </tr>
 </tbody>
 </table>
@@ -3274,12 +3284,12 @@
 </thead>
 <tbody>
 <tr>
-<td>Domain</td>
+<td>Domain Name (<code>Domain</code>)</td>
 <td><code>&lt;输入&gt;</code></td>
-<td>Centralized Logging with OpenSearch 控制台的自定义域名。不要添加 <code>http(s)</code> 前缀。</td>
+<td>亚马逊云科技点击流分析控制台的自定义域名。不要添加 <code>http(s)</code> 前缀。</td>
 </tr>
 <tr>
-<td>IamCertificateID</td>
+<td>Certificate Id (<code>IamCertificateID</code>)</td>
 <td><code>&lt;输入&gt;</code></td>
 <td>在 IAM 中 SSL 证书的 ID。ID 由 21 个大写字母和数字组成。使用 <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html#list-server-certificates" target="_blank"><code>list-server-certificates</code></a> 命令检索 ID。</td>
 </tr>

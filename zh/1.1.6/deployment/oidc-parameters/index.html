@@ -10,13 +10,9 @@
       
       
       
-        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/deployment/within-vpc/">
+        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/deployment/oidc-parameters/">
       
       
-        <link rel="prev" href="../with-oidc/">
-      
-      
-        <link rel="next" href="../../getting-started/">
       
       
       <link rel="icon" href="../../images/favicon.ico">
@@ -24,7 +20,7 @@
     
     
       
-        <title>Vpc内部署 - 亚马逊云科技点击流分析解决方案</title>
+        <title>Oidc parameters - 亚马逊云科技点击流分析解决方案</title>
       
     
     
@@ -103,11 +99,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#_1" class="md-skip">
-          跳转至
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -142,7 +133,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Vpc内部署
+              Oidc parameters
             
           </span>
         </div>
@@ -290,20 +281,16 @@
         
   
   
-    
-  
   
     
     
       
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../../solution-overview/" class="md-tabs__link">
           
   
@@ -384,28 +371,23 @@
       
   
   
-    
   
   
-  
     
     
     
       
-        
-        
-      
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
         
           
-          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -416,7 +398,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             实施指南
@@ -821,8 +803,6 @@
                 
   
   
-    
-  
   
   
     
@@ -832,11 +812,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" >
         
           
           <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
@@ -850,7 +830,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_5">
             <span class="md-nav__icon md-icon"></span>
             部署
@@ -924,28 +904,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Vpc内部署
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../within-vpc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -954,78 +916,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="目录">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      目录
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      先决条件
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      部署概述
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#1-oidc" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 1. 创建OIDC客户端
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 2. 启动堆栈
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-oidc-url" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 3. 更新 OIDC 客户端的回调 URL
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-web" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 4. 启动 Web 控制台
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2791,68 +2681,6 @@
   
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      目录
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      先决条件
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      部署概述
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#1-oidc" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 1. 创建OIDC客户端
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 2. 启动堆栈
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-oidc-url" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 3. 更新 OIDC 客户端的回调 URL
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-web" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 4. 启动 Web 控制台
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -2869,147 +2697,13 @@
   
 
 
-  <h1>Vpc内部署</h1>
+  <h1>Oidc parameters</h1>
 
-<p>在VPC内部启动</p>
-<p><strong>部署时间</strong>: 大约30分钟</p>
-<h2 id="_1">先决条件</h2>
-<p>请查看所有的<a href="../../plan-deployment/cost/">考虑因素</a>并确保您在要部署解决方案的目标地区具备以下条件：</p>
-<ul>
-<li>至少一个Amazon VPC。</li>
-<li>至少两个跨越两个可用区的私有子网（带有NAT网关或实例）。</li>
-</ul>
-<h2 id="_2">部署概述</h2>
-<p>按照以下步骤在AWS上部署此解决方案。</p>
-<p><a href="#1-oidc">步骤 1. 创建OIDC客户端</a></p>
-<p><a href="#2">步骤 2. 启动堆栈</a></p>
-<p><a href="#3-oidc-url">步骤 3. 更新OIDC客户端的回调URL</a></p>
-<p><a href="#4-web">步骤 4. 启动Web控制台</a></p>
-<h2 id="1-oidc">步骤 1. 创建OIDC客户端</h2>
-<p>您可以使用现有的OpenID Connect（OIDC）提供者，或按照<a href="../with-oidc/#step-1-create-oidc-client">此指南</a>创建一个OIDC客户端。</p>
-<div class="admonition tip">
-<p class="admonition-title">提示</p>
-<p>默认情况下，此解决方案在VPC中部署控制台时不需要SSL证书。您必须使用OIDC客户端来支持具有<code>http</code>协议的回调URL。</p>
-</div>
-<h2 id="2">步骤 2. 启动堆栈</h2>
-<ol>
-<li>
-<p>登录AWS管理控制台，并使用下方按钮启动AWS CloudFormation模板。</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>在AWS控制台中启动</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>在AWS区域中启动</td>
-<td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://solutions-reference.s3.amazonaws.com/clickstream-analytics-on-aws/latest/private-exist-vpc-control-plane-stack.template.json" target="_blank"><img alt="启动堆栈" src="../../images/launch-stack.webp" /></a></td>
-</tr>
-<tr>
-<td>在AWS中国区域中启动</td>
-<td><a href="https://console.amazonaws.cn/cloudformation/home#/stacks/new?templateURL=https://aws-gcr-solutions.s3.cn-north-1.amazonaws.com.cn/clickstream-analytics-on-aws/latest/cn/private-exist-vpc-control-plane-stack.template.json" target="_blank"><img alt="启动堆栈" src="../../images/launch-stack.webp" /></a></td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p>登录控制台后，模板将在默认区域中启动。如果要在其他AWS区域中启动亚马逊云科技点击流分析解决方案，请使用控制台导航栏中的区域选择器。</p>
-</li>
-<li>在<strong>创建堆栈</strong>页面上，验证<strong>Amazon S3 URL</strong>文本框中显示的正确模板URL，并选择<strong>下一步</strong>。</li>
-<li>在<strong>指定堆栈详细信息</strong>页面上，为您的解决方案堆栈指定一个名称。有关命名字符限制的信息，请参阅<em>AWS Identity and Access Management用户指南</em>中的<a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html" target="_blank">IAM和AWS STS配额</a>部分。</li>
-<li>
-<p>在<strong>参数</strong>下，查看模板的参数，并根据需要进行修改。</p>
-<ul>
-<li>此解决方案使用以下参数：</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>默认值</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>VPC ID (<code>VpcId</code>)</td>
-<td><code>&lt;需要输入&gt;</code></td>
-<td>选择要部署解决方案的VPC。</td>
-</tr>
-<tr>
-<td>Private Subnet IDs (<code>PrivateSubnets</code>)</td>
-<td><code>&lt;需要输入&gt;</code></td>
-<td>选择要部署解决方案的子网。<strong>注意</strong>：您必须至少选择两个跨两个可用区的子网。</td>
-</tr>
-<tr>
-<td>OpenID Connector Client Id (<code>OIDCClientId</code>)</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>OpenID Connect 客户端 ID。</td>
-</tr>
-<tr>
-<td>OpenID Connector Issuer (<code>OIDCProvider</code>)</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>OpenID Connect 提供程序发行方。发行方必须以 <code>https://</code> 开头</td>
-</tr>
-<tr>
-<td>Admin User Email (<code>Email</code>)</td>
-<td><code>&lt;需要输入&gt;</code></td>
-<td>指定管理员的电子邮件地址。此电子邮件地址将收到一个临时密码，用于访问 亚马逊云科技点击流分析 Web 控制台。您可以在启动解决方案后直接在配置的 Cognito 用户池中创建更多用户。</td>
-</tr>
-<tr>
-<td>IAM Role Prefix (<code>IamRolePrefix</code>)</td>
-<td><code>&lt;可选输入&gt;</code></td>
-<td>指定在解决方案中创建的 IAM 角色名称的前缀。</td>
-</tr>
-<tr>
-<td>IAM Role Boundary ARN (<code>IamRoleBoundaryArn</code>)</td>
-<td><code>&lt;可选输入&gt;</code></td>
-<td>指定在解决方案中创建的<a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html">IAM 角色的权限边界</a>。</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p>选择<strong>下一步</strong>。</p>
-</li>
-<li>在<strong>配置堆栈选项</strong>页面上，选择<strong>下一步</strong>。</li>
-<li>在<strong>审查</strong>页面上，审查并确认设置。勾选确认模板将创建AWS Identity and Access Management (IAM)资源的框。</li>
-<li>选择<strong>创建堆栈</strong>以部署堆栈。</li>
-</ol>
-<p>您可以在AWS CloudFormation控制台中的<strong>状态</strong>列中查看堆栈的状态。大约10分钟后，您应该会收到<strong>CREATE_COMPLETE</strong>状态。</p>
-<h2 id="3-oidc-url">步骤 3. 更新 OIDC 客户端的回调 URL</h2>
-<ol>
-<li>登录 <a href="https://console.aws.amazon.com/cloudformation/" target="_blank">AWS CloudFormation 控制台</a>。</li>
-<li>选择解决方案的堆栈。</li>
-<li>选择 <strong>输出</strong> 选项卡。</li>
-<li>获取 <strong>ControlPlaneURL</strong> 作为端点。</li>
-<li>将回调 URL <code>${ControlPlaneURL}/signin</code> 更新或添加到您的 OIDC 客户端。<ol>
-<li>对于 Keycloak，请在 <strong>有效重定向 URL</strong> 中添加或更新 URL。</li>
-<li>对于 Authing.cn，请在 <strong>身份验证配置</strong> 的 <strong>登录回调 URL</strong> 中添加或更新 URL。</li>
-</ol>
-</li>
-</ol>
-<h2 id="4-web">步骤 4. 启动 Web 控制台</h2>
-<div class="admonition info">
-<p class="admonition-title">重要提示</p>
-<p>您的登录凭据由 OIDC 提供者管理。在登录到 亚马逊云科技点击流分析 控制台之前，请确保您已在 OIDC 提供者的用户池中创建了至少一个用户。</p>
-</div>
-<ol>
-<li>由于您将解决方案控制台部署在无公共访问权限的 VPC 中，您需要建立与由内部应用负载均衡器提供服务的解决方案控制台的网络连接。以下是一些选项供您参考。<ol>
-<li>（选项 1）使用跳板主机，例如 <a href="https://aws.amazon.com/solutions/implementations/linux-bastion/">Linux 跳板主机在 AWS 上</a> 解决方案。</li>
-<li>（选项 2）使用 <a href="https://aws.amazon.com/vpn/client-vpn/">AWS Client VPN</a> 或 <a href="https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html">AWS Site-to-Site VPN</a>。</li>
-<li>（选项 3）使用 <a href="https://aws.amazon.com/directconnect/">AWS Direct Connect</a>。</li>
-</ol>
-</li>
-<li>应用负载均衡器只允许来自指定安全组的流量通过，您可以从步骤 2 中部署的堆栈的名为 <strong>SourceSecurityGroup</strong> 的输出中找到安全组 ID。然后将安全组附加到您的跳板主机或其他访问解决方案控制台的源。</li>
-<li>在 Web 浏览器中使用先前分配的域名或生成的 <strong>ControlPlaneURL</strong>。</li>
-<li>选择 <strong>登录</strong>，并导航到 OIDC 提供者。</li>
-<li>输入登录凭据。根据您的 OIDC 提供者的策略，您可能会被要求更改首次登录的默认密码。</li>
-<li>完成验证后，系统将打开 亚马逊云科技点击流分析 Web 控制台。</li>
-</ol>
-<p>登录到 亚马逊云科技点击流分析 控制台后，您可以开始为您的应用程序<a href="../../getting-started/1.create-project/">创建项目</a>。</p>
+<p>| OpenID Connector Client Id (<code>OIDCClientId</code>) | <code>&lt;输入&gt;</code> | OpenID Connect 客户端 ID。 |
+| OpenID Connector Issuer (<code>OIDCProvider</code>) | <code>&lt;输入&gt;</code> | OpenID Connect 提供程序发行方。发行方必须以 <code>https://</code> 开头 |
+| Admin User Email (<code>Email</code>) | <code>&lt;需要输入&gt;</code> | 指定管理员的电子邮件地址。此电子邮件地址将收到一个临时密码，用于访问 亚马逊云科技点击流分析 Web 控制台。您可以在启动解决方案后直接在配置的 Cognito 用户池中创建更多用户。 |
+| IAM Role Prefix (<code>IamRolePrefix</code>) | <code>&lt;可选输入&gt;</code> | 指定在解决方案中创建的 IAM 角色名称的前缀。 |
+| IAM Role Boundary ARN (<code>IamRoleBoundaryArn</code>) | <code>&lt;可选输入&gt;</code> | 指定在解决方案中创建的<a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html">IAM 角色的权限边界</a>。 |</p>
 
 
 

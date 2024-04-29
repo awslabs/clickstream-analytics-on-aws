@@ -2875,9 +2875,19 @@
 </thead>
 <tbody>
 <tr>
-<td>Email</td>
+<td>Admin User Email (<code>Email</code>)</td>
 <td><code>&lt;需要输入&gt;</code></td>
 <td>指定管理员的电子邮件地址。此电子邮件地址将收到一个临时密码，用于访问 亚马逊云科技点击流分析 Web 控制台。您可以在启动解决方案后直接在配置的 Cognito 用户池中创建更多用户。</td>
+</tr>
+<tr>
+<td>IAM Role Prefix (<code>IamRolePrefix</code>)</td>
+<td><code>&lt;可选输入&gt;</code></td>
+<td>指定在解决方案中创建的 IAM 角色名称的前缀。</td>
+</tr>
+<tr>
+<td>IAM Role Boundary ARN (<code>IamRoleBoundaryArn</code>)</td>
+<td><code>&lt;可选输入&gt;</code></td>
+<td>指定在解决方案中创建的<a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html">IAM 角色的权限边界</a>。</td>
 </tr>
 </tbody>
 </table>
@@ -2909,17 +2919,17 @@
 </thead>
 <tbody>
 <tr>
-<td>托管区域 ID</td>
+<td>Host Zone ID (<code>HostedZoneId</code>)</td>
 <td><code>&lt;需要输入&gt;</code></td>
 <td>选择 Amazon Route 53 的公共托管区域 ID。</td>
 </tr>
 <tr>
-<td>托管区域名称</td>
+<td>Host Zone Name (<code>HostedZoneName</code>)</td>
 <td><code>&lt;需要输入&gt;</code></td>
 <td>公共托管区域的域名，例如 <code>example.com</code>。</td>
 </tr>
 <tr>
-<td>记录名称</td>
+<td>Record Name (<code>RecordName</code>)</td>
 <td><code>&lt;需要输入&gt;</code></td>
 <td>控制台的域名的子名称（在 R53 中称为记录名称）。例如，如果您要为控制台使用自定义域 <code>clickstream.example.com</code>，请输入 <code>clickstream</code>。</td>
 </tr>
