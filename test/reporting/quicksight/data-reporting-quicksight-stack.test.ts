@@ -343,7 +343,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
     const validValues = [
       'arn:aws:iam::000000000000:role/redshift-serverless-role',
       'arn:aws-cn:iam::000000000000:role/redshift-serverless-role',
-      '',
     ];
 
     for (const v of validValues) {
@@ -357,6 +356,7 @@ describe('DataReportingQuickSightStack parameter test', () => {
       'b-1.test.com:9092,b-2.test.com:9092',
       'b1.test.com:9092',
       'b_1.test.com',
+      '',
     ];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);

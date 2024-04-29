@@ -1306,6 +1306,11 @@ export class ReportingService {
       if (!latestPipeline) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
+
+      if (!latestPipeline.reporting?.quickSight?.accountName) {
+        return res.status(201).json(new ApiSuccess('Skip warm up'));
+      }
+
       const region = latestPipeline.region;
 
       //warmup principal
@@ -1315,21 +1320,22 @@ export class ReportingService {
       );
 
       //warm up redshift serverless
-      if (latestPipeline.dataModeling?.redshift?.newServerless) {
-        const dataApiRole = getStackOutputFromPipelineStatus(
-          latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-          PipelineStackType.REPORTING,
-          OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN);
-        const redshiftEndpoint = getStackOutputFromPipelineStatus(
-          latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-          PipelineStackType.REPORTING,
-          OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS);
-        logger.debug(`Data Api Role: ${dataApiRole}, Redshift Endpoint: ${redshiftEndpoint}`);
-        const workgroupName = redshiftEndpoint?.split('.')[0];
-        if (!dataApiRole || !workgroupName) {
-          logger.warn('Data Api Role or Workgroup Name not found');
-          return res.status(201).json(new ApiSuccess('Data Api Role or Workgroup Name not found'));
-        }
+      const dataApiRole = getStackOutputFromPipelineStatus(
+        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+        PipelineStackType.REPORTING,
+        OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN);
+      const redshiftEndpoint = getStackOutputFromPipelineStatus(
+        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+        PipelineStackType.REPORTING,
+        OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS);
+      logger.debug(`Data Api Role: ${dataApiRole}, Redshift Endpoint: ${redshiftEndpoint}`);
+      const workgroupName = redshiftEndpoint?.split('.')[0];
+      if (!dataApiRole || !workgroupName) {
+        logger.warn('Data Api Role or Workgroup Name not found');
+        return res.status(201).json(new ApiSuccess('Data Api Role or Workgroup Name not found'));
+      }
+      const redshiftType = redshiftEndpoint?.split('.')[3];
+      if (redshiftType === 'redshift-serverless') {
         const redshiftDataClient = sdkClient.RedshiftDataClient(
           {
             region: region,
@@ -1350,13 +1356,13 @@ export class ReportingService {
           Id: executeResponse.Id,
         });
         let resp = await redshiftDataClient.send(checkParams);
-        logger.info(`Get statement status: ${resp.Status}`);
+        logger.debug(`Get statement status: ${resp.Status}`);
         let count = 0;
         while (resp.Status != StatusString.FINISHED && resp.Status != StatusString.FAILED && count < 60) {
           await sleep(500);
           count++;
           resp = await redshiftDataClient.send(checkParams);
-          logger.info(`Get statement status: ${resp.Status}`);
+          logger.debug(`Get statement status: ${resp.Status}`);
         }
         if (resp.Status == StatusString.FAILED) {
           logger.warn('Warmup redshift serverless with error,', {
@@ -1366,7 +1372,7 @@ export class ReportingService {
         }
       }
 
-      logger.info('end of warm up reporting service');
+      logger.debug('end of warm up reporting service');
       return res.status(201).json(new ApiSuccess('OK'));
     } catch (error) {
       logger.warn(`Warmup redshift serverless with error: ${error}`);
