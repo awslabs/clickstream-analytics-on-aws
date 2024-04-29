@@ -651,6 +651,9 @@ importers:
       jwks-rsa:
         specifier: ^3.0.1
         version: 3.1.0
+      mustache:
+        specifier: ^4.2.0
+        version: 4.2.0
       node-cache:
         specifier: ^5.1.2
         version: 5.1.2
