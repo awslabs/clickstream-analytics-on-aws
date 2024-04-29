@@ -1108,8 +1108,14 @@ ul.menu-list li.checkbox-item {
 
 // Analytics Layout Style
 .cs-analytics-traffic-table {
+  [class^='awsui_wrapper_'] {
+    overflow: visible !important;
+  }
   [class^='awsui_body-cell'] {
     overflow: visible !important;
+  }
+  [class^='awsui_dropdown-content'] {
+    max-height: none !important;
   }
 }
 
