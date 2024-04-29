@@ -71,7 +71,8 @@ public class ETLRunnerBaseTest extends BaseSparkTest {
                         newArrayList(transformerClassNames.split(",")),
                         projectId, validAppIds,
                         Long.valueOf(dataFreshnessInHour),
-                        nDaysUser, nDaysItem, configDirPath.toString()
+                        nDaysUser, nDaysItem, configDirPath.toString(),
+                        "true"
                 ),
                 new ETLRunnerConfig.InputOutputConfig(
                         "false",

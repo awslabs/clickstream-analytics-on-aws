@@ -50,14 +50,18 @@ public final class DataProcessor {
      * args[12] means outputFormat.
      * args[13] means outputPartitions.
      * args[14] means rePartitions.
+     * args[15] means nUserKeepDays.
+     * args[16] means nItemKeepDays.
+     * args[17] means configRuleDir.
+     * args[18] means filterBotByUa.
      * @param args input arguments
      */
     public static void main(final String[] args) {
         runWithSpark(args, null);
     }
     public static void runWithSpark(final String[] args, final SparkSession sparkSession){
-        int argsLen = 17;
-        Preconditions.checkArgument(args.length == 18, "This job can only accept input argument with length " + argsLen);
+        int argsLen = 19;
+        Preconditions.checkArgument(args.length == argsLen, "This job can only accept input argument with length " + argsLen);
         String debug = args[0];
         String database = args[1];
         String sourceTable = args[2];
@@ -76,6 +80,7 @@ public final class DataProcessor {
         String nUserKeepDays = args[15];
         String nItemKeepDays = args[16];
         String configRuleDir = args[17];
+        String filterBotByUa = args[18];
 
         ETLRunnerConfig runnerConfig;
         runnerConfig = new ETLRunnerConfig(
@@ -86,7 +91,8 @@ public final class DataProcessor {
                         Long.valueOf(dataFreshnessInHour),
                         Integer.valueOf(nUserKeepDays),
                         Integer.valueOf(nItemKeepDays),
-                        configRuleDir
+                        configRuleDir,
+                        filterBotByUa
                         ),
                 new ETLRunnerConfig.InputOutputConfig(
                         debug,

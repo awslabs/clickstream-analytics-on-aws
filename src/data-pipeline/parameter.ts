@@ -142,6 +142,16 @@ export function createStackParameters(scope: Construct) {
     type: 'String',
   });
 
+  const filterBotEventParam = new CfnParameter(scope, 'FilterBotEventParam', {
+    description: 'Filter bot events by user agent',
+    default: 'true',
+    allowedValues: [
+      'true',
+      'false',
+    ],
+    type: 'String',
+  });
+
   const metadata = {
     'AWS::CloudFormation::Interface': {
       ParameterGroups: [
@@ -194,6 +204,7 @@ export function createStackParameters(scope: Construct) {
             s3PathPluginJarsParam.logicalId,
             s3PathPluginFilesParam.logicalId,
             outputFormatParam.logicalId,
+            filterBotEventParam.logicalId,
           ],
         },
 
@@ -288,6 +299,9 @@ export function createStackParameters(scope: Construct) {
         [emrApplicationIdleTimeoutMinutesParam.logicalId]: {
           default: 'EMR serverless idle timeout minutes',
         },
+        [filterBotEventParam.logicalId]: {
+          default: 'Filter bot events by user agent',
+        },
       },
     },
   };
@@ -317,6 +331,7 @@ export function createStackParameters(scope: Construct) {
       userKeepDaysParam,
       itemKeepDaysParam,
       emrApplicationArchitectureParam,
+      filterBotEventParam,
     },
   };
 }

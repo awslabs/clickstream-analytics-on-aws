@@ -28,6 +28,7 @@ public final class UAEnrichHelper {
     private static final Parser UA_PARSER = new Parser();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static final String UA_STRING = "string";
+    public static final String BOT = "Bot";
 
     private UAEnrichHelper() {
     }
@@ -69,8 +70,8 @@ public final class UAEnrichHelper {
         if (family == null) {
             return null;
         }
-        if (family.toLowerCase().contains("bot")) {
-            return "Bot";
+        if (family.toLowerCase().contains("bot") || family.equals("Spider") || family.equals("Crawler")) {
+            return BOT;
         } else if (family.toLowerCase().contains("mobile") || family.toLowerCase().contains("phone")) {
             return "Mobile";
         } else if (family.toLowerCase().contains("tablet") || family.toLowerCase().contains("pad") || family.toLowerCase().contains("kindle")) {

@@ -351,7 +351,7 @@ describe('DataPipelineStack parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(22);
+    expect(paramCount).toEqual(23);
   });
 
 
@@ -519,6 +519,14 @@ describe('DataPipelineStack parameter test', () => {
       Type: 'String',
     });
   });
+
+  test('Should has parameter FilterBotEventParam', () => {
+    template.hasParameter('FilterBotEventParam', {
+      Default: 'true',
+      Type: 'String',
+    });
+  });
+
 });
 
 
