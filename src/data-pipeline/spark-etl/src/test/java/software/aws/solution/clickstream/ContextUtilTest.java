@@ -55,7 +55,8 @@ public class ContextUtilTest {
                         projectId, validAppIds,
                         Long.valueOf(dataFreshnessInHour),
                         360 * 30, 360 * 30,
-                        configDirPath.toString()
+                        configDirPath.toString(),
+                        "true"
                 ),
                 new ETLRunnerConfig.InputOutputConfig(
                         "true",

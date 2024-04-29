@@ -69,6 +69,7 @@ export interface DataPipelineProps {
   readonly userKeepDays: number;
   readonly itemKeepDays: number;
   readonly emrApplicationArchitecture: EmrApplicationArchitectureType;
+  readonly filterBotEvent: 'true' | 'false';
 }
 
 export interface ClickstreamSinkTables {
@@ -178,6 +179,7 @@ export class DataPipelineConstruct extends Construct {
         outputFormat: this.props.outputFormat,
         userKeepDays: this.props.userKeepDays,
         itemKeepDays: this.props.itemKeepDays,
+        filterBotEvent: this.props.filterBotEvent,
       },
       this.roleUtil,
     );
