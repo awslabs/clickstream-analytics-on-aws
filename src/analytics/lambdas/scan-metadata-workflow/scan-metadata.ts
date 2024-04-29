@@ -12,7 +12,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { logger, renderCategoryInSql } from '@aws/clickstream-base-lib';
+import { logger, parseMetadataFromSql, renderCategoryInSql } from '@aws/clickstream-base-lib';
 import { SP_SCAN_METADATA, PROPERTY_ARRAY_TEMP_TABLE } from '../../private/constant';
 import { describeStatement, getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
@@ -109,18 +109,10 @@ export const handler = async (event: ScanMetadataEvent) => {
 };
 
 function insertPropertyTemplateTable(fileContent: string, sqlStatements: string[], tableName: string, property_type: string) {
-  const content = renderCategoryInSql(fileContent);
-  const metadataRegex = /-- METADATA (.+)/g;
-  const metadataMatches = content.matchAll(metadataRegex);
+  const metadataArray = parseMetadataFromSql(fileContent);
   let values: string = '';
-  for (const match of metadataMatches) {
-    const metadataJson = match[1];
-    try {
-      const metadataObject = JSON.parse(metadataJson);
-      values += `('${metadataObject.category}', '${metadataObject.name}', '${metadataObject.dataType}', '${property_type}'), `;
-    } catch (parseError) {
-      logger.error('JSON parsing error:', { parseError });
-    }
+  for (const metadataObject of metadataArray) {
+    values += `('${metadataObject.category}', '${metadataObject.name}', '${metadataObject.dataType}', '${property_type}'), `;
   }
   if (values.length > 0) {
     values = values.slice(0, -2);

@@ -13,6 +13,7 @@
 
 import { randomInt } from 'crypto';
 import Mustache from 'mustache';
+import { logger } from './powertools';
 import { MUSTACHE_RENDER_CATEGORIES } from '../constant';
 
 export function isEmpty(a: any): boolean {
@@ -88,4 +89,21 @@ export function renderCategoryInSql(sqlTemplate: string) {
   return Mustache.render(sqlTemplate, {
     ...MUSTACHE_RENDER_CATEGORIES,
   });
+}
+
+export function parseMetadataFromSql(fileContent: string): any[] {
+  const content = renderCategoryInSql(fileContent);
+  const metadataRegex = /-- METADATA (.+)/g;
+  const metadataMatches = content.matchAll(metadataRegex);
+  const metadataArray: any[] = [];
+  for (const match of metadataMatches) {
+    const metadataJson = match[1];
+    try {
+      const metadataObject = JSON.parse(metadataJson);
+      metadataArray.push(metadataObject);
+    } catch (parseError) {
+      logger.warn('JSON parsing error:', { parseError });
+    }
+  }
+  return metadataArray;
 }
