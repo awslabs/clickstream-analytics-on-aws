@@ -34,6 +34,9 @@ import {
   QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX,
   ExploreAggregationMethod,
   DEFAULT_TIMEZONE,
+  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
+  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
+  sleep,
 } from '@aws/clickstream-base-lib';
 import {
   CreateDataSetCommandOutput, QuickSight,
@@ -53,16 +56,23 @@ import {
   SimpleNumericalAggregationFunction,
   InputColumnDataType,
 } from '@aws-sdk/client-quicksight';
+import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
 import { ReportingCheck } from './reporting-check';
-import { AttributionTouchPoint, ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, GroupingCondition, PairEventAndCondition, SQLParameters, buildColNameWithPrefix, buildConditionProps } from './sql-builder';
+import { AttributionTouchPoint, ColumnAttribute, Condition, EVENT_USER_VIEW, EventAndCondition, EventComputeMethodsProps, GroupingCondition, PairEventAndCondition, SQLParameters, buildColNameWithPrefix, buildConditionProps } from './sql-builder';
 import { AttributionSQLParameters } from './sql-builder-attribution';
+import { PipelineStackType } from '../../common/model-ln';
 import { logger } from '../../common/powertools';
+import { SDKClient } from '../../common/sdk-client';
+import { getStackOutputFromPipelineStatus } from '../../common/utils';
 import i18next from '../../i18n';
 import { IPipeline } from '../../model/pipeline';
+
+
+const sdkClient: SDKClient = new SDKClient();
 
 export interface VisualProps {
   readonly sheetId: string;
@@ -671,7 +681,6 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
     Width: '120px',
   });
 
-  console.log(groupingColNames);
   for (const colName of groupingColNames) {
     const groupColFieldId = uuidv4();
     groupBy.push({
@@ -1839,4 +1848,59 @@ export function isValidGroupingCondition(groupCondition: GroupingCondition | und
   }
 
   return true;
+}
+
+export async function warmupRedshift(pipeline: IPipeline, appId: string) {
+  const dataApiRole = getStackOutputFromPipelineStatus(
+    pipeline.stackDetails ?? pipeline.status?.stackDetails,
+    PipelineStackType.REPORTING,
+    OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN);
+  const redshiftEndpoint = getStackOutputFromPipelineStatus(
+    pipeline.stackDetails ?? pipeline.status?.stackDetails,
+    PipelineStackType.REPORTING,
+    OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS);
+  logger.debug(`Data Api Role: ${dataApiRole}, Redshift Endpoint: ${redshiftEndpoint}`);
+  const workgroupName = redshiftEndpoint?.split('.')[0];
+  if (!dataApiRole || !workgroupName) {
+    logger.warn('Data Api Role or Workgroup Name not found');
+    return;
+  }
+  const redshiftType = redshiftEndpoint?.split('.')[3];
+  if (redshiftType === 'redshift-serverless') {
+    const redshiftDataClient = sdkClient.RedshiftDataClient(
+      {
+        region: pipeline.region,
+      },
+      dataApiRole,
+    );
+    const input = {
+      Sqls: [`select * from ${appId}.${EVENT_USER_VIEW} limit 1`],
+      WorkgroupName: workgroupName,
+      Database: pipeline.projectId,
+      WithEvent: false,
+    };
+
+    const params = new BatchExecuteStatementCommand(input);
+    const executeResponse = await redshiftDataClient.send(params);
+
+    const checkParams = new DescribeStatementCommand({
+      Id: executeResponse.Id,
+    });
+    let resp = await redshiftDataClient.send(checkParams);
+    logger.debug(`Get statement status: ${resp.Status}`);
+    let count = 0;
+    while (resp.Status != StatusString.FINISHED && resp.Status != StatusString.FAILED && count < 60) {
+      await sleep(500);
+      count++;
+      resp = await redshiftDataClient.send(checkParams);
+      logger.debug(`Get statement status: ${resp.Status}`);
+    }
+    if (resp.Status == StatusString.FAILED) {
+      logger.info('Warmup redshift serverless with error,', {
+        status: resp.Status,
+        response: resp,
+      });
+    }
+    logger.info('Warmup redshift serverless successfully');
+  }
 }

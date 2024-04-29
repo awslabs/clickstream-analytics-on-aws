@@ -1002,6 +1002,10 @@ const BASE_REPORTING_PARAMETERS = [
     ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserCredentialParameterName`,
   },
   {
+    ParameterKey: 'RedshiftIAMRoleParam.#',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.RedshiftDataApiRoleArn`,
+  },
+  {
     ParameterKey: 'QuickSightTimezoneParam',
     ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
   },
@@ -1068,6 +1072,10 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   {
     ParameterKey: 'RedshiftParameterKeyParam.#',
     ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserCredentialParameterName`,
+  },
+  {
+    ParameterKey: 'RedshiftIAMRoleParam.#',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.RedshiftDataApiRoleArn`,
   },
   {
     ParameterKey: 'QuickSightTimezoneParam',
