@@ -104,7 +104,7 @@ describe('QuickSight Lambda function', () => {
         {
           name: 'User Dim Data Set',
           tableName: 'User_Dim_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'user_pseudo_id',
@@ -203,7 +203,7 @@ describe('QuickSight Lambda function', () => {
         {
           name: 'ODS Flattened Data Set',
           tableName: 'Session_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'session_id',
@@ -298,7 +298,7 @@ describe('QuickSight Lambda function', () => {
         {
           name: 'User Dim Data Set',
           tableName: 'User_Dim_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'user_pseudo_id',
@@ -397,7 +397,7 @@ describe('QuickSight Lambda function', () => {
         {
           name: 'ODS Flattened Data Set',
           tableName: 'Session_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'session_id',
@@ -469,7 +469,7 @@ describe('QuickSight Lambda function', () => {
         {
           name: 'Session Data Set',
           tableName: 'User_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'user_pseudo_id',
@@ -590,7 +590,7 @@ describe('QuickSight Lambda function', () => {
       dataSets: [
         {
           tableName: 'User_Dim_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'user_pseudo_id',
@@ -688,7 +688,7 @@ describe('QuickSight Lambda function', () => {
         },
         {
           tableName: 'Session_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           customSql: 'select * from {{schema}}.clickstream_session_view_v2 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc(\'day\', <<$endDate>>))',
           columns: [
             {
@@ -759,7 +759,7 @@ describe('QuickSight Lambda function', () => {
         },
         {
           tableName: 'Lifecycle_Daily_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v2',
           columns: [
             {
@@ -806,7 +806,7 @@ describe('QuickSight Lambda function', () => {
       dataSets: [
         {
           tableName: 'clickstream_user_dim_view',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'user_pseudo_id',
@@ -904,7 +904,7 @@ describe('QuickSight Lambda function', () => {
         },
         {
           tableName: 'Lifecycle_Daily_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v2',
           columns: [
             {
@@ -952,7 +952,7 @@ describe('QuickSight Lambda function', () => {
         {
           name: 'User Dim Data Set',
           tableName: 'User_Dim_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'user_pseudo_id',
@@ -1051,7 +1051,7 @@ describe('QuickSight Lambda function', () => {
         {
           name: 'ODS Flattened Data Set',
           tableName: 'Session_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'session_id',
@@ -1146,7 +1146,7 @@ describe('QuickSight Lambda function', () => {
         {
           name: 'User Dim Data Set',
           tableName: 'User_Dim_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'user_pseudo_id',
@@ -1245,7 +1245,7 @@ describe('QuickSight Lambda function', () => {
         {
           name: 'ODS Flattened Data Set',
           tableName: 'Session_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           customSql: 'select * from {{schema}}.clickstream_session_view_v2 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc(\'day\', <<$endDate>>))',
           columns: [
             {
@@ -1342,7 +1342,7 @@ describe('QuickSight Lambda function', () => {
         {
           name: 'User Dim Data Set',
           tableName: 'User_Dim_View',
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           columns: [
             {
               Name: 'user_pseudo_id',
@@ -1440,7 +1440,7 @@ describe('QuickSight Lambda function', () => {
         },
         {
           tableName: CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
-          importMode: 'DIRECT_QUERY',
+          useSpice: 'yes',
           customSql: `
             select 
              *

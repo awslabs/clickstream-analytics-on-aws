@@ -55,6 +55,7 @@ import {
   GeoSpatialDataRole,
   SimpleNumericalAggregationFunction,
   InputColumnDataType,
+  DataSetImportMode,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
@@ -397,7 +398,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
       Name: datasetId,
-      ImportMode: props.importMode,
+      ImportMode: props.useSpice === 'yes' ? DataSetImportMode.SPICE : DataSetImportMode.DIRECT_QUERY,
       Permissions: requestAction === ExploreRequestAction.PUBLISH ? datasetPermissionActions : undefined,
       PhysicalTableMap: {
         PhyTable1: {
