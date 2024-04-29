@@ -187,9 +187,10 @@
 
         | 参数  | 默认值          | 描述                                                  |
         | ---------- | ---------------- | ------------------------------------------------------------ |
-        | OIDCClientId | `<输入>` | OpenID Connect 客户端 ID。 |
-        | OIDCProvider  | `<输入>` | OpenID Connect 提供程序发行方。发行方必须以 `https://` 开头 |
-        | Email | `<需要输入>` | 指定管理员的电子邮件地址。|
+        {% 
+          include-markdown "./oidc-parameters.md"
+          comments=false
+        %}
 
         !!! info "重要提示"
             {%
@@ -199,18 +200,17 @@
 
     * 如果您在 AWS 区域中使用自定义域名启动解决方案，则还有以下附加参数：
 
-        | 参数  | 默认值          | 描述                                                  |
-        | ---------- | ---------------- | ------------------------------------------------------------ |
-        | Hosted Zone ID | `<输入>` | 选择 Amazon Route 53 的公共托管区域的 ID。 |
-        | Hosted Zone Name | `<输入>` | 公共托管区域的域名，例如 `example.com`。 |
-        | Record Name | `<输入>` | 控制台的子名称（在 R53 中称为记录名称）。例如，如果您想为控制台使用自定义域名 `clickstream.example.com`，则输入 `clickstream`。 |
+        {% 
+          include-markdown "./domain-parameters.md"
+          comments=false
+        %}
 
     * 如果您在 AWS 中国区域中启动解决方案，则还有以下附加参数：
 
         | 参数  | 默认值          | 描述                                                  |
         | ---------- | ---------------- | ------------------------------------------------------------ |
-        | Domain | `<输入>` | Centralized Logging with OpenSearch 控制台的自定义域名。不要添加 `http(s)` 前缀。 |
-        | IamCertificateID | `<输入>` | 在 IAM 中 SSL 证书的 ID。ID 由 21 个大写字母和数字组成。使用 [`list-server-certificates`][iam-list-cert]{target='_blank'} 命令检索 ID。 |
+        | Domain Name (`Domain`) | `<输入>` | {{solution_name}}控制台的自定义域名。不要添加 `http(s)` 前缀。 |
+        | Certificate Id (`IamCertificateID`) | `<输入>` | 在 IAM 中 SSL 证书的 ID。ID 由 21 个大写字母和数字组成。使用 [`list-server-certificates`][iam-list-cert]{target='_blank'} 命令检索 ID。 |
 
 6. 选择**下一步**。
 7. 在**配置堆栈选项**页面上，选择**下一步**。
