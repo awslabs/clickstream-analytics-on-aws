@@ -586,6 +586,9 @@ describe('Workflow test with pipeline version', () => {
                         {
                           ParameterKey: 'QuickSightTimezoneParam',
                         },
+                        {
+                          ParameterKey: 'RedshiftIAMRoleParam.#',
+                        },
                       ],
                       ),
                     },
@@ -677,6 +680,9 @@ describe('Workflow test with pipeline version', () => {
                           {
                             ParameterKey: 'QuickSightTimezoneParam',
                           },
+                          {
+                            ParameterKey: 'RedshiftIAMRoleParam.#',
+                          },
                         ]),
                     },
                   },
@@ -757,6 +763,9 @@ describe('Workflow test with pipeline version', () => {
                         [
                           {
                             ParameterKey: 'QuickSightTimezoneParam',
+                          },
+                          {
+                            ParameterKey: 'RedshiftIAMRoleParam.#',
                           },
                         ],
                       ),
@@ -1219,6 +1228,9 @@ describe('Workflow test with pipeline version in China region', () => {
                         [
                           {
                             ParameterKey: 'QuickSightTimezoneParam',
+                          },
+                          {
+                            ParameterKey: 'RedshiftIAMRoleParam.#',
                           },
                         ],
                       ),

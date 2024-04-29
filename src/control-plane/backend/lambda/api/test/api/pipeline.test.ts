@@ -236,7 +236,6 @@ describe('Pipeline test', () => {
       const workflow = input.TransactItems[1].Put.Item.workflow.M.Workflow.M;
       const serviceCatalogAppRegistry = workflow.Branches.L[0].M.States.M.ServiceCatalogAppRegistry.M;
       const callback = serviceCatalogAppRegistry.Data.M.Callback.M;
-      console.log(callback);
       expect(
         callback.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
         callback.BucketPrefix.S.startsWith('clickstream/workflow/main-') &&
@@ -3427,7 +3426,8 @@ describe('Pipeline test', () => {
         expressionAttributeValues[':templateVersion'].S === SolutionVersion.V_1_1_4.fullVersion &&
         expressionAttributeValues[':tags'].L[0].M.value.S === SolutionVersion.V_1_1_4.fullVersion &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'GCRUser' &&
-        reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/GCRUser',
+        reportInput.M.Parameters.L[1].M.ParameterValue.S === 'default' &&
+        reportInput.M.Parameters.L[2].M.ParameterValue.S === 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/GCRUser',
       ).toBeTruthy();
     });
     process.env.AWS_REGION = 'cn-north-1';

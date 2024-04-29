@@ -372,7 +372,6 @@ export class CPipeline {
       length: 255,
       omission: '',
     });
-    console.log(`Creating topic ${topicName}`);
     const topicArn = await createTopicAndSubscribeSQSQueue(
       this.pipeline.region,
       this.pipeline.projectId,
