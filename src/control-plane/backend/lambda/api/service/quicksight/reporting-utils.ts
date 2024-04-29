@@ -681,7 +681,6 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
     Width: '120px',
   });
 
-  console.log(groupingColNames);
   for (const colName of groupingColNames) {
     const groupColFieldId = uuidv4();
     groupBy.push({

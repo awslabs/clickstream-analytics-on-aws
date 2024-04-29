@@ -20,6 +20,7 @@ import {
   SECURITY_GROUP_PATTERN,
   SUBNETS_PATTERN,
   QUICKSIGHT_USER_ARN_PATTERN,
+  IAM_ROLE_ARN_PATTERN,
 } from '@aws/clickstream-base-lib';
 import { CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -142,6 +143,15 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Parameter Key Name',
   };
 
+  const redshiftIAMRoleParam = new CfnParameter(scope, 'RedshiftIAMRoleParam', {
+    description: 'The ARN of IAM role used by Redshift Data API.',
+    type: 'String',
+    allowedPattern: IAM_ROLE_ARN_PATTERN,
+  });
+  labels[redshiftIAMRoleParam.logicalId] = {
+    default: 'Redshift Data API Role ARN',
+  };
+
   groups.push({
     Label: { default: 'QuickSight Information' },
     Parameters: [
@@ -163,6 +173,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       redShiftDBSchemaParam.logicalId,
       redshiftPortParam.logicalId,
       redshiftParameterKeyParam.logicalId,
+      redshiftIAMRoleParam.logicalId,
     ],
   });
 
@@ -179,6 +190,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     redShiftDBSchemaParam,
     redshiftPortParam,
     redshiftParameterKeyParam,
+    redshiftIAMRoleParam,
     paramLabels: labels,
     paramGroups: groups,
   };
