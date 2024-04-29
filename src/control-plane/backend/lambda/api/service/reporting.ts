@@ -26,8 +26,6 @@ import {
   ExploreComputeMethod,
   sleep,
   SolutionVersion,
-  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
-  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
 } from '@aws/clickstream-base-lib';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
