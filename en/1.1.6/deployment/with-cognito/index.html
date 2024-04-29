@@ -2894,9 +2894,19 @@
 </thead>
 <tbody>
 <tr>
-<td>Email</td>
+<td>Admin User Email (<code>Email</code>)</td>
 <td><code>&lt;Requires input&gt;</code></td>
 <td>Specify the email of the Administrator. This email address will receive a temporary password to access the Clickstream Analytics on AWS web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution.</td>
+</tr>
+<tr>
+<td>IAM Role Prefix (<code>IamRolePrefix</code>)</td>
+<td><code>&lt;Optional input&gt;</code></td>
+<td>Specify the prefix for the name of IAM roles created in the solution.</td>
+</tr>
+<tr>
+<td>IAM Role Boundary ARN (<code>IamRoleBoundaryArn</code>)</td>
+<td><code>&lt;Optional input&gt;</code></td>
+<td>Specify <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html">the permissions boundary for the IAM roles</a> created in the solution.</td>
 </tr>
 </tbody>
 </table>
@@ -2928,17 +2938,17 @@ By default, this deployment uses TLSv1.0 and TLSv1.1 in CloudFront. However, we 
 </thead>
 <tbody>
 <tr>
-<td>Hosted Zone ID</td>
+<td>Host Zone ID (<code>HostedZoneId</code>)</td>
 <td><code>&lt;Requires input&gt;</code></td>
 <td>Choose the public hosted zone ID of Amazon Route 53.</td>
 </tr>
 <tr>
-<td>Hosted Zone Name</td>
+<td>Host Zone Name (<code>HostedZoneName</code>)</td>
 <td><code>&lt;Requires input&gt;</code></td>
 <td>The domain name of the public hosted zone, for example, <code>example.com</code>.</td>
 </tr>
 <tr>
-<td>Record Name</td>
+<td>Record Name (<code>RecordName</code>)</td>
 <td><code>&lt;Requires input&gt;</code></td>
 <td>The sub name (as known as record name in R53) of the domain name of console. For example, enter <code>clickstream</code>, if you want to use custom domain <code>clickstream.example.com</code> for the console.</td>
 </tr>

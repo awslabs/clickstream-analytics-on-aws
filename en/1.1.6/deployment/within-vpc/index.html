@@ -2957,29 +2957,39 @@
 </thead>
 <tbody>
 <tr>
-<td>VpcId</td>
+<td>VPC ID (<code>VpcId</code>)</td>
 <td><code>&lt;Requires input&gt;</code></td>
 <td>Select the VPC in which the solution will be deployed.</td>
 </tr>
 <tr>
-<td>PrivateSubnets</td>
+<td>Private Subnet IDs (<code>PrivateSubnets</code>)</td>
 <td><code>&lt;Requires input&gt;</code></td>
 <td>Select the subnets in which the solution will be deployed. <strong>Note</strong>: You must choose two subnets across two AZs at least.</td>
 </tr>
 <tr>
-<td>OIDCClientId</td>
+<td>OpenID Connector Client Id (<code>OIDCClientId</code>)</td>
 <td><code>&lt;Requires input&gt;</code></td>
 <td>OpenID Connect client Id.</td>
 </tr>
 <tr>
-<td>OIDCProvider</td>
+<td>OpenID Connector Issuer (<code>OIDCProvider</code>)</td>
 <td><code>&lt;Requires input&gt;</code></td>
 <td>OpenID Connect provider issuer. The issuer must begin with <code>https://</code></td>
 </tr>
 <tr>
-<td>Email</td>
+<td>Admin User Email (<code>Email</code>)</td>
 <td><code>&lt;Requires input&gt;</code></td>
-<td>Specify the email of the Administrator.</td>
+<td>Specify the email of the Administrator. This email address will receive a temporary password to access the Clickstream Analytics on AWS web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution.</td>
+</tr>
+<tr>
+<td>IAM Role Prefix (<code>IamRolePrefix</code>)</td>
+<td><code>&lt;Optional input&gt;</code></td>
+<td>Specify the prefix for the name of IAM roles created in the solution.</td>
+</tr>
+<tr>
+<td>IAM Role Boundary ARN (<code>IamRoleBoundaryArn</code>)</td>
+<td><code>&lt;Optional input&gt;</code></td>
+<td>Specify <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html">the permissions boundary for the IAM roles</a> created in the solution.</td>
 </tr>
 </tbody>
 </table>

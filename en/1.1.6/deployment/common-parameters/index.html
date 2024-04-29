@@ -8,13 +8,9 @@
       
       
       
-        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/deployment/with-oidc/">
+        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/deployment/common-parameters/">
       
       
-        <link rel="prev" href="../with-cognito/">
-      
-      
-        <link rel="next" href="../within-vpc/">
       
       
       <link rel="icon" href="../../images/favicon.ico">
@@ -22,7 +18,7 @@
     
     
       
-        <title>OIDC - Clickstream Analytics on AWS</title>
+        <title>Common parameters - Clickstream Analytics on AWS</title>
       
     
     
@@ -101,11 +97,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#launch-with-openid-connect-oidc" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -140,7 +131,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OIDC
+              Common parameters
             
           </span>
         </div>
@@ -288,20 +279,16 @@
         
   
   
-    
-  
   
     
     
       
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../../solution-overview/" class="md-tabs__link">
           
   
@@ -382,28 +369,23 @@
       
   
   
-    
   
   
-  
     
     
     
       
-        
-        
-      
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
         
           
-          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -414,7 +396,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             Implementation Guide
@@ -819,8 +801,6 @@
                 
   
   
-    
-  
   
   
     
@@ -830,11 +810,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" >
         
           
           <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
@@ -848,7 +828,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_5">
             <span class="md-nav__icon md-icon"></span>
             Deployment
@@ -901,30 +881,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    OIDC
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../with-oidc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -933,131 +893,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deployment-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Deployment Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-1-create-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 1. Create OIDC client
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 1. Create OIDC client">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#option-1-using-cognito-user-pool-from-another-region" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Option 1) Using Cognito User Pool from another region
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-2-authingcn-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Option 2) Authing.cn OIDC client
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-3-keycloak-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Option 3) Keycloak OIDC client
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-4-adfs-openid-connect-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Option 4) ADFS OpenID Connect Client
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-launch-the-stack" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 2. Launch the stack
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-update-the-callback-url-of-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3. Update the callback URL of OIDC client
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-setup-dns-resolver" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 4. Setup DNS Resolver
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-5-launch-the-web-console" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 5. Launch the web console
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2864,121 +2699,6 @@
   
   
   
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deployment-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Deployment Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-1-create-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 1. Create OIDC client
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 1. Create OIDC client">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#option-1-using-cognito-user-pool-from-another-region" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Option 1) Using Cognito User Pool from another region
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-2-authingcn-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Option 2) Authing.cn OIDC client
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-3-keycloak-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Option 3) Keycloak OIDC client
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-4-adfs-openid-connect-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Option 4) ADFS OpenID Connect Client
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-launch-the-stack" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 2. Launch the stack
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-update-the-callback-url-of-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3. Update the callback URL of OIDC client
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-setup-dns-resolver" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 4. Setup DNS Resolver
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-5-launch-the-web-console" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 5. Launch the web console
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -2996,377 +2716,11 @@
   
 
 
-<h1 id="launch-with-openid-connect-oidc">Launch with OpenID Connect (OIDC)</h1>
-<p><strong>Time to deploy</strong>: Approximately 30 minutes</p>
-<h2 id="prerequisites">Prerequisites</h2>
-<div class="admonition info">
-<p class="admonition-title">Important</p>
-<p>The Clickstream Analytics on AWS console is served via CloudFront distribution which is considered as an Internet information service.</p>
-<p>If deploying the solution in <strong>AWS China Regions</strong>, a valid <a href="https://www.amazonaws.cn/en/support/icp/?nc2=h_l2_su">ICP Recordal</a> is required. Check <a href="../../resources/aws-china-prerequisites/">this documentation</a> for additional prerequisites.</p>
-</div>
-<ul>
-<li>A domain. You will use this domain to access the Clickstream Analytics on AWS console. This is required for AWS China Regions, and is optional for AWS Regions.</li>
-<li>An SSL certificate in AWS IAM. The SSL must be associated with the given domain. Follow <a href="../../resources/upload-ssl-certificate/">this guide</a> to upload SSL certificate to IAM. This is required for AWS China Regions only.</li>
-</ul>
-<h2 id="deployment-overview">Deployment Overview</h2>
-<p>Use the following steps to deploy this solution on AWS.</p>
-<p><a href="#step-1-create-oidc-client">Step 1. Create OIDC client</a></p>
-<p><a href="#step-2-launch-the-stack">Step 2. Launch the stack</a></p>
-<p><a href="#step-3-update-the-callback-url-of-oidc-client">Step 3. Update the callback URL of OIDC client</a></p>
-<p><a href="#step-4-setup-dns-resolver">Step 4. Set up DNS Resolver</a></p>
-<p><a href="#step-5-launch-the-web-console">Step 5. Launch the web console</a></p>
-<h2 id="step-1-create-oidc-client">Step 1. Create OIDC client</h2>
-<p>You can use different kinds of OpenID Connect providers. This section introduces Option 1 to Option 4.</p>
-<ul>
-<li>(Option 1) Using Amazon Cognito from another region as OIDC provider.</li>
-<li>(Option 2) <a href="https://www.authing.cn/" target="_blank">Authing</a>, which is an example of a third-party authentication provider.</li>
-<li>(Option 3) <a href="https://github.com/aws-samples/keycloak-on-aws" target="_blank">Keycloak</a>, which is a solution maintained by AWS and can serve as an authentication identity provider.</li>
-<li>(Option 4) <a href="https://docs.microsoft.com/en-us/windows-server/identity/active-directory-federation-services" target="_blank">ADFS</a>, which is a service offered by Microsoft.</li>
-<li>(Option 5) Other third-party authentication platforms such as <a href="https://auth0.com/" target="_blank">Auth0</a>.</li>
-</ul>
-<p>Follow the steps below to create an OIDC client, and obtain the <code>client_id</code> and <code>issuer</code>.</p>
-<h3 id="option-1-using-cognito-user-pool-from-another-region">(Option 1) Using Cognito User Pool from another region</h3>
-<p>You can leverage the <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html">Cognito User Pool</a> in a supported AWS Region as the OIDC provider.</p>
-<ol>
-<li>Go to the <a href="https://console.aws.amazon.com/cognito/home">Amazon Cognito console</a> in an AWS Region.</li>
-<li>Set up the hosted UI with the Amazon Cognito console based on this <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-app-integration.html#cognito-user-pools-create-an-app-integration">guide</a>. Please pay attentions to below two configurations<ul>
-<li>Choose <strong>Public client</strong> when selecting the <strong>App type</strong>. Make sure don't change the selection <strong>Don't generate a client secret</strong> for <strong>Client secret</strong>.</li>
-<li>Add <strong>Profile</strong> in <strong>OpenID Connect scopes</strong>.</li>
-</ul>
-</li>
-<li>
-<p>Enter the <strong>Callback URL</strong> and <strong>Sign out URL</strong> using your domain name for Clickstream Analytics on AWS console as the following:</p>
-<ul>
-<li><strong>Callback URL</strong>: <code>http[s]://&lt;domain-name&gt;/signin</code></li>
-<li><strong>Sign out URL</strong>: <code>http[s]://&lt;domain-name&gt;</code></li>
-</ul>
-<div class="admonition info">
-<p class="admonition-title">Note</p>
-<p>If you're not using custom domain for the console, you don't know the domain name of console. You can input a fake one, for example, <code>clickstream.example.com</code>. Then update it following guidelines in Step 3.</p>
-</div>
-</li>
-<li>
-<p>If your hosted UI is set up, you should be able to see something like below.</p>
-<p><a class="glightbox" href="../../images/OIDC/cognito-hostUI-new.jpeg" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="cognito host ui" src="../../images/OIDC/cognito-hostUI-new.jpeg" /></a></p>
-</li>
-<li>
-<p>Save the App client ID, User pool ID and the AWS Region to a file, which will be used later.</p>
-<p><a class="glightbox" href="../../images/OIDC/cognito-new-console-clientID.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="cognito client id" src="../../images/OIDC/cognito-new-console-clientID.png" /></a>
-   <a class="glightbox" href="../../images/OIDC/cognito-new-console-userpoolID.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="cognito userpool id" src="../../images/OIDC/cognito-new-console-userpoolID.png" /></a></p>
-</li>
-</ol>
-<p>In <a href="#step-2-launch-the-stack">Step 2. Launch the stack</a>, enter the parameters below from your Cognito User Pool.</p>
-<ul>
-<li><strong>OIDCClientId</strong>: <code>App client ID</code></li>
-<li><strong>OIDCProvider</strong>: <code>https://cognito-idp.${REGION}.amazonaws.com/${USER_POOL_ID}</code></li>
-</ul>
-<h3 id="option-2-authingcn-oidc-client">(Option 2) Authing.cn OIDC client</h3>
-<ol>
-<li>Go to the <a href="https://console.authing.cn/console" target="_blank">Authing console</a>.</li>
-<li>Create a user pool if you don't have one.</li>
-<li>Select the user pool.</li>
-<li>On the left navigation bar, select <strong>Self-built App</strong> under <strong>Applications</strong>.</li>
-<li>Click the <strong>Create</strong> button.</li>
-<li>Enter the <strong>Application Name</strong>, and <strong>Subdomain</strong>.</li>
-<li>
-<p>Save the <code>App ID</code> (that is, <code>client_id</code>) and <code>Issuer</code> to a text file from Endpoint Information, which will be used later.</p>
-<p><a class="glightbox" href="../../images/OIDC/authing-endpoint-info.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="authing endpoint info" src="../../images/OIDC/authing-endpoint-info.png" /></a></p>
-</li>
-<li>
-<p>Update the <code>Login Callback URL</code> and <code>Logout Callback URL</code>, note that you need to add <strong><code>/signin</code></strong> to your domain name for <code>Login Callback URL</code> as follow:</p>
-<ul>
-<li><strong>Callback URL</strong>: <code>http[s]://&lt;domain-name&gt;/signin</code></li>
-<li><strong>Sign out URL</strong>: <code>http[s]://&lt;domain-name&gt;</code></li>
-</ul>
-</li>
-<li>
-<p>Set the Authorization Configuration.</p>
-<p><a class="glightbox" href="../../images/OIDC/authing-authorization-configuration.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="authing authorization configuration" src="../../images/OIDC/authing-authorization-configuration.png" /></a></p>
-</li>
-</ol>
-<p>You have successfully created an authing self-built application.</p>
-<p>In <a href="#step-2-launch-the-stack">Step 2. Launch the stack</a>, enter the parameters below from your Authing user pool.</p>
-<ul>
-<li><strong>OIDCClientId</strong>: <code>client id</code></li>
-<li><strong>OIDCProvider</strong>: <code>Issuer</code></li>
-</ul>
-<h3 id="option-3-keycloak-oidc-client">(Option 3) Keycloak OIDC client</h3>
-<ol>
-<li>
-<p>Deploy the Keycloak solution in AWS China Regions following <a href="https://aws-samples.github.io/keycloak-on-aws/en/implementation-guide/deployment/" target="_blank">this guide</a>.</p>
-</li>
-<li>
-<p>Sign in to the Keycloak console.</p>
-</li>
-<li>
-<p>On the left navigation bar, select <strong>Add realm</strong>. Skip this step if you already have a realm.</p>
-</li>
-<li>
-<p>Go to the realm setting page. Choose <strong>Endpoints</strong>, and then <strong>OpenID Endpoint Configuration</strong> from the list.</p>
-<p><a class="glightbox" href="../../images/OIDC/keycloak-example-realm.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="keycloak realm" src="../../images/OIDC/keycloak-example-realm.png" /></a></p>
-</li>
-<li>
-<p>In the JSON file that opens up in your browser, record the <strong>issuer</strong> value which will be used later.</p>
-<p><a class="glightbox" href="../../images/OIDC/keycloak-OIDC-config.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="keycloak oidc config" src="../../images/OIDC/keycloak-OIDC-config.png" /></a></p>
-</li>
-<li>
-<p>Go back to Keycloak console and select <strong>Clients</strong> on the left navigation bar, and choose <strong>Create</strong>.</p>
-</li>
-<li>Enter a Client ID, which must contain letters (case-insensitive) or numbers. Record the <strong>Client ID</strong> which will be used later.</li>
-<li>
-<p>Change client settings. Enter <code>http[s]://&lt;Clickstream Analytics on AWS Console domain&gt;/signin</code> in <strong>Valid Redirect URIs</strong>, and enter <code>&lt;console domain&gt;</code> and <code>+</code> in <strong>Web Origins</strong>.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>If you're not using custom domain for the console, the domain name of console is not available yet. You can enter a fake one, for example, <code>clickstream.example.com</code>, and then update it following guidelines in Step 3.</p>
-</div>
-</li>
-<li>
-<p>In the Advanced Settings, set the <strong>Access Token Lifespan</strong> to at least 5 minutes.</p>
-</li>
-<li>Select <strong>Users</strong> on the left navigation bar.</li>
-<li>Click <strong>Add user</strong> and enter <strong>Username</strong>.</li>
-<li>After the user is created, select <strong>Credentials</strong>, and enter <strong>Password</strong>.</li>
-</ol>
-<p>In <a href="#step-2-launch-the-stack">Step 2. Launch the stack</a>, enter the parameters below from your Keycloak realm.</p>
-<ul>
-<li><strong>OIDCClientId</strong>: <code>client id</code></li>
-<li><strong>OIDCProvider</strong>: <code>https://&lt;KEYCLOAK_DOMAIN_NAME&gt;/auth/realms/&lt;REALM_NAME&gt;</code></li>
-</ul>
-<h3 id="option-4-adfs-openid-connect-client">(Option 4) ADFS OpenID Connect Client</h3>
-<ol>
-<li>Make sure your ADFS is installed. For information about how to install ADFS, refer to <a href="https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/deployment/ad-fs-deployment-guide">this guide</a>.</li>
-<li>Make sure you can log in to the ADFS Sign On page. The URL should be <code>https://adfs.domain.com/adfs/ls/idpinitiatedSignOn.aspx</code>, and you need to replace <strong>adfs.domain.com</strong> with your real ADFS domain.</li>
-<li>Log on your <strong>Domain Controller</strong>, and open <strong>Active Directory Users and Computers</strong>.</li>
-<li>
-<p>Create a <strong>Security Group</strong> for Clickstream Analytics on AWS Users, and add your planned Clickstream Analytics on AWS users to this Security Group.</p>
-</li>
-<li>
-<p>Log on to ADFS server, and open <strong>ADFS Management</strong>.</p>
-</li>
-<li>
-<p>Right click <strong>Application Groups</strong>, choose <strong>Application Group</strong>, and enter the name for the Application Group. Select <strong>Web browser accessing a web application</strong> option under <strong>Client-Server Applications</strong>, and choose <strong>Next</strong>.</p>
-</li>
-<li>
-<p>Record the <strong>Client Identifier</strong> (<code>client_id</code>) under <strong>Redirect URI</strong>, enter your Clickstream Analytics on AWS domain (for example, <code>xx.example.com</code>), and choose <strong>Add</strong>, and then choose <strong>Next</strong>.</p>
-</li>
-<li>
-<p>In the <strong>Choose Access Control Policy</strong> window, select <strong>Permit specific group</strong>, choose <strong>parameters</strong> under Policy part, add the created Security Group in Step 4, then click <strong>Next</strong>. You can configure other access control policy based on your requirements.</p>
-</li>
-<li>
-<p>Under Summary window, choose <strong>Next</strong>, and choose <strong>Close</strong>.</p>
-</li>
-<li>
-<p>Open the Windows PowerShell on ADFS Server, and run the following commands to configure ADFS to allow CORS for your planned URL.</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Set-AdfsResponseHeaders<span class="w"> </span>-EnableCORS<span class="w"> </span><span class="nv">$true</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Set-AdfsResponseHeaders<span class="w"> </span>-CORSTrustedOrigins<span class="w"> </span>https://&lt;your-clickstream-analytics-on-aws-domain&gt;
-</span></code></pre></div>
-</li>
-<li>
-<p>Under Windows PowerShell on ADFS server, run the following command to get the Issuer (<code>issuer</code>) of ADFS, which is similar to <code>https://adfs.example.com/adfs</code>.</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Get-ADFSProperties<span class="w"> </span><span class="p">|</span><span class="w"> </span>Select<span class="w"> </span>IdTokenIssuer
-</span></code></pre></div>
-<p><a class="glightbox" href="../../images/OIDC/adfs-9.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="get adfs properties" src="../../images/OIDC/adfs-9.png" /></a></p>
-</li>
-</ol>
-<p>In <a href="#step-2-launch-the-stack">Step 2. Launch the stack</a>, enter the parameters below from your ADFS server.</p>
-<ul>
-<li><strong>OIDCClientId</strong>: <code>client id</code></li>
-<li><strong>OIDCProvider</strong>: Get the server of the issuer from above step 11</li>
-</ul>
-<h2 id="step-2-launch-the-stack">Step 2. Launch the stack</h2>
-<ol>
-<li>
-<p>Sign in to the <a href="https://console.aws.amazon.com/">AWS Management Console</a> and use the button below to launch the AWS CloudFormation template.</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Launch in AWS Console</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Launch in AWS Regions</td>
-<td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://solutions-reference.s3.amazonaws.com/clickstream-analytics-on-aws/latest/cloudfront-s3-control-plane-stack-global-oidc.template.json" target="_blank"><img alt="Launch Stack" src="../../images/launch-stack.webp" /></a></td>
-</tr>
-<tr>
-<td>Launch with custom domain in AWS Regions</td>
-<td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://solutions-reference.s3.amazonaws.com/clickstream-analytics-on-aws/latest/cloudfront-s3-control-plane-stack-global-customdomain-oidc.template.json" target="_blank"><img alt="Launch Stack" src="../../images/launch-stack.webp" /></a></td>
-</tr>
-<tr>
-<td>Launch in AWS China Regions</td>
-<td><a href="https://console.amazonaws.cn/cloudformation/home#/stacks/new?templateURL=https://aws-gcr-solutions.s3.cn-north-1.amazonaws.com.cn/clickstream-analytics-on-aws/latest/cn/cloudfront-s3-control-plane-stack-cn.template.json" target="_blank"><img alt="Launch Stack" src="../../images/launch-stack.webp" /></a></td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p>The template is launched in the default region after you log in to the console. To launch the Clickstream Analytics on AWS solution in a different AWS Region, use the Region selector in the console navigation bar.</p>
-</li>
-<li>On the <strong>Create stack</strong> page, verify that the correct template URL shows in the <strong>Amazon S3 URL</strong> text box and choose <strong>Next</strong>.</li>
-<li>On the <strong>Specify stack details</strong> page, assign a name to your solution stack. For information about naming character limitations, refer to <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html" target="_blank">IAM and AWS STS quotas</a> in the <em>AWS Identity and Access Management User Guide</em>.</li>
-<li>
-<p>Under <strong>Parameters</strong>, review the parameters for the template and modify them as necessary.</p>
-<ul>
-<li>
-<p>This solution uses the following parameters:</p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>OpenID Connector Client Id (<code>OIDCClientId</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>OpenID Connect client Id.</td>
-</tr>
-<tr>
-<td>OpenID Connector Issuer (<code>OIDCProvider</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>OpenID Connect provider issuer. The issuer must begin with <code>https://</code></td>
-</tr>
-<tr>
-<td>Admin User Email (<code>Email</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>Specify the email of the Administrator. This email address will receive a temporary password to access the Clickstream Analytics on AWS web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution.</td>
-</tr>
-<tr>
-<td>IAM Role Prefix (<code>IamRolePrefix</code>)</td>
-<td><code>&lt;Optional input&gt;</code></td>
-<td>Specify the prefix for the name of IAM roles created in the solution.</td>
-</tr>
-<tr>
-<td>IAM Role Boundary ARN (<code>IamRoleBoundaryArn</code>)</td>
-<td><code>&lt;Optional input&gt;</code></td>
-<td>Specify <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html">the permissions boundary for the IAM roles</a> created in the solution.</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition info">
-<p class="admonition-title">Important</p>
-<p><!-- BEGIN INCLUDE ./tls-note.md -->
-By default, this deployment uses TLSv1.0 and TLSv1.1 in CloudFront. However, we recommend that you manually configure CloudFront to use the more secure TLSv1.2/TLSv1.3 and apply for a certificate and custom domain to enable this. We highly recommend that you update your TLS configuration and cipher suite selection according to the following recommendations:</p>
-<ul>
-<li><strong>Transport Layer Security Protocol</strong>: Upgrade to TLSv1.2 or higher</li>
-<li><strong>Key Exchange</strong>: ECDHE</li>
-<li><strong>Block Cipher Mode of Operation</strong>: GCM</li>
-<li><strong>Authentication</strong>: ECDSA</li>
-<li><strong>Encryption Cipher</strong>: AES256</li>
-<li><strong>Message Authentication</strong>: SHA(256/384/any hash function except for SHA1)</li>
-</ul>
-<p>Such as TLSv1.2_2021 can meet the above recommendations.
-<!-- END INCLUDE --></p>
-</div>
-</li>
-<li>
-<p>If you are launching the solution with custom domain in AWS Regions, this solution has the following additional parameters:</p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Host Zone ID (<code>HostedZoneId</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>Choose the public hosted zone ID of Amazon Route 53.</td>
-</tr>
-<tr>
-<td>Host Zone Name (<code>HostedZoneName</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>The domain name of the public hosted zone, for example, <code>example.com</code>.</td>
-</tr>
-<tr>
-<td>Record Name (<code>RecordName</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>The sub name (as known as record name in R53) of the domain name of console. For example, enter <code>clickstream</code>, if you want to use custom domain <code>clickstream.example.com</code> for the console.</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p>If you are launching the solution in AWS China Regions, this solution has the following additional parameters:</p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Domain Name (<code>Domain</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>Custom domain for Clickstream Analytics on AWS console. Do NOT add <code>http(s)</code> prefix.</td>
-</tr>
-<tr>
-<td>Certificate Id (<code>IamCertificateID</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>The ID of the SSL certificate in IAM. The ID is composed of 21 characters of capital letters and digits. Use the <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html#list-server-certificates" target="_blank"><code>list-server-certificates</code></a> command to retrieve the ID.</td>
-</tr>
-</tbody>
-</table>
-</li>
-</ul>
-</li>
-<li>
-<p>Choose <strong>Next</strong>.</p>
-</li>
-<li>On the <strong>Configure stack options</strong> page, choose <strong>Next</strong>.</li>
-<li>On the <strong>Review</strong> page, review and confirm the settings. Check the box acknowledging that the template creates AWS Identity and Access Management (IAM) resources.</li>
-<li>Choose <strong>Create stack</strong>  to deploy the stack.</li>
-</ol>
-<p>You can view the status of the stack in the AWS CloudFormation console in the <strong>Status</strong> column. You should receive a <strong>CREATE_COMPLETE</strong> status in approximately 10 minutes.</p>
-<h2 id="step-3-update-the-callback-url-of-oidc-client">Step 3. Update the callback URL of OIDC client</h2>
-<div class="admonition info">
-<p class="admonition-title">Important</p>
-<p>If you don't deploy stack with custom domain, you must complete below steps.</p>
-</div>
-<ol>
-<li>Sign in to the <a href="https://console.aws.amazon.com/cloudformation/" target="_blank">AWS CloudFormation console</a>.</li>
-<li>Select the solution's stack.</li>
-<li>Choose the <strong>Outputs</strong> tab.</li>
-<li>Obtain the <strong>ControlPlaneURL</strong> as the endpoint.</li>
-<li>Update or add the callback URL to your OIDC.<ol>
-<li>For Cognito, add or update the url in <strong>Allowed callback URL</strong> of your client with value <code>${ControlPlaneURL}/signin</code>. <strong>NOTE</strong>: The url must start with <code>https://</code>.</li>
-<li>For Keycloak, add or update the url in <strong>Valid Redirect URIs</strong> of your client with value <code>${ControlPlaneURL}/signin</code>.</li>
-<li>For Authing.cn, add or update the url in <strong>Login Callback URL</strong> of <strong>Authentication Configuration</strong>.</li>
-</ol>
-</li>
-</ol>
-<h2 id="step-4-setup-dns-resolver">Step 4. Setup DNS Resolver</h2>
-<div class="admonition info">
-<p class="admonition-title">Important</p>
-<p>If you deploy stack in AWS Regions, you can skip this step.</p>
-</div>
-<p>This solution provisions a CloudFront distribution that gives you access to the Clickstream Analytics on AWS console.</p>
-<ol>
-<li>Sign in to the <a href="https://console.aws.amazon.com/cloudformation/" target="_blank">AWS CloudFormation console</a>.</li>
-<li>Select the solution's stack.</li>
-<li>Choose the <strong>Outputs</strong> tab.</li>
-<li>Obtain the <strong>ControlPlaneURL</strong> and <strong>CloudFrontDomainName</strong>.</li>
-<li>Create a CNAME record for <strong>ControlPlaneURL</strong> in DNS resolver, which points to the domain <strong>CloudFrontDomainName</strong> obtained in previous step.</li>
-</ol>
-<h2 id="step-5-launch-the-web-console">Step 5. Launch the web console</h2>
-<div class="admonition info">
-<p class="admonition-title">Important</p>
-<p>Your login credentials is managed by the OIDC provider. Before signing in to the Clickstream Analytics on AWS console, make sure you have created at least one user in the OIDC provider's user pool.</p>
-</div>
-<ol>
-<li>Use the previously assigned domain name or the generated <strong>ControlPlaneURL</strong> in a web browser.</li>
-<li>Choose <strong>Sign In</strong>, and navigate to OIDC provider.</li>
-<li>Enter sign-in credentials. You may be asked to change your default password for first-time login, which depends on your OIDC provider's policy.</li>
-<li>After the verification is complete, the system opens the Clickstream Analytics on AWS web console.</li>
-</ol>
-<p>Once you have logged into the Clickstream Analytics on AWS console, you can start to <a href="../../getting-started/1.create-project/">create a project</a> for your applications.</p>
+  <h1>Common parameters</h1>
+
+<p>| Admin User Email (<code>Email</code>) | <code>&lt;Requires input&gt;</code> | Specify the email of the Administrator. This email address will receive a temporary password to access the Clickstream Analytics on AWS web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution. |
+| IAM Role Prefix (<code>IamRolePrefix</code>) | <code>&lt;Optional input&gt;</code> | Specify the prefix for the name of IAM roles created in the solution. |
+| IAM Role Boundary ARN (<code>IamRoleBoundaryArn</code>) | <code>&lt;Optional input&gt;</code> | Specify <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html">the permissions boundary for the IAM roles</a> created in the solution. |</p>
 
 
 
