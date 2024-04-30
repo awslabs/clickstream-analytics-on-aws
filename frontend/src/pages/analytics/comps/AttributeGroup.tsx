@@ -41,44 +41,42 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
       {groupOptions.map((element, index) => {
         return (
           <div key={identity(index)}>
-            <div className="cs-analytics-parameter">
-              <div className="flex w-85p">
-                <div className="cs-para-name">{index + 1}</div>
-                <div className="flex-1">
-                  <EventItem
-                    disableValidate
-                    type="attribute"
-                    placeholder={defaultStr(
-                      t('analytics:labels.attributeSelectPlaceholder')
-                    )}
-                    categoryOption={element}
-                    changeCurCategoryOption={(item) => {
-                      if (!item) {
-                        return;
-                      }
+            <div className="cs-analytics-parameter w-75p">
+              <div className="cs-para-name">{index + 1}</div>
+              <div className="flex-1">
+                <EventItem
+                  disableValidate
+                  type="attribute"
+                  placeholder={defaultStr(
+                    t('analytics:labels.attributeSelectPlaceholder')
+                  )}
+                  categoryOption={element}
+                  changeCurCategoryOption={(item) => {
+                    if (!item) {
+                      return;
+                    }
+                    const newGroupOptions = [...groupOptions];
+                    newGroupOptions[index] = item;
+                    setGroupOptions(newGroupOptions);
+                  }}
+                  categories={groupParameters}
+                  loading={loading}
+                  disabled={disabled}
+                />
+              </div>
+              <div className="event-delete">
+                <span className="remove-icon">
+                  <Button
+                    onClick={() => {
+                      // remove index option from groupOptions
                       const newGroupOptions = [...groupOptions];
-                      newGroupOptions[index] = item;
+                      newGroupOptions.splice(index, 1);
                       setGroupOptions(newGroupOptions);
                     }}
-                    categories={groupParameters}
-                    loading={loading}
-                    disabled={disabled}
+                    variant="link"
+                    iconName="close"
                   />
-                </div>
-                <div className="event-delete">
-                  <span className="remove-icon">
-                    <Button
-                      onClick={() => {
-                        // remove index option from groupOptions
-                        const newGroupOptions = [...groupOptions];
-                        newGroupOptions.splice(index, 1);
-                        setGroupOptions(newGroupOptions);
-                      }}
-                      variant="link"
-                      iconName="close"
-                    />
-                  </span>
-                </div>
+                </span>
               </div>
             </div>
           </div>
