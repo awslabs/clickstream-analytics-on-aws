@@ -53,7 +53,7 @@
   "app_version" : null,
   "app_title" : null,
   "app_install_source" : null,
-  "platform" : "Web",
+  "platform" : "macOS",
   "project_id" : "test_project_id",
   "app_id" : "sessionStartAppId1",
   "screen_view_screen_name" : null,
