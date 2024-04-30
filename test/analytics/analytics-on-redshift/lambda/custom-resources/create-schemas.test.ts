@@ -17,7 +17,7 @@ process.env.S3_BUCKET = 'test-bucket';
 process.env.S3_PREFIX='test-prefix/';
 process.env.PROJECT_ID='project1';
 
-import { CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV, CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, CLICKSTREAM_DEPRECATED_VIEW_LIST } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT, CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, CLICKSTREAM_DEPRECATED_VIEW_LIST } from '@aws/clickstream-base-lib';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -293,7 +293,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     s3ClientMock.on(PutObjectCommand).callsFake((params) => {
       const body = params.Body as string;
-      if (body.includes(`CREATE MATERIALIZED VIEW project1.app1.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV}`)) {
+      if (body.includes(`CREATE MATERIALIZED VIEW project1.app1.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT}`)) {
         expect(body).toContain('CONVERT_TIMEZONE(\'Asia/Shanghai\'');
       }
       return {};
