@@ -164,7 +164,11 @@ public final class GTMEventParser extends BaseEventParser {
 
         String platform = PLATFORM_WEB;
         if (gtmEvent.getClientHints() != null) {
-            platform = gtmEvent.getClientHints().isMobile() ? "Mobile" :PLATFORM_WEB;
+            if (gtmEvent.getClientHints().getPlatform() != null) {
+                platform = gtmEvent.getClientHints().getPlatform().replaceAll("\\W", "");
+            } else if (gtmEvent.getClientHints().isMobile()) {
+                platform = "Mobile";
+            }
         }
         clickstreamEvent.setPlatform(platform);
 

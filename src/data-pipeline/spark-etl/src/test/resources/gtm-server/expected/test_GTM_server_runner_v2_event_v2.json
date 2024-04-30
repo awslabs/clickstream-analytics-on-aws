@@ -153,7 +153,7 @@
   "page_view_page_url" : "http://d3mpqdtjegq8im.cloudfront.net/",
   "page_view_page_url_path" : null,
   "page_view_page_url_query_parameters" : null,
-  "platform" : "Web",
+  "platform" : "macOS",
   "process_info" : {
     "ingest_time" : "2023-08-29T04:04:25Z",
     "input_file_name" : "server-all-with-ss.json",
