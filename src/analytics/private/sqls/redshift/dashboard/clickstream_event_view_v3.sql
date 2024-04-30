@@ -37,6 +37,7 @@ SELECT
   device_screen_height,
   device_viewport_width,
   device_viewport_height,
+  device_ua.string as device_ua_string,
   geo_continent,
   geo_sub_continent,
   geo_country,
