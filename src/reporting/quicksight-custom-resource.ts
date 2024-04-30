@@ -324,6 +324,10 @@ function _getDataSetDefs(
             Type: 'DECIMAL',
           },
           {
+            Name: 'total_user_engagement_time_minutes',
+            Type: 'DECIMAL',
+          },
+          {
             Name: 'avg_user_engagement_time_minutes',
             Type: 'DECIMAL',
           },
@@ -345,6 +349,7 @@ function _getDataSetDefs(
           'session_count',
           'engagement_session_count',
           'engagement_rate',
+          'total_user_engagement_time_minutes',
           'avg_user_engagement_time_minutes',
           'event_count',
           'user_id',
@@ -1042,6 +1047,10 @@ function _getDataSetDefs(
             Type: 'DECIMAL',
           },
           {
+            Name: 'total_user_engagement_time_minutes',
+            Type: 'DECIMAL',
+          },
+          {
             Name: 'avg_user_engagement_time_minutes',
             Type: 'DECIMAL',
           },
@@ -1075,6 +1084,7 @@ function _getDataSetDefs(
           'session_count',
           'engagement_session_count',
           'engagement_rate',
+          'total_user_engagement_time_minutes',
           'avg_user_engagement_time_minutes',
           'event_count',
           'user_id',
