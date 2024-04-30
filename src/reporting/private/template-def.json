@@ -93,6 +93,10 @@
                 "DataType": "DECIMAL"
                 },
                 {
+                "Name": "total_user_engagement_time_minutes",
+                "DataType": "DECIMAL"
+                },
+                {
                 "Name": "event_count",
                 "DataType": "INTEGER"
                 },
@@ -313,6 +317,10 @@
                 {
                 "Name": "device_viewport_height",
                 "DataType": "INTEGER"
+                },
+                {
+                "Name": "device_ua_string",
+                "DataType": "STRING"
                 },
                 {
                 "Name": "geo_continent",
@@ -1560,7 +1568,7 @@
                         "Subtitle": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
-                                "RichText": "<visual-subtitle>\n  <inline color=\"#929191\">Active users: the</inline>\n  <inline color=\"#929191\" font-size=\"14px\"> total number of users who triggerred any event in the selected time range. </inline>\n  <br/>\n  <inline color=\"#929191\" font-size=\"14px\">New users: the number of users who interacted with your site or launched your app for the first time (event triggered: </inline>\n  <inline color=\"#929191\" font-size=\"14px\">\n    <i>_first_open</i>\n  </inline>\n  <inline color=\"#929191\" font-size=\"14px\">).</inline>\n</visual-subtitle>"
+                                "RichText": "<visual-subtitle>\n  <inline color=\"#929191\">Active users: the</inline>\n  <inline color=\"#929191\" font-size=\"14px\"> total number of users who triggered any event in the selected time range. </inline>\n  <br/>\n  <inline color=\"#929191\" font-size=\"14px\">New users: the number of users who interacted with your site or launched your app for the first time (event triggered: </inline>\n  <inline color=\"#929191\" font-size=\"14px\">\n    <i>_first_open</i>\n  </inline>\n  <inline color=\"#929191\" font-size=\"14px\">).</inline>\n</visual-subtitle>"
                             }
                         },
                         "ChartConfiguration": {
@@ -2274,10 +2282,7 @@
                                                 "FieldId": "LogicalTable1.avg_user_engagement_time_msec.8.1711007664420",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                                    "ColumnName": "avg_user_engagement_time_minutes"
-                                                },
-                                                "AggregationFunction": {
-                                                    "SimpleNumericalAggregation": "AVERAGE"
+                                                    "ColumnName": "Average User Engagement Time (Minutes)"
                                                 }
                                             }
                                         },
@@ -2883,7 +2888,7 @@
                         "Subtitle": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
-                                "RichText": "<visual-subtitle>\n  <inline color=\"#9b9a9a\">Active users: the</inline>\n  <inline color=\"#9b9a9a\" font-size=\"14px\"> total number of users who triggerred any event in the selected time range. </inline>\n  <br/>\n  <inline color=\"#9b9a9a\" font-size=\"14px\">New users: the number of users who interacted with your site or launched your app for the first time (event triggered: </inline>\n  <inline color=\"#9b9a9a\" font-size=\"14px\">\n    <i>_first_open</i>\n  </inline>\n  <inline color=\"#9b9a9a\" font-size=\"14px\">).</inline>\n</visual-subtitle>"
+                                "RichText": "<visual-subtitle>\n  <inline color=\"#9b9a9a\">Active users: the</inline>\n  <inline color=\"#9b9a9a\" font-size=\"14px\"> total number of users who triggered any event in the selected time range. </inline>\n  <br/>\n  <inline color=\"#9b9a9a\" font-size=\"14px\">New users: the number of users who interacted with your site or launched your app for the first time (event triggered: </inline>\n  <inline color=\"#9b9a9a\" font-size=\"14px\">\n    <i>_first_open</i>\n  </inline>\n  <inline color=\"#9b9a9a\" font-size=\"14px\">).</inline>\n</visual-subtitle>"
                             }
                         },
                         "ChartConfiguration": {
@@ -9775,6 +9780,11 @@
             "DataSetIdentifier": "Day_User_Acquisition",
             "Name": "Engagement Rate",
             "Expression": "sum({engagement_session_count})/sum({session_count})"
+        },
+        {
+            "DataSetIdentifier": "Day_User_Acquisition",
+            "Name": "Average User Engagement Time (Minutes)",
+            "Expression": "sum({total_user_engagement_time_minutes}) / sum({session_count}) / distinct_count({user_id})"
         },
         {
             "DataSetIdentifier": "Day_User_View_Engagement",

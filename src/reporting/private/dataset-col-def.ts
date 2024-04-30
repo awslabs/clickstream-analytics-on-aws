@@ -141,6 +141,10 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'INTEGER',
   },
   {
+    Name: 'device_ua_string',
+    Type: 'STRING',
+  },
+  {
     Name: 'geo_continent',
     Type: 'STRING',
   },

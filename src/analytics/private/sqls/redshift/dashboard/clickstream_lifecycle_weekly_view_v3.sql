@@ -24,7 +24,7 @@ calculated as (
   from (
     select time_period_week, platform,
       case when lag is null or lag = 0 then '1-NEW'
-        when lag_size = 1 then '2-ACTIVE'
+        when lag_size = 1 then '2-RETAINED-ACTIVE'
         when lag_size > 1 then '3-RETURN'
       end as this_week_value,
       case when lead_size = 1 then NULL
