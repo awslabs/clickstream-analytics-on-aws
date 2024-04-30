@@ -144,7 +144,7 @@ public final class CategoryListEvaluator {
         return categoryAndTerms;
     }
 
-   static List<String> getCandidateUrls(final String theReferrerUrl, final String hostName, final String pathInput) {
+   static List<String> getCandidateUrls(final String theReferrerUrl, final String hostNameInput, final String pathInput) {
         List<String> candidateUrls = new ArrayList<>();
         if (theReferrerUrl.contains("://")) {
             candidateUrls.add(theReferrerUrl.split("://")[1]);
@@ -156,6 +156,10 @@ public final class CategoryListEvaluator {
 
         if (hasPath && !path.startsWith("/")){
             path = "/" + path; // NOSONAR
+        }
+        String hostName = hostNameInput;
+        if (hostNameInput == null) {
+            hostName = "";
         }
         if (hasPath){
             String hostNameAndPath = hostName + path;
