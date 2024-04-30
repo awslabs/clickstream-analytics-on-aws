@@ -15,6 +15,7 @@ import {
   CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST,
   CLICKSTREAM_DEPRECATED_VIEW_LIST,
   CLICKSTREAM_EVENT_VIEW_NAME,
+  MUSTACHE_RENDER_CATEGORIES,
   aws_sdk_client_common_config,
   generateRandomStr,
   logger,
@@ -267,6 +268,7 @@ function getCreateOrUpdateSchemasSQL(newAddedAppIdList: string[], props: Resourc
       table_session: odsTableNames.session,
       user_bi: biUsername,
       ...SQL_TEMPLATE_PARAMETER,
+      ...MUSTACHE_RENDER_CATEGORIES,
     };
 
     sqlStatements.push(`CREATE SCHEMA IF NOT EXISTS ${app}`);
@@ -324,6 +326,7 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
       table_item_v2: odsTableNames.item_v2,
       table_session: odsTableNames.session,
       ...SQL_TEMPLATE_PARAMETER,
+      ...MUSTACHE_RENDER_CATEGORIES,
       timezone: timezoneDict[app] ?? 'UTC',
       baseView: CLICKSTREAM_EVENT_VIEW_NAME,
     };

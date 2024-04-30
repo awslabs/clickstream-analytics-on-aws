@@ -26,6 +26,7 @@ import {
   SolutionInfo,
   SolutionVersion,
   METADATA_V3_VERSION,
+  parseMetadataFromSql,
 } from '@aws/clickstream-base-lib';
 import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
@@ -1464,16 +1465,7 @@ function readMetadataFromSqlFile(builtInList: IMetadataBuiltInList | undefined):
 function readAndIterateFile(filePath: string): any[] {
   try {
     const fileContent = readFileSync(filePath, 'utf-8');
-    const lines = fileContent.split('\n');
-    const metadata: any[] = [];
-    for (const line of lines) {
-      if (line.includes('-- METADATA ')) {
-        const metaStr = line.split('-- METADATA ')[1].trim();
-        const meta = JSON.parse(metaStr);
-        metadata.push(meta);
-      }
-    }
-    return metadata;
+    return parseMetadataFromSql(fileContent);
   } catch (error) {
     logger.warn('readAndIterateFile error', { error, filePath });
     return [];

@@ -187,3 +187,18 @@ export enum ExploreAnalyticsNumericOperators {
   LESS_THAN_OR_EQUAL = '<=',
   BETWEEN = 'between',
 }
+
+export const MUSTACHE_RENDER_CATEGORIES = {
+  category_device: ConditionCategoryFrontend.DEVICE,
+  category_geo: ConditionCategoryFrontend.GEO,
+  category_traffic_source: ConditionCategoryFrontend.TRAFFIC_SOURCE,
+  category_app_info: ConditionCategoryFrontend.APP_INFO,
+  category_event_outer: ConditionCategoryFrontend.EVENT_OUTER,
+  category_screen_view: ConditionCategoryFrontend.SCREEN_VIEW,
+  category_page_view: ConditionCategoryFrontend.PAGE_VIEW,
+  category_upgrade: ConditionCategoryFrontend.UPGRADE,
+  category_search: ConditionCategoryFrontend.SEARCH,
+  category_outbound: ConditionCategoryFrontend.OUTBOUND,
+  category_session: ConditionCategoryFrontend.SESSION,
+  category_sdk: ConditionCategoryFrontend.SDK,
+};
