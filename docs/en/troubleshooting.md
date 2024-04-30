@@ -147,6 +147,10 @@ You need to tune the EMR job default configuration, and please refer to the [con
 
 It's caused by the large volume of data to be loaded or the Redshift load being very high. You could mitigate this error by increasing the compute resources of Redshift (for example, RPUs for Redshift serverless) or reducing [the data processing interval][data-processing-param]. Then [restart the data-loading workflow][restart-loading-workflow].
 
+## Problem: Received the error "Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors." when viewing dashboards in Analytics Studio.
+
+The dashboard is likely using views or materialized views that are not yet ready in Redshift. The solution asynchronously creates or updates the views and materialized views used by the dashboard after creating or updating the pipeline of the project. The duration of the creation or update depends on the workload of the Redshift cluster and the existing data volume and can take minutes to hours. You can keep track of progress in the **Redshift Schemas** section in the **Processing** tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via **Actions - Redrive** or **New execution** with the input unchanged.
+
 [log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL
 [data-processing-param]: ./pipeline-mgmt/data-processing/configure-execution-para.md#parameters
 [restart-loading-workflow]: ./faq.md#how-do-i-resume-a-failed-data-loading-workflow
