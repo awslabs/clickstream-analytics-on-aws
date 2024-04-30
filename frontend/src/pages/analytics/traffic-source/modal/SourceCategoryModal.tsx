@@ -321,50 +321,53 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
               options={categoryOptions}
             />
           </FormField>
-          <FormField
-            label={t(
-              'analytics:metadata.trafficSource.sourceCategory.columnPattern'
-            )}
-            description={t(
-              'analytics:metadata.trafficSource.sourceCategory.patternDesc'
-            )}
-            errorText={ternary(
-              inputPatternNumError,
-              t('analytics:valid.inputPatternNumError'),
-              undefined
-            )}
-          >
-            <ColumnLayout columns={2} variant="text-grid">
-              <Input
-                onChange={({ detail }) => setNewPattern(detail.value)}
-                value={newPattern}
-                placeholder={defaultStr(
-                  t('analytics:header.inputPatternPlaceholder')
+          {selectedCategory &&
+            selectedCategory.value === ESourceCategory.SEARCH && (
+              <FormField
+                label={t(
+                  'analytics:metadata.trafficSource.sourceCategory.columnPattern'
                 )}
-              />
-              <Button
-                iconName="add-plus"
-                onClick={() => {
-                  if (!newPattern.trim()) {
-                    return false;
-                  }
-                  if (newPatterns.length >= 10 || newPattern.length === 0) {
-                    setInputPatternNumError(true);
-                    return false;
-                  }
-                  setNewPatterns(newPatterns.concat({ label: newPattern }));
-                }}
-              />
-            </ColumnLayout>
-            <TokenGroup
-              onDismiss={({ detail: { itemIndex } }) => {
-                setNewPatterns(
-                  newPatterns.filter((item, eIndex) => eIndex !== itemIndex)
-                );
-              }}
-              items={newPatterns}
-            />
-          </FormField>
+                description={t(
+                  'analytics:metadata.trafficSource.sourceCategory.patternDesc'
+                )}
+                errorText={ternary(
+                  inputPatternNumError,
+                  t('analytics:valid.inputPatternNumError'),
+                  undefined
+                )}
+              >
+                <ColumnLayout columns={2} variant="text-grid">
+                  <Input
+                    onChange={({ detail }) => setNewPattern(detail.value)}
+                    value={newPattern}
+                    placeholder={defaultStr(
+                      t('analytics:header.inputPatternPlaceholder')
+                    )}
+                  />
+                  <Button
+                    iconName="add-plus"
+                    onClick={() => {
+                      if (!newPattern.trim()) {
+                        return false;
+                      }
+                      if (newPatterns.length >= 10 || newPattern.length === 0) {
+                        setInputPatternNumError(true);
+                        return false;
+                      }
+                      setNewPatterns(newPatterns.concat({ label: newPattern }));
+                    }}
+                  />
+                </ColumnLayout>
+                <TokenGroup
+                  onDismiss={({ detail: { itemIndex } }) => {
+                    setNewPatterns(
+                      newPatterns.filter((item, eIndex) => eIndex !== itemIndex)
+                    );
+                  }}
+                  items={newPatterns}
+                />
+              </FormField>
+            )}
         </SpaceBetween>
       </Modal>
     </>
