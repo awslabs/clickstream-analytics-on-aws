@@ -208,7 +208,8 @@ export const reportingViewsDef: SQLViewDef[] = [
     timezoneSensitive: 'true',
   },
   {
-    viewName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_SP,
+    viewName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT,
+    spName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_SP,
     type: 'sp',
     scheduleRefresh: 'true',
     timezoneSensitive: 'true',
