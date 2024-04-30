@@ -1092,6 +1092,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
               {
+                Name: 'device_ua_string',
+                Type: 'STRING',
+              },
+              {
                 Name: 'geo_continent',
                 Type: 'STRING',
               },

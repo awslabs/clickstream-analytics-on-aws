@@ -315,6 +315,10 @@
                 "DataType": "INTEGER"
                 },
                 {
+                "Name": "device_ua_string",
+                "DataType": "STRING"
+                },
+                {
                 "Name": "geo_continent",
                 "DataType": "STRING"
                 },
