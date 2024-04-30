@@ -18,8 +18,9 @@ import {
   CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP,
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_SP,
-  // CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
-  // CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,
+  CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT,
+  CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_SP,
+  CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,
   CLICKSTREAM_DEVICE_CRASH_RATE,
   CLICKSTREAM_DEVICE_CRASH_RATE_SP,
   CLICKSTREAM_DEVICE_USER_DEVICE,
@@ -42,13 +43,13 @@ import {
   CLICKSTREAM_EVENT_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
-  // CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
+  CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
   CLICKSTREAM_RETENTION_DAU_WAU, CLICKSTREAM_RETENTION_DAU_WAU_SP,
   CLICKSTREAM_RETENTION_EVENT_OVERTIME,
   CLICKSTREAM_RETENTION_EVENT_OVERTIME_SP,
   CLICKSTREAM_RETENTION_USER_NEW_RETURN,
   CLICKSTREAM_RETENTION_USER_NEW_RETURN_SP,
-  // CLICKSTREAM_RETENTION_VIEW_NAME,
+  CLICKSTREAM_RETENTION_VIEW_NAME,
 
 } from '@aws/clickstream-base-lib';
 import { SQLDef, SQLViewDef } from './model';
@@ -63,26 +64,22 @@ export const reportingViewsDef: SQLViewDef[] = [
     viewName: CLICKSTREAM_EVENT_VIEW_NAME,
   },
   {
+    viewName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT,
+  },
+  {
     viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
   },
-  // {
-  //   viewName: CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,
-  //   type: 'mv',
-  //   scheduleRefresh: 'true',
-  //   timezoneSensitive: 'true',
-  // },
+  {
+    viewName: CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,
+    type: 'mv',
+    scheduleRefresh: 'true',
+  },
   {
     viewName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
   },
-  // {
-  //   viewName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
-  //   type: 'mv',
-  //   scheduleRefresh: 'true',
-  //   timezoneSensitive: 'true',
-  // },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW,
   },
@@ -211,6 +208,12 @@ export const reportingViewsDef: SQLViewDef[] = [
     timezoneSensitive: 'true',
   },
   {
+    viewName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_SP,
+    type: 'sp',
+    scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
+  },
+  {
     viewName: CLICKSTREAM_DEVICE_CRASH_RATE,
     spName: CLICKSTREAM_DEVICE_CRASH_RATE_SP,
     type: 'sp',
@@ -233,16 +236,15 @@ export const reportingViewsDef: SQLViewDef[] = [
   {
     viewName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
   },
-  // {
-  //   viewName: CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
-  //   type: 'mv',
-  //   scheduleRefresh: 'true',
-  //   timezoneSensitive: 'true',
-  // },
-  // {
-  //   viewName: CLICKSTREAM_RETENTION_VIEW_NAME,
-  // },
-
+  {
+    viewName: CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
+    type: 'mv',
+    scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
+  },
+  {
+    viewName: CLICKSTREAM_RETENTION_VIEW_NAME,
+  },
 ];
 
 // keep order

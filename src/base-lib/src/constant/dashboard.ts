@@ -23,14 +23,15 @@ export const CLICKSTREAM_SESSION_M_VIEW_NAME = 'clickstream_session_m_view';
 export const CLICKSTREAM_SESSION_M_MAX_VIEW_NAME = 'clickstream_session_m_max_view';
 
 export const CLICKSTREAM_EVENT_VIEW_NAME = 'clickstream_event_view_v3';
-export const CLICKSTREAM_EVENT_BASE_VIEW_NAME = "clickstream_event_base_view";
+export const CLICKSTREAM_EVENT_BASE_VIEW_NAME = 'clickstream_event_base_view';
 export const CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER = 'clickstream_acquisition_country_new_user';
 export const CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP = 'clickstream_acquisition_country_new_user_sp';
 export const CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER = 'clickstream_acquisition_day_traffic_source_user';
 export const CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP = 'clickstream_acquisition_day_traffic_source_user_sp';
 export const CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION = 'clickstream_acquisition_day_user_acquisition';
 export const CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_SP = 'clickstream_acquisition_day_user_acquisition_sp';
-export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV = 'clickstream_acquisition_day_user_view_cnt_mv';
+export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT = 'clickstream_acquisition_day_user_view_cnt';
+export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_SP = 'clickstream_acquisition_day_user_view_cnt_sp';
 export const CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV = 'clickstream_acquisition_intra_day_user_mv';
 
 export const CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW = 'clickstream_engagement_day_user_view';
@@ -63,7 +64,7 @@ export const CLICKSTREAM_EVENT_VIEW_PLACEHOLDER = 'Event_View';
 export const CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER = 'Country_New_User';
 export const CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER = 'Day_Traffic_Source_User';
 export const CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER = 'Day_User_Acquisition';
-export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER = 'Day_User_View';
+export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_PLACEHOLDER = 'Day_User_View';
 
 export const CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER = 'Intra_Day_User';
 export const CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER = 'Day_User_View_Engagement';
