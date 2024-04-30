@@ -42,13 +42,13 @@ import {
   CLICKSTREAM_EVENT_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
-  CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
+  // CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
   CLICKSTREAM_RETENTION_DAU_WAU, CLICKSTREAM_RETENTION_DAU_WAU_SP,
   CLICKSTREAM_RETENTION_EVENT_OVERTIME,
   CLICKSTREAM_RETENTION_EVENT_OVERTIME_SP,
   CLICKSTREAM_RETENTION_USER_NEW_RETURN,
   CLICKSTREAM_RETENTION_USER_NEW_RETURN_SP,
-  CLICKSTREAM_RETENTION_VIEW_NAME,
+  // CLICKSTREAM_RETENTION_VIEW_NAME,
 
 } from '@aws/clickstream-base-lib';
 import { SQLDef, SQLViewDef } from './model';
@@ -233,15 +233,15 @@ export const reportingViewsDef: SQLViewDef[] = [
   {
     viewName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
   },
-  {
-    viewName: CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
-    type: 'mv',
-    scheduleRefresh: 'true',
-    timezoneSensitive: 'true',
-  },
-  {
-    viewName: CLICKSTREAM_RETENTION_VIEW_NAME,
-  },
+  // {
+  //   viewName: CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
+  //   type: 'mv',
+  //   scheduleRefresh: 'true',
+  //   timezoneSensitive: 'true',
+  // },
+  // {
+  //   viewName: CLICKSTREAM_RETENTION_VIEW_NAME,
+  // },
 
 ];
 
