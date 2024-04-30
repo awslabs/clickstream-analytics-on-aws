@@ -39,6 +39,7 @@ import {
   SharingModel,
   ResourceExistsException,
   ResourcePermission,
+  DataSetImportMode,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -101,6 +102,12 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
     timezone = '[]';
   }
   const timezoneDict = timezoneJsonArrayToDict(JSON.parse(timezone));
+
+  logger.info('dataset info', {
+    useSpice: props.useSpice,
+    dataSets: props.dashboardDefProps.dataSets,
+    timezoneDict: timezoneDict,
+  });
 
   if (event.RequestType === 'Create') {
     return _onCreate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event, timezoneDict);
@@ -255,7 +262,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
 
       const dashboard = await updateQuickSightDashboard(quickSight, commonParams,
         dashboardDefProps, oldDashboardDefProps,
-        createdQuickSightResources);
+        createdQuickSightResources, props.useSpice);
 
       dashboards.push({
         appId: schemaName,
@@ -591,12 +598,14 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
   dashboardDef: QuickSightDashboardDefProps,
   oldDashboardDef: QuickSightDashboardDefProps,
   createdQuickSightResources: CreatedQuickSightResources,
+  useSpice: string,
 )
 : Promise<UpdateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
   const dataSets = dashboardDef.dataSets;
   const oldDataSets = oldDashboardDef.dataSets;
+  const dataSetsSpice = dashboardDef.dataSetsSpice;
   const databaseName = dashboardDef.databaseName;
 
   await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn,
@@ -622,7 +631,8 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
     needUpdateDataSetTableNames: needUpdateDataSetTableNames,
   });
 
-  for ( const dataSet of dataSets) {
+  const targetDataSet = useSpice === 'yes' ? dataSetsSpice : dataSets;
+  for ( const dataSet of targetDataSet) {
     let createdDataset;
     if (needUpdateDataSetTableNames.includes(dataSet.tableName)) {
       logger.info(`update data set : ${dataSet.tableName}`);
@@ -843,7 +853,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
       Permissions: getDataSetPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
       DatasetParameters: datasetParameters,
-      ImportMode: props.importMode,
+      ImportMode: props.useSpice === 'yes' ? DataSetImportMode.SPICE : DataSetImportMode.DIRECT_QUERY,
       PhysicalTableMap: {
         PhyTable1: {
           CustomSql: {
@@ -1108,8 +1118,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
       Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
-
-      ImportMode: props.importMode,
+      ImportMode: props.useSpice === 'yes' ? DataSetImportMode.SPICE : DataSetImportMode.DIRECT_QUERY,
       PhysicalTableMap: {
         PhyTable1: {
           CustomSql: {

@@ -209,6 +209,7 @@ stackSuppressions([
 stackSuppressions([
   new MetricsStack(app, app.node.tryGetContext('metricsStackName') ?? 'metrics-stack', {
     synthesizer: synthesizer(),
+    suppressTemplateIndentation: true,
   }),
 ], commonCdkNagRules);
 

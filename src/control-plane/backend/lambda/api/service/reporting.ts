@@ -271,7 +271,7 @@ export class ReportingService {
     datasetPropsArray.push({
       tableName: props.viewName,
       columns: datasetColumns,
-      importMode: 'DIRECT_QUERY',
+      useSpice: 'no',
       customSql: props.sql,
       projectedColumns: visualProjectedColumns,
     });
@@ -313,7 +313,7 @@ export class ReportingService {
     datasetPropsArray.push({
       tableName: props.tableVisualViewName,
       columns: tableViewCols,
-      importMode: 'DIRECT_QUERY',
+      useSpice: 'no',
       customSql: props.sqlTable,
       projectedColumns: ['event_date'].concat(projectedColumns),
     });
@@ -561,7 +561,7 @@ export class ReportingService {
       datasetPropsArray.push({
         tableName: viewName,
         columns: datasetColumns,
-        importMode: 'DIRECT_QUERY',
+        useSpice: 'no',
         customSql: sql,
         projectedColumns: projectedColumns,
       });
@@ -715,7 +715,7 @@ export class ReportingService {
       datasetPropsArray.push({
         tableName: viewName,
         columns: projectedColumnsAndDatasetColumns.datasetColumns,
-        importMode: 'DIRECT_QUERY',
+        useSpice: 'no',
         customSql: sql,
         projectedColumns: projectedColumnsAndDatasetColumns.projectedColumns,
       });
@@ -860,7 +860,7 @@ export class ReportingService {
       datasetPropsArray.push({
         tableName: viewName,
         columns: pathAnalysisVisualColumns,
-        importMode: 'DIRECT_QUERY',
+        useSpice: 'no',
         customSql: sql,
         projectedColumns: [
           'event_date',
@@ -987,7 +987,7 @@ export class ReportingService {
       datasetPropsArray.push({
         tableName: viewName,
         columns: datasetColumns,
-        importMode: 'DIRECT_QUERY',
+        useSpice: 'no',
         customSql: sql,
         projectedColumns,
       });
