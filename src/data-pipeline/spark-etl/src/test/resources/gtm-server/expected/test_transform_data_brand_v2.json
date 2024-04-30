@@ -53,7 +53,7 @@
   "app_version" : null,
   "app_title" : null,
   "app_install_source" : null,
-  "platform" : "Web",
+  "platform" : "macOS",
   "project_id" : "test_project_id_gtm_server",
   "app_id" : "brandAppId1",
   "screen_view_screen_name" : null,
