@@ -28,6 +28,7 @@ import AnalyticsDataManagement from 'pages/analytics/data-management/AnalyticsDa
 import AnalyticsExplore from 'pages/analytics/explore/AnalyticsExplore';
 import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
 import AddUserSegments from 'pages/analytics/segments/AddUserSegment';
+import UserSegmentDetails from 'pages/analytics/segments/UserSegmentDetails';
 import UserSegments from 'pages/analytics/segments/UserSegments';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
@@ -501,6 +502,19 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
               >
                 <AddUserSegments actionType="edit" />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/analytics/:projectId/app/:appId/segments/:segmentId/details"
+            element={
+              <RoleRoute
+                sessionExpired={sessionExpired}
+                layout="analytics"
+                auth={auth}
+                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+              >
+                <UserSegmentDetails />
               </RoleRoute>
             }
           />

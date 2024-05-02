@@ -16,6 +16,7 @@ import {
   ContentLayout,
   Header,
 } from '@cloudscape-design/components';
+import { getApplicationDetail } from 'apis/application';
 import { getSegmentById } from 'apis/segments';
 import {
   ExtendSegment,
@@ -47,6 +48,7 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
   });
   const [segmentGroupData, setSegmentGroupData] =
     useState<IEventSegmentationObj>({ ...DEFAULT_SEGMENT_GROUP_DATA });
+  const [timezone, setTimezone] = useState('');
 
   const breadcrumbItems = [
     {
@@ -87,6 +89,19 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
       }
     };
 
+    // Get app details
+    const getAppDetails = async () => {
+      const appApiResponse = await getApplicationDetail({
+        id: appId ?? '',
+        pid: projectId ?? '',
+      });
+      if (appApiResponse.success) {
+        const { timezone } = appApiResponse.data;
+        setTimezone(timezone);
+      }
+    };
+
+    getAppDetails();
     if (actionType === 'duplicate' || actionType === 'edit') {
       getSegmentObject();
     }
@@ -122,6 +137,7 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
                   }}
                   segmentGroupData={segmentGroupData}
                   actionType={actionType}
+                  timezone={timezone}
                 />
               </SegmentProvider>
             </ContentLayout>

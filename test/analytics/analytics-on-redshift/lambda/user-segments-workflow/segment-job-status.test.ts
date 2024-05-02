@@ -105,9 +105,9 @@ describe('User segments workflow segment-job-status lambda tests', () => {
       UpdateExpression: 'set jobStatus = :js, jobEndTime = :et, segmentUserNumber = :su, totalUserNumber = :tu, sampleData = :sd',
       ExpressionAttributeValues: {
         ':js': SegmentJobStatus.COMPLETED,
-        ':et': '1712724208234',
-        ':su': '1056',
-        ':tu': '3677',
+        ':et': 1712724208234,
+        ':su': 1056,
+        ':tu': 3677,
         ':sd': expect.any(Object),
       },
       ReturnValues: 'ALL_NEW',

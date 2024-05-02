@@ -12,6 +12,7 @@
  */
 
 import {
+  Box,
   Button,
   Container,
   DatePicker,
@@ -36,9 +37,11 @@ import {
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { useSegmentContext } from 'context/SegmentContext';
 import { cloneDeep, identity, omit } from 'lodash';
+import moment from 'moment-timezone';
 import {
   convertCronExpByTimeRange,
   convertUISegmentObjectToAPIObject,
+  generateDayTimesOption,
   getAutoRefreshDayOptionsByType,
 } from 'pages/analytics/analytics-utils';
 import React, { useEffect, useState } from 'react';
@@ -53,6 +56,7 @@ interface SegmentEditorProps {
   segmentObject: ExtendSegment;
   updateSegmentObject: (key: string, value: any) => void;
   segmentGroupData?: IEventSegmentationObj;
+  timezone: string;
 }
 
 const SegmentEditor: React.FC<SegmentEditorProps> = (
@@ -64,6 +68,12 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
   const { segmentObject, updateSegmentObject } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
   const [loadingCreate, setLoadingCreate] = useState(false);
+  const [autoRefreshDay, setAutoRefreshDay] = useState('');
+  const [autoRefreshTime, setAutoRefreshTime] = useState('');
+
+  const timeOffsetInHour = props.timezone
+    ? moment().tz(props.timezone).utcOffset() / 60
+    : 0;
 
   useEffect(() => {
     // Load segmentDataState for duplicate and edit segment
@@ -74,6 +84,24 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
       });
     }
   }, []);
+
+  useEffect(() => {
+    const cron = segmentObject.refreshSchedule.cron;
+    if (cron === 'Manual' || cron === 'Custom') {
+      return;
+    }
+
+    const time = (parseInt(autoRefreshTime) - timeOffsetInHour + 24) % 24;
+    const cronExpression = convertCronExpByTimeRange(
+      segmentObject.autoRefreshOption,
+      autoRefreshDay,
+      time.toString()
+    );
+    updateSegmentObject('refreshSchedule', {
+      ...segmentObject.refreshSchedule,
+      cronExpression,
+    });
+  }, [autoRefreshDay, autoRefreshTime]);
 
   const validateSegmentName = () => {
     if (!segmentObject.name.trim()) {
@@ -133,6 +161,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
           'refreshType',
           'autoRefreshOption',
           'autoRefreshDayOption',
+          'autoRefreshTimeOption',
           'expireDate',
           'nameError',
           'cronError',
@@ -222,33 +251,29 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                   if (e.detail.value === 'manual') {
                     updateSegmentObject('autoRefreshOption', null);
                     updateSegmentObject('autoRefreshDayOption', null);
+                    updateSegmentObject('autoRefreshTimeOption', null);
                     updateSegmentObject('refreshSchedule', {
                       cron: 'Manual',
                       cronExpression: undefined,
                       expireAfter: segmentObject.refreshSchedule.expireAfter,
                     });
                   } else {
-                    const defaultDailyOption = SEGMENT_AUTO_REFRESH_OPTIONS[0];
-                    updateSegmentObject(
-                      'autoRefreshOption',
-                      defaultDailyOption
-                    );
+                    updateSegmentObject('autoRefreshOption', {
+                      label: 'Daily',
+                      value: 'Daily',
+                    });
                     updateSegmentObject('refreshSchedule', {
-                      cron: defaultDailyOption.value,
-                      cronExpression: convertCronExpByTimeRange(
-                        defaultDailyOption,
-                        getAutoRefreshDayOptionsByType(
-                          defaultDailyOption.value ?? ''
-                        )?.[0].value ?? ''
-                      ),
+                      cron: 'Daily',
+                      cronExpression: `cron(0 ${
+                        (24 - timeOffsetInHour) % 24
+                      } * * ? *)`,
                       expireAfter: segmentObject.refreshSchedule.expireAfter,
                     });
-                    updateSegmentObject(
-                      'autoRefreshDayOption',
-                      getAutoRefreshDayOptionsByType(
-                        defaultDailyOption.value ?? ''
-                      )?.[0]
-                    );
+                    updateSegmentObject('autoRefreshDayOption', undefined);
+                    updateSegmentObject('autoRefreshTimeOption', {
+                      label: '12AM',
+                      value: '0',
+                    });
                   }
                 }}
                 items={[
@@ -276,25 +301,27 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                             'autoRefreshOption',
                             e.detail.selectedOption
                           );
-                          updateSegmentObject(
-                            'autoRefreshDayOption',
-                            getAutoRefreshDayOptionsByType(
-                              e.detail.selectedOption.value ?? ''
-                            )?.[0]
-                          );
                           updateSegmentObject('refreshSchedule', {
                             ...segmentObject.refreshSchedule,
                             cron: e.detail.selectedOption.value,
-                            cronExpression: convertCronExpByTimeRange(
-                              e.detail.selectedOption,
-                              getAutoRefreshDayOptionsByType(
-                                e.detail.selectedOption.value ?? ''
-                              )?.[0]?.value ?? ''
-                            ),
                           });
+                          const dayOption = getAutoRefreshDayOptionsByType(
+                            e.detail.selectedOption.value ?? ''
+                          )?.[0];
+                          updateSegmentObject(
+                            'autoRefreshDayOption',
+                            dayOption
+                          );
+                          setAutoRefreshDay(dayOption?.value ?? '');
+                          updateSegmentObject('autoRefreshTimeOption', {
+                            label: '12AM',
+                            value: '0',
+                          });
+                          setAutoRefreshTime('0');
                           if (e.detail.selectedOption.value === 'Custom') {
                             updateSegmentObject('refreshSchedule', {
                               ...segmentObject.refreshSchedule,
+                              cron: e.detail.selectedOption.value,
                               cronExpression: '',
                             });
                           }
@@ -320,27 +347,47 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                         />
                       </FormField>
                     ) : (
-                      <FormField>
-                        <Select
-                          selectedOption={segmentObject.autoRefreshDayOption}
-                          options={getAutoRefreshDayOptionsByType(
-                            segmentObject.autoRefreshOption?.value ?? ''
-                          )}
-                          onChange={(e) => {
-                            updateSegmentObject(
-                              'autoRefreshDayOption',
-                              e.detail.selectedOption
-                            );
-                            updateSegmentObject('refreshSchedule', {
-                              ...segmentObject.refreshSchedule,
-                              cronExpression: convertCronExpByTimeRange(
-                                segmentObject.autoRefreshOption,
+                      <>
+                        {segmentObject.autoRefreshOption?.value !== 'Daily' && (
+                          <FormField>
+                            <Select
+                              selectedOption={
+                                segmentObject.autoRefreshDayOption
+                              }
+                              options={getAutoRefreshDayOptionsByType(
+                                segmentObject.autoRefreshOption?.value ?? ''
+                              )}
+                              onChange={(e) => {
+                                updateSegmentObject(
+                                  'autoRefreshDayOption',
+                                  e.detail.selectedOption
+                                );
+                                setAutoRefreshDay(
+                                  e.detail.selectedOption.value ?? ''
+                                );
+                              }}
+                            />
+                          </FormField>
+                        )}
+                        <FormField>
+                          <Select
+                            selectedOption={segmentObject.autoRefreshTimeOption}
+                            options={generateDayTimesOption()}
+                            onChange={(e) => {
+                              updateSegmentObject(
+                                'autoRefreshTimeOption',
+                                e.detail.selectedOption
+                              );
+                              setAutoRefreshTime(
                                 e.detail.selectedOption.value ?? ''
-                              ),
-                            });
-                          }}
-                        />
-                      </FormField>
+                              );
+                            }}
+                          />
+                        </FormField>
+                        <Box fontSize="heading-s" padding={{ top: 'xs' }}>
+                          {moment.tz(props.timezone).format('Z')}
+                        </Box>
+                      </>
                     )}
                   </SpaceBetween>
                 </div>

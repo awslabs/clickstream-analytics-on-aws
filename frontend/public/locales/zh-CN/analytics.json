@@ -286,6 +286,7 @@
     "inputDomainError": "必须输入域名",
     "inputSourceError": "必须输入流量源",
     "inputCategoryError": "必须选择一个类别",
+    "inputPatternNumError": "关键字模式不能超过10个",
     "inputChannelGroupNameError": "必须输入渠道组名称",
     "inputChannelGroupConditionError": "输入必须为JSON格式"
   },
@@ -459,6 +460,29 @@
       "selectUserGroup": "请选择用户分群组",
       "segmentDescPlaceholder": "提供简短描述",
       "filterByTimeRange": "按日期和时间范围过滤"
+    },
+    "details": {
+      "title": "分群详细信息",
+      "desc": "在分群信息中查看分群关键信息及监控分群变化趋势。",
+      "date": "日期",
+      "userNumber": "用户数量",
+      "segmentUserNumber": "分群用户数量",
+      "totalUserNumber": "总用户数量",
+      "percentageOfTotalUser": "占总用户数量百分比",
+      "noSegmentJobData": "无可用分群数据",
+      "refreshSchedule": "刷新计划",
+      "refreshExpiration": "自动刷新过期时间",
+      "createdBy": "创建信息",
+      "updatedBy": "更新信息",
+      "segmentHistory": "分群历史",
+      "segmentHistoryDesc": "最新30次分群刷新历史数据",
+      "startTime": "任务开始时间",
+      "endTime": "任务结束时间",
+      "jobStatus": "任务状态",
+      "export": "导出",
+      "segmentUserSample": "用户取样",
+      "segmentUserSampleDesc": "从最近一次分群刷新结果中取样的用户",
+      "noSampleData": "无可用样例数据"
     },
     "valid": {
       "nameEmptyError": "请输入分群名称。",

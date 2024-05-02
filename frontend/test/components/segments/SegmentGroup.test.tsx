@@ -104,6 +104,7 @@ describe('SegmentEditor', () => {
           segmentObject={{ ...INIT_SEGMENT_OBJ }}
           updateSegmentObject={updateSegmentObjFn}
           actionType="new"
+          timezone="Asia/Shanghai"
         />
       );
       queryAllByTestId = result.queryAllByTestId;
@@ -123,6 +124,7 @@ describe('SegmentEditor', () => {
           segmentObject={{ ...INIT_SEGMENT_OBJ }}
           updateSegmentObject={updateSegmentObjFn}
           actionType="new"
+          timezone="Asia/Shanghai"
         />
       );
       queryAllByTestId = result.queryAllByTestId;
@@ -149,6 +151,7 @@ describe('SegmentEditor', () => {
           updateSegmentObject={updateSegmentObjFn}
           segmentGroupData={{ ...DEFAULT_SEGMENT_GROUP_DATA }}
           actionType="edit"
+          timezone="Asia/Shanghai"
         />
       );
       queryAllByTestId = result.queryAllByTestId;

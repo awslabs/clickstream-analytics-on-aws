@@ -18,6 +18,7 @@ import {
   ButtonDropdown,
   ContentLayout,
   Header,
+  Link,
   SpaceBetween,
   Table,
 } from '@cloudscape-design/components';
@@ -58,7 +59,13 @@ const UserSegments: React.FC = () => {
       id: 'name',
       header: 'Name',
       cell: (e: Segment) => {
-        return e.name;
+        return (
+          <Link
+            href={`/analytics/${projectId}/app/${appId}/segments/${e.segmentId}/details`}
+          >
+            {e.name}
+          </Link>
+        );
       },
     },
     {
@@ -108,7 +115,6 @@ const UserSegments: React.FC = () => {
         setLoadingDelete(true);
         const segmentRes = await deleteSegment({
           segmentId: selectedSegment[0].segmentId,
-          projectId,
           appId,
         });
         if (segmentRes.success) {
@@ -163,12 +169,16 @@ const UserSegments: React.FC = () => {
                       <SpaceBetween direction="horizontal" size="xs">
                         <ButtonDropdown
                           onItemClick={(e) => {
+                            const hrefPath = `/analytics/${projectId}/app/${appId}/segments/${selectedSegment[0].segmentId}/`;
+
                             if (e.detail.id === 'delete') {
                               confirmDeleteSegments();
                             } else if (e.detail.id === 'duplicate') {
-                              window.location.href = `/analytics/${projectId}/app/${appId}/segments/${selectedSegment[0].segmentId}/duplicate`;
+                              window.location.href = hrefPath + 'duplicate';
                             } else if (e.detail.id === 'edit') {
-                              window.location.href = `/analytics/${projectId}/app/${appId}/segments/${selectedSegment[0].segmentId}/edit`;
+                              window.location.href = hrefPath + 'edit';
+                            } else if (e.detail.id === 'detail') {
+                              window.location.href = hrefPath + 'details';
                             }
                           }}
                           loading={loadingDelete}

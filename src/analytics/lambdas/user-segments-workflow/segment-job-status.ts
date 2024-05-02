@@ -93,9 +93,9 @@ const _handler = async (event: SegmentJobStatusEvent) => {
         const content = await summaryData.Body.transformToString();
         const lines = content.split('\n');
         const values = lines[1].split(',');
-        const segmentUserNumber = values[0];
-        const totalUserNumber = values[1];
-        const endTime = values[2];
+        const segmentUserNumber = Number(values[0]);
+        const totalUserNumber = Number(values[1]);
+        const endTime = Number(values[2]);
 
         // Get sample data from segment output
         const sampleData = await readSegmentSampleDataFromS3(process.env.PIPELINE_S3_BUCKET!, `${s3Path}${CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME}`);
