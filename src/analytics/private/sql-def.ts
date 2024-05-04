@@ -40,6 +40,7 @@ import {
   CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_SP,
   CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_SP,
   CLICKSTREAM_EVENT_BASE_VIEW_NAME,
+  CLICKSTREAM_EVENT_BASE_VIEW_SP_NAME,
   CLICKSTREAM_EVENT_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
@@ -57,8 +58,6 @@ import { SQLDef, SQLViewDef } from './model';
 export const reportingViewsDef: SQLViewDef[] = [
   {
     viewName: CLICKSTREAM_EVENT_BASE_VIEW_NAME,
-    type: 'mv',
-    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_EVENT_VIEW_NAME,
@@ -68,6 +67,12 @@ export const reportingViewsDef: SQLViewDef[] = [
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
+  },
+  {
+    viewName: CLICKSTREAM_EVENT_BASE_VIEW_SP_NAME,
+    spName: CLICKSTREAM_EVENT_BASE_VIEW_SP_NAME,
+    type: 'custom-mv',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,

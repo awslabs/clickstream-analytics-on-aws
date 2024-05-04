@@ -24,6 +24,7 @@ export const CLICKSTREAM_SESSION_M_MAX_VIEW_NAME = 'clickstream_session_m_max_vi
 
 export const CLICKSTREAM_EVENT_VIEW_NAME = 'clickstream_event_view_v3';
 export const CLICKSTREAM_EVENT_BASE_VIEW_NAME = 'clickstream_event_base_view';
+export const CLICKSTREAM_EVENT_BASE_VIEW_SP_NAME = 'clickstream_event_base_view_sp';
 export const CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER = 'clickstream_acquisition_country_new_user';
 export const CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP = 'clickstream_acquisition_country_new_user_sp';
 export const CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER = 'clickstream_acquisition_day_traffic_source_user';
