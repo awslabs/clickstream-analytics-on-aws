@@ -5,7 +5,7 @@ DECLARE
   latest_ingest_time_msec bigint;
 BEGIN
 
-  SELECT COALESCE(max(ingest_time_msec), (EXTRACT(epoch FROM CURRENT_TIMESTAMP - INTERVAL '7 days') * 1000)::bigint ) INTO latest_ingest_time_msec 
+  SELECT COALESCE(max(ingest_time_msec), (EXTRACT(epoch FROM CURRENT_TIMESTAMP - INTERVAL '1 days') * 1000)::bigint ) INTO latest_ingest_time_msec 
   FROM {{database_name}}.{{schema}}.clickstream_event_base_view
   where event_timestamp >= CURRENT_TIMESTAMP - INTERVAL '7 days'
   ;
@@ -130,7 +130,7 @@ BEGIN
   from {{database_name}}.{{schema}}.event_v2 e
   join {{database_name}}.{{schema}}.session_m_view s 
     on e.user_pseudo_id = s.user_pseudo_id and e.session_id = s.session_id
-  where ingest_time_msec >= latest_ingest_time_msec;
+  where ingest_time_msec > latest_ingest_time_msec;
 
   MERGE INTO {{database_name}}.{{schema}}.clickstream_event_base_view
   USING clickstream_event_base_view_stage as stage on clickstream_event_base_view.event_timestamp = stage.event_timestamp and clickstream_event_base_view.event_id = stage.event_id
