@@ -15,8 +15,8 @@ import { join } from 'path';
 import {
   CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
   CLICKSTREAM_EVENT_VIEW_NAME,
-  CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
-  CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER,
+  CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT,
+  CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
   CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
@@ -219,9 +219,9 @@ function _getDataSetDefs(
     datasets = [
       //Acquisition Sheet
       {
-        tableName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER,
+        tableName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV} `,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT} `,
         columns: [
           {
             Name: 'event_date',
@@ -918,9 +918,9 @@ function _getDataSetDefs(
     datasets = [
       //Acquisition Sheet
       {
-        tableName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER,
+        tableName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV} where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT} where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))`,
         columns: [
           {
             Name: 'event_date',

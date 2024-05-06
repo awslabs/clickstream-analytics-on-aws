@@ -332,7 +332,7 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      if (viewDef.type === undefined || viewDef.type !== 'sp') {
+      if (viewDef.type === undefined || (viewDef.type !== 'sp' && viewDef.type !== 'custom-mv')) {
         views.push(viewDef.viewName);
       }
       sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));

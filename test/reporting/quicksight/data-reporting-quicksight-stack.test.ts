@@ -1694,49 +1694,46 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Day_User_View',
             useSpice: 'no',
-            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_day_user_view_cnt_mv where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))",
-            columns:
-                [
-                  {
-                    Name: 'event_date',
-                    Type: 'DATETIME',
-                  },
-                  {
-                    Name: 'platform',
-                    Type: 'STRING',
-                  },
-                  {
-                    Name: 'Active users',
-                    Type: 'STRING',
-                  },
-                  {
-                    Name: 'New users',
-                    Type: 'INTEGER',
-                  },
-                  {
-                    Name: 'view_count',
-                    Type: 'INTEGER',
-                  },
-                ],
-            dateTimeDatasetParameter:
-                [
-                  {
-                    name: 'startDate02',
-                    timeGranularity: 'DAY',
-                  },
-                  {
-                    name: 'endDate02',
-                    timeGranularity: 'DAY',
-                  },
-                ],
-            projectedColumns:
-                [
-                  'event_date',
-                  'platform',
-                  'Active users',
-                  'New users',
-                  'view_count',
-                ],
+            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_day_user_view_cnt where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'Active users',
+                Type: 'STRING',
+              },
+              {
+                Name: 'New users',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'view_count',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate02',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate02',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'Active users',
+              'New users',
+              'view_count',
+            ],
           },
           {
             tableName: 'Day_Traffic_Source_User',
@@ -3344,38 +3341,36 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Day_User_View',
             useSpice: 'yes',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_acquisition_day_user_view_cnt_mv ',
-            columns:
-                [
-                  {
-                    Name: 'event_date',
-                    Type: 'DATETIME',
-                  },
-                  {
-                    Name: 'platform',
-                    Type: 'STRING',
-                  },
-                  {
-                    Name: 'Active users',
-                    Type: 'STRING',
-                  },
-                  {
-                    Name: 'New users',
-                    Type: 'INTEGER',
-                  },
-                  {
-                    Name: 'view_count',
-                    Type: 'INTEGER',
-                  },
-                ],
-            projectedColumns:
-                [
-                  'event_date',
-                  'platform',
-                  'Active users',
-                  'New users',
-                  'view_count',
-                ],
+            customSql: 'SELECT * FROM {{schema}}.clickstream_acquisition_day_user_view_cnt ',
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'Active users',
+                Type: 'STRING',
+              },
+              {
+                Name: 'New users',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'view_count',
+                Type: 'INTEGER',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'Active users',
+              'New users',
+              'view_count',
+            ],
           },
           {
             tableName: 'Day_Traffic_Source_User',
