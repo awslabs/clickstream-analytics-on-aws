@@ -205,7 +205,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         maxConcurrency: 1,
         itemsPath: '$.timezoneWithAppIdList',
         inputPath: '$',
-        parameters: {
+        itemSelector: {
           'timezoneWithAppId.$': '$$.Map.Item.Value',
           'detail.$': '$',
         },
