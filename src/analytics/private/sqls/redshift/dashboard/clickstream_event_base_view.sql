@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS {{database_name}}.{{schema}}.{{viewName}} (
   event_value_currency varchar(32),
   event_bundle_sequence_id bigint,
   ingest_time_msec bigint,
+  create_time timestamp,
   device_mobile_brand_name varchar(255),
   device_mobile_model_name varchar(255),
   device_manufacturer varchar(255),

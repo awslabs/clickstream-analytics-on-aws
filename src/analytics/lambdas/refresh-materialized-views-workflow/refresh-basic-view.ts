@@ -59,7 +59,7 @@ export const handler = async (event: RefreshBasicViewEvent) => {
     let queryId : string | undefined;
     const type = event.detail.type;
     if (type === 'custom-mv') {
-      sqlStatements.push(`CALL ${timezoneWithAppId.appId}.${viewName}();`);
+      sqlStatements.push(`CALL ${timezoneWithAppId.appId}.${viewName}(NULL, NULL);`);
 
       logger.info('sqlStatements', { sqlStatements });
       queryId = await executeStatements(

@@ -1,13 +1,26 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} () 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (p_start_time timestamp, p_end_time timestamp) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
-  latest_ingest_time_msec bigint;
+  start_time timestamp;
+  end_time timestamp;
 BEGIN
 
-  SELECT COALESCE(max(ingest_time_msec), (EXTRACT(epoch FROM CURRENT_TIMESTAMP - INTERVAL '1 days') * 1000)::bigint ) INTO latest_ingest_time_msec 
-  FROM {{database_name}}.{{schema}}.clickstream_event_base_view
-  where event_timestamp >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+  IF p_start_time IS NOT NULL and p_end_time IS NOT NULL THEN
+    SELECT 
+      p_start_time as start_time,
+      p_end_time as end_time INTO rec
+    ;
+    call {{database_name}}.{{schema}}.sp_clickstream_log('clickstream_event_base_view', 'info', 'refresh with custom time range:' || start_time || ' - ' || end_time);
+  ELSE
+    SELECT 
+      COALESCE(max(create_time), CURRENT_TIMESTAMP - INTERVAL '1 days') as start_time,
+      CURRENT_TIMESTAMP + INTERVAL '1 days' as end_time INTO rec
+    FROM {{database_name}}.{{schema}}.clickstream_event_base_view
+    WHERE event_timestamp >= CURRENT_TIMESTAMP - INTERVAL '7 days' --reduce scan range
+
+    call {{database_name}}.{{schema}}.sp_clickstream_log('clickstream_event_base_view', 'info', 'refresh time range:' || start_time || ' - ' || end_time);
+  END IF
   ;
 
   create temp table clickstream_event_base_view_stage (like {{database_name}}.{{schema}}.clickstream_event_base_view); 
@@ -25,6 +38,7 @@ BEGIN
     event_value_currency,
     event_bundle_sequence_id,
     ingest_time_msec,
+    create_time,
     device_mobile_brand_name,
     device_mobile_model_name,
     device_manufacturer,
@@ -130,7 +144,9 @@ BEGIN
   from {{database_name}}.{{schema}}.event_v2 e
   join {{database_name}}.{{schema}}.session_m_view s 
     on e.user_pseudo_id = s.user_pseudo_id and e.session_id = s.session_id
-  where ingest_time_msec > latest_ingest_time_msec;
+  where e.create_time > rec.start_time and e.create_time <= rec.end_time
+  and e.event_timestamp >= CURRENT_TIMESTAMP - INTERVAL '7 days' --reduce scan range
+  ;
 
   MERGE INTO {{database_name}}.{{schema}}.clickstream_event_base_view
   USING clickstream_event_base_view_stage as stage on clickstream_event_base_view.event_timestamp = stage.event_timestamp and clickstream_event_base_view.event_id = stage.event_id
@@ -149,6 +165,7 @@ BEGIN
     event_value_currency,
     event_bundle_sequence_id,
     ingest_time_msec,
+    create_time,
     device_mobile_brand_name,
     device_mobile_model_name,
     device_manufacturer,
@@ -264,6 +281,7 @@ BEGIN
     stage.event_value_currency,
     stage.event_bundle_sequence_id,
     stage.ingest_time_msec,
+    stage.create_time,
     stage.device_mobile_brand_name,
     stage.device_mobile_model_name,
     stage.device_manufacturer,
