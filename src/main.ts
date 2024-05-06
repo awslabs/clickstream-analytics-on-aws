@@ -326,7 +326,7 @@ class CNLambdaFunctionAspect implements IAspect {
       if (func.runtime && func.runtime == Runtime.NODEJS_20_X.toString()) {
         func.addPropertyOverride('Runtime',
           Fn.conditionIf(this.awsChinaCondition(Stack.of(node)).logicalId,
-            Runtime.NODEJS_18_X.toString(), func.architectures));
+            Runtime.NODEJS_18_X.toString(), func.runtime));
       }
     }
   }
