@@ -299,7 +299,7 @@ class NodejsFunctionSanityAspect implements IAspect {
       if (!(node instanceof SolutionNodejsFunction)) {
         Annotations.of(node).addError('Directly using NodejsFunction is not allowed in the solution. Use SolutionNodejsFunction instead.');
       }
-      if (node.runtime != Runtime.NODEJS_18_X) {
+      if (node.runtime != Runtime.NODEJS_20_X) {
         Annotations.of(node).addError('You must use Nodejs 18.x runtime for Lambda with javascript in this solution.');
       }
     }
@@ -323,11 +323,6 @@ class CNLambdaFunctionAspect implements IAspect {
               LogGroup: (func.loggingConfig as CfnFunction.LoggingConfigProperty).logGroup,
               SystemLogLevel: (func.loggingConfig as CfnFunction.LoggingConfigProperty).systemLogLevel,
             }));
-      }
-      if (func.architectures && func.architectures[0] == Architecture.arm64) {
-        func.addPropertyOverride('Architectures',
-          Fn.conditionIf(this.awsChinaCondition(Stack.of(node)).logicalId,
-            Fn.ref('AWS::NoValue'), func.architectures));
       }
     }
   }
