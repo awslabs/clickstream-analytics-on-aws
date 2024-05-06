@@ -321,8 +321,7 @@ const UserSegmentDetails: React.FC = () => {
                             {t('analytics:segment.details.refreshSchedule')}
                           </Box>
                           <Box margin={{ top: 'xxs' }}>
-                            {getRefreshSchedule(segment)}
-                            {moment.tz(timezone).format('Z')}
+                            {getRefreshSchedule(segment, timezone)}
                           </Box>
                         </div>
                         <div>
@@ -592,7 +591,7 @@ const UserSegmentDetails: React.FC = () => {
   );
 };
 
-const getRefreshSchedule = (segment) => {
+const getRefreshSchedule = (segment, timezone) => {
   if (!segment) {
     return '';
   }
@@ -606,7 +605,8 @@ const getRefreshSchedule = (segment) => {
     const segmentObj = segment.uiRenderingObject.segmentObject;
     const day = segmentObj.autoRefreshDayOption?.label ?? '';
     const time = segmentObj.autoRefreshTimeOption?.label ?? '';
-    return type + ' | ' + day + ' ' + time;
+    const tz = moment.tz(timezone).format('z');
+    return `${type} | ${day} ${time}(${tz})`;
   }
 };
 

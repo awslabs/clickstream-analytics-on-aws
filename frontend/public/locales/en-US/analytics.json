@@ -459,7 +459,8 @@
       "provideDesc": "Provide a short description",
       "selectUserGroup": "Please select user segment group",
       "segmentDescPlaceholder": "Provide a short description",
-      "filterByTimeRange": "Filter by a date and time range"
+      "filterByTimeRange": "Filter by a date and time range",
+      "appTimezone": "the app's timezone"
     },
     "details": {
       "title": "Segment Details",

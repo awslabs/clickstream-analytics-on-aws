@@ -385,7 +385,9 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                           />
                         </FormField>
                         <Box fontSize="heading-s" padding={{ top: 'xs' }}>
-                          {moment.tz(props.timezone).format('Z')}
+                          {`(${moment.tz(props.timezone).format('z')} - ${t(
+                            'analytics:segment.comp.appTimezone'
+                          )})`}
                         </Box>
                       </>
                     )}

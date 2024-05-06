@@ -459,7 +459,8 @@
       "provideDesc": "提供简短描述",
       "selectUserGroup": "请选择用户分群组",
       "segmentDescPlaceholder": "提供简短描述",
-      "filterByTimeRange": "按日期和时间范围过滤"
+      "filterByTimeRange": "按日期和时间范围过滤",
+      "appTimezone": "应用程序使用时区"
     },
     "details": {
       "title": "分群详细信息",
