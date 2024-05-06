@@ -210,6 +210,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setEventTimeMsec(ingestEvent.getEventTimestamp() + timeShiftInfo.getTimeDiff());
         clickstreamEvent.setEventTimestamp(new Timestamp(clickstreamEvent.getEventTimeMsec()));
         clickstreamEvent.setEventId(ingestEvent.getEventId());
+        clickstreamEvent.setIngestTimeMsec(extraParams.getIngestTimestamp());
 
         if (timeShiftInfo.isAdjusted()) {
             log.warn("eventTimestamp is adjusted from " + timeShiftInfo.getOriginEventTimestamp()
