@@ -46,12 +46,18 @@ public class ClickstreamEventParserTest extends BaseTest {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line
         String line = resourceFileContent("/original_data_nozip.json");
 
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         ClickstreamIngestRow row = clickstreamEventParser.ingestLineToRow(line);
 
         String expectedJson = this.resourceFileAsString("/expected/test_parse_line.json");
 
         Assertions.assertEquals(expectedJson, prettyJson(objectToJsonString(row)));
+    }
+
+    private static ClickstreamEventParser getClickstreamEventParser() {
+        TransformConfig transformConfig = new TransformConfig();
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance(transformConfig);
+        return clickstreamEventParser;
     }
 
     @Test
@@ -62,7 +68,7 @@ public class ClickstreamEventParserTest extends BaseTest {
         String secondLine = lines.split("\n")[1];
         String thirdLine = lines.split("\n")[2];
 
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         ClickstreamIngestRow row1 = clickstreamEventParser.ingestLineToRow(firstLine);
         Assertions.assertEquals(1682319109405L, row1.getUploadTimestamp());
 
@@ -76,7 +82,7 @@ public class ClickstreamEventParserTest extends BaseTest {
     void test_parse_data() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_data
         String line = resourceFileContent("/event_deser_input.json");
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         Event ingestEvent = clickstreamEventParser.ingestDataToEvent(line);
 
         String expectedJson = this.resourceFileAsString("/expected/test_parse_data.json");
@@ -92,7 +98,7 @@ public class ClickstreamEventParserTest extends BaseTest {
         setEnableEventTimeShift(false);
         String line = resourceFileContent("/original_data_nozip_upload_time.json");
         log.info(line);
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         String projectId = "test_project_id";
         String fileName = "original_data_nozip_upload_time.json";
 
@@ -115,7 +121,7 @@ public class ClickstreamEventParserTest extends BaseTest {
         setEnableEventTimeShift(true);
         String line = resourceFileContent("/original_data_nozip_uri_upload.json");
         log.info(line);
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         String projectId = "test_project_id";
         String fileName = "original_data_nozip_uri_upload.json";
 
@@ -135,7 +141,7 @@ public class ClickstreamEventParserTest extends BaseTest {
 
         String line = resourceFileContent("/original_data_nozip_upload_time.json");
         log.info(line);
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         String projectId = "test_project_id";
         String fileName = "original_data_nozip_upload_time.json";
 
@@ -155,7 +161,7 @@ public class ClickstreamEventParserTest extends BaseTest {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_to_db_row_single
         String line = resourceFileContent("/original_data_single.json");
         log.info(line);
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         String projectId = "test_project_id";
         String fileName = "original_data_single.json";
 
@@ -172,7 +178,7 @@ public class ClickstreamEventParserTest extends BaseTest {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_to_db_row_zip
         String line = resourceFileContent("/original_data.json");
         log.info(line);
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         String projectId = "test_project_id";
         String fileName = "original_data.json";
 
@@ -192,7 +198,7 @@ public class ClickstreamEventParserTest extends BaseTest {
 
         String line = resourceFileContent("/original_data_page_url.json");
         log.info(line);
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         String projectId = "test_project_id";
         String fileName = "original_data_page_url.json";
 
@@ -217,7 +223,10 @@ public class ClickstreamEventParserTest extends BaseTest {
         Map<String, RuleConfig> ruleConfigMap = new HashMap<>();
         ruleConfigMap.put("uba-app", getRuleConfigV0());
 
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance(ruleConfigMap);
+        TransformConfig transformConfig = new TransformConfig();
+        transformConfig.setAppRuleConfig(ruleConfigMap);
+
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance(transformConfig);
         String projectId = "test_project_id";
         String fileName = "original_data_page_url.json";
 
@@ -241,9 +250,11 @@ public class ClickstreamEventParserTest extends BaseTest {
         log.info(line);
         Map<String, RuleConfig> ruleConfigMap = new HashMap<>();
         ruleConfigMap.put("uba-app", getRuleConfigV0());
+        TransformConfig transformConfig = new TransformConfig();
+        transformConfig.setAppRuleConfig(ruleConfigMap);
+        transformConfig.setTrafficSourceEnrichmentDisabled(false);
 
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
-        clickstreamEventParser.setAppRuleConfig(ruleConfigMap);
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
 
         String projectId = "test_project_id";
         String fileName = "original_data_page_url.json";
@@ -266,7 +277,7 @@ public class ClickstreamEventParserTest extends BaseTest {
 
         String line = resourceFileContent("/original_data_with_items.json");
         log.info(line);
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         String projectId = "test_project_id";
         String fileName = "original_data_with_items.json";
 
@@ -288,7 +299,7 @@ public class ClickstreamEventParserTest extends BaseTest {
 
         String line = resourceFileContent("/original_data_page_url.json");
         log.info(line);
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         String projectId = "test_project_id";
         String fileName = "original_data_page_url.json";
 
@@ -307,7 +318,7 @@ public class ClickstreamEventParserTest extends BaseTest {
     void test_parse_empty_data() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_empty_data
 
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         ExtraParams extraParams = ExtraParams.builder().build();
         ParseDataResult r = clickstreamEventParser.parseData("", extraParams, 0);
         Assertions.assertEquals(0, r.getClickstreamEventList().size());

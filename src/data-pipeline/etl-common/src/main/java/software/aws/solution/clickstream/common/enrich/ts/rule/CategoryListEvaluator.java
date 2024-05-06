@@ -58,7 +58,7 @@ public final class CategoryListEvaluator {
         List<CategoryItem> categoryItems;
         categoryItems = objectMapper.readValue(jsonArray, new TypeReference<List<CategoryItem>>() {
         });
-        log.info("Category rules read: {}", categoryItems.size());
+        log.debug("Category rules read: {}", categoryItems.size());
 
         Map<String, CategoryItem> categoryMap = new HashMap<>();
         Map<String, String> sourceCategoryMap = new HashMap<>();
@@ -67,7 +67,7 @@ public final class CategoryListEvaluator {
             sourceCategoryMap.put(categoryItem.getSource(), categoryItem.getCategory());
         }
 
-        log.info("Category rules map size: {}", categoryMap.size());
+        log.debug("Category rules map size: {}", categoryMap.size());
 
         CategoryListEvaluator categoryListEvaluator = new CategoryListEvaluator();
         categoryListEvaluator.setCategoryMap(categoryMap);
@@ -79,12 +79,12 @@ public final class CategoryListEvaluator {
     public static CategoryListEvaluator fromJsonFile(final String fileName) throws IOException {
         File f = new File(fileName);
         if (f.exists() && !f.isDirectory()) {
-            log.info("Reading category rules from file: {}", fileName);
+            log.debug("Reading category rules from file: {}", fileName);
             return fromJson(readTextFile(fileName));
         }
 
         if (CategoryListEvaluator.class.getClassLoader().getResource(fileName) != null) {
-            log.info("Reading category rules from resource file: {}", fileName);
+            log.debug("Reading category rules from resource file: {}", fileName);
             return fromJson(readResourceFile(fileName));
         }
 
@@ -138,7 +138,7 @@ public final class CategoryListEvaluator {
         } else {
             categoryAndTerms.setCategory(UNASSIGNED);
             categoryAndTerms.setSource(hostName);
-            log.info("No category found for url: {}", theReferrerUrl);
+            log.debug("No category found for url: {}", theReferrerUrl);
         }
         log.debug("evaluate() return: {}", categoryAndTerms);
         return categoryAndTerms;

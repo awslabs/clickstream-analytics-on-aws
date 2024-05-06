@@ -14,19 +14,18 @@
 package software.aws.solution.clickstream.udfconverter;
 
 import lombok.extern.slf4j.Slf4j;
-import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 
-import java.util.Map;
 
 import static software.aws.solution.clickstream.transformer.TransformerNameEnum.CLICKSTREAM;
 
 @Slf4j
 public class ClickstreamDataConverterV3 extends BaseDataConverter {
-    private final Map<String, RuleConfig> appRuleConfig;
+    private final TransformConfig transformConfig;
 
-    public ClickstreamDataConverterV3(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    public ClickstreamDataConverterV3(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
     @Override
@@ -35,8 +34,8 @@ public class ClickstreamDataConverterV3 extends BaseDataConverter {
     }
 
     @Override
-    public Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
+    public TransformConfig getTransformConfig() {
+        return this.transformConfig;
     }
 
 }

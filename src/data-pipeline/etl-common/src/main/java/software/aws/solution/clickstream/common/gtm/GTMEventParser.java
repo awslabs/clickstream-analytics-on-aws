@@ -42,18 +42,18 @@ public final class GTMEventParser extends BaseEventParser {
     private static GTMEventParser instance;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private final Map<String, RuleConfig> appRuleConfig;
-    private GTMEventParser(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    private final TransformConfig transformConfig;
+    private GTMEventParser(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
     public static GTMEventParser getInstance() {
         // use default config rule in java resource file
         return getInstance(null);
     }
 
-    public static GTMEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+    public static GTMEventParser getInstance(final TransformConfig transformConfig) {
         if (instance == null) {
-            instance = new GTMEventParser(appRuleConfig);
+            instance = new GTMEventParser(transformConfig);
         }
         return instance;
     }
@@ -77,6 +77,12 @@ public final class GTMEventParser extends BaseEventParser {
         }
         return OBJECT_MAPPER.readTree(ingestDataField);
     }
+
+    @Override
+    protected TransformConfig getTransformConfig() {
+        return this.transformConfig;
+    }
+
     @Override
     public ParseDataResult parseData(final String dataString, final ExtraParams extraParams, final int index) throws JsonProcessingException {
         ParseDataResult parseDataResult = new ParseDataResult();
@@ -196,7 +202,11 @@ public final class GTMEventParser extends BaseEventParser {
         clickstreamEvent.setCustomParameters(customParameters);
 
         // set traffic source
-        setTrafficSourceBySourceParser(clickstreamEvent);
+        if (isDisableTrafficSourceEnrichment()) {
+            log.info("Traffic source enrichment is disabled");
+        } else {
+            setTrafficSourceBySourceParser(clickstreamEvent);
+        }
 
         Map<String, String> processInfo = new HashMap<>();
         processInfo.put("rid", extraParams.getRid());
@@ -405,10 +415,5 @@ public final class GTMEventParser extends BaseEventParser {
             }
         }
         return clickstreamItems;
-    }
-
-    @Override
-    protected Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
     }
 }

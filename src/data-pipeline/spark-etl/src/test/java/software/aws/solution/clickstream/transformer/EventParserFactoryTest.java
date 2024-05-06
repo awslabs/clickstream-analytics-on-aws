@@ -21,6 +21,7 @@ import static software.aws.solution.clickstream.transformer.TransformerNameEnum.
 
 import software.aws.solution.clickstream.common.ClickstreamEventParser;
 import software.aws.solution.clickstream.common.EventParser;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.common.gtm.GTMEventParser;
 import software.aws.solution.clickstream.common.sensors.SensorsEventParser;
 import software.aws.solution.clickstream.udfconverter.EventParserFactory;
@@ -31,19 +32,22 @@ public class EventParserFactoryTest {
 
     @Test
     public void shouldReturnGTMEventParser() {
-        EventParser parser = EventParserFactory.getEventParser(GTM_SERVER_DATA, new HashMap<>());
+        TransformConfig transformConfig = new TransformConfig();
+
+        EventParser parser = EventParserFactory.getEventParser(GTM_SERVER_DATA, transformConfig);
         assertTrue(parser instanceof GTMEventParser);
     }
 
     @Test
     public void shouldReturnFakeSensorEventParser() {
-        EventParser parser = EventParserFactory.getEventParser(SENSORS_DATA, new HashMap<>());
+        TransformConfig transformConfig = new TransformConfig();
+        EventParser parser = EventParserFactory.getEventParser(SENSORS_DATA, transformConfig);
         assertTrue(parser instanceof SensorsEventParser);
     }
 
     @Test
     public void shouldReturnClickstreamEventParser() {
-        EventParser parser = EventParserFactory.getEventParser(CLICKSTREAM, new HashMap<>());
+        EventParser parser = EventParserFactory.getEventParser(CLICKSTREAM, null);
         assertTrue(parser instanceof ClickstreamEventParser);
     }
 }

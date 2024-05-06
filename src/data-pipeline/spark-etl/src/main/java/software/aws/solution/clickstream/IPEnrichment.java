@@ -33,6 +33,7 @@ import software.aws.solution.clickstream.util.*;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,6 +45,7 @@ import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 @Slf4j
 public class IPEnrichment {
+    private static final Map<String, Row> CACHED_IP_MAP = new HashMap<>();
     public Dataset<Row> transform(final Dataset<Row> dataset) {
         UserDefinedFunction udfEnrichIP = udf(enrich(), DataTypes.createStructType(
                 new StructField[]{
@@ -71,14 +73,18 @@ public class IPEnrichment {
 
     static UDF2<String, String, Row> enrich() {
         return (ipValue, localeValue) -> {
+            if (CACHED_IP_MAP.containsKey(ipValue)) {
+                return CACHED_IP_MAP.get(ipValue);
+            }
             GenericRow defaultRow = new GenericRow(
                     new Object[]{null, null, null, null, null, null, localeValue}
             );
+
             try (Reader reader = new Reader(new File(SparkFiles.get("GeoLite2-City.mmdb")),
                     new CHMCache(1024 * 128))) {
                 InetAddress address = InetAddress.getByName(ipValue);
                 LookupResult result = reader.get(address, LookupResult.class);
-                return Optional.ofNullable(result)
+                GenericRow resultRow = Optional.ofNullable(result)
                         .map(geo -> new GenericRow(new Object[]{
                                 Optional.ofNullable(geo.getCity()).map(LookupResult.City::getName).orElse(null),
                                 Optional.ofNullable(geo.getContinent()).map(LookupResult.Continent::getName).orElse(null),
@@ -89,6 +95,8 @@ public class IPEnrichment {
                                 localeValue
                         }))
                         .orElse(defaultRow);
+                CACHED_IP_MAP.put(ipValue, resultRow);
+                return resultRow;
             } catch (Exception e) {
                 log.warn(e.getMessage());
                 return defaultRow;

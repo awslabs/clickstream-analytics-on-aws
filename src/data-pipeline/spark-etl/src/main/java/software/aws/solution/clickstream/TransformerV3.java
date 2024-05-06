@@ -28,7 +28,7 @@ import software.aws.solution.clickstream.transformer.BaseTransformerV3;
 import software.aws.solution.clickstream.transformer.Cleaner;
 import software.aws.solution.clickstream.udfconverter.ClickstreamDataConverterV3;
 import software.aws.solution.clickstream.udfconverter.DatasetConverter;
-import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 import software.aws.solution.clickstream.util.ContextUtil;
 import software.aws.solution.clickstream.util.DatasetUtil;
@@ -262,7 +262,7 @@ public class TransformerV3 extends BaseTransformerV3 {
         if (this.getTransformConfig() == null) {
             throw new ExecuteTransformerException("Transform config is not set");
         }
-        return new ClickstreamDataConverterV3(this.transformConfig.getAppRuleConfig());
+        return new ClickstreamDataConverterV3(this.transformConfig);
     }
 
 
