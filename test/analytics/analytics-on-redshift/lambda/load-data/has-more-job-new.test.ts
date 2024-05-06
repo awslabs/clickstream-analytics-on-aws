@@ -89,10 +89,6 @@ test('Should get all JOB_NEW files', async () => {
   const response = await handler(inputEvent, context);
   expect(response).toEqual({
     processingFilesCount: {
-      event: 1,
-      event_parameter: 1,
-      item: 1,
-      user: 1,
       event_v2: 1,
       item_v2: 1,
       user_v2: 1,
@@ -118,7 +114,7 @@ test('Should get all JOB_NEW files', async () => {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames:
      { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-    ExpressionAttributeValues: { ':job_status': 'user#PROCESSING', ':s3_uri': `s3://${inputEvent.odsSourceBucket}/project1/test/user/` },
+    ExpressionAttributeValues: { ':job_status': 'session#PROCESSING', ':s3_uri': `s3://${inputEvent.odsSourceBucket}/project1/test/session/` },
     FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
     IndexName: 'by_status',
     KeyConditionExpression: '#job_status = :job_status',
