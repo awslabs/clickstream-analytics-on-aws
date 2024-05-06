@@ -21,6 +21,7 @@ import 'aws-sdk-client-mock-jest';
 const refreshBasicViewEvent: RefreshBasicViewEvent = {
   detail: {
     viewName: 'view1',
+    type: 'mv',
   },
   timezoneWithAppId: {
     appId: 'app1',

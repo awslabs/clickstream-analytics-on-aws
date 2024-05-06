@@ -88,7 +88,7 @@ export interface CustomProperties {
 
 type SQLBasic = {
   readonly multipleLine?: 'true' | 'false';
-  readonly type?: 'mv' | 'sp' | 'table' | 'view';
+  readonly type?: 'mv' | 'sp' | 'table' | 'view' | 'custom-mv';
   readonly scheduleRefresh?: 'true' | 'false';
   readonly timezoneSensitive?: 'true' | 'false';
 }

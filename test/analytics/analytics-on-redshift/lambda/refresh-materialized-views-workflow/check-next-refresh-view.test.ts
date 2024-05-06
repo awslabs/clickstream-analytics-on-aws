@@ -53,6 +53,7 @@ describe('Lambda - check next refresh task', () => {
     expect(resp).toEqual({
       detail: {
         viewName: 'user_m_max_view',
+        type: 'mv',
         nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
       },
       timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
@@ -65,6 +66,20 @@ describe('Lambda - check next refresh task', () => {
     expect(resp).toEqual({
       detail: {
         viewName: 'user_m_view_v2',
+        type: 'mv',
+        nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
+      },
+      timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
+    });
+  });
+
+  test('clickstream_event_base_view_sp is triggered from upstream step function', async () => {
+    checkNextRefreshViewEvent.detail.completeRefreshView = 'session_m_view';
+    const resp = await handler(checkNextRefreshViewEvent);
+    expect(resp).toEqual({
+      detail: {
+        viewName: 'clickstream_event_base_view_sp',
+        type: 'custom-mv',
         nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
       },
       timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
@@ -89,6 +104,7 @@ describe('Lambda - check next refresh task', () => {
     expect(resp).toEqual({
       detail: {
         viewName: 'user_m_view_v2',
+        type: 'mv',
         nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
       },
       timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
@@ -102,6 +118,7 @@ describe('Lambda - check next refresh task', () => {
     expect(resp).toEqual({
       detail: {
         viewName: 'user_m_max_view',
+        type: 'mv',
         nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
       },
       timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,

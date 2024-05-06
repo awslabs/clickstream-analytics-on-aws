@@ -82,6 +82,7 @@ export const handler = async (event: CheckNextRefreshViewEvent) => {
     detail: {
       nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
       viewName: nextView?.name,
+      type: nextView?.type,
     },
     timezoneWithAppId,
   };
@@ -103,7 +104,7 @@ export function getRefreshList() {
 
   reportingViewsDef.forEach((def) => {
     if (def.scheduleRefresh === 'true') {
-      if (def.type === 'mv') {
+      if (def.type === 'mv' || def.type === 'custom-mv') {
         mvViews.push({
           name: def.viewName,
           type: def.type,
