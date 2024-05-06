@@ -84,7 +84,7 @@ BEGIN
 		event_timestamp TIMESTAMP,
     property_category VARCHAR(20),
     property_name VARCHAR(255),
-    property_value VARCHAR(512),
+    property_value VARCHAR(MAX),
     value_type VARCHAR(255),
     platform VARCHAR(255)	
   );
