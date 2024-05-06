@@ -6,7 +6,7 @@
   "event_value" : 34.5,
   "event_value_currency" : "USD",
   "event_bundle_sequence_id" : 125,
-  "ingest_time_msec" : null,
+  "ingest_time_msec" : 1682319109102,
   "device_mobile_brand_name" : "Brand HUAWEI",
   "device_mobile_model_name" : "HUAWEI-P10",
   "device_manufacturer" : "Make HUAWEI",
