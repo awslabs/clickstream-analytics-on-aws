@@ -17,6 +17,7 @@ import {
   generateCronDateRange,
   generateRedshiftInterval,
   generateStr,
+  getDateTimeWithTimezoneString, getLocaleDateString,
   validateAppId,
   validateEmails,
   validateProjectId,
@@ -310,5 +311,15 @@ describe('validateAppId', () => {
   it('returns false for an app ID that contains invalid characters', () => {
     const invalidAppId = 'InvalidAppId$';
     expect(validateAppId(invalidAppId)).toBe(false);
+  });
+});
+
+describe('generate date time string', () => {
+  it('returns locale date time with timezone', () => {
+    expect(getDateTimeWithTimezoneString(1714981584000, 'Asia/Shanghai')).toEqual('2024-05-06 15:46:24(CST)');
+  });
+
+  it('returns locale date string', () => {
+    expect(getLocaleDateString(1714981584000, 'Asia/Shanghai')).toEqual('2024-05-06');
   });
 });

@@ -92,8 +92,8 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
     // Get app details
     const getAppDetails = async () => {
       const appApiResponse = await getApplicationDetail({
-        id: appId ?? '',
-        pid: projectId ?? '',
+        id: defaultStr(appId),
+        pid: defaultStr(projectId),
       });
       if (appApiResponse.success) {
         const { timezone } = appApiResponse.data;

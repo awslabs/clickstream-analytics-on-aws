@@ -14,6 +14,7 @@ import {
   SegmentDdbItem,
   SegmentJobStatus,
   SegmentJobStatusItem,
+  SegmentUserItem,
 } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
@@ -29,6 +30,7 @@ import {
   StatusIndicator,
 } from '@cloudscape-design/components';
 import Table from '@cloudscape-design/components/table';
+import { getApplicationDetail } from 'apis/application';
 import {
   deleteSegment,
   getExportFileS3Url,
@@ -40,14 +42,22 @@ import {
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
+import moment from 'moment-timezone';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { defaultStr } from '../../../ts/utils';
+import {
+  createDownloadLink,
+  defaultStr,
+  getDateTimeWithTimezoneString,
+  getLocaleDateString,
+  ternary,
+} from 'ts/utils';
 
 const UserSegmentDetails: React.FC = () => {
   const { t } = useTranslation();
   const [segment, setSegment] = useState<SegmentDdbItem>();
+  const [timezone, setTimezone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [segmentJobs, setSegmentJobs] = useState<SegmentJobStatusItem[]>([]);
   const [isJobsLoading, setIsJobsLoading] = useState(false);
@@ -74,6 +84,7 @@ const UserSegmentDetails: React.FC = () => {
     },
   ];
 
+  // Get segment setting details
   useEffect(() => {
     const getSegmentDetails = async () => {
       setIsLoading(true);
@@ -84,8 +95,17 @@ const UserSegmentDetails: React.FC = () => {
       });
       if (segmentApiResponse.success) {
         const segment: SegmentDdbItem = segmentApiResponse.data;
-        console.log(segment);
         setSegment(segment);
+      }
+
+      // Get app details for timezone info
+      const appApiResponse = await getApplicationDetail({
+        id: appId,
+        pid: projectId,
+      });
+      if (appApiResponse.success) {
+        const { timezone } = appApiResponse.data;
+        setTimezone(timezone);
       }
 
       setIsLoading(false);
@@ -94,6 +114,7 @@ const UserSegmentDetails: React.FC = () => {
     getSegmentDetails();
   }, []);
 
+  // Get segment job history and sample data
   useEffect(() => {
     getSegmentJobHistory();
     getSegmentSampleData();
@@ -116,50 +137,48 @@ const UserSegmentDetails: React.FC = () => {
     const sampleDataResponse = await getSampleData({ segmentId });
     if (sampleDataResponse.success) {
       setSegmentSample(sampleDataResponse.data as SegmentJobStatusItem);
-      console.log(sampleDataResponse.data);
     }
 
     setIsSampleDataLoading(false);
   };
 
   const constructSegmentTrendChart = () => {
-    const getTimeLabel = (time: number) => new Date(time).toLocaleString();
+    const getTimeLabel = (time: number) =>
+      getDateTimeWithTimezoneString(time, timezone);
     const jobs = segmentJobs.filter((job) => job.jobStatus === 'Completed');
 
     return (
       <MixedLineBarChart
-        series={
-          jobs.length === 0
-            ? []
-            : [
-                {
-                  title: defaultStr(
-                    t('analytics:segment.details.segmentUserNumber')
-                  ),
-                  type: 'bar',
-                  data: jobs.map((job) => ({
-                    x: getTimeLabel(job.jobStartTime),
-                    y: job.segmentUserNumber,
-                  })),
-                },
-                {
-                  title: defaultStr(
-                    t('analytics:segment.details.totalUserNumber')
-                  ),
-                  type: 'line',
-                  data: jobs.map((job) => ({
-                    x: getTimeLabel(job.jobStartTime),
-                    y: job.totalUserNumber,
-                  })),
-                },
-              ]
-        }
+        series={ternary(
+          jobs.length === 0,
+          [],
+          [
+            {
+              title: defaultStr(
+                t('analytics:segment.details.segmentUserNumber')
+              ),
+              type: 'bar',
+              data: jobs.map((job) => ({
+                x: getTimeLabel(job.jobStartTime),
+                y: job.segmentUserNumber,
+              })),
+            },
+            {
+              title: defaultStr(t('analytics:segment.details.totalUserNumber')),
+              type: 'line',
+              data: jobs.map((job) => ({
+                x: getTimeLabel(job.jobStartTime),
+                y: job.totalUserNumber,
+              })),
+            },
+          ]
+        )}
         xDomain={jobs.map((job) => getTimeLabel(job.jobStartTime))}
         xScaleType="categorical"
         xTitle={defaultStr(t('analytics:segment.details.date'))}
         yTitle={defaultStr(t('analytics:segment.details.userNumber'))}
         hideFilter
-        statusType={isJobsLoading ? 'loading' : 'finished'}
+        statusType={ternary(isJobsLoading, 'loading', 'finished')}
         empty={
           <Box textAlign="center" color="inherit">
             <b>{defaultStr(t('analytics:segment.details.noSegmentJobData'))}</b>
@@ -170,26 +189,29 @@ const UserSegmentDetails: React.FC = () => {
   };
 
   const constructJobStatusCell = (status: SegmentJobStatus) => {
-    if (status === SegmentJobStatus.COMPLETED) {
-      return (
-        <StatusIndicator type="success">
-          {t('status.completed')}
-        </StatusIndicator>
-      );
-    } else if (status === SegmentJobStatus.IN_PROGRESS) {
-      return (
-        <StatusIndicator type="in-progress">
-          {t('status.inProgress')}
-        </StatusIndicator>
-      );
-    } else if (status === SegmentJobStatus.FAILED) {
-      return (
-        <StatusIndicator type="error">{t('status.failed')}</StatusIndicator>
-      );
-    } else if (status === SegmentJobStatus.PENDING) {
-      return (
-        <StatusIndicator type="pending">{t('status.pending')}</StatusIndicator>
-      );
+    switch (status) {
+      case SegmentJobStatus.COMPLETED:
+        return (
+          <StatusIndicator type="success">
+            {t('status.completed')}
+          </StatusIndicator>
+        );
+      case SegmentJobStatus.IN_PROGRESS:
+        return (
+          <StatusIndicator type="in-progress">
+            {t('status.inProgress')}
+          </StatusIndicator>
+        );
+      case SegmentJobStatus.FAILED:
+        return (
+          <StatusIndicator type="error">{t('status.failed')}</StatusIndicator>
+        );
+      case SegmentJobStatus.PENDING:
+        return (
+          <StatusIndicator type="pending">
+            {t('status.pending')}
+          </StatusIndicator>
+        );
     }
   };
 
@@ -224,7 +246,7 @@ const UserSegmentDetails: React.FC = () => {
                     header={
                       <Header
                         variant="h2"
-                        description={segment?.description ?? ''}
+                        description={defaultStr(segment?.description)}
                         actions={
                           <ButtonDropdown
                             items={[
@@ -288,7 +310,7 @@ const UserSegmentDetails: React.FC = () => {
                           </ButtonDropdown>
                         }
                       >
-                        {segment?.name ?? ''}
+                        {defaultStr(segment?.name)}
                       </Header>
                     }
                   >
@@ -300,6 +322,7 @@ const UserSegmentDetails: React.FC = () => {
                           </Box>
                           <Box margin={{ top: 'xxs' }}>
                             {getRefreshSchedule(segment)}
+                            {moment.tz(timezone).format('Z')}
                           </Box>
                         </div>
                         <div>
@@ -307,7 +330,7 @@ const UserSegmentDetails: React.FC = () => {
                             {t('analytics:segment.details.refreshExpiration')}
                           </Box>
                           <Box margin={{ top: 'xxs' }}>
-                            {getAutoRefreshExpiration(segment)}
+                            {getAutoRefreshExpiration(segment, timezone)}
                           </Box>
                         </div>
                         <div>
@@ -315,7 +338,7 @@ const UserSegmentDetails: React.FC = () => {
                             {t('analytics:segment.details.createdBy')}
                           </Box>
                           <Box margin={{ top: 'xxs' }}>
-                            {getCreatedByInfo(segment)}
+                            {getCreatedByInfo(segment, timezone)}
                           </Box>
                         </div>
                         <div>
@@ -323,7 +346,7 @@ const UserSegmentDetails: React.FC = () => {
                             {t('analytics:segment.details.updatedBy')}
                           </Box>
                           <Box margin={{ top: 'xxs' }}>
-                            {getUpdatedByInfo(segment)}
+                            {getUpdatedByInfo(segment, timezone)}
                           </Box>
                         </div>
                       </ColumnLayout>
@@ -360,15 +383,23 @@ const UserSegmentDetails: React.FC = () => {
                           id: 'startTime',
                           header: t('analytics:segment.details.startTime'),
                           cell: (e: SegmentJobStatusItem) =>
-                            new Date(e.jobStartTime).toLocaleString(),
+                            getDateTimeWithTimezoneString(
+                              e.jobStartTime,
+                              timezone
+                            ),
                         },
                         {
                           id: 'endTime',
                           header: t('analytics:segment.details.endTime'),
                           cell: (e: SegmentJobStatusItem) =>
-                            e.jobEndTime === 0
-                              ? '-'
-                              : new Date(e.jobEndTime).toLocaleString(),
+                            ternary(
+                              e.jobEndTime === 0,
+                              '-',
+                              getDateTimeWithTimezoneString(
+                                e.jobEndTime,
+                                timezone
+                              )
+                            ),
                         },
                         {
                           id: 'userNumber',
@@ -416,14 +447,10 @@ const UserSegmentDetails: React.FC = () => {
                                   if (segmentApiResponse.success) {
                                     const url =
                                       segmentApiResponse.data.presignedUrl;
-                                    console.log(url);
-
-                                    const link = document.createElement('a');
-                                    link.href = url;
-                                    link.download = `${
-                                      segment?.name || 'segment'
-                                    }.csv`;
-                                    link.click();
+                                    const name =
+                                      defaultStr(segment?.name, 'segment') +
+                                      '.csv';
+                                    createDownloadLink(url, name);
                                   }
                                 }}
                               />
@@ -452,92 +479,99 @@ const UserSegmentDetails: React.FC = () => {
                         {
                           id: 'user_pseudo_id',
                           header: 'User pseudo id',
-                          cell: (e: any) => e.user_pseudo_id,
+                          cell: (e: SegmentUserItem) => e.user_pseudo_id,
                         },
                         {
                           id: 'user_id',
                           header: 'User id',
-                          cell: (e: any) => e.user_id,
+                          cell: (e: SegmentUserItem) => e.user_id,
                         },
                         {
                           id: 'event_timestamp',
                           header: 'Event timestamp',
-                          cell: (e: any) => e.event_timestamp,
+                          cell: (e: SegmentUserItem) => e.event_timestamp,
                         },
                         {
                           id: 'user_properties_json_str',
                           header: 'User properties',
-                          cell: (e: any) => e.user_properties_json_str,
+                          cell: (e: SegmentUserItem) =>
+                            e.user_properties_json_str,
                         },
                         {
                           id: 'first_touch_time_msec',
                           header: 'First touch time',
-                          cell: (e: any) => e.first_touch_time_msec,
+                          cell: (e: SegmentUserItem) => e.first_touch_time_msec,
                         },
                         {
                           id: 'first_visit_date',
                           header: 'First visit date',
-                          cell: (e: any) => e.first_visit_date,
+                          cell: (e: SegmentUserItem) => e.first_visit_date,
                         },
                         {
                           id: 'first_app_install_source',
                           header: 'First app install source',
-                          cell: (e: any) => e.first_app_install_source,
+                          cell: (e: SegmentUserItem) =>
+                            e.first_app_install_source,
                         },
                         {
                           id: 'first_referrer',
                           header: 'First referrer',
-                          cell: (e: any) => e.first_referrer,
+                          cell: (e: SegmentUserItem) => e.first_referrer,
                         },
                         {
                           id: 'first_traffic_category',
                           header: 'First traffic category',
-                          cell: (e: any) => e.first_traffic_category,
+                          cell: (e: SegmentUserItem) =>
+                            e.first_traffic_category,
                         },
                         {
                           id: 'first_traffic_source',
                           header: 'First traffic source',
-                          cell: (e: any) => e.first_traffic_source,
+                          cell: (e: SegmentUserItem) => e.first_traffic_source,
                         },
                         {
                           id: 'first_traffic_medium',
                           header: 'First traffic medium',
-                          cell: (e: any) => e.first_traffic_medium,
+                          cell: (e: SegmentUserItem) => e.first_traffic_medium,
                         },
                         {
                           id: 'first_traffic_campaign_id',
                           header: 'First traffic campaign id',
-                          cell: (e: any) => e.first_traffic_campaign_id,
+                          cell: (e: SegmentUserItem) =>
+                            e.first_traffic_campaign_id,
                         },
                         {
                           id: 'first_traffic_campaign',
                           header: 'First traffic campaign',
-                          cell: (e: any) => e.first_traffic_campaign,
+                          cell: (e: SegmentUserItem) =>
+                            e.first_traffic_campaign,
                         },
                         {
                           id: 'first_traffic_content',
                           header: 'First traffic content',
-                          cell: (e: any) => e.first_traffic_content,
+                          cell: (e: SegmentUserItem) => e.first_traffic_content,
                         },
                         {
                           id: 'first_traffic_term',
                           header: 'First traffic term',
-                          cell: (e: any) => e.first_traffic_term,
+                          cell: (e: SegmentUserItem) => e.first_traffic_term,
                         },
                         {
                           id: 'first_traffic_clid_platform',
                           header: 'First traffic clid platform',
-                          cell: (e: any) => e.first_traffic_clid_platform,
+                          cell: (e: SegmentUserItem) =>
+                            e.first_traffic_clid_platform,
                         },
                         {
                           id: 'first_traffic_clid',
                           header: 'First traffic clid',
-                          cell: (e: any) => e.first_traffic_clid,
+                          cell: (e: SegmentUserItem) => e.first_traffic_clid,
                         },
                         {
                           id: 'first_traffic_channel_group',
                           header: 'First traffic channel group',
-                          cell: (e: any) => e.first_traffic_channel_group,
+                          cell: (e: SegmentUserItem) =>
+                            e.first_traffic_channel_group,
                         },
                       ]}
                       items={segmentSample?.sampleData || []}
@@ -576,16 +610,22 @@ const getRefreshSchedule = (segment) => {
   }
 };
 
-const getAutoRefreshExpiration = (segment: SegmentDdbItem | undefined) => {
+const getAutoRefreshExpiration = (
+  segment: SegmentDdbItem | undefined,
+  timezone: string
+) => {
   if (!segment) {
     return '-';
   }
 
   const expiration = segment?.refreshSchedule.expireAfter;
-  return new Date(expiration).toLocaleString();
+  return getDateTimeWithTimezoneString(expiration, timezone);
 };
 
-const getCreatedByInfo = (segment: SegmentDdbItem | undefined) => {
+const getCreatedByInfo = (
+  segment: SegmentDdbItem | undefined,
+  timezone: string
+) => {
   if (!segment) {
     return '-';
   }
@@ -593,12 +633,15 @@ const getCreatedByInfo = (segment: SegmentDdbItem | undefined) => {
   return (
     <>
       <Box variant="p">{segment.createBy}</Box>
-      <Box variant="p">{new Date(segment.createAt).toLocaleDateString()}</Box>
+      <Box variant="p">{getLocaleDateString(segment.createAt, timezone)}</Box>
     </>
   );
 };
 
-const getUpdatedByInfo = (segment: SegmentDdbItem | undefined) => {
+const getUpdatedByInfo = (
+  segment: SegmentDdbItem | undefined,
+  timezone: string
+) => {
   if (!segment) {
     return '-';
   }
@@ -607,7 +650,7 @@ const getUpdatedByInfo = (segment: SegmentDdbItem | undefined) => {
     <>
       <Box variant="p">{segment.lastUpdateBy}</Box>
       <Box variant="p">
-        {new Date(segment.lastUpdateAt).toLocaleDateString()}
+        {getLocaleDateString(segment.lastUpdateAt, timezone)}
       </Box>
     </>
   );
