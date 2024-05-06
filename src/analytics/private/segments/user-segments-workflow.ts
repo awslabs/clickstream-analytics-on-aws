@@ -23,6 +23,7 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
   Choice,
   Condition,
+  DefinitionBody,
   Fail,
   IStateMachine,
   LogLevel,
@@ -178,7 +179,7 @@ export class UserSegmentsWorkflow extends Construct {
     segmentJobStatusTask.next(jobStatusChoice);
 
     return new StateMachine(this, 'StateMachine', {
-      definition: segmentJobInitTask,
+      definitionBody: DefinitionBody.fromChainable(segmentJobInitTask),
       logs: {
         destination: createLogGroup(this, {
           prefix: '/aws/vendedlogs/states/Clickstream/UserSegmentsStateMachine',
