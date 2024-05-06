@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
+import { getAWSSDKClientConfig, logger } from '@aws/clickstream-base-lib';
 import {
   CloudFormationClient,
   CreateStackCommand,
@@ -82,7 +82,7 @@ export const handler = async (event: SfnStackEvent, _context: any): Promise<any>
 export const createStack = async (event: SfnStackEvent) => {
   try {
     const cloudFormationClient = new CloudFormationClient({
-      ...aws_sdk_client_common_config,
+      ...getAWSSDKClientConfig(3, 10000, 10000),
       region: event.Input.Region,
     });
     const params: CreateStackCommand = new CreateStackCommand({
@@ -200,7 +200,7 @@ export const deleteStack = async (event: SfnStackEvent) => {
   }
   try {
     const cloudFormationClient = new CloudFormationClient({
-      ...aws_sdk_client_common_config,
+      ...getAWSSDKClientConfig(3, 10000, 10000),
       region: event.Input.Region,
     });
     const disProtectionParams: UpdateTerminationProtectionCommand = new UpdateTerminationProtectionCommand({
@@ -270,7 +270,7 @@ export const describeStack = async (event: SfnStackEvent) => {
 export const describe = async (region: string, stackName: string) => {
   try {
     const cloudFormationClient = new CloudFormationClient({
-      ...aws_sdk_client_common_config,
+      ...getAWSSDKClientConfig(3, 10000, 10000),
       region,
     });
     const params: DescribeStacksCommand = new DescribeStacksCommand({
@@ -297,7 +297,7 @@ export const callback = async (event: SfnStackEvent) => {
 
   try {
     const s3Client = new S3Client({
-      ...aws_sdk_client_common_config,
+      ...getAWSSDKClientConfig(3, 10000, 10000),
     });
     const input = {
       Body: JSON.stringify({ [event.Input.StackName]: event.Result }),
@@ -325,7 +325,7 @@ export const callback = async (event: SfnStackEvent) => {
 export const doUpdate = async (region: string, input: UpdateStackCommandInput): Promise<UpdateStackCommandOutput> => {
   try {
     const cloudFormationClient = new CloudFormationClient({
-      ...aws_sdk_client_common_config,
+      ...getAWSSDKClientConfig(3, 10000, 10000),
       region: region,
     });
     const params: UpdateStackCommand = new UpdateStackCommand(input);

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
+import { getAWSSDKClientConfig, logger } from '@aws/clickstream-base-lib';
 import { CloudFormationClient, DescribeStacksCommand, Output, Parameter, Tag } from '@aws-sdk/client-cloudformation';
 import { JSONPath } from 'jsonpath-plus';
 import { putStringToS3, readS3ObjectAsJson } from '../api/store/aws/s3';
@@ -111,7 +111,7 @@ export const callback = async (event: SfnStackEvent) => {
 export const describe = async (region: string, stackName: string) => {
   try {
     const cloudFormationClient = new CloudFormationClient({
-      ...aws_sdk_client_common_config,
+      ...getAWSSDKClientConfig(3, 10000, 10000),
       region,
     });
     const params: DescribeStacksCommand = new DescribeStacksCommand({
