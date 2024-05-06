@@ -390,7 +390,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       allowPublicSubnet: props.applicationLoadBalancerProps.internetFacing,
       vpcSubnets: props.networkProps.subnets,
       securityGroups: [frontendLambdaSG],
-      architecture: Architecture.X86_64,
+      architecture: Architecture.ARM_64,
     });
 
     addCfnNagSuppressRules(lambdaFn.node.defaultChild as CfnResource, [

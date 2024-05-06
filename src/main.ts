@@ -12,7 +12,6 @@
  */
 
 import { SolutionInfo } from '@aws/clickstream-base-lib';
-import { Architecture } from '@aws-sdk/client-lambda';
 import { Annotations, App, Aspects, CfnCondition, Fn, IAspect, Stack } from 'aws-cdk-lib';
 import { CfnFunction, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -323,6 +322,11 @@ class CNLambdaFunctionAspect implements IAspect {
               LogGroup: (func.loggingConfig as CfnFunction.LoggingConfigProperty).logGroup,
               SystemLogLevel: (func.loggingConfig as CfnFunction.LoggingConfigProperty).systemLogLevel,
             }));
+      }
+      if (func.runtime && func.runtime == Runtime.NODEJS_20_X.toString()) {
+        func.addPropertyOverride('Runtime',
+          Fn.conditionIf(this.awsChinaCondition(Stack.of(node)).logicalId,
+            Runtime.NODEJS_18_X.toString(), func.architectures));
       }
     }
   }

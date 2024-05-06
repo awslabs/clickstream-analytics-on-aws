@@ -15,9 +15,9 @@ const { awscdk, gitlab, javascript, typescript, JsonPatch } = require('projen');
 const Nx = require('./projenrc/nx');
 const PnpmWorkspace = require('./projenrc/pnpm');
 const version = '1.2.0';
-const cdkVersion = '2.81.0';
-const minNodeVersion = '18.17.0';
-const pnpmVersion = '8.15.3';
+const cdkVersion = '2.140.0';
+const minNodeVersion = '20.12.0';
+const pnpmVersion = '9.0.6';
 
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',

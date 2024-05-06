@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:18 AS builder
+FROM public.ecr.aws/docker/library/node:20 AS builder
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 COPY frontend frontend
@@ -16,7 +16,7 @@ ARG CHUNK_MAX_SIZE=1024000
 ARG REACT_APP_SOLUTION_VERSION
 
 RUN export GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP} && export CHUNK_MIN_SIZE=${CHUNK_MIN_SIZE} && export CHUNK_MAX_SIZE=${CHUNK_MAX_SIZE}
-RUN npm install -g pnpm@8.15.3
+RUN npm install -g pnpm@9.0.6
 RUN pnpm install
 RUN pnpm projen
 RUN pnpm nx build @aws/clickstream-base-lib

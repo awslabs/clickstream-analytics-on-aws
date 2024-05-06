@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:18
+FROM public.ecr.aws/docker/library/node:20
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 
@@ -12,7 +12,7 @@ COPY nx.json nx.json
 COPY projenrc projenrc
 COPY pnpm-workspace.yaml pnpm-workspace.yaml
 
-RUN npm install -g pnpm@8.15.3 @vercel/ncc@0.38.1
+RUN npm install -g pnpm@9.0.6 @vercel/ncc@0.38.1
 RUN rm -fr node_modules
 RUN pnpm install && pnpm nx run-many --target=build
 RUN cd src/control-plane/backend/lambda/api && pnpm run ncc-build

@@ -33,7 +33,7 @@ export function getSqlContent(
     fileName = sqlDef.spName ? `${sqlDef.spName}.sql` : `${sqlDef.viewName}.sql`;
   }
   const sqlTemplatePath = join(path, fileName);
-  const sqlTemplate = readFileSync(sqlTemplatePath, 'utf8');
+  const sqlTemplate = readFileSync(sqlTemplatePath).toString('utf-8');
 
   return Mustache.render(sqlTemplate, {
     ...mustacheParam,
