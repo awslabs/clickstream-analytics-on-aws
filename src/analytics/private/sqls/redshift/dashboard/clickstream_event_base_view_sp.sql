@@ -12,7 +12,7 @@ BEGIN
       p_start_time as start_time,
       p_end_time as end_time' into rec
     ;
-    call {{database_name}}.{{schema}}.sp_clickstream_log('clickstream_event_base_view', 'info', 'refresh with custom time range:' || start_time || ' - ' || end_time);
+    call {{database_name}}.{{schema}}.sp_clickstream_log('clickstream_event_base_view', 'info', 'refresh with custom time range:' || rec.start_time || ' - ' || rec.end_time);
   ELSE
     EXECUTE 'SELECT
       COALESCE(max(created_time), CURRENT_TIMESTAMP - INTERVAL ''1 days'') as start_time,
@@ -21,7 +21,7 @@ BEGIN
     WHERE event_timestamp >= CURRENT_TIMESTAMP - INTERVAL ''7 days'' --reduce scan range' into rec
     ;
 
-    call {{database_name}}.{{schema}}.sp_clickstream_log('clickstream_event_base_view', 'info', 'refresh time range:' || start_time || ' - ' || end_time);
+    call {{database_name}}.{{schema}}.sp_clickstream_log('clickstream_event_base_view', 'info', 'refresh time range:' || rec.start_time || ' - ' || rec.end_time);
   END IF
   ;
 
