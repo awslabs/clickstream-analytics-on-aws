@@ -43,3 +43,16 @@ export const marshallOptions = {
 export const unmarshallOptions = {
   wrapNumbers: false,
 };
+
+export function getAWSSDKClientConfig(maxAttempts: number = 3, connectionTimeout: number = 5000, requestTimeout: number = 5000) {
+  return {
+    maxAttempts,
+    requestHandler: new NodeHttpHandler({
+      connectionTimeout,
+      requestTimeout,
+      httpAgent: httpAgent,
+      httpsAgent: httpsAgent,
+    }),
+    customUserAgent: userAgent,
+  };
+}
