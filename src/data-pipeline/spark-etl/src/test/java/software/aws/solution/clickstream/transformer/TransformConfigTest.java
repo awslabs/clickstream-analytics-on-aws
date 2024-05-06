@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 
 public class TransformConfigTest {
 

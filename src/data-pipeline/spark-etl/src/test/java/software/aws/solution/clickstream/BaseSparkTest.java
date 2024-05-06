@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.common.RuleConfig;
-import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.*;

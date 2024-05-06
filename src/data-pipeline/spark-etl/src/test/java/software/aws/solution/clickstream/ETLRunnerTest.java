@@ -17,7 +17,7 @@ package software.aws.solution.clickstream;
 import com.clearspring.analytics.util.*;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
-import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.*;
@@ -109,7 +109,6 @@ class ETLRunnerTest extends ETLRunnerBaseTest {
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(APP_IDS_PROP, "id1,id2,uba-app");
         System.setProperty(PROJECT_ID_PROP, "projectId1");
-        System.setProperty(SAVE_INFO_TO_WAREHOUSE_PROP, "true");
 
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
 

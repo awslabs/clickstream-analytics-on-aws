@@ -24,7 +24,7 @@ import java.util.List;
 
 public class ETLRunnerConfig {
     @NotEmpty
-    private final boolean saveInfoToWarehouse;
+    private final String runFlag;
     @NotEmpty
     private final String database;
     @NotEmpty
@@ -70,7 +70,7 @@ public class ETLRunnerConfig {
             @NotNull final TimestampConfig timestampConfig,
             @NotNull final PartitionConfig partitionConfig
     ) {
-        this.saveInfoToWarehouse = Boolean.valueOf(inputOutputConfig.getSaveInfoToWarehouse());
+        this.runFlag = inputOutputConfig.getRunFlag();
         this.database = inputOutputConfig.getDatabase();
         this.sourceTable = inputOutputConfig.getSourceTable();
         this.jobDataDir = inputOutputConfig.getJobDataUri();
@@ -91,8 +91,8 @@ public class ETLRunnerConfig {
         this.filterBotByUa = transformationConfig.getFilterBotByUa();
     }
 
-    public boolean isSaveInfoToWarehouse() {
-        return saveInfoToWarehouse;
+    public String getRunFlag() {
+        return runFlag;
     }
 
     public String getDatabase() {
@@ -189,7 +189,7 @@ public class ETLRunnerConfig {
     @Getter
     public static class InputOutputConfig {
         @NotNull
-        private final String saveInfoToWarehouse;
+        private final String runFlag;
         @NotNull
         private final String database;
         @NotNull

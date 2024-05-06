@@ -13,10 +13,8 @@
 
 package software.aws.solution.clickstream.transformer;
 
-import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 
-import java.util.Map;
-
-public interface AppRuleConfigurable {
-    Map<String, RuleConfig> getAppRuleConfig();
+public interface TransformConfigurable {
+   TransformConfig getTransformConfig();
 }

@@ -46,10 +46,10 @@ public final class ClickstreamEventParser extends BaseEventParser {
     public static final String EVENT_USER_ENGAGEMENT = "_user_engagement";
     public static final String EVENT_SCROLL = "_scroll";
 
-    private Map<String, RuleConfig> appRuleConfig;
+    private TransformConfig transformConfig;
 
-    private ClickstreamEventParser(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    private ClickstreamEventParser(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
     public static ClickstreamEventParser getInstance() {
@@ -57,9 +57,9 @@ public final class ClickstreamEventParser extends BaseEventParser {
         return getInstance(null);
     }
 
-    public static ClickstreamEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+    public static ClickstreamEventParser getInstance(final TransformConfig transformConfig) {
         if (instance == null) {
-            instance = new ClickstreamEventParser(appRuleConfig);
+            instance = new ClickstreamEventParser(transformConfig);
         }
          return instance;
     }
@@ -432,12 +432,18 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setTrafficSourceChannelGroup(clientTsInfo.getChannel());
         clickstreamEvent.setTrafficSourceCategory(clientTsInfo.getCategory());
 
-        log.info("setTrafficSource() platform: {}, source: {}", clickstreamEvent.getPlatform(), clientTsInfo.getSource());
+        log.debug("setTrafficSource() platform: {}, source: {}", clickstreamEvent.getPlatform(), clientTsInfo.getSource());
+
+        if (isDisableTrafficSourceEnrichment()) {
+            log.info("disable.traffic.source.enrichment is set, skipping traffic source enrichment");
+            return;
+        }
 
         // TrafficSource is set by SDK, but category or channel not set
-        if (clientTsInfo.getSource() != null && (clientTsInfo.getCategory() == null || clientTsInfo.getChannel() == null)) {
+        if (clientTsInfo.getSource() != null && !clientTsInfo.getSource().isEmpty()
+                && (clientTsInfo.getCategory() == null || clientTsInfo.getChannel() == null)) {
             String appId = clickstreamEvent.getAppId();
-            RuleConfig ruleConfig = getAppRuleConfig() != null ? getAppRuleConfig().get(appId) : null;
+            RuleConfig ruleConfig = getAppRuleConfig().get(appId);
             if (ruleConfig == null) {
                 log.warn("RuleConfig is not set for appId: " + appId);
             }
@@ -536,11 +542,11 @@ public final class ClickstreamEventParser extends BaseEventParser {
     }
 
     @Override
-    public Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
+    public TransformConfig getTransformConfig() {
+        return this.transformConfig;
     }
-    public void setAppRuleConfig(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    public void setTransformConfig(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
     private boolean isEnableEventTimeShift() {
@@ -565,7 +571,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
         timeShiftInfo.setUploadTimestamp(uploadTimestamp);
 
         if (!isEnableEventTimeShift()) {
-            log.info("event time shift is disabled");
+            log.debug("event time shift is disabled");
             return timeShiftInfo;
         }
 

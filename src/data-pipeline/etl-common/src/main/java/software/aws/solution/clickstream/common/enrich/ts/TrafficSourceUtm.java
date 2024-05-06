@@ -18,6 +18,7 @@ import lombok.*;
 @Setter
 @Getter
 @ToString
+@EqualsAndHashCode
 public class TrafficSourceUtm {
     private String source; // NOSONAR
     private String medium; // NOSONAR

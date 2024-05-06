@@ -29,7 +29,6 @@ class CleanerTest extends BaseSparkTest {
     public void should_clean_normal_data() {
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(APP_IDS_PROP, "uba-app");
-        System.setProperty(SAVE_INFO_TO_WAREHOUSE_PROP, "false");
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
         Dataset<Row> cleanedDataset = cleaner.clean(dataset, "/data_schema.json");
@@ -92,7 +91,6 @@ class CleanerTest extends BaseSparkTest {
         //  DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.CleanerTest.should_clean_future_event_time_data
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(APP_IDS_PROP, "test-clean-future");
-        System.setProperty(SAVE_INFO_TO_WAREHOUSE_PROP, "false");
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/original_data_with_future_time.json")).getPath());
         Dataset<Row> cleanedDataset = cleaner.clean(dataset, "/data_schema.json");
@@ -100,5 +98,14 @@ class CleanerTest extends BaseSparkTest {
 
     }
 
+    @Test
+    public void should_keep_some_events_data() {
+        //  DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.CleanerTest.should_keep_some_events_data
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
+        System.setProperty(APP_IDS_PROP, "app_id1");
 
+        Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/original_data_event_name_not_filtered.json")).getPath());
+        Dataset<Row> cleanedDataset = cleaner.clean(dataset, "/data_schema.json");
+        assertEquals(3, cleanedDataset.count());
+    }
 }

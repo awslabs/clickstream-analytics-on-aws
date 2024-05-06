@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.clickstream.common.BaseEventParser;
 import software.aws.solution.clickstream.common.ExtraParams;
 import software.aws.solution.clickstream.common.ParseDataResult;
-import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.common.Util;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.common.model.ClickstreamEventPropValue;
@@ -60,19 +60,19 @@ public final class SensorsEventParser extends BaseEventParser {
     private static final String GZIP_DATA_LIST = "data_list=";
     private static final String GZIP_DATA = "data=";
     private static SensorsEventParser instance;
-    private final Map<String, RuleConfig> appRuleConfig;
+    private final TransformConfig transformConfig;
 
-    private SensorsEventParser(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    private SensorsEventParser(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
     public static SensorsEventParser getInstance() {
         return getInstance(null);
     }
 
-    public static SensorsEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+    public static SensorsEventParser getInstance(final TransformConfig transformConfig) {
         if (instance == null) {
-            instance = new SensorsEventParser(appRuleConfig);
+            instance = new SensorsEventParser(transformConfig);
         }
         return instance;
     }
@@ -170,6 +170,11 @@ public final class SensorsEventParser extends BaseEventParser {
         }
     }
 
+    @Override
+    protected TransformConfig getTransformConfig() {
+        return this.transformConfig;
+    }
+
     public String getBase64Data(final String data) {
         String b64Data = null;
 
@@ -239,7 +244,11 @@ public final class SensorsEventParser extends BaseEventParser {
         clickstreamEvent.setCustomParameters(customParameters);
 
         // set traffic source
-        setTrafficSourceBySourceParser(clickstreamEvent);
+        if (isDisableTrafficSourceEnrichment()) {
+            log.info("Traffic source enrichment is disabled");
+        } else {
+            setTrafficSourceBySourceParser(clickstreamEvent);
+        }
 
         Map<String, String> processInfo = new HashMap<>();
         processInfo.put("rid", extraParams.getRid());
@@ -396,10 +405,5 @@ public final class SensorsEventParser extends BaseEventParser {
             }
         }
         return clickstreamItems;
-    }
-
-    @Override
-    protected Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
     }
 }

@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.spark.sql.functions.lit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 
@@ -51,6 +52,9 @@ class IPEnrichmentTest extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data.json")).getPath());
+        dataset = dataset.withColumn("geo_for_enrich", dataset.col("geo_for_enrich").withField("ip", lit("99.99.99.99")))
+                .withColumn("ip", lit("99.99.99.99"));
+
         Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);
 
         Row row = transformedDataset.first();

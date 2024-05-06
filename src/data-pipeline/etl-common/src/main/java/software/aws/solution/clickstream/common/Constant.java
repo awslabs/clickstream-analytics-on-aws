@@ -163,4 +163,6 @@ public final class Constant {
     public static final String APP_EXCEPTION_MESSAGE = "app_exception_message";
     public static final String APP_EXCEPTION_STACK = "app_exception_stack";
     public static final String SET_TIME_MSEC = "set_time_msec";
+    public static final String ETL_RUN_FLAG = "etl.run.flag";
+
 }

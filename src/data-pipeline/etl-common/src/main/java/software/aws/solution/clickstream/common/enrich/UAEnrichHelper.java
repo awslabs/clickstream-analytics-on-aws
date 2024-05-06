@@ -29,6 +29,7 @@ public final class UAEnrichHelper {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static final String UA_STRING = "string";
     public static final String BOT = "Bot";
+    private static final Map<String, ClickstreamUA> CACHED_UA = new HashMap<>();
 
     private UAEnrichHelper() {
     }
@@ -36,6 +37,9 @@ public final class UAEnrichHelper {
         ClickstreamUA clickstreamUA = new ClickstreamUA();
         if (userAgent == null || userAgent.isEmpty()) {
             return clickstreamUA;
+        }
+        if (CACHED_UA.containsKey(userAgent)) {
+            return CACHED_UA.get(userAgent);
         }
         Client client = UA_PARSER.parse(userAgent);
         if (client.userAgent != null) {
@@ -63,6 +67,7 @@ public final class UAEnrichHelper {
         uaMap.put(UA_STRING, userAgent);
         clickstreamUA.setUaMap(uaMap);
 
+        CACHED_UA.put(userAgent, clickstreamUA);
         return clickstreamUA;
     }
 
