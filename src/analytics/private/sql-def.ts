@@ -277,6 +277,18 @@ export const schemaDefs: SQLDef[] = [
     sqlFile: 'sp-scan-metadata.sql',
   },
   {
+    sqlFile: 'sp-merge-event-v2.sql',
+  },
+  {
+    sqlFile: 'sp-merge-item-v2.sql',
+  },
+  {
+    sqlFile: 'sp-merge-session.sql',
+  },
+  {
+    sqlFile: 'sp-merge-user-v2.sql',
+  },
+  {
     sqlFile: 'sp-clear-expired-data.sql',
   },
   {

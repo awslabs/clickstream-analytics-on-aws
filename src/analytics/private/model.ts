@@ -202,6 +202,10 @@ export type MustacheParamType = {
   database_name: string;
   schema: string;
   sp_scan_metadata: string;
+  sp_merge_event_v2: string;
+  sp_merge_item_v2: string;
+  sp_merge_session: string;
+  sp_merge_user_v2: string;
   sp_clickstream_log: string;
   sp_clickstream_log_non_atomic: string;
   table_clickstream_log: string;
