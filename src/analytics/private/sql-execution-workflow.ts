@@ -100,7 +100,7 @@ export function createSQLExecutionStepFunctions(scope: Construct, props: SQLExec
   const map = new Map(scope, 'Execute SQL statements', {
     maxConcurrency: 1,
     itemsPath: '$.sqls',
-    parameters: {
+    itemSelector: {
       sql: JsonPath.stringAt('$$.Map.Item.Value'),
     },
   });
