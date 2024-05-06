@@ -31,6 +31,10 @@ import {
 } from '@aws-sdk/client-cloudformation';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
+const MAX_ATTEMPTS = 3;
+const CONNECTION_TIMEOUT = 10000;
+const REQUEST_TIMEOUT = 10000;
+
 export enum StackAction {
   CREATE = 'Create',
   UPDATE = 'Update',
@@ -82,7 +86,7 @@ export const handler = async (event: SfnStackEvent, _context: any): Promise<any>
 export const createStack = async (event: SfnStackEvent) => {
   try {
     const cloudFormationClient = new CloudFormationClient({
-      ...getAWSSDKClientConfig(3, 10000, 10000),
+      ...getAWSSDKClientConfig(MAX_ATTEMPTS, CONNECTION_TIMEOUT, REQUEST_TIMEOUT),
       region: event.Input.Region,
     });
     const params: CreateStackCommand = new CreateStackCommand({
@@ -200,7 +204,7 @@ export const deleteStack = async (event: SfnStackEvent) => {
   }
   try {
     const cloudFormationClient = new CloudFormationClient({
-      ...getAWSSDKClientConfig(3, 10000, 10000),
+      ...getAWSSDKClientConfig(MAX_ATTEMPTS, CONNECTION_TIMEOUT, REQUEST_TIMEOUT),
       region: event.Input.Region,
     });
     const disProtectionParams: UpdateTerminationProtectionCommand = new UpdateTerminationProtectionCommand({
@@ -270,7 +274,7 @@ export const describeStack = async (event: SfnStackEvent) => {
 export const describe = async (region: string, stackName: string) => {
   try {
     const cloudFormationClient = new CloudFormationClient({
-      ...getAWSSDKClientConfig(3, 10000, 10000),
+      ...getAWSSDKClientConfig(MAX_ATTEMPTS, CONNECTION_TIMEOUT, REQUEST_TIMEOUT),
       region,
     });
     const params: DescribeStacksCommand = new DescribeStacksCommand({
@@ -297,7 +301,7 @@ export const callback = async (event: SfnStackEvent) => {
 
   try {
     const s3Client = new S3Client({
-      ...getAWSSDKClientConfig(3, 10000, 10000),
+      ...getAWSSDKClientConfig(MAX_ATTEMPTS, CONNECTION_TIMEOUT, REQUEST_TIMEOUT),
     });
     const input = {
       Body: JSON.stringify({ [event.Input.StackName]: event.Result }),
@@ -325,7 +329,7 @@ export const callback = async (event: SfnStackEvent) => {
 export const doUpdate = async (region: string, input: UpdateStackCommandInput): Promise<UpdateStackCommandOutput> => {
   try {
     const cloudFormationClient = new CloudFormationClient({
-      ...getAWSSDKClientConfig(3, 10000, 10000),
+      ...getAWSSDKClientConfig(MAX_ATTEMPTS, CONNECTION_TIMEOUT, REQUEST_TIMEOUT),
       region: region,
     });
     const params: UpdateStackCommand = new UpdateStackCommand(input);

@@ -16,6 +16,10 @@ import { CloudFormationClient, DescribeStacksCommand, Output, Parameter, Tag } f
 import { JSONPath } from 'jsonpath-plus';
 import { putStringToS3, readS3ObjectAsJson } from '../api/store/aws/s3';
 
+const MAX_ATTEMPTS = 3;
+const CONNECTION_TIMEOUT = 10000;
+const REQUEST_TIMEOUT = 10000;
+
 // Set the AWS Region for access s3 bucket.
 // Note: It is different from pipeline region.
 const REGION = process.env.AWS_REGION ?? 'us-east-1';
@@ -111,7 +115,7 @@ export const callback = async (event: SfnStackEvent) => {
 export const describe = async (region: string, stackName: string) => {
   try {
     const cloudFormationClient = new CloudFormationClient({
-      ...getAWSSDKClientConfig(3, 10000, 10000),
+      ...getAWSSDKClientConfig(MAX_ATTEMPTS, CONNECTION_TIMEOUT, REQUEST_TIMEOUT),
       region,
     });
     const params: DescribeStacksCommand = new DescribeStacksCommand({
