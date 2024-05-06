@@ -34,10 +34,6 @@ import { ApplicationSchemasAndReporting } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
 import {
   DYNAMODB_TABLE_INDEX_NAME,
-  REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
-  REDSHIFT_EVENT_TABLE_NAME,
-  REDSHIFT_ITEM_TABLE_NAME,
-  REDSHIFT_USER_TABLE_NAME,
   REDSHIFT_EVENT_V2_TABLE_NAME,
   REDSHIFT_ITEM_V2_TABLE_NAME,
   REDSHIFT_USER_V2_TABLE_NAME,
@@ -73,10 +69,6 @@ import { createSGForEgressToAwsService } from '../common/sg';
 import { getExistVpc } from '../common/vpc-utils';
 
 export interface RedshiftOdsTables {
-  readonly event: string;
-  readonly event_parameter: string;
-  readonly user: string;
-  readonly item: string;
   readonly event_v2: string;
   readonly item_v2: string;
   readonly user_v2: string;
@@ -244,10 +236,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
     }
 
     const redshiftTables: RedshiftOdsTables = {
-      event: REDSHIFT_EVENT_TABLE_NAME,
-      event_parameter: REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
-      user: REDSHIFT_USER_TABLE_NAME,
-      item: REDSHIFT_ITEM_TABLE_NAME,
       event_v2: REDSHIFT_EVENT_V2_TABLE_NAME,
       item_v2: REDSHIFT_ITEM_V2_TABLE_NAME,
       user_v2: REDSHIFT_USER_V2_TABLE_NAME,
