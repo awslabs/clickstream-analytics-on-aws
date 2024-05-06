@@ -60,28 +60,13 @@ export const handler = async (event: RefreshBasicViewEvent) => {
     const type = event.detail.type;
     if (type === 'custom-mv') {
       sqlStatements.push(`CALL ${timezoneWithAppId.appId}.${viewName}(NULL, NULL);`);
-
-      logger.info('sqlStatements', { sqlStatements });
-      queryId = await executeStatements(
-        redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-
-      logger.info(`Refresh sp for app: ${timezoneWithAppId.appId} finished, spName: ${viewName}`);
-      return {
-        detail: {
-          queryId: queryId,
-          viewName: viewName,
-        },
-        timezoneWithAppId,
-      };
     } else {
       sqlStatements.push(`REFRESH MATERIALIZED VIEW ${timezoneWithAppId.appId}.${viewName};`);
-
-      logger.info('sqlStatements', { sqlStatements });
-      queryId = await executeStatements(
-        redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-
-      logger.info(`Refresh mv for app: ${timezoneWithAppId.appId} is scheduled and viewName: ${viewName}`);
     }
+    logger.info('sqlStatements', { sqlStatements });
+    queryId = await executeStatements(
+      redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
+    logger.info(`Refresh mv/sp for app: ${timezoneWithAppId.appId} is scheduled and viewName: ${viewName}`);
 
     return {
       detail: {
