@@ -392,9 +392,11 @@ public final class GTMEventParser extends BaseEventParser {
 
         if (items != null && !items.isEmpty()) {
             for (Item item : items) {
+                if (item.getItemId() == null || item.getItemId().isEmpty()) {
+                   continue;
+                }
                 ClickstreamItem clickstreamItem = new ClickstreamItem();
                 clickstreamItems.add(clickstreamItem);
-
                 clickstreamItem.setAppId(clickstreamEvent.getAppId());
                 clickstreamItem.setEventTimestamp(clickstreamEvent.getEventTimestamp());
                 clickstreamItem.setEventId(clickstreamEvent.getEventId());

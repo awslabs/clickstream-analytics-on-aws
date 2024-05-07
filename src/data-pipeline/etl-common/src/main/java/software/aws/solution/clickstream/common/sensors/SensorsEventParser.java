@@ -384,6 +384,9 @@ public final class SensorsEventParser extends BaseEventParser {
 
         if (items != null && !items.isEmpty()) {
             for (Item item : items) {
+                if (item.getItemId() == null || item.getItemId().isEmpty()) {
+                    continue;
+                }
                 ClickstreamItem clickstreamItem = new ClickstreamItem();
                 clickstreamItems.add(clickstreamItem);
 

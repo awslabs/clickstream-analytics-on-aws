@@ -108,6 +108,10 @@ public final class ClickstreamEventParser extends BaseEventParser {
             return clickstreamItemList;
         }
         for (Item item : items) {
+            if (item.getItemId() == null || item.getItemId().isEmpty()) {
+                continue;
+            }
+
             ClickstreamItem clickstreamItem = new ClickstreamItem();
             clickstreamItemList.add(clickstreamItem);
 
