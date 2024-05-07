@@ -59,7 +59,7 @@ export const handler = async (event: RefreshBasicViewEvent) => {
     let queryId : string | undefined;
     const type = event.detail.type;
     if (type === 'custom-mv') {
-      sqlStatements.push(`CALL ${timezoneWithAppId.appId}.${viewName}(NULL, NULL);`);
+      sqlStatements.push(`CALL ${timezoneWithAppId.appId}.${viewName}(NULL, NULL, 7*24);`); //todo: set third parameter to value fo data freshness
     } else {
       sqlStatements.push(`REFRESH MATERIALIZED VIEW ${timezoneWithAppId.appId}.${viewName};`);
     }

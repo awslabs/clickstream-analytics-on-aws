@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (p_start_time timestamp, p_end_time timestamp) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (p_start_time timestamp, p_end_time timestamp, fressness_in_hours integer) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
@@ -18,7 +18,7 @@ BEGIN
       COALESCE(max(created_time), CURRENT_TIMESTAMP - INTERVAL ''1 days'') as start_time,
       CURRENT_TIMESTAMP + INTERVAL ''1 days'' as end_time
     FROM {{database_name}}.{{schema}}.clickstream_event_base_view
-    WHERE event_timestamp >= CURRENT_TIMESTAMP - INTERVAL ''7 days'' --reduce scan range' into rec
+    WHERE event_timestamp >= CURRENT_TIMESTAMP - INTERVAL ''' || fressness_in_hours || ' hours'' --reduce scan range' into rec
     ;
 
     call {{database_name}}.{{schema}}.sp_clickstream_log('clickstream_event_base_view', 'info', 'refresh time range:' || rec.start_time || ' - ' || rec.end_time);
