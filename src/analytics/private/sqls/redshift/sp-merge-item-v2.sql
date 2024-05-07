@@ -12,7 +12,12 @@ BEGIN
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Copy ods data into item v2 stage table successfully.');
 
 	MERGE INTO {{schema}}.item_v2
-	USING item_v2_stage AS stage ON ({{schema}}.item_v2.event_id = stage.event_id AND {{schema}}.item_v2.user_pseudo_id = stage.user_pseudo_id AND {{schema}}.item_v2.item_id = stage.item_id)
+	USING item_v2_stage AS stage ON (
+		{{schema}}.item_v2.event_id = stage.event_id AND 
+		{{schema}}.item_v2.user_pseudo_id = stage.user_pseudo_id AND 
+		{{schema}}.item_v2.item_id = stage.item_id AND 
+		{{schema}}.item_v2.event_timestamp = stage.event_timestamp
+	)
 	WHEN MATCHED THEN
 	UPDATE SET 
 			created_time = CURRENT_TIMESTAMP

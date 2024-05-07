@@ -13,7 +13,11 @@ BEGIN
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Copy ods data into session stage table successfully.');
 
 	MERGE INTO {{schema}}.session
-	USING session_stage AS stage ON ({{schema}}.session.user_pseudo_id = stage.user_pseudo_id AND {{schema}}.session.session_id = stage.session_id)
+	USING session_stage AS stage ON (
+		{{schema}}.session.user_pseudo_id = stage.user_pseudo_id AND 
+		{{schema}}.session.session_id = stage.session_id AND
+		{{schema}}.session.event_timestamp = stage.event_timestamp
+	)
 	WHEN MATCHED THEN
 	UPDATE SET 
 			created_time = CURRENT_TIMESTAMP

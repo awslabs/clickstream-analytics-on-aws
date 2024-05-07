@@ -14,7 +14,25 @@ BEGIN
 	MERGE INTO {{schema}}.user_v2
 	USING user_v2_stage AS stage ON ({{schema}}.user_v2.user_pseudo_id = stage.user_pseudo_id)
 	WHEN MATCHED THEN
-	UPDATE SET 
+	UPDATE SET
+			user_id = stage.user_id,
+			user_properties = stage.user_properties,
+			user_properties_json_str = stage.user_properties_json_str,
+			first_touch_time_msec = stage.first_touch_time_msec,
+			first_visit_date = stage.first_visit_date,
+			first_referrer = stage.first_referrer,
+			first_traffic_source = stage.first_traffic_source,
+			first_traffic_medium = stage.first_traffic_medium,
+			first_traffic_campaign = stage.first_traffic_campaign,
+			first_traffic_content = stage.first_traffic_content,
+			first_traffic_term = stage.first_traffic_term,
+			first_traffic_campaign_id = stage.first_traffic_campaign_id,
+			first_traffic_clid_platform = stage.first_traffic_clid_platform,
+			first_traffic_clid = stage.first_traffic_clid,
+			first_traffic_channel_group = stage.first_traffic_channel_group,
+			first_traffic_category = stage.first_traffic_category,
+			first_app_install_source = stage.first_app_install_source,
+			process_info = stage.process_info, 
 			created_time = CURRENT_TIMESTAMP
 	WHEN NOT MATCHED THEN
 	INSERT (

@@ -105,7 +105,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
   });
 
-  test('Executed Redshift copy command', async () => {
+  test('Executed Redshift MERGE command', async () => {
     const executeId = 'Id-1';
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: executeId });
@@ -187,7 +187,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
 
 });
 
-describe('Lambda - do loading manifest to Provisioned Redshift via COPY command', () => {
+describe('Lambda - do loading manifest to Provisioned Redshift via MERGE command', () => {
   const redshiftDataMock = mockClient(RedshiftDataClient);
   const dynamoDBClientMock = mockClient(DynamoDBClient);
 
@@ -205,7 +205,7 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
     process.env.REDSHIFT_DB_USER = dbUser;
   });
 
-  test('Executed Redshift copy command', async () => {
+  test('Executed Redshift MERGE command', async () => {
     const executeId = 'Id-1';
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: executeId });
