@@ -405,6 +405,7 @@ const baseProject = new typescript.TypeScriptProject({
     'jwks-rsa@^3.0.1',
     'node-cache@^5.1.2',
     'mustache@^4.2.0',
+    'moment-timezone@^0.5.45',
   ],
   devDeps: [
     '@types/node-fetch@^2.6.4',
