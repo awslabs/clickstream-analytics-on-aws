@@ -15,14 +15,12 @@ package software.aws.solution.clickstream.common;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Map;
 
 @Getter
 @Setter
-@ToString
 public class TransformConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     private Map<String, RuleConfig> appRuleConfig; // NOSONAR
