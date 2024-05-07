@@ -44,6 +44,7 @@ import { useNavigate } from 'react-router-dom';
 import { MAX_USER_INPUT_LENGTH, PLUGIN_TYPE_LIST } from 'ts/const';
 import {
   alertMsg,
+  defaultStr,
   validatePluginMainFunction,
   validatePluginName,
 } from 'ts/utils';
@@ -391,7 +392,7 @@ function Content() {
                 description={t('plugin:create.descDesc')}
               >
                 <Textarea
-                  placeholder={t('plugin:create.pluginDesc') || ''}
+                  placeholder={defaultStr(t('plugin:create.pluginDesc'))}
                   value={curDescription}
                   onChange={(e) => {
                     if (
@@ -459,7 +460,9 @@ function Content() {
                         `${t('upload.removeFile')} ${e + 1}`,
                       limitShowFewer: t('upload.limitShowFewer'),
                       limitShowMore: t('upload.limitShowMore'),
-                      errorIconAriaLabel: t('upload.errorIconAriaLabel'),
+                      errorIconAriaLabel: defaultStr(
+                        t('upload.errorIconAriaLabel')
+                      ),
                     }}
                     showFileLastModified
                     showFileSize
@@ -497,7 +500,9 @@ function Content() {
                         `${t('upload.removeFile')} ${e + 1}`,
                       limitShowFewer: t('upload.limitShowFewer'),
                       limitShowMore: t('upload.limitShowMore'),
-                      errorIconAriaLabel: t('upload.errorIconAriaLabel'),
+                      errorIconAriaLabel: defaultStr(
+                        t('upload.errorIconAriaLabel')
+                      ),
                     }}
                     multiple
                     showFileLastModified
