@@ -73,25 +73,23 @@ const TrafficSourceHome: React.FC<TrafficSourceHomeProps> = (
   }, []);
 
   return (
-    <>
+    <SpaceBetween direction="horizontal" size="m">
       <Alert statusIconAriaLabel="Info">
         {t('analytics:metadata.trafficSource.alert')}
       </Alert>
-      <SpaceBetween direction="vertical" size="l" />
       <ChannelGroup
         loading={loading}
         setLoading={setLoading}
         state={trafficSourceState}
         dispatch={trafficSourceDispatch}
       />
-      <SpaceBetween direction="vertical" size="l" />
       <SourceCategory
         loading={loading}
         setLoading={setLoading}
         state={trafficSourceState}
         dispatch={trafficSourceDispatch}
       />
-    </>
+    </SpaceBetween>
   );
 };
 
