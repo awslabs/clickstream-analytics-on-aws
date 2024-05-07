@@ -317,7 +317,7 @@ export class ClickStreamApiConstruct extends Construct {
       description: 'Lambda function for api of solution Clickstream Analytics on AWS',
       code: this.getLambdaCode(),
       handler: 'run.sh',
-      runtime: Runtime.NODEJS_18_X,
+      runtime: Runtime.NODEJS_20_X,
       architecture: Architecture.ARM_64,
       layers: [new LambdaAdapterLayer(this, 'LambdaAdapterLayer')],
       environment: {

@@ -208,7 +208,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       frontendProps: {
         assetPath: join(__dirname, '..'),
 
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
+        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V20),
         buildCommands: [
           'npm install -g pnpm@8.15.3 --prefix /tmp/node/.npm-global',
           'export PATH=/tmp/node/.npm-global/bin:$PATH',

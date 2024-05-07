@@ -82,7 +82,7 @@ test('SQLExecutionStepFn is created as expected', () => {
         'Arn',
       ],
     },
-    Runtime: 'nodejs18.x',
+    Runtime: 'nodejs20.x',
     Timeout: 900,
   });
 

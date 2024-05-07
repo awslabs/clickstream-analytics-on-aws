@@ -16,7 +16,7 @@ phases:
     runtime-versions:
       nodejs: latest
     commands:
-      - n 18.17.1
+      - n 20.12.0
   pre_build:
     commands:
       - |-
