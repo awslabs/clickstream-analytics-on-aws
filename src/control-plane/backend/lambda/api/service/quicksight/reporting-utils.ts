@@ -1887,14 +1887,15 @@ export async function warmupRedshift(pipeline: IPipeline, appId: string) {
     const checkParams = new DescribeStatementCommand({
       Id: executeResponse.Id,
     });
+    await sleep(200);
     let resp = await redshiftDataClient.send(checkParams);
     logger.debug(`Get statement status: ${resp.Status}`);
     let count = 0;
-    while (resp.Status != StatusString.FINISHED && resp.Status != StatusString.FAILED && count < 60) {
+    while (resp.Status != StatusString.FINISHED && resp.Status != StatusString.FAILED && count < 30) {
       await sleep(500);
       count++;
       resp = await redshiftDataClient.send(checkParams);
-      logger.debug(`Get statement status: ${resp.Status}`);
+      logger.debug(`Get statement status: ${resp.Status}, retry count: ${count}`);
     }
     if (resp.Status == StatusString.FAILED) {
       logger.info('Warmup redshift serverless with error,', {
