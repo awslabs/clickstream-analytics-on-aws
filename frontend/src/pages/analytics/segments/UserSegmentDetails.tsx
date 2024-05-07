@@ -11,6 +11,8 @@
  *  and limitations under the License.
  */
 import {
+  getDateTimeWithTimezoneString,
+  getLocaleDateString,
   SegmentDdbItem,
   SegmentJobStatus,
   SegmentJobStatusItem,
@@ -49,8 +51,6 @@ import { useParams } from 'react-router-dom';
 import {
   createDownloadLink,
   defaultStr,
-  getDateTimeWithTimezoneString,
-  getLocaleDateString,
   ternary,
 } from 'ts/utils';
 

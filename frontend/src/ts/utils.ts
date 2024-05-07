@@ -21,7 +21,7 @@ import {
 } from '@cloudscape-design/components';
 import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
 import { isEqual } from 'lodash';
-import moment from 'moment-timezone';
+import moment from 'moment';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import {
   CLICK_STREAM_USER_DATA,
@@ -543,17 +543,4 @@ export const createDownloadLink = (url: string, name: string) => {
   link.href = url;
   link.download = name;
   link.click();
-};
-
-export const getDateTimeWithTimezoneString = (
-  timestamp: number,
-  timezone: string
-) => {
-  return moment
-    .tz(moment(timestamp), timezone)
-    .format('YYYY-MM-DD HH:mm:ss(z)');
-};
-
-export const getLocaleDateString = (timestamp: number, timezone: string) => {
-  return moment.tz(moment(timestamp), timezone).format('YYYY-MM-DD');
 };
