@@ -298,7 +298,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
 
   deps: [
     ...commonDeps,
-    'cdk-nag@^2.20.6',
+    'cdk-nag@^2.28.110',
     'cdk-bootstrapless-synthesizer@^2.2.11',
     '@aws/clickstream-base-lib@workspace:*',
     ...cdkAlphaModules,
