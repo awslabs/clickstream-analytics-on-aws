@@ -115,7 +115,7 @@
           "exec": "pnpm i --no-frozen-lockfile"
         },
         {
-          "exec": "pnpm update @types/jest @types/jsonwebtoken @types/node-fetch @types/node jest jest-junit ts-jest typescript @aws-lambda-powertools/logger @aws-sdk/types @smithy/node-http-handler hpagent jsonwebtoken jwks-rsa mustache node-cache node-fetch"
+          "exec": "pnpm update @types/jest @types/jsonwebtoken @types/node-fetch @types/node jest jest-junit ts-jest typescript @aws-lambda-powertools/logger @aws-sdk/types @smithy/node-http-handler hpagent jsonwebtoken jwks-rsa moment-timezone mustache node-cache node-fetch"
         },
         {
           "exec": "pnpm dlx projen"
