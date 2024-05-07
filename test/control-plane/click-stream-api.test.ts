@@ -241,7 +241,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
     });
     newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
@@ -258,7 +258,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         },
       },
       Handler: 'index.handler',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
       Timeout: 15,
       TracingConfig: {
         Mode: 'Active',
@@ -279,7 +279,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         },
       },
       Handler: 'index.handler',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
       Timeout: 15,
       TracingConfig: {
         Mode: 'Active',
@@ -300,14 +300,14 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
     });
     newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
     });
     newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
@@ -1436,7 +1436,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       },
       Handler: 'index.handler',
       MemorySize: 256,
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
       Timeout: 30,
     });
     expect(findResourcesName(newALBApiStackTemplate, 'Custom::AWS'))
@@ -1761,7 +1761,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         },
       ],
       MemorySize: 512,
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
       Timeout: 30,
     });
     newCloudfrontApiStackTemplate.hasResource('AWS::Lambda::Function', {
@@ -1776,14 +1776,14 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
     });
     newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
     });
     newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
@@ -1800,14 +1800,14 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
         Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
     });
     newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
         Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
     });
     newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [

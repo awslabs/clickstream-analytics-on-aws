@@ -58,10 +58,10 @@ export const handler = async (event: ScanMetadataEvent) => {
     const createPropertyArrayTempTable = `CREATE TABLE IF NOT EXISTS ${schema}.${PROPERTY_ARRAY_TEMP_TABLE} (category VARCHAR, property_name VARCHAR, value_type VARCHAR, property_type VARCHAR);`;
     propertyListSqlStatements.push(createPropertyArrayTempTable);
 
-    const fileContent = readFileSync('/opt/event-v2.sql', 'utf-8');
+    const fileContent = readFileSync('/opt/event-v2.sql').toString('utf-8');
     insertPropertyTemplateTable(fileContent, propertyListSqlStatements, `${schema}.${PROPERTY_ARRAY_TEMP_TABLE}`, 'event_property');
 
-    const fileContentUser = readFileSync('/opt/user-v2.sql', 'utf-8');
+    const fileContentUser = readFileSync('/opt/user-v2.sql').toString('utf-8');
     insertPropertyTemplateTable(fileContentUser, propertyListSqlStatements, `${schema}.${PROPERTY_ARRAY_TEMP_TABLE}`, 'user_property');
 
     const propertyListQueryId = await executeStatements(

@@ -115,8 +115,8 @@ export class DataReportingQuickSightStack extends Stack {
       }],
 
       definition: Fn.conditionIf(useSpiceCondition.logicalId,
-        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-spice.json'), 'utf-8')),
-        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json'), 'utf-8')),
+        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-spice.json')).toString('utf-8')),
+        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json')).toString('utf-8')),
       ),
     });
 

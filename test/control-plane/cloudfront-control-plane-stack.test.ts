@@ -293,7 +293,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
       },
       Timeout: 15,
       Handler: 'index.handler',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
     },
     );
   });
@@ -566,7 +566,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
         },
       },
       Handler: 'index.handler',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
       LoggingConfig: {
         ApplicationLogLevel: 'WARN',
         LogFormat: 'JSON',
@@ -905,7 +905,7 @@ describe('CloudFrontS3PortalStack - China region', () => {
         ],
       },
       Handler: 'index.handler',
-      Runtime: 'nodejs18.x',
+      Runtime: 'nodejs20.x',
       LoggingConfig: {
         ApplicationLogLevel: 'WARN',
         LogFormat: 'JSON',

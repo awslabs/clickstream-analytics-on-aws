@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-This project requires Node.js LTS (version 18 or later) and NPM (version 9 or later).
+This project requires Node.js LTS (version 20 or later) and NPM (version 9 or later).
 [Node.js](http://nodejs.org/) and [NPM](https://npmjs.org/) are really easy to install.
 To make sure you have them available on your machine,
 try running the following command.
@@ -10,7 +10,7 @@ try running the following command.
 ```sh
 $ npm -v && node -v
 9.6.7
-v18.17.0
+v20.12.0
 ```
 
 ## Available Scripts

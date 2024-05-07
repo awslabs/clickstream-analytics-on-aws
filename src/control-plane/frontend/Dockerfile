@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:18 AS builder
+FROM public.ecr.aws/docker/library/node:20 AS builder
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 COPY frontend frontend
