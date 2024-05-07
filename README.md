@@ -47,7 +47,7 @@ Follow the [implementation guide][doc-deployment] to deploy the solution using A
 
 - Make sure you have an AWS account
 - Configure [credential of aws cli][configure-aws-cli]
-- Install Node.js LTS version 18.17.0 or later
+- Install Node.js LTS version 20.12.0 or later
 - Install Docker Engine
 - Install pnpm `npm install -g pnpm@8.15.3`
 - Install the dependencies of the solution by executing the command `pnpm install && pnpm projen && pnpm nx build @aws/clickstream-base-lib`
