@@ -1137,13 +1137,13 @@ export const generateMonthDayOptions = () => {
 };
 
 export const getAutoRefreshDayOptionsByType = (type: string) => {
-  if (type === 'Daily') {
-    return generateDayTimesOption();
-  } else if (type === 'Weekly') {
+  if (type === 'Weekly') {
     return generateWeekDayOptions();
   } else if (type === 'Monthly') {
     return generateMonthDayOptions();
   }
+
+  return undefined;
 };
 
 const convertAttributeList = (
@@ -1354,15 +1354,16 @@ export const convertUISegmentObjectToAPIObject = (
 
 export const convertCronExpByTimeRange = (
   timeUnit: SelectProps.Option,
-  specificTime: string
+  day: string,
+  time: string
 ) => {
-  const cronStr = '';
   if (timeUnit.value === 'Daily') {
-    return `cron(${specificTime} 0 * * ? *)`;
+    return `cron(0 ${time} * * ? *)`;
   } else if (timeUnit.value === 'Weekly') {
-    return `cron(0 0 ? * ${specificTime} *)`;
+    return `cron(0 ${time} ? * ${day} *)`;
   } else if (timeUnit.value === 'Monthly') {
-    return `cron(0 0 ${specificTime} * ? *)`;
+    return `cron(0 ${time} ${day} * ? *)`;
   }
-  return cronStr;
+
+  return '';
 };

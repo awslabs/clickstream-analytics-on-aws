@@ -11,7 +11,12 @@
  *  and limitations under the License.
  */
 
-import { formatDate, parseDynamoDBTableARN } from '../lib/common/utils';
+import {
+  formatDate,
+  getDateTimeWithTimezoneString,
+  getLocaleDateString,
+  parseDynamoDBTableARN,
+} from '../lib/common/utils';
 
 describe('utils functions tests', () => {
   test('parseDynamoDBTableARN function', () => {
@@ -27,5 +32,13 @@ describe('utils functions tests', () => {
     const date = new Date(1707523212345); // '2024/02/10'
 
     expect(formatDate(date)).toEqual('2024-02-10');
+  });
+
+  test('returns locale date time with timezone', () => {
+    expect(getDateTimeWithTimezoneString(1714981584000, 'Asia/Shanghai')).toEqual('2024-05-06 15:46:24(CST)');
+  });
+
+  test('returns locale date string', () => {
+    expect(getLocaleDateString(1714981584000, 'Asia/Shanghai')).toEqual('2024-05-06');
   });
 });

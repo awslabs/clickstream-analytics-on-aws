@@ -416,8 +416,8 @@ export class UserSegmentsSql {
   private composeParameterConditionClause(condition: ParameterCondition, type: ParameterSourceType) {
     const customColumn = type === 'EventParameter' ? EVENT_CUSTOM_PARAM_COLUMN : USER_CUSTOM_ATTR_COLUMN;
     const customValue = `${customColumn}.${condition.parameterName}.value`;
-    const field = condition.parameterType === MetadataSource.PRESET ? condition.parameterName :
-      condition.dataType === MetadataValueType.STRING || condition.dataType === MetadataValueType.BOOLEAN ? customValue : `CAST(${customValue} AS FLOAT)`;
+    const customValueStatement = condition.dataType === MetadataValueType.STRING || condition.dataType === MetadataValueType.BOOLEAN ? customValue : `CAST(${customValue} AS FLOAT)`;
+    const field = condition.parameterType === MetadataSource.PRESET ? condition.parameterName : customValueStatement;
     const inputValues = condition.inputValue.map(value => {
       switch (condition.dataType) {
         case MetadataValueType.STRING:
@@ -450,9 +450,9 @@ export class UserSegmentsSql {
       case ExploreAnalyticsOperators.NOT_IN:
         return `${field} NOT IN (${inputValues.join(', ')})`;
       case ExploreAnalyticsOperators.CONTAINS:
-        return `(${condition.inputValue.map(value => (`${field} LIKE '%${value}%'`)).join(' AND ')})`;
+        return '(' + condition.inputValue.map(value => (`${field} LIKE '%${value}%'`)).join(' AND ') + ')';
       case ExploreAnalyticsOperators.NOT_CONTAINS:
-        return `(${condition.inputValue.map(value => (`${field} NOT LIKE '%${value}%'`)).join(' AND ')})`;
+        return '(' + condition.inputValue.map(value => (`${field} NOT LIKE '%${value}%'`)).join(' AND ') + ')';
       case ExploreAnalyticsOperators.TRUE:
         return `${field} = true`;
       case ExploreAnalyticsOperators.FALSE:

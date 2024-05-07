@@ -12,6 +12,7 @@
  */
 
 import { randomInt } from 'crypto';
+import moment from 'moment-timezone';
 import Mustache from 'mustache';
 import { logger } from './powertools';
 import { MUSTACHE_RENDER_CATEGORIES } from '../constant';
@@ -107,3 +108,16 @@ export function parseMetadataFromSql(fileContent: string): any[] {
   }
   return metadataArray;
 }
+
+export const getDateTimeWithTimezoneString = (
+  timestamp: number,
+  timezone: string,
+) => {
+  return moment
+    .tz(moment(timestamp), timezone)
+    .format('YYYY-MM-DD HH:mm:ss(z)');
+};
+
+export const getLocaleDateString = (timestamp: number, timezone: string) => {
+  return moment.tz(moment(timestamp), timezone).format('YYYY-MM-DD');
+};

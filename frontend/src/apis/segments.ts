@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { Segment, SegmentDdbItem } from '@aws/clickstream-base-lib';
+import {
+  Segment,
+  SegmentDdbItem,
+  SegmentJobStatusItem,
+} from '@aws/clickstream-base-lib';
 import { apiRequest } from 'ts/request';
 
 export const getSegmentsList = async (params: {
@@ -48,10 +52,45 @@ export const updateSegment = async (segmentObj: Segment) => {
 export const deleteSegment = async (params: {
   segmentId: string;
   appId: string;
-  projectId: string;
 }) => {
   return (await apiRequest(
     'delete',
-    `/segments/${params.segmentId}?appId=${params.appId}&projectId=${params.projectId}`
+    `/segments/${params.segmentId}?appId=${params.appId}`
   )) as ApiResponse<{ segmentId: string }>;
+};
+
+export const getSegmentJobs = async (params: { segmentId: string }) => {
+  return (await apiRequest(
+    'get',
+    `/segments/${params.segmentId}/jobs`
+  )) as ApiResponse<SegmentJobStatusItem[]>;
+};
+
+export const getExportFileS3Url = async (params: {
+  projectId: string;
+  appId: string;
+  segmentId: string;
+  jobRunId: string;
+}) => {
+  return (await apiRequest(
+    'get',
+    `/segments/${params.segmentId}/jobs/${params.jobRunId}/exportS3Url?projectId=${params.projectId}&appId=${params.appId}`
+  )) as ApiResponse<{ presignedUrl: string }>;
+};
+
+export const refreshSegment = async (params: {
+  segmentId: string;
+  appId: string;
+}) => {
+  return (await apiRequest(
+    'get',
+    `/segments/${params.segmentId}/refresh?appId=${params.appId}`
+  )) as ApiResponse<{ segmentId: string }>;
+};
+
+export const getSampleData = async (params: { segmentId: string }) => {
+  return (await apiRequest(
+    'get',
+    `/segments/${params.segmentId}/sampleData`
+  )) as ApiResponse<SegmentJobStatusItem>;
 };

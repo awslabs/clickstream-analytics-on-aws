@@ -1420,7 +1420,7 @@ function _getRunningStatus(lastAction: string) {
       break;
   }
   return status;
-};
+}
 
 function getMetadataVersionType(pipeline: IPipeline) {
   const version = pipeline.templateVersion?.split('-')[0] ?? '';

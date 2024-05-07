@@ -537,3 +537,10 @@ export const isJson = (str) => {
   }
   return true;
 };
+
+export const createDownloadLink = (url: string, name: string) => {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.click();
+};

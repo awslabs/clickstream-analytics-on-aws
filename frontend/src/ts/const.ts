@@ -497,7 +497,7 @@ export const SEGMENT_AUTO_REFRESH_OPTIONS = [
   { label: 'Daily', value: 'Daily' },
   { label: 'Weekly', value: 'Weekly' },
   { label: 'Monthly', value: 'Monthly' },
-  { label: 'Custom(Cron)', value: 'Custom' },
+  { label: 'Custom (Cron)', value: 'Custom' },
 ];
 
 export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
@@ -564,6 +564,7 @@ export const INIT_SEGMENT_OBJ: ExtendSegment = {
   refreshType: 'manual',
   autoRefreshOption: SEGMENT_AUTO_REFRESH_OPTIONS[0],
   autoRefreshDayOption: null,
+  autoRefreshTimeOption: null,
   expireDate: '',
 };
 

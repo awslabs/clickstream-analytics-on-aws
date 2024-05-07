@@ -101,6 +101,7 @@ export interface ExtendSegment extends Segment {
   refreshType: 'manual' | 'auto' | 'custom';
   autoRefreshOption: SelectProps.Option;
   autoRefreshDayOption: SelectProps.Option | null;
+  autoRefreshTimeOption: SelectProps.Option | null;
   expireDate: string;
   // validation
   nameError?: string;

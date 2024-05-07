@@ -170,6 +170,27 @@ export interface SegmentJobStatusItem {
   createAt: number;
 }
 
+export interface SegmentUserItem {
+  user_pseudo_id: string;
+  user_id: string;
+  event_timestamp: string;
+  user_properties_json_str: string;
+  first_touch_time_msec: string;
+  first_visit_date: string;
+  first_app_install_source: string;
+  first_referrer: string;
+  first_traffic_category: string;
+  first_traffic_source: string;
+  first_traffic_medium: string;
+  first_traffic_campaign_id: string;
+  first_traffic_campaign: string;
+  first_traffic_content: string;
+  first_traffic_term: string;
+  first_traffic_clid_platform: string;
+  first_traffic_clid: string;
+  first_traffic_channel_group: string;
+}
+
 export enum SegmentJobStatus {
   PENDING = 'Pending',
   IN_PROGRESS = 'In Progress',

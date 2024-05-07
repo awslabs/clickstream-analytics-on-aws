@@ -214,7 +214,9 @@
     "addChannelGroup": "添加新组",
     "reorder": "重新排序",
     "apply": "应用",
-    "newGroup": "添加分组"
+    "newGroup": "添加分组",
+    "export": "导出",
+    "refreshSegment": "刷新分群"
   },
   "item": "项目",
   "items": "项目",
@@ -230,6 +232,8 @@
     "updating": "正在更新",
     "deleting": "正在删除",
     "pending": "待定",
+    "inProgress": "运行中",
+    "completed": "已完成",
     "unknown": "未知",
     "dnsError": "DNS 无法正确解析域名。"
   },
