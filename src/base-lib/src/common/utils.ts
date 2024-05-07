@@ -14,8 +14,8 @@
 import { randomInt } from 'crypto';
 import moment from 'moment-timezone';
 import Mustache from 'mustache';
-import { MUSTACHE_RENDER_CATEGORIES } from '../constant';
 import { logger } from './powertools';
+import { MUSTACHE_RENDER_CATEGORIES } from '../constant';
 
 export function isEmpty(a: any): boolean {
   if (a === '') return true; //Verify empty string
