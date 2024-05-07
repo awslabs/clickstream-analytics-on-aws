@@ -3809,7 +3809,7 @@
                                                 "DataSetIdentifier": "Day_User_View",
                                                 "ColumnName": "Active users"
                                             },
-                                            "AggregationFunction": "COUNT",
+                                            "AggregationFunction": "DISTINCT_COUNT",
                                             "FormatConfiguration": {
                                                 "NumericFormatConfiguration": {
                                                     "NumberDisplayFormatConfiguration": {
