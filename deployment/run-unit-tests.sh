@@ -11,7 +11,7 @@ cp src/reporting/private/dashboard.ts src/control-plane/backend/lambda/api/servi
 export CI=true
 
 echo "pnpm install"
-npm install -g pnpm@9.0.6
+npm install -g pnpm@8.15.3
 pnpm install
 
 pnpm projen

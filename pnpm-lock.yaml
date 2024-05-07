@@ -14,14 +14,14 @@ importers:
   .:
     dependencies:
       '@aws-cdk/aws-glue-alpha':
-        specifier: ^2.81.0-alpha.0
-        version: 2.81.0-alpha.0(aws-cdk-lib@2.139.0)(constructs@10.3.0)
+        specifier: ^2.140.0-alpha.0
+        version: 2.140.0-alpha.0(aws-cdk-lib@2.140.0)(constructs@10.3.0)
       '@aws-cdk/aws-kinesisanalytics-flink-alpha':
-        specifier: ^2.81.0-alpha.0
-        version: 2.81.0-alpha.0(aws-cdk-lib@2.139.0)(constructs@10.3.0)
+        specifier: ^2.140.0-alpha.0
+        version: 2.140.0-alpha.0(aws-cdk-lib@2.140.0)(constructs@10.3.0)
       '@aws-cdk/aws-servicecatalogappregistry-alpha':
-        specifier: ^2.81.0-alpha.0
-        version: 2.81.0-alpha.0(aws-cdk-lib@2.139.0)(constructs@10.3.0)
+        specifier: ^2.140.0-alpha.0
+        version: 2.140.0-alpha.0(aws-cdk-lib@2.140.0)(constructs@10.3.0)
       '@aws-lambda-powertools/logger':
         specifier: ^1.17.0
         version: 1.18.1
@@ -140,8 +140,8 @@ importers:
         specifier: ^2.0.7
         version: 2.2.0
       aws-cdk-lib:
-        specifier: ^2.81.0
-        version: 2.139.0(constructs@10.3.0)
+        specifier: ^2.140.0
+        version: 2.140.0(constructs@10.3.0)
       cdk-bootstrapless-synthesizer:
         specifier: ^2.2.11
         version: 2.3.2(aws-cdk-lib@2.140.0)(constructs@10.3.0)
@@ -249,8 +249,8 @@ importers:
         specifier: ^6
         version: 6.21.0(eslint@8.57.0)(typescript@4.9.5)
       aws-cdk:
-        specifier: ^2.81.0
-        version: 2.139.0
+        specifier: ^2.140.0
+        version: 2.140.0
       aws-sdk-client-mock:
         specifier: ^3.0.1
         version: 3.1.0
@@ -967,33 +967,33 @@ packages:
       constructs: 10.3.0
     dev: false
 
-  /@aws-cdk/aws-glue-alpha@2.81.0-alpha.0(aws-cdk-lib@2.139.0)(constructs@10.3.0):
-    resolution: {integrity: sha512-unzXzzkojF08YrA0Hhrlxl2XQYzyy3Vx/GgwmGsJ0MZ6MrT/Gnvz9iUNwE1DQoIKKJfOq/auFnVRcdJjrJVBjw==}
+  /@aws-cdk/aws-glue-alpha@2.140.0-alpha.0(aws-cdk-lib@2.140.0)(constructs@10.3.0):
+    resolution: {integrity: sha512-yuqX0D6rLcqFIgsKpIiVIgKSlLdNm1H4OPwb/UaXAh5WjfNzOYyi9xQDPeEl3Wpc1ZA0K4NdBZz0Qszzoe6/VQ==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
-      aws-cdk-lib: ^2.140.0
+      aws-cdk-lib: 2.81.0
       constructs: ^10.0.0
     dependencies:
       aws-cdk-lib: 2.140.0(constructs@10.3.0)
       constructs: 10.3.0
     dev: false
 
-  /@aws-cdk/aws-kinesisanalytics-flink-alpha@2.81.0-alpha.0(aws-cdk-lib@2.139.0)(constructs@10.3.0):
-    resolution: {integrity: sha512-72AlheexPoAoxOZu4Td+bWnhUIUDM0BmlpMy6aYXxLZbXm0W94m7uIN+0YGzrfWmY6CpnbqbahJs4ZPNEQj/6Q==}
+  /@aws-cdk/aws-kinesisanalytics-flink-alpha@2.140.0-alpha.0(aws-cdk-lib@2.140.0)(constructs@10.3.0):
+    resolution: {integrity: sha512-RG9O4/+luRclnRFnU/SxEKkb8Qil0q4CRO652HVBB3A2VRM3u1PdPaCvCoC/NtFpe1AZOwZ92eX7Y+HVpPJE8A==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
-      aws-cdk-lib: ^2.140.0
+      aws-cdk-lib: 2.81.0
       constructs: ^10.0.0
     dependencies:
       aws-cdk-lib: 2.140.0(constructs@10.3.0)
       constructs: 10.3.0
     dev: false
 
-  /@aws-cdk/aws-servicecatalogappregistry-alpha@2.81.0-alpha.0(aws-cdk-lib@2.139.0)(constructs@10.3.0):
-    resolution: {integrity: sha512-UIIHkvYa84P3ZLCeX6DZPnOOXMPZ14lwQvYvgVQ/+TTwLn6BCqEt9dNzsvuarjzQXfWyXOQK7X1Z7cJxQXjwVw==}
+  /@aws-cdk/aws-servicecatalogappregistry-alpha@2.140.0-alpha.0(aws-cdk-lib@2.140.0)(constructs@10.3.0):
+    resolution: {integrity: sha512-Ku9whHoH6tZsn28CzUZhjhZ1vAPOoTXWfX1LJC5OxACelt18fSpoxGhhlgwdq75lYCtmGShoYpvE5qSTC9tcfg==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
-      aws-cdk-lib: ^2.140.0
+      aws-cdk-lib: 2.81.0
       constructs: ^10.0.0
     dependencies:
       aws-cdk-lib: 2.140.0(constructs@10.3.0)

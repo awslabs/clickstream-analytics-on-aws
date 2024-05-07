@@ -210,7 +210,7 @@ export class CloudFrontControlPlaneStack extends Stack {
 
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V20),
         buildCommands: [
-          'npm install -g pnpm@9.0.6 --prefix /tmp/node/.npm-global',
+          'npm install -g pnpm@8.15.3 --prefix /tmp/node/.npm-global',
           'export PATH=/tmp/node/.npm-global/bin:$PATH',
           'export APP_PATH=/tmp/app',
           'mkdir $APP_PATH',
