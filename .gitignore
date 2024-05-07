@@ -40,6 +40,7 @@ test-deploy*
 deployment/global-s3-assets/
 deployment/regional-s3-assets/
 deployment/open-source/
+deployment/ecr
 .viperlightrc
 codescan-funcs.sh
 codescan-*-default.sh

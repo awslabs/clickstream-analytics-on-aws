@@ -205,26 +205,40 @@ else
     export SOLUTION_ID
 fi
 
-if [[ -z $SOLUTION_ECR_BUILD_VERSION ]]; then
-    echo "SOLUTION_ECR_BUILD_VERSION is missing from ../solution_config"
+if [[ -z $SOLUTION_NAME ]]; then
+    echo "SOLUTION_NAME is missing from ../solution_config"
     exit 1
-else 
-    export SOLUTION_ECR_BUILD_VERSION
+else
+    export SOLUTION_NAME
 fi
 
-if [[ -z $SOLUTION_ECR_ACCOUNT ]]; then
-    echo "SOLUTION_ECR_ACCOUNT is missing from ../solution_config"
+if [[ -z $SOLUTION_TRADEMARKEDNAME ]]; then
+    echo "SOLUTION_TRADEMARKEDNAME is missing from ../solution_config"
     exit 1
 else 
-    export SOLUTION_ECR_ACCOUNT
+    export SOLUTION_TRADEMARKEDNAME
 fi
 
-if [[ -z $SOLUTION_ECR_REPO_NAME ]]; then
-    echo "SOLUTION_ECR_REPO_NAME is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_ECR_REPO_NAME
-fi
+# if [[ -z $SOLUTION_ECR_BUILD_VERSION ]]; then
+#     echo "SOLUTION_ECR_BUILD_VERSION is missing from ../solution_config"
+#     exit 1
+# else 
+#     export SOLUTION_ECR_BUILD_VERSION
+# fi
+
+# if [[ -z $SOLUTION_ECR_ACCOUNT ]]; then
+#     echo "SOLUTION_ECR_ACCOUNT is missing from ../solution_config"
+#     exit 1
+# else 
+#     export SOLUTION_ECR_ACCOUNT
+# fi
+
+# if [[ -z $SOLUTION_ECR_REPO_NAME ]]; then
+#     echo "SOLUTION_ECR_REPO_NAME is missing from ../solution_config"
+#     exit 1
+# else 
+#     export SOLUTION_ECR_REPO_NAME
+# fi
 
 if [[ -z ${SOLUTION_CN_TEMPLATES[@]} ]]; then
     echo "SOLUTION_CN_TEMPLATES is missing from ../solution_config"
@@ -340,6 +354,28 @@ do_replace "*.template.json" %%TEMPLATE_OUTPUT_BUCKET%% ${TEMPLATE_OUTPUT_BUCKET
 do_replace "*.template.json" %%SOLUTION_ECR_ACCOUNT%% ${SOLUTION_ECR_ACCOUNT}
 do_replace "*.template.json" %%SOLUTION_ECR_REPO_NAME%% ${SOLUTION_ECR_REPO_NAME}
 do_replace "*.template.json" %%SOLUTION_ECR_BUILD_VERSION%% ${SOLUTION_ECR_BUILD_VERSION}
+
+echo "------------------------------------------------------------------------------"
+echo "${bold}[ECR] Build and replace ECR images${normal}"
+echo "------------------------------------------------------------------------------"
+
+image_root_dir="$template_dir/ecr"
+do_cmd mkdir -p $image_root_dir
+
+# copy nginx image to the deployment folder
+nginx_image_source_path="$source_dir/src/ingestion-server/server/images/nginx"
+nginx_image_dist_path="$image_root_dir/nginx"
+do_cmd cp -rf $nginx_image_source_path $nginx_image_dist_path
+
+echo "***** public ECR registry: $PUBLIC_ECR_REGISTRY"
+replace="s|PUBLIC_ECR_REGISTRY|$PUBLIC_ECR_REGISTRY|g"
+echo "sed -i -e $replace"
+sed -i -e $replace *.template.json
+
+echo "***** public ECR tag: $PUBLIC_ECR_TAG"
+replace="s/PUBLIC_ECR_TAG/$PUBLIC_ECR_TAG/g"
+echo "sed -i -e $replace"
+sed -i -e $replace *.template.json
 
 
 for cn_template in ${SOLUTION_CN_TEMPLATES[@]}; do 
