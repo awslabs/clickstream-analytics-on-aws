@@ -321,6 +321,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
         '<rootDir>/cdk.out/',
         '<rootDir>/deployment/',
       ],
+      testTimeout: 30000,
     },
   },
   tsconfig: {

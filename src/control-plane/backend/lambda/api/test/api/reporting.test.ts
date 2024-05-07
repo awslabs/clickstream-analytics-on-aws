@@ -2331,6 +2331,96 @@ describe('reporting test', () => {
     });
   });
 
+  it('warmup retry max count', async () => {
+    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
+    });
+    redshiftClientMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.STARTED,
+    });
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        dataModeling: {
+          ods: {
+            bucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: '',
+            },
+            fileSuffix: '.snappy.parquet',
+          },
+          athena: false,
+          redshift: {
+            dataRange: 259200,
+            provisioned: {
+              clusterIdentifier: 'redshift-cluster-111111',
+              dbUser: 'clickstream_111111',
+            },
+          },
+          loadWorkflow: {
+            bucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: '',
+            },
+            maxFilesLimit: 50,
+          },
+        },
+        stackDetails: [
+          BASE_STATUS.stackDetails[0],
+          BASE_STATUS.stackDetails[1],
+          BASE_STATUS.stackDetails[2],
+          BASE_STATUS.stackDetails[3],
+          {
+            ...BASE_STATUS.stackDetails[4],
+            outputs: [
+              {
+                OutputKey: 'DataSourceArn',
+                OutputValue: 'arn:aws:quicksight:ap-northeast-1:555555555555:datasource/clickstream_datasource_adfsd_uqqk_d84e29f0',
+              },
+              {
+                OutputKey: 'Dashboards',
+                OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+              },
+              {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
+                OutputValue: 'arn:aws:iam::111122223333:role/RedshiftDataApiRole',
+              },
+              {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
+                OutputValue: 'redshift-workgroup-1.cjvqjvqjvqjv.ap-southeast-1.redshift-serverless.amazonaws.com',
+              },
+            ],
+          },
+          BASE_STATUS.stackDetails[5],
+        ],
+        reporting: {
+          quickSight: {
+            accountName: 'clickstream-acc-xxx',
+          },
+        },
+        timezone: [
+          {
+            timezone: 'Asia/Singapore',
+            appId: 'app1',
+          },
+        ],
+      }],
+    });
+    const res = await request(app)
+      .post('/api/reporting/warmup')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: 'project01_wvzh',
+        appId: 'app1',
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data).toEqual('OK');
+    expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 1);
+    expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 31);
+  });
+
   it('clean - ThrottlingException', async () => {
     quickSightMock.on(ListDashboardsCommand).resolves({
       DashboardSummaryList: [{

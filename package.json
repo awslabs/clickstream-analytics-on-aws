@@ -136,6 +136,7 @@
       "<rootDir>/cdk.out/",
       "<rootDir>/deployment/"
     ],
+    "testTimeout": 30000,
     "testMatch": [
       "<rootDir>/src/**/__tests__/**/*.ts?(x)",
       "<rootDir>/(test|src)/**/*(*.)@(spec|test).ts?(x)"
