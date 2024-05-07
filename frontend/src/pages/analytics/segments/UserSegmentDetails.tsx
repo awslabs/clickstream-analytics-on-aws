@@ -48,11 +48,7 @@ import moment from 'moment-timezone';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import {
-  createDownloadLink,
-  defaultStr,
-  ternary,
-} from 'ts/utils';
+import { createDownloadLink, defaultStr, ternary } from 'ts/utils';
 
 const UserSegmentDetails: React.FC = () => {
   const { t } = useTranslation();
