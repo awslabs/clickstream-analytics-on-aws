@@ -299,7 +299,7 @@ class NodejsFunctionSanityAspect implements IAspect {
         Annotations.of(node).addError('Directly using NodejsFunction is not allowed in the solution. Use SolutionNodejsFunction instead.');
       }
       if (node.runtime != Runtime.NODEJS_20_X) {
-        Annotations.of(node).addError('You must use Nodejs 18.x runtime for Lambda with javascript in this solution.');
+        Annotations.of(node).addError('You must use Nodejs 20.x runtime for Lambda with javascript in this solution.');
       }
     }
   }
