@@ -147,7 +147,7 @@ export class ScanMetadataWorkflow extends Construct {
         maxConcurrency: 1,
         itemsPath: '$.GetJobList.appIdList',
         inputPath: '$',
-        parameters: {
+        itemSelector: {
           'appId.$': '$$.Map.Item.Value',
           'scanEndDate.$': '$.workflowInfo.Payload.scanEndDate',
           'scanStartDate.$': '$.workflowInfo.Payload.scanStartDate',

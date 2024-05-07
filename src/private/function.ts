@@ -38,7 +38,7 @@ export class SolutionNodejsFunction extends NodejsFunction {
       } : {
         externalModules: [],
       },
-      runtime: Runtime.NODEJS_18_X,
+      runtime: Runtime.NODEJS_20_X,
       architecture: Architecture.ARM_64,
       environment: {
         ...POWERTOOLS_ENVS,

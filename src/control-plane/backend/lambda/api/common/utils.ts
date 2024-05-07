@@ -1464,7 +1464,7 @@ function readMetadataFromSqlFile(builtInList: IMetadataBuiltInList | undefined):
 
 function readAndIterateFile(filePath: string): any[] {
   try {
-    const fileContent = readFileSync(filePath, 'utf-8');
+    const fileContent = readFileSync(filePath).toString('utf-8');
     return parseMetadataFromSql(fileContent);
   } catch (error) {
     logger.warn('readAndIterateFile error', { error, filePath });

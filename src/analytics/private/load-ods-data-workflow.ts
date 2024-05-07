@@ -427,7 +427,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         {
           maxConcurrency: 1,
           itemsPath: '$.manifestList',
-          parameters: {
+          itemSelector: {
             'execution_id.$': '$$.Execution.Id',
             'appId.$': '$$.Map.Item.Value.appId',
             'manifestFileName.$': '$$.Map.Item.Value.manifestFileName',
