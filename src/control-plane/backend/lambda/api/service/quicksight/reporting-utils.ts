@@ -540,8 +540,8 @@ function _addVisualLayout(sheet: any, visual: VisualProps, requestAction: string
   const layout = findKthElement(sheet, 'Layouts', 1) as Array<any>;
   const elements = findElementByPath(layout, 'Configuration.GridLayout.Elements') as Array<any>;
 
-  const layoutControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-control.json'), 'utf8'));
-  const visualControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-visual.json'), 'utf8'));
+  const layoutControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-control.json')).toString('utf-8'));
+  const visualControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-visual.json')).toString('utf-8'));
 
   if (elements.length > 0) {
     const lastElement = elements.at(elements.length - 1);
@@ -599,7 +599,7 @@ export function getFunnelVisualDef(visualId: string, viewName: string, titleProp
 
 function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, countColName: string) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/funnel-funnel-chart.json'), 'utf8');
+  const visualDef = readFileSync(join(__dirname, './templates/funnel-funnel-chart.json')).toString('utf-8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -618,7 +618,7 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
 
   const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
-  const visualDef = readFileSync(join(__dirname, `./templates/funnel-bar-chart${props.suffix}.json`), 'utf8');
+  const visualDef = readFileSync(join(__dirname, `./templates/funnel-bar-chart${props.suffix}.json`)).toString('utf-8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -656,7 +656,7 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
 export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
   titleProps: DashboardTitleProps, groupColumn: string, groupingColNames: string[]): Visual {
 
-  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json'), 'utf8')) as Visual;
+  const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json')).toString('utf-8')) as Visual;
   visualDef.TableVisual!.VisualId = visualId;
 
   visualDef.TableVisual!.Title!.FormatText = {
@@ -816,13 +816,13 @@ export async function getVisualRelatedDefs(props: VisualRelatedDefProps, locale:
 
   if (props.timeScopeType === ExploreTimeScopeType.FIXED) {
 
-    filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-datetime.json'), 'utf8')) as FilterControl;
+    filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-datetime.json')).toString('utf-8')) as FilterControl;
     filterControl.DateTimePicker!.FilterControlId = filterControlId;
     filterControl.DateTimePicker!.Title = 'event_date between';
     filterControl.DateTimePicker!.SourceFilterId = sourceFilterId;
     filterControl.DateTimePicker!.DisplayOptions!.InfoIconLabelOptions!.InfoIconText = filterInfoText;
 
-    const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group.template'), 'utf8');
+    const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group.template')).toString('utf-8');
     const mustacheFilterGroupType: MustacheFilterGroupType = {
       sheetId: props.sheetId,
       dataSetIdentifier: props.viewName,
@@ -834,27 +834,27 @@ export async function getVisualRelatedDefs(props: VisualRelatedDefProps, locale:
     filterGroup.Filters![0].TimeRangeFilter!.RangeMaximumValue!.StaticValue = new Date(props.timeEnd!);
 
   } else {
-    filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-relative-datetime.json'), 'utf8')) as FilterControl;
+    filterControl = JSON.parse(readFileSync(join(__dirname, './templates/filter-control-relative-datetime.json')).toString('utf-8')) as FilterControl;
     filterControl.RelativeDateTime!.FilterControlId = filterControlId;
     filterControl.RelativeDateTime!.Title = 'event_date';
     filterControl.RelativeDateTime!.SourceFilterId = sourceFilterId;
     filterControl.RelativeDateTime!.DisplayOptions!.InfoIconLabelOptions!.InfoIconText = filterInfoText;
 
-    const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json'), 'utf8')) as ParameterDeclaration;
+    const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString('utf-8')) as ParameterDeclaration;
     parameterDeclarationStart.DateTimeParameterDeclaration!.Name = `dateStart${parameterSuffix}`;
     parameterDeclarationStart.DateTimeParameterDeclaration!.TimeGranularity = 'DAY';
     parameterDeclarationStart.DateTimeParameterDeclaration!.DefaultValues!.RollingDate!.Expression = `addDateTime(-${props.lastN}, '${props.timeUnit}', truncDate('${props.timeUnit}', now()))`;
     parameterDeclarationStart.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = undefined;
     parameterDeclarations.push(parameterDeclarationStart);
 
-    const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json'), 'utf8')) as ParameterDeclaration;
+    const parameterDeclarationEnd = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json')).toString('utf-8')) as ParameterDeclaration;
     parameterDeclarationEnd.DateTimeParameterDeclaration!.Name = `dateEnd${parameterSuffix}`;
     parameterDeclarationEnd.DateTimeParameterDeclaration!.TimeGranularity = 'DAY';
     parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.RollingDate!.Expression = 'addDateTime(1, \'DD\', truncDate(\'DD\', now()))';
     parameterDeclarationEnd.DateTimeParameterDeclaration!.DefaultValues!.StaticValues = undefined;
     parameterDeclarations.push(parameterDeclarationEnd);
 
-    const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group-relative.template'), 'utf8');
+    const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group-relative.template')).toString('utf-8');
     const mustacheRelativeDateFilterGroupType: MustacheRelativeDateFilterGroupType = {
       sheetId: props.sheetId,
       dataSetIdentifier: props.viewName,
@@ -878,7 +878,7 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
 
   const columnConfigurations: ColumnConfiguration[] = [];
   for (const col of colNames) {
-    const config = JSON.parse(readFileSync(join(__dirname, './templates/percentage-column-config.json'), 'utf8')) as ColumnConfiguration;
+    const config = JSON.parse(readFileSync(join(__dirname, './templates/percentage-column-config.json')).toString('utf-8')) as ColumnConfiguration;
     config.Column!.ColumnName = col;
     config.Column!.DataSetIdentifier = viewName;
     columnConfigurations.push(config);
@@ -899,7 +899,7 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
   const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
   const templatePath = `./templates/event-${quickSightChartType}-chart${props.suffix}.json`;
-  const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
+  const visualDef = readFileSync(join(__dirname, templatePath)).toString('utf-8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -941,7 +941,7 @@ export function getAttributionTableVisualDef(visualId: string, viewName: string,
   quickSightChartType: QuickSightChartType) : Visual {
 
   const templatePath = `./templates/attribution-${quickSightChartType}-chart.json`;
-  const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
+  const visualDef = readFileSync(join(__dirname, templatePath)).toString('utf-8');
   const mustacheAttributionAnalysisType: MustacheAttributionAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -963,7 +963,7 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
 
   const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
-  const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`), 'utf8');
+  const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`)).toString('utf-8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -1000,7 +1000,7 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
 
   const props = _getMultipleVisualProps(grouppingColName !== undefined);
 
-  const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`), 'utf8');
+  const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`)).toString('utf-8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -1079,7 +1079,7 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
 
 export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMethodsProps, visualId: string, viewName: string,
   titleProps: DashboardTitleProps, grouppingColName?: string[]) : Visual {
-  const visualDef = readFileSync(join(__dirname, './templates/event-table-chart.json'), 'utf8');
+  const visualDef = readFileSync(join(__dirname, './templates/event-table-chart.json')).toString('utf-8');
   const mustacheEventAnalysisType: MustacheEventTableAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -1200,7 +1200,7 @@ export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMet
 }
 
 export function getPathAnalysisChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
-  const visualDef = readFileSync(join(__dirname, './templates/path-sankey-chart.json'), 'utf8');
+  const visualDef = readFileSync(join(__dirname, './templates/path-sankey-chart.json')).toString('utf-8');
   const mustachePathAnalysisType: MustachePathAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -1246,7 +1246,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
   const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
   const templatePath = `./templates/retention-${quickSightChartType}-chart${props.suffix}.json`;
-  const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
+  const visualDef = readFileSync(join(__dirname, templatePath)).toString('utf-8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -1288,7 +1288,7 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
 
   const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
-  const visualDef = readFileSync(join(__dirname, `./templates/retention-pivot-table-chart${props.suffix}.json`), 'utf8');
+  const visualDef = readFileSync(join(__dirname, `./templates/retention-pivot-table-chart${props.suffix}.json`)).toString('utf-8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,

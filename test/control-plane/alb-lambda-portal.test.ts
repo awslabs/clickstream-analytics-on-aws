@@ -247,7 +247,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       }),
       Timeout: 10,
       Architectures: [
-        'x86_64',
+        'arm64',
       ],
     });
     template.hasResource('AWS::Lambda::Function', { // create dependencies on execution role with sufficient policy to create ENI

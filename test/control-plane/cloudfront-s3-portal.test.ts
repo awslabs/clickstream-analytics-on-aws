@@ -35,7 +35,7 @@ const cdkOut = '/tmp/cloudfront-s3-portal-test';
 const commonApp = new TestApp(cdkOut);
 const frontendProps = {
   assetPath: 'frontend',
-  dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
+  dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V20),
   buildCommands: [
     'echo test > /asset-output/test',
   ],

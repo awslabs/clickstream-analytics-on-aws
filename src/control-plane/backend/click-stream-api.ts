@@ -322,7 +322,7 @@ export class ClickStreamApiConstruct extends Construct {
         },
       }),
       handler: 'run.sh',
-      runtime: Runtime.NODEJS_18_X,
+      runtime: Runtime.NODEJS_20_X,
       architecture: Architecture.ARM_64,
       layers: [new LambdaAdapterLayer(this, 'LambdaAdapterLayer')],
       environment: {
