@@ -56,6 +56,10 @@ export const SP_CLEAR_EXPIRED_DATA = 'sp_clear_expired_data';
 
 export const SQL_TEMPLATE_PARAMETER = {
   sp_scan_metadata: 'sp_scan_metadata',
+  sp_merge_event_v2: 'sp_merge_event_v2',
+  sp_merge_item_v2: 'sp_merge_item_v2',
+  sp_merge_user_v2: 'sp_merge_user_v2',
+  sp_merge_session: 'sp_merge_session',
   sp_clickstream_log: 'sp_clickstream_log',
   sp_clickstream_log_non_atomic: 'sp_clickstream_log_non_atomic',
   table_clickstream_log: 'clickstream_log',
