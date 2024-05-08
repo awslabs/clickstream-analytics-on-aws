@@ -1,0 +1,95 @@
+{
+  "name": "Solutions Quality Gate v1",
+  "conditions": [
+    {
+      "metric": "new_duplicated_lines_density",
+      "op": "GT",
+      "error": "10"
+    },
+    {
+      "metric": "new_maintainability_rating",
+      "op": "GT",
+      "error": "1"
+    },
+    {
+      "metric": "new_reliability_rating",
+      "op": "GT",
+      "error": "1"
+    },
+    {
+      "metric": "new_security_hotspots_reviewed",
+      "op": "LT",
+      "error": "100"
+    },
+    {
+      "metric": "new_security_rating",
+      "op": "GT",
+      "error": "1"
+    },
+    {
+      "metric": "blocker_violations",
+      "op": "GT",
+      "error": "0"
+    },
+    {
+      "metric": "bugs",
+      "op": "GT",
+      "error": "0"
+    },
+    {
+      "metric": "code_smells",
+      "op": "GT",
+      "error": "40"
+    },
+    {
+      "metric": "coverage",
+      "op": "LT",
+      "error": "80"
+    },
+    {
+      "metric": "critical_violations",
+      "op": "GT",
+      "error": "0"
+    },
+    {
+      "metric": "duplicated_lines_density",
+      "op": "GT",
+      "error": "30"
+    },
+    {
+      "metric": "sqale_rating",
+      "op": "GT",
+      "error": "1"
+    },
+    {
+      "metric": "major_violations",
+      "op": "GT",
+      "error": "0"
+    },
+    {
+      "metric": "reliability_rating",
+      "op": "GT",
+      "error": "1"
+    },
+    {
+      "metric": "security_rating",
+      "op": "GT",
+      "error": "1"
+    },
+    {
+      "metric": "vulnerabilities",
+      "op": "GT",
+      "error": "0"
+    },
+    {
+      "metric": "new_coverage",
+      "op": "LT",
+      "error": "80"
+    },
+    {
+      "metric": "security_hotspots_reviewed",
+      "op": "LT",
+      "error": "100"
+    }
+  ]
+}
