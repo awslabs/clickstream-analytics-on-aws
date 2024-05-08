@@ -128,8 +128,8 @@ public final class DataProcessor {
         }
 
         Arrays.stream(spark.sparkContext().getConf().getAll()).forEach(c -> log.info(c._1 + " -> " + c._2));
-        Configurator.setRootLevel(Level.WARN);
-        Configurator.setLevel("software.aws.solution.clickstream", Level.INFO);
+        Configurator.setRootLevel(Level.WARN); // NOSONAR
+        Configurator.setLevel("software.aws.solution.clickstream", Level.INFO); // NOSONAR
 
         ETLRunner etlRunner = new ETLRunner(spark, runnerConfig);
         etlRunner.run();
