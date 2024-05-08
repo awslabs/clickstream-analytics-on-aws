@@ -29,23 +29,24 @@ import org.apache.spark.sql.catalyst.expressions.GenericRow;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
+import software.aws.solution.clickstream.common.Cache;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.File;
 import java.net.InetAddress;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.split;
 import static org.apache.spark.sql.functions.udf;
+import static software.aws.solution.clickstream.common.Util.getStackTrace;
 import static software.aws.solution.clickstream.util.DatasetUtil.GEO_FOR_ENRICH;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 @Slf4j
 public class IPEnrichment {
-    private static final Map<String, Row> CACHED_IP_MAP = new HashMap<>();
+    private static final Cache<Row> CACHED_IP = new Cache<>();
     public Dataset<Row> transform(final Dataset<Row> dataset) {
         UserDefinedFunction udfEnrichIP = udf(enrich(), DataTypes.createStructType(
                 new StructField[]{
@@ -73,18 +74,18 @@ public class IPEnrichment {
 
     static UDF2<String, String, Row> enrich() {
         return (ipValue, localeValue) -> {
-            if (CACHED_IP_MAP.containsKey(ipValue)) {
-                return CACHED_IP_MAP.get(ipValue);
+            if (CACHED_IP.containsKey(ipValue)) {
+                return CACHED_IP.get(ipValue);
             }
             GenericRow defaultRow = new GenericRow(
                     new Object[]{null, null, null, null, null, null, localeValue}
             );
-
+            GenericRow resultRow = defaultRow;
             try (Reader reader = new Reader(new File(SparkFiles.get("GeoLite2-City.mmdb")),
                     new CHMCache(1024 * 128))) {
                 InetAddress address = InetAddress.getByName(ipValue);
                 LookupResult result = reader.get(address, LookupResult.class);
-                GenericRow resultRow = Optional.ofNullable(result)
+                resultRow = Optional.ofNullable(result)
                         .map(geo -> new GenericRow(new Object[]{
                                 Optional.ofNullable(geo.getCity()).map(LookupResult.City::getName).orElse(null),
                                 Optional.ofNullable(geo.getContinent()).map(LookupResult.Continent::getName).orElse(null),
@@ -95,12 +96,11 @@ public class IPEnrichment {
                                 localeValue
                         }))
                         .orElse(defaultRow);
-                CACHED_IP_MAP.put(ipValue, resultRow);
-                return resultRow;
             } catch (Exception e) {
-                log.warn(e.getMessage());
-                return defaultRow;
+                log.warn("failed to enrich IP: " + ipValue + ", " + getStackTrace(e));
             }
+            CACHED_IP.put(ipValue, resultRow);
+            return resultRow;
         };
     }
 

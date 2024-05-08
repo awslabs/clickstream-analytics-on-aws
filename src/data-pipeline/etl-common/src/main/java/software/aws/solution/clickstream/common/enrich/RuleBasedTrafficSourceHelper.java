@@ -16,6 +16,7 @@ package software.aws.solution.clickstream.common.enrich;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import software.aws.solution.clickstream.common.Cache;
 import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.Util;
 import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
@@ -69,7 +70,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     private final CategoryListEvaluator categoryListEvaluator;
     private final ChannelListEvaluator channelListEvaluator;
 
-    private static final Map<String, CategoryTrafficSource> CACHED_CATEGORY_TRAFFIC_SOURCE = new HashMap<>();
+    private static final Cache<CategoryTrafficSource> CACHED_CATEGORY_TRAFFIC_SOURCE = new Cache<>();
     @Getter
     private final String appId;
 
