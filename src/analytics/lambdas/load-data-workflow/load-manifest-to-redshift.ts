@@ -104,22 +104,8 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
 
   const schema = appId;
 
-  /**
-   * Get table owner in Redshift, only table or database owner can analyze table:
-   * SELECT n.nspname AS schema_name , pg_get_userbyid (c.relowner) AS table_owner , c.relname AS table_name ,
-   * CASE WHEN c.relkind = 'v' THEN 'view' ELSE 'table' END AS table_type , d.description AS table_description
-   * FROM pg_class As c LEFT JOIN pg_namespace n ON n.oid = c.relnamespace LEFT JOIN pg_tablespace t ON t.oid = c.reltablespace
-   * LEFT JOIN pg_description As d ON (d.objoid = c.oid AND d.objsubid = 0)
-   * WHERE c.relname='ods_events' and n.nspname NOT IN ('pg_catalog', 'information_schema') ORDER BY schema_name, table_name;
-   */
-  // Governs automatic computation and refresh of optimizer statistics at the end of a successful COPY command.
-  const sqlStatement = `COPY ${schema}.${odsTableName} FROM '${manifestFileName}' `
-    + `IAM_ROLE '${REDSHIFT_ROLE_ARN}' `
-    + 'STATUPDATE ON '
-    + 'FORMAT AS PARQUET SERIALIZETOJSON '
-    + 'MANIFEST '
-    + 'ACCEPTINVCHARS;'
-    ;
+  // call sp to merge data into data
+  const sqlStatement = `CALL ${schema}.sp_merge_${odsTableName}('${manifestFileName}', '${REDSHIFT_ROLE_ARN}')`;
 
   try {
     const queryId = await executeStatements(

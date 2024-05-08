@@ -12,7 +12,7 @@
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { ExecuteStatementCommand, ExecuteStatementCommandInput, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
+import { ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 
@@ -105,7 +105,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
   });
 
-  test('Executed Redshift copy command', async () => {
+  test('Executed Redshift MERGE command', async () => {
     const executeId = 'Id-1';
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: executeId });
@@ -187,7 +187,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
 
 });
 
-describe('Lambda - do loading manifest to Provisioned Redshift via COPY command', () => {
+describe('Lambda - do loading manifest to Provisioned Redshift via MERGE command', () => {
   const redshiftDataMock = mockClient(RedshiftDataClient);
   const dynamoDBClientMock = mockClient(DynamoDBClient);
 
@@ -205,16 +205,10 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
     process.env.REDSHIFT_DB_USER = dbUser;
   });
 
-  test('Executed Redshift copy command', async () => {
+  test('Executed Redshift MERGE command', async () => {
     const executeId = 'Id-1';
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
-    redshiftDataMock.on(ExecuteStatementCommand).callsFakeOnce(input => {
-      if (input as ExecuteStatementCommandInput) {
-        if (input.Sql.includes(`COPY app1.${loadManifestEvent.odsTableName} FROM `)) {return { Id: executeId };}
-      }
-      throw new Error(`Sql '${input.Sql}' is not expected.`);
-    },
-    );
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: executeId });
 
     const resp = await handler(loadManifestEvent, context);
     expect(resp).toEqual({
