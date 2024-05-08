@@ -37,8 +37,11 @@ jobs:
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: |
+            .github/
             src/**/*
+            test/**
             frontend/**/*
+            sonar-project.properties
             deployment/global-s3-assets
             !deployment/global-s3-assets/**/asset.*
   cfn-lint-scan:
@@ -132,3 +135,84 @@ jobs:
           fi
           # force check notice-js
           ../viperlight/bin/viperlight pubcheck -m notice-js
+  sonarqube:
+    name: sonarqube scan
+    runs-on: ${{ vars.LARGE_RUNNER_S || 'ubuntu-latest' }}
+    services:
+      sonarqube:
+        image: public.ecr.aws/docker/library/sonarqube:9.9.0-community
+        ports:
+          - 9000:9000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: "7"      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Configure AWS Credentials
+        if: ${{ env.iam_role_to_assume != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.iam_role_to_assume }}
+          aws-region: us-east-1
+      - name: Login to Amazon ECR Public
+        if: ${{ env.iam_role_to_assume != '' }}
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+      - name: Install dependencies
+        run: pnpm i --no-frozen-lockfile
+      - name: Run build and unit tests
+        run: bash deployment/run-unit-tests.sh
+      - name: Configure sonarqube
+        env:
+          SONARQUBE_URL: http://localhost:9000
+          SONARQUBE_ADMIN_PASSWORD: ${{ secrets.SONARQUBE_ADMIN_PASSWORD }}
+        run: |
+          bash .github/workflows/sonarqube/sonar-configure.sh
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_HOST_URL: http://sonarqube:9000
+          SONAR_TOKEN: ${{ env.SONARQUBE_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=pr-${{ github.event.pull_request.number }}
+      # Check the Quality Gate status.
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        # Force to fail step after specific time.
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ env.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: http://localhost:9000
+      - uses: phwt/sonarqube-quality-gate-action@v1
+        id: quality-gate-check
+        if: always()
+        with:
+          sonar-project-key: pr-${{ github.event.pull_request.number }}
+          sonar-host-url: http://sonarqube:9000
+          sonar-token: ${{ env.SONARQUBE_TOKEN }}
+          github-token: ${{ secrets.PROJEN_GITHUB_TOKEN }}
+      - name: Set up Sonar Quality Gate
+        uses: zxkane/sonar-quality-gate@master
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJEN_GITHUB_TOKEN }}
+          GIT_URL: "https://api.github.com"
+          GIT_TOKEN: ${{ secrets.PROJEN_GITHUB_TOKEN }} 
+          SONAR_URL: http://sonarqube:9000
+          SONAR_TOKEN: ${{ env.SONARQUBE_TOKEN }}
+          SONAR_PROJECT_KEY: pr-${{ github.event.pull_request.number }}
+        with:
+          login: ${{ env.SONARQUBE_TOKEN }}
+          skipScanner: true
