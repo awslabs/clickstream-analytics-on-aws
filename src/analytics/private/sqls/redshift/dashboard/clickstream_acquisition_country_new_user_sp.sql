@@ -17,6 +17,7 @@ select
 from {{database_name}}.{{schema}}.{{baseView}}
 where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
 group by 1,2,3,4
+having (user_count > 0)
 ;
 
 EXCEPTION WHEN OTHERS THEN

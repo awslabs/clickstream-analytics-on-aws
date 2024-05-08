@@ -1922,13 +1922,13 @@
                         "Type": "SINGLE_SELECT",
                         "SelectableValues": {
                             "Values": [
-                                "App Install Source",
-                                "Traffic Campaign",
-                                "Traffic Channel Group",
-                                "Traffic Clid Platform",
-                                "Traffic Medium",
-                                "Traffic Source",
-                                "Traffic Source / Medium"
+                                "App First Install Source",
+                                "User First Traffic Campaign",
+                                "User First Traffic Channel Group",
+                                "User First Traffic Clid Platform",
+                                "User First Traffic Medium",
+                                "User First Traffic Source",
+                                "User First Traffic Source / Medium"
                             ]
                         }
                     }
@@ -3809,7 +3809,7 @@
                                                 "DataSetIdentifier": "Day_User_View",
                                                 "ColumnName": "Active users"
                                             },
-                                            "AggregationFunction": "COUNT",
+                                            "AggregationFunction": "DISTINCT_COUNT",
                                             "FormatConfiguration": {
                                                 "NumericFormatConfiguration": {
                                                     "NumberDisplayFormatConfiguration": {
