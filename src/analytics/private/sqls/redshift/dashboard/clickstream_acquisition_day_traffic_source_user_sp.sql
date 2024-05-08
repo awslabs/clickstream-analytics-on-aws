@@ -18,7 +18,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Traffic Source' as aggregation_type,
+    'User First Traffic Source' as aggregation_type,
     first_traffic_source as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -38,7 +38,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Traffic Source / Medium' as aggregation_type,
+    'User First Traffic Source / Medium' as aggregation_type,
     first_traffic_source || ' / ' || first_traffic_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -58,7 +58,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Traffic Medium' as aggregation_type,
+    'User First Traffic Medium' as aggregation_type,
     first_traffic_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -78,7 +78,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Traffic Campaign' as aggregation_type,
+    'User First Traffic Campaign' as aggregation_type,
     first_traffic_campaign as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -98,7 +98,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Traffic Clid Platform' as aggregation_type,
+    'User First Traffic Clid Platform' as aggregation_type,
     first_traffic_clid_platform as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -118,7 +118,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Traffic Channel Group' as aggregation_type,
+    'User First Traffic Channel Group' as aggregation_type,
     first_traffic_channel_group as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -138,7 +138,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'App Install Source' as aggregation_type,
+    'App First Install Source' as aggregation_type,
     first_app_install_source as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -158,7 +158,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Session Source' as aggregation_type,
+    'Session Traffic Source' as aggregation_type,
     session_source as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -177,7 +177,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Session Medium' as aggregation_type,
+    'Session Traffic Medium' as aggregation_type,
     session_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -196,7 +196,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Session Source / Medium' as aggregation_type,
+    'Session Traffic Source / Medium' as aggregation_type,
     session_source || ' / ' || session_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -215,7 +215,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Session Campaign' as aggregation_type,
+    'Session Traffic Campaign' as aggregation_type,
     session_campaign as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -233,7 +233,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Session Clid Platform' as aggregation_type,
+    'Session Traffic Clid Platform' as aggregation_type,
     session_clid_platform as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -251,7 +251,7 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Session Channel Group' as aggregation_type,
+    'Session Traffic Channel Group' as aggregation_type,
     session_channel_group as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}

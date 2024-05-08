@@ -70,7 +70,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Traffic Source' as aggregation_type,
+    'User First Traffic Source' as aggregation_type,
     tmp2.first_traffic_source as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -105,7 +105,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Traffic Source / Medium' as aggregation_type,
+    'User First Traffic Source / Medium' as aggregation_type,
     tmp2.first_traffic_source || ' / ' || tmp2.first_traffic_medium as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -140,7 +140,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Traffic Medium' as aggregation_type,
+    'User First Traffic Medium' as aggregation_type,
     tmp2.first_traffic_medium as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -175,7 +175,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Traffic Campaign' as aggregation_type,
+    'User First Traffic Campaign' as aggregation_type,
     tmp2.first_traffic_campaign as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -211,7 +211,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Traffic Clid Platform' as aggregation_type,
+    'User First Traffic Clid Platform' as aggregation_type,
     tmp2.first_traffic_clid_platform as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -247,7 +247,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Traffic Channel Group' as aggregation_type,
+    'User First Traffic Channel Group' as aggregation_type,
     tmp2.first_traffic_channel_group as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -283,7 +283,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'App Install Source' as aggregation_type,
+    'App First Install Source' as aggregation_type,
     tmp2.first_app_install_source as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -319,7 +319,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Session Source' as aggregation_type,
+    'Session Traffic Source' as aggregation_type,
     tmp2.session_source as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -354,7 +354,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Session Medium' as aggregation_type,
+    'Session Traffic Medium' as aggregation_type,
     tmp2.session_medium as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -389,7 +389,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Session Source / Medium' as aggregation_type,
+    'Session Traffic Source / Medium' as aggregation_type,
     tmp2.session_source || ' / ' || tmp2.session_medium as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -425,7 +425,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Session Campaign' as aggregation_type,
+    'Session Traffic Campaign' as aggregation_type,
     tmp2.session_campaign as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -460,7 +460,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Session Clid Platform' as aggregation_type,
+    'Session Traffic Clid Platform' as aggregation_type,
     tmp2.session_clid_platform as aggregation_dim,
     tmp2.platform,
     user_id,
@@ -495,7 +495,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 )
 SELECT 
     day::date AS event_date,
-    'Session Channel Group' as aggregation_type,
+    'Session Traffic Channel Group' as aggregation_type,
     tmp2.session_channel_group as aggregation_dim,
     tmp2.platform,
     user_id,
