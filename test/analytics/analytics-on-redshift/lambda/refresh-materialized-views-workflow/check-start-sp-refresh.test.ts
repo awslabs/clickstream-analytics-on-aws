@@ -89,7 +89,7 @@ describe('Lambda - check next refresh task', () => {
 
   test('forceRefresh is true but startRefreshViewNameOrSPName is not the sp', async () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
-    checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName = 'no_user_m_max_view';
+    checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName = 'no_exist_mv';
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {

@@ -144,7 +144,7 @@ BEGIN
     CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.session_id ELSE NULL END as view_session_indicator,
     CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.event_id ELSE NULL END as view_event_indicator
   from {{database_name}}.{{schema}}.event_v2 e
-  left join {{database_name}}.{{schema}}.session_m_view s 
+  left join {{database_name}}.{{schema}}.session s 
     on e.user_pseudo_id = s.user_pseudo_id and e.session_id = s.session_id
   where e.created_time > rec.start_time and e.created_time <= rec.end_time
   and e.event_timestamp >= CURRENT_TIMESTAMP - INTERVAL '7 days' --reduce scan range
