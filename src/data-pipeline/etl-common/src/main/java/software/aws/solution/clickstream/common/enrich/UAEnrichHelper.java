@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.type.*;
 import com.fasterxml.jackson.databind.*;
 import lombok.extern.slf4j.*;
+import software.aws.solution.clickstream.common.Cache;
 import software.aws.solution.clickstream.common.model.*;
 import ua_parser.*;
 
@@ -29,7 +30,7 @@ public final class UAEnrichHelper {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static final String UA_STRING = "string";
     public static final String BOT = "Bot";
-    private static final Map<String, ClickstreamUA> CACHED_UA = new HashMap<>();
+    private static final Cache<ClickstreamUA> CACHED_UA = new Cache<>();
 
     private UAEnrichHelper() {
     }

@@ -18,13 +18,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import software.aws.solution.clickstream.common.Cache;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static software.aws.solution.clickstream.common.Util.readResourceFile;
 import static software.aws.solution.clickstream.common.Util.readTextFile;
@@ -34,8 +33,7 @@ public final class ChannelListEvaluator {
     public static final String UNASSIGNED = "Unassigned";
     @Getter
     private List<ChannelRule> channelRules;
-
-    private static final Map<String, String> CHANNEL_CACHED = new HashMap<>();
+    private static final Cache<String> CHANNEL_CACHED = new Cache<>();
 
     private ChannelListEvaluator() {
 
