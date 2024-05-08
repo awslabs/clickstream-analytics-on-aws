@@ -1926,13 +1926,13 @@
                         "Type": "SINGLE_SELECT",
                         "SelectableValues": {
                             "Values": [
-                                "App Install Source",
-                                "Traffic Campaign",
-                                "Traffic Channel Group",
-                                "Traffic Clid Platform",
-                                "Traffic Medium",
-                                "Traffic Source",
-                                "Traffic Source / Medium"
+                                "App First Install Source",
+                                "User First Traffic Campaign",
+                                "User First Traffic Channel Group",
+                                "User First Traffic Clid Platform",
+                                "User First Traffic Medium",
+                                "User First Traffic Source",
+                                "User First Traffic Source / Medium"
                             ]
                         }
                     }
@@ -1961,12 +1961,12 @@
                         "Type": "SINGLE_SELECT",
                         "SelectableValues": {
                             "Values": [
-                                "Session Campaign",
-                                "Session Channel Group",
-                                "Session Clid Platform",
-                                "Session Medium",
-                                "Session Source",
-                                "Session Source / Medium"
+                                "Session Traffic Campaign",
+                                "Session Traffic Channel Group",
+                                "Session Traffic Clid Platform",
+                                "Session Traffic Medium",
+                                "Session Traffic Source",
+                                "Session Traffic Source / Medium"
                             ]
                         }
                     }
@@ -9914,7 +9914,7 @@
                 "Name": "userSourceDim",
                 "DefaultValues": {
                     "StaticValues": [
-                        "Traffic Source"
+                        "User First Traffic Source"
                     ]
                 },
                 "ValueWhenUnset": {
@@ -9928,7 +9928,7 @@
                 "Name": "trafficSourceDim",
                 "DefaultValues": {
                     "StaticValues": [
-                        "Session Source"
+                        "Session Traffic Source"
                     ]
                 },
                 "ValueWhenUnset": {
