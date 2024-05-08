@@ -107,5 +107,7 @@ class CleanerTest extends BaseSparkTest {
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/original_data_event_name_not_filtered.json")).getPath());
         Dataset<Row> cleanedDataset = cleaner.clean(dataset, "/data_schema.json");
         assertEquals(3, cleanedDataset.count());
+
     }
+
 }
