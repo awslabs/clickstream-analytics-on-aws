@@ -25,7 +25,8 @@ const AnalyticsAnalyzesFullWindow: React.FC = () => {
     try {
       const { success, data }: ApiResponse<any> = await embedAnalyzesUrl(
         defaultStr(projectId),
-        window.location.origin
+        window.location.origin,
+        'false',
       );
       if (success && data.EmbedUrl) {
         setDashboardEmbedUrl(data.EmbedUrl);

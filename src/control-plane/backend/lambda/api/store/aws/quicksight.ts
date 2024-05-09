@@ -138,6 +138,7 @@ export const generateEmbedUrlForRegisteredUser = async (
   region: string,
   userArn: string,
   allowedDomain: string,
+  generativeQnA: boolean,
   dashboardId?: string,
   sheetId?: string,
   visualId?: string,
@@ -152,7 +153,14 @@ export const generateEmbedUrlForRegisteredUser = async (
       AllowedDomains: [allowedDomain],
       ExperienceConfiguration: {},
     };
-    if (sheetId && visualId) {
+    if (generativeQnA) {
+      commandInput = {
+        ...commandInput,
+        ExperienceConfiguration: {
+          GenerativeQnA: {},
+        },
+      };
+    } else if (sheetId && visualId) {
       commandInput = {
         ...commandInput,
         ExperienceConfiguration: {

@@ -18,7 +18,7 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ExploreEmbedFrameProps {
-  embedType: 'dashboard' | 'visual' | 'console';
+  embedType: 'dashboard' | 'visual' | 'console' | 'Q';
   embedUrl: string;
   embedPage: 'dashboard' | 'explore' | 'analyze';
 }
@@ -71,6 +71,15 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
           }
         );
         break;
+      case 'Q':
+        await embeddingContext.embedGenerativeQnA(
+          {
+            url: embedUrl,
+            container: `#EmbedId`,
+            resizeHeightOnSizeChangedEvent: true,
+          }
+        );
+        break;
       default:
         break;
     }
@@ -86,7 +95,7 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
     <div
       id="EmbedId"
       className={
-        embedType === 'console'
+        (embedType === 'console' || embedType === 'Q')
           ? 'iframe-explore fixed-height'
           : 'iframe-explore'
       }
