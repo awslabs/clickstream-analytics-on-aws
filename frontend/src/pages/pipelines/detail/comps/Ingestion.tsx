@@ -197,7 +197,10 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
               projectId={pipelineInfo?.projectId}
               pipelineId={pipelineInfo?.pipelineId}
               customDomain={pipelineInfo?.ingestionServer.domain.domainName}
-              fetch={ternary(pipelineInfo?.pipelineId, true, false)}
+              fetch={
+                ternary(pipelineInfo?.pipelineId, true, false) &&
+                pipelineInfo.network.publicSubnetIds.length > 0
+              }
             />
           </div>
         )}
@@ -228,7 +231,10 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
                 projectId={pipelineInfo?.projectId}
                 pipelineId={pipelineInfo?.pipelineId}
                 endpoint={pipelineInfo?.endpoint}
-                fetch={ternary(pipelineInfo?.pipelineId, true, false)}
+                fetch={
+                  ternary(pipelineInfo?.pipelineId, true, false) &&
+                  pipelineInfo.network.publicSubnetIds.length > 0
+                }
               />
             </div>
           </>
