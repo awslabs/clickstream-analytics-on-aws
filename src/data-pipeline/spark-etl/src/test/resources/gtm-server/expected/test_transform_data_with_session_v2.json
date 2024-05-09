@@ -6,7 +6,7 @@
   "session_number" : 9,
   "session_start_time_msec" : 1704867230837,
   "session_source" : "Direct",
-  "session_medium" : "Direct",
+  "session_medium" : "None",
   "session_campaign" : "Direct",
   "session_content" : null,
   "session_term" : null,

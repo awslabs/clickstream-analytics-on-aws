@@ -79,7 +79,7 @@
     "utm_source" : "google",
     "utm_term" : "term-1"
   },
-  "page_view_hostname" : "myhost.com",
+  "page_view_hostname" : "https://host-name-001.com",
   "page_view_latest_referrer" : null,
   "page_view_latest_referrer_host" : null,
   "page_view_entrances" : null,

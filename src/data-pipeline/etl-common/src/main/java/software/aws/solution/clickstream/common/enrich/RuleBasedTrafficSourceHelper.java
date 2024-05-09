@@ -66,6 +66,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     public static final String NONE = "None";
     public static final String REFERRAL = "Referral";
     public static final String ORGANIC = "Organic";
+    public static final String INTERNAL = "Internal";
 
     static {
         KNOWN_CLID_TO_MEDIUM_MAP = getKnownClidTypeToSourceMediumMap();
@@ -332,13 +333,14 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (pageReferrer != null && !pageReferrer.isEmpty()) {
              pageReferrerHost = parseUrl(pageReferrer).getHostName();
         }
-        boolean isPageHostNameSameAsReferrerHost = pageHostName == null || !pageHostName.equalsIgnoreCase(pageReferrerHost);
+        boolean isInternalReferrer = pageHostName != null && pageHostName.equalsIgnoreCase(pageReferrerHost);
+        log.debug("isInternalReferrer: {}", isInternalReferrer);
 
         CategoryTrafficSource categoryTrafficSource = null;
 
         if (latestReferrer != null && !latestReferrer.isEmpty()) {
             categoryTrafficSource = parse(trafficSourceUtm, latestReferrer, latestReferrerHost);
-        } else if (pageReferrer != null && !pageReferrer.isEmpty() && !isPageHostNameSameAsReferrerHost) {
+        } else if (pageReferrer != null && !pageReferrer.isEmpty() && !isInternalReferrer) {
             categoryTrafficSource = parse(trafficSourceUtm, pageReferrer, pageReferrerHost);
         } else {
             categoryTrafficSource = parse(trafficSourceUtm, null, null);
@@ -356,19 +358,34 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (categoryTrafficSource.getSource() == null) {
             categoryTrafficSource.setSource(DIRECT);
             categoryTrafficSource.setCategory(DIRECT);
-            categoryTrafficSource.setChannelGroup(DIRECT);
+            if (isInternalReferrer) {
+                categoryTrafficSource.setChannelGroup(INTERNAL);
+            } else {
+                categoryTrafficSource.setChannelGroup(DIRECT);
+            }
+        }
+
+        if (categoryTrafficSource.getSource() != null && categoryTrafficSource.getMedium() == null) {
+            categoryTrafficSource.setMedium(getMediumBySource(categoryTrafficSource.getSource()));
         }
 
         if (categoryTrafficSource.getMedium() == null) {
-            categoryTrafficSource.setMedium(getMediumByReferrer(pageReferrer, latestReferrer, isPageHostNameSameAsReferrerHost));
+            categoryTrafficSource.setMedium(getMediumByReferrer(pageReferrer, latestReferrer, isInternalReferrer));
         }
         CACHED_CATEGORY_TRAFFIC_SOURCE.put(catchKey, categoryTrafficSource);
 
         return categoryTrafficSource;
     }
 
-    String getMediumByReferrer(final String pageReferrer, final String latestReferrer, final boolean isPageHostNameSameAsReferrerHost) {
-        log.debug("getMediumByReferrer() enter pageReferrer: {}, latestReferrer: {}, isPageHostNameSameAsReferrerHost: {}", pageReferrer, latestReferrer, isPageHostNameSameAsReferrerHost);
+    private String getMediumBySource(final String source) {
+        if (source !=null && source.toLowerCase().matches(".*(google|bing|yahoo|duckduckgo|baidu|yandex).*")) {
+            return ORGANIC;
+        }
+        return null;
+    }
+
+    String getMediumByReferrer(final String pageReferrer, final String latestReferrer, final boolean isInternalReferrer) {
+        log.debug("getMediumByReferrer() enter pageReferrer: {}, latestReferrer: {}, isInternalReferrer: {}", pageReferrer, latestReferrer, isInternalReferrer);
 
         if ((pageReferrer == null || pageReferrer.isEmpty()) && (latestReferrer == null || latestReferrer.isEmpty())) {
             return NONE;
@@ -393,7 +410,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             }
         }
 
-        if (isPageHostNameSameAsReferrerHost) {
+        if (isInternalReferrer) {
             return NONE;
         }
 
