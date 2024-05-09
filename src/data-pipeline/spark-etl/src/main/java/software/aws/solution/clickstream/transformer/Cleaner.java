@@ -35,6 +35,7 @@ import software.aws.solution.clickstream.util.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,9 @@ import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_P
 import static software.aws.solution.clickstream.util.ContextUtil.JOB_NAME_PROP;
 import static software.aws.solution.clickstream.util.DatasetUtil.CORRUPT_RECORD;
 import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_FIRST_OPEN;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_FIRST_VISIT;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PROFILE_SET;
 import static software.aws.solution.clickstream.util.DatasetUtil.JOB_NAME_COL;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.common.Util.decompress;
@@ -206,13 +210,17 @@ public class Cleaner {
         return dataset.filter((FilterFunction<Row>) row -> {
             long ingestTimestamp = row.getAs("ingest_time");
             long eventTimestamp = row.getStruct(row.fieldIndex("data")).getAs("timestamp");
+            String eventName = row.getStruct(row.fieldIndex("data")).getAs("event_type");
+
+            if (Arrays.asList(EVENT_FIRST_OPEN, EVENT_FIRST_VISIT, EVENT_PROFILE_SET).contains(eventName)) {
+                return true;
+            }
 
             if (eventTimestamp > Instant.now().toEpochMilli()) {
                 String eventId = row.getStruct(row.fieldIndex("data")).getAs("event_id");
                 log.warn("eventTimestamp is in the future, eventTimestamp:" + eventTimestamp + ", eventId:" + eventId);
                 return false;
             }
-
             return ingestTimestamp - eventTimestamp <= dataFreshnessInHour * 60 * 60 * 1000L;
         });
     }

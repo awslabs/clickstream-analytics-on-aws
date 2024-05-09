@@ -16,6 +16,7 @@ package software.aws.solution.clickstream.common.enrich;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import software.aws.solution.clickstream.common.Cache;
 import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.Util;
 import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
@@ -68,6 +69,8 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
     private final CategoryListEvaluator categoryListEvaluator;
     private final ChannelListEvaluator channelListEvaluator;
+
+    private static final Cache<CategoryTrafficSource> CACHED_CATEGORY_TRAFFIC_SOURCE = new Cache<>();
     @Getter
     private final String appId;
 
@@ -159,12 +162,12 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             }
         }
 
-        log.info("clidMap: {}", clidMap);
+        log.debug("clidMap: {}", clidMap);
         return clidMap;
     }
 
     private static String getFirst(final List<String> list) {
-        return list != null && !list.isEmpty() ? list.get(0) : null;
+        return list != null && !list.isEmpty() && !list.get(0).isEmpty()? list.get(0) : null;
     }
 
     private static boolean isEmpty(final String v, final String emtpyValue) {
@@ -177,26 +180,30 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
     @Override
     public CategoryTrafficSource parse(final String pageUrl, final String pageReferrer, final String latestReferrer, final String latestReferrerHost) {
-        log.info("parser() enter pageUrl: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
+        log.debug("parser() enter pageUrl: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
 
+        String cachedKey = String.join("|", pageUrl, pageReferrer, latestReferrer);
+        if (CACHED_CATEGORY_TRAFFIC_SOURCE.containsKey(cachedKey)) {
+            return CACHED_CATEGORY_TRAFFIC_SOURCE.get(cachedKey);
+        }
         TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
 
         if (pageUrl != null && !pageUrl.isEmpty()) {
             trafficSourceUtm = getUtmSourceFromUrl(pageUrl);
         }
-
-        return parse(trafficSourceUtm, pageReferrer, latestReferrer, latestReferrerHost);
-
+        CategoryTrafficSource result = parse(trafficSourceUtm, pageReferrer, latestReferrer, latestReferrerHost);
+        CACHED_CATEGORY_TRAFFIC_SOURCE.put(cachedKey, result);
+        return result;
     }
 
-    private TrafficSourceUtm getUtmSourceFromUrl(final String urlIput) {
+    private TrafficSourceUtm getUtmSourceFromUrl(final String urlInput) {
         TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
-        if (urlIput == null) {
+        if (urlInput == null || urlInput.isEmpty()) {
             return trafficSourceUtm;
         }
 
-        String url = urlIput;
-        if (!urlIput.contains("://")) {
+        String url = urlInput;
+        if (!urlInput.contains("://")) {
             url = "http://" + url;
         }
 
@@ -210,7 +217,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         String utmCampaign = getFirst(params.get("utm_campaign"));
         String utmSourcePlatform = getFirst(params.get("utm_source_platform"));
 
-        log.info("utmSource: {}, utmMedium: {}, utmContent: {}, utmTerm: {}, utmCampaign: {}, utmId: {}, utmSourcePlatform: {}, gclid: {}",
+        log.debug("utmSource: {}, utmMedium: {}, utmContent: {}, utmTerm: {}, utmCampaign: {}, utmId: {}, utmSourcePlatform: {}, gclid: {}",
                 utmSource, utmMedium, utmContent, utmTerm, utmCampaign, utmId, utmSourcePlatform, gclid);
 
         Map<String, String> clidMap = createClidTypeValueMap(gclid, params);
@@ -241,7 +248,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     }
 
     public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String theReferrer, final String theReferrerHost) {
-        log.info("trafficSourceUtmInput: {}, theReferrer: {}, theReferrerHost: {}", trafficSourceUtmInput, theReferrer, theReferrerHost);
+        log.debug("trafficSourceUtmInput: {}, theReferrer: {}, theReferrerHost: {}", trafficSourceUtmInput, theReferrer, theReferrerHost);
         TrafficSourceUtm trafficSourceUtm = normEmptyInTrafficSourceUtm(trafficSourceUtmInput);
 
         SourceCategoryAndTerms sourceCategoryAndTerms = this.categoryListEvaluator.evaluate(theReferrer);
@@ -250,7 +257,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         String terms = sourceCategoryAndTerms.getTerms();
         String category = sourceCategoryAndTerms.getCategory();
 
-        log.info("categoryListEvaluator source: {}, terms: {}, category: {}", source, terms, category);
+        log.debug("categoryListEvaluator source: {}, terms: {}, category: {}", source, terms, category);
 
         if (trafficSourceUtm.getSource() == null) {
             trafficSourceUtm.setSource(source);
@@ -266,7 +273,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
         if (trafficSourceUtm.getSource() != null && categoryForEval == null) {
             category = this.categoryListEvaluator.getCategoryBySource(trafficSourceUtm.getSource());
-            log.info("category is null/UNASSIGNED, trying to get category from source: {} -> category: {}", trafficSourceUtm.getSource(), category);
+            log.debug("category is null/UNASSIGNED, trying to get category from source: {} -> category: {}", trafficSourceUtm.getSource(), category);
         }
 
         ChannelRuleEvaluatorInput evalInput = ChannelRuleEvaluatorInput.from(trafficSourceUtm, categoryForEval, theReferrer, theReferrerHost);
@@ -281,15 +288,19 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
                 categoryTrafficSource.setCampaign(DIRECT);
             }
         }
-        log.info("return categoryTrafficSource: {}", categoryTrafficSource);
+        log.debug("return categoryTrafficSource: {}", categoryTrafficSource);
         return categoryTrafficSource;
 
     }
 
     @Override
     public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String pageReferrer, final String latestReferrer, final String latestReferrerHost) {
-        log.info("parser() enter trafficSourceUtm: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", trafficSourceUtmInput, pageReferrer, latestReferrer, latestReferrerHost);
+        log.debug("parser() enter trafficSourceUtm: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", trafficSourceUtmInput, pageReferrer, latestReferrer, latestReferrerHost);
 
+        String catchKey = String.join("|", trafficSourceUtmInput.hashCode() + "", pageReferrer, latestReferrer);
+        if (CACHED_CATEGORY_TRAFFIC_SOURCE.containsKey(catchKey)) {
+            return CACHED_CATEGORY_TRAFFIC_SOURCE.get(catchKey);
+        }
         TrafficSourceUtm trafficSourceUtm = normEmptyInTrafficSourceUtm(trafficSourceUtmInput);
 
         if (trafficSourceUtm.getSource() == null) {
@@ -334,6 +345,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (categoryTrafficSource.getMedium() == null) {
             categoryTrafficSource.setMedium(categoryTrafficSource.getChannelGroup());
         }
+        CACHED_CATEGORY_TRAFFIC_SOURCE.put(catchKey, categoryTrafficSource);
 
         return categoryTrafficSource;
     }

@@ -21,10 +21,12 @@ import org.apache.spark.sql.expressions.*;
 import org.apache.spark.sql.types.*;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.util.ContextUtil;
 
 import java.util.*;
 
 import static org.apache.spark.sql.functions.*;
+import static software.aws.solution.clickstream.util.ContextUtil.DISABLE_MAX_LENGTH_CHECK;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
 import static software.aws.solution.clickstream.model.ModelV2.toColumnArray;
 
@@ -220,8 +222,8 @@ public class MaxLengthTransformerV2 {
     }
 
     public Dataset<Row> transform(final Dataset<Row> dataset, final List<ColumnsMaxLength> columnsMaxLengthList) {
-        if (System.getenv("DISABLE_MAX_LEN_CHECK") != null
-                && System.getenv("DISABLE_MAX_LEN_CHECK").equals("true")){
+        if (ContextUtil.getEtlRunFlag().contains(DISABLE_MAX_LENGTH_CHECK)){
+            log.info("disable.max.length.check is set, ignore MaxLengthTransformerV2");
             return dataset;
         }
 

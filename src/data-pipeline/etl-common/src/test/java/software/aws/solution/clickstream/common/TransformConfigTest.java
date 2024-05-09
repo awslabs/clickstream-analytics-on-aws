@@ -11,19 +11,19 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.transformer;
+package software.aws.solution.clickstream.common;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashMap;
-import software.aws.solution.clickstream.common.RuleConfig;
-
 public class TransformConfigTest {
-
     @Test
     public void shouldInitializeEmptyAppRuleConfig() {
         TransformConfig transformConfig = new TransformConfig();
@@ -38,10 +38,11 @@ public class TransformConfigTest {
         ruleConfigMap.put("testRule", ruleConfig);
 
         transformConfig.setAppRuleConfig(ruleConfigMap);
+        transformConfig.setTrafficSourceEnrichmentDisabled(true);
 
         assertNotNull(transformConfig.getAppRuleConfig());
         assertEquals(ruleConfig, transformConfig.getAppRuleConfig().get("testRule"));
-        assertTrue(transformConfig.toString().contains("testRule"));
+        assertTrue(transformConfig.isTrafficSourceEnrichmentDisabled());
     }
 
     @Test
@@ -54,5 +55,6 @@ public class TransformConfigTest {
         transformConfig.setAppRuleConfig(ruleConfigMap);
 
         assertNull(transformConfig.getAppRuleConfig().get("nonExistentRule"));
+        assertFalse(transformConfig.isTrafficSourceEnrichmentDisabled());
     }
 }

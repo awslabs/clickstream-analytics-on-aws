@@ -46,10 +46,10 @@ public final class ClickstreamEventParser extends BaseEventParser {
     public static final String EVENT_USER_ENGAGEMENT = "_user_engagement";
     public static final String EVENT_SCROLL = "_scroll";
 
-    private Map<String, RuleConfig> appRuleConfig;
+    private TransformConfig transformConfig;
 
-    private ClickstreamEventParser(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    private ClickstreamEventParser(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
     public static ClickstreamEventParser getInstance() {
@@ -57,9 +57,9 @@ public final class ClickstreamEventParser extends BaseEventParser {
         return getInstance(null);
     }
 
-    public static ClickstreamEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+    public static ClickstreamEventParser getInstance(final TransformConfig transformConfig) {
         if (instance == null) {
-            instance = new ClickstreamEventParser(appRuleConfig);
+            instance = new ClickstreamEventParser(transformConfig);
         }
          return instance;
     }
@@ -108,6 +108,10 @@ public final class ClickstreamEventParser extends BaseEventParser {
             return clickstreamItemList;
         }
         for (Item item : items) {
+            if (item.getItemId() == null || item.getItemId().isEmpty()) {
+                continue;
+            }
+
             ClickstreamItem clickstreamItem = new ClickstreamItem();
             clickstreamItemList.add(clickstreamItem);
 
@@ -260,7 +264,6 @@ public final class ClickstreamEventParser extends BaseEventParser {
 
         return clickstreamEvent;
     }
-
 
     private void setEventCustomParameters(final Event ingestEvent, final Map<String, ClickstreamEventPropValue> customProperties, final ClickstreamEvent clickstreamEvent) {
         try {
@@ -432,12 +435,18 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setTrafficSourceChannelGroup(clientTsInfo.getChannel());
         clickstreamEvent.setTrafficSourceCategory(clientTsInfo.getCategory());
 
-        log.info("setTrafficSource() platform: {}, source: {}", clickstreamEvent.getPlatform(), clientTsInfo.getSource());
+        log.debug("setTrafficSource() platform: {}, source: {}", clickstreamEvent.getPlatform(), clientTsInfo.getSource());
+
+        if (isDisableTrafficSourceEnrichment()) {
+            log.info("disable.traffic.source.enrichment is set, skipping traffic source enrichment");
+            return;
+        }
 
         // TrafficSource is set by SDK, but category or channel not set
-        if (clientTsInfo.getSource() != null && (clientTsInfo.getCategory() == null || clientTsInfo.getChannel() == null)) {
+        if (clientTsInfo.getSource() != null && !clientTsInfo.getSource().isEmpty()
+                && (clientTsInfo.getCategory() == null || clientTsInfo.getChannel() == null)) {
             String appId = clickstreamEvent.getAppId();
-            RuleConfig ruleConfig = getAppRuleConfig() != null ? getAppRuleConfig().get(appId) : null;
+            RuleConfig ruleConfig = getAppRuleConfig().get(appId);
             if (ruleConfig == null) {
                 log.warn("RuleConfig is not set for appId: " + appId);
             }
@@ -536,11 +545,11 @@ public final class ClickstreamEventParser extends BaseEventParser {
     }
 
     @Override
-    public Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
+    public TransformConfig getTransformConfig() {
+        return this.transformConfig;
     }
-    public void setAppRuleConfig(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    public void setTransformConfig(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
     private boolean isEnableEventTimeShift() {
@@ -552,7 +561,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
 
     private TimeShiftInfo getEventTimeShiftInfo(final Event ingestEvent, final ExtraParams extraParams) {
         TimeShiftInfo timeShiftInfo = new TimeShiftInfo();
-
+        long currentTime = System.currentTimeMillis();
         Long eventTimestamp = ingestEvent.getEventTimestamp();
         Long uploadTimestamp = extraParams.getUploadTimestamp();
 
@@ -564,8 +573,10 @@ public final class ClickstreamEventParser extends BaseEventParser {
         timeShiftInfo.setTimeDiff(0L);
         timeShiftInfo.setUploadTimestamp(uploadTimestamp);
 
-        if (!isEnableEventTimeShift()) {
-            log.info("event time shift is disabled");
+        boolean isFutureEvent = eventTimestamp > currentTime;
+
+        if (!isEnableEventTimeShift() && !isFutureEvent) {
+            log.debug("event time shift is not enable and event is not future event, skip time shift adjustment.");
             return timeShiftInfo;
         }
 
@@ -588,14 +599,26 @@ public final class ClickstreamEventParser extends BaseEventParser {
         if (uploadTimestamp != null) {
             Long ingestTimestamp = extraParams.getIngestTimestamp();
             long timeDiff = ingestTimestamp - uploadTimestamp;
-            if (Math.abs(timeDiff) > timeShiftInfo.getAdjustThreshold()) {
+            if (Math.abs(timeDiff) > timeShiftInfo.getAdjustThreshold() || isFutureEvent) {
                 timeShiftInfo.setTimeDiff(timeDiff);
                 eventTimestamp += timeDiff;
                 log.warn("ingestTimestamp is " + timeDiff + " seconds ahead of uploadTimestamp");
                 timeShiftInfo.setAdjusted(true);
+                timeShiftInfo.setReason("ingestTimestamp is " + timeDiff + " millis ahead of uploadTimestamp, isFutureEvent: " + isFutureEvent);
             }
             timeShiftInfo.setEventTimestamp(eventTimestamp);
         }
+
+        if (timeShiftInfo.getEventTimestamp() > currentTime) {
+            timeShiftInfo.setEventTimestamp(timeShiftInfo.getIngestTimestamp());
+            timeShiftInfo.setAdjusted(true);
+            timeShiftInfo.setTimeDiff(timeShiftInfo.getIngestTimestamp() - timeShiftInfo.getOriginEventTimestamp());
+            timeShiftInfo.setReason(String.join("|",
+                    timeShiftInfo.getReason() == null ? "": timeShiftInfo.getReason(),
+                    "eventTimestamp is in the future, set to ingestTimestamp"));
+        }
+
+        log.debug("timeShiftInfo: " + timeShiftInfo);
 
         return timeShiftInfo;
     }
@@ -613,7 +636,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
             processInfo.put("event_timestamp_adjusted", true + "");
             processInfo.put("event_timestamp_adjusted_from", timeShiftInfo.getOriginEventTimestamp() + "");
             processInfo.put("event_timestamp_adjusted_to", timeShiftInfo.getEventTimestamp() + "");
-            processInfo.put("event_timestamp_adjusted_reason", "ingest_time is " + (timeShiftInfo.getTimeDiff() / 1000) + " seconds ahead of upload_time");
+            processInfo.put("event_timestamp_adjusted_reason", timeShiftInfo.getReason());
         }
         clickstreamEvent.setProcessInfo(processInfo);
     }

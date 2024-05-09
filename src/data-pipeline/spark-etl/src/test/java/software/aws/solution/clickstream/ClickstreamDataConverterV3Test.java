@@ -26,7 +26,7 @@ public class ClickstreamDataConverterV3Test extends BaseSparkTest {
     private ClickstreamDataConverterV3 converter;
     @BeforeEach
     void setupConverter() {
-        this.converter = new ClickstreamDataConverterV3(getTestTransformConfig().getAppRuleConfig());
+        this.converter = new ClickstreamDataConverterV3(getTestTransformConfig());
     }
 
     public static Dataset<Row> addFileName(Dataset<Row> dataset) {

@@ -15,7 +15,7 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.util.TableName;
 
 import java.util.Map;

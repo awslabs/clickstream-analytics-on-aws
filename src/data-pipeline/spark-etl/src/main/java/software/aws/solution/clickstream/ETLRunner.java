@@ -30,8 +30,8 @@ import org.apache.spark.sql.types.StructType;
 import org.sparkproject.guava.annotations.VisibleForTesting;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
-import software.aws.solution.clickstream.transformer.TransformConfig;
 import software.aws.solution.clickstream.util.*;
 
 import javax.validation.constraints.NotEmpty;
@@ -58,6 +58,7 @@ import static org.apache.spark.sql.functions.date_format;
 
 import static software.aws.solution.clickstream.TransformerV3.CLIENT_TIMESTAMP;
 import static software.aws.solution.clickstream.TransformerV3.INPUT_FILE_NAME;
+import static software.aws.solution.clickstream.util.ContextUtil.DISABLE_TRAFFIC_SOURCE_ENRICHMENT;
 import static software.aws.solution.clickstream.util.ContextUtil.JOB_NAME_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.OUTPUT_COALESCE_PARTITIONS_PROP;
@@ -135,6 +136,11 @@ public class ETLRunner {
 
         TransformConfig transformRuleConfig = new TransformConfig();
         transformRuleConfig.setAppRuleConfig(appRuleConfig);
+        transformRuleConfig.setTrafficSourceEnrichmentDisabled(false);
+        if (runConfig.getRunFlag() != null && runConfig.getRunFlag().contains(DISABLE_TRAFFIC_SOURCE_ENRICHMENT)) {
+            transformRuleConfig.setTrafficSourceEnrichmentDisabled(true);
+            log.info("Traffic source enrichment is disabled");
+        }
 
         this.transformConfig = transformRuleConfig;
     }
@@ -427,6 +433,7 @@ public class ETLRunner {
     protected long writeResult(final String outputPath, final Dataset<Row> dataset, final TableName tbName) {
         log.info("writeResult for table " + tbName);
         Dataset<Row> partitionedDataset = prepareForPartition(dataset, tbName);
+        partitionedDataset.cache();
         long resultCount = partitionedDataset.count();
         log.info(new ETLMetric(resultCount, "writeResult for table " + tbName).toString());
         log.info("outputPath: " + outputPath);
@@ -454,7 +461,6 @@ public class ETLRunner {
             }
             log.info("actual numPartitions: " + numPartitions);
             partitionedDataset = partitionedDataset.coalesce(numPartitions);
-
             partitionedDataset.write()
                     .option("compression", "snappy")
                     .partitionBy(partitionBy).mode(SaveMode.Append).parquet(saveOutputPath);

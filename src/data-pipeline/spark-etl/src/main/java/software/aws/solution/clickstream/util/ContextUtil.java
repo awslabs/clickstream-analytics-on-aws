@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.storage.StorageLevel;
+import software.aws.solution.clickstream.common.Constant;
 
 import java.util.Arrays;
 
@@ -26,7 +27,6 @@ import static software.aws.solution.clickstream.common.ClickstreamEventParser.EN
 public final class ContextUtil {
     public static final String JOB_NAME_PROP= "job.name";
     public static final String WAREHOUSE_DIR_PROP = "warehouse.dir";
-    public static final String SAVE_INFO_TO_WAREHOUSE_PROP = "save.info.to.warehouse";
     public static final String DEBUG_LOCAL_PROP = "debug.local";
     public static final String OUTPUT_COALESCE_PARTITIONS_PROP = "output.coalesce.partitions";
     public static final String DATA_FRESHNESS_HOUR_PROP = "data.freshness.hour";
@@ -42,6 +42,8 @@ public final class ContextUtil {
     public static final String ITEM_KEEP_DAYS_PROP =  "keep.item.days";
 
     public static final String FILTER_BOT_BY_UA_PROP = "filter.bot.by.ua";
+    public static final String DISABLE_TRAFFIC_SOURCE_ENRICHMENT = "disable.traffic.source.enrichment";
+    public static final String DISABLE_MAX_LENGTH_CHECK = "disable.max.length.check";
 
     private static Dataset<Row> datasetCached;
 
@@ -72,7 +74,7 @@ public final class ContextUtil {
         System.setProperty(OUTPUT_PATH_PROP, config.getOutputPath());
         System.setProperty(DATA_FRESHNESS_HOUR_PROP, String.valueOf(config.getDataFreshnessInHour()));
         System.setProperty(OUTPUT_COALESCE_PARTITIONS_PROP, String.valueOf(config.getOutPartitions()));
-        System.setProperty(SAVE_INFO_TO_WAREHOUSE_PROP, String.valueOf(config.isSaveInfoToWarehouse()));
+        System.setProperty(Constant.ETL_RUN_FLAG, String.valueOf(config.getRunFlag()));
         System.setProperty(USER_KEEP_DAYS_PROP, String.valueOf(config.getUserKeepDays()));
         System.setProperty(ITEM_KEEP_DAYS_PROP, String.valueOf(config.getItemKeepDays()));
         System.setProperty(FILTER_BOT_BY_UA_PROP, config.getFilterBotByUa());
@@ -110,5 +112,8 @@ public final class ContextUtil {
 
     public static void setEnableEventTimeShift(final boolean enableEventTimeShift) {
         System.setProperty(ENABLE_EVENT_TIME_SHIFT_PROP, String.valueOf(enableEventTimeShift));
+    }
+    public static String getEtlRunFlag() {
+        return System.getProperty(Constant.ETL_RUN_FLAG, "");
     }
 }

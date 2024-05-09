@@ -24,6 +24,7 @@ import software.aws.solution.clickstream.common.ingest.ClickstreamIngestRow;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -147,6 +148,21 @@ public abstract class BaseEventParser implements EventParser {
         }
     }
 
-    protected abstract Map<String, RuleConfig> getAppRuleConfig();
+    protected abstract TransformConfig getTransformConfig();
+
+    protected Map<String, RuleConfig> getAppRuleConfig() {
+        if (getTransformConfig() != null && getTransformConfig().getAppRuleConfig() != null) {
+            return getTransformConfig().getAppRuleConfig();
+        } else {
+            return new HashMap<>();
+        }
+    }
+
+    protected boolean isDisableTrafficSourceEnrichment() {
+        if (this.getTransformConfig() == null) {
+            return false;
+        }
+        return this.getTransformConfig() != null && this.getTransformConfig().isTrafficSourceEnrichmentDisabled();
+    }
 
 }

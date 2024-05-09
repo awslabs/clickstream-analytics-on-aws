@@ -29,7 +29,7 @@ public class ServerDataConverterV2Test extends BaseSparkTest {
     ServerDataConverterV2 converter;
     @BeforeEach
     void setupConverter() {
-        this.converter = new ServerDataConverterV2(getTestTransformConfig().getAppRuleConfig());
+        this.converter = new ServerDataConverterV2(getTestTransformConfig());
     }
     public static Dataset<Row> addFileName(Dataset<Row> dataset) {
         return dataset.withColumn(INPUT_FILE_NAME, input_file_name());
