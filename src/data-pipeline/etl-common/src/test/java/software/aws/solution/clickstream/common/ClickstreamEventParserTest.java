@@ -13,6 +13,10 @@
 
 package software.aws.solution.clickstream.common;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.*;
 import org.apache.logging.log4j.*;
 import org.apache.logging.log4j.core.config.*;
@@ -360,5 +364,53 @@ public class ClickstreamEventParserTest extends BaseTest {
     }
 
 
+    @Test
+    void test_adjustFutureEventTime() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_adjustFutureEventTime
 
+        setEnableEventTimeShift(false);
+        String dataString = resourceFileContent("/data_future_event_time.json");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        long eventTime = System.currentTimeMillis() + 30 * 60* 1000;
+        JsonNode data = objectMapper.readTree(dataString);
+
+        ObjectNode dataNode = (ObjectNode) data;
+        dataNode.put("timestamp", eventTime);
+        ObjectNode user = (ObjectNode)dataNode.get("user");
+
+        ObjectNode userFirstTouch =  JsonNodeFactory.instance.objectNode();
+        userFirstTouch.set("value", dataNode.get("timestamp"));
+        userFirstTouch.set("set_timestamp", dataNode.get("timestamp"));
+
+        user.set("_user_first_touch_timestamp", userFirstTouch);
+        dataNode.set("user", user);
+
+        ObjectNode attributes = (ObjectNode) dataNode.get("attributes");
+        attributes.put("_session_start_timestamp", eventTime + 10);
+
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
+        log.info(dataNode.toPrettyString());
+
+        long ingestTimestamp = eventTime + 10;
+        ParseDataResult rowResult = clickstreamEventParser.parseData(dataNode.toString(),
+                ExtraParams.builder()
+                        .appId("test")
+                        .projectId("test_project_id")
+                        .ingestTimestamp(ingestTimestamp)
+                        .uploadTimestamp(eventTime + 20)
+                        .ua("test")
+                        .ip("9.9.9.9")
+                        .rid("test_rid")
+                        .uri("test_uri")
+                        .inputFileName("test_file")
+                .build(), 0);
+
+        ClickstreamEvent eventV2 = rowResult.getClickstreamEventList().get(0);
+        log.info(prettyJson(objectToJsonString(eventV2)));
+
+        Assertions.assertEquals("true", eventV2.getProcessInfo().get("event_timestamp_adjusted"));
+        Assertions.assertEquals("ingestTimestamp is -10 seconds ahead of uploadTimestamp, isFutureEvent: true|eventTimestamp is in the future, set to ingestTimestamp", eventV2.getProcessInfo().get("event_timestamp_adjusted_reason"));
+        Assertions.assertEquals(eventV2.getEventTimeMsec(),  ingestTimestamp); // ingestTimestamp
+    }
 }

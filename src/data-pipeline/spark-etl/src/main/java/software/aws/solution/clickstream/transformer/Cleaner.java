@@ -211,15 +211,16 @@ public class Cleaner {
             long ingestTimestamp = row.getAs("ingest_time");
             long eventTimestamp = row.getStruct(row.fieldIndex("data")).getAs("timestamp");
             String eventName = row.getStruct(row.fieldIndex("data")).getAs("event_type");
+
+            if (Arrays.asList(EVENT_FIRST_OPEN, EVENT_FIRST_VISIT, EVENT_PROFILE_SET).contains(eventName)) {
+                return true;
+            }
+
             if (eventTimestamp > Instant.now().toEpochMilli()) {
                 String eventId = row.getStruct(row.fieldIndex("data")).getAs("event_id");
                 log.warn("eventTimestamp is in the future, eventTimestamp:" + eventTimestamp + ", eventId:" + eventId);
                 return false;
             }
-            if (Arrays.asList(EVENT_FIRST_OPEN, EVENT_FIRST_VISIT, EVENT_PROFILE_SET).contains(eventName)) {
-                return true;
-            }
-
             return ingestTimestamp - eventTimestamp <= dataFreshnessInHour * 60 * 60 * 1000L;
         });
     }
