@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS, SolutionInfo } from '@aws/clickstream-base-lib';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   Aspects,
   Aws,
@@ -195,6 +195,11 @@ export class DataReportingQuickSightStack extends Stack {
       description: 'Redshift workgroup name.',
       value: stackParams.redshiftEndpointParam.valueAsString,
     }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS);
+
+    new CfnOutput(this, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME, {
+      description: 'Redshift Database name.',
+      value: stackParams.redshiftDBParam.valueAsString,
+    }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME);
 
 
     addCfnNag(this);

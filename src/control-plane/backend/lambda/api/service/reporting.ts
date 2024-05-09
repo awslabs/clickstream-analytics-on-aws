@@ -26,6 +26,7 @@ import {
   ExploreComputeMethod,
   sleep,
   SolutionVersion,
+  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME,
 } from '@aws/clickstream-base-lib';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
@@ -69,9 +70,11 @@ import {
 } from './quicksight/reporting-utils';
 import { EventAndCondition, EventComputeMethodsProps, ExploreAnalyticsType, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
 import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
+import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
+import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
 import { QuickSightUserArns, deleteExploreUser, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -135,11 +138,15 @@ export class ReportingService {
       encodeQueryValueForSql(query as SQLParameters);
 
       //construct parameters to build sql
+      const dbName = getStackOutputFromPipelineStatus(
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
+        PipelineStackType.REPORTING,
+        OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME);
       const viewName = getTempResourceName(query.viewName, query.action);
       const sqlParameters = {
         ...query,
         schemaName: query.appId,
-        dbName: query.projectId,
+        dbName: dbName,
         timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
       };
@@ -536,12 +543,16 @@ export class ReportingService {
       query.timezone = getTimezoneByAppId(pipeline, query.appId);
 
       //construct parameters to build sql
+      const dbName = getStackOutputFromPipelineStatus(
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
+        PipelineStackType.REPORTING,
+        OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME);
       const viewName = getTempResourceName(query.viewName, query.action);
 
       const sqlParameters : SQLParameters = {
         ...query,
         schemaName: query.appId,
-        dbName: query.projectId,
+        dbName: dbName,
         timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
       };
@@ -689,9 +700,13 @@ export class ReportingService {
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
 
+      const dbName = getStackOutputFromPipelineStatus(
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
+        PipelineStackType.REPORTING,
+        OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME);
       const sqlParameters = {
         ...query,
-        dbName: query.projectId,
+        dbName: dbName,
         schemaName: query.appId,
         timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
@@ -775,11 +790,11 @@ export class ReportingService {
     }
   };
 
-  private _buildSqlForPathAnalysis(query: any) {
+  private _buildSqlForPathAnalysis(query: any, dbName: string) {
     if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
       return buildEventPathAnalysisView({
         timezone: query.timezone,
-        dbName: query.projectId,
+        dbName: dbName,
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
@@ -852,8 +867,12 @@ export class ReportingService {
       encodeQueryValueForSql(query as SQLParameters);
 
       //construct parameters to build sql
+      const dbName = getStackOutputFromPipelineStatus(
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
+        PipelineStackType.REPORTING,
+        OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME);
       const viewName = getTempResourceName(query.viewName, query.action);
-      let sql = this._buildSqlForPathAnalysis(query);
+      let sql = this._buildSqlForPathAnalysis(query, dbName);
       logger.debug(`path analysis sql: ${sql}`);
 
       const datasetPropsArray: DataSetProps[] = [];
@@ -947,10 +966,14 @@ export class ReportingService {
       encodeQueryValueForSql(query as SQLParameters);
 
       //construct parameters to build sql
+      const dbName = getStackOutputFromPipelineStatus(
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
+        PipelineStackType.REPORTING,
+        OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME);
       const viewName = getTempResourceName(query.viewName, query.action);
       const sql = buildRetentionAnalysisView({
         timezone: query.timezone,
-        dbName: query.projectId,
+        dbName: dbName,
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
