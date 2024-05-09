@@ -34,7 +34,7 @@ export class SystemService {
       try {
         const response = await fetchRemoteUrl(templateUrl);
         const jsonData = await response.json();
-        logger.debug('Received remote template', { jsonData });
+        // logger.debug('Received remote template', { jsonData });
         const { version, buildString } = this._parseVersionString( jsonData.Description);
         logger.info(`fetched the template ${templateUrl}.`, { version, buildString });
         remoteVersion = `${version}-${buildString}`;

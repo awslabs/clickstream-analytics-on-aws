@@ -73,6 +73,12 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
       value: 'analyzes',
     },
     {
+      text: t('nav.analytics.q'),
+      icon: <Icon name="gen-ai" variant="inverted" />,
+      href: `/analytics/${projectId}/app/${appId}/q`,
+      value: 'q',
+    },
+    {
       text: t('nav.analytics.segments'),
       icon: <ExtendIcon icon="UnchecksGrid" />,
       href: `/analytics/${projectId}/app/${appId}/segments`,

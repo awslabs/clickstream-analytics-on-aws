@@ -264,11 +264,12 @@ export const clean = async (region: string) => {
 
 export const embedAnalyzesUrl = async (
   projectId: string,
-  allowedDomain: string
+  allowedDomain: string,
+  q: string,
 ) => {
   const result: any = await apiRequest(
     'get',
-    `project/${projectId}/analyzes?allowedDomain=${allowedDomain}`
+    `project/${projectId}/analyzes?allowedDomain=${allowedDomain}&q=${q}`
   );
   return result;
 };

@@ -13,7 +13,6 @@
 
 import {
   AppLayout,
-  Button,
   Container,
   ContentLayout,
   Header,
@@ -37,7 +36,7 @@ import { useParams } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 
-const AnalyticsAnalyzes: React.FC = () => {
+const AnalyticsAmazonQ: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
@@ -51,7 +50,7 @@ const AnalyticsAnalyzes: React.FC = () => {
       const { success, data }: ApiResponse<any> = await embedAnalyzesUrl(
         defaultStr(projectId),
         window.location.origin,
-        'false',
+        'true',
       );
       if (success && data.EmbedUrl) {
         setDashboardEmbedUrl(data.EmbedUrl);
@@ -89,8 +88,8 @@ const AnalyticsAnalyzes: React.FC = () => {
       href: '/analytics',
     },
     {
-      text: t('breadCrumb.analyzes'),
-      href: `/analytics/${projectId}/app/${appId}/analyzes`,
+      text: t('breadCrumb.analyticsQ'),
+      href: `/analytics/${projectId}/app/${appId}/q`,
     },
   ];
 
@@ -101,7 +100,7 @@ const AnalyticsAnalyzes: React.FC = () => {
   return (
     <div className="flex">
       <AnalyticsNavigation
-        activeHref={`/analytics/${projectId}/app/${appId}/analyzes`}
+        activeHref={`/analytics/${projectId}/app/${appId}/q`}
       />
       <div className="flex-1">
         <AppLayout
@@ -131,7 +130,7 @@ const AnalyticsAnalyzes: React.FC = () => {
                 <SpaceBetween size="m">
                   <Header
                     variant="h1"
-                    description={t('analytics:analyzes.description')}
+                    description={t('analytics:q.description')}
                     info={
                       <InfoLink
                         onFollow={() => {
@@ -142,20 +141,8 @@ const AnalyticsAnalyzes: React.FC = () => {
                         }}
                       />
                     }
-                    actions={
-                      <SpaceBetween size="xs" direction="horizontal">
-                        <Button
-                          href={`/analytics/${projectId}/app/${appId}/analyzes/full`}
-                          iconAlign="right"
-                          iconName="external"
-                          target="_blank"
-                        >
-                          {t('common:button.fullWindowView')}
-                        </Button>
-                      </SpaceBetween>
-                    }
                   >
-                    {t('analytics:analyzes.title')}
+                    {t('analytics:q.title')}
                   </Header>
                 </SpaceBetween>
               }
@@ -165,7 +152,7 @@ const AnalyticsAnalyzes: React.FC = () => {
                   <Loading isPage />
                 ) : (
                   <ExploreEmbedFrame
-                    embedType="console"
+                    embedType="Q"
                     embedUrl={dashboardEmbedUrl}
                     embedPage="analyze"
                   />
@@ -181,4 +168,4 @@ const AnalyticsAnalyzes: React.FC = () => {
   );
 };
 
-export default AnalyticsAnalyzes;
+export default AnalyticsAmazonQ;

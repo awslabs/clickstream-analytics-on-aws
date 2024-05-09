@@ -57,6 +57,11 @@
     "description": "您可以在此处通过拖拉拽的方式创建自定义图表并发布成仪表板。",
     "comeSoon": "当前功能即将上线"
   },
+  "q": {
+    "title": "Analytics Q",
+    "description": "",
+    "comeSoon": ""
+  },
   "explore": {
     "title": "探索",
     "description": "探索模块提供了一系列高级分析模型支持您动态地查询和分析点击流数据。选择一个分析模型开始。",

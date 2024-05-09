@@ -57,6 +57,11 @@
     "description": "You can create custom analysis and dashboard in a drag-and-drop manner in this module.",
     "comeSoon": "The feature is about to be launched."
   },
+  "q": {
+    "title": "Analytics Q",
+    "description": "",
+    "comeSoon": ""
+  },
   "explore": {
     "title": "Explorations",
     "description": "The Explore module provides a range of advanced analytical models to enable you to dynamically query and analyze clickstream data. Select an analytics model to begin.",
