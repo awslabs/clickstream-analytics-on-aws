@@ -40,7 +40,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
-import { defaultStr } from 'ts/utils';
+import { addTimezoneUtcOffset, defaultStr, getTimezoneOptions } from 'ts/utils';
 import ConfigAndroidSDK from './comp/ConfigAndroidSDK';
 import ConfigFlutterSDK from './comp/ConfigFlutterSDK';
 import ConfigIOSSDK from './comp/ConfigIOSSDK';
@@ -97,7 +97,7 @@ const ApplicationDetail: React.FC = () => {
         });
       if (success) {
         setApplicationInfo(data);
-        setTimeZone(data.timezone);
+        setTimeZone(addTimezoneUtcOffset(data.timezone));
         getProjectDetailById();
       }
     } catch (error) {
@@ -111,7 +111,7 @@ const ApplicationDetail: React.FC = () => {
         await updateApplicationTimezone({
           pid: defaultStr(pid),
           id: defaultStr(id),
-          timezone: timeZone,
+          timezone: timeZone.split(' (UTC ')[0],
         });
       if (success) {
         setApplicationInfo({
@@ -191,7 +191,7 @@ const ApplicationDetail: React.FC = () => {
                       </Box>
                       {!isEditing && (
                         <div className="flex align-center">
-                          <div>{applicationInfo?.timezone}</div>
+                          <div>{applicationInfo?.timezone ? addTimezoneUtcOffset(applicationInfo?.timezone) : ''}</div>
                           {!applicationInfo?.timezone.trim() && (
                             <Button
                               onClick={() => {
@@ -211,12 +211,7 @@ const ApplicationDetail: React.FC = () => {
                               onChange={({ detail }) => {
                                 setTimeZone(detail.value);
                               }}
-                              options={moment.tz.names().flatMap((tz) => {
-                                return {
-                                  label: tz,
-                                  value: tz,
-                                };
-                              })}
+                              options={getTimezoneOptions()}
                               placeholder={defaultStr(
                                 t('application:labels.timezonePlaceholder')
                               )}
