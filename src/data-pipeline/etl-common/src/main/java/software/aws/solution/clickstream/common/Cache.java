@@ -17,13 +17,13 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 
 public class Cache<T> {
-    private final Map<String, T> cache;
+    private final Map<String, T> dataCached;
 
     public Cache() {
         this(Integer.MAX_VALUE);
     }
     public Cache(final int size) {
-        this.cache = new LinkedHashMap<>(10_000, 0.75f, true) {
+        this.dataCached = new LinkedHashMap<>(10_000, 0.75f, true) {
             @Override
             protected boolean removeEldestEntry(final Map.Entry<String, T> eldest) {
                 return size() >  size;
@@ -31,13 +31,13 @@ public class Cache<T> {
         };
     }
     public boolean containsKey(final String key) {
-        return cache.containsKey(key);
+        return dataCached.containsKey(key);
     }
     public T get(final String key) {
-        return cache.get(key);
+        return dataCached.get(key);
     }
 
     public void put(final String key, final T data) {
-        cache.put(key, data);
+        dataCached.put(key, data);
     }
 }
