@@ -40,6 +40,8 @@ import {
   ResourceExistsException,
   ResourcePermission,
   DataSetImportMode,
+  IngestionType,
+  RefreshInterval,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -63,6 +65,7 @@ import {
   waitForDataSourceChangeCompleted,
   DateTimeParameter,
   existFolder,
+  existRefrshSchedule,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -782,9 +785,11 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     const identifier = buildDataSetId(commonParams.databaseName, commonParams.schema, props.tableName);
     const datasetId = identifier.id;
 
+    const timezone = commonParams.timezoneDict[commonParams.schema] ?? 'UTC';
+
     const mustacheParam: MustacheParamType = {
       schema: commonParams.databaseName.concat('.').concat(commonParams.schema),
-      timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
+      timezone,
     };
 
     logger.info('SQL to run:', Mustache.render(props.customSql, mustacheParam));
@@ -874,6 +879,10 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     };
     logger.info('dataset params', { datasetParams });
     const dataset = await quickSight.createDataSet(datasetParams);
+
+    if(props.useSpice === 'yes') {
+      insertOrUpdateRefreshSchedule(quickSight, commonParams, datasetId);
+    }
 
     await waitForDataSetCreateCompleted(quickSight, commonParams.awsAccountId, datasetId);
     logger.info('create dataset finished', { datasetId });
@@ -1020,6 +1029,8 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
   const identifier = buildDataSetId(databaseName, schema, props.tableName);
   const datasetId = identifier.id;
   try {
+    await deleteRefreshSchedule(quickSight, awsAccountId, datasetId);
+
     result = await quickSight.deleteDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
@@ -1038,6 +1049,59 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
 
 };
 
+const insertOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParams: ResourceCommonParams, datasetId: string) => {
+  const scheduleId = `schedule-${datasetId}`;
+  const exist = await existRefrshSchedule(quickSight, commonParams.awsAccountId, datasetId, scheduleId);
+
+  if(exist) {
+    await quickSight.updateRefreshSchedule({
+      AwsAccountId: commonParams.awsAccountId,
+      DataSetId: datasetId,
+      Schedule: {
+        ScheduleId: scheduleId,
+        ScheduleFrequency: {
+          Interval: RefreshInterval.DAILY,
+          Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
+          TimeOfTheDay: '06:00',
+        },
+        RefreshType: IngestionType.INCREMENTAL_REFRESH,
+      },
+    });
+  } else {
+    await quickSight.createRefreshSchedule({
+      AwsAccountId: commonParams.awsAccountId,
+      DataSetId: datasetId,
+      Schedule: {
+        ScheduleId: scheduleId,
+        ScheduleFrequency: {
+          Interval: RefreshInterval.DAILY,
+          Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
+          TimeOfTheDay: '06:00',
+        },
+        RefreshType: IngestionType.INCREMENTAL_REFRESH,
+      },
+    });
+  }
+}
+
+const deleteRefreshSchedule = async (quickSight: QuickSight, awsAccountId: string, datasetId: string) => {
+  const scheduleId = `schedule-${datasetId}`;
+  try{
+    await quickSight.deleteRefreshSchedule({
+      AwsAccountId: awsAccountId,
+      DataSetId: datasetId,
+      ScheduleId: scheduleId,
+    });
+  } catch (err: any) {
+    if ((err as Error) instanceof ResourceNotFoundException) {
+      logger.info('Refresh schedule not exist. skip delete operation.');
+    } else {
+      logger.error(`Delete QuickSight refresh schedule failed due to: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+}
+
 const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
   dataSourceArn: string,
   props: DataSetProps,
@@ -1048,9 +1112,11 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     const identifier = buildDataSetId(commonParams.databaseName, commonParams.schema, props.tableName);
     const datasetId = identifier.id;
 
+    const timezone = commonParams.timezoneDict[commonParams.schema] ?? 'UTC';
+
     const mustacheParam: MustacheParamType = {
       schema: commonParams.databaseName.concat('.').concat(commonParams.schema),
-      timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
+      timezone,
     };
 
     logger.info('SQL to run:', Mustache.render(props.customSql, mustacheParam));
@@ -1138,6 +1204,10 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       },
     });
     logger.info(`update dataset finished. Id: ${dataset?.DataSetId}`);
+
+    if(props.useSpice === 'yes') {
+      insertOrUpdateRefreshSchedule(quickSight, commonParams, datasetId);
+    }
 
     await waitForDataSetCreateCompleted(quickSight, commonParams.awsAccountId, datasetId);
 

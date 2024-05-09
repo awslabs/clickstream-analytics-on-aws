@@ -367,6 +367,25 @@ export const existFolder = async (quickSight: QuickSight, accountId: string, fol
   }
 };
 
+export const existRefrshSchedule = async (quickSight: QuickSight, accountId: string, datasetId: string, scheduleId: string) => {
+
+  try {
+    await quickSight.describeRefreshSchedule({
+      AwsAccountId: accountId,
+      DataSetId: datasetId,
+      ScheduleId: scheduleId,
+
+    });
+    return true;
+  } catch (err: any) {
+    if ((err as Error) instanceof ResourceNotFoundException) {
+      return false;
+    } else {
+      throw err;
+    }
+  }
+};
+
 export const findDashboardWithPrefix = async (quickSight: QuickSight, accountId: string, prefix: string, excludeDashboardId: string|undefined) => {
   try {
     const dashboardSummaries: DashboardSummary[] = [];
