@@ -31,7 +31,6 @@ import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.transformer.BaseTransformerV3.TABLE_VERSION_SUFFIX_V3;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
-import static software.aws.solution.clickstream.TransformerV3.ETL_USER_V2_PROPS;
 
 
 @Slf4j

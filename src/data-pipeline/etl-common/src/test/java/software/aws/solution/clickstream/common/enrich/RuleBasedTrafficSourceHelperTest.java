@@ -70,8 +70,8 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 null, null, null);
 
         String expectedValue = "{\n" +
-                "  \"source\" : \"google\",\n" +
-                "  \"medium\" : \"cpc\",\n" +
+                "  \"source\" : \"Google\",\n" +
+                "  \"medium\" : \"CPC\",\n" +
                 "  \"campaign\" : \"shopping\",\n" +
                 "  \"content\" : \"content\",\n" +
                 "  \"term\" : null,\n" +
@@ -121,7 +121,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
         String expectedValue = "{\n" +
                 "  \"source\" : \"Direct\",\n" +
-                "  \"medium\" : \"Direct\",\n" +
+                "  \"medium\" : \"None\",\n" +
                 "  \"campaign\" : \"Direct\",\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : null,\n" +
@@ -144,7 +144,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         CategoryTrafficSource trafficSource = parser.parse("", "", "", "");
         String expectedValue = "{\n" +
                 "  \"source\" : \"Direct\",\n" +
-                "  \"medium\" : \"Direct\",\n" +
+                "  \"medium\" : \"None\",\n" +
                 "  \"campaign\" : \"Direct\",\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : null,\n" +
@@ -153,7 +153,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "  \"clid\" : null,\n" +
                 "  \"channelGroup\" : \"Direct\",\n" +
                 "  \"category\" : \"Direct\"\n" +
-                "}\n";
+                "}";
         String value = prettyJson(Util.objectToJsonString(trafficSource));
         Assertions.assertEquals(prettyJson(expectedValue), value);
     }
@@ -165,8 +165,8 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         CategoryTrafficSource trafficSource = parser.parse("https://www.example.com/query_path",
                 "https://google.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
-                "  \"source\" : \"google\",\n" +
-                "  \"medium\" : \"Organic Search\",\n" +
+                "  \"source\" : \"Google\",\n" +
+                "  \"medium\" : \"Organic\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : null,\n" +
@@ -188,7 +188,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 null, "https://video.google.com/search?q=flowers&q=football&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"Google Video\",\n" +
-                "  \"medium\" : \"Organic Search\",\n" +
+                "  \"medium\" : \"Organic\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,football\",\n" +
@@ -216,7 +216,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
         String expectedValue = "{\n" +
                 "  \"source\" : \"Google Video\",\n" +
-                "  \"medium\" : \"Organic Search\",\n" +
+                "  \"medium\" : \"Organic\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers2,football2\",\n" +
@@ -246,7 +246,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "https://search.imesh.com/search?q=flowers&si=foo&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"iMesh\",\n" +
-                "  \"medium\" : \"Organic Search\",\n" +
+                "  \"medium\" : \"Referral\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,foo\",\n" +
@@ -269,7 +269,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "https://search.imesh.com/search?q=flowers&si=foo&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"iMesh\",\n" +
-                "  \"medium\" : \"Organic Search\",\n" +
+                "  \"medium\" : \"Referral\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,foo\",\n" +
@@ -281,6 +281,104 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "}";
         String value = prettyJson(Util.objectToJsonString(trafficSource));
         Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+    @Test
+    void testGetMediumByReferrer1() throws IOException {
+        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer1
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageReferrer = "https://example.com";
+        String latestReferrer = "https://www.google.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg";
+        boolean internalReferrer = false;
+
+        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
+        Assertions.assertEquals(RuleBasedTrafficSourceHelper.ORGANIC, medium);
+
+    }
+
+    @Test
+    void testGetMediumByReferrer2() throws IOException {
+        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer2
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageReferrer = "https://example.com";
+        String latestReferrer = "https://www.abc.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg";
+        boolean internalReferrer = false;
+
+        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
+        Assertions.assertEquals(RuleBasedTrafficSourceHelper.REFERRAL, medium);
+
+    }
+
+    @Test
+    void testGetMediumByReferrer3() throws IOException {
+        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer3
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageReferrer = "https://example.com";
+        String latestReferrer = null;
+        boolean internalReferrer = false;
+
+        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
+        Assertions.assertEquals(RuleBasedTrafficSourceHelper.REFERRAL, medium);
+
+    }
+
+    @Test
+    void testGetMediumByReferrer4() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer4
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageReferrer = "https://example.com";
+        String latestReferrer = null;
+        boolean internalReferrer = true;
+
+        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
+        Assertions.assertEquals(RuleBasedTrafficSourceHelper.NONE, medium);
+
+    }
+
+    @Test
+    void testGetMediumByReferrer5() throws IOException {
+        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer5
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageReferrer = null;
+        String latestReferrer = null;
+        boolean internalReferrer = false;
+
+        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
+        Assertions.assertEquals(RuleBasedTrafficSourceHelper.NONE, medium);
+
+    }
+
+
+    @Test
+    void testGetMediumByReferrer6() throws IOException {
+        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer6
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageReferrer = "https://www.baidu.com";
+        String latestReferrer = null;
+        boolean internalReferrer = false;
+
+        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
+        Assertions.assertEquals(RuleBasedTrafficSourceHelper.ORGANIC, medium);
+    }
+
+    @Test
+    void testGetMediumByReferrer7() throws IOException {
+        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer7
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageReferrer = "https://example.com";
+        String latestReferrer = "https://www.google.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg";
+        boolean internalReferrer = true;
+
+        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
+        Assertions.assertEquals(RuleBasedTrafficSourceHelper.ORGANIC, medium);
+
     }
 
 }
