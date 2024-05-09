@@ -110,6 +110,15 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Enable QuickSight SPICE Import Mode',
   };
 
+  const redshiftDefaultDBParam = new CfnParameter(scope, 'RedshiftDefaultDBParam', {
+    description: 'Redshift Default database name.',
+    type: 'String',
+    default: 'dev',
+  });
+  labels[redshiftDefaultDBParam.logicalId] = {
+    default: 'Redshift Default Database Name',
+  };
+
   const redshiftDBParam = new CfnParameter(scope, 'RedshiftDBParam', {
     description: 'Redshift database name.',
     type: 'String',
@@ -181,6 +190,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     Label: { default: 'Redshift Information' },
     Parameters: [
       redshiftEndpointParam.logicalId,
+      redshiftDefaultDBParam.logicalId,
       redshiftDBParam.logicalId,
       redShiftDBSchemaParam.logicalId,
       redshiftPortParam.logicalId,
@@ -199,6 +209,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     quickSightTimezoneParam,
     quickSightUseSpiceParam,
     redshiftEndpointParam,
+    redshiftDefaultDBParam,
     redshiftDBParam,
     redShiftDBSchemaParam,
     redshiftPortParam,
