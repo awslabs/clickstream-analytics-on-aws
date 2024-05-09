@@ -65,6 +65,7 @@ phases:
             }
 
             bash ${CODEBUILD_SRC_DIR}/deployment/run-unit-tests.sh
+            cd ${CODEBUILD_SRC_DIR}/deployment/
             if [ -n "$VERSION" ]; then
               chmod +x ./build-s3-dist.sh && ./build-s3-dist.sh $DIST_OUTPUT_BUCKET $SOLUTION_NAME ${VERSION}
             else
