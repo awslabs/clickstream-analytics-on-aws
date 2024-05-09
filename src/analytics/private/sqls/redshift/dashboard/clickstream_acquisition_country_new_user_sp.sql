@@ -8,6 +8,7 @@ BEGIN
   current_date := day;
   WHILE i < ndays LOOP
     DELETE FROM {{database_name}}.{{schema}}.{{viewName}} where event_date = current_date;
+
     INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (event_date, platform, geo_country, geo_city, user_count)
     select 
       current_date::date as event_date,
@@ -20,6 +21,7 @@ BEGIN
     group by 1,2,3,4
     having (user_count > 0)
     ;
+    
     current_date := current_date - 1;
     i := i + 1;
   END LOOP;

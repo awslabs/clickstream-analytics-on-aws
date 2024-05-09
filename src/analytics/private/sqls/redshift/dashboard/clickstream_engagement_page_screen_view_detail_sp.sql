@@ -6,9 +6,7 @@ DECLARE
   i integer = 0;
 BEGIN
   current_date := day;
-
   WHILE i < ndays LOOP
-
     DELETE FROM {{database_name}}.{{schema}}.{{viewName}} where event_date = current_date;
 
     INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (

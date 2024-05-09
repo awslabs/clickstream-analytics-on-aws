@@ -6,10 +6,9 @@ DECLARE
   i integer = 0;
 BEGIN
   current_date := day;
-
   WHILE i < ndays LOOP
-
     DELETE FROM {{database_name}}.{{schema}}.{{viewName}} where event_date = current_date;
+
     INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
         event_date,
         platform,
@@ -25,6 +24,7 @@ BEGIN
     where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
     group by 1,2
     ;
+    
     current_date := current_date - 1;
     i := i + 1;
   END LOOP;

@@ -6,31 +6,28 @@ DECLARE
   i integer = 0;
 BEGIN
   current_date := day;
-
   WHILE i < ndays LOOP
-
     DELETE FROM {{database_name}}.{{schema}}.{{viewName}} where event_date = current_date;
 
     drop table if exists event_traffic_tmp_tb;
     create temp table event_traffic_tmp_tb as (
-        SELECT 
-            merged_user_id as user_id,
-            session_id,
-            COUNT(DISTINCT event_id) AS event_count,
-            SUM(CASE WHEN event_name = '_page_view' OR event_name = '_screen_view' THEN 1 ELSE 0 END) AS session_views,
-            MAX(session_duration) AS session_duration,
-            SUM(user_engagement_time_msec) AS user_engagement_time_msec,
-            CASE WHEN
-            SUM(CASE WHEN event_name = '_page_view' OR event_name = '_screen_view' THEN 1 ELSE 0 END) > 1 
-            OR MAX(session_duration) > 10000  THEN 1 ELSE 0 
-            END AS session_indicator,
-            MAX(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS new_user_indicator
-        FROM 
-            {{database_name}}.{{schema}}.{{baseView}}
-        WHERE
-            DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
-        GROUP BY 
-            1,2
+      SELECT 
+        merged_user_id as user_id,
+        session_id,
+        COUNT(DISTINCT event_id) AS event_count,
+        SUM(CASE WHEN event_name = '_page_view' OR event_name = '_screen_view' THEN 1 ELSE 0 END) AS session_views,
+        MAX(session_duration) AS session_duration,
+        SUM(user_engagement_time_msec) AS user_engagement_time_msec,
+        CASE WHEN
+          SUM(CASE WHEN event_name = '_page_view' OR event_name = '_screen_view' THEN 1 ELSE 0 END) > 1 
+          OR MAX(session_duration) > 10000  THEN 1 ELSE 0 
+        END AS session_indicator,
+        MAX(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS new_user_indicator
+      FROM 
+        {{database_name}}.{{schema}}.{{baseView}}
+      WHERE
+        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+      GROUP BY 1,2
     );
 
     drop table if exists event_traffic_tmp_tb_2;
@@ -519,6 +516,8 @@ BEGIN
 
 
     DROP TABLE IF EXISTS event_traffic_tmp_tb;
+
+    DROP TABLE IF EXISTS event_traffic_tmp_tb_2
 
     current_date := current_date - 1;
     i := i + 1;
