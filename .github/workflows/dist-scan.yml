@@ -195,6 +195,9 @@ jobs:
         env:
           SONAR_TOKEN: ${{ env.SONARQUBE_TOKEN }}
           SONAR_HOST_URL: http://localhost:9000
+      - name: Show SonarQube report
+        run: |
+          cat .scannerwork/report-task.txt
       - uses: phwt/sonarqube-quality-gate-action@v1
         id: quality-gate-check
         if: always()
