@@ -265,7 +265,6 @@ public final class ClickstreamEventParser extends BaseEventParser {
         return clickstreamEvent;
     }
 
-
     private void setEventCustomParameters(final Event ingestEvent, final Map<String, ClickstreamEventPropValue> customProperties, final ClickstreamEvent clickstreamEvent) {
         try {
             Map<String, ClickstreamEventPropValue> customPropertiesFromEvent = convertStringObjectMapToStringEventPropMap(ingestEvent.getCustomProperties());
@@ -562,7 +561,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
 
     private TimeShiftInfo getEventTimeShiftInfo(final Event ingestEvent, final ExtraParams extraParams) {
         TimeShiftInfo timeShiftInfo = new TimeShiftInfo();
-
+        long currentTime = System.currentTimeMillis();
         Long eventTimestamp = ingestEvent.getEventTimestamp();
         Long uploadTimestamp = extraParams.getUploadTimestamp();
 
@@ -574,8 +573,10 @@ public final class ClickstreamEventParser extends BaseEventParser {
         timeShiftInfo.setTimeDiff(0L);
         timeShiftInfo.setUploadTimestamp(uploadTimestamp);
 
-        if (!isEnableEventTimeShift()) {
-            log.debug("event time shift is disabled");
+        boolean isFutureEvent = eventTimestamp > currentTime;
+
+        if (!isEnableEventTimeShift() && !isFutureEvent) {
+            log.debug("event time shift is not enable and event is not future event, skip time shift adjustment.");
             return timeShiftInfo;
         }
 
@@ -598,14 +599,26 @@ public final class ClickstreamEventParser extends BaseEventParser {
         if (uploadTimestamp != null) {
             Long ingestTimestamp = extraParams.getIngestTimestamp();
             long timeDiff = ingestTimestamp - uploadTimestamp;
-            if (Math.abs(timeDiff) > timeShiftInfo.getAdjustThreshold()) {
+            if (Math.abs(timeDiff) > timeShiftInfo.getAdjustThreshold() || isFutureEvent) {
                 timeShiftInfo.setTimeDiff(timeDiff);
                 eventTimestamp += timeDiff;
                 log.warn("ingestTimestamp is " + timeDiff + " seconds ahead of uploadTimestamp");
                 timeShiftInfo.setAdjusted(true);
+                timeShiftInfo.setReason("ingestTimestamp is " + timeDiff + " seconds ahead of uploadTimestamp, isFutureEvent: " + isFutureEvent);
             }
             timeShiftInfo.setEventTimestamp(eventTimestamp);
         }
+
+        if (timeShiftInfo.getEventTimestamp() > currentTime) {
+            timeShiftInfo.setEventTimestamp(timeShiftInfo.getIngestTimestamp());
+            timeShiftInfo.setAdjusted(true);
+            timeShiftInfo.setTimeDiff(timeShiftInfo.getIngestTimestamp() - timeShiftInfo.getOriginEventTimestamp());
+            timeShiftInfo.setReason(String.join("|",
+                    timeShiftInfo.getReason() == null ? "": timeShiftInfo.getReason(),
+                    "eventTimestamp is in the future, set to ingestTimestamp"));
+        }
+
+        log.debug("timeShiftInfo: " + timeShiftInfo);
 
         return timeShiftInfo;
     }
@@ -623,7 +636,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
             processInfo.put("event_timestamp_adjusted", true + "");
             processInfo.put("event_timestamp_adjusted_from", timeShiftInfo.getOriginEventTimestamp() + "");
             processInfo.put("event_timestamp_adjusted_to", timeShiftInfo.getEventTimestamp() + "");
-            processInfo.put("event_timestamp_adjusted_reason", "ingest_time is " + (timeShiftInfo.getTimeDiff() / 1000) + " seconds ahead of upload_time");
+            processInfo.put("event_timestamp_adjusted_reason", timeShiftInfo.getReason());
         }
         clickstreamEvent.setProcessInfo(processInfo);
     }

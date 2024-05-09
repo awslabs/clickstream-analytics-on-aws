@@ -15,9 +15,11 @@ package software.aws.solution.clickstream.common.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class TimeShiftInfo {
     Long ingestTimestamp;
     Long uploadTimestamp;
@@ -27,4 +29,5 @@ public class TimeShiftInfo {
     boolean isAdjusted;
     String uri;
     Integer adjustThreshold;
+    String reason;
 }
