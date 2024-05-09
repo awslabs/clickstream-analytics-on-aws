@@ -60,13 +60,13 @@ export const generateStr = (length: number, onlyLowerCase = false) => {
 };
 
 export const getTimezoneOptions = () => {
-  const tzs = moment.tz.names().filter((tz) => !FILTER_TIME_ZONE.includes(tz))
+  const tzs = moment.tz.names().filter((tz) => !FILTER_TIME_ZONE.includes(tz));
   const tzOptions = tzs.flatMap((tz) => {
     return {
       label: addTimezoneUtcOffset(tz),
       value: addTimezoneUtcOffset(tz),
     };
-  })
+  });
   return tzOptions;
 };
 
@@ -74,8 +74,8 @@ export const addTimezoneUtcOffset = (tz: string) => {
   if (tz.includes(' (UTC ')) {
     return tz;
   }
-  const utcOffset = moment(new Date()).tz(tz).format("Z")
-  return `${tz} (UTC ${utcOffset})`
+  const utcOffset = moment(new Date()).tz(tz).format('Z');
+  return `${tz} (UTC ${utcOffset})`;
 };
 
 export const generateRedshiftRPUOptionListByRegion = (region: string) => {

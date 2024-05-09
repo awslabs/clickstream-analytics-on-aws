@@ -93,7 +93,7 @@ const RegisterApp: React.FC = () => {
       const { success, data }: ApiResponse<ResponseCreate> =
         await createApplication({
           ...application,
-          timezone: application.timezone.split(' (UTC ')[0]
+          timezone: application.timezone.split(' (UTC ')[0],
         });
       if (success && data.id) {
         getApplicationDetailByAppId(data.id);

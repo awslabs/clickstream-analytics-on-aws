@@ -191,7 +191,11 @@ const ApplicationDetail: React.FC = () => {
                       </Box>
                       {!isEditing && (
                         <div className="flex align-center">
-                          <div>{applicationInfo?.timezone ? addTimezoneUtcOffset(applicationInfo?.timezone) : ''}</div>
+                          <div>
+                            {applicationInfo?.timezone
+                              ? addTimezoneUtcOffset(applicationInfo?.timezone)
+                              : ''}
+                          </div>
                           {!applicationInfo?.timezone.trim() && (
                             <Button
                               onClick={() => {
