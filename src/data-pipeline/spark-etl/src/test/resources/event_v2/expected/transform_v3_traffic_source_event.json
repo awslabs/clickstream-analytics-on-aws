@@ -137,7 +137,7 @@
   "process_info" : {
     "event_timestamp_adjusted" : "true",
     "event_timestamp_adjusted_from" : "1682319109442",
-    "event_timestamp_adjusted_reason" : "ingest_time is 1000 seconds ahead of upload_time",
+    "event_timestamp_adjusted_reason" : "ingestTimestamp is 1000000 millis ahead of uploadTimestamp, isFutureEvent: false",
     "event_timestamp_adjusted_to" : "1682320109442",
     "ingest_time" : "2023-04-24T06:51:49.102Z",
     "input_file_name" : "_TEST_INPUT_FILE_NAME_",

@@ -604,7 +604,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
                 eventTimestamp += timeDiff;
                 log.warn("ingestTimestamp is " + timeDiff + " seconds ahead of uploadTimestamp");
                 timeShiftInfo.setAdjusted(true);
-                timeShiftInfo.setReason("ingestTimestamp is " + timeDiff + " seconds ahead of uploadTimestamp, isFutureEvent: " + isFutureEvent);
+                timeShiftInfo.setReason("ingestTimestamp is " + timeDiff + " millis ahead of uploadTimestamp, isFutureEvent: " + isFutureEvent);
             }
             timeShiftInfo.setEventTimestamp(eventTimestamp);
         }

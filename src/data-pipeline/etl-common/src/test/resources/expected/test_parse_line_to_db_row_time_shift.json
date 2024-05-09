@@ -117,7 +117,7 @@
     "upload_time" : "2023-04-24T09:38:29.403Z",
     "ingest_time" : "2023-04-24T12:51:49.403Z",
     "event_timestamp_adjusted" : "true",
-    "event_timestamp_adjusted_reason" : "ingestTimestamp is 11600000 seconds ahead of uploadTimestamp, isFutureEvent: false",
+    "event_timestamp_adjusted_reason" : "ingestTimestamp is 11600000 millis ahead of uploadTimestamp, isFutureEvent: false",
     "rid" : "07157da84281bb7234ba6f8613df7d32",
     "event_timestamp_adjusted_to" : "1682330709447",
     "event_timestamp_adjusted_from" : "1682319109447",

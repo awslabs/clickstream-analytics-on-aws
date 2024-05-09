@@ -410,7 +410,7 @@ public class ClickstreamEventParserTest extends BaseTest {
         log.info(prettyJson(objectToJsonString(eventV2)));
 
         Assertions.assertEquals("true", eventV2.getProcessInfo().get("event_timestamp_adjusted"));
-        Assertions.assertEquals("ingestTimestamp is -10 seconds ahead of uploadTimestamp, isFutureEvent: true|eventTimestamp is in the future, set to ingestTimestamp", eventV2.getProcessInfo().get("event_timestamp_adjusted_reason"));
+        Assertions.assertEquals("ingestTimestamp is -10 millis ahead of uploadTimestamp, isFutureEvent: true|eventTimestamp is in the future, set to ingestTimestamp", eventV2.getProcessInfo().get("event_timestamp_adjusted_reason"));
         Assertions.assertEquals(eventV2.getEventTimeMsec(),  ingestTimestamp); // ingestTimestamp
     }
 }
