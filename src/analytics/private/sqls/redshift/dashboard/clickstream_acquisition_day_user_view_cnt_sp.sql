@@ -10,8 +10,8 @@ DELETE FROM {{database_name}}.{{schema}}.{{viewName}} where event_date = day;
 INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
   event_date, 
   platform,
-  "Active User", 
-  "New User",
+  "Active users", 
+  "New users",
   view_count
 )
 SELECT 
