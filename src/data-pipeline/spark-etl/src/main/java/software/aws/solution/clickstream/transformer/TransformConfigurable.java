@@ -13,18 +13,8 @@
 
 package software.aws.solution.clickstream.transformer;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 
-import java.io.Serializable;
-import java.util.Map;
-
-@Getter
-@Setter
-@ToString
-public class TransformConfig implements Serializable {
-    private static final long serialVersionUID = 1L;
-    private Map<String, RuleConfig> appRuleConfig; // NOSONAR
+public interface TransformConfigurable {
+   TransformConfig getTransformConfig();
 }

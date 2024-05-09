@@ -13,6 +13,7 @@
 
 package software.aws.solution.clickstream.common.enrich.ts.rule;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -21,6 +22,7 @@ import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceUtm;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 public class ChannelRuleEvaluatorInput {
     // traffic_source_category
     private String trafficSourceCategory; // NOSONAR

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import software.aws.solution.clickstream.common.Cache;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,6 +33,7 @@ public final class ChannelListEvaluator {
     public static final String UNASSIGNED = "Unassigned";
     @Getter
     private List<ChannelRule> channelRules;
+    private static final Cache<String> CHANNEL_CACHED = new Cache<>();
 
     private ChannelListEvaluator() {
 
@@ -49,12 +51,12 @@ public final class ChannelListEvaluator {
     public static ChannelListEvaluator fromJsonFile(final String fileName) throws IOException {
         File f = new File(fileName);
         if (f.exists() && !f.isDirectory()) {
-            log.info("Reading channel rules from file: {}", fileName);
+            log.debug("Reading channel rules from file: {}", fileName);
             return fromJson(readTextFile(fileName));
         }
 
         if (ChannelListEvaluator.class.getClassLoader().getResource(fileName) != null) {
-            log.info("Reading channel rules from resource file: {}", fileName);
+            log.debug("Reading channel rules from resource file: {}", fileName);
             return fromJson(readResourceFile(fileName));
         }
 
@@ -63,15 +65,23 @@ public final class ChannelListEvaluator {
     }
 
     public String evaluate(final ChannelRuleEvaluatorInput channelRuleEvaluatorInput) {
-        log.info("Evaluating channel rule for: {}", channelRuleEvaluatorInput.toString());
+        log.debug("Evaluating channel rule for: {}", channelRuleEvaluatorInput.toString());
+
+        String cachedKey = channelRuleEvaluatorInput.hashCode() + "";
+        if (CHANNEL_CACHED.containsKey(cachedKey)) {
+            return CHANNEL_CACHED.get(cachedKey);
+        }
+
+        String channel = UNASSIGNED;
         ChannelRuleEvaluator evaluator = ChannelRuleEvaluator.getInstance();
 
         for (ChannelRule rule : this.channelRules) {
             if (evaluator.evaluate(rule, channelRuleEvaluatorInput)) {
-                return rule.getChannel();
+                channel = rule.getChannel();
+                break;
             }
         }
-        log.info("No channel rule matched for: {}", channelRuleEvaluatorInput.toString());
-        return UNASSIGNED;
+        CHANNEL_CACHED.put(cachedKey, channel);
+        return channel;
     }
 }

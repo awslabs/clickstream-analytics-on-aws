@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.apache.spark.sql.functions.col;
@@ -44,6 +45,7 @@ import static software.aws.solution.clickstream.common.BaseEventParser.UPLOAD_TI
 import static software.aws.solution.clickstream.model.ModelV2.toColumnArray;
 import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForEventV2;
 import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForItemV2;
+import static software.aws.solution.clickstream.util.DatasetUtil.deDupDataset;
 
 @Slf4j
 public abstract class BaseTransformerV3 implements TransformerInterfaceV3 {
@@ -70,19 +72,23 @@ public abstract class BaseTransformerV3 implements TransformerInterfaceV3 {
     }
 
     public Dataset<Row> extractEvent(final Dataset<Row> convertedDataset) {
+        List<String> allFields = ModelV2.getEventFields();
         Dataset<Row> eventDataset = convertedDataset.select(explode(expr("dataOut.events")).alias("event"))
                 .select("event.*")
-                .select(toColumnArray(ModelV2.getEventFields()));
+                .select(toColumnArray(allFields));
         return addProcessInfo(runMaxLengthTransformerForEventV2(eventDataset));
     }
 
     public Dataset<Row> extractItem(final Dataset<Row> convertedDataset) {
+        List<String> keyFields = Arrays.asList(Constant.EVENT_ID, Constant.USER_PSEUDO_ID, Constant.ITEM_ID);
+        List<String> allFields = ModelV2.getItemFields();
+
         Dataset<Row> itemDataset = convertedDataset.select(explode(expr("dataOut.items")).alias("item"))
                 .select("item.*")
-                .select(toColumnArray(ModelV2.getItemFields()));
-        return addProcessInfo(runMaxLengthTransformerForItemV2(itemDataset));
+                .select(toColumnArray(allFields));
+        Dataset<Row> deDupitemDataset = deDupDataset(itemDataset, keyFields, allFields);
+        return addProcessInfo(runMaxLengthTransformerForItemV2(deDupitemDataset));
     }
-
 
     @Override
     public Map<TableName, Dataset<Row>> transform(final Dataset<Row> dataset) {
@@ -90,7 +96,7 @@ public abstract class BaseTransformerV3 implements TransformerInterfaceV3 {
         ContextUtil.cacheDataset(cleanedDataset);
         log.info(new ETLMetric(cleanedDataset, "after clean").toString());
 
-        log.info(cleanedDataset.schema().prettyJson());
+        log.debug(cleanedDataset.schema().prettyJson());
 
         if (Arrays.asList(dataset.columns()).contains(CLIENT_TIMESTAMP)) {
             cleanedDataset = cleanedDataset.withColumn(UPLOAD_TIMESTAMP, col(CLIENT_TIMESTAMP).cast(DataTypes.LongType));

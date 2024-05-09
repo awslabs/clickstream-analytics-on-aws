@@ -15,26 +15,24 @@ package software.aws.solution.clickstream.udfconverter;
 
 import software.aws.solution.clickstream.common.ClickstreamEventParser;
 import software.aws.solution.clickstream.common.EventParser;
-import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.gtm.GTMEventParser;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 import software.aws.solution.clickstream.common.sensors.SensorsEventParser;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
-
-import java.util.Map;
+import software.aws.solution.clickstream.common.TransformConfig;
 
 public final class EventParserFactory {
     private EventParserFactory() {
     }
 
-    public static EventParser getEventParser(final TransformerNameEnum parserName, final Map<String, RuleConfig> appRuleConfig) {
+    public static EventParser getEventParser(final TransformerNameEnum parserName, final TransformConfig transformConfig) {
         switch (parserName) {
             case GTM_SERVER_DATA:
-                return GTMEventParser.getInstance(appRuleConfig);
+                return GTMEventParser.getInstance(transformConfig);
             case SENSORS_DATA:
-                return SensorsEventParser.getInstance(appRuleConfig);
+                return SensorsEventParser.getInstance(transformConfig);
             case CLICKSTREAM:
-                return ClickstreamEventParser.getInstance(appRuleConfig);
+                return ClickstreamEventParser.getInstance(transformConfig);
             default:
                 throw new ExecuteTransformerException("Unknown parser name: " + parserName);
         }

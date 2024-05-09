@@ -11,12 +11,18 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.transformer;
+package software.aws.solution.clickstream.common;
 
-import software.aws.solution.clickstream.common.RuleConfig;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public interface AppRuleConfigurable {
-    Map<String, RuleConfig> getAppRuleConfig();
+@Getter
+@Setter
+public class TransformConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private Map<String, RuleConfig> appRuleConfig; // NOSONAR
+    private boolean trafficSourceEnrichmentDisabled; // NOSONAR
 }

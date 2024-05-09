@@ -17,6 +17,8 @@ package software.aws.solution.clickstream;
 
 import com.google.common.base.Preconditions;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.spark.sql.SparkSession;
 import software.aws.solution.clickstream.util.*;
 
@@ -28,14 +30,14 @@ import static com.google.common.collect.Lists.newArrayList;
 @Slf4j
 public final class DataProcessor {
 
-    private static final String APP_NAME = "ClickStream-Data-ETL";
+    private static final String APP_NAME = "ClickStreamDataETL";
 
     private DataProcessor() {
     }
 
     /**
-     * This job accept input argument with length 6.
-     * args[0] means save info to warehouse flag 'true' or 'false'
+     * This job accept input argument with length 19.
+     * args[0] means runFlag, e.g. disable.traffic.source.enrichment|disable.max.length.check
      * args[1] means glue catalog database.
      * args[2] means glue catalog source table name.
      * args[3] means start timestamp of event.
@@ -62,7 +64,7 @@ public final class DataProcessor {
     public static void runWithSpark(final String[] args, final SparkSession sparkSession){
         int argsLen = 19;
         Preconditions.checkArgument(args.length == argsLen, "This job can only accept input argument with length " + argsLen);
-        String debug = args[0];
+        String runFlag = args[0];
         String database = args[1];
         String sourceTable = args[2];
         String startTimestamp = args[3];
@@ -95,7 +97,7 @@ public final class DataProcessor {
                         filterBotByUa
                         ),
                 new ETLRunnerConfig.InputOutputConfig(
-                        debug,
+                        runFlag,
                         database,
                         sourceTable,
                         sourcePath,
@@ -126,6 +128,8 @@ public final class DataProcessor {
         }
 
         Arrays.stream(spark.sparkContext().getConf().getAll()).forEach(c -> log.info(c._1 + " -> " + c._2));
+        Configurator.setRootLevel(Level.WARN); // NOSONAR
+        Configurator.setLevel("software.aws.solution.clickstream", Level.INFO); // NOSONAR
 
         ETLRunner etlRunner = new ETLRunner(spark, runnerConfig);
         etlRunner.run();

@@ -13,9 +13,9 @@
 
 package software.aws.solution.clickstream.sensors;
 
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 import software.aws.solution.clickstream.transformer.BaseThirdPartyTransformer;
-import software.aws.solution.clickstream.transformer.TransformConfig;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 import software.aws.solution.clickstream.udfconverter.DatasetConverter;
 
@@ -34,7 +34,7 @@ public class SensorsDataTransformerV2 extends BaseThirdPartyTransformer {
         if (this.transformConfig == null) {
             throw new ExecuteTransformerException("Transform config is not set");
         }
-        return new SensorsDataConverterV2(this.transformConfig.getAppRuleConfig());
+        return new SensorsDataConverterV2(this.transformConfig);
     }
 
     @Override

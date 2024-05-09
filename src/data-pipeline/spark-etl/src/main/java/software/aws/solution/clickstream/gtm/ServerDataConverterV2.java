@@ -19,12 +19,10 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.DataTypes;
-import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.udfconverter.BaseDataConverter;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 import software.aws.solution.clickstream.udfconverter.UDFHelper;
-
-import java.util.Map;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.lit;
@@ -39,10 +37,10 @@ import static software.aws.solution.clickstream.util.DatasetUtil.hasColumn;
 
 @Slf4j
 public class ServerDataConverterV2 extends BaseDataConverter {
-    private final Map<String, RuleConfig> appRuleConfig;
+    private final TransformConfig transformConfig;
 
-    public ServerDataConverterV2(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
+    public ServerDataConverterV2(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
     }
 
     @Override
@@ -72,11 +70,11 @@ public class ServerDataConverterV2 extends BaseDataConverter {
 
     @Override
     public UserDefinedFunction getConvertUdf() {
-        return udf(UDFHelper.getConvertDataUdf(this.getName(), this.getAppRuleConfig()), UDFHelper.getUdfOutput());
+        return udf(UDFHelper.getConvertDataUdf(this.getName(), this.getTransformConfig()), UDFHelper.getUdfOutput());
     }
 
     @Override
-    public Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
+    public TransformConfig getTransformConfig() {
+        return this.transformConfig;
     }
 }

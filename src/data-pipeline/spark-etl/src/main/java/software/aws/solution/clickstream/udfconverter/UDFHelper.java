@@ -24,7 +24,7 @@ import org.apache.spark.sql.types.StructField;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.ExtraParams;
 import software.aws.solution.clickstream.common.ParseDataResult;
-import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.common.model.ClickstreamItem;
 import software.aws.solution.clickstream.common.model.ClickstreamUser;
@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import static software.aws.solution.clickstream.common.Util.ERROR_LOG;
 import static software.aws.solution.clickstream.common.Util.VALUE_LOG;
@@ -52,13 +51,13 @@ public final class UDFHelper {
     private UDFHelper() {
     }
     public static UDF10<String, Long, Long, String, String, String, String, String, String, String, List<GenericRow>>
-    getConvertDataUdf(final TransformerNameEnum name, final Map<String, RuleConfig> appRuleConfig) {
+    getConvertDataUdf(final TransformerNameEnum name, final TransformConfig transformConfig) {
         return (String value,
                 Long ingestTimestamp, Long uploadTimestamp,
                 String rid, String uri, String ua, String ip,
                 String projectId, String inputFileName, String appId) -> {
             try {
-                EventParser eventParser = EventParserFactory.getEventParser(name, appRuleConfig);
+                EventParser eventParser = EventParserFactory.getEventParser(name, transformConfig);
 
                 return UDFHelper.getGenericRowList(value, ExtraParams.builder()
                         .ingestTimestamp(ingestTimestamp)

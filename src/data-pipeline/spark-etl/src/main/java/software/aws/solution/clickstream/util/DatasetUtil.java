@@ -14,6 +14,7 @@
 package software.aws.solution.clickstream.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
@@ -34,16 +35,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.expr;
+import static org.apache.spark.sql.functions.first;
 import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.max;
 import static org.apache.spark.sql.functions.max_by;
 import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.struct;
+import static software.aws.solution.clickstream.common.Util.getStackTrace;
 import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.GTM_PREVIOUS_SESSION_KEEP_DAYS;
 import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.MAX_SN;
+import static software.aws.solution.clickstream.model.ModelV2.toColumnArray;
 import static software.aws.solution.clickstream.util.ContextUtil.JOB_NAME_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 
@@ -376,7 +381,7 @@ public final class DatasetUtil {
         try {
             Dataset<Row> fullItemsDatasetRead = spark.read().schema(schemaRead).parquet(path);
             log.info(pathInfo + ", read count:" + fullItemsDatasetRead.count());
-            log.info("schema: {}", fullItemsDatasetRead.schema().treeString());
+            log.debug("schema: {}", fullItemsDatasetRead.schema().treeString());
 
             if (isEventTimestampTypeLong) {
                 log.info("filtered by EVENT_TIMESTAMP >= '{}'", nDaysBeforeDate.getTime());
@@ -394,9 +399,9 @@ public final class DatasetUtil {
 
             fullItemsDataset.cache();
             // forces Spark to load the data immediately and cache it in memory
-            log.info(pathInfo + ",cache data count:" + fullItemsDataset.count());
+            log.info(pathInfo + ", cache data count:" + fullItemsDataset.count());
         } catch (Exception e) {
-            log.error("readDatasetFromPath " + e.getMessage());
+            log.error("readDatasetFromPath " + getStackTrace(e));
             if (e.getMessage().toLowerCase().contains("path does not exist")) {
                 List<Row> dataList = new ArrayList<>();
                 return spark.createDataFrame(dataList, schemaRead);
@@ -538,6 +543,17 @@ public final class DatasetUtil {
         String s3FilePath = Paths.get(System.getProperty(WAREHOUSE_DIR_PROP), pathName).toString().replace("s3:/", "s3://");
         log.info("save corruptedDataset to " + s3FilePath);
         corruptDataset.withColumn(JOB_NAME_COL, lit(jobName)).write().partitionBy(JOB_NAME_COL).option(COMPRESSION, "gzip").mode(SaveMode.Append).json(s3FilePath);
+    }
+
+    public static Dataset<Row> deDupDataset(final Dataset<Row> inputDataset, final List<String> keyFields, final List<String> allFields) {
+        List<Column> aggCols = allFields.stream().filter(
+                colName ->  !keyFields.contains(colName)
+        ).map(colName -> first(col(colName)).alias(colName)).collect(Collectors.toList());  // NOSONAR
+
+        return inputDataset
+                .groupBy(keyFields.get(0), keyFields.subList(1, keyFields.size()).toArray(new String[0]))
+                .agg(aggCols.get(0), aggCols.subList(1, aggCols.size()).toArray(new Column[0]))
+                .select(toColumnArray(allFields));
     }
 
 }
