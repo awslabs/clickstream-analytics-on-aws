@@ -377,6 +377,10 @@ public final class ClickstreamEventParser extends BaseEventParser {
 
         setPageViewUrl(clickstreamEvent, ingestEvent.getAttributes().getPageUrl());
 
+        if (ingestEvent.getHostName() != null) {
+            clickstreamEvent.setPageViewHostname(ingestEvent.getHostName());
+        }
+
         clickstreamEvent.setPageViewLatestReferrer(ingestEvent.getAttributes().getLatestReferrer());
         clickstreamEvent.setPageViewLatestReferrerHost(ingestEvent.getAttributes().getLatestReferrerHost());
         if (clickstreamEvent.getPageViewLatestReferrer() != null
@@ -465,6 +469,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
 
             CategoryTrafficSource ts = rsHelper.parse(trafficSourceUtm,
                     clickstreamEvent.getPageViewPageReferrer(),
+                    clickstreamEvent.getPageViewHostname(),
                     clickstreamEvent.getPageViewLatestReferrer(),
                     clickstreamEvent.getPageViewLatestReferrerHost());
 
