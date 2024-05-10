@@ -431,19 +431,55 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'active_user',
+            Name: 'active_users',
             Type: 'STRING',
           },
           {
-            Name: 'new_user',
+            Name: 'new_users',
             Type: 'STRING',
           },
         ],
         projectedColumns: [
           'event_date',
           'platform',
-          'active_user',
-          'new_user',
+          'active_users',
+          'new_users',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
+        useSpice: 'yes',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV}`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'active_users',
+            Type: 'STRING',
+          },
+          {
+            Name: 'new_users',
+            Type: 'STRING',
+          },
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'endDate23',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'platform',
+          'active_users',
+          'new_users',
         ],
       },
 
@@ -1180,11 +1216,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'active_user',
+            Name: 'active_users',
             Type: 'STRING',
           },
           {
-            Name: 'new_user',
+            Name: 'new_users',
             Type: 'STRING',
           },
         ],
