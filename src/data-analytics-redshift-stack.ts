@@ -189,6 +189,7 @@ export function createRedshiftAnalyticsStack(
       emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
       dataFreshnessInHour: props.dataFreshnessInHour,
+      refreshReportDays: props.refreshReportDays,
       timezoneWithAppId: props.timezoneWithAppId,
     },
   );
@@ -208,6 +209,7 @@ export function createRedshiftAnalyticsStack(
       emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
       dataFreshnessInHour: props.dataFreshnessInHour,
+      refreshReportDays: props.refreshReportDays,
       timezoneWithAppId: props.timezoneWithAppId,
     },
   );
@@ -225,6 +227,7 @@ export function createRedshiftAnalyticsStack(
       emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
       dataFreshnessInHour: props.dataFreshnessInHour,
+      refreshReportDays: props.refreshReportDays,
       timezoneWithAppId: props.timezoneWithAppId,
     },
   );

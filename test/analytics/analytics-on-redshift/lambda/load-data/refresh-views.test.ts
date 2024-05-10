@@ -86,7 +86,10 @@ describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
 
     expect(sfnClientMock).toHaveReceivedNthCommandWith(1, StartExecutionCommand, {
       stateMachineArn: 'arn:aws:states:us-east-1:111122223333:workflow/abc',
-      input: JSON.stringify({ latestJobTimestamp: triggerTimestamp }),
+      input: JSON.stringify({
+        refreshEndTime: triggerTimestamp,
+        forceRefresh: 'false',
+      }),
     });
 
   });

@@ -304,26 +304,6 @@ export const schemaDefs: SQLDef[] = [
     sqlFile: 'user-v2.sql',
   },
   {
-    sqlFile: 'user-m-max-view.sql',
-    type: 'mv',
-    scheduleRefresh: 'true',
-  },
-  {
-    sqlFile: 'user-m-view-v2.sql',
-    type: 'mv',
-    scheduleRefresh: 'true',
-  },
-  {
-    sqlFile: 'session-m-max-view.sql',
-    type: 'mv',
-    scheduleRefresh: 'true',
-  },
-  {
-    sqlFile: 'session-m-view.sql',
-    type: 'mv',
-    scheduleRefresh: 'true',
-  },
-  {
     sqlFile: 'fn-combine-json-list.sql',
   },
   {

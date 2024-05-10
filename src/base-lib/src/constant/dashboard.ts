@@ -16,12 +16,6 @@ export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME = 'clickstream_lifecycle_wee
 export const CLICKSTREAM_RETENTION_VIEW_NAME = 'clickstream_retention_view_v3';
 export const CLICKSTREAM_RETENTION_BASE_VIEW_NAME = 'clickstream_retention_base_view';
 
-export const CLICKSTREAM_USER_M_VIEW_NAME = 'clickstream_user_m_view_v2';
-export const CLICKSTREAM_USER_M_MAX_VIEW_NAME = 'clickstream_user_m_max_view_v2';
-
-export const CLICKSTREAM_SESSION_M_VIEW_NAME = 'clickstream_session_m_view';
-export const CLICKSTREAM_SESSION_M_MAX_VIEW_NAME = 'clickstream_session_m_max_view';
-
 export const CLICKSTREAM_EVENT_VIEW_NAME = 'clickstream_event_view_v3';
 export const CLICKSTREAM_EVENT_BASE_VIEW_NAME = 'clickstream_event_base_view';
 export const CLICKSTREAM_EVENT_BASE_VIEW_SP_NAME = 'clickstream_event_base_view_sp';

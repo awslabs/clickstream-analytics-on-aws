@@ -12,7 +12,7 @@ BEGIN
 
     -- Step 3: UNLOAD full segment user info to S3
     EXECUTE '
-        UNLOAD (''SELECT * FROM {{schema}}.user_m_view_v2 WHERE user_pseudo_id IN (SELECT * FROM temp_segment_user)'')
+        UNLOAD (''SELECT * FROM {{schema}}.user_v2 WHERE user_pseudo_id IN (SELECT * FROM temp_segment_user)'')
         TO ' || QUOTE_LITERAL(s3_path || 'segment_')
         || 'IAM_ROLE ' || QUOTE_LITERAL(iam_role)
         || 'PARALLEL OFF ALLOWOVERWRITE HEADER EXTENSION ''csv'' FORMAT AS CSV
@@ -32,7 +32,7 @@ BEGIN
             SELECT
               COUNT(DISTINCT user_pseudo_id) AS total_user_number
             FROM
-              {{schema}}.user_m_view_v2
+              {{schema}}.user_v2
           )
           SELECT
             segment_user_number,

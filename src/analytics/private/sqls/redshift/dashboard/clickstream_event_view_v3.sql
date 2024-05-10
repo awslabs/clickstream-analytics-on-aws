@@ -25,4 +25,4 @@ SELECT
 FROM 
     {{database_name}}.{{schema}}.clickstream_event_base_view as e
 JOIN 
-    {{database_name}}.{{schema}}.user_m_view_v2 as u ON e.user_pseudo_id = u.user_pseudo_id;
+    {{database_name}}.{{schema}}.user_v2 as u ON e.user_pseudo_id = u.user_pseudo_id;

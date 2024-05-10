@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { CLICKSTREAM_DEVICE_USER_DEVICE_SP } from '@aws/clickstream-base-lib';
 import { DescribeStatementCommand, ExecuteStatementCommand, GetStatementResultCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckRefreshSpStatusEvent } from '../../../../../src/analytics/lambdas/refresh-materialized-views-workflow/check-refresh-sp-status';
@@ -26,7 +27,10 @@ let checkRefreshSpStatusEvent: CheckRefreshSpStatusEvent = {
   },
   originalInput: {
     forceRefresh: '',
+  },
+  timezoneWithAppId: {
     appId: 'app1',
+    timezone: 'Asia/Shanghai',
   },
 };
 
@@ -47,7 +51,10 @@ describe('Lambda - check the refresh status in Redshift Serverless', () => {
       },
       originalInput: {
         forceRefresh: '',
+      },
+      timezoneWithAppId: {
         appId: 'app1',
+        timezone: 'Asia/Shanghai',
       },
     };
     redshiftDataMock.reset();
@@ -57,8 +64,9 @@ describe('Lambda - check the refresh status in Redshift Serverless', () => {
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
   });
 
-  test('Check refresh status with response FINISHED, and the force is true', async () => {
+  test('Check refresh status with response FINISHED, and the force is true and is last sp', async () => {
     checkRefreshSpStatusEvent.originalInput.forceRefresh = 'true';
+    checkRefreshSpStatusEvent.detail.spName = CLICKSTREAM_DEVICE_USER_DEVICE_SP;
     const exeuteId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolves({
       Status: StatusString.FINISHED,
@@ -82,12 +90,43 @@ describe('Lambda - check the refresh status in Redshift Serverless', () => {
     });
 
     expect(redshiftDataMock).toHaveReceivedNthCommandWith(2, ExecuteStatementCommand, {
-      Sql: `INSERT INTO ${checkRefreshSpStatusEvent.originalInput.appId}.refresh_mv_sp_status (refresh_name, refresh_type, refresh_date, triggerred_by)\
+      Sql: `INSERT INTO ${checkRefreshSpStatusEvent.timezoneWithAppId.appId}.refresh_mv_sp_status (refresh_name, refresh_type, refresh_date, triggerred_by)\
  VALUES ('${checkRefreshSpStatusEvent.detail.spName}', 'SP', '${checkRefreshSpStatusEvent.detail.refreshDate}', 'MANUALLY');`,
     });
   });
 
-  test('Check refresh status with response FINISHED, and the force is false', async () => {
+  test('Check refresh status with response FINISHED, and the force is false and is last sp', async () => {
+    checkRefreshSpStatusEvent.originalInput.forceRefresh = 'false';
+    checkRefreshSpStatusEvent.detail.spName = CLICKSTREAM_DEVICE_USER_DEVICE_SP;
+    const exeuteId = 'Id-1';
+    redshiftDataMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.FINISHED,
+    });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({ Records: [] });
+    const resp = await handler(checkRefreshSpStatusEvent, context);
+    expect(resp).toEqual({
+      detail: {
+        status: StatusString.FINISHED,
+        completeRefreshSp: checkRefreshSpStatusEvent.detail.spName,
+      },
+      waitTimeInfo: {
+        loopCount: 1,
+        waitTime: 30,
+      },
+    });
+
+    expect(redshiftDataMock).toHaveReceivedNthCommandWith(1, DescribeStatementCommand, {
+      Id: checkRefreshSpStatusEvent.detail.queryId,
+    });
+
+    expect(redshiftDataMock).toHaveReceivedNthCommandWith(2, ExecuteStatementCommand, {
+      Sql: `INSERT INTO ${checkRefreshSpStatusEvent.timezoneWithAppId.appId}.refresh_mv_sp_status (refresh_name, refresh_type, refresh_date, triggerred_by)\
+ VALUES ('${checkRefreshSpStatusEvent.detail.spName}', 'SP', '${checkRefreshSpStatusEvent.detail.refreshDate}', 'WORK_FLOW');`,
+    });
+  });
+
+  test('Check refresh status with response FINISHED, and is not last sp', async () => {
     checkRefreshSpStatusEvent.originalInput.forceRefresh = 'false';
     const exeuteId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolves({
@@ -109,11 +148,6 @@ describe('Lambda - check the refresh status in Redshift Serverless', () => {
 
     expect(redshiftDataMock).toHaveReceivedNthCommandWith(1, DescribeStatementCommand, {
       Id: checkRefreshSpStatusEvent.detail.queryId,
-    });
-
-    expect(redshiftDataMock).toHaveReceivedNthCommandWith(2, ExecuteStatementCommand, {
-      Sql: `INSERT INTO ${checkRefreshSpStatusEvent.originalInput.appId}.refresh_mv_sp_status (refresh_name, refresh_type, refresh_date, triggerred_by)\
- VALUES ('${checkRefreshSpStatusEvent.detail.spName}', 'SP', '${checkRefreshSpStatusEvent.detail.refreshDate}', 'WORK_FLOW');`,
     });
   });
 

@@ -19,13 +19,14 @@ import 'aws-sdk-client-mock-jest';
 
 
 const refreshBasicViewEvent: RefreshBasicViewEvent = {
-  detail: {
-    viewName: 'view1',
-    type: 'mv',
+  view: {
+    name: 'view1',
+    type: 'basic',
+    timezoneSensitive: 'true',
   },
   timezoneWithAppId: {
     appId: 'app1',
-    timezone: 'Asia/Shanghai',
+    timezone: 'America/Noronha',
   },
 };
 
@@ -50,14 +51,14 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
     const resp = await handler(refreshBasicViewEvent);
     expect(resp).toEqual({
       detail: {
-        viewName: refreshBasicViewEvent.detail.viewName,
+        viewName: refreshBasicViewEvent.view.name,
         queryId: exeuteId,
       },
       timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
-      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.detail.viewName};`,
+      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name};`,
     });
   });
 
@@ -96,7 +97,7 @@ describe('Lambda - refresh in Redshift Provisioned', () => {
     const resp = await handler(refreshBasicViewEvent);
     expect(resp).toEqual({
       detail: {
-        viewName: refreshBasicViewEvent.detail.viewName,
+        viewName: refreshBasicViewEvent.view.name,
         queryId: exeuteId,
       },
       timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
@@ -104,7 +105,7 @@ describe('Lambda - refresh in Redshift Provisioned', () => {
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       ClusterIdentifier: clusterIdentifier,
       DbUser: dbUser,
-      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.detail.viewName};`,
+      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name};`,
     });
   });
 
