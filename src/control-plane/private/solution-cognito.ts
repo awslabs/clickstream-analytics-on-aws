@@ -127,6 +127,10 @@ export class SolutionCognito extends Construct {
           name: 'email',
           value: props.email,
         },
+        {
+          name: 'email_verified',
+          value: 'true',
+        },
       ],
       username: props.email,
     });
