@@ -121,7 +121,7 @@ const UserSegmentDetails: React.FC = () => {
 
     const segmentJobsResponse = await getSegmentJobs({ segmentId });
     if (segmentJobsResponse.success) {
-      setSegmentJobs(segmentJobsResponse.data as SegmentJobStatusItem[]);
+      setSegmentJobs(segmentJobsResponse.data);
     }
 
     setIsJobsLoading(false);
@@ -132,13 +132,13 @@ const UserSegmentDetails: React.FC = () => {
 
     const sampleDataResponse = await getSampleData({ segmentId });
     if (sampleDataResponse.success) {
-      setSegmentSample(sampleDataResponse.data as SegmentJobStatusItem);
+      setSegmentSample(sampleDataResponse.data);
     }
 
     setIsSampleDataLoading(false);
   };
 
-  const constructSegmentTrendChart = () => {
+  const renderSegmentTrendChart = () => {
     const getTimeLabel = (time: number) =>
       getDateTimeWithTimezoneString(time, timezone);
     const jobs = segmentJobs.filter((job) => job.jobStatus === 'Completed');
@@ -184,7 +184,7 @@ const UserSegmentDetails: React.FC = () => {
     );
   };
 
-  const constructJobStatusCell = (status: SegmentJobStatus) => {
+  const renderJobStatusCell = (status: SegmentJobStatus) => {
     switch (status) {
       case SegmentJobStatus.COMPLETED:
         return (
@@ -209,6 +209,30 @@ const UserSegmentDetails: React.FC = () => {
           </StatusIndicator>
         );
     }
+  };
+
+  const renderExportDownloadLink = (jobStatusItem: SegmentJobStatusItem) => {
+    return (
+      <Button
+        variant="icon"
+        iconName="download"
+        disabled={jobStatusItem.jobStatus !== SegmentJobStatus.COMPLETED}
+        onClick={async () => {
+          const segmentApiResponse = await getExportFileS3Url({
+            projectId,
+            appId,
+            segmentId,
+            jobRunId: jobStatusItem.jobRunId,
+          });
+
+          if (segmentApiResponse.success) {
+            const url = segmentApiResponse.data.presignedUrl;
+            const name = defaultStr(segment?.name, 'segment') + '.csv';
+            createDownloadLink(url, name);
+          }
+        }}
+      />
+    );
   };
 
   return (
@@ -347,7 +371,7 @@ const UserSegmentDetails: React.FC = () => {
                       </ColumnLayout>
                     </Box>
                     <Box margin={{ vertical: 'l' }}>
-                      {constructSegmentTrendChart()}
+                      {renderSegmentTrendChart()}
                     </Box>
                     <Table
                       loading={isJobsLoading}
@@ -372,7 +396,7 @@ const UserSegmentDetails: React.FC = () => {
                           id: 'status',
                           header: t('analytics:segment.details.jobStatus'),
                           cell: (e: SegmentJobStatusItem) =>
-                            constructJobStatusCell(e.jobStatus),
+                            renderJobStatusCell(e.jobStatus),
                         },
                         {
                           id: 'startTime',
@@ -422,35 +446,8 @@ const UserSegmentDetails: React.FC = () => {
                         {
                           id: 'export',
                           header: t('analytics:segment.details.export'),
-                          cell: (e: SegmentJobStatusItem) => {
-                            return (
-                              <Button
-                                variant="icon"
-                                iconName="download"
-                                disabled={
-                                  e.jobStatus !== SegmentJobStatus.COMPLETED
-                                }
-                                onClick={async () => {
-                                  const segmentApiResponse =
-                                    await getExportFileS3Url({
-                                      projectId,
-                                      appId,
-                                      segmentId,
-                                      jobRunId: e.jobRunId,
-                                    });
-
-                                  if (segmentApiResponse.success) {
-                                    const url =
-                                      segmentApiResponse.data.presignedUrl;
-                                    const name =
-                                      defaultStr(segment?.name, 'segment') +
-                                      '.csv';
-                                    createDownloadLink(url, name);
-                                  }
-                                }}
-                              />
-                            );
-                          },
+                          cell: (e: SegmentJobStatusItem) =>
+                            renderExportDownloadLink(e),
                         },
                       ]}
                       items={segmentJobs}
