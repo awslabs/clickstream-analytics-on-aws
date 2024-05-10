@@ -12,6 +12,7 @@
  */
 
 import { logger } from '@aws/clickstream-base-lib';
+import { RefreshViewOrSp } from './get-refresh-viewlist';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
@@ -20,10 +21,7 @@ const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
 
 export interface RefreshBasicViewEvent {
-  detail: {
-    viewName: string;
-    type: string;
-  };
+  view: RefreshViewOrSp;
   timezoneWithAppId: {
     appId: string;
     timezone: string;
@@ -53,13 +51,15 @@ export const handler = async (event: RefreshBasicViewEvent) => {
 
   const sqlStatements: string[] = [];
   const timezoneWithAppId = event.timezoneWithAppId;
-  const viewName = event.detail.viewName;
+  const viewName = event.view.name;
+
+  const dataFreshnessInHour = process.env.DATA_REFRESHNESS_IN_HOUR!;
 
   try {
     let queryId : string | undefined;
-    const type = event.detail.type;
+    const type = event.view.type;
     if (type === 'custom-mv') {
-      sqlStatements.push(`CALL ${timezoneWithAppId.appId}.${viewName}(NULL, NULL);`);
+      sqlStatements.push(`CALL ${timezoneWithAppId.appId}.${viewName}(NULL, NULL, ${dataFreshnessInHour});`);
     } else {
       sqlStatements.push(`REFRESH MATERIALIZED VIEW ${timezoneWithAppId.appId}.${viewName};`);
     }

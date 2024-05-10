@@ -21,7 +21,7 @@ import 'aws-sdk-client-mock-jest';
 const checkRefreshViewStatusEvent: CheckRefreshViewStatusEvent = {
   detail: {
     queryId: 'id-1',
-    viewName: 'user_m_max_view',
+    viewName: 'clickstream_event_base_view_sp',
   },
   timezoneWithAppId: {
     appId: 'app1',

@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (p_start_time timestamp, p_end_time timestamp) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (p_start_time timestamp, p_end_time timestamp, fressness_in_hours integer) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
@@ -18,7 +18,7 @@ BEGIN
       COALESCE(max(created_time), CURRENT_TIMESTAMP - INTERVAL ''1 days'') as start_time,
       CURRENT_TIMESTAMP + INTERVAL ''1 days'' as end_time
     FROM {{database_name}}.{{schema}}.clickstream_event_base_view
-    WHERE event_timestamp >= CURRENT_TIMESTAMP - INTERVAL ''7 days'' --reduce scan range' into rec
+    WHERE event_timestamp >= CURRENT_TIMESTAMP - INTERVAL ''' || fressness_in_hours || ' hours'' --reduce scan range' into rec
     ;
 
     call {{database_name}}.{{schema}}.sp_clickstream_log('clickstream_event_base_view', 'info', 'refresh time range:' || rec.start_time || ' - ' || rec.end_time);
@@ -40,7 +40,7 @@ BEGIN
     event_value_currency,
     event_bundle_sequence_id,
     ingest_time_msec,
-    created_time,
+    e.created_time,
     device_mobile_brand_name,
     device_mobile_model_name,
     device_manufacturer,
@@ -144,7 +144,7 @@ BEGIN
     CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.session_id ELSE NULL END as view_session_indicator,
     CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.event_id ELSE NULL END as view_event_indicator
   from {{database_name}}.{{schema}}.event_v2 e
-  left join {{database_name}}.{{schema}}.session_m_view s 
+  left join {{database_name}}.{{schema}}.session s 
     on e.user_pseudo_id = s.user_pseudo_id and e.session_id = s.session_id
   where e.created_time > rec.start_time and e.created_time <= rec.end_time
   and e.event_timestamp >= CURRENT_TIMESTAMP - INTERVAL '7 days' --reduce scan range
