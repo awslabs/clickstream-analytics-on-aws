@@ -144,8 +144,8 @@ cat > task-definition.json << EOF
   ], 
   "networkMode": "awsvpc",  
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "1024",
-  "memory": "2048"
+  "cpu": "4096",
+  "memory": "30720"
 }
 EOF
 
