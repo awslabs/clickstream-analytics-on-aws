@@ -53,6 +53,8 @@ import {
   CLICKSTREAM_ENGAGEMENT_EVENT_NAME,
   CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,
+  CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER,
+  CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME,
 } from '@aws/clickstream-base-lib';
 import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -212,6 +214,23 @@ function _getDataSetDefs(
       projectedColumns: [...eventViewProjectedColumns, 'event_timestamp_local', 'event_date'],
     },
   );
+
+  dataSetProps.push(
+    {
+      tableName: CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER,
+      useSpice: 'no',
+      customSql: `SELECT max(refresh_date) as last_refresh_date FROM {{schema}}.${CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME}`,
+      columns: [
+        {
+          Name: 'last_refresh_date',
+          Type: 'DATETIME',
+        },
+      ],
+      projectedColumns: [
+        'last_refresh_date',
+      ],
+    },
+  )
 
   let datasets: DataSetProps[] = [];
   if (useSpice === 'yes') {

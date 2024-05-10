@@ -79,6 +79,9 @@ export const CLICKSTREAM_DEVICE_USER_DEVICE_PLACEHOLDER = 'Device';
 export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'Lifecycle_Weekly_View';
 export const CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER = 'Retention_View';
 
+export const CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER = 'Last_Refresh_Date';
+export const CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME = 'refresh_mv_sp_status';
+
 export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [
   'clickstream_lifecycle_daily_view_v1',
   'clickstream_lifecycle_weekly_view_v1',
