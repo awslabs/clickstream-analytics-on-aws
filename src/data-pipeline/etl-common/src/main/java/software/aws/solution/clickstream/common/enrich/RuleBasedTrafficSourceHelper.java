@@ -30,9 +30,11 @@ import software.aws.solution.clickstream.common.enrich.ts.rule.SourceCategoryAnd
 import software.aws.solution.clickstream.common.exception.ExtractDataException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static software.aws.solution.clickstream.common.Util.getUriParams;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
@@ -45,23 +47,27 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     public static final String TYPE = "type";
     public static final String VALUE = "value";
     public static final String DIRECT = "Direct";
-    public static final String LINKEDIN = "linkedin";
-    public static final String YOUTUBE = "youtube";
-    public static final String TIKTOK = "tiktok";
-    public static final String BAIDU = "baidu";
-    public static final String GOOGLE = "google";
-    public static final String FACEBOOK = "facebook";
-    public static final String TWITTER = "twitter";
-    public static final String MICROSOFT = "microsoft";
-    public static final String PINTEREST = "pinterest";
-    public static final String BING = "bing";
-    public static final String SCOCIAL = "scocial";
-    public static final String VIDEO = "video";
-    public static final String CPC = "cpc";
-    public static final String DISPLAY = "display";
+    public static final String LINKEDIN = "Linkedin";
+    public static final String YOUTUBE = "Youtube";
+    public static final String TIKTOK = "Tiktok";
+    public static final String BAIDU = "Baidu";
+    public static final String GOOGLE = "Google";
+    public static final String FACEBOOK = "Facebook";
+    public static final String TWITTER = "Twitter";
+    public static final String MICROSOFT = "Microsoft";
+    public static final String PINTEREST = "Pinterest";
+    public static final String BING = "Bing";
+    public static final String SCOCIAL = "Scocial";
+    public static final String VIDEO = "Video";
+    public static final String CPC = "CPC";
+    public static final String DISPLAY = "Display";
     public static final String CLID = "clid";
     private static final Map<String, SourceMedium> KNOWN_CLID_TO_MEDIUM_MAP;
     private static final Map<String, RuleBasedTrafficSourceHelper> INSTANCES = new HashMap<>();
+    public static final String NONE = "None";
+    public static final String REFERRAL = "Referral";
+    public static final String ORGANIC = "Organic";
+    public static final String INTERNAL = "Internal";
 
     static {
         KNOWN_CLID_TO_MEDIUM_MAP = getKnownClidTypeToSourceMediumMap();
@@ -187,11 +193,12 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             return CACHED_CATEGORY_TRAFFIC_SOURCE.get(cachedKey);
         }
         TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
-
+        String pageHostName = null;
         if (pageUrl != null && !pageUrl.isEmpty()) {
             trafficSourceUtm = getUtmSourceFromUrl(pageUrl);
+            pageHostName = parseUrl(pageUrl).getHostName();
         }
-        CategoryTrafficSource result = parse(trafficSourceUtm, pageReferrer, latestReferrer, latestReferrerHost);
+        CategoryTrafficSource result = parse(trafficSourceUtm, pageHostName, pageReferrer, latestReferrer, latestReferrerHost);
         CACHED_CATEGORY_TRAFFIC_SOURCE.put(cachedKey, result);
         return result;
     }
@@ -222,16 +229,15 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
         Map<String, String> clidMap = createClidTypeValueMap(gclid, params);
 
-        String clidType = clidMap.get(TYPE);
-
-        if (utmSource == null && clidType != null && KNOWN_CLID_TO_MEDIUM_MAP.containsKey(clidType)) {
-            utmSource = KNOWN_CLID_TO_MEDIUM_MAP.get(clidType).getSource();
-            if (utmMedium == null) {
-                utmMedium = KNOWN_CLID_TO_MEDIUM_MAP.get(clidType).getMedium();
-            }
-        }
         trafficSourceUtm.setSource(utmSource);
         trafficSourceUtm.setMedium(utmMedium);
+
+        String clidType = clidMap.get(TYPE);
+
+        if (utmSource == null && clidType != null) {
+           setSourceAndMediumByClid(clidType, trafficSourceUtm);
+        }
+
         trafficSourceUtm.setCampaign(utmCampaign);
         trafficSourceUtm.setContent(utmContent);
         trafficSourceUtm.setTerm(utmTerm);
@@ -245,6 +251,22 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             }
         }
         return trafficSourceUtm;
+    }
+
+    private static void setSourceAndMediumByClid(final String clidType,  final TrafficSourceUtm trafficSourceUtm) {
+        String utmSource = null;
+        String utmMedium = null;
+        if (KNOWN_CLID_TO_MEDIUM_MAP.containsKey(clidType)) {
+            utmSource = KNOWN_CLID_TO_MEDIUM_MAP.get(clidType).getSource();
+            utmMedium = KNOWN_CLID_TO_MEDIUM_MAP.get(clidType).getMedium();
+        } else {
+            utmSource = clidType;
+            utmMedium = CPC;
+        }
+        trafficSourceUtm.setSource(utmSource);
+        if (trafficSourceUtm.getMedium() == null || trafficSourceUtm.getMedium().isEmpty()) {
+            trafficSourceUtm.setMedium(utmMedium);
+        }
     }
 
     public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String theReferrer, final String theReferrerHost) {
@@ -294,8 +316,13 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     }
 
     @Override
-    public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String pageReferrer, final String latestReferrer, final String latestReferrerHost) {
-        log.debug("parser() enter trafficSourceUtm: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", trafficSourceUtmInput, pageReferrer, latestReferrer, latestReferrerHost);
+    public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput,
+                                       final String pageHostName,
+                                       final String pageReferrer,
+                                       final String latestReferrer,
+                                       final String latestReferrerHost) {
+        log.debug("parse() enter trafficSourceUtmInput: {}, pageHostName: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}",
+                trafficSourceUtmInput, pageHostName, pageReferrer, latestReferrer, latestReferrerHost);
 
         String catchKey = String.join("|", trafficSourceUtmInput.hashCode() + "", pageReferrer, latestReferrer);
         if (CACHED_CATEGORY_TRAFFIC_SOURCE.containsKey(catchKey)) {
@@ -311,22 +338,32 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             trafficSourceUtm = getUtmSourceFromUrl(pageReferrer);
         }
 
-        String theReferrer = null;
-        String theReferrerHost = null;
+        String pageReferrerHost = null;
+        if (pageReferrer != null && !pageReferrer.isEmpty()) {
+             pageReferrerHost = parseUrl(pageReferrer).getHostName();
+        }
+        boolean isInternalReferrer = pageHostName != null && pageHostName.equalsIgnoreCase(pageReferrerHost);
+        log.debug("isInternalReferrer: {}", isInternalReferrer);
+
         CategoryTrafficSource categoryTrafficSource = null;
 
         if (latestReferrer != null && !latestReferrer.isEmpty()) {
-            theReferrer = latestReferrer;
-            theReferrerHost = latestReferrerHost;
-            categoryTrafficSource = parse(trafficSourceUtm, theReferrer, theReferrerHost);
-        } else if (pageReferrer != null && !pageReferrer.isEmpty()) {
-            theReferrer = pageReferrer;
-            theReferrerHost = parseUrl(theReferrer).getHostName();
-            categoryTrafficSource = parse(trafficSourceUtm, theReferrer, theReferrerHost);
+            categoryTrafficSource = parse(trafficSourceUtm, latestReferrer, latestReferrerHost);
+        } else if (pageReferrer != null && !pageReferrer.isEmpty() && !isInternalReferrer) {
+            categoryTrafficSource = parse(trafficSourceUtm, pageReferrer, pageReferrerHost);
         } else {
             categoryTrafficSource = parse(trafficSourceUtm, null, null);
         }
 
+        handleUnassignedSource(categoryTrafficSource, pageReferrer, latestReferrer, isInternalReferrer);
+
+        CACHED_CATEGORY_TRAFFIC_SOURCE.put(catchKey, categoryTrafficSource);
+
+        return categoryTrafficSource;
+    }
+
+    private void handleUnassignedSource(final CategoryTrafficSource categoryTrafficSource, final String pageReferrer,
+                                        final String latestReferrer,  final boolean isInternalReferrer) {
         if (categoryTrafficSource.getSource() != null) {
             if (categoryTrafficSource.getCategory() == null) {
                 categoryTrafficSource.setCategory(CategoryListEvaluator.UNASSIGNED);
@@ -339,15 +376,75 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (categoryTrafficSource.getSource() == null) {
             categoryTrafficSource.setSource(DIRECT);
             categoryTrafficSource.setCategory(DIRECT);
-            categoryTrafficSource.setChannelGroup(DIRECT);
+            if (isInternalReferrer) {
+                categoryTrafficSource.setChannelGroup(INTERNAL);
+            } else {
+                categoryTrafficSource.setChannelGroup(DIRECT);
+            }
+        }
+
+        if (categoryTrafficSource.getSource() != null && categoryTrafficSource.getMedium() == null) {
+            categoryTrafficSource.setMedium(getMediumBySource(categoryTrafficSource.getSource()));
         }
 
         if (categoryTrafficSource.getMedium() == null) {
-            categoryTrafficSource.setMedium(categoryTrafficSource.getChannelGroup());
+            categoryTrafficSource.setMedium(getMediumByReferrer(pageReferrer, latestReferrer, isInternalReferrer));
         }
-        CACHED_CATEGORY_TRAFFIC_SOURCE.put(catchKey, categoryTrafficSource);
+    }
 
-        return categoryTrafficSource;
+    private String getMediumBySource(final String source) {
+        Pattern pattern = Pattern.compile(".*(google|bing|yahoo|duckduckgo|baidu|yandex).*", Pattern.CASE_INSENSITIVE); // NOSONAR
+        if (pattern.matcher(source).matches()) {
+            return ORGANIC;
+        }
+        return null;
+    }
+
+    String getMediumByReferrer(final String pageReferrer, final String latestReferrer, final boolean isInternalReferrer) {
+        log.debug("getMediumByReferrer() enter pageReferrer: {}, latestReferrer: {}, isInternalReferrer: {}", pageReferrer, latestReferrer, isInternalReferrer);
+
+        if (isAllEmpty(pageReferrer, latestReferrer)) {
+            return NONE;
+        }
+
+        List<String> knownSearchEngineDomains = Arrays.asList(
+                "google.com",
+                "bing.com",
+                "yahoo.com",
+                "duckduckgo.com",
+                "baidu.com",
+                "yandex.com"
+        );
+
+        if (latestReferrer != null && !latestReferrer.isEmpty()) {
+            String referrerHost = parseUrl(latestReferrer).getHostName();
+            if (referrerHost.startsWith("www.")) {
+                referrerHost = referrerHost.substring(4);
+            }
+            if (knownSearchEngineDomains.contains(referrerHost)) {
+                return ORGANIC;
+            }
+        }
+
+        if (isInternalReferrer) {
+            return NONE;
+        }
+
+        if (pageReferrer != null && !pageReferrer.isEmpty()) {
+            String referrerHost = parseUrl(pageReferrer).getHostName();
+            if (referrerHost.startsWith("www.")) {
+                referrerHost = referrerHost.substring(4);
+            }
+            if (knownSearchEngineDomains.contains(referrerHost)) {
+                return ORGANIC;
+            }
+        }
+
+        return REFERRAL;
+    }
+
+    private static boolean isAllEmpty(final String pageReferrer, final String latestReferrer) {
+        return (pageReferrer == null || pageReferrer.isEmpty()) && (latestReferrer == null || latestReferrer.isEmpty());
     }
 
     private TrafficSourceUtm normEmptyInTrafficSourceUtm(final TrafficSourceUtm trafficSourceUtmInput) {

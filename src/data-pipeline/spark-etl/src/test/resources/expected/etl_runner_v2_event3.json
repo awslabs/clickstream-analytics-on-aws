@@ -27,7 +27,7 @@
     "time_zone_offset_seconds" : 28800,
     "vendor_id" : "deviceid-1",
     "advertising_id" : "uf24bec657ea8eff7",
-    "host_name" : "https://host-name-001.com",
+    "host_name" : "host-name-001.com",
     "viewport_width" : null,
     "viewport_height" : null
   },

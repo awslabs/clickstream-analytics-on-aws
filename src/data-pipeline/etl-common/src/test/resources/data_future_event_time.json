@@ -2,7 +2,7 @@
   "hashCode": "80452b0",
   "app_id": "app1",
   "unique_id": "83e45133-ddaf-4ac6-9844-fe457807715198",
-  "host_name": "https://host-name-001.com",
+  "host_name": "host-name-001.com",
   "device_id": "deviceid-1682319109447",
   "device_unique_id": "uf24bec657ea8eff7",
   "event_type": "_first_open",

@@ -19,7 +19,7 @@
   "zone_offset" : 28800000,
   "locale" : "zh_CN_#Hans",
   "system_language" : "zh",
-  "host_name" : "https://host-name-001.com",
+  "host_name" : "host-name-001.com",
   "app_version" : "1.0",
   "app_package_name" : "com.example.demoapplication",
   "app_title" : "test-title-98-0",

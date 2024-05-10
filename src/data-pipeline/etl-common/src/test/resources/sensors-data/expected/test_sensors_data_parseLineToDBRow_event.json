@@ -37,7 +37,7 @@
   "geo_city" : null,
   "geo_locale" : null,
   "traffic_source_source" : "Direct",
-  "traffic_source_medium" : "Direct",
+  "traffic_source_medium" : "None",
   "traffic_source_campaign" : "Direct",
   "traffic_source_content" : null,
   "traffic_source_term" : null,
