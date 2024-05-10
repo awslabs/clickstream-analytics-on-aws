@@ -54,19 +54,21 @@ const UserSegments: React.FC = () => {
   const [selectedSegment, setSelectedSegment] = useState<Segment[]>([]);
   const [loadingDelete, setLoadingDelete] = useState(false);
 
+  const renderSegmentDetailsLink = (e: Segment) => {
+    return (
+      <Link
+        href={`/analytics/${projectId}/app/${appId}/segments/${e.segmentId}/details`}
+      >
+        {e.name}
+      </Link>
+    );
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
       header: 'Name',
-      cell: (e: Segment) => {
-        return (
-          <Link
-            href={`/analytics/${projectId}/app/${appId}/segments/${e.segmentId}/details`}
-          >
-            {e.name}
-          </Link>
-        );
-      },
+      cell: (e: Segment) => renderSegmentDetailsLink(e),
     },
     {
       id: 'description',
