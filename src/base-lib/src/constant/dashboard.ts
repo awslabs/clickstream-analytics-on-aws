@@ -29,8 +29,8 @@ export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT = 'clickstream_acquisitio
 export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_SP = 'clickstream_acquisition_day_user_view_cnt_sp';
 export const CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV = 'clickstream_acquisition_intra_day_user_mv';
 
-export const CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW = 'clickstream_engagement_day_user_view';
-export const CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_SP = 'clickstream_engagement_day_user_view_sp';
+export const CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW = 'clickstream_engagement_day_event_view';
+export const CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW_SP = 'clickstream_engagement_day_event_view_sp';
 export const CLICKSTREAM_ENGAGEMENT_ENTRANCE = 'clickstream_engagement_entrance';
 export const CLICKSTREAM_ENGAGEMENT_ENTRANCE_SP = 'clickstream_engagement_entrance_sp';
 export const CLICKSTREAM_ENGAGEMENT_EXIT = 'clickstream_engagement_exit';
@@ -62,7 +62,7 @@ export const CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER = 'Day_Use
 export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_PLACEHOLDER = 'Day_User_View';
 
 export const CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER = 'Intra_Day_User';
-export const CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER = 'Day_User_View_Engagement';
+export const CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW_PLACEHOLDER = 'Day_Event_View_Engagement';
 export const CLICKSTREAM_ENGAGEMENT_ENTRANCE_PLACEHOLDER = 'Entrance';
 export const CLICKSTREAM_ENGAGEMENT_EXIT_PLACEHOLDER = 'Exit';
 export const CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER = 'Engagement_KPI';

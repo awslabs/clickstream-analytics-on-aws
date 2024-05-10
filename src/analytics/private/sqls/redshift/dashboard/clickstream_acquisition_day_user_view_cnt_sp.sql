@@ -13,15 +13,15 @@ BEGIN
     INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
       event_date, 
       platform,
-      "Active users", 
-      "New users",
+      active_users, 
+      new_users,
       view_count
     )
     SELECT 
       current_date::date AS event_date,
       platform,
-      merged_user_id as "Active users", 
-      SUM(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS "New users",
+      merged_user_id as active_users, 
+      SUM(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS new_users,
       SUM(CASE WHEN event_name = '_screen_view' OR event_name = '_page_view' THEN 1 ELSE 0 END) AS view_count
     FROM 
       {{database_name}}.{{schema}}.{{baseView}}

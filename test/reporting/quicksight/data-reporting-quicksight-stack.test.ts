@@ -1721,11 +1721,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'Active users',
+                Name: 'active_users',
                 Type: 'STRING',
               },
               {
-                Name: 'New users',
+                Name: 'new_users',
                 Type: 'INTEGER',
               },
               {
@@ -1746,8 +1746,8 @@ describe('DataReportingQuickSightStack resource test', () => {
             projectedColumns: [
               'event_date',
               'platform',
-              'Active users',
-              'New users',
+              'active_users',
+              'new_users',
               'view_count',
             ],
           },
@@ -1983,9 +1983,9 @@ describe('DataReportingQuickSightStack resource test', () => {
                 ],
           },
           {
-            tableName: 'Day_User_View_Engagement',
+            tableName: 'Day_Event_View_Engagement',
             useSpice: 'no',
-            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_day_user_view where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_day_event_view where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))",
             columns:
                 [
                   {
@@ -3368,11 +3368,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'Active users',
+                Name: 'active_users',
                 Type: 'STRING',
               },
               {
-                Name: 'New users',
+                Name: 'new_users',
                 Type: 'INTEGER',
               },
               {
@@ -3383,8 +3383,8 @@ describe('DataReportingQuickSightStack resource test', () => {
             projectedColumns: [
               'event_date',
               'platform',
-              'Active users',
-              'New users',
+              'active_users',
+              'new_users',
               'view_count',
             ],
           },
@@ -3580,9 +3580,9 @@ describe('DataReportingQuickSightStack resource test', () => {
                 ],
           },
           {
-            tableName: 'Day_User_View_Engagement',
+            tableName: 'Day_Event_View_Engagement',
             useSpice: 'yes',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_engagement_day_user_view ',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_engagement_day_event_view ',
             columns:
                 [
                   {

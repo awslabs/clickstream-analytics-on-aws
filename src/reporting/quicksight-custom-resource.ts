@@ -23,8 +23,8 @@ import {
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
-  CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW,
-  CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER,
+  CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW,
+  CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW_PLACEHOLDER,
   CLICKSTREAM_ENGAGEMENT_KPI,
   CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER,
   CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW,
@@ -430,9 +430,9 @@ function _getDataSetDefs(
 
       //Engagement Sheet
       {
-        tableName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER,
+        tableName: CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW} `,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW} `,
         columns: [
           {
             Name: 'event_date',
@@ -1186,9 +1186,9 @@ function _getDataSetDefs(
 
       //Engagement Sheet
       {
-        tableName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER,
+        tableName: CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW} where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW} where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))`,
         columns: [
           {
             Name: 'event_date',
