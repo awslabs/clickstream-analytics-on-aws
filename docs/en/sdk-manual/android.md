@@ -295,7 +295,7 @@ Here is an explanation of each method.
 | withSessionTimeoutDuration()    | long           | false    | 5000          | the duration of the session timeout in milliseconds                                         |
 | withTrackScreenViewEvents()     | boolean        | false    | true          | whether to auto-record screen view events                                                   |
 | withTrackUserEngagementEvents() | boolean        | false    | true          | whether to auto-record user engagement events                                               |
-| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether to auto-record app exception events                                                 |
+| withTrackAppExceptionEvents()   | boolean        | false    | false         | whether to auto-record app exception events                                                 |
 | withLogEvents()                 | boolean        | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
 | withCustomDns()                 | String         | false    | --            | the method for setting your custom DNS, [Learn more](#configure-custom-dns)                 |
 | withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events.                            |
