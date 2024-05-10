@@ -106,7 +106,7 @@ class TransformerTest extends BaseSparkTest {
         assertEquals(1, transformedDataset.count());
         Row row = transformedDataset.first();
         Row device = row.getStruct(row.fieldIndex("device"));
-        assertEquals("https://host-name-001.com", device.getString(device.fieldIndex("host_name")));
+        assertEquals("host-name-001.com", device.getString(device.fieldIndex("host_name")));
     }
     
     @Test

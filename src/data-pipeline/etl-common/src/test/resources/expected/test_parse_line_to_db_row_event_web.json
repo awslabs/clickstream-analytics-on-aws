@@ -75,7 +75,7 @@
   "page_view_page_url_query_parameters" : {
     "q" : "abc"
   },
-  "page_view_hostname" : "https://host-name-001.com",
+  "page_view_hostname" : "host-name-001.com",
   "page_view_latest_referrer" : "www.baidu.com",
   "page_view_latest_referrer_host" : "www.baidu.com",
   "page_view_entrances" : null,
