@@ -1460,7 +1460,7 @@ export class CReportingStack extends JSONObject {
 
   @JSONObject.optional('dev')
   @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
-    return stack._pipeline?.projectId ?? '';
+    return stack._pipeline?.projectId ?? 'dev';
   })
   @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
     RedshiftDefaultDBParam?: string;
