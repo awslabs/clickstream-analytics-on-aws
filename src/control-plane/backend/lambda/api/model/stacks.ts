@@ -1458,6 +1458,13 @@ export class CReportingStack extends JSONObject {
   @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
     QuickSightTimezoneParam?: string;
 
+  @JSONObject.optional('dev')
+  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
+    return stack._pipeline?.projectId ?? 'dev';
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+    RedshiftDefaultDBParam?: string;
+
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CReportingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
