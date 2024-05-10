@@ -24,7 +24,7 @@ pnpm --dir frontend run test
 
 # spark-etl
 docker run -i --rm -v `pwd`/src/data-pipeline/:/data --workdir /data \
-  public.ecr.aws/docker/library/gradle:7.6-jdk17 sh -c 'cd /data/etl-common/ && gradle install && cd /data/spark-etl/ && gradle test jacocoAggregatedReport'
+  public.ecr.aws/docker/library/gradle:7.6-jdk17 sh -c 'cd /data/etl-common/ && gradle clean test jacocoAggregatedReport install && cd /data/spark-etl/ && gradle clean test jacocoAggregatedReport'
 
 # flink-etl
 docker run -i --rm -v `pwd`/src/streaming-ingestion/flink-etl/:/data --workdir /data \
