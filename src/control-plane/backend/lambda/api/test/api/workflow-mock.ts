@@ -986,10 +986,6 @@ const BASE_REPORTING_PARAMETERS = [
     ParameterValue: 'app_7777_7777_1,app_7777_7777_2',
   },
   {
-    ParameterKey: 'QuickSightTemplateArnParam',
-    ParameterValue: '',
-  },
-  {
     ParameterKey: 'QuickSightVpcConnectionSubnetParam',
     ParameterValue: 'subnet-00000000000000010,subnet-00000000000000011',
   },
@@ -1016,7 +1012,7 @@ const BASE_REPORTING_PARAMETERS = [
 ];
 
 export const REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS = [
-  ...BASE_REPORTING_PARAMETERS.slice(0, 7),
+  ...BASE_REPORTING_PARAMETERS.slice(0, 6),
   {
     ParameterKey: 'RedshiftEndpointParam',
     ParameterValue: 'https://redshift/xxx/yyy',
@@ -1025,7 +1021,7 @@ export const REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS = [
     ParameterKey: 'RedshiftPortParam',
     ParameterValue: '5002',
   },
-  ...BASE_REPORTING_PARAMETERS.slice(7, BASE_REPORTING_PARAMETERS.length),
+  ...BASE_REPORTING_PARAMETERS.slice(6, BASE_REPORTING_PARAMETERS.length),
 ];
 
 export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
@@ -1052,10 +1048,6 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   {
     ParameterKey: 'RedShiftDBSchemaParam',
     ParameterValue: 'app_7777_7777_1,app_7777_7777_2',
-  },
-  {
-    ParameterKey: 'QuickSightTemplateArnParam',
-    ParameterValue: '',
   },
   {
     ParameterKey: 'RedshiftEndpointParam.#',
