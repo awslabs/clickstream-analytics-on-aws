@@ -26,7 +26,6 @@ import {
   Textarea,
 } from '@cloudscape-design/components';
 import { createApplication, getApplicationDetail } from 'apis/application';
-import moment from 'moment-timezone';
 import ConfigAndroidSDK from 'pages/application/detail/comp/ConfigAndroidSDK';
 import ConfigFlutterSDK from 'pages/application/detail/comp/ConfigFlutterSDK';
 import ConfigIOSSDK from 'pages/application/detail/comp/ConfigIOSSDK';
@@ -35,8 +34,8 @@ import ConfigWebSDK from 'pages/application/detail/comp/ConfigWebSDK';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FILTER_TIME_ZONE, MAX_USER_INPUT_LENGTH } from 'ts/const';
-import { defaultStr, validateAppId } from 'ts/utils';
+import { MAX_USER_INPUT_LENGTH } from 'ts/const';
+import { defaultStr, getTimezoneOptions, validateAppId } from 'ts/utils';
 
 const RegisterApp: React.FC = () => {
   const { t } = useTranslation();
@@ -92,7 +91,10 @@ const RegisterApp: React.FC = () => {
     setLoadingCreate(true);
     try {
       const { success, data }: ApiResponse<ResponseCreate> =
-        await createApplication(application);
+        await createApplication({
+          ...application,
+          timezone: application.timezone.split(' (UTC ')[0],
+        });
       if (success && data.id) {
         getApplicationDetailByAppId(data.id);
       }
@@ -212,15 +214,7 @@ const RegisterApp: React.FC = () => {
                       };
                     });
                   }}
-                  options={moment.tz
-                    .names()
-                    .filter((tz) => !FILTER_TIME_ZONE.includes(tz))
-                    .flatMap((tz) => {
-                      return {
-                        label: tz,
-                        value: tz,
-                      };
-                    })}
+                  options={getTimezoneOptions()}
                   placeholder={defaultStr(
                     t('application:labels.timezonePlaceholder')
                   )}
