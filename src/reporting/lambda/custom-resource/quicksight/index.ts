@@ -146,7 +146,7 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
 
         const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
           schemaName,
-          dashboardDefProps, timezoneDict);
+          dashboardDefProps, timezoneDict, props.useSpice);
 
         dashboards.push({
           appId: schemaName,
@@ -156,9 +156,9 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
     } catch (err: any) {
       logger.error('Create QuickSight dashboard failed', err);
       //remove created Quicksight resources
-      for (const schemaName of databaseSchemaNames.split(',')) {
-        await deleteQuickSightDashboard(quickSight, awsAccountId, props.dashboardDefProps.databaseName, schemaName, props.dashboardDefProps);
-      }
+      // for (const schemaName of databaseSchemaNames.split(',')) {
+      //   await deleteQuickSightDashboard(quickSight, awsAccountId, props.dashboardDefProps.databaseName, schemaName, props.dashboardDefProps);
+      // }
       throw err;
     }
   } else {
@@ -322,7 +322,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   } catch (err: any) {
     logger.error('Update QuickSight dashboard failed', err);
     //remove created Quicksight resources
-    await cleanQuickSightResource(createdQuickSightResources, quickSight, awsAccountId, props.dashboardDefProps.databaseName);
+    //await cleanQuickSightResource(createdQuickSightResources, quickSight, awsAccountId, props.dashboardDefProps.databaseName);
 
     throw err;
   }

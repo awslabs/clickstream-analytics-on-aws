@@ -2086,7 +2086,7 @@
                                                 "FieldId": "23234208-6046-4ac5-8d8d-ff4c031fd15f.3.1713699345900",
                                                 "Column": {
                                                     "DataSetIdentifier": "Intra_Day_User",
-                                                    "ColumnName": "Previous Day New User"
+                                                    "ColumnName": "Previous Day New Users"
                                                 }
                                             }
                                         }
@@ -9818,7 +9818,7 @@
         },
         {
             "DataSetIdentifier": "Intra_Day_User",
-            "Name": "Previous Day New User",
+            "Name": "Previous Day New Users",
             "Expression": "periodOverPeriodLastValue(distinct_count({new_user}), {event_date},DAY, 1)"
         },
         {

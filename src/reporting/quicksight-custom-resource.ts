@@ -423,8 +423,8 @@ function _getDataSetDefs(
         projectedColumns: [
           'event_date',
           'platform',
-          'active_users',
-          'new_users',
+          'active_user',
+          'new_user',
         ],
       },
 
