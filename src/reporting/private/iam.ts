@@ -104,7 +104,7 @@ export function createRoleForQuicksightCustomResourceLambda(
         'quicksight:UpdateRefreshSchedule',
         'quicksight:DeleteRefreshSchedule',
         'quicksight:PutDataSetRefreshProperties',
-        'quicksight:DesribeDataSetRefreshProperties',
+        'quicksight:DescribeDataSetRefreshProperties',
         'quicksight:DeleteDataSetRefreshProperties',
       ],
     }),

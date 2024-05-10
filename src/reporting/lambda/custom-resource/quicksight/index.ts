@@ -69,6 +69,7 @@ import {
   DateTimeParameter,
   existFolder,
   existRefrshSchedule,
+  waitForDataSetRefreshPropertySetCompleted,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -266,6 +267,8 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
         timezoneDict: timezoneDict,
       };
 
+      logger.info('useSpice:', props.useSpice);
+
       const dashboard = await updateQuickSightDashboard(quickSight, commonParams,
         dashboardDefProps, oldDashboardDefProps,
         createdQuickSightResources, props.useSpice);
@@ -282,10 +285,13 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
         schema: schemaName,
         dashboardDefProps: dashboardDefProps,
       });
+
+      logger.info('useSpice:', props.useSpice);
       const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
         schemaName,
         dashboardDefProps,
         timezoneDict,
+        props.useSpice
       );
 
       logger.info('Creating schema', {
@@ -433,11 +439,13 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps,
   timezoneDict: { [key: string]: string },
+  useSpice: string
 )
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
   const dataSets = dashboardDef.dataSets;
+  const dataSetsSpice = dashboardDef.dataSetsSpice;
   const databaseName = dashboardDef.databaseName;
   const commonParams: ResourceCommonParams = {
     awsAccountId: accountId,
@@ -450,7 +458,8 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 
   await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn, sharePrincipalArn);
 
-  for ( const dataSet of dataSets) {
+  const targetDataSet = useSpice === 'yes' ? dataSetsSpice : dataSets;
+  for ( const dataSet of targetDataSet) {
     const createdDataset = await createDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
     logger.info(`data set id: ${createdDataset?.DataSetId}`);
 
@@ -855,6 +864,10 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info('datasetParameters: ', { datasetParameters });
 
     logger.info('start to create dataset');
+    logger.info('useSpice:', {
+      useSpice: props.useSpice,
+      datasetId: datasetId,
+    })
     const datasetParams: CreateDataSetCommandInput = {
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
@@ -942,10 +955,20 @@ const deleteFolder = async (quickSight: QuickSight, awsAccountId: string, databa
 
   //delete folder
   if (needDeleteFolder) {
-    await quickSight.deleteFolder({
-      AwsAccountId: awsAccountId,
-      FolderId: getQuickSightFolderId(databaseName, schema),
-    });
+
+    try{
+      await quickSight.deleteFolder({
+        AwsAccountId: awsAccountId,
+        FolderId: getQuickSightFolderId(databaseName, schema),
+      });
+    } catch (err: any) {
+      if ((err as Error) instanceof ResourceNotFoundException) {
+        logger.info('Folder not exist. skip delete operation.');
+        return;
+      }
+      logger.error(`Delete QuickSight folder failed due to: ${(err as Error).message}`);
+      throw err;
+    }
   }
 };
 
@@ -1032,8 +1055,11 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
   const identifier = buildDataSetId(databaseName, schema, props.tableName);
   const datasetId = identifier.id;
   try {
-    await deleteRefreshSchedule(quickSight, awsAccountId, datasetId);
 
+    if(props.useSpice === 'yes'){
+      await deleteRefreshSchedule(quickSight, awsAccountId, datasetId);
+    }
+    
     result = await quickSight.deleteDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
@@ -1055,14 +1081,18 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
 const insertOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParams: ResourceCommonParams, datasetId: string, lookbackColumn: string | undefined) => {
   const scheduleId = `schedule-${datasetId}`;
   const exist = await existRefrshSchedule(quickSight, commonParams.awsAccountId, datasetId, scheduleId);
-
-
   try{
+    logger.info('Start to delete QuickSight refresh properties', {
+      datasetId,
+    });
     await quickSight.deleteDataSetRefreshProperties({
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
     });
+    logger.info('Delete QuickSight refresh properties finished.');
   } catch (err: any) {
+
+    logger.info(`error message: ${(err as Error).message}`);
     if ((err as Error) instanceof InvalidParameterValueException) {
       logger.info('Refresh properties not exist. skip delete operation.');
     } else {
@@ -1070,6 +1100,11 @@ const insertOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
       throw err;
     }
   }
+
+  logger.info('Start to put QuickSight refresh properties', {
+    datasetId,
+    lookbackColumn,
+  });
 
   await quickSight.putDataSetRefreshProperties({
     AwsAccountId: commonParams.awsAccountId,
@@ -1087,7 +1122,14 @@ const insertOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
     }
   });
 
+  await waitForDataSetRefreshPropertySetCompleted(quickSight, commonParams.awsAccountId, datasetId);
+  logger.info('Put QuickSight refresh properties finished.');
+
   if(exist) {
+    logger.info('Start to update QuickSight refresh schedule', {
+      datasetId,
+      scheduleId,
+    })
     await quickSight.updateRefreshSchedule({
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
@@ -1102,7 +1144,16 @@ const insertOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
         
       },
     });
+    logger.info('end to update QuickSight refresh schedule', {
+      datasetId,
+      scheduleId,
+    })
+
   } else {
+    logger.info('Start to create QuickSight refresh schedule', {
+      datasetId,
+      scheduleId,
+    });
     await quickSight.createRefreshSchedule({
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
@@ -1115,6 +1166,11 @@ const insertOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
         },
         RefreshType: IngestionType.INCREMENTAL_REFRESH,
       },
+    });
+
+    logger.info('end to create QuickSight refresh schedule', {
+      datasetId,
+      scheduleId,
     });
   }
 }
@@ -1242,10 +1298,6 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
 
     await waitForDataSetCreateCompleted(quickSight, commonParams.awsAccountId, datasetId);
 
-    if(props.useSpice === 'yes') {
-      await insertOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
-    }
-
     await quickSight.updateDataSetPermissions({
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
@@ -1253,6 +1305,10 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     });
 
     logger.info(`grant dataset permissions to new principal ${commonParams.ownerPrincipalArn}, ${commonParams.sharePrincipalArn}`);
+
+    if(props.useSpice === 'yes') {
+      await insertOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
+    }
 
     return dataset;
 

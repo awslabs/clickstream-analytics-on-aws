@@ -231,11 +231,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'active users',
+            Name: 'active_users',
             Type: 'STRING',
           },
           {
-            Name: 'new users',
+            Name: 'new_users',
             Type: 'INTEGER',
           },
           {
@@ -246,8 +246,8 @@ function _getDataSetDefs(
         projectedColumns: [
           'event_date',
           'platform',
-          'active users',
-          'new users',
+          'active_users',
+          'new_users',
           'view_count',
         ],
       },
@@ -412,19 +412,19 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'Active User',
+            Name: 'active_user',
             Type: 'STRING',
           },
           {
-            Name: 'New User',
+            Name: 'new_user',
             Type: 'STRING',
           },
         ],
         projectedColumns: [
           'event_date',
           'platform',
-          'Active User',
-          'New User',
+          'active_users',
+          'new_users',
         ],
       },
 
@@ -932,11 +932,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'Active users',
+            Name: 'active_users',
             Type: 'STRING',
           },
           {
-            Name: 'New users',
+            Name: 'new_users',
             Type: 'INTEGER',
           },
           {
@@ -959,8 +959,8 @@ function _getDataSetDefs(
         projectedColumns: [
           'event_date',
           'platform',
-          'Active users',
-          'New users',
+          'active_users',
+          'new_users',
           'view_count',
         ],
       },
@@ -1161,11 +1161,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'Active User',
+            Name: 'active_user',
             Type: 'STRING',
           },
           {
-            Name: 'New User',
+            Name: 'new_user',
             Type: 'STRING',
           },
         ],
@@ -1179,8 +1179,8 @@ function _getDataSetDefs(
         projectedColumns: [
           'event_date',
           'platform',
-          'Active User',
-          'New User',
+          'active_users',
+          'new_users',
         ],
       },
 

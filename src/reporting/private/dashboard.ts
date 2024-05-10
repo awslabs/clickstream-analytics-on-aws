@@ -258,6 +258,29 @@ export async function waitForDataSetDeleteCompleted(quickSight: QuickSight, acco
   }
 };
 
+export async function waitForDataSetRefreshPropertySetCompleted(quickSight: QuickSight, accountId: string, datasetId: string) {
+  for (const _i of Array(60).keys()) {
+    try {
+      const result = await quickSight.describeDataSetRefreshProperties({
+        AwsAccountId: accountId,
+        DataSetId: datasetId,
+      });
+
+      logger.info(`dashboard status: ${result.DataSetRefreshProperties}`);
+
+      if (result.DataSetRefreshProperties !== undefined && result.DataSetRefreshProperties.RefreshConfiguration?.IncrementalRefresh !== undefined) {
+        return;
+      } 
+      logger.info('wait dataset refresh property put complete : sleep 1 second');
+      await sleep(1000);
+
+    } catch (err: any) {
+      logger.error(`Dataset refresh property put failed due to ${err}`);
+      throw err;
+    }
+  }
+};
+
 export async function waitForAnalysisDeleteCompleted(quickSight: QuickSight, accountId: string, analysisId: string) {
   for (const _i of Array(60).keys()) {
     try {
@@ -377,9 +400,11 @@ export const existRefrshSchedule = async (quickSight: QuickSight, accountId: str
       ScheduleId: scheduleId,
 
     });
+    logger.info('found refresh schedule:', scheduleId);
     return true;
   } catch (err: any) {
     if ((err as Error) instanceof ResourceNotFoundException) {
+      logger.info('not found refresh schedule:', scheduleId);
       return false;
     } else {
       throw err;

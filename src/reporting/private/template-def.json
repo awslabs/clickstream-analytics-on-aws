@@ -13,11 +13,11 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "Active users",
+                "Name": "active_users",
                 "DataType": "STRING"
                 },
                 {
-                "Name": "New users",
+                "Name": "new_users",
                 "DataType": "INTEGER"
                 },
                 {
@@ -1086,11 +1086,11 @@
                         "DataType": "STRING"
                     },
                     {
-                        "Name": "Active User",
+                        "Name": "active_user",
                         "DataType": "STRING"
                     },
                     {
-                        "Name": "New User",
+                        "Name": "new_user",
                         "DataType": "STRING"
                     }
                 ]
@@ -1599,7 +1599,7 @@
                                                 "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_View",
-                                                    "ColumnName": "Active users"
+                                                    "ColumnName": "active_users"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
                                             }
@@ -1609,7 +1609,7 @@
                                                 "FieldId": "075548fc-1d4a-4f81-87bd-44ba03e344f4.2.1710423237563",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_View",
-                                                    "ColumnName": "New users"
+                                                    "ColumnName": "new_users"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -1684,7 +1684,7 @@
                                             "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
                                             "Column": {
                                                 "DataSetIdentifier": "Day_User_View",
-                                                "ColumnName": "Active users"
+                                                "ColumnName": "active_users"
                                             }
                                         }
                                     }
@@ -1758,14 +1758,14 @@
                                     {
                                         "Element": {
                                             "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
-                                            "FieldValue": "Active users"
+                                            "FieldValue": "active_users"
                                         },
                                         "Color": "#2A5D78"
                                     },
                                     {
                                         "Element": {
                                             "FieldId": "075548fc-1d4a-4f81-87bd-44ba03e344f4.2.1710423237563",
-                                            "FieldValue": "New users"
+                                            "FieldValue": "new_users"
                                         },
                                         "Color": "#2CAD00"
                                     }
@@ -2076,7 +2076,7 @@
                                                 "FieldId": "LogicalTable1.new_user.2.1713842381120",
                                                 "Column": {
                                                     "DataSetIdentifier": "Intra_Day_User",
-                                                    "ColumnName": "New User"
+                                                    "ColumnName": "new_user"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
                                             }
@@ -2505,7 +2505,7 @@
                                         "DataPathList": [
                                             {
                                                 "FieldId": "b945e825-c64b-4ae2-be3d-5e5646b409bd.7.1712026978749",
-                                                "FieldValue": "Active User"
+                                                "FieldValue": "active_user"
                                             }
                                         ],
                                         "Width": "141px"
@@ -2919,7 +2919,7 @@
                                                 "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_View",
-                                                    "ColumnName": "Active users"
+                                                    "ColumnName": "active_users"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
                                             }
@@ -2929,7 +2929,7 @@
                                                 "FieldId": "075548fc-1d4a-4f81-87bd-44ba03e344f4.2.1710423237563",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_View",
-                                                    "ColumnName": "New users"
+                                                    "ColumnName": "new_users"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -3004,7 +3004,7 @@
                                             "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
                                             "Column": {
                                                 "DataSetIdentifier": "Day_User_View",
-                                                "ColumnName": "Active users"
+                                                "ColumnName": "active_users"
                                             }
                                         }
                                     }
@@ -3078,14 +3078,14 @@
                                     {
                                         "Element": {
                                             "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
-                                            "FieldValue": "Active users"
+                                            "FieldValue": "active_users"
                                         },
                                         "Color": "#2A5D78"
                                     },
                                     {
                                         "Element": {
                                             "FieldId": "075548fc-1d4a-4f81-87bd-44ba03e344f4.2.1710423237563",
-                                            "FieldValue": "New users"
+                                            "FieldValue": "new_users"
                                         },
                                         "Color": "#2CAD00"
                                     }
@@ -3888,7 +3888,7 @@
                                                 "FieldId": "LogicalTable1.active_user.2.1713842347050",
                                                 "Column": {
                                                     "DataSetIdentifier": "Intra_Day_User",
-                                                    "ColumnName": "Active User"
+                                                    "ColumnName": "active_user"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
                                             }
@@ -3988,10 +3988,10 @@
                                 "Values": [
                                     {
                                         "CategoricalMeasureField": {
-                                            "FieldId": "LogicalTable1.Active users.0.1714194122317",
+                                            "FieldId": "LogicalTable1.active_users.0.1714194122317",
                                             "Column": {
                                                 "DataSetIdentifier": "Day_User_View",
-                                                "ColumnName": "Active users"
+                                                "ColumnName": "active_users"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT",
                                             "FormatConfiguration": {
@@ -4059,10 +4059,10 @@
                                 "Values": [
                                     {
                                         "NumericalMeasureField": {
-                                            "FieldId": "LogicalTable1.New users.0.1714194232368",
+                                            "FieldId": "LogicalTable1.new_users.0.1714194232368",
                                             "Column": {
                                                 "DataSetIdentifier": "Day_User_View",
-                                                "ColumnName": "New users"
+                                                "ColumnName": "new_users"
                                             },
                                             "AggregationFunction": {
                                                 "SimpleNumericalAggregation": "SUM"
@@ -9814,12 +9814,12 @@
         {
             "DataSetIdentifier": "Intra_Day_User",
             "Name": "Previous Day Active Users",
-            "Expression": "periodOverPeriodLastValue(distinct_count({Active User}), {event_date},DAY, 1)"
+            "Expression": "periodOverPeriodLastValue(distinct_count({active_user}), {event_date},DAY, 1)"
         },
         {
             "DataSetIdentifier": "Intra_Day_User",
             "Name": "Previous Day New User",
-            "Expression": "periodOverPeriodLastValue(distinct_count({New User}), {event_date},DAY, 1)"
+            "Expression": "periodOverPeriodLastValue(distinct_count({new_user}), {event_date},DAY, 1)"
         },
         {
             "DataSetIdentifier": "Page_Screen_View_Detail",
