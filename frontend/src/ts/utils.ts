@@ -22,6 +22,7 @@ import {
 import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
 import { isEqual } from 'lodash';
 import moment from 'moment';
+import momentTimezone from 'moment-timezone';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import {
   CLICK_STREAM_USER_DATA,
@@ -60,7 +61,9 @@ export const generateStr = (length: number, onlyLowerCase = false) => {
 };
 
 export const getTimezoneOptions = () => {
-  const tzs = moment.tz.names().filter((tz) => !FILTER_TIME_ZONE.includes(tz));
+  const tzs = momentTimezone.tz
+    .names()
+    .filter((tz) => !FILTER_TIME_ZONE.includes(tz));
   const tzOptions = tzs.flatMap((tz) => {
     return {
       label: addTimezoneUtcOffset(tz),
