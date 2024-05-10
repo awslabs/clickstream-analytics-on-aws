@@ -40,6 +40,7 @@ export interface RefreshMaterializedViewsWorkflowProps {
   readonly databaseName: string;
   readonly dataAPIRole: IRole;
   readonly dataFreshnessInHour: number;
+  readonly refreshReportDays: number;
   readonly timezoneWithAppId: string;
 }
 
@@ -84,7 +85,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
 
     const initCheckMVWaitTimeInfo = new Pass(this, 'Init Check MV wait time info', {
       parameters: {
-        waitTime: 10,
+        waitTime: 5,
         loopCount: 0,
       },
       resultPath: '$.waitTimeInfo',
@@ -94,7 +95,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     const refreshBasicViewFnJob = new LambdaInvoke(this, `${this.node.id} - refresh basic view`, {
       lambdaFunction: refreshBasicViewFn,
       payload: TaskInput.fromObject({
-        'detail.$': '$.detail',
+        'view.$': '$.view',
         'timezoneWithAppId.$': '$.timezoneWithAppId',
       }),
       outputPath: '$.Payload',
@@ -107,18 +108,17 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       maxAttempts: 6,
     });
 
-    const checkNextRefreshViewFn = this.checkNextRefreshViewFn(props, lambdaLogGroup);
-    const checkNextRefreshViewJob = new LambdaInvoke(this, `${this.node.id} - Check next view should be refreshed`, {
-      lambdaFunction: checkNextRefreshViewFn,
+    const getRefreshViewListFn = this.getRefreshViewListFn(props, lambdaLogGroup);
+    const getRefreshViewListJob = new LambdaInvoke(this, `${this.node.id} - Get view list which should be refreshed`, {
+      lambdaFunction: getRefreshViewListFn,
       payload: TaskInput.fromObject({
-        'detail.$': '$.detail',
         'timezoneWithAppId.$': '$.timezoneWithAppId',
         'originalInput.$': '$$.Execution.Input',
       }),
       outputPath: '$.Payload',
     });
 
-    checkNextRefreshViewJob.addRetry({
+    getRefreshViewListJob.addRetry({
       errors: ['Lambda.TooManyRequestsException'],
       interval: Duration.seconds(3),
       backoffRate: 2,
@@ -130,28 +130,12 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       error: 'Check next refresh view FAILED',
     });
 
-    const checkStartSpRefreshFn = this.checkStartSpRefreshFn(props, lambdaLogGroup);
-    const checkStartSpRefreshJob = new LambdaInvoke(this, `${this.node.id} - Check whether start SP refresh`, {
-      lambdaFunction: checkStartSpRefreshFn,
-      payload: TaskInput.fromObject({
-        'detail.$': '$.detail',
-        'timezoneWithAppId.$': '$.timezoneWithAppId',
-        'originalInput.$': '$$.Execution.Input',
-      }),
-      outputPath: '$.Payload',
-    });
-
-    checkStartSpRefreshJob.addRetry({
-      errors: ['Lambda.TooManyRequestsException'],
-      interval: Duration.seconds(3),
-      backoffRate: 2,
-      maxAttempts: 6,
-    });
-
     const refreshViewJobFailed = new Fail(this, `${this.node.id} - Refresh view job fails`, {
       cause: 'Refresh View Job Failed',
       error: 'Refresh View Job FAILED',
     });
+
+    const refreshBasicViewComplete = new Pass(this, `${this.node.id} - refresh basic view completes`);
 
     refreshBasicViewFnJob
       .next(initCheckMVWaitTimeInfo)
@@ -161,11 +145,15 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         new Choice(this, `${this.node.id} - Check if refresh view job completes`)
           .when(Condition.stringEquals('$.detail.status', WorkflowStatus.FAILED), refreshViewJobFailed)
           .when(Condition.stringEquals('$.detail.status', WorkflowStatus.ABORTED), refreshViewJobFailed)
-          .when(Condition.stringEquals('$.detail.status', WorkflowStatus.FINISHED), checkNextRefreshViewJob)
+          .when(Condition.stringEquals('$.detail.status', WorkflowStatus.FINISHED), refreshBasicViewComplete)
           .otherwise(waitCheckMVStatus),
       );
 
-    const doRefreshJobSucceed = new Succeed(this, `${this.node.id} - Refresh job succeed`);
+    const refreshJobSucceed = new Succeed(this, `${this.node.id} - Refresh job succeed`);
+
+    const refreshJobSucceedForAnAppId = new Pass(this, `${this.node.id} - Refresh job succeed for an app_id`);
+
+    const doRefreshSpWorkflowSuccess = new Pass(this, `${this.node.id} - Refresh sp workflow succeed`);
 
     const refreshSpSubWorkflow = this.createSubWorkflow(props, lambdaLogGroup, stepFunctionLogGroup);
 
@@ -174,27 +162,36 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       associateWithParent: true,
       integrationPattern: IntegrationPattern.RUN_JOB,
       input: TaskInput.fromObject({
-        'originalInput.$': '$.detail',
-        'detail': {},
+        'timezoneWithAppId.$': '$.timezoneWithAppId',
+        'originalInput.$': '$$.Execution.Input',
       }),
       outputPath: '$.Output',
     });
 
-    const doNothing = new Succeed(this, `${this.node.id} - Do Nothing`);
-    checkStartSpRefreshJob
-      .next(
-        new Choice(this, `${this.node.id} - Choice whether refresh SP should be start or not`)
-          .when(Condition.stringEquals('$.detail.nextStep', 'REFRESH_SP'), subExecution)
-          .otherwise(doNothing),
-      );
+    subExecution.next(doRefreshSpWorkflowSuccess);
 
-    subExecution.next(checkStartSpRefreshJob);
+    const doRefreshBasicViewJob = new Map(
+      this,
+      `${this.node.id} - Do refresh basic view job`,
+      {
+        maxConcurrency: 1,
+        itemsPath: '$.viewList',
+        inputPath: '$',
+        itemSelector: {
+          'view.$': '$$.Map.Item.Value',
+          'timezoneWithAppId.$': '$.timezoneWithAppId',
+        },
+        resultPath: '$.doRefreshBasicViewJobResult',
+      },
+    );
+    doRefreshBasicViewJob.itemProcessor(refreshBasicViewFnJob);
+    doRefreshBasicViewJob.next(subExecution);
 
-    checkNextRefreshViewJob
+    getRefreshViewListJob
       .next(
         new Choice(this, `${this.node.id} - Choice for next view should be refreshed`)
-          .when(Condition.stringEquals('$.detail.nextStep', 'REFRESH_MV'), refreshBasicViewFnJob)
-          .when(Condition.stringEquals('$.detail.nextStep', 'END'), checkStartSpRefreshJob)
+          .when(Condition.stringEquals('$.nextStep', 'REFRESH_MV'), doRefreshBasicViewJob)
+          .when(Condition.stringEquals('$.nextStep', 'END'), refreshJobSucceedForAnAppId)
           .otherwise(checkNextRefreshViewJobFail),
       );
 
@@ -207,18 +204,17 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         inputPath: '$',
         itemSelector: {
           'timezoneWithAppId.$': '$$.Map.Item.Value',
-          'detail.$': '$',
         },
-        resultPath: '$.doRefreshJobResult',
+        resultPath: '$.timezoneWithAppId',
       },
     );
 
-    doRefreshJob.itemProcessor(checkNextRefreshViewJob);
-    doRefreshJob.next(doRefreshJobSucceed);
+    doRefreshJob.itemProcessor(getRefreshViewListJob);
+    doRefreshJob.next(refreshJobSucceed);
 
     const checkJobExist = new Choice(this, `${this.node.id} - Check if job exists`)
       .when(Condition.isPresent('$.timezoneWithAppIdList'), doRefreshJob)
-      .otherwise(doRefreshJobSucceed);
+      .otherwise(refreshJobSucceed);
 
     const parseTimeZoneWithAppIdListFn = this.parseTimeZoneWithAppIdList(props, lambdaLogGroup);
     const parseTimeZoneWithAppIdListJob = new LambdaInvoke(this, `${this.node.id} - Parse timezone with appId list from props`, {
@@ -257,12 +253,12 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
 
     const refreshWorkflowDefinition = checkWorkflowStartJob
       .next(
-        new Choice(this, `${this.node.id} - Check if scan metadata workflow start`)
-          .when(Condition.stringEquals('$.status', WorkflowStatus.SKIP), doRefreshJobSucceed)
+        new Choice(this, `${this.node.id} - Check if refresh workflow start`)
+          .when(Condition.stringEquals('$.status', WorkflowStatus.SKIP), refreshJobSucceed)
           .when(Condition.stringEquals('$.status', WorkflowStatus.CONTINUE), getAppIdList));
 
     // Create state machine
-    const refreshMaterializedViewsMachine = new StateMachine(this, 'RefreshMaterializedViewsMachine', {
+    const refreshMaterializedViewsMachine = new StateMachine(this, 'RefreshMVStateMachine', {
       definitionBody: DefinitionBody.fromChainable(refreshWorkflowDefinition),
       logs: {
         destination: stepFunctionLogGroup,
@@ -337,51 +333,25 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     return fn;
   }
 
-  private checkNextRefreshSpFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
+  private getRefreshViewListFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
     const fnSG = props.securityGroupForLambda;
 
-    const fn = new SolutionNodejsFunction(this, 'CheckNextRefreshSp', {
+    const fn = new SolutionNodejsFunction(this, 'GetRefreshViewList', {
       entry: join(
         this.lambdaRootPath,
-        'check-next-refresh-sp.ts',
+        'get-refresh-viewlist.ts',
       ),
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
       logGroup,
       reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, 'CheckNextRefreshSpRole', true, []),
-      ...props.networkConfig,
-      securityGroups: [fnSG],
-      environment: {
-        ... this.toRedshiftEnvVariables(props),
-        PROJECT_ID: props.projectId,
-        REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-      },
-      applicationLogLevel: 'WARN',
-    });
-    props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
-    return fn;
-  }
-
-  private checkNextRefreshViewFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
-    const fnSG = props.securityGroupForLambda;
-
-    const fn = new SolutionNodejsFunction(this, 'CheckNextRefreshView', {
-      entry: join(
-        this.lambdaRootPath,
-        'check-next-refresh-view.ts',
-      ),
-      handler: 'handler',
-      memorySize: 128,
-      timeout: Duration.minutes(3),
-      logGroup,
-      reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, 'CheckNextRefreshViewRole', true, []),
+      role: createLambdaRole(this, 'GetRefreshViewListRole', true, []),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
         PROJECT_ID: props.projectId,
+        REFRESH_MODE: 'all',
       },
       applicationLogLevel: 'WARN',
     });
@@ -409,6 +379,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         PROJECT_ID: props.projectId,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
+        DATA_REFRESHNESS_IN_HOUR: props.dataFreshnessInHour.toString(),
       },
       applicationLogLevel: 'WARN',
     });
@@ -436,7 +407,8 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         PROJECT_ID: props.projectId,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        DATA_REFRESHNESS_IN_HOUR: props.dataFreshnessInHour.toString(),
+        REFRESH_MODE: 'all',
+        REFRESH_SP_DAYS: props.refreshReportDays.toString(),
       },
       applicationLogLevel: 'WARN',
     });
@@ -537,13 +509,16 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
   }
 
   private createSubWorkflow(props: RefreshMaterializedViewsWorkflowProps, lambdaLogGroup: LogGroup, stepFunctionLogGroup: LogGroup): IStateMachine {
+    const doRefreshSpJobSucceed = new Succeed(this, `${this.node.id} - Refresh sp job succeed`);
 
     const refreshSpFn = this.refreshSpFn(props, lambdaLogGroup);
     const refreshSpFnJob = new LambdaInvoke(this, `${this.node.id} - refresh SP`, {
       lambdaFunction: refreshSpFn,
       payload: TaskInput.fromObject({
-        'detail.$': '$.detail',
-        'originalInput.$': '$$.Execution.Input.originalInput',
+        'sp.$': '$.sp',
+        'timezoneWithAppId.$': '$$.Execution.Input.timezoneWithAppId',
+        'refreshDate.$': '$.refreshDate',
+        'refreshSpDays.$': '$.refreshSpDays',
       }),
       outputPath: '$.Payload',
     });
@@ -560,8 +535,9 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       lambdaFunction: checkRefreshSpStatusFn,
       payload: TaskInput.fromObject({
         'detail.$': '$.detail',
-        'originalInput.$': '$$.Execution.Input.originalInput',
+        'timezoneWithAppId.$': '$$.Execution.Input.timezoneWithAppId',
         'waitTimeInfo.$': '$.waitTimeInfo',
+        'originalInput.$': '$$.Execution.Input.originalInput',
       }),
       outputPath: '$.Payload',
     });
@@ -579,7 +555,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
 
     const initCheckSPWaitTimeInfo = new Pass(this, 'Init Check SP wait time info', {
       parameters: {
-        waitTime: 10,
+        waitTime: 5,
         loopCount: 0,
       },
       resultPath: '$.waitTimeInfo',
@@ -590,22 +566,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       error: 'Refresh SP Job FAILED',
     });
 
-    const checkNextRefreshSpFn = this.checkNextRefreshSpFn(props, lambdaLogGroup);
-    const checkNextRefreshSpJob = new LambdaInvoke(this, `${this.node.id} - Check next sp should be refreshed`, {
-      lambdaFunction: checkNextRefreshSpFn,
-      payload: TaskInput.fromObject({
-        'detail.$': '$.detail',
-        'originalInput.$': '$$.Execution.Input.originalInput',
-      }),
-      outputPath: '$.Payload',
-    });
-
-    checkNextRefreshSpJob.addRetry({
-      errors: ['Lambda.TooManyRequestsException'],
-      interval: Duration.seconds(3),
-      backoffRate: 2,
-      maxAttempts: 6,
-    });
+    const refreshSpComplete = new Pass(this, `${this.node.id} - refresh sp completes`);
 
     refreshSpFnJob
       .next(initCheckSPWaitTimeInfo)
@@ -615,26 +576,54 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         new Choice(this, `${this.node.id} - Check if refresh SP job completes`)
           .when(Condition.stringEquals('$.detail.status', WorkflowStatus.FAILED), refreshSpJobFailed)
           .when(Condition.stringEquals('$.detail.status', WorkflowStatus.ABORTED), refreshSpJobFailed)
-          .when(Condition.stringEquals('$.detail.status', WorkflowStatus.FINISHED), checkNextRefreshSpJob)
+          .when(Condition.stringEquals('$.detail.status', WorkflowStatus.FINISHED), refreshSpComplete)
           .otherwise(waitCheckSPStatus),
       );
 
-    const refreshSpWorkflowEnd = new Pass(this, `${this.node.id} - Refresh SP workflow End`, {
-      parameters: {
-        'detail.$': '$.detail',
-        'timezoneWithAppId.$': '$.timezoneWithAppId',
-      },
+    const checkStartSpRefreshFn = this.checkStartSpRefreshFn(props, lambdaLogGroup);
+    const checkStartSpRefreshJob = new LambdaInvoke(this, `${this.node.id} - Check whether start SP refresh`, {
+      lambdaFunction: checkStartSpRefreshFn,
+      payload: TaskInput.fromObject({
+        'timezoneWithAppId.$': '$$.Execution.Input.timezoneWithAppId',
+        'originalInput.$': '$$.Execution.Input.originalInput',
+      }),
+      outputPath: '$.Payload',
     });
 
-    checkNextRefreshSpJob
+    checkStartSpRefreshJob.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
+    });
+
+    const doRefreshSpJob = new Map(
+      this,
+      `${this.node.id} - Do refresh sp job`,
+      {
+        maxConcurrency: 1,
+        itemsPath: '$.spList',
+        inputPath: '$',
+        itemSelector: {
+          'sp.$': '$$.Map.Item.Value',
+          'refreshDate.$': '$.refreshDate',
+          'refreshSpDays.$': '$.refreshSpDays',
+        },
+        resultPath: '$.doRefreshSpJobResult',
+      },
+    );
+    doRefreshSpJob.itemProcessor(refreshSpFnJob);
+    doRefreshSpJob.next(doRefreshSpJobSucceed);
+
+    checkStartSpRefreshJob
       .next(
-        new Choice(this, `${this.node.id} - Choice for next sp should be refreshed`)
-          .when(Condition.stringEquals('$.detail.nextStep', 'REFRESH_SP'), refreshSpFnJob)
-          .otherwise(refreshSpWorkflowEnd),
+        new Choice(this, `${this.node.id} - Choice refresh SP start`)
+          .when(Condition.stringEquals('$.nextStep', 'REFRESH_SP'), doRefreshSpJob)
+          .otherwise(doRefreshSpJobSucceed),
       );
 
-    const subRefreshSpStateMachine = new StateMachine(this, 'RefreshSpStateMachine', {
-      definitionBody: DefinitionBody.fromChainable(checkNextRefreshSpJob),
+    const subRefreshSpStateMachine = new StateMachine(this, 'RefreshSPStateMachine', {
+      definitionBody: DefinitionBody.fromChainable(checkStartSpRefreshJob),
       logs: {
         destination: stepFunctionLogGroup,
         level: LogLevel.ALL,
