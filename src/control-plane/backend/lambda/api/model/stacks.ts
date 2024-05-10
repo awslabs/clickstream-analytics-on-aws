@@ -1458,7 +1458,7 @@ export class CReportingStack extends JSONObject {
   @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
     QuickSightTimezoneParam?: string;
 
-  @JSONObject.optional('')
+  @JSONObject.optional('dev')
   @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
     return stack._pipeline?.projectId ?? '';
   })
