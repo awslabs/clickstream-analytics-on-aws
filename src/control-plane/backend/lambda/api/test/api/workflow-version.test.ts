@@ -589,6 +589,9 @@ describe('Workflow test with pipeline version', () => {
                         {
                           ParameterKey: 'RedshiftIAMRoleParam.#',
                         },
+                        {
+                          ParameterKey: 'RedshiftDefaultDBParam',
+                        },
                       ],
                       ),
                     },
@@ -683,6 +686,9 @@ describe('Workflow test with pipeline version', () => {
                           {
                             ParameterKey: 'RedshiftIAMRoleParam.#',
                           },
+                          {
+                            ParameterKey: 'RedshiftDefaultDBParam',
+                          },
                         ]),
                     },
                   },
@@ -766,6 +772,9 @@ describe('Workflow test with pipeline version', () => {
                           },
                           {
                             ParameterKey: 'RedshiftIAMRoleParam.#',
+                          },
+                          {
+                            ParameterKey: 'RedshiftDefaultDBParam',
                           },
                         ],
                       ),
@@ -1231,6 +1240,9 @@ describe('Workflow test with pipeline version in China region', () => {
                           },
                           {
                             ParameterKey: 'RedshiftIAMRoleParam.#',
+                          },
+                          {
+                            ParameterKey: 'RedshiftDefaultDBParam',
                           },
                         ],
                       ),
