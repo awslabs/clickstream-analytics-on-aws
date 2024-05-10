@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}}(day date, timezone varchar) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}}(day date, timezone varchar, ndays integer) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
