@@ -42,6 +42,9 @@ import {
   DataSetImportMode,
   IngestionType,
   RefreshInterval,
+  LookbackWindowSizeUnit,
+  CreateDataSetCommandInput,
+  InvalidParameterValueException,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -852,7 +855,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info('datasetParameters: ', { datasetParameters });
 
     logger.info('start to create dataset');
-    const datasetParams = {
+    const datasetParams: CreateDataSetCommandInput = {
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
       Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
@@ -880,12 +883,12 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info('dataset params', { datasetParams });
     const dataset = await quickSight.createDataSet(datasetParams);
 
-    if(props.useSpice === 'yes') {
-      insertOrUpdateRefreshSchedule(quickSight, commonParams, datasetId);
-    }
-
     await waitForDataSetCreateCompleted(quickSight, commonParams.awsAccountId, datasetId);
     logger.info('create dataset finished', { datasetId });
+
+    if(props.useSpice === 'yes') {
+      await insertOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
+    }
 
     return dataset;
 
@@ -1049,9 +1052,40 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
 
 };
 
-const insertOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParams: ResourceCommonParams, datasetId: string) => {
+const insertOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParams: ResourceCommonParams, datasetId: string, lookbackColumn: string | undefined) => {
   const scheduleId = `schedule-${datasetId}`;
   const exist = await existRefrshSchedule(quickSight, commonParams.awsAccountId, datasetId, scheduleId);
+
+
+  try{
+    await quickSight.deleteDataSetRefreshProperties({
+      AwsAccountId: commonParams.awsAccountId,
+      DataSetId: datasetId,
+    });
+  } catch (err: any) {
+    if ((err as Error) instanceof InvalidParameterValueException) {
+      logger.info('Refresh properties not exist. skip delete operation.');
+    } else {
+      logger.error(`Delete QuickSight refresh properties failed due to: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  await quickSight.putDataSetRefreshProperties({
+    AwsAccountId: commonParams.awsAccountId,
+    DataSetId: datasetId,
+    DataSetRefreshProperties: {
+      RefreshConfiguration: {
+        IncrementalRefresh: {
+          LookbackWindow:{
+            ColumnName: lookbackColumn ?? 'event_date',
+            Size: 1,
+            SizeUnit: LookbackWindowSizeUnit.DAY,
+          },
+        }
+      }
+    }
+  });
 
   if(exist) {
     await quickSight.updateRefreshSchedule({
@@ -1065,6 +1099,7 @@ const insertOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
           TimeOfTheDay: '06:00',
         },
         RefreshType: IngestionType.INCREMENTAL_REFRESH,
+        
       },
     });
   } else {
@@ -1205,11 +1240,11 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     });
     logger.info(`update dataset finished. Id: ${dataset?.DataSetId}`);
 
-    if(props.useSpice === 'yes') {
-      insertOrUpdateRefreshSchedule(quickSight, commonParams, datasetId);
-    }
-
     await waitForDataSetCreateCompleted(quickSight, commonParams.awsAccountId, datasetId);
+
+    if(props.useSpice === 'yes') {
+      await insertOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
+    }
 
     await quickSight.updateDataSetPermissions({
       AwsAccountId: commonParams.awsAccountId,

@@ -108,7 +108,6 @@ export function createQuicksightCustomResource(
     dataSetsSpice: _getDataSetDefs('yes', eventViewColumns, eventViewProjectedColumns, tenYearsAgo, futureDate),
   };
 
-  console.log('props.useSpice:', props.useSpice);
   const cr = new CustomResource(scope, 'QuicksightCustomResource', {
     serviceToken: provider.serviceToken,
     properties: {
@@ -232,11 +231,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'Active users',
+            Name: 'active users',
             Type: 'STRING',
           },
           {
-            Name: 'New users',
+            Name: 'new users',
             Type: 'INTEGER',
           },
           {
@@ -247,8 +246,8 @@ function _getDataSetDefs(
         projectedColumns: [
           'event_date',
           'platform',
-          'Active users',
-          'New users',
+          'active users',
+          'new users',
           'view_count',
         ],
       },
@@ -760,6 +759,7 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER,
         useSpice: 'yes',
+        lookbackColumn: 'first_date',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} `,
         columns: [
           {
@@ -794,6 +794,7 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
         useSpice: 'yes',
+        lookbackColumn: 'time_period',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} `,
         columns: [
           {

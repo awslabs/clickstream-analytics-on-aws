@@ -96,6 +96,22 @@ export function createRoleForQuicksightCustomResourceLambda(
     new PolicyStatement({
       effect: Effect.ALLOW,
       resources: [
+        `${arnPrefix}:dataset/clickstream_dataset_*`,
+      ],
+      actions: [
+        'quicksight:DescribeRefreshSchedule',
+        'quicksight:CreateRefreshSchedule',
+        'quicksight:UpdateRefreshSchedule',
+        'quicksight:DeleteRefreshSchedule',
+        'quicksight:PutDataSetRefreshProperties',
+        'quicksight:DesribeDataSetRefreshProperties',
+        'quicksight:DeleteDataSetRefreshProperties',
+      ],
+    }),
+
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      resources: [
         `${arnPrefix}:folder/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
       ],
       actions: [

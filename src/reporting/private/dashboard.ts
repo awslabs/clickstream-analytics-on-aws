@@ -82,6 +82,7 @@ export interface DataSetProps {
   tableName: string;
   columns: InputColumn[];
   useSpice: string;
+  lookbackColumn?: string;
   columnGroups?: ColumnGroupsProps[];
   projectedColumns?: string[];
   tagColumnOperations?: TagColumnOperationProps[];
