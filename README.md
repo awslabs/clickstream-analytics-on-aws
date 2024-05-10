@@ -105,6 +105,32 @@ bash start.sh -s backend
 bash start.sh -s frontend
 ```
 
+## Local build spark ETL jar
+
+- Step1: Build ETL common
+
+```shell
+cd src/data-pipeline/etl-common 
+./gradlew clean build install
+
+```
+
+- Step2: Build spark ETL jar
+
+```shell
+cd src/data-pipeline/spark-etl
+
+# build with unit tests
+./gradlew clean build 
+
+# or only build jar and skip all unit tests 
+./gradlew clean build -x test -x :coverageCheck
+
+# check the jar file
+ls -l ./build/libs/spark-etl-*.jar
+
+```
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
