@@ -393,7 +393,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     }
 
     private String getMediumBySource(final String source) {
-        Pattern pattern = Pattern.compile(".*(google|bing|yahoo|duckduckgo|baidu|yandex).*", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(".*(google|bing|yahoo|duckduckgo|baidu|yandex).*", Pattern.CASE_INSENSITIVE); // NOSONAR
         if (pattern.matcher(source).matches()) {
             return ORGANIC;
         }
