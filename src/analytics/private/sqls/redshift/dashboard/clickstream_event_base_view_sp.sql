@@ -40,7 +40,7 @@ BEGIN
     event_value_currency,
     event_bundle_sequence_id,
     ingest_time_msec,
-    created_time,
+    e.created_time,
     device_mobile_brand_name,
     device_mobile_model_name,
     device_manufacturer,

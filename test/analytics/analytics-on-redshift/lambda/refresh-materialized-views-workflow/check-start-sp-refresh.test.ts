@@ -11,8 +11,13 @@
  *  and limitations under the License.
  */
 
-import { CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP, CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP } from '@aws/clickstream-base-lib';
-import { DescribeStatementCommand, ExecuteStatementCommand, GetStatementResultCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
+import {
+  CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
+  CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP,
+  CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
+  CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
+} from '@aws/clickstream-base-lib';
+import { GetStatementResultCommand, ExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckStartRefreshSpEvent } from '../../../../../src/analytics/lambdas/refresh-materialized-views-workflow/check-start-sp-refresh';
 import { RefreshWorkflowSteps } from '../../../../../src/analytics/private/constant';
@@ -23,13 +28,11 @@ describe('Lambda - check next refresh task', () => {
   const redshiftDataMock = mockClient(RedshiftDataClient);
 
   let checkNextRefreshViewEvent: CheckStartRefreshSpEvent = {
-    detail: {
-      completeRefreshDate: '',
-    },
     originalInput: {
-      startRefreshViewNameOrSPName: '',
-      latestJobTimestamp: '1710026295000',
-      forceRefresh: '',
+      refreshEndTime: '1715123933000',
+      refreshStartTime: '1714519133000',
+      forceRefresh: 'false',
+      refreshMode: 'all',
     },
     timezoneWithAppId: {
       appId: 'app1',
@@ -39,13 +42,11 @@ describe('Lambda - check next refresh task', () => {
 
   beforeEach(() => {
     checkNextRefreshViewEvent = {
-      detail: {
-        completeRefreshDate: '',
-      },
       originalInput: {
-        startRefreshViewNameOrSPName: '',
-        latestJobTimestamp: '1710026295000',
-        forceRefresh: '',
+        refreshEndTime: '1715123933000',
+        refreshStartTime: '1714519133000',
+        forceRefresh: 'false',
+        refreshMode: 'all',
       },
       timezoneWithAppId: {
         appId: 'app1',
@@ -55,51 +56,44 @@ describe('Lambda - check next refresh task', () => {
     redshiftDataMock.reset();
   });
 
-  test('forceRefresh is true and it is first time', async () => {
-    checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
-    checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName = CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP;
+  test('this refresh mode is no_report', async () => {
+    checkNextRefreshViewEvent.originalInput.refreshMode = 'no_report';
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
-      detail: {
-        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
-        startRefreshViewNameOrSPName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
-        refreshDate: '2024-03-10',
-        appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
-        timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
-        forceRefresh: checkNextRefreshViewEvent.originalInput.forceRefresh,
-      },
+      nextStep: RefreshWorkflowSteps.END_STEP,
     });
   });
 
-  test('forceRefresh is true but there is no startRefreshViewNameOrSPName', async () => {
+  test('the end refresh time is not more than latest refresh time, but forceRefresh is true', async () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
-    await expect(handler(checkNextRefreshViewEvent)).rejects.toThrow('forceRefresh is true, but no completeRefreshView or startRefreshView found');
-  });
-
-  test('forceRefresh is true and it is the END', async () => {
-    checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
-    checkNextRefreshViewEvent.detail.completeRefreshDate = '2024-03-10';
+    redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({
+      Records: [
+        [{ stringValue: '2024-05-08' }],
+      ],
+    });
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
-      detail: {
-        nextStep: RefreshWorkflowSteps.END_STEP,
-      },
+      nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
+      refreshDate: '2024-05-08',
+      refreshSpDays: 8,
+      spList: expect.arrayContaining([
+        {
+          name: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
+          type: 'sp',
+          timezoneSensitive: 'true',
+          viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
+        },
+        {
+          name: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP,
+          type: 'sp',
+          timezoneSensitive: 'true',
+          viewName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
+        },
+      ]),
     });
   });
 
-  test('forceRefresh is true but startRefreshViewNameOrSPName is not the sp', async () => {
-    checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
-    checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName = 'no_exist_mv';
-    const resp = await handler(checkNextRefreshViewEvent);
-    expect(resp).toEqual({
-      detail: {
-        nextStep: RefreshWorkflowSteps.END_STEP,
-      },
-    });
-  });
-
-  test('forceRefresh is false and this is the first time to refresh sp', async () => {
-    checkNextRefreshViewEvent.originalInput.forceRefresh = 'false';
+  test('the end refresh time is not more than latest refresh time', async () => {
     redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
       Status: StatusString.FINISHED,
     });
@@ -108,96 +102,47 @@ describe('Lambda - check next refresh task', () => {
 
     redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({
       Records: [
-        [{ stringValue: '2023-10-25' }],
+        [{ stringValue: '2024-05-08' }],
       ],
     });
-
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
-      detail: {
-        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
-        refreshDate: '2024-03-10',
-        startRefreshViewNameOrSPName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
-        appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
-        timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
-      },
+      nextStep: RefreshWorkflowSteps.END_STEP,
     });
   });
 
-  test('forceRefresh is false and this is first time, but this date has been refreshed', async () => {
-    checkNextRefreshViewEvent.originalInput.forceRefresh = 'false';
-    redshiftDataMock.on(DescribeStatementCommand).resolves({
+  test('the end refresh time is more than latest refresh time', async () => {
+    redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
       Status: StatusString.FINISHED,
     });
     const exeuteId = 'Id-1';
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
-
-    redshiftDataMock.on(GetStatementResultCommand).resolves({
-      Records: [
-        [{ stringValue: '2024-03-10' }],
-      ],
-    });
-
-    const resp = await handler(checkNextRefreshViewEvent);
-    expect(resp).toEqual({
-      detail: {
-        nextStep: RefreshWorkflowSteps.END_STEP,
-      },
-    });
-  });
-
-  test('forceRefresh is false and this is first time, but the first sp has been refreshed', async () => {
-    checkNextRefreshViewEvent.originalInput.forceRefresh = 'false';
-    redshiftDataMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-    const exeuteId = 'Id-1';
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
 
     redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({
       Records: [
-        [{ stringValue: '2024-03-10' }],
-      ],
-    }).resolves({
-      Records: [
-        [{ stringValue: '2024-03-08' }],
+        [{ stringValue: '2024-05-07' }],
       ],
     });
 
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
-      detail: {
-        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
-        refreshDate: '2024-03-10',
-        startRefreshViewNameOrSPName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP,
-        appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
-        timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
-      },
-    });
-  });
-
-  test('forceRefresh is false and there is no next sp for the date, but there is earlier date need to be refreshed', async () => {
-    checkNextRefreshViewEvent.originalInput.forceRefresh = 'false';
-    checkNextRefreshViewEvent.detail.completeRefreshDate = '2024-03-10';
-    const resp = await handler(checkNextRefreshViewEvent);
-    expect(resp).toEqual({
-      detail: {
-        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
-        refreshDate: '2024-03-09',
-        appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
-        timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
-      },
-    });
-  });
-
-  test('forceRefresh is false and there is no next sp for the date, and there is no earlier date need to be refreshed', async () => {
-    checkNextRefreshViewEvent.originalInput.forceRefresh = 'false';
-    checkNextRefreshViewEvent.detail.completeRefreshDate = '2024-03-08';
-    const resp = await handler(checkNextRefreshViewEvent);
-    expect(resp).toEqual({
-      detail: {
-        nextStep: RefreshWorkflowSteps.END_STEP,
-      },
+      nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
+      refreshDate: '2024-05-08',
+      refreshSpDays: 8,
+      spList: expect.arrayContaining([
+        {
+          name: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
+          type: 'sp',
+          timezoneSensitive: 'true',
+          viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
+        },
+        {
+          name: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP,
+          type: 'sp',
+          timezoneSensitive: 'true',
+          viewName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
+        },
+      ]),
     });
   });
 });

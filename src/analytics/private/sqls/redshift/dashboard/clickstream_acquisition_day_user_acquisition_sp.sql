@@ -517,7 +517,7 @@ BEGIN
 
     DROP TABLE IF EXISTS event_traffic_tmp_tb;
 
-    DROP TABLE IF EXISTS event_traffic_tmp_tb_2
+    DROP TABLE IF EXISTS event_traffic_tmp_tb_2;
 
     current_date := current_date - 1;
     i := i + 1;

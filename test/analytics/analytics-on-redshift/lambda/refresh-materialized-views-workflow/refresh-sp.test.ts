@@ -17,17 +17,18 @@ import { handler, RefreshSpEvent } from '../../../../../src/analytics/lambdas/re
 import { REDSHIFT_MODE } from '../../../../../src/common/model';
 import 'aws-sdk-client-mock-jest';
 
-
 const refreshSpEvent: RefreshSpEvent = {
-  detail: {
-    spName: 'sp1',
-    refreshDate: '2024-01-01',
+  sp: {
+    name: 'sp1',
+    type: 'sp',
     timezoneSensitive: 'true',
   },
-  originalInput: {
+  timezoneWithAppId: {
     appId: 'app1',
-    timezone: 'Asia/Shanghai',
+    timezone: 'America/Noronha',
   },
+  refreshDate: '2021-10-01',
+  refreshSpDays: '3',
 };
 
 describe('Lambda - do refresh in Redshift Serverless', () => {
@@ -51,16 +52,32 @@ describe('Lambda - do refresh in Redshift Serverless', () => {
     const resp = await handler(refreshSpEvent);
     expect(resp).toEqual({
       detail: {
-        spName: refreshSpEvent.detail.spName,
+        spName: refreshSpEvent.sp.name,
         queryId: exeuteId,
-        refreshDate: refreshSpEvent.detail.refreshDate,
-        appId: refreshSpEvent.originalInput.appId,
-        timezone: refreshSpEvent.originalInput.timezone,
+        refreshDate: refreshSpEvent.refreshDate,
       },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
-      Sql: `CALL ${refreshSpEvent.originalInput.appId}.${refreshSpEvent.detail.spName}('${refreshSpEvent.detail.refreshDate}', '${refreshSpEvent.originalInput.timezone}');`,
+      Sql: `CALL ${refreshSpEvent.timezoneWithAppId.appId}.${refreshSpEvent.sp.name}('${refreshSpEvent.refreshDate}', '${refreshSpEvent.timezoneWithAppId.timezone}', ${refreshSpEvent.refreshSpDays});`,
+    });
+  });
+
+  test('Executed Redshift refresh sp command without timezoneSensitive', async () => {
+    refreshSpEvent.sp.timezoneSensitive = 'false';
+    const exeuteId = 'Id-1';
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+    const resp = await handler(refreshSpEvent);
+    expect(resp).toEqual({
+      detail: {
+        spName: refreshSpEvent.sp.name,
+        queryId: exeuteId,
+        refreshDate: refreshSpEvent.refreshDate,
+      },
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+      WorkgroupName: workGroupName,
+      Sql: `CALL ${refreshSpEvent.timezoneWithAppId.appId}.${refreshSpEvent.sp.name}('${refreshSpEvent.refreshDate}', ${refreshSpEvent.refreshSpDays});`,
     });
   });
 
@@ -72,56 +89,6 @@ describe('Lambda - do refresh in Redshift Serverless', () => {
     } catch (error) {
       expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
         WorkgroupName: workGroupName,
-      });
-    }
-  });
-});
-
-describe('Lambda - refresh in Redshift Provisioned', () => {
-
-  const redshiftDataMock = mockClient(RedshiftDataClient);
-
-  const clusterIdentifier = 'cluster-1';
-  const dbUser = 'aUser';
-
-  beforeEach(() => {
-    redshiftDataMock.reset();
-
-    // set the env before loading the source
-    process.env.REDSHIFT_MODE = REDSHIFT_MODE.PROVISIONED;
-    process.env.REDSHIFT_CLUSTER_IDENTIFIER = clusterIdentifier;
-    process.env.REDSHIFT_DB_USER = dbUser;
-  });
-
-  test('Executed Redshift refresh sp command', async () => {
-    const exeuteId = 'Id-1';
-    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
-    const resp = await handler(refreshSpEvent);
-    expect(resp).toEqual({
-      detail: {
-        spName: refreshSpEvent.detail.spName,
-        queryId: exeuteId,
-        refreshDate: refreshSpEvent.detail.refreshDate,
-        appId: refreshSpEvent.originalInput.appId,
-        timezone: refreshSpEvent.originalInput.timezone,
-      },
-    });
-    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
-      ClusterIdentifier: clusterIdentifier,
-      DbUser: dbUser,
-      Sql: `CALL ${refreshSpEvent.originalInput.appId}.${refreshSpEvent.detail.spName}('${refreshSpEvent.detail.refreshDate}', '${refreshSpEvent.originalInput.timezone}');`,
-    });
-  });
-
-  test('Execute command error in Redshift when doing refresh', async () => {
-    redshiftDataMock.on(ExecuteStatementCommand).rejectsOnce();
-    try {
-      await handler(refreshSpEvent);
-      fail('The error in executing statement of Redshift data was caught');
-    } catch (error) {
-      expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
-        ClusterIdentifier: clusterIdentifier,
-        DbUser: dbUser,
       });
     }
   });

@@ -63,6 +63,8 @@ process.env.REFRESH_STATE_MACHINE_ARN = 'arn:aws:states:us-east-1:111122223333:w
 
 process.env.TIMEZONE_WITH_APPID_LIST = '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]'
 
+process.env.REFRESH_MODE = 'all'
+
 // streaming ingestion
 process.env.STATE_MACHINE_ARN= 'arn:aws:states:us-east-1:111122223333:workflow/abc'
 process.env.S3_BUCKET = 'test-pipe-line-bucket';

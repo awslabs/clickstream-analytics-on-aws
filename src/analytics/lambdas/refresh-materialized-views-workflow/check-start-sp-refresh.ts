@@ -12,7 +12,7 @@
  */
 
 import { utc } from 'moment-timezone';
-import { getRefreshList, RefreshViewOrSp } from './check-next-refresh-view';
+import { getRefreshList } from './get-refresh-viewlist';
 import { RefreshWorkflowSteps } from '../../private/constant';
 import { getRedshiftClient, executeStatementsWithWait, getRedshiftProps, getStatementResult } from '../redshift-data';
 
@@ -23,13 +23,11 @@ const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
 
 export interface CheckStartRefreshSpEvent {
-  detail: {
-    completeRefreshDate: string;
-  };
   originalInput: {
-    startRefreshViewNameOrSPName: string;
-    latestJobTimestamp: string;
+    refreshEndTime: string;
+    refreshStartTime: string;
     forceRefresh: string;
+    refreshMode: string;
   };
   timezoneWithAppId: {
     appId: string;
@@ -39,85 +37,75 @@ export interface CheckStartRefreshSpEvent {
 
 /**
  * The lambda function to check reresh sp start or not.
- * @param event CheckRefreshSpStatusEvent.
+ * @param event CheckStartRefreshSpEvent.
  * @returns {
-* detail: {
-*  startRefreshViewNameOrSPName: string,
-*  refreshDate: string,
-*  appId: string,
-*  timezone: string,
-*  forceRefresh: string,
-*  nextStep: 'REFRESH_SP' | 'END',
-* }
+  * detail: {
+  *  startRefreshViewNameOrSPName: string,
+  *  refreshDate: string,
+  *  appId: string,
+  *  timezone: string,
+  *  forceRefresh: string,
+  *  nextStep: 'REFRESH_SP' | 'END',
+  * }
 * }
 */
 export const handler = async (event: CheckStartRefreshSpEvent) => {
-  const spList = getRefreshList().spViews;
+  let refreshMode = event.originalInput.refreshMode;
+  if (!refreshMode) {
+    refreshMode = process.env.REFRESH_MODE!;
+  }
+  if (refreshMode === 'no_report') {
+    return {
+      nextStep: RefreshWorkflowSteps.END_STEP,
+    };
+  }
 
   const timezoneWithAppId = event.timezoneWithAppId;
+  const forceRefresh = event.originalInput.forceRefresh;
+  const refreshDateString = getDateStringFromEndTimeAndTimezone(event.originalInput.refreshEndTime, timezoneWithAppId.timezone);
 
-  const dataFreshnessInHour = process.env.DATA_REFRESHNESS_IN_HOUR!;
-
-  const refreshDateString = getDateStringFromTimestampAndTimezone(event.originalInput.latestJobTimestamp, timezoneWithAppId.timezone);
-
-  const refreshEarliestDate = getRefreshEarliestDate(dataFreshnessInHour, refreshDateString);
-  let response = {};
-
-  // force is true, just refresh the date indicated
-  if (event.originalInput.forceRefresh === 'true') {
-    response = await handleForceRefresh(event, spList, refreshDateString, timezoneWithAppId);
-  } else {
-    response = await handleAutoRefresh(event, spList, refreshDateString, timezoneWithAppId, refreshEarliestDate);
+  let skipSpRefresh = false;
+  if (forceRefresh !== 'true') {
+    skipSpRefresh = await isSkipSpRefresh(timezoneWithAppId.appId, refreshDateString);
   }
-  return response;
+  if (skipSpRefresh) {
+    return {
+      nextStep: RefreshWorkflowSteps.END_STEP,
+    };
+  }
+
+  const refreshSpDays = getRrefreshSpDays(event.originalInput.refreshEndTime, event.originalInput.refreshStartTime, timezoneWithAppId.timezone);
+  const spList = getRefreshList().spList;
+  return {
+    refreshDate: refreshDateString,
+    refreshSpDays,
+    nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
+    spList,
+  };
 };
 
-async function handleForceRefresh(
-  event: CheckStartRefreshSpEvent,
-  spList: RefreshViewOrSp[],
-  refreshDateString: string,
-  timezoneWithAppId: { appId: string; timezone: string },
-) {
-  if (event.detail.completeRefreshDate) {
-    // force refresh has been ended
-    return {
-      detail: {
-        nextStep: RefreshWorkflowSteps.END_STEP,
-      },
-    };
-  } else if (event.originalInput.startRefreshViewNameOrSPName) {
-    const index = spList.findIndex((spInfo) => spInfo.name === event.originalInput.startRefreshViewNameOrSPName);
-    if (index !== -1) {
-      return {
-        detail: {
-          startRefreshViewNameOrSPName: event.originalInput.startRefreshViewNameOrSPName,
-          refreshDate: refreshDateString,
-          appId: timezoneWithAppId.appId,
-          timezone: timezoneWithAppId.timezone,
-          forceRefresh: event.originalInput.forceRefresh,
-          nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
-        },
-      };
-    } else {
-      // no sp need to be force refreshed
-      return {
-        detail: {
-          nextStep: RefreshWorkflowSteps.END_STEP,
-        },
-      };
-    }
-  } else {
-    throw new Error('forceRefresh is true, but no completeRefreshView or startRefreshView found');
-  }
+function getDateStringFromEndTimeAndTimezone(timestamp: string, timezone: string): string {
+  const utcMoment = utc(parseInt(timestamp));
+  const dateTimezone = utcMoment.tz(timezone);
+
+  return dateTimezone.format('YYYY-MM-DD');
 }
 
-async function handleAutoRefresh(
-  event: CheckStartRefreshSpEvent,
-  spList: RefreshViewOrSp[],
-  refreshDateString: string,
-  timezoneWithAppId: { appId: string; timezone: string },
-  refreshEarliestDate: Date,
-) {
+function getRrefreshSpDays(endTime: string, startTime: string, timezone: string): number {
+  let refreshSpDays: number = parseInt(process.env.REFRESH_SP_DAYS!);
+  if (startTime) {
+    const endMoment = utc(parseInt(endTime));
+    const startMoment = utc(parseInt(startTime));
+    const endDateTimezone = endMoment.tz(timezone);
+    const startDateTimezone = startMoment.tz(timezone);
+
+    refreshSpDays = endDateTimezone.diff(startDateTimezone, 'days') + 1;
+  }
+  return refreshSpDays;
+}
+
+async function isSkipSpRefresh(appId: string, refreshDateString: string) {
+
   const redshiftProps = getRedshiftProps(
     process.env.REDSHIFT_MODE!,
     REDSHIFT_DATABASE,
@@ -126,68 +114,18 @@ async function handleAutoRefresh(
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
     process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
   );
-  if (event.detail.completeRefreshDate) {
-    // check whether there need to refresh earlier date
-    const date = new Date(event.detail.completeRefreshDate);
-    if (date > refreshEarliestDate) {
-      date.setDate(date.getDate() - 1);
-      return {
-        detail: {
-          refreshDate: date.toISOString().split('T')[0],
-          appId: timezoneWithAppId.appId,
-          timezone: timezoneWithAppId.timezone,
-          nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
-        },
-      };
-    } else {
-      return {
-        detail: {
-          nextStep: RefreshWorkflowSteps.END_STEP,
-        },
-      };
-    }
-  } else {
-    // first time to refresh sp
-    // check max refresh date
-    for (const sp of spList) {
-      const propertyListSqlStatements: string[] = [];
-      propertyListSqlStatements.push(`SELECT MAX(refresh_date) FROM ${timezoneWithAppId.appId}.refresh_mv_sp_status where refresh_name = '${sp.name}' and triggerred_by = 'WORK_FLOW';`);
-      const propertyListQueryId = await executeStatementsWithWait(
-        redshiftDataApiClient, propertyListSqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-      const response = await getStatementResult(redshiftDataApiClient, propertyListQueryId!);
-      let lastRefreshDateStr;
-      if (response.Records) {
-        lastRefreshDateStr = response.Records[0][0]?.stringValue;
-      }
-      if (!lastRefreshDateStr || new Date(lastRefreshDateStr) < new Date(refreshDateString)) {
-        return {
-          detail: {
-            startRefreshViewNameOrSPName: sp.name,
-            refreshDate: refreshDateString,
-            appId: timezoneWithAppId.appId,
-            timezone: timezoneWithAppId.timezone,
-            nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
-          },
-        };
-      }
-    }
-    return {
-      detail: {
-        nextStep: RefreshWorkflowSteps.END_STEP,
-      },
-    };
+
+  const propertyListSqlStatements: string[] = [];
+  propertyListSqlStatements.push(`SELECT MAX(refresh_date) FROM ${appId}.refresh_mv_sp_status where triggerred_by = 'WORK_FLOW';`);
+  const propertyListQueryId = await executeStatementsWithWait(
+    redshiftDataApiClient, propertyListSqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
+  const response = await getStatementResult(redshiftDataApiClient, propertyListQueryId!);
+  let lastRefreshDateStr;
+  if (response.Records) {
+    lastRefreshDateStr = response.Records[0][0]?.stringValue;
   }
-}
-
-function getRefreshEarliestDate(dataFreshnessInHour: string, refreshDate: string): Date {
-  const date = new Date(refreshDate);
-  date.setHours(date.getHours() - parseInt(dataFreshnessInHour) + 24);
-  return date;
-}
-
-function getDateStringFromTimestampAndTimezone(timestamp: string, timezone: string): string {
-  const utcMoment = utc(parseInt(timestamp));
-  const dateTimezone = utcMoment.tz(timezone);
-
-  return dateTimezone.format('YYYY-MM-DD');
+  if (!lastRefreshDateStr || new Date(lastRefreshDateStr) < new Date(refreshDateString)) {
+    return false;
+  }
+  return true;
 }
