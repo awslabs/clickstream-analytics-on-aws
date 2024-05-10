@@ -12,23 +12,19 @@
  */
 
 package software.aws.solution.clickstream.common;
+import java.util.HashMap;
 import java.util.Map;
-
-import java.util.LinkedHashMap;
 
 public class Cache<T> {
     private final Map<String, T> dataCached;
+    private final int size;
 
     public Cache() {
-        this(Integer.MAX_VALUE);
+        this(Integer.MAX_VALUE/2);
     }
     public Cache(final int size) {
-        this.dataCached = new LinkedHashMap<>(10_000, 0.75f, true) {
-            @Override
-            protected boolean removeEldestEntry(final Map.Entry<String, T> eldest) {
-                return size() >  size;
-            }
-        };
+        this.dataCached = new HashMap<>(1024 * 1024);
+        this.size = size;
     }
     public boolean containsKey(final String key) {
         return dataCached.containsKey(key);
@@ -38,6 +34,9 @@ public class Cache<T> {
     }
 
     public void put(final String key, final T data) {
+        if (dataCached.size() >= size) {
+            dataCached.remove(dataCached.keySet().iterator().next());
+        }
         dataCached.put(key, data);
     }
 }
