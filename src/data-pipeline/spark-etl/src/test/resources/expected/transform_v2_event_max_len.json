@@ -27,7 +27,7 @@
     "time_zone_offset_seconds" : 28800,
     "vendor_id" : "deviceid-1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id",
     "advertising_id" : "device_unique_iddevice_unique_iddevice_unique_iduf24bec657ea8eff7-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe45780771519883e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198",
-    "host_name" : "https://host-name-001.com",
+    "host_name" : "host-name-001.com",
     "viewport_width" : null,
     "viewport_height" : null
   },

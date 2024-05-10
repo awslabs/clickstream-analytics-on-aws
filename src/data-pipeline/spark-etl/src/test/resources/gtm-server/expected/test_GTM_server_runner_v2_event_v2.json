@@ -168,7 +168,7 @@
   "traffic_source_campaign" : "Direct",
   "traffic_source_category" : "Direct",
   "traffic_source_channel_group" : "Direct",
-  "traffic_source_medium" : "Direct",
+  "traffic_source_medium" : "None",
   "traffic_source_source" : "Direct",
   "user_engagement_time_msec" : 8129,
   "user_id" : "0eb41e46-2373-4883-8daf-e1975ccb3821",

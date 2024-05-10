@@ -36,7 +36,7 @@ public class ETLRunnerForGtmV2Test extends ETLRunnerBaseTest {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty("force.merge", "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/etl_runner/test_GTM_server_runner_v2");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/etl_runner/test_GTM_server_runner_v2_" + System.currentTimeMillis());
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
 
         List<String> transformers = Lists.newArrayList();

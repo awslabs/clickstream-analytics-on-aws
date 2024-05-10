@@ -49,7 +49,7 @@
   "first_visit_date" : "2023-08-29",
   "first_referrer" : null,
   "first_traffic_source" : "Direct",
-  "first_traffic_medium" : "Direct",
+  "first_traffic_medium" : "None",
   "first_traffic_campaign" : "Direct",
   "first_traffic_content" : null,
   "first_traffic_term" : null,
