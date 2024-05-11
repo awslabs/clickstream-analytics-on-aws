@@ -22,11 +22,13 @@ import {
 import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
 import { isEqual } from 'lodash';
 import moment from 'moment';
+import momentTimezone from 'moment-timezone';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import {
   CLICK_STREAM_USER_DATA,
   EPipelineStatus,
   ExecutionType,
+  FILTER_TIME_ZONE,
   IUserRole,
 } from './const';
 
@@ -56,6 +58,27 @@ export const generateStr = (length: number, onlyLowerCase = false) => {
     randomString += validCharacters.charAt(value % validCharacters.length);
   });
   return randomString;
+};
+
+export const getTimezoneOptions = () => {
+  const tzs = momentTimezone.tz
+    .names()
+    .filter((tz) => !FILTER_TIME_ZONE.includes(tz));
+  const tzOptions = tzs.flatMap((tz) => {
+    return {
+      label: addTimezoneUtcOffset(tz),
+      value: addTimezoneUtcOffset(tz),
+    };
+  });
+  return tzOptions;
+};
+
+export const addTimezoneUtcOffset = (tz: string) => {
+  if (tz.includes(' (UTC ')) {
+    return tz;
+  }
+  const utcOffset = moment(new Date()).tz(tz).format('Z');
+  return `${tz} (UTC ${utcOffset})`;
 };
 
 export const generateRedshiftRPUOptionListByRegion = (region: string) => {

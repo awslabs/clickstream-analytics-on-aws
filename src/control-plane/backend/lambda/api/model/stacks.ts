@@ -1264,6 +1264,14 @@ export class CDataModelingStack extends JSONObject {
   @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
     TimeZoneWithAppId?: string;
 
+  @JSONObject.optional(24)
+  @JSONObject.gt(0)
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataProcessing?.dataFreshnessInHour ?? 24;
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+    DataFreshnessInHour?: number;
+
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
@@ -1454,6 +1462,13 @@ export class CReportingStack extends JSONObject {
   })
   @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
     QuickSightTimezoneParam?: string;
+
+  @JSONObject.optional('dev')
+  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
+    return stack._pipeline?.projectId ?? 'dev';
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+    RedshiftDefaultDBParam?: string;
 
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CReportingStack, _key:string, _value:string) => {

@@ -839,6 +839,10 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterKey: 'TimeZoneWithAppId',
     ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
   },
+  {
+    ParameterKey: 'DataFreshnessInHour',
+    ParameterValue: '7',
+  },
 ];
 
 export const DATA_PROCESSING_NEW_SERVERLESS_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(
@@ -1005,6 +1009,10 @@ const BASE_REPORTING_PARAMETERS = [
     ParameterKey: 'QuickSightTimezoneParam',
     ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
   },
+  {
+    ParameterKey: 'RedshiftDefaultDBParam',
+    ParameterValue: 'project_8888_8888',
+  },
 ];
 
 export const REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS = [
@@ -1076,6 +1084,10 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   {
     ParameterKey: 'QuickSightTimezoneParam',
     ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
+  },
+  {
+    ParameterKey: 'RedshiftDefaultDBParam',
+    ParameterValue: 'project_8888_8888',
   },
 ];
 

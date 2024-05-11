@@ -137,6 +137,7 @@ jobs:
           ../viperlight/bin/viperlight pubcheck -m notice-js
   sonarqube:
     name: sonarqube scan
+    if: ${{ github.event.pull_request.number }}
     runs-on: ${{ vars.LARGE_RUNNER_S || 'ubuntu-latest' }}
     services:
       sonarqube:
@@ -171,7 +172,9 @@ jobs:
       - name: Install dependencies
         run: pnpm i --no-frozen-lockfile
       - name: Run build and unit tests
-        run: bash deployment/run-unit-tests.sh
+        run: |
+          export LOCAL_TESTING=true # speed up the tests for infra
+          bash deployment/run-unit-tests.sh
       - name: Configure sonarqube
         env:
           SONARQUBE_URL: http://localhost:9000
@@ -203,11 +206,10 @@ jobs:
           sonar-host-url: http://sonarqube:9000
           sonar-token: ${{ env.SONARQUBE_TOKEN }}
           github-token: ${{ secrets.PROJEN_GITHUB_TOKEN }}
-      - name: Set up Sonar Quality Gate
+      - name: Post Sonar Quality results to PR
         uses: zxkane/sonar-quality-gate@master
         if: always()
         env:
-          DEBUG: true
           GITHUB_TOKEN: ${{ secrets.PROJEN_GITHUB_TOKEN }}
           GIT_URL: "https://api.github.com"
           GIT_TOKEN: ${{ secrets.PROJEN_GITHUB_TOKEN }} 

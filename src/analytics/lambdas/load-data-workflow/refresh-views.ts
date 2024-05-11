@@ -46,7 +46,8 @@ export const handler = async (_e: any, _c: Context) => {
       const triggerDate = subtractDayFromTimestamp(latestJobTimestamp);
 
       const input = JSON.stringify({
-        latestJobTimestamp: triggerDate,
+        refreshEndTime: triggerDate,
+        forceRefresh: 'false',
       });
 
       const startExecutionCommand = new StartExecutionCommand({
