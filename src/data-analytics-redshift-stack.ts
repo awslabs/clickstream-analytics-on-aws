@@ -189,6 +189,7 @@ export function createRedshiftAnalyticsStack(
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
       dataFreshnessInHour: props.dataFreshnessInHour,
       refreshReportDays: props.refreshReportDays,
+      refreshMode: props.refreshMode,
       timezoneWithAppId: props.timezoneWithAppId,
     },
   );
@@ -209,6 +210,7 @@ export function createRedshiftAnalyticsStack(
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
       dataFreshnessInHour: props.dataFreshnessInHour,
       refreshReportDays: props.refreshReportDays,
+      refreshMode: props.refreshMode,
       timezoneWithAppId: props.timezoneWithAppId,
     },
   );
@@ -227,6 +229,7 @@ export function createRedshiftAnalyticsStack(
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
       dataFreshnessInHour: props.dataFreshnessInHour,
       refreshReportDays: props.refreshReportDays,
+      refreshMode: props.refreshMode,
       timezoneWithAppId: props.timezoneWithAppId,
     },
   );
