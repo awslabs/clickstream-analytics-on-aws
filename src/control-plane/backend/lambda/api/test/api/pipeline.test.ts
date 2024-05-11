@@ -4145,6 +4145,48 @@ describe('Pipeline test', () => {
       message: 'The pipeline current status does not allow upgrade.',
     });
   });
+  it('Retry pipeline when failed', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
+    ddbMock.on(GetCommand).resolves({
+      Item: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        lastAction: 'Delete',
+        stackDetails: [
+          {
+            ...stackDetailsWithOutputs[0],
+            stackStatus: StackStatus.DELETE_FAILED,
+          },
+          {
+            ...stackDetailsWithOutputs[1],
+          },
+          {
+            ...stackDetailsWithOutputs[2],
+          },
+          stackDetailsWithOutputs[3],
+          stackDetailsWithOutputs[4],
+          stackDetailsWithOutputs[5],
+        ],
+      },
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    const res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/retry?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Pipeline retry.',
+    });
+    expect(sfnMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
+  });
   it('Delete pipeline', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
