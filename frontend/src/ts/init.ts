@@ -173,10 +173,12 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   enableRedshift: true,
   eventFreshValue: '3',
   redshiftExecutionValue: '6',
+  streamingDataRangeValue: '1',
 
   selectedExcutionType: null,
   selectedExcutionUnit: null,
   selectedEventFreshUnit: null,
+  selectedStreamingDataRangeUnit: null,
   selectedRedshiftCluster: null,
   selectedRedshiftRole: null,
   selectedRedshiftExecutionUnit: null,
