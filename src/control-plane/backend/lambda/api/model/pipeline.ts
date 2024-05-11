@@ -692,6 +692,10 @@ export class CPipeline {
   }
 
   public async retry(): Promise<void> {
+    if (this.pipeline.lastAction === 'Delete') {
+      await this.delete();
+      return;
+    }
     // create rule to listen CFN stack
     await this._createRules();
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
