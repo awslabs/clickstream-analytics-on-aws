@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
-import moment from 'moment-timezone';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
+import moment from 'moment-timezone';
 import { PipelineServ } from './pipeline';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
 import { logger } from '../common/powertools';
