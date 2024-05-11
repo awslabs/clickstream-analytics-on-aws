@@ -922,7 +922,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
 
     // set streaming
-    if (!pipelineInfo.enableStreaming) {
+    if (!pipelineInfo.enableStreaming || !pipelineInfo.enableRedshift) {
       createPipelineObj.streaming = null;
     } else {
       createPipelineObj.streaming = {
@@ -1306,6 +1306,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               kafkaSGEmptyError={kafkaSGEmptyError}
               bufferKDSModeEmptyError={bufferKDSModeEmptyError}
               bufferKDSShardNumFormatError={bufferKDSShardNumFormatError}
+              changeEnableStreaming={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    enableStreaming: enable,
+                  };
+                });
+              }}
               changeNetworkType={(type) => {
                 setPipelineInfo((prev) => {
                   return {
@@ -1546,6 +1554,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeBufferType={(type) => {
                 let sinkInterval = '';
                 let sinkBatchSize = '';
+                let tmpEnableStream = false;
                 if (type === SinkType.KDS) {
                   sinkInterval = DEFAULT_KDS_SINK_INTERVAL;
                   sinkBatchSize = DEFAULT_KDS_BATCH_SIZE;
@@ -1577,11 +1586,16 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   }
                 }
 
+                if (type === SinkType.S3 || type === SinkType.MSK) {
+                  tmpEnableStream = false;
+                }
+
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
                     enableDataProcessing: tmpEnableProcessing,
                     enableReporting: tmpEnableQuickSight,
+                    enableStreaming: tmpEnableStream,
                     ingestionServer: {
                       ...prev.ingestionServer,
                       sinkType: type,
@@ -1829,6 +1843,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
+              changeStreamingDataRangeValue={(value) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    streamingDataRangeValue: value,
+                  };
+                });
+              }}
             />
           ),
         },
@@ -1957,14 +1979,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     ...prev,
                     selectedTransformPlugins: plugins,
                     transformPluginChanged: true,
-                  };
-                });
-              }}
-              changeEnableStreaming={(enable) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    enableStreaming: enable,
                   };
                 });
               }}

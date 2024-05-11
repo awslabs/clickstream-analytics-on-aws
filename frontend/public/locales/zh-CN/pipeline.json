@@ -313,10 +313,12 @@
     "reportNotSupported": "不支持",
     "reportNotSupportedDesc": "如果未启用数据处理，则不支持自动生成分析报表。",
     "notSupportedServices": "以下服务：{{unSupportedServices}} 在此区域不可用，某些功能可能不支持。",
-    "streamingTitle": "流式传输",
-    "streamingDesc": "数据将被流式传输到亚马逊Kinesis数据流中进行实时消费，lambda程序将定期读取数据并将其存储到S3存储桶中。",
-    "enableStreaming": "启用流式传输",
-    "enableStreamingDesc": "如果要为管道启用流式传输，请启用此选项。"
+    "streamingTitle": "实时分析配置",
+    "streamingDesc": "启用此管道的实时分析",
+    "enableStreaming": "启用实时分析",
+    "enableStreamingDesc": "启用实时分析将为该管道创建实时数据处理资源（即Lambda）。请注意，需要支付额外费用。",
+    "streamingDataRangeTitle": "实时数据范围",
+    "streamingDataRangeDesc": "实时数据范围是保留实时数据的时间段，超过数据范围的数据将从实时数据表中删除，不会显示在仪表板中。"
   },
   "detail": {
     "ingestion": "数据摄取",
