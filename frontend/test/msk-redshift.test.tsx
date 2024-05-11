@@ -53,9 +53,6 @@ describe('Test data processing settings', () => {
     const dataProcessingDom = render(
       <DataProcessing
         pipelineInfo={pipelineData}
-        changeEnableStreaming={() => {
-          return;
-        }}
         changeEnableDataProcessing={() => {
           return;
         }}
@@ -185,9 +182,6 @@ describe('Test redshift settings', () => {
     const configIngestionDom = render(
       <DataProcessing
         pipelineInfo={pipelineData}
-        changeEnableStreaming={() => {
-          return;
-        }}
         changeEnableDataProcessing={() => {
           return;
         }}
@@ -372,9 +366,6 @@ describe('Test redshift settings', () => {
     const configIngestionDom = render(
       <DataProcessing
         pipelineInfo={pipelineData}
-        changeEnableStreaming={() => {
-          return;
-        }}
         changeEnableDataProcessing={() => {
           return;
         }}
@@ -500,9 +491,6 @@ describe('Test MSK kafkaConnector settings', () => {
     const configIngestionDom = render(
       <DataProcessing
         pipelineInfo={pipelineData}
-        changeEnableStreaming={() => {
-          return;
-        }}
         changeEnableDataProcessing={() => {
           return;
         }}
@@ -637,9 +625,6 @@ describe('Test MSK kafkaConnector settings', () => {
     const configIngestionDom = render(
       <DataProcessing
         pipelineInfo={pipelineData}
-        changeEnableStreaming={() => {
-          return;
-        }}
         changeEnableDataProcessing={() => {
           return;
         }}
