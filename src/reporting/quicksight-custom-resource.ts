@@ -219,15 +219,15 @@ function _getDataSetDefs(
     {
       tableName: CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER,
       useSpice: 'no',
-      customSql: `SELECT max(refresh_date) as last_refresh_date FROM {{schema}}.${CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME}`,
+      customSql: `SELECT max(refresh_date) as "Last refresh date" FROM {{schema}}.${CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME}`,
       columns: [
         {
-          Name: 'last_refresh_date',
+          Name: 'Last refresh date',
           Type: 'DATETIME',
         },
       ],
       projectedColumns: [
-        'last_refresh_date',
+        'Last refresh date',
       ],
     },
   )

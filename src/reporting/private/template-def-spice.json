@@ -1092,6 +1092,18 @@
                 ]
             },
             "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Last_Refresh_Date",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "Last refresh date",
+                        "DataType": "DATETIME"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
         }
     ],
     "Sheets": [
@@ -2085,7 +2097,7 @@
                                                 "FieldId": "b945e825-c64b-4ae2-be3d-5e5646b409bd.7.1712026978749",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                                    "ColumnName": "Active User"
+                                                    "ColumnName": "Active Users"
                                                 }
                                             }
                                         },
@@ -2370,7 +2382,7 @@
                                         "DataPathList": [
                                             {
                                                 "FieldId": "b945e825-c64b-4ae2-be3d-5e5646b409bd.7.1712026978749",
-                                                "FieldValue": "Active User"
+                                                "FieldValue": "Active Users"
                                             }
                                         ],
                                         "Width": "141px"
@@ -9537,7 +9549,7 @@
         },
         {
             "DataSetIdentifier": "Day_User_Acquisition",
-            "Name": "Active User",
+            "Name": "Active Users",
             "Expression": "distinct_countIf({user_id},startsWith({aggregation_type}, \"Session\", CASE_INSENSITIVE))"
         },
         {
@@ -11161,7 +11173,7 @@
                             {
                                 "Column": {
                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                    "ColumnName": "Active User"
+                                    "ColumnName": "Active Users"
                                 },
                                 "SortDirection": "DESC"
                             }

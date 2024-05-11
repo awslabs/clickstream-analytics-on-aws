@@ -139,7 +139,7 @@
         "ColumnGroupSchemaList": []
         },
         {
-        "Placeholder": "Day_User_View_Engagement",
+        "Placeholder": "Day_Event_View_Engagement",
         "DataSetSchema": {
             "ColumnSchemaList": [
                 {
@@ -1092,6 +1092,18 @@
                     {
                         "Name": "new_user",
                         "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Last_Refresh_Date",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "Last refresh date",
+                        "DataType": "DATETIME"
                     }
                 ]
             },
@@ -4811,7 +4823,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711008537213",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View_Engagement",
+                                                    "DataSetIdentifier": "Day_Event_View_Engagement",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "67e7e705-6a9f-4c05-ab0a-6c017b625de7"
@@ -4823,7 +4835,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "96aab19b-9a34-4ab2-a8cf-75c545b27f6d.2.1711612796223",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View_Engagement",
+                                                    "DataSetIdentifier": "Day_Event_View_Engagement",
                                                     "ColumnName": "Other events"
                                                 },
                                                 "AggregationFunction": {
@@ -4835,7 +4847,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.view_count.2.1711008548112",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View_Engagement",
+                                                    "DataSetIdentifier": "Day_Event_View_Engagement",
                                                     "ColumnName": "view_count"
                                                 },
                                                 "AggregationFunction": {
@@ -9787,7 +9799,7 @@
             "Expression": "sum({total_user_engagement_time_minutes}) / sum({session_count}) / distinct_count({user_id})"
         },
         {
-            "DataSetIdentifier": "Day_User_View_Engagement",
+            "DataSetIdentifier": "Day_Event_View_Engagement",
             "Name": "Other events",
             "Expression": "{event_count} - {view_count}"
         },
@@ -9968,7 +9980,7 @@
                         "DataSetParameterName": "startDate08"
                     },
                     {
-                        "DataSetIdentifier": "Day_User_View_Engagement",
+                        "DataSetIdentifier": "Day_Event_View_Engagement",
                         "DataSetParameterName": "startDate09"
                     },
                     {
@@ -10058,7 +10070,7 @@
                         "DataSetParameterName": "endDate08"
                     },
                     {
-                        "DataSetIdentifier": "Day_User_View_Engagement",
+                        "DataSetIdentifier": "Day_Event_View_Engagement",
                         "DataSetParameterName": "endDate09"
                     },
                     {

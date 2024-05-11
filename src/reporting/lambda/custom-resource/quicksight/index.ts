@@ -44,7 +44,6 @@ import {
   RefreshInterval,
   LookbackWindowSizeUnit,
   CreateDataSetCommandInput,
-  InvalidParameterValueException,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -322,7 +321,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   } catch (err: any) {
     logger.error('Update QuickSight dashboard failed', err);
     //remove created Quicksight resources
-    //await cleanQuickSightResource(createdQuickSightResources, quickSight, awsAccountId, props.dashboardDefProps.databaseName);
+    // await cleanQuickSightResource(createdQuickSightResources, quickSight, awsAccountId, props.dashboardDefProps.databaseName);
 
     throw err;
   }
@@ -334,19 +333,19 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   };
 };
 
-const cleanQuickSightResource = async (createdQuickSightResources: CreatedQuickSightResources, quickSight: QuickSight,
-  awsAccountId: string, databaseName: string) => {
-  if (createdQuickSightResources.createdSchemas.length > 0) {
-    for (const schema of createdQuickSightResources.createdSchemas) {
-      await deleteQuickSightDashboard(quickSight, awsAccountId, schema.dashboardDefProps.databaseName, schema.schema, schema.dashboardDefProps);
-    }
-  }
-  if (createdQuickSightResources.createdDataSets.length > 0) {
-    for (const dataSet of createdQuickSightResources.createdDataSets) {
-      await deleteDataSet(quickSight, awsAccountId, dataSet.schema, databaseName, dataSet.dataSetProps);
-    }
-  }
-};
+// const cleanQuickSightResource = async (createdQuickSightResources: CreatedQuickSightResources, quickSight: QuickSight,
+//   awsAccountId: string, databaseName: string) => {
+//   if (createdQuickSightResources.createdSchemas.length > 0) {
+//     for (const schema of createdQuickSightResources.createdSchemas) {
+//       await deleteQuickSightDashboard(quickSight, awsAccountId, schema.dashboardDefProps.databaseName, schema.schema, schema.dashboardDefProps);
+//     }
+//   }
+//   if (createdQuickSightResources.createdDataSets.length > 0) {
+//     for (const dataSet of createdQuickSightResources.createdDataSets) {
+//       await deleteDataSet(quickSight, awsAccountId, dataSet.schema, databaseName, dataSet.dataSetProps);
+//     }
+//   }
+// };
 
 const getFolderPermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
   if (sharePrincipalArn === ownerPrincipalArn) {
@@ -900,7 +899,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info('create dataset finished', { datasetId });
 
     if(props.useSpice === 'yes') {
-      await insertOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
+      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
     }
 
     return dataset;
@@ -1078,78 +1077,34 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
 
 };
 
-const insertOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParams: ResourceCommonParams, datasetId: string, lookbackColumn: string | undefined) => {
+const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParams: ResourceCommonParams, datasetId: string, lookbackColumn: string | undefined) => {
   const scheduleId = `schedule-${datasetId}`;
   const exist = await existRefrshSchedule(quickSight, commonParams.awsAccountId, datasetId, scheduleId);
-  try{
-    logger.info('Start to delete QuickSight refresh properties', {
+  if(!exist) {  
+    logger.info('Start to put QuickSight refresh properties', {
       datasetId,
+      lookbackColumn,
     });
-    await quickSight.deleteDataSetRefreshProperties({
+  
+    await quickSight.putDataSetRefreshProperties({
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
-    });
-    logger.info('Delete QuickSight refresh properties finished.');
-  } catch (err: any) {
-
-    logger.info(`error message: ${(err as Error).message}`);
-    if ((err as Error) instanceof InvalidParameterValueException) {
-      logger.info('Refresh properties not exist. skip delete operation.');
-    } else {
-      logger.error(`Delete QuickSight refresh properties failed due to: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  logger.info('Start to put QuickSight refresh properties', {
-    datasetId,
-    lookbackColumn,
-  });
-
-  await quickSight.putDataSetRefreshProperties({
-    AwsAccountId: commonParams.awsAccountId,
-    DataSetId: datasetId,
-    DataSetRefreshProperties: {
-      RefreshConfiguration: {
-        IncrementalRefresh: {
-          LookbackWindow:{
-            ColumnName: lookbackColumn ?? 'event_date',
-            Size: 1,
-            SizeUnit: LookbackWindowSizeUnit.DAY,
-          },
+      DataSetRefreshProperties: {
+        RefreshConfiguration: {
+          IncrementalRefresh: {
+            LookbackWindow:{
+              ColumnName: lookbackColumn ?? 'event_date',
+              Size: 1,
+              SizeUnit: LookbackWindowSizeUnit.DAY,
+            },
+          }
         }
       }
-    }
-  });
-
-  await waitForDataSetRefreshPropertySetCompleted(quickSight, commonParams.awsAccountId, datasetId);
-  logger.info('Put QuickSight refresh properties finished.');
-
-  if(exist) {
-    logger.info('Start to update QuickSight refresh schedule', {
-      datasetId,
-      scheduleId,
-    })
-    await quickSight.updateRefreshSchedule({
-      AwsAccountId: commonParams.awsAccountId,
-      DataSetId: datasetId,
-      Schedule: {
-        ScheduleId: scheduleId,
-        ScheduleFrequency: {
-          Interval: RefreshInterval.DAILY,
-          Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
-          TimeOfTheDay: '06:00',
-        },
-        RefreshType: IngestionType.INCREMENTAL_REFRESH,
-        
-      },
     });
-    logger.info('end to update QuickSight refresh schedule', {
-      datasetId,
-      scheduleId,
-    })
+  
+    await waitForDataSetRefreshPropertySetCompleted(quickSight, commonParams.awsAccountId, datasetId);
+    logger.info('Put QuickSight refresh properties finished.');
 
-  } else {
     logger.info('Start to create QuickSight refresh schedule', {
       datasetId,
       scheduleId,
@@ -1307,7 +1262,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info(`grant dataset permissions to new principal ${commonParams.ownerPrincipalArn}, ${commonParams.sharePrincipalArn}`);
 
     if(props.useSpice === 'yes') {
-      await insertOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
+      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
     }
 
     return dataset;
