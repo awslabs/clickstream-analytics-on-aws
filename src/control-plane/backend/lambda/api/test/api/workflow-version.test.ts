@@ -487,7 +487,11 @@ describe('Workflow test with pipeline version', () => {
                           {
                             StartAt: 'Reporting',
                             States: {
-                              Reporting: setTagsToStack(ReportingStack, Tags),
+                              Reporting: removeParametersFromStack(setTagsToStack(ReportingStack, Tags), [
+                                {
+                                  ParameterKey: 'QuickSightPrincipalParam',
+                                },
+                              ]),
                             },
                           },
                         ],
@@ -810,26 +814,25 @@ describe('Workflow test with pipeline version', () => {
                           },
                         ],
                       ),
-                      Reporting: removeParametersFromStack(
-                        setTagsWithVersion(ReportingStack, SolutionVersion.V_1_1_5),
-                        [
-                          {
-                            ParameterKey: 'QuickSightTimezoneParam',
-                          },
-                          {
-                            ParameterKey: 'RedshiftIAMRoleParam.#',
-                          },
-                          {
-                            ParameterKey: 'RedshiftDefaultDBParam',
-                          },
-                        ],
-                      ),
                       AfterRedshiftStacks: {
                         Branches: [
                           {
                             StartAt: 'Reporting',
                             States: {
-                              Reporting: ReportingStack,
+                              Reporting: removeParametersFromStack(
+                                ReportingStack,
+                                [
+                                  {
+                                    ParameterKey: 'QuickSightTimezoneParam',
+                                  },
+                                  {
+                                    ParameterKey: 'RedshiftIAMRoleParam.#',
+                                  },
+                                  {
+                                    ParameterKey: 'RedshiftDefaultDBParam',
+                                  },
+                                ],
+                              ),
                             },
                           },
                         ],
@@ -1011,20 +1014,11 @@ describe('Workflow test with pipeline version in China region', () => {
                           {
                             StartAt: 'Reporting',
                             States: {
-                              Reporting: mergeParametersFromStack(
-                                setTagsToStack(ReportingStackCn, Tags),
+                              Reporting: removeParametersFromStack(
+                                setTagsToStack(reportingStackCn, Tags),
                                 [
                                   {
-                                    ParameterKey: 'QuickSightUserParam',
-                                    ParameterValue: 'GCRUser',
-                                  },
-                                  {
                                     ParameterKey: 'QuickSightPrincipalParam',
-                                    ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                                  },
-                                  {
-                                    ParameterKey: 'QuickSightOwnerPrincipalParam',
-                                    ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
                                   },
                                 ],
                               ),
@@ -1315,53 +1309,38 @@ describe('Workflow test with pipeline version in China region', () => {
                           },
                         ],
                       ),
-                      Reporting: removeParametersFromStack(
-                        mergeParametersFromStack(
-                          setTagsWithVersion(ReportingStackCn, SolutionVersion.V_1_1_5), [
-                            {
-                              ParameterKey: 'QuickSightUserParam',
-                              ParameterValue: 'GCRUser',
-                            },
-                            {
-                              ParameterKey: 'QuickSightPrincipalParam',
-                              ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                            },
-                            {
-                              ParameterKey: 'QuickSightOwnerPrincipalParam',
-                              ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                            },
-                          ]),
-                        [
-                          {
-                            ParameterKey: 'QuickSightTimezoneParam',
-                          },
-                          {
-                            ParameterKey: 'RedshiftIAMRoleParam.#',
-                          },
-                          {
-                            ParameterKey: 'RedshiftDefaultDBParam',
-                          },
-                        ],
-                      ),
                       AfterRedshiftStacks: {
                         Branches: [
                           {
                             StartAt: 'Reporting',
                             States: {
-                              Reporting: mergeParametersFromStack(ReportingStackCn, [
-                                {
-                                  ParameterKey: 'QuickSightUserParam',
-                                  ParameterValue: 'GCRUser',
-                                },
-                                {
-                                  ParameterKey: 'QuickSightPrincipalParam',
-                                  ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                                },
-                                {
-                                  ParameterKey: 'QuickSightOwnerPrincipalParam',
-                                  ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                                },
-                              ]),
+                              Reporting: removeParametersFromStack(
+                                mergeParametersFromStack(ReportingStackCn, [
+                                  {
+                                    ParameterKey: 'QuickSightUserParam',
+                                    ParameterValue: 'GCRUser',
+                                  },
+                                  {
+                                    ParameterKey: 'QuickSightPrincipalParam',
+                                    ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                                  },
+                                  {
+                                    ParameterKey: 'QuickSightOwnerPrincipalParam',
+                                    ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                                  },
+                                ]),
+                                [
+                                  {
+                                    ParameterKey: 'QuickSightTimezoneParam',
+                                  },
+                                  {
+                                    ParameterKey: 'RedshiftIAMRoleParam.#',
+                                  },
+                                  {
+                                    ParameterKey: 'RedshiftDefaultDBParam',
+                                  },
+                                ],
+                              ),
                             },
                           },
                         ],
@@ -1445,18 +1424,9 @@ describe('Workflow test with pipeline version in China region', () => {
                           {
                             StartAt: 'Reporting',
                             States: {
-                              Reporting: mergeParametersFromStack(ReportingStackCn, [
-                                {
-                                  ParameterKey: 'QuickSightUserParam',
-                                  ParameterValue: 'GCRUser',
-                                },
+                              Reporting: removeParametersFromStack(reportingStackCn, [
                                 {
                                   ParameterKey: 'QuickSightPrincipalParam',
-                                  ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                                },
-                                {
-                                  ParameterKey: 'QuickSightOwnerPrincipalParam',
-                                  ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
                                 },
                               ]),
                             },

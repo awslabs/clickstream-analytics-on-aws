@@ -13,10 +13,8 @@
 
 import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
 import { StackStatus } from '@aws-sdk/client-cloudformation';
-import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
-import { DescribeApplicationCommand, KinesisAnalyticsV2Client, UpdateApplicationCommand } from '@aws-sdk/client-kinesis-analytics-v2';
-import { ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { SNSClient } from '@aws-sdk/client-sns';
+import { DescribeApplicationCommand, UpdateApplicationCommand } from '@aws-sdk/client-kinesis-analytics-v2';
+import { ExecutionStatus, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
   PutCommand,
   ScanCommand,
@@ -32,12 +30,6 @@ import { PipelineServerProtocol, WorkflowStateType } from '../../common/types';
 import { getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-
-const ddbMock = mockClient(DynamoDBDocumentClient);
-const sfnMock = mockClient(SFNClient);
-const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
-const snsMock = mockClient(SNSClient);
-const kinesisAnalyticsV2Mock = mockClient(KinesisAnalyticsV2Client);
 
 describe('Application test', () => {
   beforeEach(() => {
@@ -1230,11 +1222,11 @@ describe('Application test', () => {
     expect(mockClients.ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
   it('Enable stream on application', async () => {
-    projectExistedMock(ddbMock, true);
-    appExistedMock(ddbMock, true);
-    createEventRuleMock(cloudWatchEventsMock);
-    createSNSTopicMock(snsMock);
-    ddbMock.on(QueryCommand)
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
           {
@@ -1296,8 +1288,8 @@ describe('Application test', () => {
           },
         ],
       });
-    ddbMock.on(UpdateCommand).resolves({});
-    kinesisAnalyticsV2Mock.on(DescribeApplicationCommand).resolves({
+    mockClients.ddbMock.on(UpdateCommand).resolves({});
+    mockClients.kinesisAnalyticsV2Mock.on(DescribeApplicationCommand).resolves({
       ApplicationDetail: {
         ApplicationARN: 'arn:aws:kinesisanalytics:us-east-1:555555555555:application/ClickstreamStreamingIngestion204CC39E-F3',
         ApplicationStatus: 'READY',
@@ -1323,7 +1315,7 @@ describe('Application test', () => {
         },
       },
     });
-    kinesisAnalyticsV2Mock.on(UpdateApplicationCommand).resolves({});
+    mockClients.kinesisAnalyticsV2Mock.on(UpdateApplicationCommand).resolves({});
     const res = await request(app)
       .put(`/api/app/${MOCK_APP_ID}/stream`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -1338,8 +1330,8 @@ describe('Application test', () => {
       success: true,
       message: 'Application streaming updated.',
     });
-    expect(kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(DescribeApplicationCommand, 1);
-    expect(kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(UpdateApplicationCommand, 1);
+    expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(DescribeApplicationCommand, 1);
+    expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(UpdateApplicationCommand, 1);
   });
   afterAll((done) => {
     server.close();

@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { KinesisAnalyticsV2 } from '@aws-sdk/client-kinesis-analytics-v2';
 import { logger } from '../../common/powertools';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
 
 export const updateFlinkApplicationEnvironmentProperties = async (

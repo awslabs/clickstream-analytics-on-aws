@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { AliasListEntry, KMSClient, paginateListAliases } from '@aws-sdk/client-kms';
 import { awsAccountId, awsPartition } from '../../common/constants';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
 export const listAliases = async (region: string) => {
   const client = new KMSClient({

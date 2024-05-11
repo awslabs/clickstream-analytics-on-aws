@@ -215,7 +215,7 @@ describe('Pipeline test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(cloudWatchEventsMock).toHaveReceivedCommandWith(PutRuleCommand, {
-      EventPattern: '{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:undefined:cloudformation:ap-southeast-1:555555555555:stack/test-prefix-Clickstream*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}',
+      EventPattern: '{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:aws:cloudformation:ap-southeast-1:555555555555:stack/test-prefix-Clickstream*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}',
       Name: 'ClickstreamRuleForCFN-longlonglonglonglonglonglonglonglonglonglo',
     });
     expect(snsMock).toHaveReceivedCommandWith(CreateTopicCommand, {
