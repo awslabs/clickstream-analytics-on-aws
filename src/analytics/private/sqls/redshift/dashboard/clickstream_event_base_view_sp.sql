@@ -27,7 +27,7 @@ BEGIN
 
   create temp table clickstream_event_base_view_stage (like {{database_name}}.{{schema}}.clickstream_event_base_view); 
 
-  insert into clickstream_event_base_view_stage 
+  EXECUTE 'insert into clickstream_event_base_view_stage 
   select 
     e.event_timestamp,
     e.event_id,
@@ -96,7 +96,7 @@ BEGIN
     screen_view_previous_screen_unique_id,
     screen_view_previous_time_msec,
     screen_view_engagement_time_msec,
-    case when screen_view_entrances then 'true' else 'false' end as screen_view_entrances,
+    case when screen_view_entrances then ''true'' else ''false'' end as screen_view_entrances,
     page_view_page_referrer,
     page_view_page_referrer_title,
     page_view_previous_time_msec,
@@ -107,8 +107,8 @@ BEGIN
     page_view_hostname,
     page_view_latest_referrer,
     page_view_latest_referrer_host,
-    case when page_view_entrances then 'true' else 'false' end as page_view_entrances,
-    case when app_start_is_first_time then 'true' else 'false' end as app_start_is_first_time,
+    case when page_view_entrances then ''true'' else ''false'' end as page_view_entrances,
+    case when app_start_is_first_time then ''true'' else ''false'' end as app_start_is_first_time,
     upgrade_previous_app_version,
     upgrade_previous_os_version,
     search_key,
@@ -117,7 +117,7 @@ BEGIN
     outbound_link_domain,
     outbound_link_id,
     outbound_link_url,
-    case when outbound_link then 'true' else 'false' end as outbound_link,
+    case when outbound_link then ''true'' else ''false'' end as outbound_link,
     user_engagement_time_msec,
     scroll_engagement_time_msec,
     sdk_error_code,
@@ -141,13 +141,13 @@ BEGIN
     session_clid,
     session_channel_group,
     session_source_category,
-    CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.session_id ELSE NULL END as view_session_indicator,
-    CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.event_id ELSE NULL END as view_event_indicator
+    CASE WHEN event_name IN (''_page_view'', ''_screen_view'') THEN e.session_id ELSE NULL END as view_session_indicator,
+    CASE WHEN event_name IN (''_page_view'', ''_screen_view'') THEN e.event_id ELSE NULL END as view_event_indicator
   from {{database_name}}.{{schema}}.event_v2 e
   left join {{database_name}}.{{schema}}.session s 
     on e.user_pseudo_id = s.user_pseudo_id and e.session_id = s.session_id
-  where e.created_time > rec.start_time and e.created_time <= rec.end_time
-  and e.event_timestamp >= CURRENT_TIMESTAMP - INTERVAL '7 days' --reduce scan range
+  where e.created_time > ''' || rec.start_time || ''' and e.created_time <= ''' || rec.end_time || ''' 
+  and e.event_timestamp >= CURRENT_TIMESTAMP - INTERVAL ''' || fressness_in_hours || ' hours'' --reduce scan range'
   ;
 
   MERGE INTO {{database_name}}.{{schema}}.clickstream_event_base_view
