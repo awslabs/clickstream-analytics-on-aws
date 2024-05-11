@@ -503,6 +503,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'TimeZoneWithAppId',
       'DataFreshnessInHour',
       'RefreshReportDays',
+      'RefreshMode',
     ];
     const templateParams = Object.keys(nestStack.Properties.Parameters).map(
       (pk) => {
@@ -648,6 +649,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       mvRefreshInterval: 120,
       dataFreshnessInHour: 72,
       refreshReportDays: 1,
+      refreshMode: 'all',
       timezoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
       newRedshiftServerlessProps: undefined,
       existingRedshiftServerlessProps: undefined,
@@ -699,6 +701,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       mvRefreshInterval: 120,
       dataFreshnessInHour: 72,
       refreshReportDays: 1,
+      refreshMode: 'all',
       timezoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
       newRedshiftServerlessProps: {
         vpcId: 'vpc-id',
@@ -752,6 +755,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       ...nestStackCommonTablesProps,
       dataFreshnessInHour: 72,
       refreshReportDays: 1,
+      refreshMode: 'all',
       timezoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
       mvRefreshInterval: 120,
       existingRedshiftServerlessProps: serverlessRedshiftProps,

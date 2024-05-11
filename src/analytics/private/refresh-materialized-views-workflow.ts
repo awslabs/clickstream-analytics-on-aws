@@ -41,6 +41,7 @@ export interface RefreshMaterializedViewsWorkflowProps {
   readonly dataAPIRole: IRole;
   readonly dataFreshnessInHour: number;
   readonly refreshReportDays: number;
+  readonly refreshMode: string;
   readonly timezoneWithAppId: string;
 }
 
@@ -351,7 +352,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       securityGroups: [fnSG],
       environment: {
         PROJECT_ID: props.projectId,
-        REFRESH_MODE: 'all',
+        REFRESH_MODE: props.refreshMode,
       },
       applicationLogLevel: 'WARN',
     });
@@ -407,7 +408,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         PROJECT_ID: props.projectId,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        REFRESH_MODE: 'all',
+        REFRESH_MODE: props.refreshMode,
         REFRESH_SP_DAYS: props.refreshReportDays.toString(),
       },
       applicationLogLevel: 'WARN',
