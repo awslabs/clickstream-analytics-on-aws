@@ -413,4 +413,41 @@ public class ClickstreamEventParserTest extends BaseTest {
         Assertions.assertEquals("ingestTimestamp is -10 millis ahead of uploadTimestamp, isFutureEvent: true|eventTimestamp is in the future, set to ingestTimestamp", eventV2.getProcessInfo().get("event_timestamp_adjusted_reason"));
         Assertions.assertEquals(eventV2.getEventTimeMsec(),  ingestTimestamp); // ingestTimestamp
     }
+
+
+    @Test
+    void test_screen_view_engagement_time() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_screen_view_engagement_time
+
+        setEnableEventTimeShift(false);
+        String dataString = resourceFileContent("/screen_view_engagement_time.json");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        long eventTime = 1715428120323L + 30 * 60 * 1000;
+        JsonNode data = objectMapper.readTree(dataString);
+
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
+        log.info(data.toPrettyString());
+
+        long ingestTimestamp = eventTime + 10;
+        ParseDataResult rowResult = clickstreamEventParser.parseData(data.toString(),
+                ExtraParams.builder()
+                        .appId("test")
+                        .projectId("test_project_id")
+                        .ingestTimestamp(ingestTimestamp)
+                        .uploadTimestamp(eventTime + 20)
+                        .ua("test")
+                        .ip("9.9.9.9")
+                        .rid("test_rid")
+                        .uri("test_uri")
+                        .inputFileName("test_file")
+                        .build(), 0);
+
+        ClickstreamEvent eventV2 = rowResult.getClickstreamEventList().get(0);
+        log.info(prettyJson(objectToJsonString(eventV2)));
+
+        String expectedJson = this.resourceFileAsString("/expected/test_screen_view_engagement_time.json");
+
+        Assertions.assertEquals(expectedJson, prettyJson(eventV2.toJson()));
+    }
 }
