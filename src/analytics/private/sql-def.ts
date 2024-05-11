@@ -304,34 +304,34 @@ export const schemaDefs: SQLDef[] = [
     sqlFile: 'user-v2.sql',
   },
   {
-    sqlFile: 'fn-combine-json-list.sql',
+    sqlFile: 'migrate/fn-combine-json-list.sql',
   },
   {
-    sqlFile: 'fn-parse-utm-from-url.sql',
+    sqlFile: 'migrate/fn-parse-utm-from-url.sql',
   },
   {
-    sqlFile: 'fn-rm-object-props.sql',
+    sqlFile: 'migrate/fn-rm-object-props.sql',
   },
   {
-    sqlFile: 'fn-transform-event-custom-props.sql',
+    sqlFile: 'migrate/fn-transform-event-custom-props.sql',
   },
   {
-    sqlFile: 'fn-transform-user-custom-props.sql',
+    sqlFile: 'migrate/fn-transform-user-custom-props.sql',
   },
   {
-    sqlFile: 'sp-migrate-event-to-v2.sql',
+    sqlFile: 'migrate/sp-migrate-event-to-v2.sql',
   },
   {
-    sqlFile: 'sp-migrate-item-to-v2.sql',
+    sqlFile: 'migrate/sp-migrate-item-to-v2.sql',
   },
   {
-    sqlFile: 'sp-migrate-user-to-v2.sql',
+    sqlFile: 'migrate/sp-migrate-user-to-v2.sql',
   },
   {
-    sqlFile: 'sp-migrate-session-to-v2.sql',
+    sqlFile: 'migrate/sp-migrate-session-to-v2.sql',
   },
   {
-    sqlFile: 'sp-migrate-data-to-v2.sql',
+    sqlFile: 'migrate/sp-migrate-data-to-v2.sql',
   },
   {
     sqlFile: 'segment-user.sql',
