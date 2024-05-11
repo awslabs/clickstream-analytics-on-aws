@@ -294,9 +294,11 @@ export class StackManager {
     retryActionMap.set('Create+FAILED', 'Update');
     retryActionMap.set('Create+COMPLETE', 'Update');
     retryActionMap.set('Create+ROLLBACK_COMPLETE', 'Update');
+    retryActionMap.set('Update+EMPTY', 'Create');
     retryActionMap.set('Update+FAILED', 'Update');
     retryActionMap.set('Update+COMPLETE', 'Update');
     retryActionMap.set('Update+ROLLBACK_COMPLETE', 'Update');
+    retryActionMap.set('Upgrade+EMPTY', 'Create');
     retryActionMap.set('Upgrade+FAILED', 'Upgrade');
     retryActionMap.set('Upgrade+COMPLETE', 'Upgrade');
     retryActionMap.set('Upgrade+ROLLBACK_COMPLETE', 'Upgrade');
@@ -330,6 +332,30 @@ export class StackManager {
       BucketName: stackWorkflowS3Bucket ?? '',
       BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
     };
+    return state;
+  }
+
+  public setPipelineWorkflowCallback(executionName: string) {
+    if (!this.execWorkflow || !this.workflow) {
+      throw new Error('Pipeline workflow is empty.');
+    }
+    this.execWorkflow.Workflow = this._setWorkflowCallback(this.execWorkflow.Workflow, executionName);
+    this.workflow.Workflow = this._setWorkflowCallback(this.workflow.Workflow, executionName);
+  }
+
+  private _setWorkflowCallback(state: WorkflowState, executionName: string): WorkflowState {
+    if (state.Type === WorkflowStateType.PARALLEL) {
+      for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        for (let key of Object.keys(branch.States)) {
+          branch.States[key] = this._setWorkflowCallback(branch.States[key], executionName);
+        }
+      }
+    } else if (state.Type === WorkflowStateType.STACK || state.Type === WorkflowStateType.PASS) {
+      state.Data!.Callback = {
+        BucketName: stackWorkflowS3Bucket ?? '',
+        BucketPrefix: `clickstream/workflow/${executionName}`,
+      };
+    }
     return state;
   }
 

@@ -2878,6 +2878,9 @@ describe('Pipeline test', () => {
     });
   });
   it('Update pipeline add reporting', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
@@ -2920,8 +2923,15 @@ describe('Pipeline test', () => {
     });
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const branches = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const reportingState = branches.L[1].M.States.M.Reporting;
+      const redshiftState = branches.L[1].M.States.M.DataModelingRedshift;
       expect(
-        input.TransactItems[0].Put.Item.workflow.M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.End.BOOL === true,
+        reportingState.M.End.BOOL === true &&
+        reportingState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
+        reportingState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000' &&
+        redshiftState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
+        redshiftState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000',
       ).toBeTruthy();
     });
     const res = await request(app)

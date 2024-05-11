@@ -1886,6 +1886,27 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED: IPipeline = {
   },
 };
 
+export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_EMPTY: IPipeline = {
+  ...BASE_RETRY_PIPELINE,
+  lastAction: 'Update',
+  stackDetails: [
+    BASE_STATUS.stackDetails[0],
+    {
+      ...BASE_STATUS.stackDetails[1],
+      stackStatus: undefined,
+    },
+    BASE_STATUS.stackDetails[2],
+    BASE_STATUS.stackDetails[3],
+    BASE_STATUS.stackDetails[4],
+    BASE_STATUS.stackDetails[5],
+  ],
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    status: ExecutionStatus.FAILED,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+  },
+};
+
 export const RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE: IPipeline = {
   ...BASE_RETRY_PIPELINE,
   lastAction: 'Upgrade',
