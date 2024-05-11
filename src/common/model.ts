@@ -105,7 +105,11 @@ export enum DataPipelineCustomMetricsName {
   CORRUPTED='Data Processing corrupted count',
   RUN_TIME='Data Processing job run time seconds',
   INPUT_FILE_COUNT='Data Processing input file count',
+  FILTERED_BY_APP_IDS='Data count filtered by appIds',
+  FILTERED_BY_DATA_FRESHNESS_AND_FUTURE = 'Data count filtered by freshness and future time',
+  FILTERED_BY_BOT = 'Data count filtered by bot',
 };
+
 
 export enum AnalyticsCustomMetricsName {
   FILE_NEW='New files count',
