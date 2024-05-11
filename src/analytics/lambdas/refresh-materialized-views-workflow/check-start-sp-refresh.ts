@@ -65,7 +65,7 @@ export const handler = async (event: CheckStartRefreshSpEvent) => {
   const refreshDateString = getDateStringFromEndTimeAndTimezone(event.originalInput.refreshEndTime, timezoneWithAppId.timezone);
 
   let skipSpRefresh = false;
-  if (forceRefresh !== 'true') {
+  if (forceRefresh && forceRefresh === 'false') {
     skipSpRefresh = await isSkipSpRefresh(timezoneWithAppId.appId, refreshDateString);
   }
   if (skipSpRefresh) {
