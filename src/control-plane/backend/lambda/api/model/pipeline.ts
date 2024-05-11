@@ -421,6 +421,8 @@ export class CPipeline {
     if (this._editStackTags(oldPipeline)) {
       this.stackManager.updateWorkflowTags();
     }
+    // update workflow callback
+    this.stackManager.setPipelineWorkflowCallback();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -527,6 +529,8 @@ export class CPipeline {
     const oldStackNames = this.stackManager.getWorkflowStacks(oldPipeline.workflow?.Workflow!);
     // update workflow
     this.stackManager.upgradeWorkflow(oldStackNames);
+    // update workflow callback
+    this.stackManager.setPipelineWorkflowCallback();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -670,6 +674,8 @@ export class CPipeline {
     this._setExecution(executionName);
     // update workflow
     this.stackManager.deleteWorkflow();
+    // update workflow callback
+    this.stackManager.setPipelineWorkflowCallback();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -697,6 +703,8 @@ export class CPipeline {
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this._setExecution(executionName);
     this.stackManager.retryWorkflow();
+    // update workflow callback
+    this.stackManager.setPipelineWorkflowCallback();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
