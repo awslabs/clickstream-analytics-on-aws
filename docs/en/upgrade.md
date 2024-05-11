@@ -2,8 +2,12 @@
 
 !!! warning "Important"
 
-    1. Please be advised that upgrading to this version directly from version 1.0.x is not supported. It is necessary to upgrade to [version 1.1.5][v115] first. 
-    2. Upgrading from version 1.1.5 or any earlier 1.1 version will rebuild the default analysis dashboard and you will not be able to analyze previous data. If you need to migrate the existing data, it is imperative that you contact the AWS Clickstream team for support through your sales representative.
+    1. Please be advised that upgrading directly from version 1.0.x to this version is not supported. It is necessary to upgrade to [version 1.1.5][v115] first.
+    2. By upgrading the web console from earlier 1.1 versions before 1.1.6, you could continue to view the dashboards of the project. However, you could not [explore the existing Clickstream data][exploration] due to the feature relying on the updated data schema.
+
+## Planning and Preparation
+
+1. **Data Processing Interval** (only applicable when upgrading from a version earlier than v1.1.6 and data processing enabled): The data schema has been updated since version 1.1.6. Ensure no data processing job is running while upgrading the existing pipeline. The pipeline upgrade will take approximately 20 minutes. You can update the existing pipeline to increase the interval and check if there are any running jobs of the EMR Serverless application in the console.
 
 ## Upgrade Process
 
@@ -36,7 +40,7 @@
 
 You can view the status of the stack in the AWS CloudFormation console in the **Status** column. You should receive an `UPDATE_COMPLETE` status after a few minutes.
 
-### Upgrade the pipeline of project
+### Upgrade the Project Pipeline
 
 !!! info "Important"
 
@@ -51,7 +55,62 @@ You can view the status of the stack in the AWS CloudFormation console in the **
 
 You can view the status of the pipeline in the solution console in the **Status** column. After a few minutes, you can receive an Active status.
 
-[quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
+## Post-Upgrade Actions (only applicable to data modeling enabled)
+
+### Upgrade the Data Schema and Out-of-the-box Dashboards
+
+The solution automatically and asynchronously upgrades the views and materialized views used by the dashboard after upgrading the pipeline of the project. The duration of the update depends on the workload of the Redshift cluster and the existing data volume, and can take minutes to hours. You can track the progress in the **Redshift Schemas** section in the **Processing** tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via **Actions - Redrive** or **New execution** with the input unchanged.
+
+### Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
+
+1. Open [Redshift query editor v2][query-editor]. You can refer to the AWS document [Working with query editor v2][working-with-query-editor] to log in and query data using Redshift query editor v2.
+
+    !!! info "Note"
+        You must use the `admin` user or a user with schema (known as the app ID) ownership permission. See this [FAQ][view-schema-in-redshift] for more details.
+
+2. Select the Serverless workgroup or provisioned cluster, `<project-id>`->`<app-id>`->Tables, and ensure that tables for the appId are listed there.
+
+3. Create a new SQL Editor.
+
+4. Execute the following SQL in the editor, which will migrate all events from the past 180 days up until now to the new tables.
+
+    ```sql
+    -- please replace `<app-id>` with your actual app id
+    -- update the day range based on your needs
+    CALL "<app-id>".sp_migrate_all_to_v2(180);
+    ```
+
+5. Wait for the SQL to complete. The execution time depends on the volume of data in the `events` table.
+
+6. Execute the following SQL to check the stored procedure execution log; ensure there are no errors. If there are any interruptions, timeouts, or other errors, you can re-execute step 4 to continue the data migration.
+
+    ```sql
+    -- please replace `<app-id>` with your actual app id
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_event_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_all_to_v2' ORDER BY log_date DESC;
+    ```
+
+7. If you don't have other applications using the legacy tables and views, you could run the following SQL to clean up the legacy views and tables to save Redshift storage.
+
+    ```sql
+    -- please replace `<app-id>` with your actual app id
+    DROP TABLE "<app-id>".event CASCADE;
+    DROP TABLE "<app-id>".item CASCADE;
+    DROP TABLE "<app-id>".user CASCADE;
+    DROP TABLE "<app-id>".event_parameter CASCADE;
+
+    DROP PROCEDURE "<app-id>".sp_migrate_event_to_v2(nday integer);
+    DROP PROCEDURE "<app-id>".sp_migrate_item_to_v2(nday integer);
+    DROP PROCEDURE "<app-id>".sp_clear_expired_events(retention_range_days integer);
+    DROP PROCEDURE "<app-id>".sp_migrate_all_to_v2(nday integer);
+    DROP PROCEDURE "<app-id>".sp_migrate_user_to_v2();
+    DROP PROCEDURE "<app-id>".sp_migrate_session_to_v2();
+    DROP PROCEDURE "<app-id>".sp_clear_item_and_user();
+    ```
+
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md
 [query-editor]: https://aws.amazon.com/redshift/query-editor-v2/
@@ -65,3 +124,5 @@ You can view the status of the pipeline in the solution console in the **Status*
 [intranet-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/private-exist-vpc-control-plane-stack.template.json
 [troubleshooting]: ./troubleshooting.md
 [v115]: https://awslabs.github.io/clickstream-analytics-on-aws/en/1.1.5/upgrade/
+[exploration]: ./analytics/explore/index.md
+[view-schema-in-redshift]: ./faq.md#i-already-enable-data-modeling-on-redshift-so-why-cant-i-see-the-schema-and-tables-created-by-this-solution-in-the-redshift-query-editor

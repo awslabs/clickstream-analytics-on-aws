@@ -2,8 +2,8 @@
 
 !!! warning " 升级须知"
 
-    1. 请注意,从版本 1.0.x 直接升级到此版本是不被支持的。必须先升级到[版本1.1.5][v115]。
-    2. 从版本 1.1.5 或任何更早的 1.1 版本升级都会重建默认的仪表板分析，无法分析先前的数据。如果您需要迁移现有数据，请通过您的销售代表与 AWS Clickstream 团队联系以获取支持。
+    1. 请注意，不支持直接从1.0.x版本升级到当前版本。您需要先升级到[1.1.5版本][v115]。
+    2. 从较早的1.1版本(1.1.6之前)升级Web控制台后，您仍然可以查看项目的仪表板。但是，由于此功能依赖于新的数据模型，您将无法在分析工作坊[探索老版本的点击流数据][exploration]。
 
 ## 升级过程
 
@@ -51,6 +51,62 @@
 
 您可以在解决方案控制台的 **状态** 列中查看管道的状态。 几分钟后您应该会收到`活跃`状态。
 
+## 升级后操作(仅适用于已启用数据建模)
+
+### 升级数据模型和预置仪表板
+
+在升级项目的管道后，解决方案会自动异步升级仪表板所需的视图和物化视图。更新持续时间取决于 Redshift 集群的工作负载和现有数据量，可能需要几分钟到几小时。您可以在管道详情页面的**数据处理和建模**标签下的**Redshift Schemas**部分中跟踪进度。如果后期配置作业失败，您可以通过其链接访问工作流程的执行情况，然后使用保持不变的输入通过**操作 - 重启**或**新执行**来重新运行作业。
+
+### 迁移现有数据(仅适用于从1.1.6之前的版本升级)
+
+1. 打开[Redshift查询编辑器v2][query-editor]。您可以参考AWS文档[使用查询编辑器v2][working-with-query-editor]，以登录并使用Redshift查询编辑器查询数据。
+
+    !!! info "注意"
+        您必须使用admin用户或具有schema(即作为应用程序ID)所有权权限的用户。有关更多详细信息，请参阅此[FAQ][view-schema-in-redshift]。
+
+2. 选择Serverless工作组或预置集群，`<project-id>`->`<app-id>`->表，并确保列出了appId的表。
+
+3. 创建一个新的SQL编辑器。
+
+4. 在编辑器中执行以下SQL，它将迁移从此刻开始过去180天内的所有事件到新表。
+
+    ```sql
+    -- 请用您的实际应用程序ID替换 `<app-id>`
+    -- 根据需要更新天数范围
+    CALL "<app-id>".sp_migrate_all_to_v2(180);
+    ```
+
+5. 等待SQL执行完成。执行时间取决于`events`表中的数据量。
+
+6. 执行以下SQL来检查存储过程执行日志，确保没有错误。如遇中断，超时，其他错误，可重新执行第 4 步继续执行数据迁移。
+
+    ```sql
+    -- 请用您的实际应用程序ID替换 `<app-id>`
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_event_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_all_to_v2' ORDER BY log_date DESC;
+    ```
+
+7. 如果您没有其他应用程序使用旧表和视图，您可以运行以下SQL来清理旧视图和表，从而节省Redshift存储空间。
+
+    ```sql
+    -- 请用您的实际应用程序ID替换 `<app-id>`
+    DROP TABLE "<app-id>".event CASCADE;
+    DROP TABLE "<app-id>".item CASCADE;
+    DROP TABLE "<app-id>".user CASCADE;
+    DROP TABLE "<app-id>".event_parameter CASCADE;
+
+    DROP PROCEDURE "<app-id>".sp_migrate_event_to_v2(nday integer);
+    DROP PROCEDURE "<app-id>".sp_migrate_item_to_v2(nday integer);
+    DROP PROCEDURE "<app-id>".sp_clear_expired_events(retention_range_days integer);
+    DROP PROCEDURE "<app-id>".sp_migrate_all_to_v2(nday integer);
+    DROP PROCEDURE "<app-id>".sp_migrate_user_to_v2();
+    DROP PROCEDURE "<app-id>".sp_migrate_session_to_v2();
+    DROP PROCEDURE "<app-id>".sp_clear_item_and_user();
+    ```        
+
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md
@@ -65,3 +121,5 @@
 [intranet-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/private-exist-vpc-control-plane-stack.template.json
 [troubleshooting]: ./troubleshooting.md
 [v115]: https://awslabs.github.io/clickstream-analytics-on-aws/zh/1.1.5/upgrade/
+[exploration]: ./analytics/explore/index.md
+[view-schema-in-redshift]: ./faq.md#redshift-redshift-schema
