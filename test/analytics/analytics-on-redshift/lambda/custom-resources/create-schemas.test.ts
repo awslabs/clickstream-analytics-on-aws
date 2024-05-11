@@ -431,7 +431,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     try {
       await handler(createServerlessEvent, context, callback);
     } catch (e) {
-      expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
+      expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 4);
       expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
       return;
     }
@@ -533,7 +533,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     try {
       await handler(createProvisionedEvent, context, callback);
     } catch (e) {
-      expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
+      expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 4);
       expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
 
       expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
