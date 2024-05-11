@@ -368,10 +368,13 @@ public final class ClickstreamEventParser extends BaseEventParser {
         }
         clickstreamEvent.setPageViewPageReferrer(ingestEvent.getAttributes().getPageReferrer());
         clickstreamEvent.setPageViewPageReferrerTitle(ingestEvent.getAttributes().getPageReferrerTitle());
-        if (ingestEvent.getAttributes().getPreviousTimestamp() != null) {
-            clickstreamEvent.setPageViewPreviousTimeMsec(ingestEvent.getAttributes().getPreviousTimestamp() + timeShiftInfo.getTimeDiff());
+
+        if (EVENT_PAGE_VIEW.equals(ingestEvent.getEventName())) {
+            clickstreamEvent.setPageViewEngagementTimeMsec(ingestEvent.getAttributes().getEngagementTimeMsec());
+            if (ingestEvent.getAttributes().getPreviousTimestamp() != null) {
+                clickstreamEvent.setPageViewPreviousTimeMsec(ingestEvent.getAttributes().getPreviousTimestamp() + timeShiftInfo.getTimeDiff());
+            }
         }
-        clickstreamEvent.setPageViewEngagementTimeMsec(ingestEvent.getAttributes().getEngagementTimeMsec());
         clickstreamEvent.setPageViewPageTitle(ingestEvent.getAttributes().getPageTitle());
         clickstreamEvent.setPageViewPageUrl(ingestEvent.getAttributes().getPageUrl());
 
@@ -402,10 +405,12 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setScreenViewPreviousScreenId(ingestEvent.getAttributes().getPreviousScreenId());
         clickstreamEvent.setScreenViewPreviousScreenUniqueId(ingestEvent.getAttributes().getPreviousScreenUniqueId());
 
-        if (ingestEvent.getAttributes().getPreviousTimestamp() != null) {
-            clickstreamEvent.setScreenViewPreviousTimeMsec(ingestEvent.getAttributes().getPreviousTimestamp() + timeShiftInfo.getTimeDiff());
+        if (EVENT_SCREEN_VIEW.equals(ingestEvent.getEventName())) {
+            clickstreamEvent.setScreenViewEngagementTimeMsec(ingestEvent.getAttributes().getEngagementTimeMsec());
+            if (ingestEvent.getAttributes().getPreviousTimestamp() != null) {
+                clickstreamEvent.setScreenViewPreviousTimeMsec(ingestEvent.getAttributes().getPreviousTimestamp() + timeShiftInfo.getTimeDiff());
+            }
         }
-        clickstreamEvent.setScreenViewEngagementTimeMsec(ingestEvent.getAttributes().getEngagementTimeMsec());
         clickstreamEvent.setScreenViewEntrances(ingestEvent.getAttributes().getEntrances());
 
     }
