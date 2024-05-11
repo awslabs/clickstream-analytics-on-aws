@@ -40,7 +40,6 @@ export function getRedshiftClient(roleArn: string) {
   });
 }
 
-
 export const executeStatements = async (client: RedshiftDataClient, sqlStatements: string[],
   serverlessRedshiftProps?: RedshiftServerlessProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
   database?: string, logSQL: boolean = true) => {
@@ -62,32 +61,50 @@ export const executeStatements = async (client: RedshiftDataClient, sqlStatement
     logger.warn('No SQL statement to execute.');
     return;
   }
-  let queryId: string;
-  if (sqlStatements.length == 1) {
-    const params = new ExecuteStatementCommand({
-      Sql: sqlStatements[0],
-      WorkgroupName: serverlessRedshiftProps?.workgroupName,
-      ClusterIdentifier: provisionedRedshiftProps?.clusterIdentifier,
-      DbUser: provisionedRedshiftProps?.dbUser,
-      Database: database ?? (serverlessRedshiftProps?.databaseName ?? provisionedRedshiftProps?.databaseName),
-      WithEvent: true,
-    });
-    const execResponse = await client.send(params);
-    queryId = execResponse.Id!;
-  } else {
-    const params = new BatchExecuteStatementCommand({
-      Sqls: sqlStatements,
-      WorkgroupName: serverlessRedshiftProps?.workgroupName,
-      ClusterIdentifier: provisionedRedshiftProps?.clusterIdentifier,
-      DbUser: provisionedRedshiftProps?.dbUser,
-      Database: database ?? (serverlessRedshiftProps?.databaseName ?? provisionedRedshiftProps?.databaseName),
-      WithEvent: true,
-    });
-    const execResponse = await client.send(params);
-    queryId = execResponse.Id!;
+  let queryId: string = '';
+  const MAX_RETRIES = 3;
+  let attempt = 0;
+  let success = false;
+  let execResponse;
+  while (!success && attempt <= MAX_RETRIES) {
+    try {
+      if (sqlStatements.length == 1) {
+        const params = new ExecuteStatementCommand({
+          Sql: sqlStatements[0],
+          WorkgroupName: serverlessRedshiftProps?.workgroupName,
+          ClusterIdentifier: provisionedRedshiftProps?.clusterIdentifier,
+          DbUser: provisionedRedshiftProps?.dbUser,
+          Database: database ?? (serverlessRedshiftProps?.databaseName ?? provisionedRedshiftProps?.databaseName),
+          WithEvent: true,
+        });
+        execResponse = await client.send(params);
+        queryId = execResponse.Id!;
+      } else {
+        const params = new BatchExecuteStatementCommand({
+          Sqls: sqlStatements,
+          WorkgroupName: serverlessRedshiftProps?.workgroupName,
+          ClusterIdentifier: provisionedRedshiftProps?.clusterIdentifier,
+          DbUser: provisionedRedshiftProps?.dbUser,
+          Database: database ?? (serverlessRedshiftProps?.databaseName ?? provisionedRedshiftProps?.databaseName),
+          WithEvent: true,
+        });
+        execResponse = await client.send(params);
+        queryId = execResponse.Id!;
+      }
+      success = true;
+    } catch (err: any) {
+      attempt++;
+      if (attempt <= MAX_RETRIES) {
+        logger.info(`Retrying (${attempt}/${MAX_RETRIES})...`);
+        await sleep(2000 * attempt);
+      } else {
+        logger.error(`Error happened when executing SQL statement after retrying ${attempt} times.`, err);
+        throw err;
+      }
+    }
   }
-  logger.info(`Got query_id:${queryId} after executing command ${logSQL ? sqlStatements.join(';') : '***'} in redshift.`);
 
+  logger.info(`Got query_id:${queryId} after executing command ${logSQL ? sqlStatements.join(';') : '***'} in redshift.`);
   return queryId;
 };
 

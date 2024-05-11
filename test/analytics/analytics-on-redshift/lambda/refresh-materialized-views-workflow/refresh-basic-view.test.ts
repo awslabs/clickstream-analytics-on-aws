@@ -63,7 +63,7 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
   });
 
   test('Execute command error in Redshift when doing refresh', async () => {
-    redshiftDataMock.on(ExecuteStatementCommand).rejectsOnce();
+    redshiftDataMock.on(ExecuteStatementCommand).rejects();
     try {
       await handler(refreshBasicViewEvent);
       fail('The error in executing statement of Redshift data was caught');
@@ -72,6 +72,26 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
         WorkgroupName: workGroupName,
       });
     }
+  });
+
+  test('Execute command error at first time in Redshift when doing refresh', async () => {
+    const exeuteId = 'Id-1';
+    redshiftDataMock.on(ExecuteStatementCommand)
+      .rejectsOnce()
+      .resolves({ Id: exeuteId });
+
+    const resp = await handler(refreshBasicViewEvent);
+    expect(resp).toEqual({
+      detail: {
+        viewName: refreshBasicViewEvent.view.name,
+        queryId: exeuteId,
+      },
+      timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+      WorkgroupName: workGroupName,
+      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name};`,
+    });
   });
 });
 

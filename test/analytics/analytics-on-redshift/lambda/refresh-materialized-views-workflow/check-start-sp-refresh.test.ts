@@ -64,6 +64,35 @@ describe('Lambda - check next refresh task', () => {
     });
   });
 
+  test('the end refresh time is not more than latest refresh time, but forceRefresh is empty', async () => {
+    checkNextRefreshViewEvent.originalInput.forceRefresh = '';
+    redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({
+      Records: [
+        [{ stringValue: '2024-05-08' }],
+      ],
+    });
+    const resp = await handler(checkNextRefreshViewEvent);
+    expect(resp).toEqual({
+      nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
+      refreshDate: '2024-05-08',
+      refreshSpDays: 8,
+      spList: expect.arrayContaining([
+        {
+          name: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
+          type: 'sp',
+          timezoneSensitive: 'true',
+          viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
+        },
+        {
+          name: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP,
+          type: 'sp',
+          timezoneSensitive: 'true',
+          viewName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
+        },
+      ]),
+    });
+  });
+
   test('the end refresh time is not more than latest refresh time, but forceRefresh is true', async () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
     redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({
