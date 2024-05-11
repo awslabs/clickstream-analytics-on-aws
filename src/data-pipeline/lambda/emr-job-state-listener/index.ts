@@ -122,10 +122,25 @@ async function sendMetrics(event: any) {
 
   let metrics: {
     source: number;
-    flattedSource: number; sink: number;
-    corrupted: number; jobTimeSeconds: number;
+    flattedSource: number;
+    sink: number;
+    corrupted: number;
+    jobTimeSeconds: number;
     inputFileCount: number;
-  } = { source: 0, flattedSource: 0, sink: 0, corrupted: 0, jobTimeSeconds: 0, inputFileCount: 0 };
+    filteredByAppIds: number;
+    filteredByDataFreshnessAndFuture: number;
+    filteredByBot: number;
+  } = {
+    source: 0,
+    flattedSource: 0,
+    sink: 0,
+    corrupted: 0,
+    jobTimeSeconds: 0,
+    inputFileCount: 0,
+    filteredByAppIds: 0,
+    filteredByDataFreshnessAndFuture: 0,
+    filteredByBot: 0,
+  };
 
   const dropTableRegEx = new RegExp(/DROP TABLE IF EXISTS (.*) PURGE/);
   const metricRegEx = new RegExp(/\[ETLMetric\]/);
@@ -134,6 +149,12 @@ async function sendMetrics(event: any) {
   const sinkRegEx = new RegExp(/\[ETLMetric\]sink dataset count:\s*(\d+)/);
   const corruptedRegEx = new RegExp(/\[ETLMetric\]corrupted dataset count:\s*(\d+)/);
   const inputFileCountRegEx = new RegExp(/\[ETLMetric\]loaded input files dataset count:\s*(\d+)/);
+  // [ETLMetric]filtered by AppIds dataset count:0
+  const filteredByAppIds = new RegExp(/\[ETLMetric\]filtered by AppIds dataset count:\s*(\d+)/);
+  // [ETLMetric]filtered by DataFreshnessAndFuture dataset count:0
+  const filteredByDataFreshnessAndFuture = new RegExp(/\[ETLMetric\]filtered by DataFreshnessAndFuture dataset count:\s*(\d+)/);
+  // [ETLMetric]filtered by Bot dataset count:0
+  const filteredByBot = new RegExp(/\[ETLMetric\]filtered by Bot dataset count:\s*(\d+)/);
 
   const droppedTables: string[] = [];
   let n = 0;
@@ -156,6 +177,9 @@ async function sendMetrics(event: any) {
     const sinkMatch = sinkRegEx.exec(line);
     const corruptedMatch = corruptedRegEx.exec(line);
     const inputFileCountMatch = inputFileCountRegEx.exec(line);
+    const filteredByAppIdsMatch = filteredByAppIds.exec(line);
+    const filteredByDataFreshnessAndFutureMatch = filteredByDataFreshnessAndFuture.exec(line);
+    const filteredByBotMatch = filteredByBot.exec(line);
 
     if (sourceMatch) {
       metrics = {
@@ -182,6 +206,21 @@ async function sendMetrics(event: any) {
         ...metrics,
         inputFileCount: parseInt(inputFileCountMatch[1]),
       };
+    } else if (filteredByAppIdsMatch) {
+      metrics = {
+        ...metrics,
+        filteredByAppIds: parseInt(filteredByAppIdsMatch[1]),
+      };
+    } else if (filteredByDataFreshnessAndFutureMatch) {
+      metrics = {
+        ...metrics,
+        filteredByDataFreshnessAndFuture: parseInt(filteredByDataFreshnessAndFutureMatch[1]),
+      };
+    } else if (filteredByBotMatch) {
+      metrics = {
+        ...metrics,
+        filteredByBot: parseInt(filteredByBotMatch[1]),
+      };
     }
   };
 
@@ -196,7 +235,10 @@ async function sendMetrics(event: any) {
   jobMetrics.addMetric(DataPipelineCustomMetricsName.CORRUPTED, MetricUnits.Count, metrics.corrupted);
   jobMetrics.addMetric(DataPipelineCustomMetricsName.RUN_TIME, MetricUnits.Seconds, jobTimeSeconds);
   jobMetrics.addMetric(DataPipelineCustomMetricsName.INPUT_FILE_COUNT, MetricUnits.Count, metrics.inputFileCount);
-
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.FILTERED_BY_APP_IDS, MetricUnits.Count, metrics.filteredByAppIds);
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.FILTERED_BY_DATA_FRESHNESS_AND_FUTURE,
+    MetricUnits.Count, metrics.filteredByDataFreshnessAndFuture);
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.FILTERED_BY_BOT, MetricUnits.Count, metrics.filteredByBot);
   jobMetrics.publishStoredMetrics();
 
   logger.info('droppedTables', { droppedTables });

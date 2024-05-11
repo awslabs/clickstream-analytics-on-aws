@@ -196,11 +196,19 @@ public class Cleaner {
     }
 
     private Dataset<Row> filter(final Dataset<Row> dataset) {
+        long beforeCount = dataset.count();
+        log.info("dataset before filter count: {}", beforeCount);
+
         Dataset<Row> freshDataset = filterByDataFreshnessAndFuture(dataset);
-        log.info(new ETLMetric(freshDataset, "after filterByDataFreshnessAndFuture").toString());
+        long afterFilterFreshCount = freshDataset.count();
+
+        log.info(new ETLMetric(beforeCount - afterFilterFreshCount, "filtered by DataFreshnessAndFuture").toString());
 
         Dataset<Row> filteredDataset = filterByAppIds(freshDataset);
-        log.info(new ETLMetric(filteredDataset, "after filterByAppIds").toString());
+        long afterFilterAppIdsCount = filteredDataset.count();
+
+        log.info(new ETLMetric(afterFilterFreshCount - afterFilterAppIdsCount , "filtered by AppIds").toString());
+        log.info("dataset after filter count: {}", afterFilterAppIdsCount);
         return filteredDataset;
     }
 

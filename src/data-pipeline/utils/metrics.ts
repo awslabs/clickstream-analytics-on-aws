@@ -227,6 +227,21 @@ export function createMetricsWidget(scope: Construct, props: {
             DataPipelineCustomMetricsName.SINK,
             '.', '.', '.', '.',
           ],
+          [
+            dataPipelineNamespace,
+            DataPipelineCustomMetricsName.FILTERED_BY_APP_IDS,
+            '.', '.', '.', '.',
+          ],
+          [
+            dataPipelineNamespace,
+            DataPipelineCustomMetricsName.FILTERED_BY_DATA_FRESHNESS_AND_FUTURE,
+            '.', '.', '.', '.',
+          ],
+          [
+            dataPipelineNamespace,
+            DataPipelineCustomMetricsName.FILTERED_BY_BOT,
+            '.', '.', '.', '.',
+          ],
         ],
       },
     },
