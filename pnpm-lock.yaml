@@ -75,7 +75,7 @@ importers:
         version: 3.540.0
       '@aws-sdk/client-kinesis-analytics-v2':
         specifier: ^3.523.0
-        version: 3.540.0
+        version: 3.574.0
       '@aws-sdk/client-kms':
         specifier: ^3.523.0
         version: 3.574.0
@@ -474,7 +474,7 @@ importers:
         version: 3.3.4(webpack@5.91.0)
       tailwindcss:
         specifier: ^3.3.2
-        version: 3.4.3(ts-node@10.9.2)
+        version: 3.4.1
       terser-webpack-plugin:
         specifier: ^5.2.5
         version: 5.3.10(esbuild@0.17.19)(webpack@5.91.0)
@@ -766,10 +766,10 @@ importers:
         version: 3.574.0
       '@aws-sdk/client-kafka':
         specifier: ^3.523.0
-        version: 3.540.0
+        version: 3.569.0
       '@aws-sdk/client-kinesis-analytics-v2':
         specifier: ^3.523.0
-        version: 3.540.0
+        version: 3.574.0
       '@aws-sdk/client-kms':
         specifier: ^3.523.0
         version: 3.574.0
@@ -1896,9 +1896,9 @@ packages:
       - aws-crt
     dev: false
 
-  /@aws-sdk/client-kinesis@3.574.0:
-    resolution: {integrity: sha512-KiAPj/ptL/uWyP3geylGmvBwxbi+gDWLMiA1bavl6yVXpo3Hd8yoBWawo3C+hbROMQCagaOTRotCw46qH8m5Yw==}
-    engines: {node: '>=16.0.0'}
+  /@aws-sdk/client-kinesis@3.540.0:
+    resolution: {integrity: sha512-YLLj+J3aRwXBVdnDyRCGx9tVCcWwsKWyRIAb+Ea6pKXlySL8ymx1bhXw060pcbiUh/UHDjxYeDNHL8/6vWyA7g==}
+    engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
@@ -1998,9 +1998,9 @@ packages:
       - aws-crt
     dev: false
 
-  /@aws-sdk/client-lambda@3.574.0:
-    resolution: {integrity: sha512-l0+v9FxV9RAtN6vGfCRV6uq2dw46DN8hYudg/9sffPw5wPawfwGfg3iwxCp18lYn6Hddn5HEzaBVZW+fvDBcuw==}
-    engines: {node: '>=16.0.0'}
+  /@aws-sdk/client-lambda@3.540.0:
+    resolution: {integrity: sha512-pAVEUlQqpzTCpOmdnSXub+wjTtyJAwJFdmGW7rHpYpwQ4HfPhmN/vB6bczdl2vQNArfwS86AzTJNsftc3ID46g==}
+    engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
@@ -12833,6 +12833,7 @@ packages:
       pretty-format: 27.5.1
       slash: 3.0.0
       strip-json-comments: 3.1.1
+      ts-node: 10.9.2(@types/node@20.12.8)(typescript@4.9.5)
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -12875,6 +12876,7 @@ packages:
       pretty-format: 29.7.0
       slash: 3.0.0
       strip-json-comments: 3.1.1
+      ts-node: 10.9.2(@types/node@20.12.8)(typescript@4.9.5)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -12892,7 +12894,7 @@ packages:
       ts-node:
         optional: true
     dependencies:
-      '@babel/core': 7.24.3
+      '@babel/core': 7.24.5
       '@jest/test-sequencer': 29.7.0
       '@jest/types': 29.6.3
       '@types/node': 20.12.8
@@ -17251,8 +17253,8 @@ packages:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
     dev: true
 
-  /tailwindcss@3.4.3(ts-node@10.9.2):
-    resolution: {integrity: sha512-U7sxQk/n397Bmx4JHbJx/iSOOv5G+II3f1kpLpY2QeUv5DcPdcTsYLlusZfq1NthHS1c1cZoyFmmkex1rzke0A==}
+  /tailwindcss@3.4.1:
+    resolution: {integrity: sha512-qAYmXRfk3ENzuPBakNK0SRrUDipP8NQnEY6772uDhflcQz5EhRdD7JNZxyrFHVQNCwULPBn6FNPp9brpO7ctcA==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
