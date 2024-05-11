@@ -133,6 +133,8 @@ test('lambda should record SUCCESS job state', async () => {
     '23/04/04 02:43:36 INFO Cleaner: [ETLMetric]after processDataColumnSchema dataset count:123',
     '23/04/04 02:43:42 INFO Cleaner: [ETLMetric]after filterByDataFreshness dataset count:123',
     '23/04/04 02:43:46 INFO Cleaner: [ETLMetric]after filterByAppIds dataset count:123',
+    '23/04/04 02:43:46 INFO Cleaner: [ETLMetric]filtered by AppIds dataset count:126',
+    '23/04/04 02:43:50 INFO Cleaner: [ETLMetric]filtered by DataFreshnessAndFuture dataset count:12',
     '23/04/04 02:43:50 INFO Cleaner: [ETLMetric]after filter dataset count:123',
     '23/04/04 02:43:54 INFO Transformer: [ETLMetric]after clean dataset count:999',
     '23/04/04 02:43:59 INFO Transformer: [ETLMetric]transform return dataset count:123',
@@ -143,6 +145,7 @@ test('lambda should record SUCCESS job state', async () => {
     '23/09/15 06:37:01 INFO TransformerV2: DROP TABLE IF EXISTS test_project_007_13158910.etl_user_device_id_430162815_tmp_w_ PURGE',
     '23/09/15 06:37:04 INFO TransformerV2: DROP TABLE IF EXISTS test_project_007_13158910.etl_user_device_id_430162815_tmp_ PURGE',
     '23/09/15 06:36:17 INFO ETLRunner: [ETLMetric]sink event_parameter dataset count:55305',
+    '23/09/15 06:36:17 INFO UAEnrichmentV2: [ETLMetric]filtered by Bot dataset count:16',
     '23/09/15 06:36:17 INFO ETLRunner: [ETLMetric]sink item dataset count:37119',
     '23/09/15 06:36:17 INFO ETLRunner: [ETLMetric]sink user dataset count:7818',
 
@@ -218,6 +221,9 @@ test('lambda should record SUCCESS job state', async () => {
       [DataPipelineCustomMetricsName.CORRUPTED, 'Count', 4],
       [DataPipelineCustomMetricsName.RUN_TIME, 'Seconds', 3600],
       [DataPipelineCustomMetricsName.INPUT_FILE_COUNT, 'Count', 41],
+      [DataPipelineCustomMetricsName.FILTERED_BY_APP_IDS, 'Count', 126],
+      [DataPipelineCustomMetricsName.FILTERED_BY_DATA_FRESHNESS_AND_FUTURE, 'Count', 12],
+      [DataPipelineCustomMetricsName.FILTERED_BY_BOT, 'Count', 16],
     ],
   );
   expect(publishStoredMetricsMock).toBeCalledTimes(1);
