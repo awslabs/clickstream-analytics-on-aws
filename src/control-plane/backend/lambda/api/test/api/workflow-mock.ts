@@ -1114,7 +1114,7 @@ export const STREAMING_BASE_PARAMETERS = [
   },
   {
     ParameterKey: 'KinesisSourceStreamArn.#',
-    ParameterValue: '#.Clickstream-Ingestion-kinesis-6666-6666.KinesisArn',
+    ParameterValue: `#.${getStackPrefix()}-Ingestion-kinesis-6666-6666.KinesisArn`,
   },
   {
     ParameterKey: 'KinesisEncryptionKMSKeyArn',
@@ -1146,11 +1146,11 @@ export const STREAMING_BASE_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftDataAPIRole.#',
-    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.RedshiftDataApiRoleArn',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.RedshiftDataApiRoleArn`,
   },
   {
     ParameterKey: 'RedshiftUserParam.#',
-    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.BIUserName',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserName`,
   },
 ];
 
