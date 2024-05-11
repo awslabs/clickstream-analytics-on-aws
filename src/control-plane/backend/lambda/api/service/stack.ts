@@ -335,25 +335,25 @@ export class StackManager {
     return state;
   }
 
-  public setPipelineWorkflowCallback() {
+  public setPipelineWorkflowCallback(executionName: string) {
     if (!this.execWorkflow || !this.workflow) {
       throw new Error('Pipeline workflow is empty.');
     }
-    this.execWorkflow.Workflow = this._setWorkflowCallback(this.execWorkflow.Workflow);
-    this.workflow.Workflow = this._setWorkflowCallback(this.workflow.Workflow);
+    this.execWorkflow.Workflow = this._setWorkflowCallback(this.execWorkflow.Workflow, executionName);
+    this.workflow.Workflow = this._setWorkflowCallback(this.workflow.Workflow, executionName);
   }
 
-  private _setWorkflowCallback(state: WorkflowState): WorkflowState {
+  private _setWorkflowCallback(state: WorkflowState, executionName: string): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
         for (let key of Object.keys(branch.States)) {
-          branch.States[key] = this._setWorkflowCallback(branch.States[key]);
+          branch.States[key] = this._setWorkflowCallback(branch.States[key], executionName);
         }
       }
     } else if (state.Type === WorkflowStateType.STACK || state.Type === WorkflowStateType.PASS) {
       state.Data!.Callback = {
         BucketName: stackWorkflowS3Bucket ?? '',
-        BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
+        BucketPrefix: `clickstream/workflow/${executionName}`,
       };
     }
     return state;

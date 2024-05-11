@@ -2878,6 +2878,9 @@ describe('Pipeline test', () => {
     });
   });
   it('Update pipeline add reporting', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
@@ -2926,9 +2929,9 @@ describe('Pipeline test', () => {
       expect(
         reportingState.M.End.BOOL === true &&
         reportingState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
-        reportingState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-3333-3333' &&
+        reportingState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000' &&
         redshiftState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
-        redshiftState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-3333-3333',
+        redshiftState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000',
       ).toBeTruthy();
     });
     const res = await request(app)
