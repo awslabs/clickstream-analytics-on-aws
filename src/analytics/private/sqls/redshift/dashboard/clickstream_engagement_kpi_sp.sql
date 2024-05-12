@@ -37,9 +37,9 @@ BEGIN
     select 
       event_date,
       platform,
-      sum(session_indicator)::double precision/count(distinct merged_user_id) as avg_session_per_user,
-      sum(case when session_indicator = 1 then user_engagement_time_msec else 0 end)::double precision/sum(session_indicator)/1000/60 as avg_engagement_time_per_session_minutes,
-      sum(case when session_indicator = 1 then user_engagement_time_msec else 0 end)::double precision/count(distinct merged_user_id)/1000/60 avg_engagement_time_per_user_minutes
+      sum(session_indicator)::real/count(distinct merged_user_id) as avg_session_per_user,
+      sum(case when session_indicator = 1 then user_engagement_time_msec else 0 end)::real/sum(session_indicator)/1000/60 as avg_engagement_time_per_session_minutes,
+      sum(case when session_indicator = 1 then user_engagement_time_msec else 0 end)::real/count(distinct merged_user_id)/1000/60 avg_engagement_time_per_user_minutes
     from tmp1
     group by 1,2
     ;
