@@ -314,6 +314,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     ...commonDevDeps,
   ],
   minNodeVersion,
+  pnpmVersion,
   jestOptions: {
     jestConfig: {
       setupFiles: ['./test/jestEnv.js'],
@@ -414,6 +415,7 @@ const baseProject = new typescript.TypeScriptProject({
   eslint: false,
   sampleCode: false,
   packageManager: project.package.packageManager,
+  pnpmVersion,
   projenCommand: project.projenCommand,
 });
 baseProject.addFields({ version });
@@ -478,6 +480,7 @@ const frontendProject = new typescript.TypeScriptProject({
     },
   },
   minNodeVersion,
+  pnpmVersion,
   jestOptions: {
     jestConfig: {
       roots: ['<rootDir>/src', '<rootDir>/test'],
@@ -604,6 +607,7 @@ const apiProject = new typescript.TypeScriptProject({
     },
   },
   packageManager: project.package.packageManager,
+  pnpmVersion,
   projenCommand: project.projenCommand,
 });
 apiProject.setScript('dev', 'nodemon --watch \'**/*.ts\' -e ts --exec \'ts-node\' ./index.ts');
