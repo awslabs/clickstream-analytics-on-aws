@@ -54,12 +54,13 @@ describe('Lambda - check the scan metadata status in Redshift Serverless', () =>
       detail: {
         appId: 'app1',
         status: StatusString.FINISHED,
-        message: [],
+        message: 'Scan metadata success.',
       },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
       Id: checkScanMetadataStatusEvent.detail.id,
     });
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
   });
 
   test('Check scan metadata status with response STARTED', async () => {
@@ -179,12 +180,13 @@ describe('Lambda - check the scan metadata status in Redshift Provisioned', () =
       detail: {
         appId: 'app1',
         status: StatusString.FINISHED,
-        message: [],
+        message: 'Scan metadata success.',
       },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
       Id: checkScanMetadataStatusEvent.detail.id,
     });
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
   });
 
   test('Check scan metadata status with response STARTED', async () => {
