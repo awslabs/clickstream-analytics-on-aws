@@ -13,6 +13,8 @@
 
 package software.aws.solution.clickstream.common.sensors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Assertions;
@@ -29,6 +31,7 @@ import software.aws.solution.clickstream.common.model.ClickstreamUser;
 import software.aws.solution.clickstream.common.sensors.event.SensorsEvent;
 
 import java.io.IOException;
+import java.util.List;
 
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 
@@ -203,6 +206,27 @@ public class SensorsEventParserTest extends BaseTest {
         Assertions.assertEquals(0, r.getClickstreamEventList().size());
         Assertions.assertEquals(0, r.getClickstreamItemList().size());
         Assertions.assertNull(r.getClickstreamUser());
+    }
+
+    @Test
+    void test_parse_web_ua_data() throws IOException {
+      //    ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_parse_web_ua_data
+
+        String lines = resourceFileContent("/sensors-data/sensors-web-ua.json");
+        String[] lineList = lines.split("\n");
+
+        SensorsEventParser eventParser = SensorsEventParser.getInstance();
+        ExtraParams extraParams = ExtraParams.builder().build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        for (String line : lineList) {
+            JsonNode lineJson = objectMapper.readTree(line);
+            String ingestData = lineJson.get("data").asText();;
+            JsonNode dataNode = eventParser.getData(ingestData);
+            assert dataNode != null;
+            JsonNode ua = dataNode.get("properties").get("user_agent");
+            Assertions.assertNull(ua);
+        }
     }
 
 }

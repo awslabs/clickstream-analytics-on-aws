@@ -85,6 +85,7 @@ public class UAEnrichmentV2 {
             long beforeFilterCount = enrichedDataset.count();
             enrichedDatasetFiltered = enrichedDataset.filter(
                     col(Constant.DEVICE_UA_DEVICE_CATEGORY).notEqual(UAEnrichHelper.BOT)
+                            .or(col(Constant.DEVICE_UA_DEVICE_CATEGORY).isNull())
             );
             long afterFilterCount = enrichedDatasetFiltered.count();
             log.info(new ETLMetric(beforeFilterCount - afterFilterCount, "filtered by Bot").toString());
