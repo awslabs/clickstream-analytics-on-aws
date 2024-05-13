@@ -59,6 +59,12 @@
 
 ### 迁移现有数据(仅适用于从1.1.6之前的版本升级)
 
+!!! info "注意"
+
+    数据迁移过程是CPU密集型的。在开始迁移之前，请确保您的Redshift的负载较低。当迁移大量数据时，建议临时增加Redshift Serverless的RPU或集群大小。
+
+    在我们的基准测试中，我们使用32个RPU的Redshift Serverless，在25分钟内迁移了1亿个事件。
+
 1. 打开[Redshift查询编辑器v2][query-editor]。您可以参考AWS文档[使用查询编辑器v2][working-with-query-editor]，以登录并使用Redshift查询编辑器查询数据。
 
     !!! info "注意"
@@ -89,7 +95,9 @@
     SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_all_to_v2' ORDER BY log_date DESC;
     ```
 
-7. 如果您没有其他应用程序使用旧表和视图，您可以运行以下SQL来清理旧视图和表，从而节省Redshift存储空间。
+7. 计算迁移的数据在预置仪表板中使用的指标。参考[这个常见问题][faq-recalculate-data]获取执行步骤。
+
+8. 如果您没有其他应用程序使用旧表和视图，您可以运行以下SQL来清理旧视图和表，从而节省Redshift存储空间。
 
     ```sql
     -- 请用您的实际应用程序ID替换 `<app-id>`
@@ -123,3 +131,4 @@
 [v115]: https://awslabs.github.io/clickstream-analytics-on-aws/zh/1.1.5/upgrade/
 [exploration]: ./analytics/explore/index.md
 [view-schema-in-redshift]: ./faq.md#redshift-redshift-schema
+[faq-recalculate-data]: ./faq.md#_10

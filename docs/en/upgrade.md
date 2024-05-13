@@ -63,6 +63,12 @@ The solution automatically and asynchronously upgrades the views and materialize
 
 ### Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
 
+!!! info "Important"
+
+    The data migration process is CPU-intensive. Before starting the migration, ensure that the load on your Redshift is low. It's also advisable to consider temporarily increasing the RPUs of Redshift Serverless or the cluster size when migrating large volumes of data.
+
+    In our benchmark, we migrated 100 million events in 25 minutes using 32 RPUs of Redshift Serverless.
+
 1. Open [Redshift query editor v2][query-editor]. You can refer to the AWS document [Working with query editor v2][working-with-query-editor] to log in and query data using Redshift query editor v2.
 
     !!! info "Note"
@@ -72,7 +78,7 @@ The solution automatically and asynchronously upgrades the views and materialize
 
 3. Create a new SQL Editor.
 
-4. Customize the date range as desired, and execute the following SQL in the editor to migrate events from the past 180 days up to now to the new tables.
+4. Customize the date range as desired, and execute the following SQL in the editor to migrate events from the past 180 days, or any number of days up to the present, to the new tables.
 
     ```sql
     -- please replace `<app-id>` with your actual app id
@@ -93,7 +99,9 @@ The solution automatically and asynchronously upgrades the views and materialize
     SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_all_to_v2' ORDER BY log_date DESC;
     ```
 
-7. If you don't have other applications using the legacy tables and views, you could run the following SQL to clean up the legacy views and tables to save Redshift storage.
+7. Calculate the metrics for the migrated data used in the out-of-the-box dashboards. Refer to [this FAQ][faq-recalculate-data] for guidance.
+
+8. If you don't have other applications using the legacy tables and views, you could run the following SQL to clean up the legacy views and tables to save Redshift storage.
 
     ```sql
     -- please replace `<app-id>` with your actual app id
@@ -126,3 +134,4 @@ The solution automatically and asynchronously upgrades the views and materialize
 [v115]: https://awslabs.github.io/clickstream-analytics-on-aws/en/1.1.5/upgrade/
 [exploration]: ./analytics/explore/index.md
 [view-schema-in-redshift]: ./faq.md#i-already-enable-data-modeling-on-redshift-so-why-cant-i-see-the-schema-and-tables-created-by-this-solution-in-the-redshift-query-editor
+[faq-recalculate-data]: ./faq.md#how-do-i-recalculate-historical-events-for-out-of-the-box-dashboards
