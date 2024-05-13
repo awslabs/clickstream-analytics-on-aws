@@ -72,7 +72,7 @@ The solution automatically and asynchronously upgrades the views and materialize
 
 3. Create a new SQL Editor.
 
-4. Execute the following SQL in the editor, which will migrate all events from the past 180 days up until now to the new tables.
+4. Customize the date range as desired, and execute the following SQL in the editor to migrate events from the past 180 days up to now to the new tables.
 
     ```sql
     -- please replace `<app-id>` with your actual app id
