@@ -37,7 +37,7 @@ import {
   DescribeAnalysisCommand,
   DeleteUserCommand,
 } from '@aws-sdk/client-quicksight';
-import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
+import { BatchExecuteStatementCommand, DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
@@ -2240,12 +2240,12 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toEqual(true);
     expect(res.body.data).toEqual('OK');
-    expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 0);
+    expect(redshiftClientMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 0);
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
   });
 
   it('warmup data modeling redshift provisioned & reporting redshift serverless', async () => {
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
+    redshiftClientMock.on(ExecuteStatementCommand).resolves({
       Id: '11111111-2222-3333-4444-555555555555',
     });
     redshiftClientMock.on(DescribeStatementCommand).resolves({
@@ -2331,10 +2331,10 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toEqual(true);
     expect(res.body.data).toEqual('OK');
-    expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 1);
+    expect(redshiftClientMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
-    expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
-      Sqls: expect.arrayContaining([`select * from app1.${EVENT_USER_VIEW} limit 1`]),
+    expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
+      Sql: `select * from app1.${EVENT_USER_VIEW} limit 1`,
       WorkgroupName: 'redshift-workgroup-1',
     });
   });
@@ -2365,7 +2365,7 @@ describe('reporting test', () => {
   });
 
   it('warmup with execute ID', async () => {
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
+    redshiftClientMock.on(ExecuteStatementCommand).resolves({
       Id: '11111111-2222-3333-4444-555555555555',
     });
     redshiftClientMock.on(DescribeStatementCommand).resolves({
@@ -2452,12 +2452,12 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toEqual(true);
     expect(res.body.data).toEqual('OK');
-    expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 0);
+    expect(redshiftClientMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 0);
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
   });
 
   it('warmup retry max count', async () => {
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
+    redshiftClientMock.on(ExecuteStatementCommand).resolves({
       Id: '11111111-2222-3333-4444-555555555555',
     });
     redshiftClientMock.on(DescribeStatementCommand).resolves({
@@ -2543,7 +2543,7 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data).toEqual({ executeId: '11111111-2222-3333-4444-555555555555' });
-    expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 1);
+    expect(redshiftClientMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 31);
   });
 

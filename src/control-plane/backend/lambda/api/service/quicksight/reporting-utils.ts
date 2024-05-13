@@ -1880,7 +1880,7 @@ export async function warmupRedshift(pipeline: IPipeline, appId: string, execute
     redshiftData,
     workgroupName,
     pipeline.projectId,
-    [`select * from ${appId}.${EVENT_USER_VIEW} limit 1`],
+    `select * from ${appId}.${EVENT_USER_VIEW} limit 1`,
     executeId,
   );
   return queryId;
@@ -1890,12 +1890,12 @@ export const waitExecuteWarmupStatement = async (
   redshiftData: RedshiftData,
   workgroupName: string,
   database: string,
-  sqls: string[],
+  sql: string,
   executeId?: string) => {
   let queryId = executeId;
   if (!executeId) {
-    const executeStatementOutput = await redshiftData.batchExecuteStatement({
-      Sqls: sqls,
+    const executeStatementOutput = await redshiftData.executeStatement({
+      Sql: sql,
       WorkgroupName: workgroupName,
       Database: database,
       WithEvent: false,
