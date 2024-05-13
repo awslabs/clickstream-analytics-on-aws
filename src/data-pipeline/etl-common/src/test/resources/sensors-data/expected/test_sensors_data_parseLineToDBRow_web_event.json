@@ -24,7 +24,9 @@
   "device_ua_os_version" : null,
   "device_ua_device" : null,
   "device_ua_device_category" : null,
-  "device_ua" : null,
+  "device_ua" : {
+    "string" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.188"
+  },
   "device_screen_width" : 1080,
   "device_screen_height" : 2400,
   "device_viewport_width" : null,
@@ -102,13 +104,10 @@
   "custom_parameters" : {
     "distinct_id" : "9113946abd821d52",
     "screen_resolution" : "1080x2400",
-    "user_agent" : null,
     "properties" : {
       "$is_login_id" : false,
-      "$ip" : null,
       "$province" : null,
       "$city" : null,
-      "$user_agent" : null,
       "$url" : "com.farmerbb.notepad.android.NotepadActivity",
       "$screen_name" : "com.farmerbb.notepad.android.NotepadActivity",
       "$title" : "Notepad",

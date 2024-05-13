@@ -33,17 +33,11 @@ public class Properties {
     @JsonProperty("$is_login_id")
     private boolean isLoginId;
 
-    @JsonProperty("$ip")
-    private String ip;
-
     @JsonProperty("$province")
     private String province;
 
     @JsonProperty("$city")
     private String city;
-
-    @JsonProperty("$user_agent")
-    private String userAgent;
 
     @JsonProperty("$url")
     private String url;
