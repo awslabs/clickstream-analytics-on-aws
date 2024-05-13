@@ -6,6 +6,13 @@
 
 An AWS Solution that enables customers to build clickstream analytic system on AWS easily. This solution automates the data pipeline creation per customers' configurations with a visual pipeline builder, and provides SDKs for web and mobiles apps (including iOS, Android, and Web JS) to help customers to collect and ingest client-side data into the data pipeline on AWS. After data ingestion, the solution allows customers to further enrich and model the event data for business users to query, and provides built-in visualizations (e.g., acquisition, engagement, retention) to help them generate insights faster.
 
+## Pricing
+
+### How will I be charged and billed for the use of this solution?
+
+The solution is free to use, and you are responsible for the cost of AWS services used while running this solution. 
+You pay only for what you use, and there are no minimum or setup fees. Refer to the [Cost](./plan-deployment/cost.md) section for detailed cost estimation. 
+
 ## Data pipeline
 
 ### When do I choose Redshift serverless for data modeling?
@@ -66,11 +73,20 @@ Occasionally, the data processing job fails. You can re-run the failed job to re
 
 This solution uses a workflow named `ClickstreamLoadDataWorkflow`, orchestrated by Step Functions to load the processed data into Redshift. The workflow uses a DynamoDB table to record the files to be loaded that are processed by the data processing job. Any failure won't lose any data for loading into Redshift. It's safe to execute the workflow again to resume the loading workflow after it fails.
 
-## SDK
+### How do I recalculate historical events for out-of-the-box dashboards?
 
-### Can I use other SDK to send data to the pipeline created by this solution
+This solution only calculates the metrics in the out-of-the-box dashboards for the previous day. You might need to refresh the historical metrics after re-sending historical data, re-processing previous data, or re-importing data. You could manually reschedule the workflow to calculate historical data and update the existing metrics. Follow these steps:
 
-Yes, you can. The solution support users using third-party SDK to send data to the pipeline. Note that, if you want to enable data processing and modeling module when using a third-party SDK to send data, you will need to provide an transformation plugin to map third-party SDK's data structure to solution data schema. Please refer to [Custom plugin](./pipeline-mgmt/data-processing/configure-plugin.md) for more details.
+1. Open the Step Functions service in the AWS console for the region where your data pipeline is located.
+1. Find the state machine named **RefreshMaterializedViewsWorkflowRefreshMVStateMachine**. If you have multiple projects in the same region, check the tags of the state machine to ensure it belongs to the project for which you want to recalculate the metrics.
+1. Start a new execution with the following input JSON. You need to change the 
+`refreshStartTime` and `refreshEndTime` values to the date range for the data you want to recalculate.
+```json
+{
+"refreshEndTime": 1715406892000,
+"refreshStartTime": 1711929600000
+}
+```
 
 ## Analytics Studio
 
@@ -92,12 +108,11 @@ You are not allowed to modify the default dashboard directly, however, you can c
 5. Go back to the Dashboard, refresh the webpage, you should be able to see the Save As button at the upper right.
 6. Click Save as button, enter a name for the analysis, and click SAVE, now you should be able to see a new analysis in the Analyzes, with which now you can edit and publish a new dashboard.
 
-## Pricing
+## SDK
 
-### How will I be charged and billed for the use of this solution?
+### Can I use other SDK to send data to the pipeline created by this solution
 
-The solution is free to use, and you are responsible for the cost of AWS services used while running this solution. 
-You pay only for what you use, and there are no minimum or setup fees. Refer to the [Cost](./plan-deployment/cost.md) section for detailed cost estimation. 
+Yes, you can. The solution support users using third-party SDK to send data to the pipeline. Note that, if you want to enable data processing and modeling module when using a third-party SDK to send data, you will need to provide an transformation plugin to map third-party SDK's data structure to solution data schema. Please refer to [Custom plugin](./pipeline-mgmt/data-processing/configure-plugin.md) for more details.
 
 [monitoring-dashboard]: ./pipeline-mgmt/pipe-mgmt.md#monitoring-and-alarms
 [redshift-query-editor]: https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html
