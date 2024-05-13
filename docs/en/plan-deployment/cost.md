@@ -89,13 +89,13 @@ Key assumptions include:
 
 | Request Per Second | EMR schedule interval |  EMR cost | Redshift type            | Redshift Load cost  | Redshift Storage cost | S3 cost | Total (USD/Month) |
 | ----------------------- | --------------------- | ---------------- | -------- | ------------------------ |  ----- | ----- | -----  |
-| 10RPS             | Hourly                |     $108 ($2.2/GB)    | Serverless (8 based RPU) |     $157     |  $3.4     |  $0.36 |  $268.76    |
-|                         | 6-hourly              |     $43.4 ($0.88/GB)     | Serverless(8 based RPU)               |      $71      |  $3.4       | $0.36 |  $118.16    |
-|                         | Daily                 |      $64.8 ($1.32/GB)   | Serverless(8 based RPU)               |     $31     |  $3.4          |  $0.36 | $99.56    |
-| 100RPS             | Hourly                |      $933 ($1.9/GB)   | Serverless (8 based RPU) |       $424       |  $34      | $3.6 |  $1394.6    |
-|                         | 6-hourly              |     $433 ($0.88/GB)     | Serverless(8 based RPU)               |       $235       |  $34      |  $3.6 |  $705.6    |
-|                         | Daily                 |     $660 ($1.35/GB)     | Serverless(8 based RPU)               |       $134        |  $34      |  $3.6 |   $831.6   |
-| 1000RPS             | 40 minutes (Recommended)                |      $4024 ($0.82/GB)   | Serverless (32 based RPU) |       $5290     |  $340        | $36 | $9690    |
+| 10RPS             | Hourly                |     $66.5 ($1.35/GB)    | Serverless (8 based RPU) |     $220     |  $3.4     |  $0.36 |  $290.26    |
+|                         | 6-hourly              |     $22.2 ($0.45/GB)     | Serverless(8 based RPU)               |      $94      |  $3.4       | $0.36 |  $119.96    |
+|                         | Daily                 |      $39 ($0.8/GB)   | Serverless(8 based RPU)               |     $49     |  $3.4          |  $0.36 | $91.76    |
+| 100RPS             | Hourly                |      $353 ($0.72/GB)   | Serverless (8 based RPU) |       $838       |  $34      | $3.6 |  $1228.6    |
+|                         | 6-hourly              |     $179 ($0.37/GB)     | Serverless(8 based RPU)               |       $415       |  $34      |  $3.6 |  $631.6    |
+|                         | Daily                 |     $247 ($0.5/GB)     | Serverless(8 based RPU)               |       $168        |  $34      |  $3.6 |   $452.6   |
+| 1000RPS             | Hourly                |      $1260 ($0.26/GB)   | Serverless (8 based RPU) |       $1810     |  $340        | $36 | $3446    |
 
 !!! info "Note"
     The term **Redshift storage cost** refers to the cost of Redshift storage incurred for one month based on the corresponding RPS (Requests Per Second) specified in the above table. If the data is stored for more than one month, please refer to the [Redshift pricing](https://aws.amazon.com/redshift/pricing/?nc1=h_ls) for calculating the pricing.
