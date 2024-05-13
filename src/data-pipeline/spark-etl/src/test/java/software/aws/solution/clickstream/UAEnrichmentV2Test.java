@@ -55,4 +55,14 @@ public class UAEnrichmentV2Test extends BaseSparkTest {
         Assertions.assertEquals(0, outDataset.count());
     }
 
+    @Test
+    void test_enrich_ua_null_should_not_filtered() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.UAEnrichmentV2Test.test_enrich_ua_null_should_not_filtered
+        System.setProperty(FILTER_BOT_BY_UA_PROP, "true");
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/event_v2/transformed_data_ua_null.json")).getPath());
+        Dataset<Row> outDataset = converter.transform(dataset);
+
+        Assertions.assertEquals(2, outDataset.count());
+    }
 }
