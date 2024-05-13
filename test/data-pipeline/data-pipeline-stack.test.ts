@@ -1624,7 +1624,7 @@ test('Should set metrics widgets', () => {
 test ('Should has alarm: data Processing Job Failed', ()=> {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-    ComparisonOperator: 'GreaterThanThreshold',
+    ComparisonOperator: 'GreaterThanOrEqualToThreshold',
     EvaluationPeriods: 1,
     AlarmDescription: {
       'Fn::Join': Match.anyValue(),
