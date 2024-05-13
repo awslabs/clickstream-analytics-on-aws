@@ -270,7 +270,7 @@ export async function waitForDataSetRefreshPropertySetCompleted(quickSight: Quic
 
       if (result.DataSetRefreshProperties !== undefined && result.DataSetRefreshProperties.RefreshConfiguration?.IncrementalRefresh !== undefined) {
         return;
-      } 
+      }
       logger.info('wait dataset refresh property put complete : sleep 1 second');
       await sleep(1000);
 

@@ -219,18 +219,18 @@ function _getDataSetDefs(
     {
       tableName: CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER,
       useSpice: 'no',
-      customSql: `SELECT max(refresh_date) as "Last refresh date" FROM {{schema}}.${CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME}`,
+      customSql: `SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.${CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME}`,
       columns: [
         {
-          Name: 'Last refresh date',
+          Name: 'Latest refresh date',
           Type: 'DATETIME',
         },
       ],
       projectedColumns: [
-        'Last refresh date',
+        'Latest refresh date',
       ],
     },
-  )
+  );
 
   let datasets: DataSetProps[] = [];
   if (useSpice === 'yes') {
@@ -531,11 +531,11 @@ function _getDataSetDefs(
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_engagement_time_per_session_minutes',
+            Name: 'avg_engagement_time_per_session_seconds',
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_engagement_time_per_user_minutes',
+            Name: 'avg_engagement_time_per_user_seconds',
             Type: 'DECIMAL',
           },
         ],
@@ -543,8 +543,8 @@ function _getDataSetDefs(
           'event_date',
           'platform',
           'avg_session_per_user',
-          'avg_engagement_time_per_session_minutes',
-          'avg_engagement_time_per_user_minutes',
+          'avg_engagement_time_per_session_seconds',
+          'avg_engagement_time_per_user_seconds',
         ],
       },
       {
@@ -938,7 +938,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'operating_system / version',
+            Name: 'operating_system',
+            Type: 'STRING',
+          },
+          {
+            Name: 'operating_system_version',
             Type: 'STRING',
           },
           {
@@ -947,6 +951,14 @@ function _getDataSetDefs(
           },
           {
             Name: 'device_screen_resolution',
+            Type: 'STRING',
+          },
+          {
+            Name: 'device_ua_device',
+            Type: 'STRING',
+          },
+          {
+            Name: 'device_ua_device_category',
             Type: 'STRING',
           },
           {
@@ -960,9 +972,12 @@ function _getDataSetDefs(
           'device',
           'app_version',
           'user_id',
-          'operating_system / version',
+          'operating_system',
+          'operating_system_version',
           'device_ua_browser',
           'device_screen_resolution',
+          'device_ua_device',
+          'device_ua_device_category',
           'event_count',
         ],
       },
@@ -1299,11 +1314,11 @@ function _getDataSetDefs(
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_engagement_time_per_session_minutes',
+            Name: 'avg_engagement_time_per_session_seconds',
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_engagement_time_per_user_minutes',
+            Name: 'avg_engagement_time_per_user_seconds',
             Type: 'DECIMAL',
           },
         ],
@@ -1323,8 +1338,8 @@ function _getDataSetDefs(
           'event_date',
           'platform',
           'avg_session_per_user',
-          'avg_engagement_time_per_session_minutes',
-          'avg_engagement_time_per_user_minutes',
+          'avg_engagement_time_per_session_seconds',
+          'avg_engagement_time_per_user_seconds',
         ],
       },
       {
@@ -1403,8 +1418,8 @@ function _getDataSetDefs(
             Type: 'DECIMAL',
           },
           {
-            Name: 'event_id',
-            Type: 'STRING',
+            Name: 'event_count',
+            Type: 'INTEGER',
           },
         ],
         dateTimeDatasetParameter: [
@@ -1426,7 +1441,7 @@ function _getDataSetDefs(
           'aggregation_dim',
           'user_id',
           'user_engagement_time_seconds',
-          'event_id',
+          'event_count',
         ],
       },
       {
@@ -1848,7 +1863,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'operating_system / version',
+            Name: 'operating_system',
+            Type: 'STRING',
+          },
+          {
+            Name: 'operating_system_version',
             Type: 'STRING',
           },
           {
@@ -1857,6 +1876,14 @@ function _getDataSetDefs(
           },
           {
             Name: 'device_screen_resolution',
+            Type: 'STRING',
+          },
+          {
+            Name: 'device_ua_device',
+            Type: 'STRING',
+          },
+          {
+            Name: 'device_ua_device_category',
             Type: 'STRING',
           },
           {
@@ -1882,9 +1909,12 @@ function _getDataSetDefs(
           'device',
           'app_version',
           'user_id',
-          'operating_system / version',
+          'operating_system',
+          'operating_system_version',
           'device_ua_browser',
           'device_screen_resolution',
+          'device_ua_device',
+          'device_ua_device_category',
           'event_count',
         ],
       },
