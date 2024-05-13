@@ -191,7 +191,7 @@ public final class SensorsEventParser extends BaseEventParser {
         }
 
         if (b64Data == null) {
-            log.warn("No gzip data " + GZIP_DATA_LIST + " or " + GZIP_DATA_LIST + " found in the input data: " + data);
+            log.warn("No gzip data " + GZIP_DATA_LIST + " or " + GZIP_DATA + " found in the input data: " + data);
         }
         return b64Data;
     }
@@ -213,7 +213,7 @@ public final class SensorsEventParser extends BaseEventParser {
         clickstreamEvent.setEventName(eventName);
         clickstreamEvent.setIngestTimeMsec(extraParams.getIngestTimestamp());
 
-        setDeviceInfo(sensorsEvent, clickstreamEvent);
+        setDeviceInfo(sensorsEvent, clickstreamEvent, extraParams);
 
         setGeoInfo(sensorsEvent, clickstreamEvent);
 
@@ -236,8 +236,8 @@ public final class SensorsEventParser extends BaseEventParser {
         clickstreamEvent.setUserPseudoId(sensorsEvent.getDistinctId());
         clickstreamEvent.setSessionStartTimeMsec(sensorsEvent.getTime());
 
-        clickstreamEvent.setIp(sensorsEvent.getProperties().getIp());
-        clickstreamEvent.setUa(sensorsEvent.getProperties().getUserAgent());
+        clickstreamEvent.setIp(extraParams.getIp());
+        clickstreamEvent.setUa(extraParams.getUa());
 
         // customParameters
         Map<String, ClickstreamEventPropValue> customParameters = getEventCustomParameters(sensorsEvent, clickstreamEvent);
@@ -259,27 +259,23 @@ public final class SensorsEventParser extends BaseEventParser {
         return clickstreamEvent;
     }
 
-    private void setDeviceInfo(final SensorsEvent sensorsEvent, final ClickstreamEvent clickstreamEvent) {
+    private void setDeviceInfo(final SensorsEvent sensorsEvent, final ClickstreamEvent clickstreamEvent, final ExtraParams extraParams) {
         if (sensorsEvent.getProperties() != null) {
             clickstreamEvent.setDeviceMobileBrandName(sensorsEvent.getProperties().getProductName());
             clickstreamEvent.setDeviceMobileModelName(sensorsEvent.getProperties().getProductClassify());
 
             clickstreamEvent.setDeviceOperatingSystem(sensorsEvent.getProperties().getOs());
             clickstreamEvent.setDeviceOperatingSystemVersion(sensorsEvent.getProperties().getOsVersion());
-        }
 
-        clickstreamEvent.setDeviceSystemLanguage(sensorsEvent.getProperties().getBrowserLanguage());
-
-        if (sensorsEvent.getProperties() != null && sensorsEvent.getProperties().getUserAgent() != null) {
-            Map<String, Object> deviceUaMap = new HashMap<>();
-            deviceUaMap.put(UA_STRING, sensorsEvent.getProperties().getUserAgent());
-            clickstreamEvent.setDeviceUa(deviceUaMap);
-        }
-
-        if (null != sensorsEvent.getProperties()) {
+            clickstreamEvent.setDeviceSystemLanguage(sensorsEvent.getProperties().getBrowserLanguage());
             clickstreamEvent.setDeviceScreenWidth(sensorsEvent.getProperties().getScreenWidth());
             clickstreamEvent.setDeviceScreenHeight(sensorsEvent.getProperties().getScreenHeight());
         }
+
+        Map<String, Object> deviceUaMap = new HashMap<>();
+        deviceUaMap.put(UA_STRING, extraParams.getUa());
+        clickstreamEvent.setDeviceUa(deviceUaMap);
+
     }
 
     private void setGeoInfo(final SensorsEvent sensorsEvent, final ClickstreamEvent clickstreamEvent) {
@@ -297,7 +293,6 @@ public final class SensorsEventParser extends BaseEventParser {
         String screenResolution = sensorsEvent.getProperties().getScreenWidth() + "x" + sensorsEvent.getProperties().getScreenHeight();
         customParameters.put("distinct_id", new ClickstreamEventPropValue(sensorsEvent.getDistinctId(), ValueType.STRING));
         customParameters.put("screen_resolution", new ClickstreamEventPropValue(screenResolution, ValueType.STRING));
-        customParameters.put("user_agent", new ClickstreamEventPropValue(sensorsEvent.getProperties().getUserAgent(), ValueType.STRING));
 
         if (sensorsEvent.getProperties().getProvince() != null && sensorsEvent.getProperties().getCity() != null) {
             ObjectMapper objectMapper = new ObjectMapper();
