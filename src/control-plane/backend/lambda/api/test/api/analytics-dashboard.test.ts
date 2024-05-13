@@ -13,7 +13,6 @@
 
 import { DEFAULT_DASHBOARD_NAME_PREFIX, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS } from '@aws/clickstream-base-lib';
 import { CreateAnalysisCommand, CreateDashboardCommand, CreateDataSetCommand, CreateFolderCommand, CreateFolderMembershipCommand, DeleteAnalysisCommand, DeleteDashboardCommand, DeleteDataSetCommand, DescribeDashboardCommand, DescribeDashboardDefinitionCommand, DescribeFolderCommand, ListFolderMembersCommand, QuickSightClient, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
-import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import {
   DeleteCommand,
   DynamoDBDocumentClient,
@@ -27,11 +26,9 @@ import { MOCK_APP_ID, MOCK_DASHBOARD_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExi
 import { BASE_STATUS, KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-import { EVENT_USER_VIEW } from '../../service/quicksight/sql-builder';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const quickSightMock = mockClient(QuickSightClient);
-const redshiftClientMock = mockClient(RedshiftDataClient);
 
 describe('Analytics dashboard test', () => {
   beforeEach(() => {
@@ -357,11 +354,6 @@ describe('Analytics dashboard test', () => {
   });
 
   it('get dashboard details', async () => {
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
@@ -448,13 +440,6 @@ describe('Analytics dashboard test', () => {
     );
     expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
-
-    expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 1);
-    expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
-    expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
-      Sqls: expect.arrayContaining([`select * from ${MOCK_APP_ID}.${EVENT_USER_VIEW} limit 1`]),
-      WorkgroupName: 'redshift-workgroup-1',
-    });
   });
 
   it('delete dashboard', async () => {

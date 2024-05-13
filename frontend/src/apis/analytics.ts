@@ -250,7 +250,11 @@ export const triggerScan = async (projectId: string, appId: string) => {
   return result;
 };
 
-export const warmup = async (data: { projectId: string; appId: string }) => {
+export const warmup = async (data: {
+  projectId: string;
+  appId: string;
+  executeId?: string;
+}) => {
   const result: any = await apiRequest('post', '/reporting/warmup', data);
   return result;
 };

@@ -57,7 +57,7 @@ import {
   InputColumnDataType,
   DataSetImportMode,
 } from '@aws-sdk/client-quicksight';
-import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
+import { RedshiftData, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
@@ -1851,7 +1851,7 @@ export function isValidGroupingCondition(groupCondition: GroupingCondition | und
   return true;
 }
 
-export async function warmupRedshift(pipeline: IPipeline, appId: string) {
+export async function warmupRedshift(pipeline: IPipeline, appId: string, executeId?:string): Promise<string | undefined> {
   const dataApiRole = getStackOutputFromPipelineStatus(
     pipeline.stackDetails ?? pipeline.status?.stackDetails,
     PipelineStackType.REPORTING,
@@ -1867,42 +1867,62 @@ export async function warmupRedshift(pipeline: IPipeline, appId: string) {
     return;
   }
   const redshiftType = redshiftEndpoint?.split('.')[3];
-  if (redshiftType === 'redshift-serverless') {
-    const redshiftDataClient = sdkClient.RedshiftDataClient(
-      {
-        region: pipeline.region,
-      },
-      dataApiRole,
-    );
-    const input = {
-      Sqls: [`select * from ${appId}.${EVENT_USER_VIEW} limit 1`],
-      WorkgroupName: workgroupName,
-      Database: pipeline.projectId,
-      WithEvent: false,
-    };
-
-    const params = new BatchExecuteStatementCommand(input);
-    const executeResponse = await redshiftDataClient.send(params);
-
-    const checkParams = new DescribeStatementCommand({
-      Id: executeResponse.Id,
-    });
-    await sleep(200);
-    let resp = await redshiftDataClient.send(checkParams);
-    logger.debug(`Get statement status: ${resp.Status}`);
-    let count = 0;
-    while (resp.Status != StatusString.FINISHED && resp.Status != StatusString.FAILED && count < 30) {
-      await sleep(500);
-      count++;
-      resp = await redshiftDataClient.send(checkParams);
-      logger.debug(`Get statement status: ${resp.Status}, retry count: ${count}`);
-    }
-    if (resp.Status == StatusString.FAILED) {
-      logger.info('Warmup redshift serverless with error,', {
-        status: resp.Status,
-        response: resp,
-      });
-    }
-    logger.info('Warmup redshift serverless successfully');
+  if (redshiftType !== 'redshift-serverless') {
+    return;
   }
+  const redshiftData = sdkClient.RedshiftData(
+    {
+      region: pipeline.region,
+    },
+    dataApiRole,
+  );
+  const queryId = await waitExecuteWarmupStatement(
+    redshiftData,
+    workgroupName,
+    pipeline.projectId,
+    [`select * from ${appId}.${EVENT_USER_VIEW} limit 1`],
+    executeId,
+  );
+  return queryId;
 }
+
+export const waitExecuteWarmupStatement = async (
+  redshiftData: RedshiftData,
+  workgroupName: string,
+  database: string,
+  sqls: string[],
+  executeId?: string) => {
+  let queryId = executeId;
+  if (!executeId) {
+    const executeStatementOutput = await redshiftData.batchExecuteStatement({
+      Sqls: sqls,
+      WorkgroupName: workgroupName,
+      Database: database,
+      WithEvent: false,
+    });
+    queryId = executeStatementOutput.Id;
+  }
+  let describeStatementOutput = await redshiftData.describeStatement({
+    Id: queryId,
+  });
+  logger.info(`Got statement query '${queryId}' with status: ${describeStatementOutput.Status} after submitting it`);
+  let count = 0;
+  while (describeStatementOutput.Status != StatusString.FINISHED &&
+    describeStatementOutput.Status != StatusString.FAILED &&
+    count < 30) {
+    await sleep(500);
+    count++;
+    describeStatementOutput = await redshiftData.describeStatement({
+      Id: queryId,
+    });
+    logger.info(`Got statement query '${queryId}' with status: ${describeStatementOutput.Status} in ${count * 500} Milliseconds`);
+  }
+  if (describeStatementOutput.Status == StatusString.FAILED) {
+    logger.error(`Got statement query '${queryId}' with status: ${describeStatementOutput.Status} in ${count * 500} Milliseconds`, { describeStatementOutput });
+    throw new Error(`Statement query '${queryId}' with status ${describeStatementOutput.Status}, error: ${describeStatementOutput.Error}, queryString: ${describeStatementOutput.QueryString}`);
+  } else if (count >= 30) {
+    logger.error('Timeout: wait status timeout: ' + describeStatementOutput.Status, { describeStatementOutput });
+    return queryId;
+  }
+  return;
+};
