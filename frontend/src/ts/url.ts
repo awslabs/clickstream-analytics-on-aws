@@ -133,18 +133,20 @@ export const buildSubnetLink = (region: string, subnetId: string): string => {
   return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
 };
 
-export const buildReshiftLink = (
+export const buildRedshiftLink = (
   region: string,
   cluster: string,
   type: string
 ) => {
+  let domainSuffix = CONSOLE_GLOBAL_DOMAIN;
   if (region.startsWith('cn')) {
-    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
+    domainSuffix = CONSOLE_CHINA_DOMAIN;
   }
+  let query = `region=${region}#cluster-details?cluster=${cluster}`;
   if (type === 'serverless') {
-    return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/redshiftv2/home?region=${region}#serverless-dashboard`;
+    query = `region=${region}#serverless-dashboard`;
   }
-  return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
+  return `https://${region}.${domainSuffix}/redshiftv2/home?${query}`;
 };
 
 export const buildSFNExecutionLink = (region: string, executionArn: string) => {
