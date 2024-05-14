@@ -138,6 +138,12 @@ export const buildReshiftLink = (
   cluster: string,
   type: string
 ) => {
+  if (region.startsWith('cn')) {
+    if (type === 'serverless') {
+      return `https://${region}.${CONSOLE_CHINA_DOMAIN}/redshiftv2/home?region=${region}#serverless-dashboard`;
+    }
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
+  }
   if (type === 'serverless') {
     return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/redshiftv2/home?region=${region}#serverless-dashboard`;
   }
