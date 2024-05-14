@@ -257,25 +257,24 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   };
 
   try {
-    for (const schemaName of updateSchemas) {
-      const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
-      const oldDashboardDefProps: QuickSightDashboardDefProps = oldProps.dashboardDefProps;
+    const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
+    const commonParams: ResourceCommonParams = {
+      awsAccountId: awsAccountId,
+      databaseName: dashboardDefProps.databaseName,
+      schema: '',
+      sharePrincipalArn: sharePrincipalArn,
+      ownerPrincipalArn: ownerPrincipalArn,
+      timezoneDict: timezoneDict,
+    };
 
+    for (const schemaName of updateSchemas) {
+      const oldDashboardDefProps: QuickSightDashboardDefProps = oldProps.dashboardDefProps;
       logger.info('Updating schema', {
         schemaName: schemaName,
         dashboardDefProps: dashboardDefProps,
         oldDashboardDefProps: oldDashboardDefProps,
       });
-
-      const commonParams: ResourceCommonParams = {
-        awsAccountId: awsAccountId,
-        databaseName: dashboardDefProps.databaseName,
-        schema: schemaName,
-        sharePrincipalArn: sharePrincipalArn,
-        ownerPrincipalArn: ownerPrincipalArn,
-        timezoneDict: timezoneDict,
-      };
-
+      commonParams.schema = schemaName;
       logger.info('useSpice:', props.useSpice);
 
       const dashboard = await updateQuickSightDashboard(quickSight, commonParams,
@@ -288,17 +287,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       });
     };
 
-    const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
-    const commonParams: ResourceCommonParams = {  
-      awsAccountId: awsAccountId,
-      databaseName: dashboardDefProps.databaseName,
-      schema: '',
-      sharePrincipalArn: sharePrincipalArn,
-      ownerPrincipalArn: ownerPrincipalArn,
-      timezoneDict: timezoneDict,
-    };
     for (const schemaName of createSchemas) {
-      
       createdQuickSightResources.createdSchemas.push({
         schema: schemaName,
         dashboardDefProps: dashboardDefProps,
@@ -321,7 +310,6 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
     };
 
     for (const schemaName of deleteSchemas) {
-      const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
       const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId,
         deleteDatabase,
         schemaName,
