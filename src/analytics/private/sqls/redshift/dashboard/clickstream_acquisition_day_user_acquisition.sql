@@ -7,9 +7,9 @@ CREATE TABLE IF NOT EXISTS {{database_name}}.{{schema}}.{{viewName}} (
     new_user_count bigint,
     session_count bigint,
     engagement_session_count bigint,
-    engagement_rate double precision,
-    total_user_engagement_time_minutes double precision,
-    avg_user_engagement_time_minutes double precision,
+    engagement_rate real,
+    total_user_engagement_time_seconds real,
+    avg_user_engagement_time_seconds real,
     event_count bigint,
     update_timestamp timestamp DEFAULT getdate()
 )

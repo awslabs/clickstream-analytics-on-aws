@@ -65,8 +65,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -79,8 +79,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -100,8 +100,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -114,8 +114,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -135,8 +135,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -149,8 +149,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -170,8 +170,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -184,8 +184,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -206,8 +206,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -220,8 +220,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -242,8 +242,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -256,8 +256,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -278,8 +278,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -292,8 +292,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -314,8 +314,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -328,8 +328,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -349,8 +349,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -363,8 +363,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -384,8 +384,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -398,8 +398,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -420,8 +420,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -434,8 +434,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -455,8 +455,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        total_user_engagement_time_minutes,
-        avg_user_engagement_time_minutes,
+        total_user_engagement_time_seconds,
+        avg_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -469,8 +469,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2
@@ -490,8 +490,8 @@ BEGIN
         session_count,
         engagement_session_count,
         engagement_rate,
-        avg_user_engagement_time_minutes,
-        total_user_engagement_time_minutes,
+        avg_user_engagement_time_seconds,
+        total_user_engagement_time_seconds,
         event_count
     )
     SELECT 
@@ -504,8 +504,8 @@ BEGIN
         COUNT(tmp1.session_id) AS session_count,
         SUM(tmp1.session_indicator) AS engagement_session_count,
         SUM(tmp1.session_indicator) / SUM(tmp1.event_count) AS engagement_rate,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 AS total_user_engagement_time_minutes,
-        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end):: double precision / 1000 / 60 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_minutes,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 AS total_user_engagement_time_seconds,
+        SUM(case when tmp1.session_indicator = 1 then user_engagement_time_msec else 0 end)::real / 1000 / case when SUM(tmp1.session_indicator) > 0 then SUM(tmp1.session_indicator)  else 1 end AS avg_user_engagement_time_seconds,
         SUM(tmp1.event_count) AS event_count
     FROM 
         event_traffic_tmp_tb_2 tmp2

@@ -1374,9 +1374,6 @@ export class CReportingStack extends JSONObject {
     RedShiftDBSchemaParam?: string;
 
   @JSONObject.optional('')
-    QuickSightTemplateArnParam?: string;
-
-  @JSONObject.optional('')
   @JSONObject.custom( (stack :CReportingStack, _key:string, value:any) => {
     if (stack._pipeline?.dataModeling?.redshift?.provisioned || stack._pipeline?.dataModeling?.redshift?.existingServerless) {
       return stack._resources?.redshift?.endpoint.address;
