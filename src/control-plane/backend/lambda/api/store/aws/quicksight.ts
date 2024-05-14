@@ -275,6 +275,8 @@ export interface QuickSightUserArns {
 }
 
 export const getClickstreamUserArn = async (templateVersion: SolutionVersion, userArn: string): Promise<QuickSightUserArns> => {
+  const QUICKSIGHT_ADMIN_USER_ARN = process.env.QUICKSIGHT_ADMIN_USER_ARN;
+  const QUICKSIGHT_ADMIN_USER_NAME = QUICKSIGHT_ADMIN_USER_ARN?.split(`/${QUICKSIGHT_NAMESPACE}/`).pop();
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
   const isChinaRegion = process.env.AWS_REGION?.startsWith('cn');
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
@@ -287,10 +289,10 @@ export const getClickstreamUserArn = async (templateVersion: SolutionVersion, us
   if (templateVersion.greaterThan(SolutionVersion.V_1_1_4)) {
     // remove explore user
     return {
-      publishUserArn: publishUserArn ?? '',
-      publishUserName: publishUserName ?? '',
-      exploreUserArn: publishUserArn ?? '',
-      exploreUserName: publishUserName ?? '',
+      publishUserArn: QUICKSIGHT_ADMIN_USER_ARN ?? publishUserArn,
+      publishUserName: QUICKSIGHT_ADMIN_USER_NAME ?? publishUserName ?? '',
+      exploreUserArn: QUICKSIGHT_ADMIN_USER_ARN ?? publishUserArn,
+      exploreUserName: QUICKSIGHT_ADMIN_USER_NAME ?? publishUserName ?? '',
     };
   }
 
@@ -299,10 +301,10 @@ export const getClickstreamUserArn = async (templateVersion: SolutionVersion, us
   const exploreUserArn = isChinaRegion ? userArn :
     `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${exploreUserName}`;
   return {
-    publishUserArn: publishUserArn ?? '',
-    publishUserName: publishUserName ?? '',
-    exploreUserArn: exploreUserArn ?? '',
-    exploreUserName: exploreUserName ?? '',
+    publishUserArn: QUICKSIGHT_ADMIN_USER_ARN ?? publishUserArn,
+    publishUserName: QUICKSIGHT_ADMIN_USER_NAME ?? publishUserName ?? '',
+    exploreUserArn: QUICKSIGHT_ADMIN_USER_ARN ?? exploreUserArn,
+    exploreUserName: QUICKSIGHT_ADMIN_USER_NAME ?? exploreUserName ?? '',
   };
 };
 

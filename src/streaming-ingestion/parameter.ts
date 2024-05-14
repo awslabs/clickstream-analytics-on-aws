@@ -202,8 +202,8 @@ export function createStackParameters(scope: Construct): {
   };
 
   const redshiftModeParam = Parameters.createRedshiftModeParameter(scope, 'RedshiftMode', {
-    allowedValues: [REDSHIFT_MODE.SERVERLESS, REDSHIFT_MODE.PROVISIONED],
-    default: REDSHIFT_MODE.SERVERLESS,
+    allowedValues: [REDSHIFT_MODE.NEW_SERVERLESS, REDSHIFT_MODE.PROVISIONED],
+    default: REDSHIFT_MODE.NEW_SERVERLESS,
   });
 
   // Set Redshift common parameters
