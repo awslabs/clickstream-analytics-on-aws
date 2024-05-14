@@ -23,8 +23,8 @@ import {
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
-  CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW,
-  CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER,
+  CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW,
+  CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW_PLACEHOLDER,
   CLICKSTREAM_ENGAGEMENT_KPI,
   CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER,
   CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW,
@@ -53,6 +53,8 @@ import {
   CLICKSTREAM_ENGAGEMENT_EVENT_NAME,
   CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,
+  CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER,
+  CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME,
 } from '@aws/clickstream-base-lib';
 import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -108,7 +110,6 @@ export function createQuicksightCustomResource(
     dataSetsSpice: _getDataSetDefs('yes', eventViewColumns, eventViewProjectedColumns, tenYearsAgo, futureDate),
   };
 
-  console.log('props.useSpice:', props.useSpice);
   const cr = new CustomResource(scope, 'QuicksightCustomResource', {
     serviceToken: provider.serviceToken,
     properties: {
@@ -214,6 +215,23 @@ function _getDataSetDefs(
     },
   );
 
+  dataSetProps.push(
+    {
+      tableName: CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER,
+      useSpice: 'no',
+      customSql: `SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.${CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME}`,
+      columns: [
+        {
+          Name: 'Latest refresh date',
+          Type: 'DATETIME',
+        },
+      ],
+      projectedColumns: [
+        'Latest refresh date',
+      ],
+    },
+  );
+
   let datasets: DataSetProps[] = [];
   if (useSpice === 'yes') {
     datasets = [
@@ -232,11 +250,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'Active users',
+            Name: 'active_users',
             Type: 'STRING',
           },
           {
-            Name: 'New users',
+            Name: 'new_users',
             Type: 'INTEGER',
           },
           {
@@ -247,8 +265,8 @@ function _getDataSetDefs(
         projectedColumns: [
           'event_date',
           'platform',
-          'Active users',
-          'New users',
+          'active_users',
+          'new_users',
           'view_count',
         ],
       },
@@ -324,11 +342,11 @@ function _getDataSetDefs(
             Type: 'DECIMAL',
           },
           {
-            Name: 'total_user_engagement_time_minutes',
+            Name: 'total_user_engagement_time_seconds',
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_user_engagement_time_minutes',
+            Name: 'avg_user_engagement_time_seconds',
             Type: 'DECIMAL',
           },
           {
@@ -349,8 +367,8 @@ function _getDataSetDefs(
           'session_count',
           'engagement_session_count',
           'engagement_rate',
-          'total_user_engagement_time_minutes',
-          'avg_user_engagement_time_minutes',
+          'total_user_engagement_time_seconds',
+          'avg_user_engagement_time_seconds',
           'event_count',
           'user_id',
         ],
@@ -413,27 +431,27 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'Active User',
+            Name: 'active_users',
             Type: 'STRING',
           },
           {
-            Name: 'New User',
+            Name: 'new_users',
             Type: 'STRING',
           },
         ],
         projectedColumns: [
           'event_date',
           'platform',
-          'Active User',
-          'New User',
+          'active_users',
+          'new_users',
         ],
       },
 
       //Engagement Sheet
       {
-        tableName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER,
+        tableName: CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW} `,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW} `,
         columns: [
           {
             Name: 'event_date',
@@ -477,11 +495,11 @@ function _getDataSetDefs(
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_engagement_time_per_session_minutes',
+            Name: 'avg_engagement_time_per_session_seconds',
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_engagement_time_per_user_minutes',
+            Name: 'avg_engagement_time_per_user_seconds',
             Type: 'DECIMAL',
           },
         ],
@@ -489,8 +507,8 @@ function _getDataSetDefs(
           'event_date',
           'platform',
           'avg_session_per_user',
-          'avg_engagement_time_per_session_minutes',
-          'avg_engagement_time_per_user_minutes',
+          'avg_engagement_time_per_session_seconds',
+          'avg_engagement_time_per_user_seconds',
         ],
       },
       {
@@ -553,12 +571,12 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'user_engagement_time_minutes',
+            Name: 'user_engagement_time_seconds',
             Type: 'DECIMAL',
           },
           {
-            Name: 'event_id',
-            Type: 'STRING',
+            Name: 'event_count',
+            Type: 'INTEGER',
           },
         ],
         projectedColumns: [
@@ -567,8 +585,8 @@ function _getDataSetDefs(
           'aggregation_type',
           'aggregation_dim',
           'user_id',
-          'user_engagement_time_minutes',
-          'event_id',
+          'user_engagement_time_seconds',
+          'event_count',
         ],
       },
       {
@@ -760,6 +778,7 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER,
         useSpice: 'yes',
+        lookbackColumn: 'first_date',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} `,
         columns: [
           {
@@ -794,6 +813,7 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
         useSpice: 'yes',
+        lookbackColumn: 'time_period',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} `,
         columns: [
           {
@@ -882,7 +902,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'operating_system / version',
+            Name: 'operating_system',
+            Type: 'STRING',
+          },
+          {
+            Name: 'operating_system_version',
             Type: 'STRING',
           },
           {
@@ -891,6 +915,14 @@ function _getDataSetDefs(
           },
           {
             Name: 'device_screen_resolution',
+            Type: 'STRING',
+          },
+          {
+            Name: 'device_ua_device',
+            Type: 'STRING',
+          },
+          {
+            Name: 'device_ua_device_category',
             Type: 'STRING',
           },
           {
@@ -904,9 +936,12 @@ function _getDataSetDefs(
           'device',
           'app_version',
           'user_id',
-          'operating_system / version',
+          'operating_system',
+          'operating_system_version',
           'device_ua_browser',
           'device_screen_resolution',
+          'device_ua_device',
+          'device_ua_device_category',
           'event_count',
         ],
       },
@@ -931,11 +966,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'Active users',
+            Name: 'active_users',
             Type: 'STRING',
           },
           {
-            Name: 'New users',
+            Name: 'new_users',
             Type: 'INTEGER',
           },
           {
@@ -958,8 +993,8 @@ function _getDataSetDefs(
         projectedColumns: [
           'event_date',
           'platform',
-          'Active users',
-          'New users',
+          'active_users',
+          'new_users',
           'view_count',
         ],
       },
@@ -1047,11 +1082,11 @@ function _getDataSetDefs(
             Type: 'DECIMAL',
           },
           {
-            Name: 'total_user_engagement_time_minutes',
+            Name: 'total_user_engagement_time_seconds',
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_user_engagement_time_minutes',
+            Name: 'avg_user_engagement_time_seconds',
             Type: 'DECIMAL',
           },
           {
@@ -1084,8 +1119,8 @@ function _getDataSetDefs(
           'session_count',
           'engagement_session_count',
           'engagement_rate',
-          'total_user_engagement_time_minutes',
-          'avg_user_engagement_time_minutes',
+          'total_user_engagement_time_seconds',
+          'avg_user_engagement_time_seconds',
           'event_count',
           'user_id',
         ],
@@ -1160,11 +1195,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'Active User',
+            Name: 'active_users',
             Type: 'STRING',
           },
           {
-            Name: 'New User',
+            Name: 'new_users',
             Type: 'STRING',
           },
         ],
@@ -1178,16 +1213,16 @@ function _getDataSetDefs(
         projectedColumns: [
           'event_date',
           'platform',
-          'Active User',
-          'New User',
+          'active_users',
+          'new_users',
         ],
       },
 
       //Engagement Sheet
       {
-        tableName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER,
+        tableName: CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW} where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW} where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1243,11 +1278,11 @@ function _getDataSetDefs(
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_engagement_time_per_session_minutes',
+            Name: 'avg_engagement_time_per_session_seconds',
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_engagement_time_per_user_minutes',
+            Name: 'avg_engagement_time_per_user_seconds',
             Type: 'DECIMAL',
           },
         ],
@@ -1267,8 +1302,8 @@ function _getDataSetDefs(
           'event_date',
           'platform',
           'avg_session_per_user',
-          'avg_engagement_time_per_session_minutes',
-          'avg_engagement_time_per_user_minutes',
+          'avg_engagement_time_per_session_seconds',
+          'avg_engagement_time_per_user_seconds',
         ],
       },
       {
@@ -1343,12 +1378,12 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'user_engagement_time_minutes',
+            Name: 'user_engagement_time_seconds',
             Type: 'DECIMAL',
           },
           {
-            Name: 'event_id',
-            Type: 'STRING',
+            Name: 'event_count',
+            Type: 'INTEGER',
           },
         ],
         dateTimeDatasetParameter: [
@@ -1369,8 +1404,8 @@ function _getDataSetDefs(
           'aggregation_type',
           'aggregation_dim',
           'user_id',
-          'user_engagement_time_minutes',
-          'event_id',
+          'user_engagement_time_seconds',
+          'event_count',
         ],
       },
       {
@@ -1792,7 +1827,11 @@ function _getDataSetDefs(
             Type: 'STRING',
           },
           {
-            Name: 'operating_system / version',
+            Name: 'operating_system',
+            Type: 'STRING',
+          },
+          {
+            Name: 'operating_system_version',
             Type: 'STRING',
           },
           {
@@ -1801,6 +1840,14 @@ function _getDataSetDefs(
           },
           {
             Name: 'device_screen_resolution',
+            Type: 'STRING',
+          },
+          {
+            Name: 'device_ua_device',
+            Type: 'STRING',
+          },
+          {
+            Name: 'device_ua_device_category',
             Type: 'STRING',
           },
           {
@@ -1826,9 +1873,12 @@ function _getDataSetDefs(
           'device',
           'app_version',
           'user_id',
-          'operating_system / version',
+          'operating_system',
+          'operating_system_version',
           'device_ua_browser',
           'device_screen_resolution',
+          'device_ua_device',
+          'device_ua_device_category',
           'event_count',
         ],
       },

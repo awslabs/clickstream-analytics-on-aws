@@ -15,8 +15,8 @@ BEGIN
         aggregation_type,
         aggregation_dim,
         user_id,
-        user_engagement_time_minutes,
-        event_id
+        user_engagement_time_seconds,
+        event_count
     )
     select 
       current_date::date as event_date,
@@ -24,12 +24,12 @@ BEGIN
       'Page Title' as aggregation_type,
       page_view_page_title as aggregation_dim,
       merged_user_id,
-      page_view_engagement_time_msec::double precision/1000/60 as user_engagement_time_minutes,
-      event_id
+      sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
+      count(distinct event_id) as event_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
-      and event_name = '_page_view'
+    group by 1,2,3,4,5
     ;
 
     INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
@@ -38,8 +38,8 @@ BEGIN
         aggregation_type,
         aggregation_dim,
         user_id,
-        user_engagement_time_minutes,
-        event_id
+        user_engagement_time_seconds,
+        event_count
     )
     select 
       current_date::date as event_date,
@@ -47,12 +47,12 @@ BEGIN
       'Page URL Path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
       merged_user_id,
-      page_view_engagement_time_msec::double precision/1000/60 as user_engagement_time_minutes,
-      event_id
+      sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
+      count(distinct event_id) as event_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
-      and event_name = '_page_view'
+    group by 1,2,3,4,5
     ;
 
     INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
@@ -61,8 +61,8 @@ BEGIN
         aggregation_type,
         aggregation_dim,
         user_id,
-        user_engagement_time_minutes,
-        event_id
+        user_engagement_time_seconds,
+        event_count
     )
     select 
       current_date::date as event_date,
@@ -70,12 +70,12 @@ BEGIN
       'Screen Name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
       merged_user_id,
-      screen_view_engagement_time_msec::double precision/1000/60 as user_engagement_time_minutes,
-      event_id
+      sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
+      count(distinct event_id) as event_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
-      and event_name = '_screen_view'
+    group by 1,2,3,4,5
     ;
 
     INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
@@ -84,8 +84,8 @@ BEGIN
         aggregation_type,
         aggregation_dim,
         user_id,
-        user_engagement_time_minutes,
-        event_id
+        user_engagement_time_seconds,
+        event_count
     )
     select 
       current_date::date as event_date,
@@ -93,12 +93,12 @@ BEGIN
       'Screen Class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
       merged_user_id,
-      screen_view_engagement_time_msec::double precision/1000/60 as user_engagement_time_minutes,
-      event_id
+      sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
+      count(distinct event_id) as event_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
-      and event_name = '_screen_view'
+    group by 1,2,3,4,5
     ;
     current_date := current_date - 1;
     i := i + 1;
