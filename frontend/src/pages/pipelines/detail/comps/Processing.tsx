@@ -22,7 +22,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExecutionType } from 'ts/const';
 import {
-  buildReshiftLink,
+  buildRedshiftLink,
   buildSFNExecutionLink,
   buildSecurityGroupLink,
   buildSubnetLink,
@@ -48,7 +48,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         return (
           <Link
             external
-            href={buildReshiftLink(
+            href={buildRedshiftLink(
               pipelineInfo?.region || '',
               pipelineInfo?.dataModeling?.redshift?.provisioned
                 ?.clusterIdentifier || '',
@@ -68,7 +68,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         return (
           <Link
             external
-            href={buildReshiftLink(
+            href={buildRedshiftLink(
               pipelineInfo?.region || '',
               '',
               'serverless'
@@ -81,7 +81,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         return (
           <Link
             external
-            href={buildReshiftLink(
+            href={buildRedshiftLink(
               pipelineInfo?.region || '',
               pipelineInfo?.dataModeling?.redshift?.provisioned
                 ?.clusterIdentifier || '',
