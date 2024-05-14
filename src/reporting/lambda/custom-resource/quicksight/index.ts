@@ -149,7 +149,7 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       };
 
       for (const schemaName of databaseSchemaNames.split(',')) {
-        
+
         logger.info('creating quicksight dashboard with params', {
           schemaName: schemaName,
           dashboardDefProps: dashboardDefProps,
@@ -445,7 +445,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   const dataSets = dashboardDef.dataSets;
   const dataSetsSpice = dashboardDef.dataSetsSpice;
 
-  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, 
+  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId,
     commonParams.ownerPrincipalArn, commonParams.sharePrincipalArn);
 
   const targetDataSet = useSpice === 'yes' ? dataSetsSpice : dataSets;
