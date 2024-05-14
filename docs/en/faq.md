@@ -87,9 +87,9 @@ You are not allowed to modify the default dashboard directly, however, you can c
 You can accelerate report display by converting QuickSight datasets to SPICE mode. Here are the steps to do this:
 
 1. Purchase SPICE capacity through the QuickSight console. The required capacity depends on your data volume; it is recommended to start with 50GB and enable the auto-purchase option.
-2. In the CloudFormation console, find the stack corresponding to your target pipeline, with a name starting with “Clickstream-Reporting-”. If there are multiple pipelines, you can identify the correct one by checking the stack parameters. Alternatively, you can locate it through the solution console by clicking the pipeline status on the pipeline details page and then clicking the Reporting link in the opened window.
+2. In the CloudFormation console, find the stack corresponding to your target pipeline, with a name starting with "Clickstream-Reporting-". If there are multiple pipelines, you can identify the correct one by checking the stack parameters. Alternatively, you can locate it through the solution console by clicking the pipeline status on the pipeline details page and then clicking the Reporting link in the opened window.
 3. Click the "Update" button and select the "Use current template" option.
-4. Find the "Enable QuickSight SPICE Import Mode" parameter and change its value to “yes”. Keep other options unchanged.
+4. Find the "Enable QuickSight SPICE Import Mode" parameter and change its value to "yes". Keep other options unchanged.
 5. Click next to complete the stack update. Once the update is complete, you can start using it.
 
 **Notes:**
