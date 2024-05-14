@@ -2927,9 +2927,9 @@ describe('Pipeline test', () => {
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const branches = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M.Branches;
-      const reportingState = branches.L[1].M.States.M.Reporting;
-      const redshiftState = branches.L[1].M.States.M.DataModelingRedshift;
       const dataProcessingBranch = branches.L[1].M.States.M;
+      const reportingState = dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[0].M.States.M.Reporting;
+      const redshiftState = dataProcessingBranch.DataModelingRedshift;
       expect(
         reportingState.M.End.BOOL === true &&
         reportingState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
@@ -2937,8 +2937,7 @@ describe('Pipeline test', () => {
         redshiftState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
         redshiftState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000' &&
         dataProcessingBranch.AfterRedshiftStacks.M.End.BOOL === true &&
-        dataProcessingBranch.Reporting === undefined &&
-        dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[0].M.States.M.Reporting.M.End.BOOL === true,
+        dataProcessingBranch.Reporting === undefined,
       ).toBeTruthy();
     });
     const res = await request(app)
