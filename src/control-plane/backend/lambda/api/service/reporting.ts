@@ -1261,9 +1261,11 @@ export class ReportingService {
       );
 
       //warm up redshift serverless
-      await warmupRedshift(latestPipeline, req.body.appId);
-
-      return res.status(201).json(new ApiSuccess('OK'));
+      const executeId = await warmupRedshift(latestPipeline, req.body.appId, req.body.executeId);
+      if (executeId) {
+        return res.status(201).json(new ApiSuccess({ executeId }, 'Exceeded maximum retry count'));
+      }
+      return res.status(200).json(new ApiSuccess('OK'));
     } catch (error) {
       logger.warn(`Warmup redshift serverless with error: ${error}`);
       next(error);

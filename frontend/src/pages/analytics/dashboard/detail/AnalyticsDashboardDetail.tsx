@@ -20,7 +20,7 @@ import {
   SpaceBetween,
   Button,
 } from '@cloudscape-design/components';
-import { getAnalyticsDashboard } from 'apis/analytics';
+import { getAnalyticsDashboard, warmup } from 'apis/analytics';
 import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
@@ -46,6 +46,32 @@ const AnalyticsDashboardDetail: React.FC = () => {
   } as IAnalyticsDashboard);
   const dispatch = useContext(DispatchContext);
   const state = useContext(StateContext);
+
+  const waitWarmup = async () => {
+    if (projectId && appId) {
+      let retryCount = 3;
+      let success = true;
+      let data: any = {};
+      const res: ApiResponse<any> = await warmup({
+        projectId: projectId,
+        appId: appId,
+      });
+      success = res.success;
+      data = res.data;
+      while (success && data.executeId && retryCount > 0) {
+        const resRetry: ApiResponse<any> = await warmup({
+          projectId: projectId,
+          appId: appId,
+          executeId: data.executeId,
+        });
+        retryCount--;
+        success = resRetry.success;
+        data = resRetry.data;
+      }
+      await getAnalyticsDashboardDetails();
+    }
+  };
+
   const getAnalyticsDashboardDetails = async () => {
     setLoadingData(true);
     try {
@@ -68,7 +94,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
 
   useEffect(() => {
     if (dashboardId) {
-      getAnalyticsDashboardDetails();
+      waitWarmup();
     }
   }, [dashboardId]);
 
