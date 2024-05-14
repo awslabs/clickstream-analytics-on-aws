@@ -3690,44 +3690,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                 ],
           },
           {
-            tableName: 'Intra_Day_User',
-            useSpice: 'yes',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_acquisition_intra_day_user_mv',
-            columns:
-                [
-                  {
-                    Name: 'event_date',
-                    Type: 'DATETIME',
-                  },
-                  {
-                    Name: 'platform',
-                    Type: 'STRING',
-                  },
-                  {
-                    Name: 'active_users',
-                    Type: 'STRING',
-                  },
-                  {
-                    Name: 'new_users',
-                    Type: 'STRING',
-                  },
-                ],
-            dateTimeDatasetParameter:
-                [
-                  {
-                    name: 'endDate23',
-                    timeGranularity: 'DAY',
-                  },
-                ],
-            projectedColumns:
-                [
-                  'event_date',
-                  'platform',
-                  'active_users',
-                  'new_users',
-                ],
-          },
-          {
             tableName: 'Day_Event_View_Engagement',
             useSpice: 'yes',
             customSql: 'SELECT * FROM {{schema}}.clickstream_engagement_day_event_view ',
@@ -3861,8 +3823,8 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'event_id',
-                    Type: 'STRING',
+                    Name: 'event_count',
+                    Type: 'INTEGER',
                   },
                 ],
             projectedColumns:
@@ -3873,7 +3835,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                   'aggregation_dim',
                   'user_id',
                   'user_engagement_time_seconds',
-                  'event_id',
+                  'event_count',
                 ],
           },
           {
