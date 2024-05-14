@@ -75,7 +75,7 @@ This solution uses a workflow named `ClickstreamLoadDataWorkflow`, orchestrated 
 
 ### How do I recalculate historical events for out-of-the-box dashboards?
 
-This solution only calculates the metrics in the out-of-the-box dashboards for the previous day. You might need to refresh the historical metrics after re-sending historical data, re-processing previous data, or re-importing data. You could manually reschedule the workflow to calculate historical data and update the existing metrics. Follow these steps:
+The metrics in the out-of-the-box dashboards are calculated on a daily basis. If you need to recalculate the metrics in case of there are changes to your historical data, you could manually reschedule the workflow to re-calculate the metrics. Follow these steps:
 
 1. Open the Step Functions service in the AWS console for the region where your data pipeline is located.
 1. Find the state machine named **RefreshMaterializedViewsWorkflowRefreshMVStateMachine**. If you have multiple projects in the same region, check the tags of the state machine to ensure it belongs to the project for which you want to recalculate the metrics.
