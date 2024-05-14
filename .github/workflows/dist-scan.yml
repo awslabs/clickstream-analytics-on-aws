@@ -139,11 +139,16 @@ jobs:
     name: sonarqube scan
     if: ${{ github.event.pull_request.number }}
     runs-on: ${{ vars.LARGE_RUNNER_S || 'ubuntu-latest' }}
+    permissions:
+      id-token: write
+      contents: read
     services:
       sonarqube:
         image: public.ecr.aws/docker/library/sonarqube:9.9.0-community
         ports:
           - 9000:9000
+    env:
+      iam_role_to_assume: ${{ secrets.ROLE_ARN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -174,6 +179,7 @@ jobs:
       - name: Run build and unit tests
         run: |
           export LOCAL_TESTING=true # speed up the tests for infra
+          export JEST_MAX_WORKERS=6
           bash deployment/run-unit-tests.sh
       - name: Configure sonarqube
         env:
@@ -182,7 +188,7 @@ jobs:
         run: |
           bash .github/workflows/sonarqube/sonar-configure.sh
       - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@master
+        uses: SonarSource/sonarqube-scan-action@v2.0.2
         env:
           SONAR_HOST_URL: http://sonarqube:9000
           SONAR_TOKEN: ${{ env.SONARQUBE_TOKEN }}
@@ -192,7 +198,7 @@ jobs:
       # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
-        uses: sonarsource/sonarqube-quality-gate-action@master
+        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
         # Force to fail step after specific time.
         timeout-minutes: 5
         env:
