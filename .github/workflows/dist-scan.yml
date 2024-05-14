@@ -97,6 +97,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "8.15.3"
       - uses: actions/download-artifact@v4
         with:
           name: templates-${{ github.event.pull_request.number }}
@@ -107,7 +111,6 @@ jobs:
           ./build-open-source-dist.sh $SOLUTION_NAME
       - name: install dependencies
         run: |
-          npm install -g pnpm@8.15.3
           pnpm install --frozen-lockfile
           pnpm projen
           pnpm install --frozen-lockfile --dir frontend
@@ -151,9 +154,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: "7"      
+          version: "8.15.3"      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

@@ -314,6 +314,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     ...commonDevDeps,
   ],
   minNodeVersion,
+  pnpmVersion,
   jestOptions: {
     jestConfig: {
       setupFiles: ['./test/jestEnv.js'],
@@ -414,6 +415,7 @@ const baseProject = new typescript.TypeScriptProject({
   eslint: false,
   sampleCode: false,
   packageManager: project.package.packageManager,
+  pnpmVersion,
   projenCommand: project.projenCommand,
 });
 baseProject.addFields({ version });
@@ -478,6 +480,7 @@ const frontendProject = new typescript.TypeScriptProject({
     },
   },
   minNodeVersion,
+  pnpmVersion,
   jestOptions: {
     jestConfig: {
       roots: ['<rootDir>/src', '<rootDir>/test'],
@@ -604,6 +607,7 @@ const apiProject = new typescript.TypeScriptProject({
     },
   },
   packageManager: project.package.packageManager,
+  pnpmVersion,
   projenCommand: project.projenCommand,
 });
 apiProject.setScript('dev', 'nodemon --watch \'**/*.ts\' -e ts --exec \'ts-node\' ./index.ts');
@@ -715,6 +719,7 @@ project.github.actions.set('actions/checkout', 'actions/checkout@v4');
 project.github.actions.set('actions/setup-node', 'actions/setup-node@v4');
 project.github.actions.set('actions/setup-python', 'actions/setup-python@v5');
 project.github.actions.set('actions/upload-artifact', 'actions/upload-artifact@v4');
+project.github.actions.set('pnpm/action-setup', 'pnpm/action-setup@v4');
 project.github.actions.set('actions/download-artifact', 'actions/download-artifact@v4');
 project.github.actions.set('amannn/action-semantic-pull-request', 'amannn/action-semantic-pull-request@v5');
 project.github.actions.set('peter-evans/create-pull-request', 'peter-evans/create-pull-request@v6');
