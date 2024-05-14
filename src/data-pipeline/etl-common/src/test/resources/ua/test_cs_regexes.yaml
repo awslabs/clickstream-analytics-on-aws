@@ -1,0 +1,5 @@
+device_parsers:
+  - regex: 'Clickstream Android Application[^\-]{0,300} - (Sony) ?(Ericsson|) (.{1,200}) \w{1,20} -'
+    device_replacement: 'Clickstream $1 $2'
+    brand_replacement: 'Clickstream $1$2'
+    model_replacement: 'Clickstream $3'

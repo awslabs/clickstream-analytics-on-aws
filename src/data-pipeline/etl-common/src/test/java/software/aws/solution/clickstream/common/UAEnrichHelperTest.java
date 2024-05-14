@@ -24,12 +24,13 @@ public class UAEnrichHelperTest {
     @Test
     void test_parse_UA_string() throws JsonProcessingException {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.common.UAEnrichHelperTest.test_parse_UA_string
-        ClickstreamUA ua = UAEnrichHelper.parserUA("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
+        ClickstreamUA ua = UAEnrichHelper.parserUA("Test Clickstream Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
         String jsonStr = OBJECT_MAPPER.writeValueAsString(ua.getUaMap());
         String expectedStr = "{\"userAgent\":{\"family\":\"Chrome\",\"major\":\"58\",\"minor\":\"0\",\"patch\":\"3029\"}," +
                 "\"os\":{\"family\":\"Windows\",\"major\":\"10\",\"minor\":null,\"patch\":null,\"patchMinor\":null}," +
-                "\"device\":{\"family\":\"Other\"}," +
-                "\"string\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36\"}";
+                "\"device\":{\"family\":\"Test Device\",\"brand\":\"Test Brand\",\"model\":\"Test Model\"}," +
+                "\"string\":\"Test Clickstream Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36\"}";
+
         Assertions.assertEquals(expectedStr, jsonStr);
 
         Assertions.assertEquals("Windows", ua.getUaOs());
@@ -38,7 +39,7 @@ public class UAEnrichHelperTest {
         Assertions.assertEquals("Chrome", ua.getUaBrowser());
         Assertions.assertEquals("58.0.3029", ua.getUaBrowserVersion());
 
-        Assertions.assertEquals("Other", ua.getUaDevice());
+        Assertions.assertEquals("Test Device", ua.getUaDevice());
         Assertions.assertEquals("Other", ua.getUaDeviceCategory());
     }
 }

@@ -19,6 +19,8 @@ import com.fasterxml.jackson.core.type.*;
 import com.fasterxml.jackson.databind.*;
 import lombok.extern.slf4j.*;
 import software.aws.solution.clickstream.common.Cache;
+import software.aws.solution.clickstream.common.enrich.ua.UaDevice;
+import software.aws.solution.clickstream.common.enrich.ua.UaDeviceParser;
 import software.aws.solution.clickstream.common.model.*;
 import ua_parser.*;
 
@@ -31,6 +33,7 @@ public final class UAEnrichHelper {
     public static final String UA_STRING = "string";
     public static final String BOT = "Bot";
     private static final Cache<ClickstreamUA> CACHED_UA = new Cache<>();
+    private static UaDeviceParser deviceParser = UaDeviceParser.newInstance();
 
     private UAEnrichHelper() {
     }
@@ -51,7 +54,8 @@ public final class UAEnrichHelper {
             clickstreamUA.setUaOs(client.os.family);
             clickstreamUA.setUaOsVersion(getVersion(client.os.major, client.os.minor, client.os.patch));
         }
-        if (client.device != null) {
+
+        if (client.device != null && client.device.family != null) {
             clickstreamUA.setUaDevice(client.device.family);
             clickstreamUA.setUaDeviceCategory(getCategory(client.device.family));
         }
@@ -66,6 +70,14 @@ public final class UAEnrichHelper {
             log.error("parserUA::User agent: {}", userAgent);
         }
         uaMap.put(UA_STRING, userAgent);
+
+        UaDevice uaDevice = deviceParser.parseUADevice(userAgent);
+        if (uaDevice != null) {
+            uaMap.put("device", uaDevice);
+            clickstreamUA.setUaDevice(uaDevice.getFamily());
+            clickstreamUA.setUaDeviceCategory(getCategory(uaDevice));
+        }
+
         clickstreamUA.setUaMap(uaMap);
 
         CACHED_UA.put(userAgent, clickstreamUA);
@@ -87,6 +99,14 @@ public final class UAEnrichHelper {
         } else {
             return "Other";
         }
+    }
+
+    private static String getCategory(final UaDevice uaDevice) {
+        if (uaDevice == null) {
+            return null;
+        }
+        String family = uaDevice.getFamily();
+        return getCategory(family);
     }
 
     private static String getVersion(final String major, final String minor, final String patch) {
