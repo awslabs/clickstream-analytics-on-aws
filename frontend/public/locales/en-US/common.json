@@ -42,7 +42,8 @@
       "analyzes": "Analyses",
       "metadata": "Metadata",
       "segments": "Segments",
-      "data-management": "Data Management"
+      "data-management": "Data Management",
+      "q": "Analytics Q"
     },
     "operation": "Operation",
     "dashboard": "Monitors Dashboard",
