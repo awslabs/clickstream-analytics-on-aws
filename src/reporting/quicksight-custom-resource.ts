@@ -446,42 +446,6 @@ function _getDataSetDefs(
           'new_users',
         ],
       },
-      {
-        tableName: CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
-        useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV}`,
-        columns: [
-          {
-            Name: 'event_date',
-            Type: 'DATETIME',
-          },
-          {
-            Name: 'platform',
-            Type: 'STRING',
-          },
-          {
-            Name: 'active_users',
-            Type: 'STRING',
-          },
-          {
-            Name: 'new_users',
-            Type: 'STRING',
-          },
-        ],
-        dateTimeDatasetParameter: [
-          {
-            name: 'endDate23',
-            timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
-          },
-        ],
-        projectedColumns: [
-          'event_date',
-          'platform',
-          'active_users',
-          'new_users',
-        ],
-      },
 
       //Engagement Sheet
       {
@@ -611,8 +575,8 @@ function _getDataSetDefs(
             Type: 'DECIMAL',
           },
           {
-            Name: 'event_id',
-            Type: 'STRING',
+            Name: 'event_count',
+            Type: 'INTEGER',
           },
         ],
         projectedColumns: [
@@ -622,7 +586,7 @@ function _getDataSetDefs(
           'aggregation_dim',
           'user_id',
           'user_engagement_time_seconds',
-          'event_id',
+          'event_count',
         ],
       },
       {
