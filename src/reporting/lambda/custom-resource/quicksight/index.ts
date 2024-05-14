@@ -136,16 +136,26 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   const databaseSchemaNames = props.schemas;
   if ( databaseSchemaNames.trim().length > 0 ) {
     try {
+
+      const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
+      const databaseName = dashboardDefProps.databaseName;
+      const commonParams: ResourceCommonParams = {
+        awsAccountId: awsAccountId,
+        ownerPrincipalArn,
+        sharePrincipalArn,
+        databaseName,
+        schema: '',
+        timezoneDict,
+      };
+
       for (const schemaName of databaseSchemaNames.split(',')) {
-        const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
+        
         logger.info('creating quicksight dashboard with params', {
           schemaName: schemaName,
           dashboardDefProps: dashboardDefProps,
         });
-
-        const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
-          schemaName,
-          dashboardDefProps, timezoneDict, props.useSpice);
+        commonParams.schema = schemaName;
+        const dashboard = await createQuickSightDashboard(quickSight, commonParams, dashboardDefProps, props.useSpice);
 
         dashboards.push({
           appId: schemaName,
@@ -278,20 +288,25 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       });
     };
 
+    const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
+    const commonParams: ResourceCommonParams = {  
+      awsAccountId: awsAccountId,
+      databaseName: dashboardDefProps.databaseName,
+      schema: '',
+      sharePrincipalArn: sharePrincipalArn,
+      ownerPrincipalArn: ownerPrincipalArn,
+      timezoneDict: timezoneDict,
+    };
     for (const schemaName of createSchemas) {
-      const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
+      
       createdQuickSightResources.createdSchemas.push({
         schema: schemaName,
         dashboardDefProps: dashboardDefProps,
       });
 
+      commonParams.schema = schemaName;
       logger.info('useSpice:', props.useSpice);
-      const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
-        schemaName,
-        dashboardDefProps,
-        timezoneDict,
-        props.useSpice,
-      );
+      const dashboard = await createQuickSightDashboard(quickSight, commonParams, dashboardDefProps, props.useSpice);
 
       logger.info('Creating schema', {
         schemaName: schemaName,
@@ -432,12 +447,8 @@ const getDashboardPermission = (sharePrincipalArn: string, ownerPrincipalArn: st
 };
 
 const createQuickSightDashboard = async (quickSight: QuickSight,
-  accountId: string,
-  sharePrincipalArn: string,
-  ownerPrincipalArn: string,
-  schema: string,
+  commonParams: ResourceCommonParams,
   dashboardDef: QuickSightDashboardDefProps,
-  timezoneDict: { [key: string]: string },
   useSpice: string,
 )
 : Promise<CreateDashboardCommandOutput|undefined> => {
@@ -445,17 +456,9 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   const datasetRefs: DataSetReference[] = [];
   const dataSets = dashboardDef.dataSets;
   const dataSetsSpice = dashboardDef.dataSetsSpice;
-  const databaseName = dashboardDef.databaseName;
-  const commonParams: ResourceCommonParams = {
-    awsAccountId: accountId,
-    ownerPrincipalArn,
-    sharePrincipalArn,
-    databaseName,
-    schema,
-    timezoneDict,
-  };
 
-  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn, sharePrincipalArn);
+  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, 
+    commonParams.ownerPrincipalArn, commonParams.sharePrincipalArn);
 
   const targetDataSet = useSpice === 'yes' ? dataSetsSpice : dataSets;
   for ( const dataSet of targetDataSet) {
