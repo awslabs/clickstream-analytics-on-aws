@@ -2299,6 +2299,10 @@ describe('reporting test', () => {
                 OutputValue: 'arn:aws:iam::111122223333:role/RedshiftDataApiRole',
               },
               {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME,
+                OutputValue: 'mock-database-name',
+              },
+              {
                 OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
                 OutputValue: 'redshift-workgroup-1.cjvqjvqjvqjv.ap-southeast-1.redshift-serverless.amazonaws.com',
               },
@@ -2336,6 +2340,7 @@ describe('reporting test', () => {
     expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
       Sql: `select * from app1.${EVENT_USER_VIEW} limit 1`,
       WorkgroupName: 'redshift-workgroup-1',
+      Database: 'mock-database-name',
     });
   });
 
@@ -2417,6 +2422,10 @@ describe('reporting test', () => {
               {
                 OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
                 OutputValue: 'arn:aws:iam::111122223333:role/RedshiftDataApiRole',
+              },
+              {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME,
+                OutputValue: 'mock-database-name',
               },
               {
                 OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
@@ -2509,6 +2518,10 @@ describe('reporting test', () => {
               {
                 OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
                 OutputValue: 'arn:aws:iam::111122223333:role/RedshiftDataApiRole',
+              },
+              {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME,
+                OutputValue: 'mock-database-name',
               },
               {
                 OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,

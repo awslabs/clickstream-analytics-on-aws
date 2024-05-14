@@ -37,6 +37,7 @@ import {
   OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
   OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
   sleep,
+  OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME,
 } from '@aws/clickstream-base-lib';
 import {
   CreateDataSetCommandOutput, QuickSight,
@@ -1860,10 +1861,15 @@ export async function warmupRedshift(pipeline: IPipeline, appId: string, execute
     pipeline.stackDetails ?? pipeline.status?.stackDetails,
     PipelineStackType.REPORTING,
     OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS);
+  const redshiftDatabaseName = getStackOutputFromPipelineStatus(
+    pipeline.stackDetails ?? pipeline.status?.stackDetails,
+    PipelineStackType.REPORTING,
+    OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME);
+
   logger.debug(`Data Api Role: ${dataApiRole}, Redshift Endpoint: ${redshiftEndpoint}`);
   const workgroupName = redshiftEndpoint?.split('.')[0];
-  if (!dataApiRole || !workgroupName) {
-    logger.warn('Data Api Role or Workgroup Name not found');
+  if (!dataApiRole || !workgroupName || !redshiftDatabaseName) {
+    logger.warn('Data Api Role, Workgroup Name or Database Name not found');
     return;
   }
   const redshiftType = redshiftEndpoint?.split('.')[3];
@@ -1879,7 +1885,7 @@ export async function warmupRedshift(pipeline: IPipeline, appId: string, execute
   const queryId = await waitExecuteWarmupStatement(
     redshiftData,
     workgroupName,
-    pipeline.projectId,
+    redshiftDatabaseName,
     `select * from ${appId}.${EVENT_USER_VIEW} limit 1`,
     executeId,
   );
