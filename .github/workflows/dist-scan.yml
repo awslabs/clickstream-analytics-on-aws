@@ -216,6 +216,7 @@ jobs:
         uses: zxkane/sonar-quality-gate@master
         if: always()
         env:
+          DEBUG: true
           GITHUB_TOKEN: ${{ secrets.PROJEN_GITHUB_TOKEN }}
           GIT_URL: "https://api.github.com"
           GIT_TOKEN: ${{ secrets.PROJEN_GITHUB_TOKEN }} 
