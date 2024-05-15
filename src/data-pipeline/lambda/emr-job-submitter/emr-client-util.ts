@@ -536,7 +536,7 @@ export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkCo
     executorCore = 16;
     executorMem = 100;
     executorDisk = 200;
-    initialExecutors = 10;
+    initialExecutors = 20;
     inputRePartitions = 500;
 
   } else if (objectsInfo.sizeTotal < 500 * size_1G) {
@@ -546,7 +546,7 @@ export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkCo
     executorCore = 16;
     executorMem = 100;
     executorDisk = 200;
-    initialExecutors = 10;
+    initialExecutors = 30;
     inputRePartitions = 1000;
   } else if (objectsInfo.sizeTotal < 1000 * size_1G) {
     driverCore = 16;
@@ -555,7 +555,7 @@ export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkCo
     executorCore = 16;
     executorMem = 100;
     executorDisk = 200;
-    initialExecutors = 15;
+    initialExecutors = 40;
     inputRePartitions = 1000;
   } else {
     driverCore = 16;
@@ -564,7 +564,7 @@ export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkCo
     executorCore = 16;
     executorMem = 100;
     executorDisk = 200;
-    initialExecutors = 25;
+    initialExecutors = 50;
     inputRePartitions = 2000;
   }
 
