@@ -157,7 +157,9 @@ export const generateEmbedUrlForRegisteredUser = async (
       commandInput = {
         ...commandInput,
         ExperienceConfiguration: {
-          GenerativeQnA: {},
+          GenerativeQnA: {
+            InitialTopicId: 'default',
+          },
         },
       };
     } else if (sheetId && visualId) {
@@ -192,6 +194,7 @@ export const generateEmbedUrlForRegisteredUser = async (
         },
       };
     }
+    console.log('commandInput', commandInput);
     const res = await quickSight.generateEmbedUrlForRegisteredUser(commandInput);
     return res;
   } catch (err) {
