@@ -79,7 +79,7 @@
     ```sql
     -- 请用您的实际应用程序ID替换 `<app-id>`
     -- 根据需要更新天数范围
-    CALL "<app-id>".sp_migrate_all_to_v2(180);
+    CALL "<app-id>".sp_migrate_data_to_v2(180);
     ```
 
 5. 等待SQL执行完成。执行时间取决于`events`表中的数据量。
@@ -92,7 +92,7 @@
     SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
     SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
     SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_all_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
     ```
 
 7. 计算迁移的数据在预置仪表板中使用的指标。参考[这个常见问题][faq-recalculate-data]获取执行步骤。
@@ -109,7 +109,7 @@
     DROP PROCEDURE "<app-id>".sp_migrate_event_to_v2(nday integer);
     DROP PROCEDURE "<app-id>".sp_migrate_item_to_v2(nday integer);
     DROP PROCEDURE "<app-id>".sp_clear_expired_events(retention_range_days integer);
-    DROP PROCEDURE "<app-id>".sp_migrate_all_to_v2(nday integer);
+    DROP PROCEDURE "<app-id>".sp_migrate_data_to_v2(nday integer);
     DROP PROCEDURE "<app-id>".sp_migrate_user_to_v2();
     DROP PROCEDURE "<app-id>".sp_migrate_session_to_v2();
     DROP PROCEDURE "<app-id>".sp_clear_item_and_user();

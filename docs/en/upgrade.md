@@ -83,7 +83,7 @@ The solution automatically and asynchronously upgrades the views and materialize
     ```sql
     -- please replace `<app-id>` with your actual app id
     -- update the day range based on your needs
-    CALL "<app-id>".sp_migrate_all_to_v2(180);
+    CALL "<app-id>".sp_migrate_data_to_v2(180);
     ```
 
 5. Wait for the SQL to complete. The execution time depends on the volume of data in the `events` table.
@@ -96,7 +96,7 @@ The solution automatically and asynchronously upgrades the views and materialize
     SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
     SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
     SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_all_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
     ```
 
 7. Calculate the metrics for the migrated data used in the out-of-the-box dashboards. Refer to [this FAQ][faq-recalculate-data] for guidance.
@@ -113,7 +113,7 @@ The solution automatically and asynchronously upgrades the views and materialize
     DROP PROCEDURE "<app-id>".sp_migrate_event_to_v2(nday integer);
     DROP PROCEDURE "<app-id>".sp_migrate_item_to_v2(nday integer);
     DROP PROCEDURE "<app-id>".sp_clear_expired_events(retention_range_days integer);
-    DROP PROCEDURE "<app-id>".sp_migrate_all_to_v2(nday integer);
+    DROP PROCEDURE "<app-id>".sp_migrate_data_to_v2(nday integer);
     DROP PROCEDURE "<app-id>".sp_migrate_user_to_v2();
     DROP PROCEDURE "<app-id>".sp_migrate_session_to_v2();
     DROP PROCEDURE "<app-id>".sp_clear_item_and_user();
