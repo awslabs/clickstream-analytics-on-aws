@@ -256,7 +256,7 @@ export const reportingViewsDef: SQLViewDef[] = [
 // keep order
 export const schemaDefs: SQLDef[] = [
   {
-    sqlFile: 'clickstream-log.sql',
+    sqlFile: 'clickstream-log-v2.sql',
   },
   {
     sqlFile: 'refresh-mv-sp-status.sql',
