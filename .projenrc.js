@@ -615,10 +615,6 @@ apiProject.setScript('ncc-build', 'tsc && ncc build dist/index.js -o ncc');
 apiProject.setScript('start', 'pnpm run ncc-build && node ncc/index.js');
 apiProject.addFields({ version });
 
-project.buildWorkflow.buildTask._env = {
-  NODE_OPTIONS: '--max_old_space_size=6144',
-};
-
 project.buildWorkflow.workflow.file?.addOverride(
   'jobs.build.permissions.checks',
   'write',
@@ -634,6 +630,10 @@ project.buildWorkflow.workflow.file?.addOverride(
 project.buildWorkflow.workflow.file?.addOverride(
   'jobs.build.env.iam_role_to_assume',
   '${{ secrets.ROLE_ARN }}',
+);
+project.buildWorkflow.workflow.file?.addOverride(
+  'jobs.build.env.JEST_MAX_WORKERS',
+  '${{ vars.JEST_MAX_WORKERS || \'auto\' }}',
 );
 project.buildWorkflow.preBuildSteps.push({
   name: 'Configure AWS Credentials',
