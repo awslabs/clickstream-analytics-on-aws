@@ -2752,26 +2752,24 @@
 <p>For the clickstream project, you can specify the basic configuration of the data pipeline and set the following configurations:</p>
 <ul>
 <li><strong>AWS Region</strong>: select a region at which the pipeline will be created. If you select a region where some AWS services are not available, the corresponding feature will be disabled by default. Check <a href="../../plan-deployment/regions/">the region table</a> for feature availability.</li>
-<li><strong>VPC</strong>: specify the VPC where the compute resources of the pipeline will be located. The VPC needs to meet the below criteria for running the pipeline workload.
-    <!-- BEGIN INCLUDE ./vpc-prerequisites.md --><ul>
+<li>
+<p><strong>VPC</strong>: specify the VPC where the compute resources of the pipeline will be located. The VPC needs to meet the below criteria for running the pipeline workload.
+    <!-- BEGIN INCLUDE ./vpc-prerequisites.md --></p>
+<ul>
 <li>At least two public subnets across two availability zones (AZs) in the VPC.</li>
-<li>At least two private (with NAT gateways or instances) subnets across two AZs, or at least two isolated subnets across two AZs in the VPC. If you want to deploy the solution resources in the isolated subnets, you have to create [VPC endpoints][vpc-endpoints] for the AWS services below.<ul>
+<li>At least two private (with NAT gateways or instances) subnets across two AZs, or at least two isolated subnets across two AZs in the VPC. If you want to deploy the solution resources in the isolated subnets, you have to create <a href="https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html">VPC endpoints</a> for the AWS services below.<ul>
 <li><code>s3</code>, <code>logs</code>, <code>ecr.api</code>, <code>ecr.dkr</code>, <code>ecs</code>, <code>ecs-agent</code>, <code>ecs-telemetry</code>.</li>
 <li><code>kinesis-streams</code> if you use KDS as a sink buffer in the ingestion module.</li>
 <li><code>emr-serverless</code>, <code>glue</code> if you enable the data processing module.</li>
-<li><code>redshift-data</code>, <code>sts</code>, <code>dynamodb</code>, <code>states</code> and <code>lambda</code> if you enable Redshift as an analytics engine in the data modeling module.
-<!-- END INCLUDE --></li>
+<li><code>redshift-data</code>, <code>sts</code>, <code>dynamodb</code>(must be <a href="https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-ddb.html">Gateway endpoints for DynamoDB</a>), <code>states</code> and <code>lambda</code> if you enable Redshift as an analytics engine in the data modeling module.</li>
 </ul>
 </li>
 </ul>
-</li>
-<li><strong>Data collection SDK</strong>: specify the SDK type that the client uses.<ul>
-<li>If you choose <strong>Clickstream SDK</strong>, please refer to <a href="../../sdk-manual/">SDK manual</a> for the available Clickstream SDKs and integration guides.</li>
-<li>If you choose <strong>Third-Party SDK</strong>, you need to follow up on <a href="../data-processing/configure-plugin/#custom-plugins">this step</a> to add a custom transformer plug-in to map the data to solution schema (if data modeling &amp; reporting are needed). Note that the solution has built-in support for Google Tag Manager for server-side tagging, you can follow up on <a href="https://aws.amazon.com/solutions/guidance/using-google-tag-manager-for-server-side-website-analytics-on-aws/">Guidance for Using Google Tag Manager for Server-Side Website Analytics on AWS</a> to set up the GTM server-side servers on AWS.</li>
-</ul>
-</li>
-<li>
-<p><strong>Data location</strong>: specify the S3 bucket where the clickstream data is stored.</p>
+<p><!-- END INCLUDE -->
+* <strong>Data collection SDK</strong>: specify the SDK type that the client uses.
+- If you choose <strong>Clickstream SDK</strong>, please refer to <a href="../../sdk-manual/">SDK manual</a> for the available Clickstream SDKs and integration guides.
+- If you choose <strong>Third-Party SDK</strong>, you need to follow up on <a href="../data-processing/configure-plugin/#custom-plugins">this step</a> to add a custom transformer plug-in to map the data to solution schema (if data modeling &amp; reporting are needed). Note that the solution has built-in support for Google Tag Manager for server-side tagging, you can follow up on <a href="https://aws.amazon.com/solutions/guidance/using-google-tag-manager-for-server-side-website-analytics-on-aws/">Guidance for Using Google Tag Manager for Server-Side Website Analytics on AWS</a> to set up the GTM server-side servers on AWS.
+* <strong>Data location</strong>: specify the S3 bucket where the clickstream data is stored.</p>
 <div class="admonition info">
 <p class="admonition-title">Note</p>
 <p>The bucket encrypted with AWS KMS keys (SSE-KMS) is not supported.</p>
