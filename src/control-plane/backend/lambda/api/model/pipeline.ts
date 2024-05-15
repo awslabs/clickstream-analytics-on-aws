@@ -871,6 +871,7 @@ export class CPipeline {
   };
 
   private patchBuiltInTags() {
+    const version = SolutionVersion.Of(this.pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
     if (this.resources?.solution) {
       const builtInTagKeys = [
         BuiltInTagKeys.AWS_SOLUTION,
@@ -892,7 +893,7 @@ export class CPipeline {
         value: SolutionInfo.SOLUTION_SHORT_NAME,
       }, {
         key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
-        value: FULL_SOLUTION_VERSION,
+        value: version.fullVersion,
       }, {
         key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
         value: this.pipeline.projectId,
