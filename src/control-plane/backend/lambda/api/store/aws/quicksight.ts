@@ -157,9 +157,7 @@ export const generateEmbedUrlForRegisteredUser = async (
       commandInput = {
         ...commandInput,
         ExperienceConfiguration: {
-          GenerativeQnA: {
-            InitialTopicId: 'default',
-          },
+          GenerativeQnA: {},
         },
       };
     } else if (sheetId && visualId) {

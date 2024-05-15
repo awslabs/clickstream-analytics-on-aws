@@ -23,7 +23,7 @@
     "realtime": "实时",
     "explore": "探索",
     "analyzes": "分析",
-    "analyticsQ": "Q",
+    "analyticsQ": "Amazon Q",
     "segments": "分群",
     "createSegment": "创建分群",
     "editSegment": "编辑分群",
@@ -43,7 +43,7 @@
       "metadata": "元数据",
       "segments": "分群",
       "data-management": "数据管理",
-      "q": "Q"
+      "q": "Amazon Q"
     },
     "operation": "运维",
     "dashboard": "显示器仪表板",

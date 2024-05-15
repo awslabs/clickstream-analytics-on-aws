@@ -23,7 +23,7 @@
     "realtime": "Realtime",
     "explore": "Explore",
     "analyzes": "Analyzes",
-    "analyticsQ": "Analytics Q",
+    "analyticsQ": "Amazon Q",
     "segments": "Segments",
     "createSegment": "Create Segment",
     "editSegment": "Edit Segment",
@@ -43,7 +43,7 @@
       "metadata": "Metadata",
       "segments": "Segments",
       "data-management": "Data Management",
-      "q": "Analytics Q"
+      "q": "Amazon Q"
     },
     "operation": "Operation",
     "dashboard": "Monitors Dashboard",
