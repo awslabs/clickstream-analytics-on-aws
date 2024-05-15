@@ -1198,6 +1198,7 @@ test('check AuthenticationSecretArn pattern', () => {
       'arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx',
       'arn:aws-cn:secretsmanager:cn-northwest-1:111111111111:secret:fake-xxxxxx',
       'arn:aws-us-gov:secretsmanager:us-gov-west-1:111111111111:secret:fake-xxxxxx',
+      'arn:aws:secretsmanager:us-east-1:111111111111:secret:prefix/fake-xxxxxx',
     ];
     for (const v of validValues) {
       expect(v).toMatch(regex);
