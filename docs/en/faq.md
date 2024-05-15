@@ -108,6 +108,19 @@ You are not allowed to modify the default dashboard directly, however, you can c
 5. Go back to the Dashboard, refresh the webpage, you should be able to see the Save As button at the upper right.
 6. Click Save as button, enter a name for the analysis, and click SAVE, now you should be able to see a new analysis in the Analyzes, with which now you can edit and publish a new dashboard.
 
+### How can I speed up the display of reports?
+You can accelerate report display by converting QuickSight datasets to SPICE mode. Here are the steps to do this:
+
+1. Purchase SPICE capacity through the QuickSight console. The required capacity depends on your data volume; it is recommended to start with 50GB and enable the auto-purchase option.
+2. Open solution console, select target project and click the pipeline status on the pipeline details page and then clicking the Reporting link in the opened window.
+3. Click the "Update" button and select the "Use current template" option.
+4. Find the "Enable QuickSight SPICE Import Mode" parameter and change its value to "yes". Keep other options unchanged.
+5. Click next to complete the stack update. Once the update is complete, you can start using it.
+
+**Notes:**
+1. Enabling SPICE incurs charges based on the amount of space used. The pricing details can be found in the QuickSight console. If the report usage is high, enabling SPICE will reduce the access load on the Redshift database, which in turn may increase data latency.
+2. By default, the solution refreshes data to SPICE using an incremental update method. The refresh process starts at 6 AM daily. You can manually change the update schedule in QuickSight.
+
 ## SDK
 
 ### Can I use other SDK to send data to the pipeline created by this solution
