@@ -3528,6 +3528,7 @@ describe('Pipeline test', () => {
         expressionAttributeValues[':timezone'].L.length === 0 &&
         expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
         expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
+        dataProcessingInput.M.Tags.L[1].M.Value.S === 'v1.0.0' &&
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main' &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'Admin/fakeUser' &&
         reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser',
@@ -3537,8 +3538,15 @@ describe('Pipeline test', () => {
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
       .send({
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+        templateVersion: 'v1.0.0',
+        tags: [
+          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
+          { key: 'test-key', value: 'test-value' },
+        ],
+        timezone: undefined,
       });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
+    expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
