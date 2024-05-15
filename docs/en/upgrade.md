@@ -76,7 +76,7 @@ The solution automatically and asynchronously upgrades the views and materialize
 
 2. Select the Serverless workgroup or provisioned cluster, `<project-id>`->`<app-id>`->Tables, and ensure that tables for the appId are listed there.
 
-3. Create a new SQL Editor.
+3. Create a new SQL Editor，select your project's schema.
 
 4. Customize the date range as desired, and execute the following SQL in the editor to migrate events from the past 180 days, or any number of days up to the present, to the new tables.
 
