@@ -18,6 +18,7 @@ jobs:
     env:
       CI: "true"
       iam_role_to_assume: ${{ secrets.ROLE_ARN }}
+      JEST_MAX_WORKERS: ${{ vars.JEST_MAX_WORKERS || 'auto' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
