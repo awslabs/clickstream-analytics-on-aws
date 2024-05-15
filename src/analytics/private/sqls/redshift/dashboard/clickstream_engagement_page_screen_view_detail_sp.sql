@@ -22,7 +22,7 @@ BEGIN
       current_date::date as event_date,
       platform,
       'Page Title' as aggregation_type,
-      page_view_page_title as aggregation_dim,
+      COALESCE(page_view_page_title,'/') as aggregation_dim,
       merged_user_id,
       sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
       count(distinct event_id) as event_count
@@ -45,7 +45,7 @@ BEGIN
       current_date::date as event_date,
       platform,
       'Page URL Path' as aggregation_type,
-      page_view_page_url_path as aggregation_dim,
+      COALESCE(page_view_page_url_path, '/') as aggregation_dim,
       merged_user_id,
       sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
       count(distinct event_id) as event_count
@@ -68,7 +68,7 @@ BEGIN
       current_date::date as event_date,
       platform,
       'Screen Name' as aggregation_type,
-      screen_view_screen_name as aggregation_dim,
+      COALESCE(screen_view_screen_name, '/') as aggregation_dim,
       merged_user_id,
       sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
       count(distinct event_id) as event_count
@@ -91,7 +91,7 @@ BEGIN
       current_date::date as event_date,
       platform,
       'Screen Class' as aggregation_type,
-      screen_view_screen_id as aggregation_dim,
+      COALESCE(screen_view_screen_id, '/') as aggregation_dim,
       merged_user_id,
       sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
       count(distinct event_id) as event_count
