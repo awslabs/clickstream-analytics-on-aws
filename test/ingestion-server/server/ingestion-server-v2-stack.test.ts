@@ -1174,11 +1174,12 @@ test('check AuthenticationSecretArn pattern', () => {
       'arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx',
       'arn:aws-cn:secretsmanager:cn-northwest-1:111111111111:secret:fake-xxxxxx',
       'arn:aws-us-gov:secretsmanager:us-gov-west-1:111111111111:secret:fake-xxxxxx',
+      'arn:aws:secretsmanager:us-east-1:111111111111:secret:prefix/fake-xxxxxx',
     ];
     for (const v of validValues) {
       expect(v).toMatch(regex);
     }
-    const invalidValues = ['abc', 'arn:aws-cx:secretsmanager:us-east-1:111111111111:secret:fake', 'arn:aws:secretsmanagers:us-east-1:111111111111:certificate/fake-xxxxxx'];
+    const invalidValues = ['abc', 'arn:aws-cx:secretsmanager:us-east-1:111111111111:secret:fake', 'arn:aws:secretsmanager:us-east-1:111111111111:certificate/fake-xxxxxx'];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
     }

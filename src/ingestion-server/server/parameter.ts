@@ -573,9 +573,9 @@ function createCommonParameters(scope: Construct) {
       description: 'The AuthenticationSecretArn of OIDC provider',
       type: 'String',
       default: '',
-      allowedPattern: '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-]+$',
+      allowedPattern: '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-\/]+$',
       constraintDescription:
-      'AuthenticationSecretArn must match pattern ^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-]+$',
+      'AuthenticationSecretArn must match pattern ^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-\/]+$',
     },
   );
 
