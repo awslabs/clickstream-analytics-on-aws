@@ -1768,7 +1768,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Last_Refresh_Date',
             useSpice: 'no',
-            customSql: 'SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.refresh_mv_sp_status',
+            customSql: 'SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.refresh_mv_sp_status where triggerred_by = \'WORK_FLOW\'',
             columns:
                 [
                   {
@@ -3449,7 +3449,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Last_Refresh_Date',
             useSpice: 'no',
-            customSql: 'SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.refresh_mv_sp_status',
+            customSql: 'SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.refresh_mv_sp_status where triggerred_by = \'WORK_FLOW\'',
             columns:
                 [
                   {
