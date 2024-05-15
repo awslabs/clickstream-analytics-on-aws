@@ -345,8 +345,8 @@ export class EMRServerlessUtil {
       outputFormat: process.env.OUTPUT_FORMAT!,
       outputPartitions: process.env.OUTPUT_PARTITIONS ?? '-1',
       rePartitions: process.env.RE_PARTITIONS ?? '200',
-      userKeepDays: process.env.USER_KEEP_DAYS ?? '180',
-      itemKeepDays: process.env.ITEM_KEEP_DAYS ?? '360',
+      userKeepDays: process.env.USER_KEEP_DAYS ?? '3650',
+      itemKeepDays: process.env.ITEM_KEEP_DAYS ?? '3650',
       filterBotEvent: process.env.FILTER_BOT_EVENT ?? 'true',
     };
   }
