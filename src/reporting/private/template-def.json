@@ -10796,7 +10796,7 @@
         {
             "DataSetIdentifier": "Day_User_Acquisition",
             "Name": "Average User Engagement Time (Seconds)",
-            "Expression": "sum({total_user_engagement_time_seconds}) / sum({session_count}) / distinct_count({user_id})"
+            "Expression": "sum({total_user_engagement_time_seconds}) / sum({session_count}) )"
         },
         {
             "DataSetIdentifier": "Day_User_Acquisition",
