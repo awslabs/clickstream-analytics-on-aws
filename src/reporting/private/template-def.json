@@ -8476,15 +8476,6 @@
                                                     "ColumnName": "platform"
                                                 }
                                             }
-                                        },       
-                                        {
-                                            "CategoricalDimensionField": {
-                                                "FieldId": "LogicalTable1.app_version.4.1711460559852",
-                                                "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate",
-                                                    "ColumnName": "app_version"
-                                                }
-                                            }
                                         }
                                     ]
                                 }
@@ -8528,12 +8519,6 @@
                                         {
                                             "FieldTooltipItem": {
                                                 "FieldId": "LogicalTable1.platform.0.1711012483644",
-                                                "Visibility": "VISIBLE"
-                                            }
-                                        },
-                                        {
-                                            "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.app_version.4.1711460559852",
                                                 "Visibility": "VISIBLE"
                                             }
                                         },
