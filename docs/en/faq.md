@@ -108,9 +108,9 @@ You are not allowed to modify the default dashboard directly, however, you can c
 5. Go back to the Dashboard, refresh the webpage, you should be able to see the Save As button at the upper right.
 6. Click Save as button, enter a name for the analysis, and click SAVE, now you should be able to see a new analysis in the Analyzes, with which now you can edit and publish a new dashboard.
 
-### How to speed up the display of the default dashboard?
+### How to speed up the loading of the default dashboard?
 
-You can accelerate report display by converting QuickSight datasets to SPICE mode. Here are the steps to do this:
+You can accelerate report loading by converting QuickSight datasets to SPICE mode. Here are the steps to do this:
 
 1. Purchase SPICE capacity through the QuickSight console. The required capacity depends on your data volume; it is recommended to enable the auto-purchase option.
 2. Open the solution console, select the target project, click the pipeline **Active** status on the pipeline details page, and then open the stack detail link of **Reporting** in the CloudFormation console.
