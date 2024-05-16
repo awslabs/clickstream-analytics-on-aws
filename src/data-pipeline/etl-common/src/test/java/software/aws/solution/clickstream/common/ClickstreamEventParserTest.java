@@ -450,4 +450,25 @@ public class ClickstreamEventParserTest extends BaseTest {
 
         Assertions.assertEquals(expectedJson, prettyJson(eventV2.toJson()));
     }
+
+
+    @Test
+    void test_getData() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_getData
+        String dataString = resourceFileContent("/one_line.json");
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode lineData = objectMapper.readTree(dataString);
+
+        JsonNode data =  lineData.get("data");
+
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
+
+        JsonNode ingestionData = clickstreamEventParser.getData(data.asText());
+
+        if (ingestionData.isArray()) {
+            JsonNode firstElement =   ingestionData.elements().next();
+            System.out.print(firstElement.toPrettyString());
+        }
+    }
+
 }
