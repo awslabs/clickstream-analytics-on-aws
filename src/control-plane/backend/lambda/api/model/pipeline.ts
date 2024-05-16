@@ -670,6 +670,11 @@ export class CPipeline {
       parameterKey: 'QuickSightTimezoneParam',
       parameterValue: this.pipeline.timezone ? JSON.stringify(this.pipeline.timezone) : '',
     });
+    updateList.push({
+      stackType: PipelineStackType.STREAMING,
+      parameterKey: 'AppIds',
+      parameterValue: appIds.join(','),
+    });
     // update workflow
     this.stackManager.updateWorkflowForApp(updateList);
     // create new execution

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON } from '@aws/clickstream-base-lib';
 import moment from 'moment-timezone';
 import { PipelineServ } from './pipeline';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
@@ -255,6 +255,14 @@ export class ApplicationServ {
       if (!flinkAppName) {
         return res.status(404).json(new ApiFail('The flink application not found.'));
       }
+      const sinkKinesisJson = getStackOutputFromPipelineStatus(
+        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+        PipelineStackType.STREAMING, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON);
+      if (!sinkKinesisJson) {
+        return res.status(404).json(new ApiFail('The kinesis sink not found.'));
+      }
+      const sinkKinesisJsonObj = JSON.parse(sinkKinesisJson);
+
       const streamAppIds = latestPipeline.streaming?.appIdStreamList ?? [];
       if (enable && !streamAppIds.includes(id)) {
         streamAppIds.push(id);
@@ -264,7 +272,14 @@ export class ApplicationServ {
           streamAppIds.splice(index, 1);
         }
       }
-      const updateRes = await updateFlinkApplicationEnvironmentProperties(latestPipeline.region, flinkAppName, streamAppIds);
+      const streamEnableList: any[] = [];
+      for (const appId of streamAppIds) {
+        streamEnableList.push({
+          appId,
+          streamArn: sinkKinesisJsonObj[appId],
+        });
+      }
+      const updateRes = await updateFlinkApplicationEnvironmentProperties(latestPipeline.region, flinkAppName, streamEnableList);
       if (!updateRes) {
         return res.status(500).json(new ApiFail('Failed to update Flink application environment properties.'));
       }
