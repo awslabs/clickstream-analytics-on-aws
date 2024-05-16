@@ -10876,7 +10876,7 @@
         {
             "DataSetIdentifier": "Page_Screen_View_Detail",
             "Name": "View / User",
-            "Expression": "sum(view_count) / distinct_count({user_id})"
+            "Expression": "sum({view_count}) / distinct_count({user_id})"
         },
         {
             "DataSetIdentifier": "Retention_View",
