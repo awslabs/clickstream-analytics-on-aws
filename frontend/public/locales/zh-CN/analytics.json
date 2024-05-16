@@ -5,6 +5,7 @@
     "min": "按照{{label}}求最小值 (MIN)",
     "max": "按照{{label}}求最大值 (MAX)",
     "sum": "按照{{label}}求和 (SUM)",
+    "SUM_VALUE": "按照{{label}}求和 (SUM)",
     "avg": "按照{{label}}求平均值 (AVG)",
     "median": "按照{{label}}求中位数 (MEDIAN)"
   },

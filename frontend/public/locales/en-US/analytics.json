@@ -5,6 +5,7 @@
     "min": "MIN by {{label}}",
     "max": "MAX by {{label}}",
     "sum": "SUM by {{label}}",
+    "SUM_VALUE": "SUM by {{label}}",
     "avg": "AVG by {{label}}",
     "median": "MEDIAN by {{label}}"
   },

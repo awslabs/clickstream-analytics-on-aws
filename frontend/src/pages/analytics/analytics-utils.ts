@@ -386,7 +386,11 @@ export const getAttributionMethodOptions = (
       label: i18n.t('analytics:options.eventNumber') ?? 'Event number',
     },
     {
-      label: defaultStr(i18n.t('analytics:sumGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.sum', {
+          label: '...',
+        })
+      ),
       value: ExploreComputeMethod.SUM_VALUE,
       subList: [],
     },
