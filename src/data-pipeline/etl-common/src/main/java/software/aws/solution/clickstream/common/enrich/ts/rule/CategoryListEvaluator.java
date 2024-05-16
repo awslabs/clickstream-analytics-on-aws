@@ -184,6 +184,11 @@ public final class CategoryListEvaluator {
                 candidateUrls.add(m2.group(1));
             }
         }
+
+       if (theReferrerUrl.contains(".google.")) {
+           candidateUrls.add("google.com");
+       }
+
         List<String> resultList = new ArrayList<>(new HashSet<>(candidateUrls));
         resultList.sort((o1, o2) -> o2.length() - o1.length());
         return resultList;

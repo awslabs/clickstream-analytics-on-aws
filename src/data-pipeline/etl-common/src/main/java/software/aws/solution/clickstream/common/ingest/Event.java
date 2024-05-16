@@ -42,9 +42,6 @@ public class Event {
     private Long eventTimestamp;
     @JsonProperty("platform")
     private String platform;
-    @JsonProperty("os_name")
-    @JsonAlias("operating_system")
-    private String osName;
     @JsonProperty("os_version")
     private String osVersion;
     @JsonProperty("make")

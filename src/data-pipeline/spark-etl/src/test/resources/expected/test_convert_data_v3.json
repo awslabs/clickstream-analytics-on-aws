@@ -31,7 +31,7 @@
       "device_manufacturer" : "Make HUAWEI",
       "device_carrier" : "CDMA",
       "device_network_type" : "Mobile",
-      "device_operating_system" : "ANDROID OS",
+      "device_operating_system" : "ANDROID",
       "device_operating_system_version" : "os-v1.0",
       "device_vendor_id" : "deviceid-1682319109447",
       "device_advertising_id" : "uf24bec657ea8eff7",
@@ -120,7 +120,7 @@
       "sdk_name" : "aws-solution-clickstream-sdk",
       "app_exception_message" : null,
       "app_exception_stack" : null,
-      "custom_parameters_json_str" : "{\"_device_advertising_id\":\"DAID001\",\"country_code\":\"CN\",\"_privacy_info_analytics_storage\":\"PIAAS\",\"hashCode\":\"80452b0\",\"_privacy_info_uses_transient_token\":\"PIUTT\",\"_device_vendor_id\":\"V001\",\"_privacy_info_ads_storage\":\"PIAS\",\"_is_first_day\":true,\"event_sequence_id\":2}",
+      "custom_parameters_json_str" : "{\"_device_advertising_id\":\"DAID001\",\"country_code\":\"CN\",\"_privacy_info_analytics_storage\":\"PIAAS\",\"hashCode\":\"80452b0\",\"os_name\":\"ANDROID OS\",\"_privacy_info_uses_transient_token\":\"PIUTT\",\"_device_vendor_id\":\"V001\",\"_privacy_info_ads_storage\":\"PIAS\",\"_is_first_day\":true,\"event_sequence_id\":2}",
       "custom_parameters" : {
         "_device_advertising_id" : {
           "value" : "DAID001",
@@ -156,6 +156,10 @@
         },
         "hashCode" : {
           "value" : "80452b0",
+          "type" : "string"
+        },
+        "os_name" : {
+          "value" : "ANDROID OS",
           "type" : "string"
         }
       },
