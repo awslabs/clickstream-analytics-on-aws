@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { aws_sdk_client_common_config, logger, parseDynamoDBTableARN, METADATA_V3_VERSION } from '@aws/clickstream-base-lib';
+import { readFileSync } from 'fs';
+import { aws_sdk_client_common_config, logger, parseMetadataFromSql, parseDynamoDBTableARN, METADATA_V3_VERSION } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   BatchWriteCommand,
@@ -52,15 +53,17 @@ const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
  */
 export const handler = async (event: StoreMetadataEvent) => {
   const appId = event.detail.appId;
+  const projectId = process.env.PROJECT_ID!;
   const metadataItems: any[] = [];
   // id as key, and currentMonth as value for those marked latest month
   const markedLatestMonthMap: Map<string, any> = new Map();
   try {
-    await handlePropertiesMetadata(appId, metadataItems, markedLatestMonthMap);
+
+    await handlePropertiesMetadata(projectId, appId, metadataItems, markedLatestMonthMap);
 
     await handleEventMetadata(appId, metadataItems, markedLatestMonthMap);
 
-    await handleUserAttributeMetadata(appId, metadataItems, markedLatestMonthMap);
+    await handleUserAttributeMetadata(projectId, appId, metadataItems, markedLatestMonthMap);
 
     await batchWriteIntoDDB(metadataItems);
 
@@ -108,7 +111,12 @@ async function handleEventMetadata(appId: string, metadataItems: any[], markedLa
   putItemsMapIntoDDBItems(metadataItems, ddbItemsMap);
 }
 
-async function handlePropertiesMetadata(appId: string, metadataItems: any[], markedLatestMonthMap: Map<string, any>) {
+async function handlePropertiesMetadata(
+  projectId: string,
+  appId: string,
+  metadataItems: any[],
+  markedLatestMonthMap: Map<string, any>,
+) {
   logger.info(`Start to handle properties metadata for app: ${appId}`);
   // key is (id, originMonth), value is item
   const ddbItemsMap = await getExistingItemsFromDDB(appId, 'event_parameter_metadata');
@@ -130,13 +138,27 @@ async function handlePropertiesMetadata(appId: string, metadataItems: any[], mar
       ddbItemsMap.set(key, item);
     }
   }
+
+  const allDistinctEventSet = await getDistinctEventName(appId);
+  const allDistinctPlatformSet = await getDistinctPlatform(appId);
+
   // aggregate summary info
-  aggEventParameterSummary(ddbItemsMap);
+  await aggEventParameterSummary(ddbItemsMap, allDistinctEventSet, allDistinctPlatformSet);
 
   putItemsMapIntoDDBItems(metadataItems, ddbItemsMap);
+
+  const metadataItemsWithoutValue = generateEventPropertiesWithoutValue(projectId, appId, allDistinctEventSet, allDistinctPlatformSet);
+
+  metadataItemsWithoutValue.forEach(item => {
+    metadataItems.push({
+      PutRequest: {
+        Item: item,
+      },
+    });
+  });
 }
 
-async function handleUserAttributeMetadata(appId: string, metadataItems: any[], markedLatestMonthMap: Map<string, any>) {
+async function handleUserAttributeMetadata(projectId: string, appId: string, metadataItems: any[], markedLatestMonthMap: Map<string, any>) {
   logger.info(`Start to handle user attribute metadata for app: ${appId}`);
   // key is (id, originMonth), value is item
   const ddbItemsMap = await getExistingItemsFromDDB(appId, 'user_attribute_metadata');
@@ -154,8 +176,17 @@ async function handleUserAttributeMetadata(appId: string, metadataItems: any[], 
       ddbItemsMap.set(key, item);
     }
   }
-
   putItemsMapIntoDDBItems(metadataItems, ddbItemsMap);
+
+  const metadataItemsWithoutValue = generateUserPropertiesWithoutValue(projectId, appId);
+
+  metadataItemsWithoutValue.forEach(item => {
+    metadataItems.push({
+      PutRequest: {
+        Item: item,
+      },
+    });
+  });
 }
 
 async function batchWriteIntoDDB(metadataItems: any[]) {
@@ -408,7 +439,11 @@ async function updateEventParameterItem(itemsMap: Map<string, any>, key: string,
   // convert valueEnumMap to valueEnum and push into item
   item[dayNumber].valueEnum = [];
   for (const [parameterValue, countValue] of valueEnumMap) {
-    item[dayNumber].valueEnum.push({ value: parameterValue, count: countValue });
+    if (item[dayNumber].valueEnum.length < 20) {
+      item[dayNumber].valueEnum.push({ value: parameterValue, count: countValue });
+    } else {
+      break;
+    }
   }
 
   // item should be updated if other month data is later than current month data
@@ -452,29 +487,173 @@ async function createEventParameterItem(record: any, itemsMap: Map<string, any>,
   };
 }
 
-function aggEventParameterSummary(itemsMap: Map<string, any>) {
+async function aggEventParameterSummary(
+  itemsMap: Map<string, any>,
+  allDistinctEventSet: Set<string>,
+  allDistinctPlatformSet: Set<string>,
+) {
+  const metadataNameSet = getMetadataName();
   for (const item of itemsMap.values()) {
     const platformSet: Set<string> = new Set();
     const valueEnumAggregation: { [key: string]: number } = {};
-    aggEventParameterValueEnumAndPlatform(item, platformSet, valueEnumAggregation);
+    aggEventParameterValueEnumAndPlatform(item, platformSet, valueEnumAggregation, metadataNameSet, allDistinctPlatformSet);
     const valueEnum = [];
     // limit the size of valueEnum to 50
     for (const key in valueEnumAggregation) {
       if (valueEnum.length < 50) {
         valueEnum.push({ value: key, count: valueEnumAggregation[key] });
+      } else {
+        break;
       }
     }
-
     item.summary.platform = Array.from(platformSet);
     item.summary.valueEnum = valueEnum;
+
+    if (metadataNameSet.has(item.name)) {
+      item.summary.associatedEvents = Array.from(allDistinctEventSet);
+      item.summary.platform = Array.from(allDistinctPlatformSet);
+    }
   }
 }
 
-function aggEventParameterValueEnumAndPlatform(item: any, platformSet: Set<string>, valueEnumAggregation: { [key: string]: number }) {
+async function getDistinctEventName(appId: string) {
+  const inputSql = `SELECT distinct event_name FROM ${appId}.event_v2;`;
+  const response = await queryMetadata(inputSql);
+  const eventNameSet: Set<string> = new Set();
+  for (const record of response.Records!) {
+    eventNameSet.add(record[0].stringValue);
+  }
+  return eventNameSet;
+}
+
+async function getDistinctPlatform(appId: string) {
+  const inputSql = `SELECT distinct platform FROM ${appId}.event_v2;`;
+  const response = await queryMetadata(inputSql);
+  const platformSet: Set<string> = new Set();
+  for (const record of response.Records!) {
+    platformSet.add(record[0].stringValue);
+  }
+  return platformSet;
+}
+
+// get all METADATA name from session.sql and event-v2.sql
+function getMetadataName() {
+  const fileContentSession = readFileSync('/opt/session.sql').toString('utf-8');
+  const metadataArraySession = parseMetadataFromSql(fileContentSession);
+
+  const fileContentEvent = readFileSync('/opt/event-v2.sql').toString('utf-8');
+  const metadataArrayEvent = parseMetadataFromSql(fileContentEvent);
+  const metadataNameSet: Set<string> = new Set();
+
+  for (const metadataObject of metadataArraySession) {
+    metadataNameSet.add(metadataObject.name);
+  }
+  for (const metadataObject of metadataArrayEvent) {
+    metadataNameSet.add(metadataObject.name);
+  }
+  return metadataNameSet;
+}
+
+function generateEventPropertiesWithoutValue(
+  projectId: string,
+  appId: string,
+  allDistinctEventSet: Set<string>,
+  allDistinctPlatformSet: Set<string>,
+) {
+  const fileContentSession = readFileSync('/opt/session.sql').toString('utf-8');
+  const metadataArraySession = parseMetadataFromSql(fileContentSession);
+
+  const fileContentEvent = readFileSync('/opt/event-v2.sql').toString('utf-8');
+  const metadataArrayEvent = parseMetadataFromSql(fileContentEvent);
+
+  const metadataItemsWithoutValue: any[] = [];
+  for (const metadataObject of metadataArraySession) {
+    if (metadataObject.scanValue === 'false') {
+      metadataItemsWithoutValue.push(generateParametersRecord(metadataObject, projectId, appId, allDistinctEventSet, allDistinctPlatformSet));
+    }
+  }
+  for (const metadataObject of metadataArrayEvent) {
+    if (metadataObject.scanValue === 'false') {
+      metadataItemsWithoutValue.push(generateParametersRecord(metadataObject, projectId, appId, allDistinctEventSet, allDistinctPlatformSet));
+    }
+  }
+  return metadataItemsWithoutValue;
+}
+
+function generateUserPropertiesWithoutValue(projectId: string, appId: string) {
+  const fileContentUser = readFileSync('/opt/user-v2.sql').toString('utf-8');
+  const metadataArrayUser = parseMetadataFromSql(fileContentUser);
+  const metadataItemsWithoutValue: any[] = [];
+  for (const metadataObject of metadataArrayUser) {
+    if (metadataObject.scanValue === 'false') {
+      metadataItemsWithoutValue.push(generateUserPropertiesRecord(metadataObject, projectId, appId));
+    }
+  }
+  return metadataItemsWithoutValue;
+}
+
+// generate parameters record for scanValue is false from session.sql and event-v2.sql
+function generateParametersRecord(
+  metadataObject: any,
+  projectId: string,
+  appId: string,
+  allDistinctEventSet: Set<string>,
+  allDistinctPlatformSet: Set<string>,
+) {
+  return {
+    id: `${projectId}#${appId}#${metadataObject.category}#${metadataObject.name}#${metadataObject.dataType}`,
+    month: 'latest',
+    originMonth: convertDateToMonth(new Date().toISOString()),
+    prefix: `EVENT_PARAMETER#${projectId}#${appId}#${METADATA_V3_VERSION}`,
+    projectId: projectId,
+    appId: appId,
+    name: metadataObject.name,
+    category: metadataObject.category,
+    valueType: metadataObject.dataType,
+    createTimestamp: Date.now(),
+    updateTimestamp: Date.now(),
+    summary: {
+      hasData: true,
+      platform: Array.from(allDistinctPlatformSet),
+      valueEnum: [],
+      associatedEvents: Array.from(allDistinctEventSet),
+    },
+  };
+}
+
+function generateUserPropertiesRecord(metadataObject: any, projectId: string, appId: string) {
+  return {
+    id: `${projectId}#${appId}#${metadataObject.category}#${metadataObject.name}#${metadataObject.dataType}`,
+    month: 'latest',
+    originMonth: convertDateToMonth(new Date().toISOString()),
+    prefix: `USER_ATTRIBUTE#${projectId}#${appId}#${METADATA_V3_VERSION}`,
+    projectId: projectId,
+    appId: appId,
+    name: metadataObject.name,
+    category: metadataObject.category,
+    valueType: metadataObject.dataType,
+    createTimestamp: Date.now(),
+    updateTimestamp: Date.now(),
+    summary: {
+      hasData: true,
+    },
+  };
+}
+
+
+function aggEventParameterValueEnumAndPlatform(
+  item: any, platformSet: Set<string>,
+  valueEnumAggregation: { [key: string]: number },
+  metadataNameSet: Set<string>,
+  allDistinctPlatformSet: Set<string>,
+) {
   for (const key in item) {
     if (key.startsWith('day')) {
       const dayData = item[key];
       dayData.platform?.forEach((element: string) => platformSet.add(element));
+      if (metadataNameSet.has(item.name)) {
+        dayData.platform = Array.from(allDistinctPlatformSet);
+      }
       dayData.valueEnum?.forEach((element: any) => {
         if (valueEnumAggregation[element.value]) {
           valueEnumAggregation[element.value] += element.count;
@@ -620,4 +799,8 @@ function addVersionToPrefix(prefix: string) {
   return prefix;
 }
 
+// convert date to like #202405
+function convertDateToMonth(date: string) {
+  return `#${date.substring(0, 7).replace('-', '')}`;
+}
 

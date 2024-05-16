@@ -15,10 +15,11 @@ import { METADATA_V3_VERSION } from '@aws/clickstream-base-lib';
 import { GetStatementResultCommand, DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { BatchWriteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
+import mockfs from 'mock-fs';
 import { handler, StoreMetadataEvent } from '../../../../../src/analytics/lambdas/scan-metadata-workflow/store-metadata-into-ddb';
 import { StoreMetadataBody } from '../../../../../src/analytics/private/model';
 import { REDSHIFT_MODE } from '../../../../../src/common/model';
-
+import { loadSQLFromFS } from '../../../../fs-utils';
 import 'aws-sdk-client-mock-jest';
 
 const storeMetadataBody: StoreMetadataBody = {
@@ -28,6 +29,17 @@ const storeMetadataBody: StoreMetadataBody = {
 const storeMetadataEvent: StoreMetadataEvent = {
   detail: storeMetadataBody,
 };
+const schemaDefs = [
+  {
+    sqlFile: 'event-v2.sql',
+  },
+  {
+    sqlFile: 'session.sql',
+  },
+  {
+    sqlFile: 'user-v2.sql',
+  },
+];
 
 describe('Lambda - store the metadata into DDB from Redshift', () => {
 
@@ -46,7 +58,14 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
     // set the env before loading the source
     process.env.REDSHIFT_MODE = REDSHIFT_MODE.SERVERLESS;
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
+    const rootPath = __dirname + '/../../../../../src/analytics/private/sqls/redshift/';
+
+    mockfs({
+      ...loadSQLFromFS(schemaDefs, rootPath),
+    });
   });
+
+  afterEach(mockfs.restore);
 
   test('Combine and Store one month metadata, without existing data in DDB', async () => {
     const exeuteId = 'Id-1';
@@ -72,6 +91,12 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       })
       .resolvesOnce({
         Records: genEventParameterMetadata(['#202311'], [9, 11, 12, 14]),
+      })
+      .resolvesOnce({
+        Records: genDistinctEventName(),
+      })
+      .resolvesOnce({
+        Records: genDistinctPlatform(),
       })
       .resolvesOnce({
         Records: genEventDistinctIdAndMonth(['#202311']),
@@ -122,12 +147,18 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
 
     expect(dynamoDBMock).toHaveReceivedNthCommandWith(7, BatchWriteCommand, {
       RequestItems: {
-        ClickstreamAnalyticsMetadata: [
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: genParameterItemExpect('#202311', [9, 11, 12, 14]),
             },
           },
+        ]),
+      },
+    });
+    expect(dynamoDBMock).toHaveReceivedNthCommandWith(8, BatchWriteCommand, {
+      RequestItems: {
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: genEventItemExpect('#202311', [9, 11, 12, 14]),
@@ -138,7 +169,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: genUserAttributeItemExpect('#202311', 20),
             },
           },
-        ],
+        ]),
       },
     });
   });
@@ -178,6 +209,12 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       })
       .resolvesOnce({
         Records: genEventParameterMetadata(['#202311'], [9, 11, 12]),
+      })
+      .resolvesOnce({
+        Records: genDistinctEventName(),
+      })
+      .resolvesOnce({
+        Records: genDistinctPlatform(),
       })
       .resolvesOnce({
         Records: genEventDistinctIdAndMonth(['#202311']),
@@ -250,12 +287,19 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
     };
     expect(dynamoDBMock).toHaveReceivedNthCommandWith(7, BatchWriteCommand, {
       RequestItems: {
-        ClickstreamAnalyticsMetadata: [
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: genParameterItemExpect('#202311', [9, 11, 12]),
             },
           },
+        ]),
+      },
+    });
+
+    expect(dynamoDBMock).toHaveReceivedNthCommandWith(8, BatchWriteCommand, {
+      RequestItems: {
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: eventItem,
@@ -266,7 +310,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: userAttributeItem,
             },
           },
-        ],
+        ]),
       },
     });
   });
@@ -295,6 +339,12 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       })
       .resolvesOnce({
         Records: genEventParameterMetadata(['#202311', '#202312'], [9, 11, 12]),
+      })
+      .resolvesOnce({
+        Records: genDistinctEventName(),
+      })
+      .resolvesOnce({
+        Records: genDistinctPlatform(),
       })
       .resolvesOnce({
         Records: genEventDistinctIdAndMonth(['#202311', '#202312']),
@@ -353,7 +403,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
 
     expect(dynamoDBMock).toHaveReceivedNthCommandWith(9, BatchWriteCommand, {
       RequestItems: {
-        ClickstreamAnalyticsMetadata: [
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: genParameterItemExpect('#202311', [9, 11, 12], '#202311'),
@@ -364,6 +414,13 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: genParameterItemExpect('#202312', [9, 11, 12]),
             },
           },
+        ]),
+      },
+    });
+
+    expect(dynamoDBMock).toHaveReceivedNthCommandWith(10, BatchWriteCommand, {
+      RequestItems: {
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: genEventItemExpect('#202311', [9, 11, 12], '#202311'),
@@ -379,7 +436,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: genUserAttributeItemExpect('#202312', 20),
             },
           },
-        ],
+        ]),
       },
     });
   });
@@ -432,6 +489,12 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       })
       .resolvesOnce({
         Records: genEventParameterMetadata(['#202310', '#202311', '#202312'], [9, 11, 12]),
+      })
+      .resolvesOnce({
+        Records: genDistinctEventName(),
+      })
+      .resolvesOnce({
+        Records: genDistinctPlatform(),
       })
       .resolvesOnce({
         Records: genEventDistinctIdAndMonth(['#202310', '#202311', '#202312']),
@@ -534,7 +597,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
 
     expect(dynamoDBMock).toHaveReceivedNthCommandWith(12, BatchWriteCommand, {
       RequestItems: {
-        ClickstreamAnalyticsMetadata: [
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: genParameterItemExpect('#202311', [9, 11, 12], '#202311'),
@@ -550,6 +613,13 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: genParameterItemExpect('#202312', [9, 11, 12]),
             },
           },
+        ]),
+      },
+    });
+
+    expect(dynamoDBMock).toHaveReceivedNthCommandWith(13, BatchWriteCommand, {
+      RequestItems: {
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: eventItem11,
@@ -570,7 +640,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: genUserAttributeItemExpect('#202312', 20),
             },
           },
-        ],
+        ]),
       },
     });
   });
@@ -605,6 +675,12 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       })
       .resolvesOnce({
         Records: genEventParameterMetadata(['#202311', '#202312'], [9, 11, 12]),
+      })
+      .resolvesOnce({
+        Records: genDistinctEventName(),
+      })
+      .resolvesOnce({
+        Records: genDistinctPlatform(),
       })
       .resolvesOnce({
         Records: genEventDistinctIdAndMonth(['#202311', '#202312']),
@@ -705,7 +781,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
 
     expect(dynamoDBMock).toHaveReceivedNthCommandWith(12, BatchWriteCommand, {
       RequestItems: {
-        ClickstreamAnalyticsMetadata: [
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: genParameterItemExpect('#202311', [9, 11, 12], '#202311'),
@@ -716,6 +792,13 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: genParameterItemExpect('#202312', [9, 11, 12]),
             },
           },
+        ]),
+      },
+    });
+
+    expect(dynamoDBMock).toHaveReceivedNthCommandWith(13, BatchWriteCommand, {
+      RequestItems: {
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: genEventItemExpect('#202311', [9, 11, 12], '#202311'),
@@ -731,7 +814,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: genUserAttributeItemExpect('#202312', 20),
             },
           },
-        ],
+        ]),
       },
     });
   });
@@ -766,6 +849,12 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       })
       .resolvesOnce({
         Records: genEventParameterMetadata(['#202310', '#202311'], [9, 11, 12]),
+      })
+      .resolvesOnce({
+        Records: genDistinctEventName(),
+      })
+      .resolvesOnce({
+        Records: genDistinctPlatform(),
       })
       .resolvesOnce({
         Records: genEventDistinctIdAndMonth(['#202310', '#202311']),
@@ -824,7 +913,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
 
     expect(dynamoDBMock).toHaveReceivedNthCommandWith(9, BatchWriteCommand, {
       RequestItems: {
-        ClickstreamAnalyticsMetadata: [
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: genParameterItemExpect('#202310', [9, 11, 12], '#202310'),
@@ -835,6 +924,13 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: genParameterItemExpect('#202311', [9, 11, 12], '#202311'),
             },
           },
+        ]),
+      },
+    });
+
+    expect(dynamoDBMock).toHaveReceivedNthCommandWith(10, BatchWriteCommand, {
+      RequestItems: {
+        ClickstreamAnalyticsMetadata: expect.arrayContaining([
           {
             PutRequest: {
               Item: genEventItemExpect('#202310', [9, 11, 12], '#202310'),
@@ -850,7 +946,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: genUserAttributeItemExpect('#202312', 20),
             },
           },
-        ],
+        ]),
       },
     });
   });
@@ -928,6 +1024,28 @@ function genEventMetadata(monthList: string[], dayNumberList: number[]) {
     });
   });
   return result;
+}
+
+function genDistinctEventName() {
+  return [
+    [
+      { stringValue: 'event1' },
+    ],
+    [
+      { stringValue: 'event2' },
+    ],
+  ];
+}
+
+function genDistinctPlatform() {
+  return [
+    [
+      { stringValue: 'ANDROID' },
+    ],
+    [
+      { stringValue: 'IOS' },
+    ],
+  ];
 }
 
 function genEventParameterDistinctIdAndMonth(monthList: string[]) {
