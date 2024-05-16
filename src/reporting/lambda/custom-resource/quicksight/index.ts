@@ -44,6 +44,7 @@ import {
   RefreshInterval,
   LookbackWindowSizeUnit,
   CreateDataSetCommandInput,
+  InvalidParameterValueException,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -1080,21 +1081,30 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
       lookbackColumn,
     });
 
-    await quickSight.putDataSetRefreshProperties({
-      AwsAccountId: commonParams.awsAccountId,
-      DataSetId: datasetId,
-      DataSetRefreshProperties: {
-        RefreshConfiguration: {
-          IncrementalRefresh: {
-            LookbackWindow: {
-              ColumnName: lookbackColumn ?? 'event_date',
-              Size: 1,
-              SizeUnit: LookbackWindowSizeUnit.DAY,
+    try{
+      await quickSight.putDataSetRefreshProperties({
+        AwsAccountId: commonParams.awsAccountId,
+        DataSetId: datasetId,
+        DataSetRefreshProperties: {
+          RefreshConfiguration: {
+            IncrementalRefresh: {
+              LookbackWindow: {
+                ColumnName: lookbackColumn ?? 'event_date',
+                Size: 1,
+                SizeUnit: LookbackWindowSizeUnit.DAY,
+              },
             },
           },
         },
-      },
-    });
+      });
+    } catch (err: any) {
+      if ((err as Error) instanceof InvalidParameterValueException) {
+        logger.info('RefreshProperties exist, skip put operation.');
+      } else {
+        logger.error(`Put QuickSight refresh properties failed due to: ${(err as Error).message}`);
+        throw err;
+      }
+    }
 
     await waitForDataSetRefreshPropertySetCompleted(quickSight, commonParams.awsAccountId, datasetId);
     logger.info('Put QuickSight refresh properties finished.');
