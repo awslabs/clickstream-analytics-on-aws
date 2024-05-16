@@ -1580,12 +1580,10 @@ export class CStreamingStack extends JSONObject {
   })
     KinesisEncryptionKMSKeyArn?: string;
 
-  @JSONObject.optional(REDSHIFT_MODE.NEW_SERVERLESS)
+  @JSONObject.optional(REDSHIFT_MODE.SERVERLESS)
   @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
     if (stack._pipeline?.dataModeling?.redshift?.provisioned) {
       return REDSHIFT_MODE.PROVISIONED;
-    } else if (stack._pipeline?.dataModeling?.redshift?.existingServerless) {
-      return REDSHIFT_MODE.SERVERLESS;
     }
     return REDSHIFT_MODE.SERVERLESS;
   })
