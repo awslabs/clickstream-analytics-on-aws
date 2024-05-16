@@ -71,7 +71,7 @@
   "page_view_engagement_time_msec" : null,
   "page_view_page_title" : null,
   "page_view_page_url" : "http://www.example.com/?q=abc",
-  "page_view_page_url_path" : null,
+  "page_view_page_url_path" : "/",
   "page_view_page_url_query_parameters" : {
     "q" : "abc"
   },

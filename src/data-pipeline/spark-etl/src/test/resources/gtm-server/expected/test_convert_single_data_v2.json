@@ -91,7 +91,7 @@
       "page_view_engagement_time_msec" : null,
       "page_view_page_title" : "Retail Demo Store",
       "page_view_page_url" : "http://d3mpqdtjegq8im.cloudfront.net/?gtm_debug=1691481790745",
-      "page_view_page_url_path" : null,
+      "page_view_page_url_path" : "/",
       "page_view_page_url_query_parameters" : {
         "gtm_debug" : "1691481790745"
       },
