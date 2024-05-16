@@ -578,6 +578,10 @@ function _getDataSetDefs(
             Name: 'event_count',
             Type: 'INTEGER',
           },
+          {
+            Name: 'view_count',
+            Type: 'INTEGER',
+          }
         ],
         projectedColumns: [
           'event_date',
@@ -587,6 +591,7 @@ function _getDataSetDefs(
           'user_id',
           'user_engagement_time_seconds',
           'event_count',
+          'view_count',
         ],
       },
       {
@@ -1385,6 +1390,10 @@ function _getDataSetDefs(
             Name: 'event_count',
             Type: 'INTEGER',
           },
+          {
+            Name: 'view_count',
+            Type: 'INTEGER',
+          }
         ],
         dateTimeDatasetParameter: [
           {
@@ -1406,6 +1415,7 @@ function _getDataSetDefs(
           'user_id',
           'user_engagement_time_seconds',
           'event_count',
+          'view_count',
         ],
       },
       {

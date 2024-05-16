@@ -792,6 +792,10 @@
                 {
                 "Name": "event_count",
                 "DataType": "INTEGER"
+                },
+                {
+                "Name": "view_count",
+                "DataType": "INTEGER"
                 }
             ]
         },
@@ -5846,7 +5850,7 @@
                                                 "FieldId": "9861ba96-1421-4306-baca-5900074f2420.4.1711010080629",
                                                 "Column": {
                                                     "DataSetIdentifier": "Page_Screen_View_Detail",
-                                                    "ColumnName": "View"
+                                                    "ColumnName": "view_count"
                                                 }
                                             }
                                         },
@@ -10868,13 +10872,8 @@
         },
         {
             "DataSetIdentifier": "Page_Screen_View_Detail",
-            "Name": "View",
-            "Expression": "count(1)"
-        },
-        {
-            "DataSetIdentifier": "Page_Screen_View_Detail",
             "Name": "View / User",
-            "Expression": "count(1) / distinct_count({user_id})"
+            "Expression": "sum(view_count) / distinct_count({user_id})"
         },
         {
             "DataSetIdentifier": "Retention_View",
@@ -11962,7 +11961,7 @@
                             {
                                 "Column": {
                                     "DataSetIdentifier": "Page_Screen_View_Detail",
-                                    "ColumnName": "View"
+                                    "ColumnName": "view_count"
                                 },
                                 "SortDirection": "DESC"
                             }

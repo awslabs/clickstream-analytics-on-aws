@@ -16,7 +16,8 @@ BEGIN
         aggregation_dim,
         user_id,
         user_engagement_time_seconds,
-        event_count
+        event_count,
+        view_count
     )
     select 
       current_date::date as event_date,
@@ -25,7 +26,8 @@ BEGIN
       page_view_page_title as aggregation_dim,
       merged_user_id,
       sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
-      count(distinct event_id) as event_count
+      count(distinct event_id) as event_count,
+      sum(case when event_name = '_page_view' then 1 else 0 end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
@@ -39,7 +41,8 @@ BEGIN
         aggregation_dim,
         user_id,
         user_engagement_time_seconds,
-        event_count
+        event_count,
+        view_count
     )
     select 
       current_date::date as event_date,
@@ -48,7 +51,8 @@ BEGIN
       page_view_page_url_path as aggregation_dim,
       merged_user_id,
       sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
-      count(distinct event_id) as event_count
+      count(distinct event_id) as event_count,
+      sum(case when event_name = '_page_view' then 1 else 0 end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
@@ -62,7 +66,8 @@ BEGIN
         aggregation_dim,
         user_id,
         user_engagement_time_seconds,
-        event_count
+        event_count,
+        view_count
     )
     select 
       current_date::date as event_date,
@@ -71,7 +76,8 @@ BEGIN
       screen_view_screen_name as aggregation_dim,
       merged_user_id,
       sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
-      count(distinct event_id) as event_count
+      count(distinct event_id) as event_count,
+      sum(case when event_name = '_screen_view' then 1 else 0 end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
@@ -85,7 +91,8 @@ BEGIN
         aggregation_dim,
         user_id,
         user_engagement_time_seconds,
-        event_count
+        event_count,
+        view_count
     )
     select 
       current_date::date as event_date,
@@ -94,7 +101,8 @@ BEGIN
       screen_view_screen_id as aggregation_dim,
       merged_user_id,
       sum(user_engagement_time_msec)::real/1000 as user_engagement_time_seconds,
-      count(distinct event_id) as event_count
+      count(distinct event_id) as event_count,
+      sum(case when event_name = '_screen_view' then 1 else 0 end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
