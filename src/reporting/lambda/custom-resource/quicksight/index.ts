@@ -1081,7 +1081,7 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
       lookbackColumn,
     });
 
-    try{
+    try {
       await quickSight.putDataSetRefreshProperties({
         AwsAccountId: commonParams.awsAccountId,
         DataSetId: datasetId,
