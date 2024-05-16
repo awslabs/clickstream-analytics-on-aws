@@ -283,7 +283,7 @@
     "notSupportProjectOrApp": "This project or application does not support Analytics Studio: ",
     "metadataNotAllowEditError": "The preset metadata does not support editing.",
     "inputSpecialCharactersError": "The input cannot contain special characters(! @ # $ % ^ & * + = : ; ? ~ ' \" |).",
-    "inputDomainError": "Please input domain name.",
+    "inputDomainError": "The domain name cannot be empty or duplicate.",
     "inputSourceError": "Please input source name.",
     "inputCategoryError": "Please select a category.",
     "inputPatternNumError": "The keyword pattern can't be more than ten.",

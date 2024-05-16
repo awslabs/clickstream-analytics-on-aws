@@ -283,7 +283,7 @@
     "notSupportProjectOrApp": "当前项目或应用程序不支持分析工作坊: ",
     "metadataNotAllowEditError": "预置元数据不支持编辑",
     "inputSpecialCharactersError": "不支持输入特殊字符（! @ # $ % ^ & * + = : ; ? ~ ' \" |）",
-    "inputDomainError": "必须输入域名",
+    "inputDomainError": "域名不能为空且不能重复",
     "inputSourceError": "必须输入流量源",
     "inputCategoryError": "必须选择一个类别",
     "inputPatternNumError": "关键字模式不能超过10个",
