@@ -45,6 +45,7 @@ import {
   LookbackWindowSizeUnit,
   CreateDataSetCommandInput,
   InvalidParameterValueException,
+  RefreshSchedule,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -891,7 +892,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info('create dataset finished', { datasetId });
 
     if (props.useSpice === 'yes') {
-      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackWindowSizeUnit, props.lookbackColumn);
+      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.refreshInterval, props.lookbackColumn);
     }
 
     return dataset;
@@ -1072,7 +1073,7 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
 };
 
 const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
-  datasetId: string, lookbackWindowSizeUnit: LookbackWindowSizeUnit | undefined, lookbackColumn: string | undefined) => {
+  datasetId: string, refreshInterval: RefreshInterval | undefined, lookbackColumn: string | undefined) => {
   const scheduleId = `schedule-${datasetId}`;
   const exist = await existRefrshSchedule(quickSight, commonParams.awsAccountId, datasetId, scheduleId);
   if (!exist) {
@@ -1091,7 +1092,7 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
               LookbackWindow: {
                 ColumnName: lookbackColumn ?? 'event_date',
                 Size: 1,
-                SizeUnit: lookbackWindowSizeUnit ?? LookbackWindowSizeUnit.DAY,
+                SizeUnit: LookbackWindowSizeUnit.DAY,
               },
             },
           },
@@ -1102,7 +1103,7 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
         logger.info('RefreshProperties exist, skip put operation.');
       } else {
         logger.error(`Put QuickSight refresh properties failed due to: ${(err as Error).message}`);
-        throw err;
+        // throw err;
       }
     }
 
@@ -1113,10 +1114,19 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
       datasetId,
       scheduleId,
     });
-    await quickSight.createRefreshSchedule({
-      AwsAccountId: commonParams.awsAccountId,
-      DataSetId: datasetId,
-      Schedule: {
+
+    let schedule: RefreshSchedule;
+    if(refreshInterval === RefreshInterval.HOURLY) {
+      schedule = {
+        ScheduleId: scheduleId,
+        ScheduleFrequency: {
+          Interval: RefreshInterval.HOURLY,
+          Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
+        },
+        RefreshType: IngestionType.INCREMENTAL_REFRESH,
+      }
+    } else {
+      schedule = {
         ScheduleId: scheduleId,
         ScheduleFrequency: {
           Interval: RefreshInterval.DAILY,
@@ -1124,7 +1134,12 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
           TimeOfTheDay: '06:00',
         },
         RefreshType: IngestionType.INCREMENTAL_REFRESH,
-      },
+      }
+    }
+    await quickSight.createRefreshSchedule({
+      AwsAccountId: commonParams.awsAccountId,
+      DataSetId: datasetId,
+      Schedule: schedule,
     });
 
     logger.info('end to create QuickSight refresh schedule', {
@@ -1266,7 +1281,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info(`grant dataset permissions to new principal ${commonParams.ownerPrincipalArn}, ${commonParams.sharePrincipalArn}`);
 
     if (props.useSpice === 'yes') {
-      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackWindowSizeUnit, props.lookbackColumn);
+      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.refreshInterval, props.lookbackColumn);
     }
 
     return dataset;

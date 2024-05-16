@@ -5850,12 +5850,8 @@
                                                 "FieldId": "9861ba96-1421-4306-baca-5900074f2420.4.1711010080629",
                                                 "Column": {
                                                     "DataSetIdentifier": "Page_Screen_View_Detail",
-                                                    "ColumnName": "view_count"
-                                                },
-                                                "AggregationFunction": {
-                                                    "SimpleNumericalAggregation": "SUM"
+                                                    "ColumnName": "View"
                                                 }
-
                                             }
                                         },
                                         {
@@ -10880,6 +10876,11 @@
             "Expression": "sum({view_count}) / distinct_count({user_id})"
         },
         {
+            "DataSetIdentifier": "Page_Screen_View_Detail",
+            "Name": "View",
+            "Expression": "sum({view_count})"
+        },
+        {
             "DataSetIdentifier": "Retention_View",
             "Name": "Retention Rate",
             "Expression": "{returned_user_count} / {total_users}"
@@ -11965,7 +11966,7 @@
                             {
                                 "Column": {
                                     "DataSetIdentifier": "Page_Screen_View_Detail",
-                                    "ColumnName": "view_count"
+                                    "ColumnName": "View"
                                 },
                                 "SortDirection": "DESC"
                             }
