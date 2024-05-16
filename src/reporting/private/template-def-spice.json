@@ -8427,12 +8427,13 @@
                                 "LineChartAggregatedFieldWells": {
                                     "Category": [
                                         {
-                                            "CategoricalDimensionField": {
-                                                "FieldId": "LogicalTable1.platform.0.1711012483644",
+                                            "DateDimensionField": {
+                                                "FieldId": "LogicalTable1.event_date.2.1715764689937",
                                                 "Column": {
                                                     "DataSetIdentifier": "Crash_Rate",
-                                                    "ColumnName": "platform"
-                                                }
+                                                    "ColumnName": "event_date"
+                                                },
+                                                "HierarchyId": "LogicalTable1.event_date.2.1715764689937"
                                             }
                                         }
                                     ],
@@ -8455,6 +8456,9 @@
                                                                     "Visibility": "VISIBLE"
                                                                 }
                                                             },
+                                                            "DecimalPlacesConfiguration": {
+                                                                "DecimalPlaces": 4
+                                                            },
                                                             "NegativeValueConfiguration": {
                                                                 "DisplayMode": "NEGATIVE"
                                                             },
@@ -8473,8 +8477,9 @@
                                                 "FieldId": "LogicalTable1.app_version.4.1711460559852",
                                                 "Column": {
                                                     "DataSetIdentifier": "Crash_Rate",
-                                                    "ColumnName": "app_version"
-                                                }
+                                                    "ColumnName": "platform"
+                                                },
+                                                "HierarchyId": "0b4bb7d8-05c9-47c1-a23e-dbf68a948137"
                                             }
                                         }
                                     ]
@@ -8484,7 +8489,7 @@
                                 "CategorySort": [
                                     {
                                         "FieldSort": {
-                                            "FieldId": "LogicalTable1.platform.0.1711012483644",
+                                            "FieldId": "LogicalTable1.event_date.2.1715764689937",
                                             "Direction": "DESC"
                                         }
                                     }
@@ -8494,12 +8499,12 @@
                             "XAxisLabelOptions": {
                                 "AxisLabelOptions": [
                                     {
-                                        "CustomLabel": "Platform",
+                                        "CustomLabel": "Event Date",
                                         "ApplyTo": {
-                                            "FieldId": "LogicalTable1.platform.0.1711012483644",
+                                            "FieldId": "LogicalTable1.event_date.2.1715764689937",
                                             "Column": {
                                                 "DataSetIdentifier": "Crash_Rate",
-                                                "ColumnName": "platform"
+                                                "ColumnName": "event_date"
                                             }
                                         }
                                     }
@@ -8518,7 +8523,7 @@
                                     "TooltipFields": [
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.platform.0.1711012483644",
+                                                "FieldId": "LogicalTable1.event_date.2.1715764689937",
                                                 "Visibility": "VISIBLE"
                                             }
                                         },
@@ -8539,7 +8544,30 @@
                             }
                         },
                         "Actions": [],
-                        "ColumnHierarchies": []
+                        "ColumnHierarchies": [
+                            {
+                                "ExplicitHierarchy": {
+                                    "HierarchyId": "0b4bb7d8-05c9-47c1-a23e-dbf68a948137",
+                                    "Columns": [
+                                        {
+                                            "DataSetIdentifier": "Crash_Rate",
+                                            "ColumnName": "platform"
+                                        },
+                                        {
+                                            "DataSetIdentifier": "Crash_Rate",
+                                            "ColumnName": "app_version"
+                                        }
+                                    ],
+                                    "DrillDownFilters": []
+                                }
+                            },
+                            {
+                                "DateTimeHierarchy": {
+                                    "HierarchyId": "LogicalTable1.event_date.2.1715764689937",
+                                    "DrillDownFilters": []
+                                }
+                            }
+                        ]
                     }
                 },
                 {
