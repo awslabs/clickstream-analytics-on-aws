@@ -891,7 +891,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info('create dataset finished', { datasetId });
 
     if (props.useSpice === 'yes') {
-      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
+      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackWindowSizeUnit, props.lookbackColumn);
     }
 
     return dataset;
@@ -1072,7 +1072,7 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
 };
 
 const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
-  datasetId: string, lookbackColumn: string | undefined) => {
+  datasetId: string, lookbackWindowSizeUnit: LookbackWindowSizeUnit | undefined, lookbackColumn: string | undefined) => {
   const scheduleId = `schedule-${datasetId}`;
   const exist = await existRefrshSchedule(quickSight, commonParams.awsAccountId, datasetId, scheduleId);
   if (!exist) {
@@ -1091,7 +1091,7 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
               LookbackWindow: {
                 ColumnName: lookbackColumn ?? 'event_date',
                 Size: 1,
-                SizeUnit: LookbackWindowSizeUnit.DAY,
+                SizeUnit: lookbackWindowSizeUnit ?? LookbackWindowSizeUnit.DAY,
               },
             },
           },
@@ -1266,7 +1266,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info(`grant dataset permissions to new principal ${commonParams.ownerPrincipalArn}, ${commonParams.sharePrincipalArn}`);
 
     if (props.useSpice === 'yes') {
-      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
+      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackWindowSizeUnit, props.lookbackColumn);
     }
 
     return dataset;
