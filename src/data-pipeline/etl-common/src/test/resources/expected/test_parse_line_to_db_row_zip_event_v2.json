@@ -12,7 +12,7 @@
   "device_manufacturer" : "Make HUAWEI",
   "device_carrier" : "CDMA",
   "device_network_type" : "Mobile",
-  "device_operating_system" : null,
+  "device_operating_system" : "ANDROID",
   "device_operating_system_version" : "os-v1.0",
   "device_vendor_id" : "deviceid-1682319109447",
   "device_advertising_id" : "uf24bec657ea8eff7",

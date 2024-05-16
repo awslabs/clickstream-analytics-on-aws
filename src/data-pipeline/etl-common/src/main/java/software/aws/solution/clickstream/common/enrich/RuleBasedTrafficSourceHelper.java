@@ -343,11 +343,13 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
              pageReferrerHost = parseUrl(pageReferrer).getHostName();
         }
         boolean isInternalReferrer = pageHostName != null && pageHostName.equalsIgnoreCase(pageReferrerHost);
-        log.debug("isInternalReferrer: {}", isInternalReferrer);
+        boolean isInternalLatestReferrer = pageHostName != null && pageHostName.equalsIgnoreCase(latestReferrerHost);
+
+        log.debug("isInternalReferrer: {}, isInternalLatestReferrer: {}", isInternalReferrer, isInternalLatestReferrer);
 
         CategoryTrafficSource categoryTrafficSource = null;
 
-        if (latestReferrer != null && !latestReferrer.isEmpty()) {
+        if (latestReferrer != null && !latestReferrer.isEmpty() && !isInternalLatestReferrer) {
             categoryTrafficSource = parse(trafficSourceUtm, latestReferrer, latestReferrerHost);
         } else if (pageReferrer != null && !pageReferrer.isEmpty() && !isInternalReferrer) {
             categoryTrafficSource = parse(trafficSourceUtm, pageReferrer, pageReferrerHost);
@@ -355,7 +357,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             categoryTrafficSource = parse(trafficSourceUtm, null, null);
         }
 
-        handleUnassignedSource(categoryTrafficSource, pageReferrer, latestReferrer, isInternalReferrer);
+        handleUnassignedSource(categoryTrafficSource, pageReferrer, latestReferrer, isInternalReferrer, isInternalLatestReferrer);
 
         CACHED_CATEGORY_TRAFFIC_SOURCE.put(catchKey, categoryTrafficSource);
 
@@ -363,7 +365,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     }
 
     private void handleUnassignedSource(final CategoryTrafficSource categoryTrafficSource, final String pageReferrer,
-                                        final String latestReferrer,  final boolean isInternalReferrer) {
+                                        final String latestReferrer,
+                                        final boolean isInternalReferrer,
+                                        final boolean isInternalLatestReferrer
+    ) {
         if (categoryTrafficSource.getSource() != null) {
             if (categoryTrafficSource.getCategory() == null) {
                 categoryTrafficSource.setCategory(CategoryListEvaluator.UNASSIGNED);
@@ -376,7 +381,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (categoryTrafficSource.getSource() == null) {
             categoryTrafficSource.setSource(DIRECT);
             categoryTrafficSource.setCategory(DIRECT);
-            if (isInternalReferrer) {
+            if (isInternalReferrer || isInternalLatestReferrer) {
                 categoryTrafficSource.setChannelGroup(INTERNAL);
             } else {
                 categoryTrafficSource.setChannelGroup(DIRECT);
