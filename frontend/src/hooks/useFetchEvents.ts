@@ -197,7 +197,12 @@ function useFetchEvents() {
   };
 
   useEffect(() => {
-    if (projectId && appId && projectId !== 'undefined' && appId !== 'undefined') {
+    if (
+      projectId &&
+      appId &&
+      projectId !== 'undefined' &&
+      appId !== 'undefined'
+    ) {
       fetchData();
     }
   }, []);
