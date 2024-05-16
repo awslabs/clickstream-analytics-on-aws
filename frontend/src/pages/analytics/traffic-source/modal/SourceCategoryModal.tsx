@@ -101,6 +101,10 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
   };
 
   const checkInput = () => {
+    if (state.sourceCategories.find((item) => item.url === newDomain)) {
+      setInputDomainError(true);
+      return false;
+    }
     if (!newDomain.trim()) {
       setInputDomainError(true);
       return false;

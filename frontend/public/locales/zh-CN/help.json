@@ -89,23 +89,23 @@
     "columnTitlesDescription": "归因结果表中每列的标题如下。",
     "touchpointName": {
       "title": "Touchpoint Name: ",
-      "description": "归因触点事件名称。"
+      "description": "为归因分析选择的事件的名称。"
     },
     "totalTriggerCount": {
-      "title": "Total Trigger Count: ",
-      "description": "表示在计算周期内，归因触点事件一共触发了多少次。"
+      "title": "Trigger Count: ",
+      "description": "在所选时间段内触发触点的次数。"
     },
     "numberTriggersConversion": {
       "title": "Number of Triggers with Conversion: ",
-      "description": "在转化窗口内，有多少个触点事件与转化目标同时发生。"
+      "description": "在转换窗口内，接触点与转换目标同时发生的次数。"
     },
     "contribution": {
       "title": "Contribution(number/sum...value): ",
-      "description": "按照所选模型，该触点可以归因到转化目标的贡献度。"
+      "description": "触点的贡献值，归因于基于所选模型的转换目标。"
     },
     "contributionRate": {
       "title": "Contribution Rate: ",
-      "description": "通过归因模型计算后，归属于该触点事件的贡献占整体的占比，计算逻辑为：当前触点事件下的转化目标指标 / 整体转化目标之和。"
+      "description": "通过归因模型计算后，该触点对总贡献的百分比。计算逻辑是当前属性事件下的转换目标度量除以所有转换目标的总和。"
     }
   },
   "analyzesInfo": {
