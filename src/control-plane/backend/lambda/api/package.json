@@ -106,7 +106,7 @@
   "jest": {
     "testMatch": [
       "<rootDir>/.//**/__tests__/**/*.ts?(x)",
-      "<rootDir>/(test/|./)/**/*(*.)@(spec|test).ts?(x)"
+      "<rootDir>/@(test/|./)/**/*(*.)@(spec|test).ts?(x)"
     ],
     "clearMocks": true,
     "collectCoverage": true,
