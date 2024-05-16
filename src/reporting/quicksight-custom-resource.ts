@@ -219,7 +219,7 @@ function _getDataSetDefs(
     {
       tableName: CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER,
       useSpice: 'no',
-      customSql: `SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.${CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME}`,
+      customSql: `SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.${CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME} where triggerred_by = 'WORK_FLOW'`,
       columns: [
         {
           Name: 'Latest refresh date',
