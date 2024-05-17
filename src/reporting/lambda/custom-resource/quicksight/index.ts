@@ -46,6 +46,7 @@ import {
   CreateDataSetCommandInput,
   InvalidParameterValueException,
   RefreshSchedule,
+  RefreshFrequency,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -1103,7 +1104,7 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
         logger.info('RefreshProperties exist, skip put operation.');
       } else {
         logger.error(`Put QuickSight refresh properties failed due to: ${(err as Error).message}`);
-        // throw err;
+        throw err;
       }
     }
 
@@ -1115,27 +1116,24 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
       scheduleId,
     });
 
-    let schedule: RefreshSchedule;
-    if (refreshInterval === RefreshInterval.HOURLY) {
-      schedule = {
-        ScheduleId: scheduleId,
-        ScheduleFrequency: {
-          Interval: RefreshInterval.HOURLY,
-          Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
-        },
-        RefreshType: IngestionType.INCREMENTAL_REFRESH,
-      };
-    } else {
-      schedule = {
-        ScheduleId: scheduleId,
-        ScheduleFrequency: {
-          Interval: RefreshInterval.DAILY,
-          Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
-          TimeOfTheDay: '06:00',
-        },
-        RefreshType: IngestionType.INCREMENTAL_REFRESH,
+    let scheduleFrequency: RefreshFrequency = {
+      Interval: refreshInterval ?? RefreshInterval.DAILY,
+      Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
+    }
+
+    if (refreshInterval !== RefreshInterval.HOURLY) {
+      scheduleFrequency = {
+        ...scheduleFrequency,
+        TimeOfTheDay: '06:00',
       };
     }
+
+    const schedule: RefreshSchedule ={
+      ScheduleId: scheduleId,
+      ScheduleFrequency: scheduleFrequency,
+      RefreshType: IngestionType.INCREMENTAL_REFRESH,
+    }
+
     await quickSight.createRefreshSchedule({
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
