@@ -49,7 +49,7 @@ jobs:
           mkdocs build -f ./docs/mkdocs.zh.yml -s --site-dir ../docs/site/zh
 
       - name: Publish doc - 1.2.x
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/main' && ( vars.LATEST_VERSION == '1.2.x' || vars.PREVIEW_VERSION == '1.2.x' ) }}
         env:
           VERSION: 1.2.x
           LINK_EN: ${{ vars.LINK_EN }}
