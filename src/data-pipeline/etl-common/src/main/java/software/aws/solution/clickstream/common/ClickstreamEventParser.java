@@ -429,7 +429,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setAppVersion(ingestEvent.getAppVersion());
         clickstreamEvent.setAppTitle(ingestEvent.getAppTitle());
         if (ingestEvent.getAttributes() != null) {
-            clickstreamEvent.setAppInstallSource(ingestEvent.getAttributes().getChannel());
+            clickstreamEvent.setAppInstallSource(ingestEvent.getAttributes().getAppInstallChannel());
         }
         clickstreamEvent.setAppId(ingestEvent.getAppId());
     }

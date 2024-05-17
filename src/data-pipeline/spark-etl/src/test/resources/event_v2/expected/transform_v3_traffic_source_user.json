@@ -48,7 +48,7 @@
   "first_traffic_clid" : "{\"type\":\"gclid\",\"value\":\"gclid-1\"}",
   "first_traffic_channel_group" : "channel-group-1",
   "first_traffic_category" : "clid-category-1",
-  "first_app_install_source" : "C001",
+  "first_app_install_source" : null,
   "process_info" : {
     "first_event_name" : "_session_start",
     "latest_event_name" : "_profile_set",

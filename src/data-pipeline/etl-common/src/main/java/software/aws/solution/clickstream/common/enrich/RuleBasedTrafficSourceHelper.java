@@ -389,7 +389,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         }
 
         if (categoryTrafficSource.getSource() != null && categoryTrafficSource.getMedium() == null) {
-            categoryTrafficSource.setMedium(getMediumBySource(categoryTrafficSource.getSource()));
+            categoryTrafficSource.setMedium(getMediumBySourceAndCategory(categoryTrafficSource.getSource(), categoryTrafficSource.getCategory()));
         }
 
         if (categoryTrafficSource.getMedium() == null) {
@@ -397,7 +397,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         }
     }
 
-    private String getMediumBySource(final String source) {
+    private String getMediumBySourceAndCategory(final String source, final String category) {
+        if (REFERRAL.equals(category)) {
+            return REFERRAL;
+        }
         Pattern pattern = Pattern.compile(".*(google|bing|yahoo|duckduckgo|baidu|yandex).*", Pattern.CASE_INSENSITIVE); // NOSONAR
         if (pattern.matcher(source).matches()) {
             return ORGANIC;

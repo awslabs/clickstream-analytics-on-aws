@@ -96,9 +96,9 @@ public class EventAttributes {
     @JsonDeserialize(using = SafeLongDeserializer.class)
     @JsonProperty("_session_number")
     private Long sessionNumber;
-
-    @JsonProperty("_channel")
-    private String channel;
+    @JsonProperty("_app_install_channel")
+    @JsonAlias({"_app_install_source", "_install_channel"})
+    private String appInstallChannel;
     @JsonProperty("_traffic_source_source")
     private String trafficSourceSource;
     @JsonProperty("_traffic_source_medium")

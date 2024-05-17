@@ -52,7 +52,7 @@
   "app_package_id" : "com.example.demoapplication",
   "app_version" : "1.0",
   "app_title" : "test-title-98-0",
-  "app_install_source" : "C001",
+  "app_install_source" : null,
   "platform" : "ANDROID",
   "project_id" : "test_project_id",
   "app_id" : "uba-app",
@@ -113,7 +113,8 @@
     "_device_vendor_id" : "V001",
     "_is_first_day" : true,
     "_error_value_length_exceed" : "",
-    "event_sequence_id" : 2
+    "event_sequence_id" : 2,
+    "_channel" : "C001"
   },
   "process_info" : {
     "input_file_name" : "original_data_page_url.json",
