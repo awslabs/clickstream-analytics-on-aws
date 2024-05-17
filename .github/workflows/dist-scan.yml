@@ -141,6 +141,7 @@ jobs:
     runs-on: ${{ vars.LARGE_RUNNER_S || 'ubuntu-latest' }}
     permissions:
       id-token: write
+      pull-requests: write
       contents: read
     services:
       sonarqube:
@@ -177,9 +178,10 @@ jobs:
       - name: Install dependencies
         run: pnpm i --no-frozen-lockfile
       - name: Run build and unit tests
+        env:
+          JEST_MAX_WORKERS: ${{ vars.JEST_MAX_WORKERS || 'auto' }}
+          LOCAL_TESTING: true # speed up the tests for infra
         run: |
-          export LOCAL_TESTING=true # speed up the tests for infra
-          export JEST_MAX_WORKERS=6
           bash deployment/run-unit-tests.sh
       - name: Configure sonarqube
         env:
