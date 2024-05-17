@@ -24,15 +24,8 @@
 
 | 数据集名称 | 描述 |
 |-------------|------|
-|Event_View_`app_name`_`project_name`| 包含所有公共事件参数的事件数据 |
-|Event_Parameter_View_`app_name`_`project_name`| 包含所有私有事件参数的事件数据|
-|User_Dim_View_`app_name`_`project_name`| 包含所有公共属性的用户数据|
-|User_Attr_View_`app_name`_`project_name`| 包含所有私有（自定义）属性的用户数据|
-|Session_View_`app_name`_`project_name`| 包含有关会话的度量和维度的数据|
-|Device_View_`app_name`_`project_name`| 包含有关用户设备的信息的数据|
-|Retention_View_`app_name`_`project_name`| 提供每个日期的总用户和返回用户的指标数据|
-|Lifecycle_Weekly_View_`app_name`_`project_name`| 每周用户生命周期指标数据|
-|Lifecycle_Daily_View_`app_name`_`project_name`| 每天用户生命周期指标数据|
+|事件_视图_`app_name`_`project_name`|包含所有事件参数(通用和自定义)的事件数据,已与用户和会话表联接。|
+
 
 要创建自定义分析，可以按照以下 QuickSight 文档准备数据并创建可视化：
 

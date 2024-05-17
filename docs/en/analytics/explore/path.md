@@ -9,7 +9,7 @@ Path analysis are commonly used when analyzing user navigation pattern, for exam
 
 ## Key concepts
 
-- **Metric**: the entity used for path analysis, such as event number or user number.
+- **Metric**: the entity used for path analysis, including event number or user number.
 - **Session**: the length of the path analysis session, only the events happened within the session can form a path, events happened in different path will not be counted in the same path.
 - **Node**: a node in the path can be an event, screen, or page.
 - **Starting node**: the starting point of the path analysis.
@@ -29,7 +29,9 @@ Path analysis are commonly used when analyzing user navigation pattern, for exam
     4. Page title: use the page title as a node
     5. Page url: use the page url as a node
 4. Set a starting node. The start node will be the first node of the path, only event happen after the node will be counted into the path.
-5. Select nodes to participate in the analysis. Only node selected will be highlighted as nodes in the path. You can add up to 10 nodes.
+   1. Show all nodes: display all nodes that follow the starting node.
+   2. Show selected nodes: display the selected nodes only, other nodes could be grouped as 'others'.
+5. When choose "Show selected nodes", you need specify nodes to participate in the analysis. Only node selected will be highlighted as nodes in the path. You can add up to 10 nodes.
 6. Specify if you want to include other nodes in the path, if this option is toggled on, all the nodes that are not selected will be counted and display as "Other" in the path.
 7. Specify if you want to merge consecutive nodes, if this option is toggled on, nodes that are repeated continuously in the same session will be merged into a single node.
 8. If needed, configure global filter by selecting event parameter or user attributes. Similar to event filter, you can add multiple global filters and configure the filter relationship.

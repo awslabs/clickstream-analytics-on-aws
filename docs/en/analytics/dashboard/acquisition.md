@@ -1,5 +1,5 @@
 # Acquisition report
-You can use the User acquisition report to get insights into how new users find your website or app for the first time. This report also allows you view the detail user profile.
+You can use the acquisition report to get insights into how new users arrive at your website or app for the first time, as well as the sources of everyday traffic. 
 
 Note: This article describes the default report. You can customize the report by applying filters or comparisons or by changing the dimensions, metrics, or charts in QuickSight. [Learn more](https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html)
 
@@ -8,41 +8,49 @@ Note: This article describes the default report. You can customize the report by
 1. Access the dashboard for your application. Refer to [Access dashboard](index.md/#view-dashboards)
 2. In the dashboard, click on the sheet with name of **`Acquisition`**.
 
-## Where the data comes from
-Acquisition report are created based on the QuickSight dataset of `User_Dim_View-<app>-<project>`, which connects to the `clickstream_user_dim_view` view in analytics engine (i.e., Redshift). Below is the SQL command that generates the view.
-??? example "SQL Commands"
-    === "Redshift"
-        ```sql title="clickstream-user-dim-view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:3"
-        ```
-    === "Athena"
-        ```sql title="clickstream-user-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-user-query.sql"
-        ```
+## Data sources
+Acquisition report are created based on the following QuickSight datasets:
 
-## Dimensions and metrics
-The report includes the following dimensions and metrics. You can add more dimensions or metrics by creating `calculated field` in QuickSight dateset. [Learn more](https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html). 
+|QuickSight dataset | Redshift view / table| Description | 
+|----------|--------------------|------------------|
+|`User_User_View-<app>-<project>`|`clickstream_acquisition_day_user_view_cnt` | This dataset stores data on the number of new users and number of active users on your websites or apps for each day|
+|`Day_Traffic_Source_User-<app>-<project>`|`clickstream_acquisition_day_traffic_source_user`|This dataset stores data on the number of new users per each traffic source type for each day|
+|`Day_User_Acquisition-<app>-<project>`|`clickstream_acquisition_day_user_acquisition` |This dataset stores data on the number of new users, number of active users, number of sessions, number of engaged session, and number of events per each traffic source type for each day |
+|`Country_New_User_Acquisition-<app>-<project>`|`clickstream_acquisition_country_new_user`|This dataset stores data on the number of new users per each country and city for each day|
 
-|Field | Type| What is it | How it's populated|
-|----------|---|---------|--------------------|
-|`user_pseudo_id`| Dimension | A SDK-generated unique id for the user | Query from analytics engine|
-|`user_id`| Dimension | The user ID set via the setUserId API in SDK  | Query from analytics engine|
-|`device_id`| Dimension | The unique ID for the device, please refer to [SDK Manual](../../sdk-manual/index.md) for how the device id was obtained| Query from analytics engine|
-|`first_visit_date`| Dimension | The date that the user first visited your website or first opened the app  | Query from analytics engine|
-|`first_visit_install_source`| Dimension | The installation source when user first opened your app. Blank for web  | Query from analytics engine|
-|`first_traffic_source_source`| Dimension | The traffic source for the user when first visit the app or web  | Query from analytics engine|
-|`first_traffic_source_medium`| Dimension | The traffic medium for the user when first visit the app or web  | Query from analytics engine|
-|`first_traffic_source_name`| Dimension | The traffic campaign name for the user when first visit the app or web  | Query from analytics engine|
-|`first_visit_device_language`| Dimension | The system language of the device user used when they first opened your app or first visited your website.  | Query from analytics engine|
-|`first_visit_device_language`| Dimension | The system language of the device user used when they first opened your app or first visited your website.  | Query from analytics engine|
-|`first_platform`| Dimension | The platform when user first visited your website or first opened your app  | Query from analytics engine|
-|`first_referer`| Dimension | The referer when user first visited your website | Query from analytics engine|
-|`first_visit_country`| Dimension | The country where user first visited your website or first opened your app.  | Query from analytics engine|
-|`first_visit_city`| Dimension | The city where user first visited your website or first opened your app.  | Query from analytics engine|
-|`custom_attr_key`| Dimension | The name of the custom attribute key of the user.  | Query from analytics engine|
-|`custom_attr_value`| Dimension | The value of the custom attribute key of the user.  | Query from analytics engine|
-|`registration_status`| Dimension | If user had registered or not  | Query from analytics engine|
-|`Logged-in Rate`| Metric | Number of distinct user_id divide by number of distinct user_pseudo_id | Calculated field in QuickSight |
+
+## Dimensions
+The Acquisition report includes the following dimensions.
+
+|Dimension | Description| How it's calculated| 
+|----------|--------------------|---------|
+| First user traffic source | The source of the traffic that acquires new users to your websites or apps (for example, google, baidu, and bing)  | Traffic source is populated from utm parameters in page_url (i.e., utm_source) or traffic-source preserved attribute (i.e., _traffic_source_source), or derived from referrer url (only for web). [Learn more](../data-mgmt/traffic-source.md)|
+| First user traffic medium | The medium of the traffic that acquires new users to your websites or apps (for example, organic, paid search)  | Traffic medium is populated from utm parameters in page_url (i.e., utm_medium) or traffic-source preserved attribute (i.e., _traffic_source_medium), or derived from referrer url (only for web). [Learn more]((../data-mgmt/traffic-source.md))|
+| First user traffic campaign | The name of a promotion or marketing campaign that acquires new users to your websites or apps.  | Traffic campaign is populated from utm parameters in page_url (i.e., utm_campaign) and traffic-source preserved attribute (i.e., _traffic_source_campaign), or derived from referrer url (only for web). [Learn more]((../data-mgmt/traffic-source.md))|
+| First user traffic source / Medium | The combination of traffic source and medium that acquires new users to your websites or apps.  | Same as above for traffic source and traffic medium. [Learn more]()|
+| First user traffic channel group | Channel groups are rule-based definitions of the traffic sources. The name of the traffic channel group that acquires new users to your websites or apps.  | Traffic channel group is derived based on the traffic source and medium. [Learn more](../data-mgmt/traffic-source.md)|
+| First user traffic clid platform | The name of platform for click id (auto-tagging from advertisement platform) that acquires new users to your websites or apps.  | Traffic source clid platform is populated from clid parameter in page_url and traffic-source preserved attribute (i.e., _traffic_source_clid_platform). [Learn more](../data-mgmt/traffic-source.md)|
+| First user app install source | The name of app store that acquires new users to your apps, for example, App Store, Google Store.  | App install source is from traffic-source preserved attribute (i.e., _app_install_channel). [Learn more](../data-mgmt/traffic-source.md)|
+| Session traffic source | The traffic source that acquires users into a new session on your websites or apps (for example, google, baidu, and bing)  | Traffic source is populated from utm parameters in page_url (i.e., utm_source) or traffic-source preserved attribute (i.e., _traffic_source_source), or derived from referrer url (only for web). [Learn more](../data-mgmt/traffic-source.md)|
+| Session traffic medium | The traffic medium that acquires users into a new session on your websites or apps (for example, organic, paid search)  | Traffic medium is populated from utm parameters in page_url (i.e., utm_medium) or traffic-source preserved attribute (i.e., _traffic_source_medium), or derived from referrer url (only for web). [Learn more](../data-mgmt/traffic-source.md)|
+| Session traffic campaign | The name of a promotion or marketing campaign that acquires users into a new session on your websites or apps.  | Traffic campaign is populated from utm parameters in page_url (i.e., utm_campaign) and traffic-source preserved attribute (i.e., _traffic_source_campaign), or derived from referrer url (only for web). [Learn more](../data-mgmt/traffic-source.md)|
+| Session traffic Source / Medium | The combination of traffic source and medium that acquires users into a new session on your websites or apps.  | Same as above for traffic source and traffic medium. [Learn more](../data-mgmt/traffic-source.md)|
+| Session traffic channel group | Channel groups are rule-based definitions of the traffic sources. The name of the traffic channel group that acquires users into a new session on your websites or apps.  | Traffic channel group is derived based on the traffic-source and medium. [Learn more](../data-mgmt/traffic-source.md)|
+|Session traffic clid platform | The name of platform for click id (auto-tagging from advertisement platform) that acquires users into new session on your websites or apps.  | Traffic clid platform is populated from clid parameter in page_url and traffic-source preserved attribute (i.e., _traffic_source_clid_platform). [Learn more](../data-mgmt/traffic-source.md)|
+|Geo country| The country where users are when they are using your websites or apps  | Geo location information is inferred based on user IP address.|
+|Geo city| The city where the users are when they are using your websites or apps  | Geo location information is inferred based on user IP address.|
+
+## Metrics
+The Acquisition report includes the following metrics.
+
+|Metric | Definition| How it's populated| 
+|----------|--------------------|---------|
+| New users |The number of users who interacted with your site or launched your app for the first time (event triggered: _first_open).| Count distinct user_id or user_pseudo_id (if user_id is not available) when event_name equals '_first_open'.|
+| Active users | The number of distinct users who triggered any event in the selected time range.| Count distinct user_id or user_pseudo_id (if user_id is not available) at any event| 
+| Sessions | The number of sessions users created.| Count distinct session_id. |
+| Engaged Session | The number of sessions that lasted 10 seconds or longer, or had 1 or more page or screen views.| Count distinct session_id if the session is engaged. |
+| Engaged Rate | The percentage of sessions that were engaged sessions.| Engaged sessions / total sessions. |
+| Events | The number of times users triggered an event.| Count event_id. |
   
 ## Sample dashboard
 Below image is a sample dashboard for your reference.

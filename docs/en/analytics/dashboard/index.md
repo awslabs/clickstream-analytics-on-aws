@@ -1,7 +1,7 @@
 # Dashboard
 {{ solution_name }} solution collects data from your websites and apps to create dashboards that derive insights. You can use dashboards to monitor traffic, investigate data, and understand your users and their activities.
 
-Once the data are processed by the data pipeline, the data appears in the QuickSight dashboards. Depends on your pipeline configuration, the time for data to be available in your dashboard varies. For example, if you set the data processing interval to be 1 day, the dashboard will show data at T+1 day (T as reporting date).
+ Depends on your pipeline configuration, the time for data to be available in your dashboard varies. By default, the metrics in the out-of-the-box dashboards are calculated on a daily basis, you should see the data and metrics from previous day (according to your app's timezone).
 
 
 ## View dashboards
@@ -16,13 +16,11 @@ The dashboards contains a set of reports covering the user life cycle, helps you
 
 | Report name | What it is |
 |-------------|------------|
-|[Acquisition](./acquisition.md) | Summarizes key metrics about new users, provides detail view of user profile|
-|[Engagement](./engagement.md) | Summarizes key metrics about user engagements and sessions|
-|[Activity](./activity.md) | Summarizes key metrics about events user generates in the app, provide detail view of event attributes|
+|[Acquisition](./acquisition.md) | Summarizes key metrics about new users and traffic source|
+|[Engagement](./engagement.md) | Summarizes key metrics about user engagement levels, events, pages and screen, and sessions|
 |[Retention](./retention.md) | Summarizes key metrics about active users and user retentions |
-|[Device](./device.md) | Summarizes key metrics about the devices users are using to access your apps and websites, provides detail view of each device|
-|[User](./user.md)| This report allows you to query and view individual user' attributes and the events the user performed.|
-|[Crash](./crash.md)| This report provides metric and information about the crash events in your app.|
+|[Device](./device.md) | Summarizes key metrics about the devices users are using to access your apps and websites|
+|[Details](./details.md)| This report allows you to query and view user' attributes and the events the user performed.|
 
 
 ## Custom report
