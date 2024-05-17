@@ -1116,7 +1116,7 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
     });
 
     let schedule: RefreshSchedule;
-    if(refreshInterval === RefreshInterval.HOURLY) {
+    if (refreshInterval === RefreshInterval.HOURLY) {
       schedule = {
         ScheduleId: scheduleId,
         ScheduleFrequency: {
@@ -1124,7 +1124,7 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
           Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
         },
         RefreshType: IngestionType.INCREMENTAL_REFRESH,
-      }
+      };
     } else {
       schedule = {
         ScheduleId: scheduleId,
@@ -1134,7 +1134,7 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
           TimeOfTheDay: '06:00',
         },
         RefreshType: IngestionType.INCREMENTAL_REFRESH,
-      }
+      };
     }
     await quickSight.createRefreshSchedule({
       AwsAccountId: commonParams.awsAccountId,

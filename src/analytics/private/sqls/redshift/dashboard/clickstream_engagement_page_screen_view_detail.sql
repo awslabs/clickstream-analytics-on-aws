@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS {{database_name}}.{{schema}}.{{viewName}} (
     user_engagement_time_seconds real,
     event_count bigint,
     view_count bigint,
+    session_count bigint,
     update_timestamp timestamp DEFAULT getdate()
 )
 BACKUP YES

@@ -796,7 +796,12 @@
                 {
                 "Name": "view_count",
                 "DataType": "INTEGER"
+                },
+                {
+                "Name": "session_count",
+                "DataType": "INTEGER"
                 }
+
             ]
         },
         "ColumnGroupSchemaList": []
@@ -5878,10 +5883,7 @@
                                                 "FieldId": "LogicalTable1.user_engagement_time_msec.3.1711010034447",
                                                 "Column": {
                                                     "DataSetIdentifier": "Page_Screen_View_Detail",
-                                                    "ColumnName": "user_engagement_time_seconds"
-                                                },
-                                                "AggregationFunction": {
-                                                    "SimpleNumericalAggregation": "AVERAGE"
+                                                    "ColumnName": "Average User Engagement Time Seconds"
                                                 }
                                             }
                                         },
@@ -10879,6 +10881,11 @@
             "DataSetIdentifier": "Page_Screen_View_Detail",
             "Name": "View",
             "Expression": "sum({view_count})"
+        },
+        {
+            "DataSetIdentifier": "Page_Screen_View_Detail",
+            "Name": "Average User Engagement Time Seconds",
+            "Expression": "sum({user_engagement_time_seconds})/sum({session_count})"
         },
         {
             "DataSetIdentifier": "Retention_View",
