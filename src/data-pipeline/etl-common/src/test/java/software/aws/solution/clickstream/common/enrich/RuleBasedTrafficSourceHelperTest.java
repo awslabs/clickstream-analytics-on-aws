@@ -381,4 +381,62 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
     }
 
+
+    @Test
+    void testGetMediumByReferrer8() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer8
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://test.com/posts/2022/build-serverless-app-on-aws/protect-website-with-cognito/";
+        String pageReferrer = "https://test.com/posts/2022/build-serverless-app-on-aws/federated-oidc-login-with-cognito-and-amplify/";
+        String latestReferrer = "https://test.com/posts/2022/build-serverless-app-on-aws/federated-oidc-login-with-cognito-and-amplify/";
+        String latestReferrerHost = "test.com";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
+
+        String expectedValue = "{\n" +
+                "      \"source\" : \"Direct\",\n" +
+                "      \"medium\" : \"None\",\n" +
+                "      \"campaign\" : \"Direct\",\n" +
+                "      \"content\" : null,\n" +
+                "      \"term\" : null,\n" +
+                "      \"campaignId\" : null,\n" +
+                "      \"clidPlatform\" : null,\n" +
+                "      \"clid\" : null,\n" +
+                "      \"channelGroup\" : \"Internal\",\n" +
+                "      \"category\" : \"Direct\"\n" +
+                "    }";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+
+    @Test
+    void testGetMediumByReferrer9() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer9
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://test.com/posts/2022/build-serverless-app-on-aws/protect-website-with-cognito/";
+        String pageReferrer = null;
+        String latestReferrer = "https://i.search.google.se";
+        String latestReferrerHost = "i.search.google.se";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
+
+        String expectedValue = "{\n" +
+                "      \"source\" : \"Google\",\n" +
+                "      \"medium\" : \"Organic\",\n" +
+                "      \"campaign\" : null,\n" +
+                "      \"content\" : null,\n" +
+                "      \"term\" : null,\n" +
+                "      \"campaignId\" : null,\n" +
+                "      \"clidPlatform\" : null,\n" +
+                "      \"clid\" : null,\n" +
+                "      \"channelGroup\" : \"Organic Search\",\n" +
+                "      \"category\" : \"Search\"\n" +
+                "    }";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
 }

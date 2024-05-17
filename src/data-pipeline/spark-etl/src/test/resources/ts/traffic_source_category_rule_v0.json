@@ -365,10 +365,17 @@
     },
     {
         "url": "google.com",
-        "source": "google",
+        "source": "Google",
         "category": "Search",
         "params": [
             "q"
+        ]
+    },
+    {
+        "url": "tagassistant.google.com",
+        "source": "tagassistant.google.com",
+        "category": "Referral",
+        "params": [
         ]
     },
     {

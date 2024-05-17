@@ -26,6 +26,7 @@ import software.aws.solution.clickstream.common.model.*;
 import java.sql.*;
 import java.time.*;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static software.aws.solution.clickstream.common.Util.*;
 import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.GCLID;
@@ -295,7 +296,6 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setDeviceManufacturer(ingestEvent.getMake());
         clickstreamEvent.setDeviceCarrier(ingestEvent.getCarrier());
         clickstreamEvent.setDeviceNetworkType(ingestEvent.getNetworkType());
-        clickstreamEvent.setDeviceOperatingSystem(ingestEvent.getOsName());
         clickstreamEvent.setDeviceOperatingSystemVersion(ingestEvent.getOsVersion());
         clickstreamEvent.setDeviceVendorId(ingestEvent.getDeviceId());
         clickstreamEvent.setDeviceAdvertisingId(ingestEvent.getDeviceUniqueId());
@@ -306,6 +306,15 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setDeviceViewportWidth(ingestEvent.getViewportWidth());
         clickstreamEvent.setDeviceViewportHeight(ingestEvent.getViewportHeight());
         clickstreamEvent.setGeoLocale(ingestEvent.getLocale());
+
+        List<String> platformOsList = Stream.of(
+                PLATFORM_ANDROID, PLATFORM_IOS, PLATFORM_WECHATMP
+        ).map(String::toLowerCase).toList();
+
+        if (ingestEvent.getPlatform() != null && platformOsList.contains(ingestEvent.getPlatform().toLowerCase())) {
+            clickstreamEvent.setDeviceOperatingSystem(ingestEvent.getPlatform());
+        }
+
     }
 
     private void setValueFromAttributes(final Event ingestEvent, final ClickstreamEvent clickstreamEvent, final TimeShiftInfo timeShiftInfo) {
@@ -420,7 +429,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setAppVersion(ingestEvent.getAppVersion());
         clickstreamEvent.setAppTitle(ingestEvent.getAppTitle());
         if (ingestEvent.getAttributes() != null) {
-            clickstreamEvent.setAppInstallSource(ingestEvent.getAttributes().getChannel());
+            clickstreamEvent.setAppInstallSource(ingestEvent.getAttributes().getAppInstallChannel());
         }
         clickstreamEvent.setAppId(ingestEvent.getAppId());
     }

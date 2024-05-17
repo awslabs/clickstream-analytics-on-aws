@@ -450,4 +450,78 @@ public class ClickstreamEventParserTest extends BaseTest {
 
         Assertions.assertEquals(expectedJson, prettyJson(eventV2.toJson()));
     }
+
+
+    @Test
+    void test_DeviceOperatingSystem_set_as_platform() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_DeviceOperatingSystem_set_as_platform
+        String dataString = resourceFileContent("/one_line.json");
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode lineData = objectMapper.readTree(dataString);
+        JsonNode data =  lineData.get("data");
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
+
+        JsonNode ingestionData = clickstreamEventParser.getData(data.asText());
+        JsonNode firstElement = ingestionData;
+        if (ingestionData.isArray()) {
+             firstElement =   ingestionData.elements().next();
+        }
+       long eventTime = firstElement.get("timestamp").asLong();
+
+        ExtraParams params = ExtraParams.builder()
+                .appId("test")
+                .projectId("test_project_id")
+                .ingestTimestamp(eventTime + 20)
+                .uploadTimestamp(eventTime + 10)
+                .ua("test")
+                .ip("9.9.9.9")
+                .rid("test_rid")
+                .uri("test_uri")
+                .inputFileName("test_file")
+                .build();
+
+        ParseDataResult rowResult =  clickstreamEventParser.parseData(firstElement.toString(), params, 0);
+        ClickstreamEvent event =  rowResult.getClickstreamEventList().get(0);
+        Assertions.assertEquals("iOS", event.getDeviceOperatingSystem());
+    }
+
+
+    @Test
+    void test_DeviceOperatingSystem_set_as_platform_web() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_DeviceOperatingSystem_set_as_platform_web
+        String dataString = resourceFileContent("/one_line.json");
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode lineData = objectMapper.readTree(dataString);
+
+        JsonNode data =  lineData.get("data");
+
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
+
+        JsonNode ingestionData = clickstreamEventParser.getData(data.asText());
+        JsonNode firstElement = ingestionData;
+        if (ingestionData.isArray()) {
+            firstElement =   ingestionData.elements().next();
+        }
+        ObjectNode firstElementObj = (ObjectNode) firstElement;
+        firstElementObj.put("platform", "Web");
+
+        long eventTime = firstElementObj.get("timestamp").asLong();
+
+        ExtraParams params = ExtraParams.builder()
+                .appId("test")
+                .projectId("test_project_id")
+                .ingestTimestamp(eventTime + 20)
+                .uploadTimestamp(eventTime + 10)
+                .ua("test")
+                .ip("9.9.9.9")
+                .rid("test_rid")
+                .uri("test_uri")
+                .inputFileName("test_file")
+                .build();
+
+        ParseDataResult rowResult =  clickstreamEventParser.parseData(firstElementObj.toString(), params, 0);
+        ClickstreamEvent event =  rowResult.getClickstreamEventList().get(0);
+        Assertions.assertNull(event.getDeviceOperatingSystem());
+    }
+
 }

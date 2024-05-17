@@ -37,6 +37,10 @@ public abstract class BaseEventParser implements EventParser {
     public static final int ADJUST_THRESHOLD = 600_000; // 10 minutes
     public static final String INPUT_FILE_NAME = "input_file_name";
     public static final String PLATFORM_WEB = "Web";
+    public static final String PLATFORM_ANDROID = "Android";
+    public static final String PLATFORM_IOS = "iOS";
+    public static final String PLATFORM_WECHATMP = "WeChatMP";
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static void addDataResult(final ParseRowResult rowResult, final ParseDataResult result) {
