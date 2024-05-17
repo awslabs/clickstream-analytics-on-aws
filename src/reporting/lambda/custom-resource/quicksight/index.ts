@@ -1119,7 +1119,7 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
     let scheduleFrequency: RefreshFrequency = {
       Interval: refreshInterval ?? RefreshInterval.DAILY,
       Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
-    }
+    };
 
     if (refreshInterval !== RefreshInterval.HOURLY) {
       scheduleFrequency = {
@@ -1132,7 +1132,7 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
       ScheduleId: scheduleId,
       ScheduleFrequency: scheduleFrequency,
       RefreshType: IngestionType.INCREMENTAL_REFRESH,
-    }
+    };
 
     await quickSight.createRefreshSchedule({
       AwsAccountId: commonParams.awsAccountId,
