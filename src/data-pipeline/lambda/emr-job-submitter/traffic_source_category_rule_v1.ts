@@ -4444,6 +4444,12 @@ export const CATEGORY_RULE = [
     params: [],
   },
   {
+    url: 'tagassistant.google.com',
+    source: 'tagassistant.google.com',
+    category: 'Referral',
+    params: [],
+  },
+  {
     url: 'tagged.com',
     source: 'tagged',
     category: 'Social',
