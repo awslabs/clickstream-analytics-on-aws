@@ -36,15 +36,24 @@ import java.util.Map;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.explode;
 import static org.apache.spark.sql.functions.expr;
+import static org.apache.spark.sql.functions.first;
 import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.map;
 import static org.apache.spark.sql.functions.map_concat;
+import static org.apache.spark.sql.functions.max;
+import static org.apache.spark.sql.functions.min;
 import static org.apache.spark.sql.functions.when;
 import static software.aws.solution.clickstream.TransformerV3.CLIENT_TIMESTAMP;
 import static software.aws.solution.clickstream.common.BaseEventParser.UPLOAD_TIMESTAMP;
 import static software.aws.solution.clickstream.model.ModelV2.toColumnArray;
 import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForEventV2;
 import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForItemV2;
+import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForSession;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_APP_END;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PAGE_VIEW;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_SCREEN_VIEW;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_SESSION_START;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_USER_ENGAGEMENT;
 import static software.aws.solution.clickstream.util.DatasetUtil.deDupDataset;
 
 @Slf4j
@@ -129,10 +138,71 @@ public abstract class BaseTransformerV3 implements TransformerInterfaceV3 {
 
     }
 
+    public Dataset<Row> extractSessionFromEvent(final Dataset<Row> eventDataset) {
+        Dataset<Row> sessionDataset = eventDataset.select(
+                col(Constant.APP_ID),
+                col(Constant.EVENT_TIMESTAMP),
+                col(Constant.EVENT_NAME),
+                col(Constant.PLATFORM),
+                col(Constant.USER_PSEUDO_ID),
+                col(Constant.SESSION_ID),
+                col(Constant.USER_ID),
+                col(Constant.SESSION_NUMBER),
+                col(Constant.SESSION_START_TIME_MSEC),
+                col(Constant.TRAFFIC_SOURCE_SOURCE).alias(Constant.SESSION_SOURCE),
+                col(Constant.TRAFFIC_SOURCE_MEDIUM).alias(Constant.SESSION_MEDIUM),
+                col(Constant.TRAFFIC_SOURCE_CAMPAIGN).alias(Constant.SESSION_CAMPAIGN),
+                col(Constant.TRAFFIC_SOURCE_CONTENT).alias(Constant.SESSION_CONTENT),
+                col(Constant.TRAFFIC_SOURCE_TERM).alias(Constant.SESSION_TERM),
+                col(Constant.TRAFFIC_SOURCE_CAMPAIGN_ID).alias(Constant.SESSION_CAMPAIGN_ID),
+                col(Constant.TRAFFIC_SOURCE_CLID_PLATFORM).alias(Constant.SESSION_CLID_PLATFORM),
+                col(Constant.TRAFFIC_SOURCE_CLID).alias(Constant.SESSION_CLID),
+                col(Constant.TRAFFIC_SOURCE_CHANNEL_GROUP).alias(Constant.SESSION_CHANNEL_GROUP),
+                col(Constant.TRAFFIC_SOURCE_CATEGORY).alias(Constant.SESSION_SOURCE_CATEGORY),
+                // add event name to process info
+                mapConcatSafe(
+                        col(Constant.PROCESS_INFO),
+                        map(lit(Constant.EVENT_NAME), col(Constant.EVENT_NAME))
+                ).alias(Constant.PROCESS_INFO)
+        ).filter(col(Constant.SESSION_ID).isNotNull());
+
+        sessionDataset.cache();
+
+        log.info("sessionDataset count: {}", sessionDataset.count());
+        Dataset<Row> sessionEventDataset = sessionDataset
+                .filter(col(Constant.EVENT_NAME).isin(EVENT_SESSION_START, EVENT_PAGE_VIEW, EVENT_USER_ENGAGEMENT, EVENT_SCREEN_VIEW, EVENT_APP_END));
+
+        Column[] aggColumns = new Column[]{
+                max(col(Constant.USER_ID)).alias(Constant.USER_ID),
+                max(col(Constant.SESSION_NUMBER)).alias(Constant.SESSION_NUMBER),
+                min(col(Constant.SESSION_START_TIME_MSEC)).alias(Constant.SESSION_START_TIME_MSEC),
+                max(col(Constant.SESSION_SOURCE)).alias(Constant.SESSION_SOURCE),
+                max(col(Constant.SESSION_MEDIUM)).alias(Constant.SESSION_MEDIUM),
+                max(col(Constant.SESSION_CAMPAIGN)).alias(Constant.SESSION_CAMPAIGN),
+                max(col(Constant.SESSION_CONTENT)).alias(Constant.SESSION_CONTENT),
+                max(col(Constant.SESSION_TERM)).alias(Constant.SESSION_TERM),
+                max(col(Constant.SESSION_CAMPAIGN_ID)).alias(Constant.SESSION_CAMPAIGN_ID),
+                max(col(Constant.SESSION_CLID_PLATFORM)).alias(Constant.SESSION_CLID_PLATFORM),
+                max(col(Constant.SESSION_CLID)).alias(Constant.SESSION_CLID),
+                max(col(Constant.SESSION_CHANNEL_GROUP)).alias(Constant.SESSION_CHANNEL_GROUP),
+                max(col(Constant.SESSION_SOURCE_CATEGORY)).alias(Constant.SESSION_SOURCE_CATEGORY),
+                first(col(Constant.PROCESS_INFO)).alias(Constant.PROCESS_INFO)
+        };
+        Dataset<Row> sessionDatasetAgg = sessionEventDataset
+                .groupBy(Constant.APP_ID, Constant.USER_PSEUDO_ID, Constant.SESSION_ID)
+                .agg(
+                        max(col(Constant.EVENT_TIMESTAMP)).alias(Constant.EVENT_TIMESTAMP),
+                        aggColumns
+                );
+
+        log.info("sessionDatasetAgg count: {}", sessionDatasetAgg.count());
+        return addProcessInfo(runMaxLengthTransformerForSession(sessionDatasetAgg));
+    }
+
+
     public abstract Dataset<Row> getCleanedDataset(Dataset<Row> dataset);
 
     public abstract TransformerNameEnum getName();
-    public abstract Dataset<Row> extractSessionFromEvent(Dataset<Row> eventDataset) ;
 
     public abstract Dataset<Row> extractUser(Dataset<Row> eventDataset, Dataset<Row> convertedDataset) ;
 

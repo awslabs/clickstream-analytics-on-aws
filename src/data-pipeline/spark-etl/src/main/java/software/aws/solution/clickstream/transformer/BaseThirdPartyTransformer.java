@@ -35,15 +35,12 @@ import static org.apache.spark.sql.functions.input_file_name;
 import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.max;
 import static org.apache.spark.sql.functions.max_by;
-import static org.apache.spark.sql.functions.min;
 import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.struct;
 import static software.aws.solution.clickstream.TransformerV3.INPUT_FILE_NAME;
 import static software.aws.solution.clickstream.model.ModelV2.toColumnArray;
-import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForSession;
 import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForUserV2;
 import static software.aws.solution.clickstream.util.ContextUtil.DEBUG_LOCAL_PROP;
-import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_SESSION_START;
 import static software.aws.solution.clickstream.util.DatasetUtil.addSchemaToMap;
 import static software.aws.solution.clickstream.util.DatasetUtil.hasColumn;
 import static software.aws.solution.clickstream.util.DatasetUtil.readDatasetFromPath;
@@ -281,56 +278,6 @@ public abstract class BaseThirdPartyTransformer extends BaseTransformerV3 {
         log.info("extractUser return userDatasetFinal count: {}", userDatasetFinal.count());
 
         return addProcessInfo(runMaxLengthTransformerForUserV2(userDatasetFinal));
-    }
-
-
-    @Override
-    public Dataset<Row> extractSessionFromEvent(final Dataset<Row> eventDataset) {
-        Dataset<Row> sessionDataset = eventDataset.select(
-                        col(Constant.APP_ID),
-                        col(Constant.EVENT_TIMESTAMP),
-                        col(Constant.EVENT_NAME),
-                        col(Constant.PLATFORM),
-                        col(Constant.USER_PSEUDO_ID),
-                        col(Constant.SESSION_ID),
-                        col(Constant.USER_ID),
-                        col(Constant.SESSION_NUMBER),
-                        col(Constant.SESSION_START_TIME_MSEC),
-                        col(Constant.TRAFFIC_SOURCE_SOURCE).alias(Constant.SESSION_SOURCE),
-                        col(Constant.TRAFFIC_SOURCE_MEDIUM).alias(Constant.SESSION_MEDIUM),
-                        col(Constant.TRAFFIC_SOURCE_CAMPAIGN).alias(Constant.SESSION_CAMPAIGN),
-                        col(Constant.TRAFFIC_SOURCE_CONTENT).alias(Constant.SESSION_CONTENT),
-                        col(Constant.TRAFFIC_SOURCE_TERM).alias(Constant.SESSION_TERM),
-                        col(Constant.TRAFFIC_SOURCE_CAMPAIGN_ID).alias(Constant.SESSION_CAMPAIGN_ID),
-                        col(Constant.TRAFFIC_SOURCE_CLID_PLATFORM).alias(Constant.SESSION_CLID_PLATFORM),
-                        col(Constant.TRAFFIC_SOURCE_CLID).alias(Constant.SESSION_CLID),
-                        col(Constant.TRAFFIC_SOURCE_CHANNEL_GROUP).alias(Constant.SESSION_CHANNEL_GROUP),
-                        col(Constant.TRAFFIC_SOURCE_CATEGORY).alias(Constant.SESSION_SOURCE_CATEGORY),
-                        col(Constant.PROCESS_INFO)
-                )
-                .filter(col(Constant.SESSION_ID).isNotNull()
-                        .and(col(Constant.EVENT_NAME).equalTo(EVENT_SESSION_START))
-                )
-                .groupBy(Constant.APP_ID, Constant.USER_PSEUDO_ID, Constant.SESSION_ID)
-                .agg(
-                        max(col(Constant.EVENT_TIMESTAMP)).alias(Constant.EVENT_TIMESTAMP),
-                        max(col(Constant.USER_ID)).alias(Constant.USER_ID),
-                        max(col(Constant.SESSION_NUMBER)).alias(Constant.SESSION_NUMBER),
-                        min(col(Constant.SESSION_START_TIME_MSEC)).alias(Constant.SESSION_START_TIME_MSEC),
-                        max(col(Constant.SESSION_SOURCE)).alias(Constant.SESSION_SOURCE),
-                        max(col(Constant.SESSION_MEDIUM)).alias(Constant.SESSION_MEDIUM),
-                        max(col(Constant.SESSION_CAMPAIGN)).alias(Constant.SESSION_CAMPAIGN),
-                        max(col(Constant.SESSION_CONTENT)).alias(Constant.SESSION_CONTENT),
-                        max(col(Constant.SESSION_TERM)).alias(Constant.SESSION_TERM),
-                        max(col(Constant.SESSION_CAMPAIGN_ID)).alias(Constant.SESSION_CAMPAIGN_ID),
-                        max(col(Constant.SESSION_CLID_PLATFORM)).alias(Constant.SESSION_CLID_PLATFORM),
-                        max(col(Constant.SESSION_CLID)).alias(Constant.SESSION_CLID),
-                        max(col(Constant.SESSION_CHANNEL_GROUP)).alias(Constant.SESSION_CHANNEL_GROUP),
-                        max(col(Constant.SESSION_SOURCE_CATEGORY)).alias(Constant.SESSION_SOURCE_CATEGORY),
-                        first(col(Constant.PROCESS_INFO)).alias(Constant.PROCESS_INFO)
-                );
-        Dataset<Row> sessionDatasetAgg = sessionDataset.select(toColumnArray(ModelV2.getSessionFields()));
-        return addProcessInfo(runMaxLengthTransformerForSession(sessionDatasetAgg));
     }
 
     @Override

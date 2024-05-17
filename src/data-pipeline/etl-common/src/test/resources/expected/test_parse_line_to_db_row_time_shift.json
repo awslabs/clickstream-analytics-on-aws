@@ -12,7 +12,7 @@
   "device_manufacturer" : "Make HUAWEI",
   "device_carrier" : "CDMA",
   "device_network_type" : "Mobile",
-  "device_operating_system" : "ANDROID OS",
+  "device_operating_system" : "ANDROID",
   "device_operating_system_version" : "os-v1.0",
   "device_vendor_id" : "deviceid-1682319109447",
   "device_advertising_id" : "uf24bec657ea8eff7",
@@ -52,7 +52,7 @@
   "app_package_id" : "com.example.demoapplication",
   "app_version" : "1.0",
   "app_title" : "test-title-98-0",
-  "app_install_source" : "C001",
+  "app_install_source" : null,
   "platform" : "ANDROID",
   "project_id" : "test_project_id",
   "app_id" : "testApp1",
@@ -106,11 +106,13 @@
     "country_code" : "CN",
     "_privacy_info_analytics_storage" : "PIAAS",
     "hashCode" : "80452b0",
+    "os_name" : "ANDROID OS",
     "_privacy_info_uses_transient_token" : "PIUTT",
     "_device_vendor_id" : "V001",
     "_privacy_info_ads_storage" : "PIAS",
     "_is_first_day" : true,
-    "event_sequence_id" : 2
+    "event_sequence_id" : 2,
+    "_channel" : "C001"
   },
   "process_info" : {
     "input_file_name" : "original_data_nozip_uri_upload.json",
