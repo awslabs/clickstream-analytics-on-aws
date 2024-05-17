@@ -13,12 +13,10 @@
 
 import { logger } from '@aws/clickstream-base-lib';
 import { StatusString } from '@aws-sdk/client-redshift-data';
-import { SP_SCAN_METADATA } from '../../private/constant';
 import { CheckScanMetadataStatusEventDetail } from '../../private/model';
-import { describeStatement, executeStatementsWithWait, getRedshiftClient, getRedshiftProps, getStatementResult } from '../redshift-data';
+import { describeStatement, getRedshiftClient } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
-const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
 
 // Create an Amazon service client object.
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
@@ -41,23 +39,21 @@ export const handler = async (event: CheckScanMetadataStatusEvent) => {
 
   if (response.Status == StatusString.FINISHED) {
     logger.info('Scan metadata success.');
-    const queryResult = await queryScanMetadataLog(appId);
     return {
       detail: {
         appId: appId,
         status: response.Status,
-        message: queryResult.detail.message,
+        message: 'Scan metadata success.',
       },
     };
   } else if (response.Status == StatusString.FAILED || response.Status == StatusString.ABORTED) {
     logger.error(`Executing ${queryId} status of statement is ${response.Status}`);
-    const queryResult = await queryScanMetadataLog(appId);
     return {
       detail: {
         id: queryId,
         appId: appId,
         status: response.Status,
-        message: 'Error:' + response.Error + '\nLog:' + queryResult.detail.message,
+        message: 'Error:' + response.Error,
       },
     };
   } else {
@@ -69,43 +65,5 @@ export const handler = async (event: CheckScanMetadataStatusEvent) => {
         status: response.Status,
       },
     };
-  }
-};
-
-export const queryScanMetadataLog = async (appId: string) => {
-  const redshiftProps = getRedshiftProps(
-    process.env.REDSHIFT_MODE!,
-    REDSHIFT_DATABASE,
-    REDSHIFT_DATA_API_ROLE_ARN,
-    process.env.REDSHIFT_DB_USER!,
-    process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
-    process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
-  );
-
-  const schema = appId;
-  try {
-    const querySqlStatement = `SELECT * FROM ${schema}.clickstream_log WHERE log_name='${SP_SCAN_METADATA}' ORDER BY log_date, id`;
-    const queryId = await executeStatementsWithWait(
-      redshiftDataApiClient, [querySqlStatement], redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-
-    const response = await getStatementResult(redshiftDataApiClient, queryId!);
-
-    logger.info('Scan metadata log response:', { response });
-
-    const delSqlStatement = `DELETE FROM ${schema}.clickstream_log WHERE log_name='${SP_SCAN_METADATA}'`;
-    await executeStatementsWithWait(
-      redshiftDataApiClient, [delSqlStatement], redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-    return {
-      detail: {
-        appId: schema,
-        message: response.Records,
-      },
-    };
-
-  } catch (err) {
-    if (err instanceof Error) {
-      logger.error('Error when query scan metadata log.', err);
-    }
-    throw err;
   }
 };

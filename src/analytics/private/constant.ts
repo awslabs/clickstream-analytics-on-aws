@@ -62,7 +62,7 @@ export const SQL_TEMPLATE_PARAMETER = {
   sp_merge_session: 'sp_merge_session',
   sp_clickstream_log: 'sp_clickstream_log',
   sp_clickstream_log_non_atomic: 'sp_clickstream_log_non_atomic',
-  table_clickstream_log: 'clickstream_log',
+  table_clickstream_log: 'clickstream_log_v2',
   table_refresh_mv_sp_status: 'refresh_mv_sp_status',
 };
 

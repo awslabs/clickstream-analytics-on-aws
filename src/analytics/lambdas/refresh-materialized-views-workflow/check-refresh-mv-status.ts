@@ -38,8 +38,8 @@ export interface CheckRefreshViewStatusEvent {
  * @param event CheckRefreshViewStatusEvent.
  * @returns {
  *  detail: {
- *    status: string,
- *    completeRefreshView: string,
+ *    queryId: string;
+ *    viewName: string;
  *  }
  * }
  */

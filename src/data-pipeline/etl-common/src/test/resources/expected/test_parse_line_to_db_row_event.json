@@ -39,7 +39,7 @@
   "geo_city" : null,
   "geo_locale" : "zh_CN_#Hans",
   "traffic_source_source" : "Baidu",
-  "traffic_source_medium" : "Organic Search",
+  "traffic_source_medium" : "Organic",
   "traffic_source_campaign" : null,
   "traffic_source_content" : null,
   "traffic_source_term" : null,
@@ -71,11 +71,11 @@
   "page_view_engagement_time_msec" : null,
   "page_view_page_title" : null,
   "page_view_page_url" : "http://www.example.com/?q=abc",
-  "page_view_page_url_path" : null,
+  "page_view_page_url_path" : "/",
   "page_view_page_url_query_parameters" : {
     "q" : "abc"
   },
-  "page_view_hostname" : "www.example.com",
+  "page_view_hostname" : "host-name-001.com",
   "page_view_latest_referrer" : "www.baidu.com",
   "page_view_latest_referrer_host" : "www.baidu.com",
   "page_view_entrances" : null,

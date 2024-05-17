@@ -421,6 +421,8 @@ export class CPipeline {
     if (this._editStackTags(oldPipeline)) {
       this.stackManager.updateWorkflowTags();
     }
+    // update workflow callback
+    this.stackManager.setPipelineWorkflowCallback(executionName);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -527,6 +529,8 @@ export class CPipeline {
     const oldStackNames = this.stackManager.getWorkflowStacks(oldPipeline.workflow?.Workflow!);
     // update workflow
     this.stackManager.upgradeWorkflow(oldStackNames);
+    // update workflow callback
+    this.stackManager.setPipelineWorkflowCallback(executionName);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -670,6 +674,8 @@ export class CPipeline {
     this._setExecution(executionName);
     // update workflow
     this.stackManager.deleteWorkflow();
+    // update workflow callback
+    this.stackManager.setPipelineWorkflowCallback(executionName);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -692,11 +698,17 @@ export class CPipeline {
   }
 
   public async retry(): Promise<void> {
+    if (this.pipeline.lastAction === 'Delete') {
+      await this.delete();
+      return;
+    }
     // create rule to listen CFN stack
     await this._createRules();
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this._setExecution(executionName);
     this.stackManager.retryWorkflow();
+    // update workflow callback
+    this.stackManager.setPipelineWorkflowCallback(executionName);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -859,6 +871,7 @@ export class CPipeline {
   };
 
   private patchBuiltInTags() {
+    const version = SolutionVersion.Of(this.pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
     if (this.resources?.solution) {
       const builtInTagKeys = [
         BuiltInTagKeys.AWS_SOLUTION,
@@ -880,7 +893,7 @@ export class CPipeline {
         value: SolutionInfo.SOLUTION_SHORT_NAME,
       }, {
         key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
-        value: FULL_SOLUTION_VERSION,
+        value: version.fullVersion,
       }, {
         key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
         value: this.pipeline.projectId,

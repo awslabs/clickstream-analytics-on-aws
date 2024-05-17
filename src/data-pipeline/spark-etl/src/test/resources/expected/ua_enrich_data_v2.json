@@ -8,7 +8,7 @@
   "device" : {
     "advertising_id" : "uf24bec657ea8eff7",
     "carrier" : "CDMA",
-    "host_name" : "https://host-name-001.com",
+    "host_name" : "host-name-001.com",
     "manufacturer" : "Make HUAWEI",
     "mobile_brand_name" : "Brand HUAWEI",
     "mobile_model_name" : "HUAWEI-P10",

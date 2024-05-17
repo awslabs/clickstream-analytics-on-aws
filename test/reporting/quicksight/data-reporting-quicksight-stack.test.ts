@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS } from '@aws/clickstream-base-lib';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataReportingQuickSightStack } from '../../../src/data-reporting-quicksight-stack';
@@ -35,6 +35,10 @@ describe('DataReportingQuickSightStack parameter test', () => {
 
   test('Has Redshift serverless data api role output', () => {
     template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, {});
+  });
+
+  test('Has Redshift database name output', () => {
+    template.hasOutput(OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME, {});
   });
 
   test('Has Redshift serverless workgroup name', () => {
@@ -383,216 +387,274 @@ describe('DataReportingQuickSightStack resource test', () => {
 
   template.resourcePropertiesCountIs('AWS::IAM::Policy',
     {
-      PolicyDocument: {
-        Statement: [
+      PolicyDocument:
+    {
+      Statement:
+        [
           {
-            Action: [
-              'logs:CreateLogStream',
-              'logs:PutLogEvents',
-              'logs:CreateLogGroup',
-            ],
+            Action:
+                [
+                  'logs:CreateLogStream',
+                  'logs:PutLogEvents',
+                  'logs:CreateLogGroup',
+                ],
             Effect: 'Allow',
             Resource: '*',
           },
           {
-            Action: [
-              'quicksight:DescribeDataSource',
-              'quicksight:PassDataSource',
-              'quicksight:DescribeDataSourcePermissions',
-              'quicksight:UpdateDataSourcePermissions',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
+            Action:
                 [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':datasource/clickstream_datasource_*',
+                  'quicksight:DescribeDataSource',
+                  'quicksight:PassDataSource',
+                  'quicksight:DescribeDataSourcePermissions',
+                  'quicksight:UpdateDataSourcePermissions',
                 ],
-              ],
-            },
+            Effect: 'Allow',
+            Resource:
+                {
+                  'Fn::Join':
+                    [
+                      '',
+                      [
+                        'arn:',
+                        {
+                          Ref: 'AWS::Partition',
+                        },
+                        ':quicksight:',
+                        {
+                          Ref: 'AWS::Region',
+                        },
+                        ':',
+                        {
+                          Ref: 'AWS::AccountId',
+                        },
+                        ':datasource/clickstream_datasource_*',
+                      ],
+                    ],
+                },
           },
           {
-            Action: [
-              'quicksight:DescribeTemplate',
-              'quicksight:ListTemplateVersions',
-            ],
+            Action:
+                [
+                  'quicksight:DescribeTemplate',
+                  'quicksight:ListTemplateVersions',
+                ],
             Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:',
-                    {
-                      Ref: 'AWS::Region',
-                    },
-                    ':',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':template/clickstream_template_*',
-                  ],
+            Resource:
+                [
+                  {
+                    'Fn::Join':
+                        [
+                          '',
+                          [
+                            'arn:',
+                            {
+                              Ref: 'AWS::Partition',
+                            },
+                            ':quicksight:',
+                            {
+                              Ref: 'AWS::Region',
+                            },
+                            ':',
+                            {
+                              Ref: 'AWS::AccountId',
+                            },
+                            ':template/clickstream_template_*',
+                          ],
+                        ],
+                  },
+                  {
+                    'Fn::GetAtt':
+                        [
+                          'ClickstreamTemplateDef',
+                          'Arn',
+                        ],
+                  },
                 ],
-              },
-              {
-                'Fn::GetAtt': [
-                  'ClickstreamTemplateDef',
-                  'Arn',
-                ],
-              },
-            ],
           },
           {
-            Action: [
-              'quicksight:DescribeDataSet',
-              'quicksight:DeleteDataSet',
-              'quicksight:CreateDataSet',
-              'quicksight:UpdateDataSet',
-              'quicksight:PassDataSet',
-              'quicksight:PassDataSource',
-              'quicksight:UpdateDataSetPermissions',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
+            Action:
                 [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':dataset/clickstream_dataset_*',
+                  'quicksight:DescribeDataSet',
+                  'quicksight:DeleteDataSet',
+                  'quicksight:CreateDataSet',
+                  'quicksight:UpdateDataSet',
+                  'quicksight:PassDataSet',
+                  'quicksight:PassDataSource',
+                  'quicksight:UpdateDataSetPermissions',
                 ],
-              ],
-            },
+            Effect: 'Allow',
+            Resource:
+                {
+                  'Fn::Join':
+                    [
+                      '',
+                      [
+                        'arn:',
+                        {
+                          Ref: 'AWS::Partition',
+                        },
+                        ':quicksight:',
+                        {
+                          Ref: 'AWS::Region',
+                        },
+                        ':',
+                        {
+                          Ref: 'AWS::AccountId',
+                        },
+                        ':dataset/clickstream_dataset_*',
+                      ],
+                    ],
+                },
           },
           {
-            Action: [
-              'quicksight:DescribeAnalysis',
-              'quicksight:DeleteAnalysis',
-              'quicksight:CreateAnalysis',
-              'quicksight:UpdateAnalysis',
-              'quicksight:UpdateAnalysisPermissions',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
+            Action:
                 [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':analysis/clickstream_analysis_*',
+                  'quicksight:DescribeAnalysis',
+                  'quicksight:DeleteAnalysis',
+                  'quicksight:CreateAnalysis',
+                  'quicksight:UpdateAnalysis',
+                  'quicksight:UpdateAnalysisPermissions',
                 ],
-              ],
-            },
+            Effect: 'Allow',
+            Resource:
+                {
+                  'Fn::Join':
+                    [
+                      '',
+                      [
+                        'arn:',
+                        {
+                          Ref: 'AWS::Partition',
+                        },
+                        ':quicksight:',
+                        {
+                          Ref: 'AWS::Region',
+                        },
+                        ':',
+                        {
+                          Ref: 'AWS::AccountId',
+                        },
+                        ':analysis/clickstream_analysis_*',
+                      ],
+                    ],
+                },
           },
           {
-            Action: [
-              'quicksight:DescribeDashboard',
-              'quicksight:DeleteDashboard',
-              'quicksight:CreateDashboard',
-              'quicksight:UpdateDashboard',
-              'quicksight:UpdateDashboardPermissions',
-              'quicksight:UpdateDashboardPublishedVersion',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
+            Action:
                 [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':dashboard/clickstream_dashboard_*',
+                  'quicksight:DescribeDashboard',
+                  'quicksight:DeleteDashboard',
+                  'quicksight:CreateDashboard',
+                  'quicksight:UpdateDashboard',
+                  'quicksight:UpdateDashboardPermissions',
+                  'quicksight:UpdateDashboardPublishedVersion',
                 ],
-              ],
-            },
+            Effect: 'Allow',
+            Resource:
+                {
+                  'Fn::Join':
+                    [
+                      '',
+                      [
+                        'arn:',
+                        {
+                          Ref: 'AWS::Partition',
+                        },
+                        ':quicksight:',
+                        {
+                          Ref: 'AWS::Region',
+                        },
+                        ':',
+                        {
+                          Ref: 'AWS::AccountId',
+                        },
+                        ':dashboard/clickstream_dashboard_*',
+                      ],
+                    ],
+                },
           },
           {
-            Action: [
-              'quicksight:CreateFolderMembership',
-              'quicksight:DeleteFolderMembership',
-              'quicksight:DescribeFolder',
-              'quicksight:CreateFolder',
-              'quicksight:DeleteFolder',
-              'quicksight:UpdateFolder',
-              'quicksight:UpdateFolderPermissions',
-              'quicksight:ListFolderMembers',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
+            Action:
                 [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':folder/clickstream*',
+                  'quicksight:DescribeRefreshSchedule',
+                  'quicksight:CreateRefreshSchedule',
+                  'quicksight:UpdateRefreshSchedule',
+                  'quicksight:DeleteRefreshSchedule',
+                  'quicksight:PutDataSetRefreshProperties',
+                  'quicksight:DescribeDataSetRefreshProperties',
+                  'quicksight:DeleteDataSetRefreshProperties',
                 ],
-              ],
-            },
+            Effect: 'Allow',
+            Resource:
+                {
+                  'Fn::Join':
+                    [
+                      '',
+                      [
+                        'arn:',
+                        {
+                          Ref: 'AWS::Partition',
+                        },
+                        ':quicksight:',
+                        {
+                          Ref: 'AWS::Region',
+                        },
+                        ':',
+                        {
+                          Ref: 'AWS::AccountId',
+                        },
+                        ':dataset/clickstream_dataset_*',
+                      ],
+                    ],
+                },
+          },
+          {
+            Action:
+                [
+                  'quicksight:CreateFolderMembership',
+                  'quicksight:DeleteFolderMembership',
+                  'quicksight:DescribeFolder',
+                  'quicksight:CreateFolder',
+                  'quicksight:DeleteFolder',
+                  'quicksight:UpdateFolder',
+                  'quicksight:UpdateFolderPermissions',
+                  'quicksight:ListFolderMembers',
+                ],
+            Effect: 'Allow',
+            Resource:
+                {
+                  'Fn::Join':
+                    [
+                      '',
+                      [
+                        'arn:',
+                        {
+                          Ref: 'AWS::Partition',
+                        },
+                        ':quicksight:',
+                        {
+                          Ref: 'AWS::Region',
+                        },
+                        ':',
+                        {
+                          Ref: 'AWS::AccountId',
+                        },
+                        ':folder/clickstream*',
+                      ],
+                    ],
+                },
           },
         ],
-        Version: '2012-10-17',
-      },
+      Version: '2012-10-17',
+    },
       PolicyName: 'QuicksightCustomResourceLambdaRoleDefaultPolicyA0EB8B03',
-      Roles: [
-        {
-          Ref: 'QuicksightCustomResourceLambdaRole58092032',
-        },
-      ],
+      Roles:
+    [
+      {
+        Ref: 'QuicksightCustomResourceLambdaRole58092032',
+      },
+    ],
     }, 1);
 
   template.resourcePropertiesCountIs('AWS::Lambda::Function', {
@@ -1699,48 +1761,67 @@ describe('DataReportingQuickSightStack resource test', () => {
                 ],
           },
           {
+            tableName: 'Last_Refresh_Date',
+            useSpice: 'no',
+            customSql: 'SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.refresh_mv_sp_status where triggerred_by = \'WORK_FLOW\'',
+            columns:
+                [
+                  {
+                    Name: 'Latest refresh date',
+                    Type: 'DATETIME',
+                  },
+                ],
+            projectedColumns:
+                [
+                  'Latest refresh date',
+                ],
+          },
+          {
             tableName: 'Day_User_View',
             useSpice: 'no',
             customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_day_user_view_cnt where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))",
-            columns: [
-              {
-                Name: 'event_date',
-                Type: 'DATETIME',
-              },
-              {
-                Name: 'platform',
-                Type: 'STRING',
-              },
-              {
-                Name: 'Active users',
-                Type: 'STRING',
-              },
-              {
-                Name: 'New users',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'view_count',
-                Type: 'INTEGER',
-              },
-            ],
-            dateTimeDatasetParameter: [
-              {
-                name: 'startDate02',
-                timeGranularity: 'DAY',
-              },
-              {
-                name: 'endDate02',
-                timeGranularity: 'DAY',
-              },
-            ],
-            projectedColumns: [
-              'event_date',
-              'platform',
-              'Active users',
-              'New users',
-              'view_count',
-            ],
+            columns:
+                [
+                  {
+                    Name: 'event_date',
+                    Type: 'DATETIME',
+                  },
+                  {
+                    Name: 'platform',
+                    Type: 'STRING',
+                  },
+                  {
+                    Name: 'active_users',
+                    Type: 'STRING',
+                  },
+                  {
+                    Name: 'new_users',
+                    Type: 'INTEGER',
+                  },
+                  {
+                    Name: 'view_count',
+                    Type: 'INTEGER',
+                  },
+                ],
+            dateTimeDatasetParameter:
+                [
+                  {
+                    name: 'startDate02',
+                    timeGranularity: 'DAY',
+                  },
+                  {
+                    name: 'endDate02',
+                    timeGranularity: 'DAY',
+                  },
+                ],
+            projectedColumns:
+                [
+                  'event_date',
+                  'platform',
+                  'active_users',
+                  'new_users',
+                  'view_count',
+                ],
           },
           {
             tableName: 'Day_Traffic_Source_User',
@@ -1828,11 +1909,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'total_user_engagement_time_minutes',
+                    Name: 'total_user_engagement_time_seconds',
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'avg_user_engagement_time_minutes',
+                    Name: 'avg_user_engagement_time_seconds',
                     Type: 'DECIMAL',
                   },
                   {
@@ -1865,8 +1946,8 @@ describe('DataReportingQuickSightStack resource test', () => {
                   'session_count',
                   'engagement_session_count',
                   'engagement_rate',
-                  'total_user_engagement_time_minutes',
-                  'avg_user_engagement_time_minutes',
+                  'total_user_engagement_time_seconds',
+                  'avg_user_engagement_time_seconds',
                   'event_count',
                   'user_id',
                 ],
@@ -1950,11 +2031,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'STRING',
                   },
                   {
-                    Name: 'Active User',
+                    Name: 'active_users',
                     Type: 'STRING',
                   },
                   {
-                    Name: 'New User',
+                    Name: 'new_users',
                     Type: 'STRING',
                   },
                 ],
@@ -1969,14 +2050,14 @@ describe('DataReportingQuickSightStack resource test', () => {
                 [
                   'event_date',
                   'platform',
-                  'Active User',
-                  'New User',
+                  'active_users',
+                  'new_users',
                 ],
           },
           {
-            tableName: 'Day_User_View_Engagement',
+            tableName: 'Day_Event_View_Engagement',
             useSpice: 'no',
-            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_day_user_view where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_day_event_view where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))",
             columns:
                 [
                   {
@@ -2034,11 +2115,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'avg_engagement_time_per_session_minutes',
+                    Name: 'avg_engagement_time_per_session_seconds',
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'avg_engagement_time_per_user_minutes',
+                    Name: 'avg_engagement_time_per_user_seconds',
                     Type: 'DECIMAL',
                   },
                 ],
@@ -2058,8 +2139,8 @@ describe('DataReportingQuickSightStack resource test', () => {
                   'event_date',
                   'platform',
                   'avg_session_per_user',
-                  'avg_engagement_time_per_session_minutes',
-                  'avg_engagement_time_per_user_minutes',
+                  'avg_engagement_time_per_session_seconds',
+                  'avg_engagement_time_per_user_seconds',
                 ],
           },
           {
@@ -2136,12 +2217,12 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'STRING',
                   },
                   {
-                    Name: 'user_engagement_time_minutes',
+                    Name: 'user_engagement_time_seconds',
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'event_id',
-                    Type: 'STRING',
+                    Name: 'event_count',
+                    Type: 'INTEGER',
                   },
                 ],
             dateTimeDatasetParameter:
@@ -2162,8 +2243,8 @@ describe('DataReportingQuickSightStack resource test', () => {
                   'aggregation_type',
                   'aggregation_dim',
                   'user_id',
-                  'user_engagement_time_minutes',
-                  'event_id',
+                  'user_engagement_time_seconds',
+                  'event_count',
                 ],
           },
           {
@@ -2591,7 +2672,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'STRING',
                   },
                   {
-                    Name: 'operating_system / version',
+                    Name: 'operating_system',
+                    Type: 'STRING',
+                  },
+                  {
+                    Name: 'operating_system_version',
                     Type: 'STRING',
                   },
                   {
@@ -2600,6 +2685,14 @@ describe('DataReportingQuickSightStack resource test', () => {
                   },
                   {
                     Name: 'device_screen_resolution',
+                    Type: 'STRING',
+                  },
+                  {
+                    Name: 'device_ua_device',
+                    Type: 'STRING',
+                  },
+                  {
+                    Name: 'device_ua_device_category',
                     Type: 'STRING',
                   },
                   {
@@ -2625,9 +2718,12 @@ describe('DataReportingQuickSightStack resource test', () => {
                   'device',
                   'app_version',
                   'user_id',
-                  'operating_system / version',
+                  'operating_system',
+                  'operating_system_version',
                   'device_ua_browser',
                   'device_screen_resolution',
+                  'device_ua_device',
+                  'device_ua_device_category',
                   'event_count',
                 ],
           },
@@ -3346,38 +3442,56 @@ describe('DataReportingQuickSightStack resource test', () => {
                 ],
           },
           {
+            tableName: 'Last_Refresh_Date',
+            useSpice: 'no',
+            customSql: 'SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.refresh_mv_sp_status where triggerred_by = \'WORK_FLOW\'',
+            columns:
+                [
+                  {
+                    Name: 'Latest refresh date',
+                    Type: 'DATETIME',
+                  },
+                ],
+            projectedColumns:
+                [
+                  'Latest refresh date',
+                ],
+          },
+          {
             tableName: 'Day_User_View',
             useSpice: 'yes',
             customSql: 'SELECT * FROM {{schema}}.clickstream_acquisition_day_user_view_cnt ',
-            columns: [
-              {
-                Name: 'event_date',
-                Type: 'DATETIME',
-              },
-              {
-                Name: 'platform',
-                Type: 'STRING',
-              },
-              {
-                Name: 'Active users',
-                Type: 'STRING',
-              },
-              {
-                Name: 'New users',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'view_count',
-                Type: 'INTEGER',
-              },
-            ],
-            projectedColumns: [
-              'event_date',
-              'platform',
-              'Active users',
-              'New users',
-              'view_count',
-            ],
+            columns:
+                [
+                  {
+                    Name: 'event_date',
+                    Type: 'DATETIME',
+                  },
+                  {
+                    Name: 'platform',
+                    Type: 'STRING',
+                  },
+                  {
+                    Name: 'active_users',
+                    Type: 'STRING',
+                  },
+                  {
+                    Name: 'new_users',
+                    Type: 'INTEGER',
+                  },
+                  {
+                    Name: 'view_count',
+                    Type: 'INTEGER',
+                  },
+                ],
+            projectedColumns:
+                [
+                  'event_date',
+                  'platform',
+                  'active_users',
+                  'new_users',
+                  'view_count',
+                ],
           },
           {
             tableName: 'Day_Traffic_Source_User',
@@ -3454,11 +3568,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'total_user_engagement_time_minutes',
+                    Name: 'total_user_engagement_time_seconds',
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'avg_user_engagement_time_minutes',
+                    Name: 'avg_user_engagement_time_seconds',
                     Type: 'DECIMAL',
                   },
                   {
@@ -3480,8 +3594,8 @@ describe('DataReportingQuickSightStack resource test', () => {
                   'session_count',
                   'engagement_session_count',
                   'engagement_rate',
-                  'total_user_engagement_time_minutes',
-                  'avg_user_engagement_time_minutes',
+                  'total_user_engagement_time_seconds',
+                  'avg_user_engagement_time_seconds',
                   'event_count',
                   'user_id',
                 ],
@@ -3554,11 +3668,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'STRING',
                   },
                   {
-                    Name: 'Active User',
+                    Name: 'active_users',
                     Type: 'STRING',
                   },
                   {
-                    Name: 'New User',
+                    Name: 'new_users',
                     Type: 'STRING',
                   },
                 ],
@@ -3566,14 +3680,14 @@ describe('DataReportingQuickSightStack resource test', () => {
                 [
                   'event_date',
                   'platform',
-                  'Active User',
-                  'New User',
+                  'active_users',
+                  'new_users',
                 ],
           },
           {
-            tableName: 'Day_User_View_Engagement',
+            tableName: 'Day_Event_View_Engagement',
             useSpice: 'yes',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_engagement_day_user_view ',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_engagement_day_event_view ',
             columns:
                 [
                   {
@@ -3620,11 +3734,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'avg_engagement_time_per_session_minutes',
+                    Name: 'avg_engagement_time_per_session_seconds',
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'avg_engagement_time_per_user_minutes',
+                    Name: 'avg_engagement_time_per_user_seconds',
                     Type: 'DECIMAL',
                   },
                 ],
@@ -3633,8 +3747,8 @@ describe('DataReportingQuickSightStack resource test', () => {
                   'event_date',
                   'platform',
                   'avg_session_per_user',
-                  'avg_engagement_time_per_session_minutes',
-                  'avg_engagement_time_per_user_minutes',
+                  'avg_engagement_time_per_session_seconds',
+                  'avg_engagement_time_per_user_seconds',
                 ],
           },
           {
@@ -3700,12 +3814,12 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'STRING',
                   },
                   {
-                    Name: 'user_engagement_time_minutes',
+                    Name: 'user_engagement_time_seconds',
                     Type: 'DECIMAL',
                   },
                   {
-                    Name: 'event_id',
-                    Type: 'STRING',
+                    Name: 'event_count',
+                    Type: 'INTEGER',
                   },
                 ],
             projectedColumns:
@@ -3715,8 +3829,8 @@ describe('DataReportingQuickSightStack resource test', () => {
                   'aggregation_type',
                   'aggregation_dim',
                   'user_id',
-                  'user_engagement_time_minutes',
-                  'event_id',
+                  'user_engagement_time_seconds',
+                  'event_count',
                 ],
           },
           {
@@ -3918,6 +4032,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Retention_View',
             useSpice: 'yes',
+            lookbackColumn: 'first_date',
             customSql: 'SELECT * FROM {{schema}}.clickstream_retention_view_v3 ',
             columns:
                 [
@@ -3954,6 +4069,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Lifecycle_Weekly_View',
             useSpice: 'yes',
+            lookbackColumn: 'time_period',
             customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v3 ',
             columns:
                 [
@@ -4045,7 +4161,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                     Type: 'STRING',
                   },
                   {
-                    Name: 'operating_system / version',
+                    Name: 'operating_system',
+                    Type: 'STRING',
+                  },
+                  {
+                    Name: 'operating_system_version',
                     Type: 'STRING',
                   },
                   {
@@ -4054,6 +4174,14 @@ describe('DataReportingQuickSightStack resource test', () => {
                   },
                   {
                     Name: 'device_screen_resolution',
+                    Type: 'STRING',
+                  },
+                  {
+                    Name: 'device_ua_device',
+                    Type: 'STRING',
+                  },
+                  {
+                    Name: 'device_ua_device_category',
                     Type: 'STRING',
                   },
                   {
@@ -4068,9 +4196,12 @@ describe('DataReportingQuickSightStack resource test', () => {
                   'device',
                   'app_version',
                   'user_id',
-                  'operating_system / version',
+                  'operating_system',
+                  'operating_system_version',
                   'device_ua_browser',
                   'device_screen_resolution',
+                  'device_ua_device',
+                  'device_ua_device_category',
                   'event_count',
                 ],
           },

@@ -427,7 +427,7 @@ SELECT
     NULL AS user_first_touch_time_msec,
     app_info.id::varchar AS app_package_id,
     app_info.app_id::varchar AS app_id,
-    app_info.app_version::varchar AS app_version,
+    app_info.version::varchar AS app_version,
     app_info.install_source::varchar AS app_install_source,
     CASE
         WHEN platform IS NULL THEN 'Web'

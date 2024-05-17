@@ -24,7 +24,9 @@
   "device_ua_os_version" : null,
   "device_ua_device" : null,
   "device_ua_device_category" : null,
-  "device_ua" : null,
+  "device_ua" : {
+    "string" : "Dalvik/2.1.0 (Linux; U; Android 12; sdk_gphone64_arm64 Build/SE1A.220630.001)"
+  },
   "device_screen_width" : 1080,
   "device_screen_height" : 2400,
   "device_viewport_width" : null,
@@ -37,7 +39,7 @@
   "geo_city" : null,
   "geo_locale" : null,
   "traffic_source_source" : "Direct",
-  "traffic_source_medium" : "Direct",
+  "traffic_source_medium" : "None",
   "traffic_source_campaign" : "Direct",
   "traffic_source_content" : null,
   "traffic_source_term" : null,
@@ -102,13 +104,10 @@
   "custom_parameters" : {
     "distinct_id" : "9113946abd821d52",
     "screen_resolution" : "1080x2400",
-    "user_agent" : null,
     "properties" : {
       "$is_login_id" : false,
-      "$ip" : null,
       "$province" : null,
       "$city" : null,
-      "$user_agent" : null,
       "$url" : "com.farmerbb.notepad.android.NotepadActivity",
       "$screen_name" : "com.farmerbb.notepad.android.NotepadActivity",
       "$title" : "Notepad",

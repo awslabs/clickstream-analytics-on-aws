@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { AttributionModelType, ConditionCategory, ExploreAnalyticsOperators, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS, QuickSightChartType } from '@aws/clickstream-base-lib';
+import { AttributionModelType, ConditionCategory, ExploreAnalyticsOperators, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS, QuickSightChartType } from '@aws/clickstream-base-lib';
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
 import {
   CreateAnalysisCommand,
@@ -119,6 +119,38 @@ describe('reporting test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: [
+          BASE_STATUS.stackDetails[0],
+          BASE_STATUS.stackDetails[1],
+          BASE_STATUS.stackDetails[2],
+          BASE_STATUS.stackDetails[3],
+          {
+            ...BASE_STATUS.stackDetails[4],
+            outputs: [
+              {
+                OutputKey: 'DataSourceArn',
+                OutputValue: 'arn:aws:quicksight:ap-northeast-1:555555555555:datasource/clickstream_datasource_adfsd_uqqk_d84e29f0',
+              },
+              {
+                OutputKey: 'Dashboards',
+                OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+              },
+              {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
+                OutputValue: 'arn:aws:iam::111122223333:role/RedshiftDataApiRole',
+              },
+              {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
+                OutputValue: 'redshift-workgroup-1.cjvqjvqjvqjv.ap-southeast-1.redshift-serverless.amazonaws.com',
+              },
+              {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME,
+                OutputValue: 'shop',
+              },
+            ],
+          },
+          BASE_STATUS.stackDetails[5],
+        ],
         timezone: [
           {
             timezone: 'Asia/Singapore',
@@ -3796,7 +3828,7 @@ describe('reporting test', () => {
 
     expect(buildRetentionAnalysisView).toHaveBeenCalledWith(
       {
-        dbName: 'project01_wvzh',
+        dbName: 'shop',
         schemaName: 'app1',
         computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
@@ -3993,7 +4025,7 @@ describe('reporting test', () => {
 
     expect(buildRetentionAnalysisView).toHaveBeenCalledWith(
       {
-        dbName: 'project01_wvzh',
+        dbName: 'shop',
         schemaName: 'app1',
         computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
@@ -4089,9 +4121,53 @@ describe('reporting test in China region', () => {
     redshiftClientMock.reset();
     tokenMock(ddbMock, false);
     quickSightUserMock(ddbMock, true);
+
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: [
+          BASE_STATUS.stackDetails[0],
+          BASE_STATUS.stackDetails[1],
+          BASE_STATUS.stackDetails[2],
+          BASE_STATUS.stackDetails[3],
+          {
+            ...BASE_STATUS.stackDetails[4],
+            outputs: [
+              {
+                OutputKey: 'DataSourceArn',
+                OutputValue: 'arn:aws:quicksight:ap-northeast-1:555555555555:datasource/clickstream_datasource_adfsd_uqqk_d84e29f0',
+              },
+              {
+                OutputKey: 'Dashboards',
+                OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+              },
+              {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
+                OutputValue: 'arn:aws:iam::111122223333:role/RedshiftDataApiRole',
+              },
+              {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
+                OutputValue: 'redshift-workgroup-1.cjvqjvqjvqjv.ap-southeast-1.redshift-serverless.amazonaws.com',
+              },
+              {
+                OutputKey: OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME,
+                OutputValue: 'shop',
+              },
+            ],
+          },
+          BASE_STATUS.stackDetails[5],
+        ],
+        timezone: [
+          {
+            timezone: 'Asia/Singapore',
+            appId: 'app1',
+          },
+        ],
+      }],
+    });
   });
 
-  it('funnel bar visual - preview', async () => {
+  it('funnel bar visual - preview - china region', async () => {
     quickSightMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws-cn:quicksight:cn-north-1:11111111:analysis/analysisaaaaaaaa',
     });

@@ -19,13 +19,14 @@ import 'aws-sdk-client-mock-jest';
 
 
 const refreshBasicViewEvent: RefreshBasicViewEvent = {
-  detail: {
-    viewName: 'view1',
-    type: 'mv',
+  view: {
+    name: 'view1',
+    type: 'basic',
+    timezoneSensitive: 'true',
   },
   timezoneWithAppId: {
     appId: 'app1',
-    timezone: 'Asia/Shanghai',
+    timezone: 'America/Noronha',
   },
 };
 
@@ -50,19 +51,19 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
     const resp = await handler(refreshBasicViewEvent);
     expect(resp).toEqual({
       detail: {
-        viewName: refreshBasicViewEvent.detail.viewName,
+        viewName: refreshBasicViewEvent.view.name,
         queryId: exeuteId,
       },
       timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
-      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.detail.viewName};`,
+      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name};`,
     });
   });
 
   test('Execute command error in Redshift when doing refresh', async () => {
-    redshiftDataMock.on(ExecuteStatementCommand).rejectsOnce();
+    redshiftDataMock.on(ExecuteStatementCommand).rejects();
     try {
       await handler(refreshBasicViewEvent);
       fail('The error in executing statement of Redshift data was caught');
@@ -71,6 +72,26 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
         WorkgroupName: workGroupName,
       });
     }
+  });
+
+  test('Execute command error at first time in Redshift when doing refresh', async () => {
+    const exeuteId = 'Id-1';
+    redshiftDataMock.on(ExecuteStatementCommand)
+      .rejectsOnce()
+      .resolves({ Id: exeuteId });
+
+    const resp = await handler(refreshBasicViewEvent);
+    expect(resp).toEqual({
+      detail: {
+        viewName: refreshBasicViewEvent.view.name,
+        queryId: exeuteId,
+      },
+      timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+      WorkgroupName: workGroupName,
+      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name};`,
+    });
   });
 });
 
@@ -96,7 +117,7 @@ describe('Lambda - refresh in Redshift Provisioned', () => {
     const resp = await handler(refreshBasicViewEvent);
     expect(resp).toEqual({
       detail: {
-        viewName: refreshBasicViewEvent.detail.viewName,
+        viewName: refreshBasicViewEvent.view.name,
         queryId: exeuteId,
       },
       timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
@@ -104,7 +125,7 @@ describe('Lambda - refresh in Redshift Provisioned', () => {
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       ClusterIdentifier: clusterIdentifier,
       DbUser: dbUser,
-      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.detail.viewName};`,
+      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name};`,
     });
   });
 

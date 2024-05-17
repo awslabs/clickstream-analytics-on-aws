@@ -48,10 +48,10 @@ export function createMetricsWidget(scope: Construct, props: {
   // Alarms
 
   const failedJobAlarm = new Alarm(scope, 'failedJobAlarm', {
-    comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+    comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1,
     evaluationPeriods: 1,
-    treatMissingData: TreatMissingData.NOT_BREACHING,
+    treatMissingData: TreatMissingData.IGNORE,
     metric: new Metric({
       metricName: 'FailedJobs',
       namespace: emrServerlessNamespace,
@@ -225,6 +225,21 @@ export function createMetricsWidget(scope: Construct, props: {
           [
             dataPipelineNamespace,
             DataPipelineCustomMetricsName.SINK,
+            '.', '.', '.', '.',
+          ],
+          [
+            dataPipelineNamespace,
+            DataPipelineCustomMetricsName.FILTERED_BY_APP_IDS,
+            '.', '.', '.', '.',
+          ],
+          [
+            dataPipelineNamespace,
+            DataPipelineCustomMetricsName.FILTERED_BY_DATA_FRESHNESS_AND_FUTURE,
+            '.', '.', '.', '.',
+          ],
+          [
+            dataPipelineNamespace,
+            DataPipelineCustomMetricsName.FILTERED_BY_BOT,
             '.', '.', '.', '.',
           ],
         ],

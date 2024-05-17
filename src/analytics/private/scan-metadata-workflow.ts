@@ -361,7 +361,7 @@ export class ScanMetadataWorkflow extends Construct {
       ),
       handler: 'handler',
       memorySize: 128,
-      timeout: Duration.minutes(2),
+      timeout: Duration.minutes(5),
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },

@@ -94,6 +94,8 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly clickstreamMetadataDdbTable: ITable;
   readonly segmentsS3Prefix: string;
   readonly dataFreshnessInHour: number;
+  readonly refreshReportDays: number;
+  readonly refreshMode: string;
   readonly timezoneWithAppId: string;
 }
 
@@ -317,6 +319,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
       databaseName: projectDatabaseName,
       dataAPIRole: this.redshiftDataAPIExecRole,
       dataFreshnessInHour: props.dataFreshnessInHour,
+      refreshReportDays: props.refreshReportDays,
+      refreshMode: props.refreshMode,
       timezoneWithAppId: props.timezoneWithAppId,
     });
 
@@ -498,20 +502,20 @@ function addCfnNag(stack: Stack) {
       ],
     },
     {
-      paths_endswith: ['RefreshMaterializedViewsMachine/Role/DefaultPolicy/Resource'],
+      paths_endswith: ['RefreshMVStateMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
         ...ruleRolePolicyWithWildcardResources(
-          'RefreshMaterializedViewsMachine/Role/DefaultPolicy/Resource',
+          'RefreshMVStateMachine/Role/DefaultPolicy/Resource',
           'RefreshMaterializedViewsWorkflow', 'logs/xray').rules_to_suppress,
         ruleToSuppressRolePolicyWithHighSPCM('RefreshMaterializedViewsWorkflow'),
       ],
     },
     {
-      paths_endswith: ['RefreshSpStateMachine/Role/DefaultPolicy/Resource'],
+      paths_endswith: ['RefreshSPStateMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
         ...ruleRolePolicyWithWildcardResources(
-          'RefreshSpStateMachine/Role/DefaultPolicy/Resource',
-          'RefreshSpStateMachine', 'logs/xray').rules_to_suppress,
+          'RefreshSPStateMachine/Role/DefaultPolicy/Resource',
+          'RefreshSPStateMachine', 'logs/xray').rules_to_suppress,
       ],
     },
     {

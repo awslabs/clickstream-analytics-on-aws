@@ -81,11 +81,14 @@ public class UAEnrichmentV2 {
         }
         Dataset<Row> enrichedDatasetFiltered = enrichedDataset;
         String filterBotByUAStr = System.getProperty(FILTER_BOT_BY_UA_PROP);
-        if (Boolean.parseBoolean(filterBotByUAStr)) {
+        if (filterBotByUAStr == null || Boolean.parseBoolean(filterBotByUAStr)) {
+            long beforeFilterCount = enrichedDataset.count();
             enrichedDatasetFiltered = enrichedDataset.filter(
                     col(Constant.DEVICE_UA_DEVICE_CATEGORY).notEqual(UAEnrichHelper.BOT)
+                            .or(col(Constant.DEVICE_UA_DEVICE_CATEGORY).isNull())
             );
-            log.info("UA Enriched enrichedDatasetFiltered(BOT) count: {}", enrichedDatasetFiltered.count());
+            long afterFilterCount = enrichedDatasetFiltered.count();
+            log.info(new ETLMetric(beforeFilterCount - afterFilterCount, "filtered by Bot").toString());
         }
         return enrichedDatasetFiltered;
     }

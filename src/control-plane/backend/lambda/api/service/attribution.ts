@@ -11,15 +11,17 @@
  *  and limitations under the License.
  */
 
-import { AnalysisType, AttributionModelType, ExploreLocales, ExploreRequestAction, ExploreVisualName, QuickSightChartType } from '@aws/clickstream-base-lib';
+import { AnalysisType, AttributionModelType, ExploreLocales, ExploreRequestAction, ExploreVisualName, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME, QuickSightChartType } from '@aws/clickstream-base-lib';
 import { v4 as uuidv4 } from 'uuid';
 import { PipelineServ } from './pipeline';
 import { DataSetProps } from './quicksight/dashboard-ln';
 import { CreateDashboardResult, attributionVisualColumns, checkAttributionAnalysisParameter, encodeAttributionQueryValueForSql, getAttributionTableVisualDef, getDashboardTitleProps, getTempResourceName, getTimezoneByAppId, getVisualRelatedDefs } from './quicksight/reporting-utils';
 import { AttributionSQLParameters, buildSQLForLinearModel, buildSQLForPositionModel, buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
 import { ReportingService } from './reporting';
+import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
+import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
 
 const pipelineServ: PipelineServ = new PipelineServ();
@@ -78,10 +80,16 @@ export class AttributionAnalysisService {
   };
 
   async createSinglePointModelVisual(sheetId: string, query: any, pipeline: IPipeline) {
+
+    const dbName = getStackOutputFromPipelineStatus(
+      pipeline.stackDetails ?? pipeline.status?.stackDetails,
+      PipelineStackType.REPORTING,
+      OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME);
+
     const sql = buildSQLForSinglePointModel({
       ...query,
       schemaName: query.appId,
-      dbName: query.projectId,
+      dbName: dbName,
     } as AttributionSQLParameters);
 
     logger.debug(`sql of single point model: ${sql}`);
@@ -90,10 +98,16 @@ export class AttributionAnalysisService {
   };
 
   async createLinearModelVisual(sheetId: string, query: any, pipeline: IPipeline) {
+
+    const dbName = getStackOutputFromPipelineStatus(
+      pipeline.stackDetails ?? pipeline.status?.stackDetails,
+      PipelineStackType.REPORTING,
+      OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME);
+
     const sql = buildSQLForLinearModel({
       ...query,
       schemaName: query.appId,
-      dbName: query.projectId,
+      dbName: dbName,
     } as AttributionSQLParameters);
     logger.debug(`sql of linear model: ${sql}`);
 
@@ -101,10 +115,15 @@ export class AttributionAnalysisService {
   };
 
   async createPositionBasedModelVisual(sheetId: string, query: any, pipeline: IPipeline) {
+    const dbName = getStackOutputFromPipelineStatus(
+      pipeline.stackDetails ?? pipeline.status?.stackDetails,
+      PipelineStackType.REPORTING,
+      OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME);
+
     const sql = buildSQLForPositionModel({
       ...query,
       schemaName: query.appId,
-      dbName: query.projectId,
+      dbName: dbName,
     } as AttributionSQLParameters);
     logger.debug(`sql of position based model: ${sql}`);
 

@@ -2878,6 +2878,9 @@ describe('Pipeline test', () => {
     });
   });
   it('Update pipeline add reporting', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
@@ -2920,8 +2923,15 @@ describe('Pipeline test', () => {
     });
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const branches = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const reportingState = branches.L[1].M.States.M.Reporting;
+      const redshiftState = branches.L[1].M.States.M.DataModelingRedshift;
       expect(
-        input.TransactItems[0].Put.Item.workflow.M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.End.BOOL === true,
+        reportingState.M.End.BOOL === true &&
+        reportingState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
+        reportingState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000' &&
+        redshiftState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
+        redshiftState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000',
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -3518,6 +3528,7 @@ describe('Pipeline test', () => {
         expressionAttributeValues[':timezone'].L.length === 0 &&
         expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
         expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
+        dataProcessingInput.M.Tags.L[1].M.Value.S === 'v1.0.0' &&
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main' &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'Admin/fakeUser' &&
         reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser',
@@ -3527,8 +3538,15 @@ describe('Pipeline test', () => {
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
       .send({
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+        templateVersion: 'v1.0.0',
+        tags: [
+          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
+          { key: 'test-key', value: 'test-value' },
+        ],
+        timezone: undefined,
       });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
+    expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
@@ -4134,6 +4152,48 @@ describe('Pipeline test', () => {
       success: false,
       message: 'The pipeline current status does not allow upgrade.',
     });
+  });
+  it('Retry pipeline when failed', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
+    ddbMock.on(GetCommand).resolves({
+      Item: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        lastAction: 'Delete',
+        stackDetails: [
+          {
+            ...stackDetailsWithOutputs[0],
+            stackStatus: StackStatus.DELETE_FAILED,
+          },
+          {
+            ...stackDetailsWithOutputs[1],
+          },
+          {
+            ...stackDetailsWithOutputs[2],
+          },
+          stackDetailsWithOutputs[3],
+          stackDetailsWithOutputs[4],
+          stackDetailsWithOutputs[5],
+        ],
+      },
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    const res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/retry?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Pipeline retry.',
+    });
+    expect(sfnMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
   });
   it('Delete pipeline', async () => {
     projectExistedMock(ddbMock, true);

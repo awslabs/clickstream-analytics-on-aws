@@ -68,18 +68,18 @@ BEGIN
         DELETE FROM {{schema}}.{{table_clickstream_log}} WHERE log_date < (latest_timestamp_record.log_date - retention_range_days * interval '1 day');
         GET DIAGNOSTICS record_number := ROW_COUNT;
         CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' expired records from {{schema}}.{{table_clickstream_log}} for retention_range_days='||retention_range_days);
-    END IF;     
+    END IF; 
 
-    -- clean table_user_v2 duplicate records
-    WITH user_id_rank AS(
-	SELECT  user_pseudo_id
-	       ,ROW_NUMBER() over ( partition by user_pseudo_id ORDER BY event_timestamp desc ) AS et_rank
-	FROM {{schema}}.{{table_user_v2}})
-    delete from {{schema}}.{{table_user_v2}} using user_id_rank  
-    where {{schema}}.{{table_user_v2}}.user_pseudo_id = user_id_rank.user_pseudo_id and user_id_rank.et_rank != 1;
-
-    GET DIAGNOSTICS record_number := ROW_COUNT;
-    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' from {{schema}}.{{table_user_v2}}');
+    --  clean refresh_mv_sp_status expired records
+    EXECUTE 'SELECT log_date FROM {{schema}}.{{table_refresh_mv_sp_status}} ORDER BY log_date DESC LIMIT 1' INTO latest_timestamp_record;
+    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'get log_date = ' || latest_timestamp_record.log_date || ' from {{schema}}.{{table_refresh_mv_sp_status}}');
+    IF latest_timestamp_record.log_date is null THEN
+        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'no log_date found in {{schema}}.{{table_refresh_mv_sp_status}}');
+    ELSE
+        DELETE FROM {{schema}}.{{table_refresh_mv_sp_status}} WHERE log_date < (latest_timestamp_record.log_date - retention_range_days * interval '1 day');
+        GET DIAGNOSTICS record_number := ROW_COUNT;
+        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' expired records from {{schema}}.{{table_refresh_mv_sp_status}} for retention_range_days='||retention_range_days);
+    END IF;
 
     -- clean sp tables expired records
     num_tables := REGEXP_COUNT(table_names, ',') + 1;
