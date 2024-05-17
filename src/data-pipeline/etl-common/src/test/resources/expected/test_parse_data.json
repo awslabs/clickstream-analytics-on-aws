@@ -82,7 +82,7 @@
     "_session_start_time_msec" : 1667963966697,
     "_session_duration" : 690000,
     "_session_number" : null,
-    "_channel" : "C001",
+    "_app_install_channel" : null,
     "_traffic_source_source" : "google",
     "_traffic_source_medium" : "cpc",
     "_traffic_source_campaign" : "shopping",
@@ -106,7 +106,8 @@
     "_privacy_info_uses_transient_token" : "PIUTT",
     "_device_vendor_id" : "V001",
     "_privacy_info_ads_storage" : "PIAS",
-    "_is_first_day" : true
+    "_is_first_day" : true,
+    "_channel" : "C001"
   },
   "event_value" : null,
   "event_value_currency" : null,

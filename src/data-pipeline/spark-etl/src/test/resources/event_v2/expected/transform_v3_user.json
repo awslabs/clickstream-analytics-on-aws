@@ -17,7 +17,7 @@
   "first_traffic_clid" : null,
   "first_traffic_channel_group" : "Referral",
   "first_traffic_category" : "Unassigned",
-  "first_app_install_source" : "C001",
+  "first_app_install_source" : null,
   "process_info" : {
     "first_event_name" : "_first_open",
     "latest_event_name" : null,

@@ -41,6 +41,6 @@
   "first_traffic_clid" : null,
   "first_traffic_channel_group" : "Organic Search",
   "first_traffic_category" : "Search",
-  "first_app_install_source" : "C001",
+  "first_app_install_source" : null,
   "process_info" : null
 }

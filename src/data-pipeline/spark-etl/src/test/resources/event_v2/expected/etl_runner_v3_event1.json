@@ -55,7 +55,7 @@
   "app_package_id" : "com.example.demoapplication",
   "app_version" : "1.0",
   "app_title" : "test-title-98-0",
-  "app_install_source" : "C001",
+  "app_install_source" : null,
   "platform" : "ANDROID",
   "project_id" : "test_project_id_01",
   "app_id" : "uba-app",
@@ -104,8 +104,12 @@
   "sdk_name" : "aws-solution-clickstream-sdk",
   "app_exception_message" : null,
   "app_exception_stack" : null,
-  "custom_parameters_json_str" : "{\"_device_advertising_id\":\"DAID001\",\"_error_name_length_exceed\":\"\",\"_device_vendor_id\":\"V001\",\"_traffic_source_name\":\"TSN\",\"_error_value_length_exceed\":\"\",\"_error_name_invalid\":\"\",\"country_code\":\"CN\",\"_privacy_info_analytics_storage\":\"PIAAS\",\"hashCode\":\"80452b0\",\"_privacy_info_uses_transient_token\":\"PIUTT\",\"_privacy_info_ads_storage\":\"PIAS\",\"_is_first_day\":true,\"event_sequence_id\":2}",
+  "custom_parameters_json_str" : "{\"_device_advertising_id\":\"DAID001\",\"_error_name_length_exceed\":\"\",\"_device_vendor_id\":\"V001\",\"_traffic_source_name\":\"TSN\",\"_error_value_length_exceed\":\"\",\"_error_name_invalid\":\"\",\"country_code\":\"CN\",\"_privacy_info_analytics_storage\":\"PIAAS\",\"hashCode\":\"80452b0\",\"_privacy_info_uses_transient_token\":\"PIUTT\",\"_privacy_info_ads_storage\":\"PIAS\",\"_is_first_day\":true,\"event_sequence_id\":2,\"_channel\":\"C001\"}",
   "custom_parameters" : {
+    "_channel" : {
+      "value" : "C001",
+      "type" : "string"
+    },
     "_device_advertising_id" : {
       "value" : "DAID001",
       "type" : "string"
