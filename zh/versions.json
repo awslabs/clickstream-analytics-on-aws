@@ -1,12 +1,5 @@
 [
   {
-    "version": "1.2.x",
-    "title": "1.2.x (dev)",
-    "aliases": [
-      "dev"
-    ]
-  },
-  {
     "version": "1.1.6",
     "title": "1.1.6 (preview)",
     "aliases": [
