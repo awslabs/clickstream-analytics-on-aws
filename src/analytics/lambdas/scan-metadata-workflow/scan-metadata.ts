@@ -55,11 +55,15 @@ export const handler = async (event: ScanMetadataEvent) => {
     const propertyListSqlStatements : string[] = [];
     const dropPropertyArrayTempTable = `DROP TABLE IF EXISTS ${schema}.${PROPERTY_ARRAY_TEMP_TABLE};`;
     propertyListSqlStatements.push(dropPropertyArrayTempTable);
-    const createPropertyArrayTempTable = `CREATE TABLE IF NOT EXISTS ${schema}.${PROPERTY_ARRAY_TEMP_TABLE} (category VARCHAR, property_name VARCHAR, value_type VARCHAR, property_type VARCHAR);`;
+    const createPropertyArrayTempTable = `CREATE TABLE IF NOT EXISTS ${schema}.${PROPERTY_ARRAY_TEMP_TABLE} ` +
+      '(category VARCHAR, property_name VARCHAR, value_type VARCHAR, property_type VARCHAR, scan_value VARCHAR);';
     propertyListSqlStatements.push(createPropertyArrayTempTable);
 
     const fileContent = readFileSync('/opt/event-v2.sql').toString('utf-8');
     insertPropertyTemplateTable(fileContent, propertyListSqlStatements, `${schema}.${PROPERTY_ARRAY_TEMP_TABLE}`, 'event_property');
+
+    const fileContentSession = readFileSync('/opt/session.sql').toString('utf-8');
+    insertPropertyTemplateTable(fileContentSession, propertyListSqlStatements, `${schema}.${PROPERTY_ARRAY_TEMP_TABLE}`, 'session_property');
 
     const fileContentUser = readFileSync('/opt/user-v2.sql').toString('utf-8');
     insertPropertyTemplateTable(fileContentUser, propertyListSqlStatements, `${schema}.${PROPERTY_ARRAY_TEMP_TABLE}`, 'user_property');
@@ -112,11 +116,11 @@ function insertPropertyTemplateTable(fileContent: string, sqlStatements: string[
   const metadataArray = parseMetadataFromSql(fileContent);
   let values: string = '';
   for (const metadataObject of metadataArray) {
-    values += `('${metadataObject.category}', '${metadataObject.name}', '${metadataObject.dataType}', '${property_type}'), `;
+    values += `('${metadataObject.category}', '${metadataObject.name}', '${metadataObject.dataType}', '${property_type}', '${metadataObject.scanValue}'), `;
   }
   if (values.length > 0) {
     values = values.slice(0, -2);
-    const insertPropertyArrayTempTable = `INSERT INTO ${tableName} (category, property_name, value_type, property_type) VALUES ${values};`;
+    const insertPropertyArrayTempTable = `INSERT INTO ${tableName} (category, property_name, value_type, property_type, scan_value) VALUES ${values};`;
     sqlStatements.push(insertPropertyArrayTempTable);
   }
 }

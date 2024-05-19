@@ -94,7 +94,12 @@ export class ScanMetadataWorkflow extends Construct {
 
     const checkWorkflowStartJobSKIP = new Succeed(this, `${this.node.id} - check whether should start scan metadata job completes`);
 
-    const storeMetadataIntoDDBFn = this.storeMetadataIntoDDBFn(props);
+    const sqlLayer = new LayerVersion(this, 'SqlLayer', {
+      code: Code.fromAsset(props.sqlCodePath),
+      description: 'SQL layer',
+    });
+
+    const storeMetadataIntoDDBFn = this.storeMetadataIntoDDBFn(props, sqlLayer);
     const storeMetadataIntoDDBJob = new LambdaInvoke(this, `${this.node.id} - store scan metadata job status`, {
       lambdaFunction: storeMetadataIntoDDBFn,
       payload: TaskInput.fromObject({
@@ -107,7 +112,7 @@ export class ScanMetadataWorkflow extends Construct {
         .otherwise(scanMetadataJobFailed),
     );
 
-    const scanMetadataFn = this.scanMetadataFn(props);
+    const scanMetadataFn = this.scanMetadataFn(props, sqlLayer);
     const scanMetadataJob = new LambdaInvoke(this, `${this.node.id} - Submit scan metadata job`, {
       lambdaFunction: scanMetadataFn,
       payload: TaskInput.fromObject({
@@ -262,12 +267,7 @@ export class ScanMetadataWorkflow extends Construct {
     return fn;
   }
 
-  private scanMetadataFn(props: ScanMetadataWorkflowProps): IFunction {
-
-    const sqlLayer = new LayerVersion(this, 'SqlLayer', {
-      code: Code.fromAsset(props.sqlCodePath),
-      description: 'SQL layer',
-    });
+  private scanMetadataFn(props: ScanMetadataWorkflowProps, sqlLayer: LayerVersion): IFunction {
 
     const fnSG = props.securityGroupForLambda;
     const fn = new SolutionNodejsFunction(this, 'ScanMetadataFn', {
@@ -379,7 +379,7 @@ export class ScanMetadataWorkflow extends Construct {
     return fn;
   }
 
-  private storeMetadataIntoDDBFn(props: ScanMetadataWorkflowProps): IFunction {
+  private storeMetadataIntoDDBFn(props: ScanMetadataWorkflowProps, sqlLayer: LayerVersion): IFunction {
     const fnSG = props.securityGroupForLambda;
 
     const policyStatements = [
@@ -414,8 +414,10 @@ export class ScanMetadataWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
         METADATA_DDB_TABLE_ARN: props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn,
+        PROJECT_ID: props.projectId,
       },
       applicationLogLevel: 'WARN',
+      layers: [sqlLayer],
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
