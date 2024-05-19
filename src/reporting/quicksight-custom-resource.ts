@@ -56,7 +56,7 @@ import {
   CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER,
   CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME,
 } from '@aws/clickstream-base-lib';
-import { TimeGranularity } from '@aws-sdk/client-quicksight';
+import { RefreshInterval, TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -420,6 +420,7 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
         useSpice: 'yes',
+        refreshInterval: RefreshInterval.HOURLY,
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} `,
         columns: [
           {
@@ -578,6 +579,14 @@ function _getDataSetDefs(
             Name: 'event_count',
             Type: 'INTEGER',
           },
+          {
+            Name: 'view_count',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'session_count',
+            Type: 'INTEGER',
+          },
         ],
         projectedColumns: [
           'event_date',
@@ -587,6 +596,8 @@ function _getDataSetDefs(
           'user_id',
           'user_engagement_time_seconds',
           'event_count',
+          'view_count',
+          'session_count',
         ],
       },
       {
@@ -1385,6 +1396,14 @@ function _getDataSetDefs(
             Name: 'event_count',
             Type: 'INTEGER',
           },
+          {
+            Name: 'view_count',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'session_count',
+            Type: 'INTEGER',
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -1406,6 +1425,8 @@ function _getDataSetDefs(
           'user_id',
           'user_engagement_time_seconds',
           'event_count',
+          'view_count',
+          'session_count',
         ],
       },
       {
