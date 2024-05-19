@@ -166,6 +166,8 @@ export class AttributionAnalysisService {
       timeEnd: query.timeEnd,
     }, locale);
 
+    visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(visualId);
+
     const visualProps = {
       sheetId: sheetId,
       name: ExploreVisualName.CHART,
