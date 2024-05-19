@@ -12,7 +12,7 @@
  */
 
 import { logger } from '@aws/clickstream-base-lib';
-import { AnalysisSummary, DashboardSummary, InputColumn, QuickSight, ResourceNotFoundException, ResourceStatus, TimeGranularity, paginateListAnalyses, paginateListDashboards } from '@aws-sdk/client-quicksight';
+import { AnalysisSummary, DashboardSummary, InputColumn, QuickSight, RefreshInterval, ResourceNotFoundException, ResourceStatus, TimeGranularity, paginateListAnalyses, paginateListDashboards } from '@aws-sdk/client-quicksight';
 
 export interface RedShiftProps {
   databaseSchemaNames: string;
@@ -83,6 +83,7 @@ export interface DataSetProps {
   columns: InputColumn[];
   useSpice: string;
   lookbackColumn?: string;
+  refreshInterval?: RefreshInterval;
   columnGroups?: ColumnGroupsProps[];
   projectedColumns?: string[];
   tagColumnOperations?: TagColumnOperationProps[];

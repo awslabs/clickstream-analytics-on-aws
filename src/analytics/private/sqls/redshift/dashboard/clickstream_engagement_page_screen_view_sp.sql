@@ -21,11 +21,10 @@ BEGIN
       platform,
       'Page Title' as aggregation_type,
       page_view_page_title as aggregation_dim,
-      count(distinct event_id) as view_count
+      sum(case when event_name = '_page_view' then 1 else 0 end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date  
-      and event_name = '_page_view'
     group by 1, 2, 3, 4
     ;
 
@@ -41,11 +40,10 @@ BEGIN
       platform,
       'Page URL Path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
-      count(distinct event_id) as view_count
+      sum(case when event_name = '_page_view' then 1 else 0 end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date 
-      and event_name = '_page_view'
     group by 1, 2, 3, 4
     ;
 
@@ -61,11 +59,10 @@ BEGIN
       platform,
       'Screen Name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
-      count(distinct event_id) as view_count
+      sum(case when event_name = '_screen_view' then 1 else 0 end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date 
-      and event_name = '_screen_view'
     group by 1, 2, 3, 4
     ;
 
@@ -81,11 +78,10 @@ BEGIN
       platform,
       'Screen Class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
-      count(distinct event_id) as view_count
+      sum(case when event_name = '_screen_view' then 1 else 0 end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date 
-      and event_name = '_screen_view'
     group by 1, 2, 3, 4
     ;
     current_date := current_date - 1;
