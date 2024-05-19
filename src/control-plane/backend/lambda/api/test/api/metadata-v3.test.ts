@@ -30,8 +30,10 @@ import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const eventMockPath = join(__dirname, '../../common/sqls/redshift/event-v2.sql');
+const sessionMockPath = join(__dirname, '../../common/sqls/redshift/session.sql');
 const userMockPath = join(__dirname, '../../common/sqls/redshift/user-v2.sql');
 const eventPath = join(__dirname, '../../../../../../analytics/private/sqls/redshift/event-v2.sql');
+const sessionPath = join(__dirname, '../../../../../../analytics/private/sqls/redshift/session.sql');
 const userPath = join(__dirname, '../../../../../../analytics/private/sqls/redshift/user-v2.sql');
 
 
@@ -47,6 +49,7 @@ describe('Metadata Event test V3', () => {
     mockPipeline(ddbMock, 'v1.1.6');
     mockfs({
       [eventMockPath]: mockfs.load(eventPath),
+      [sessionMockPath]: mockfs.load(sessionPath),
       [userMockPath]: mockfs.load(userPath),
     });
   });
@@ -75,7 +78,7 @@ describe('Metadata Event test V3', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data.month).toEqual('latest');
-    expect(res.body.data.associatedParameters.length).toEqual(79);
+    expect(res.body.data.associatedParameters.length).toEqual(89);
     expect(res.body.data.associatedParameters).toContainEqual({
       id: 'project_8888_8888#app_7777_7777#device#device_mobile_brand_name#string',
       month: 'latest',
@@ -152,6 +155,7 @@ describe('Metadata Event Attribute test V3', () => {
     mockPipeline(ddbMock, 'v1.1.6');
     mockfs({
       [eventMockPath]: mockfs.load(eventPath),
+      [sessionMockPath]: mockfs.load(sessionPath),
       [userMockPath]: mockfs.load(userPath),
     });
   });
@@ -182,7 +186,7 @@ describe('Metadata Event Attribute test V3', () => {
       .get(`/api/metadata/event_parameters?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.totalCount).toEqual(80);
+    expect(res.body.data.totalCount).toEqual(90);
   });
   it('Get metadata event attribute for path nodes v3', async () => {
     ddbMock.on(QueryCommand, {
@@ -355,6 +359,7 @@ describe('Metadata User Attribute test V3', () => {
     mockPipeline(ddbMock, 'v1.1.6');
     mockfs({
       [eventMockPath]: mockfs.load(eventPath),
+      [sessionMockPath]: mockfs.load(sessionPath),
       [userMockPath]: mockfs.load(userPath),
     });
   });

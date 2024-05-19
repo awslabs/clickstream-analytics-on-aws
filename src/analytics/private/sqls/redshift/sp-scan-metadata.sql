@@ -98,23 +98,33 @@ BEGIN
 
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'create temp tables successfully.');
 
-	query := 'SELECT category, property_name, value_type FROM {{schema}}.property_array_temp_table where property_type = ''event_property'' and value_type != ''boolean''';
+	query := 'SELECT category, property_name, value_type FROM {{schema}}.property_array_temp_table where scan_value = ''true'' and property_type = ''event_property'' and value_type != ''boolean''';
 	FOR rec IN EXECUTE query LOOP
 		IF start_timestamp IS NULL THEN
-			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_id, event_timestamp, '|| quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) AS property_value, '|| quote_literal(rec.value_type) || ' AS value_type, platform FROM {{schema}}.event_v2 WHERE LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) IS NOT NULL AND event_timestamp < ''' || end_timestamp || ''')';
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT '''' as event_name, project_id, app_id, event_timestamp, '|| quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) AS property_value, '|| quote_literal(rec.value_type) || ' AS value_type, '''' as platform FROM {{schema}}.event_v2 WHERE LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) IS NOT NULL AND event_timestamp < ''' || end_timestamp || ''')';
 		ELSE
-			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_id, event_timestamp, '|| quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) AS property_value, '|| quote_literal(rec.value_type) || ' AS value_type, platform FROM {{schema}}.event_v2 WHERE LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) IS NOT NULL AND event_timestamp >= ''' || start_timestamp || ''' AND event_timestamp < ''' || end_timestamp || ''')';
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT '''' as event_name, project_id, app_id, event_timestamp, '|| quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) AS property_value, '|| quote_literal(rec.value_type) || ' AS value_type, '''' as platform FROM {{schema}}.event_v2 WHERE LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) IS NOT NULL AND event_timestamp >= ''' || start_timestamp || ''' AND event_timestamp < ''' || end_timestamp || ''')';
 		END IF;
 	END LOOP;
 
-	query := 'SELECT category, property_name, value_type FROM {{schema}}.property_array_temp_table where property_type = ''event_property'' and value_type = ''boolean''';
+	query := 'SELECT category, property_name, value_type FROM {{schema}}.property_array_temp_table where scan_value = ''true'' and property_type = ''event_property'' and value_type = ''boolean''';
 	FOR rec IN EXECUTE query LOOP
-			IF start_timestamp IS NULL THEN
-					EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_id, event_timestamp, ' || quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, CASE ' || quote_ident(rec.property_name) || ' WHEN TRUE THEN ''true'' ELSE ''false'' END AS property_value, ' || quote_literal(rec.value_type) || ' AS value_type, platform FROM {{schema}}.event_v2 WHERE ' || quote_ident(rec.property_name) || ' IS NOT NULL AND event_timestamp < ''' || end_timestamp || ''')';
-			ELSE
-					EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_id, event_timestamp, ' || quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, CASE ' || quote_ident(rec.property_name) || ' WHEN TRUE THEN ''true'' ELSE ''false'' END AS property_value, ' || quote_literal(rec.value_type) || ' AS value_type, platform FROM {{schema}}.event_v2 WHERE ' || quote_ident(rec.property_name) || ' IS NOT NULL AND event_timestamp >= ''' || start_timestamp || ''' AND event_timestamp < ''' || end_timestamp || ''')';
-			END IF;
+		IF start_timestamp IS NULL THEN
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT '''' as event_name, project_id, app_id, event_timestamp, ' || quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, CASE ' || quote_ident(rec.property_name) || ' WHEN TRUE THEN ''true'' ELSE ''false'' END AS property_value, ' || quote_literal(rec.value_type) || ' AS value_type, '''' as platform FROM {{schema}}.event_v2 WHERE ' || quote_ident(rec.property_name) || ' IS NOT NULL AND event_timestamp < ''' || end_timestamp || ''')';
+		ELSE
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT '''' as event_name, project_id, app_id, event_timestamp, ' || quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, CASE ' || quote_ident(rec.property_name) || ' WHEN TRUE THEN ''true'' ELSE ''false'' END AS property_value, ' || quote_literal(rec.value_type) || ' AS value_type, '''' as platform FROM {{schema}}.event_v2 WHERE ' || quote_ident(rec.property_name) || ' IS NOT NULL AND event_timestamp >= ''' || start_timestamp || ''' AND event_timestamp < ''' || end_timestamp || ''')';
+		END IF;
 	END LOOP;
+
+	query := 'SELECT category, property_name, value_type FROM {{schema}}.property_array_temp_table where scan_value = ''true'' and property_type = ''session_property''';
+	FOR rec IN EXECUTE query LOOP
+		IF start_timestamp IS NULL THEN
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT '''' as event_name, ''{{database_name}}'' as project_id, ''{{schema}}'' as app_id, event_timestamp, '|| quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) AS property_value, '|| quote_literal(rec.value_type) || ' AS value_type, '''' as platform FROM {{schema}}.session WHERE LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) IS NOT NULL AND event_timestamp < ''' || end_timestamp || ''')';
+		ELSE
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT '''' as event_name, ''{{database_name}}'' as project_id, ''{{schema}}'' as app_id, event_timestamp, '|| quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) AS property_value, '|| quote_literal(rec.value_type) || ' AS value_type, '''' as platform FROM {{schema}}.session WHERE LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) IS NOT NULL AND event_timestamp >= ''' || start_timestamp || ''' AND event_timestamp < ''' || end_timestamp || ''')';
+		END IF;
+	END LOOP;
+
 	-- query custom event parameters
 	IF start_timestamp IS NULL THEN
 		INSERT INTO properties_temp_table (	
@@ -233,7 +243,7 @@ BEGIN
 					event_name,
 					platform,
 					parameter_count,
-					ROW_NUMBER() OVER (PARTITION BY project_id, app_id, property_category, month, day_number, value_type, property_name ORDER BY parameter_count DESC) AS row_num
+					ROW_NUMBER() OVER (PARTITION BY project_id, app_id, property_category, month, day_number, value_type, property_name, platform, event_name ORDER BY parameter_count DESC) AS row_num
 				FROM (
 					SELECT
 						event_name, 
@@ -263,7 +273,7 @@ BEGIN
 
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Insert all parameters data into event_parameter_metadata table successfully.');	
 
-	query := 'SELECT category, property_name, value_type FROM {{schema}}.property_array_temp_table where property_type = ''user_property''';
+	query := 'SELECT category, property_name, value_type FROM {{schema}}.property_array_temp_table where scan_value = ''true'' and property_type = ''user_property''';
 	FOR rec IN EXECUTE query LOOP
 		EXECUTE 'INSERT INTO user_attribute_temp_table (SELECT '|| quote_literal(rec.category) || ' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, LEFT(' || quote_ident(rec.property_name) || '::varchar, 100) AS property_value, '|| quote_literal(rec.value_type) || ' AS value_type FROM {{schema}}.user_v2)';
 	END LOOP;	
