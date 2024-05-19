@@ -1452,10 +1452,11 @@ function readMetadataFromSqlFile(builtInList: IMetadataBuiltInList | undefined):
     builtInList = {} as IMetadataBuiltInList;
   }
   const event_parameters = readAndIterateFile(join(__dirname, './sqls/redshift/event-v2.sql'));
+  const session_parameters = readAndIterateFile(join(__dirname, './sqls/redshift/session.sql'));
   const user_attributes = readAndIterateFile(join(__dirname, './sqls/redshift/user-v2.sql'));
   builtInList = {
     ...builtInList,
-    PresetEventParameters: event_parameters,
+    PresetEventParameters: event_parameters.concat(session_parameters),
     PublicEventParameters: [],
     PresetUserAttributes: user_attributes,
   };

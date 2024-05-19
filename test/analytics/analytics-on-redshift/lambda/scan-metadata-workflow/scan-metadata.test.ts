@@ -31,6 +31,9 @@ const schemaDefs = [
     sqlFile: 'event-v2.sql',
   },
   {
+    sqlFile: 'session.sql',
+  },
+  {
     sqlFile: 'user-v2.sql',
   },
 ];
@@ -77,8 +80,8 @@ describe('Lambda - do scan metadata in Redshift Serverless', () => {
       Sqls: expect.arrayContaining(
         [
           'DROP TABLE IF EXISTS app1.property_array_temp_table;',
-          'CREATE TABLE IF NOT EXISTS app1.property_array_temp_table (category VARCHAR, property_name VARCHAR, value_type VARCHAR, property_type VARCHAR);',
-          expect.stringMatching(/INSERT INTO app1\.property_array_temp_table \(category, property_name, value_type, property_type\) VALUES \((.*)\);/),
+          'CREATE TABLE IF NOT EXISTS app1.property_array_temp_table (category VARCHAR, property_name VARCHAR, value_type VARCHAR, property_type VARCHAR, scan_value VARCHAR);',
+          expect.stringMatching(/INSERT INTO app1\.property_array_temp_table \(category, property_name, value_type, property_type, scan_value\) VALUES \((.*)\);/),
         ],
       ),
     });
@@ -108,8 +111,8 @@ describe('Lambda - do scan metadata in Redshift Serverless', () => {
       Sqls: expect.arrayContaining(
         [
           'DROP TABLE IF EXISTS app1.property_array_temp_table;',
-          'CREATE TABLE IF NOT EXISTS app1.property_array_temp_table (category VARCHAR, property_name VARCHAR, value_type VARCHAR, property_type VARCHAR);',
-          expect.stringMatching(/INSERT INTO app1\.property_array_temp_table \(category, property_name, value_type, property_type\) VALUES \((.*)\);/),
+          'CREATE TABLE IF NOT EXISTS app1.property_array_temp_table (category VARCHAR, property_name VARCHAR, value_type VARCHAR, property_type VARCHAR, scan_value VARCHAR);',
+          expect.stringMatching(/INSERT INTO app1\.property_array_temp_table \(category, property_name, value_type, property_type, scan_value\) VALUES \((.*)\);/),
         ],
       ),
     });

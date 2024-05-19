@@ -24,6 +24,7 @@ RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/locales /home/node
 RUN mkdir -p /home/node/app/src/control-plane/backend/lambda/api/ncc/sqls/redshift
 RUN cp /home/node/app/src/analytics/private/sqls/redshift/event-v2.sql /home/node/app/src/control-plane/backend/lambda/api/ncc/sqls/redshift/event-v2.sql
 RUN cp /home/node/app/src/analytics/private/sqls/redshift/user-v2.sql /home/node/app/src/control-plane/backend/lambda/api/ncc/sqls/redshift/user-v2.sql
+RUN cp /home/node/app/src/analytics/private/sqls/redshift/session.sql /home/node/app/src/control-plane/backend/lambda/api/ncc/sqls/redshift/session.sql
 
 RUN mkdir -p /asset
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/ncc /asset/
