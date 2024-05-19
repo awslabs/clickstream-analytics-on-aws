@@ -45,6 +45,8 @@ import {
   LookbackWindowSizeUnit,
   CreateDataSetCommandInput,
   InvalidParameterValueException,
+  RefreshSchedule,
+  RefreshFrequency,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -891,7 +893,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info('create dataset finished', { datasetId });
 
     if (props.useSpice === 'yes') {
-      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
+      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.refreshInterval, props.lookbackColumn);
     }
 
     return dataset;
@@ -1072,7 +1074,7 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
 };
 
 const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
-  datasetId: string, lookbackColumn: string | undefined) => {
+  datasetId: string, refreshInterval: RefreshInterval | undefined, lookbackColumn: string | undefined) => {
   const scheduleId = `schedule-${datasetId}`;
   const exist = await existRefrshSchedule(quickSight, commonParams.awsAccountId, datasetId, scheduleId);
   if (!exist) {
@@ -1113,18 +1115,29 @@ const createOrUpdateRefreshSchedule = async (quickSight: QuickSight, commonParam
       datasetId,
       scheduleId,
     });
+
+    let scheduleFrequency: RefreshFrequency = {
+      Interval: refreshInterval ?? RefreshInterval.DAILY,
+      Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
+    };
+
+    if (refreshInterval !== RefreshInterval.HOURLY) {
+      scheduleFrequency = {
+        ...scheduleFrequency,
+        TimeOfTheDay: '06:00',
+      };
+    }
+
+    const schedule: RefreshSchedule ={
+      ScheduleId: scheduleId,
+      ScheduleFrequency: scheduleFrequency,
+      RefreshType: IngestionType.INCREMENTAL_REFRESH,
+    };
+
     await quickSight.createRefreshSchedule({
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
-      Schedule: {
-        ScheduleId: scheduleId,
-        ScheduleFrequency: {
-          Interval: RefreshInterval.DAILY,
-          Timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
-          TimeOfTheDay: '06:00',
-        },
-        RefreshType: IngestionType.INCREMENTAL_REFRESH,
-      },
+      Schedule: schedule,
     });
 
     logger.info('end to create QuickSight refresh schedule', {
@@ -1266,7 +1279,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     logger.info(`grant dataset permissions to new principal ${commonParams.ownerPrincipalArn}, ${commonParams.sharePrincipalArn}`);
 
     if (props.useSpice === 'yes') {
-      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.lookbackColumn);
+      await createOrUpdateRefreshSchedule(quickSight, commonParams, datasetId, props.refreshInterval, props.lookbackColumn);
     }
 
     return dataset;
