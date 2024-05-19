@@ -635,6 +635,10 @@ project.buildWorkflow.workflow.file?.addOverride(
   'jobs.build.env.JEST_MAX_WORKERS',
   '${{ vars.JEST_MAX_WORKERS || \'auto\' }}',
 );
+project.buildWorkflow.workflow.file?.addOverride(
+  'jobs.build.env.DISABLE_V8_COMPILE_CACHE',
+  '1',
+);
 project.buildWorkflow.preBuildSteps.push({
   name: 'Configure AWS Credentials',
   if: '${{ env.iam_role_to_assume != \'\' }}',
