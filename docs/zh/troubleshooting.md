@@ -159,6 +159,15 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
 
 仪表板可能正在使用尚未在 Redshift 中就绪的视图或物化视图。本解决方案在创建或更新项目的管道时异步创建或更新仪表板使用的视图和物化视图。创建或更新的持续时间取决于 Redshift 集群的工作负载、已有数据量，完成更新可能需要几分钟到几小时。您可以在管道详情页面的**数据处理和建模**选项卡中的 **Redshift Schemas** 部分跟踪进度。如果后期配置作业失败，您可以通过其链接访问工作流的执行，并通过**操作 - 重启**或**新执行**(输入保持不变)来重新运行作业。
 
+## 问题: 在配置启用数据处理的数据管道时，数据处理 CloudFormation 堆栈遇到了错误 "The availability zones for subnets [subnet-xyz] are currently not supported."。
+
+处理点击流数据的 EMR 无服务器应用程序无法部署在上述错误消息中指定的私有子网中。
+
+**解决方法:**
+
+请在 EMR 无服务器支持的可用区域中重新创建包含私有子网的项目。您可以参考[此文档][emr-serverless-endpoints]来检查部署区域中 EMR 无服务器支持的可用区域。
+
 [log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL
 [data-processing-param]: ./pipeline-mgmt/data-processing/configure-execution-para.md#_2
 [restart-loading-workflow]: ./faq.md#_7
+[emr-serverless-endpoints]: https://docs.aws.amazon.com/zh_cn/emr/latest/EMR-Serverless-UserGuide/endpoints-quotas.html#endpoints
