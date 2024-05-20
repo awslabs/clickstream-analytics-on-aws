@@ -1934,27 +1934,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/activity/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    活动报告
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../dashboard/retention/" class="md-nav__link">
         
   
@@ -1997,32 +1976,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/user/" class="md-nav__link">
+      <a href="../../dashboard/details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    用户报告
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../dashboard/crash/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    崩溃报告
+    详细报告
   </span>
   
 
@@ -2154,7 +2112,7 @@
         
   
   <span class="md-ellipsis">
-    转化分析
+    漏斗分析
   </span>
   
 
@@ -2273,6 +2231,27 @@
   
   <span class="md-ellipsis">
     留存分析
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../attribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    归因分析
   </span>
   
 
@@ -2407,6 +2386,48 @@
   
   <span class="md-ellipsis">
     概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/metadata-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    元数据
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/traffic-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    流量
   </span>
   
 
@@ -2877,7 +2898,9 @@
 </ol>
 </li>
 <li>设置起始节点。起始节点将是路径的第一个节点，只有在该节点之后发生的事件才会计入路径。</li>
-<li>选择要参与分析的节点。只有选定的节点才会在路径中突出显示。您最多可以添加 10 个节点。</li>
+<li>显示所有节点:显示在起始节点之后的所有节点。</li>
+<li>显示选定节点:仅显示选定的节点,其他节点可以归为"其他"。</li>
+<li>当选择"显示选定节点"时,您需要指定参与分析的节点。只有选定的节点才会在路径中突出显示。您最多可以添加 10 个节点。</li>
 <li>指定是否要包含路径中的其他节点，如果启用此选项，所有未选定的节点将被计入并显示为路径中的 "其他"。</li>
 <li>指定是否要合并连续节点，如果启用此选项，同一会话中连续重复的节点将被合并为单个节点。</li>
 <li>如有需要，通过选择事件参数或用户属性配置全局过滤器。与事件过滤器类似，您可以添加多个全局过滤器并配置过滤器关系。</li>
@@ -2899,7 +2922,7 @@
 <li>启用 <strong>包括其他事件</strong>。</li>
 <li>启用 <strong>合并连续事件</strong>。</li>
 <li>在右侧 <strong>过滤器</strong> 区域配置全局过滤器：<ul>
-<li>选择 <code>other.platform</code> 作为过滤器属性。</li>
+<li>选择 <code>事件预置属性</code> / <code>平台</code> 作为过滤器属性。</li>
 <li>操作：<code>=</code></li>
 <li>值：<code>Web</code></li>
 </ul>

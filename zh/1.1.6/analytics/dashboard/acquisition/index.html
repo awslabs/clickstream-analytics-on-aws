@@ -1951,7 +1951,7 @@
         <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
-      数据来源
+      数据源
     </span>
   </a>
   
@@ -1960,7 +1960,7 @@
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      维度和指标
+      维度
     </span>
   </a>
   
@@ -1968,6 +1968,15 @@
       
         <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      指标
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       示例仪表板
     </span>
@@ -1996,27 +2005,6 @@
   
   <span class="md-ellipsis">
     参与度报告
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../activity/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    活动报告
   </span>
   
 
@@ -2075,32 +2063,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../user/" class="md-nav__link">
+      <a href="../details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    用户报告
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../crash/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    崩溃报告
+    详细报告
   </span>
   
 
@@ -2230,7 +2197,7 @@
         
   
   <span class="md-ellipsis">
-    转化分析
+    漏斗分析
   </span>
   
 
@@ -2273,6 +2240,27 @@
   
   <span class="md-ellipsis">
     留存分析
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explore/attribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    归因分析
   </span>
   
 
@@ -2407,6 +2395,48 @@
   
   <span class="md-ellipsis">
     概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/metadata-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    元数据
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/traffic-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    流量
   </span>
   
 
@@ -2799,7 +2829,7 @@
         <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
-      数据来源
+      数据源
     </span>
   </a>
   
@@ -2808,7 +2838,7 @@
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      维度和指标
+      维度
     </span>
   </a>
   
@@ -2816,6 +2846,15 @@
       
         <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      指标
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       示例仪表板
     </span>
@@ -2842,226 +2881,185 @@
 
 
 <h1 id="_1">获取报告</h1>
-<p>您可以使用用户获取报告深入了解新用户如何首次找到您的网站或应用。此报告还允许您查看详细的用户概要。</p>
-<p>注意：本文描述了默认报告。您可以通过应用过滤器或比较，或通过在 QuickSight 中更改维度、指标或图表来自定义报告。<a href="https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html">了解更多</a></p>
+<p>您可以使用获取报告来了解新用户首次访问您的网站或应用程序的方式以及日常流量来源。</p>
+<p>注意：本文介绍了默认报告。您可以通过应用筛选器或比较，或更改QuickSight中的维度、度量或图表来自定义报告。<a href="https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html">了解更多</a></p>
 <h2 id="_2">查看报告</h2>
 <ol>
-<li>访问您应用程序的仪表板。请参阅 <a href="../#view-dashboards">访问仪表板</a></li>
-<li>在仪表板中，单击名称为 <strong><code>Acquisition</code></strong> 的表。</li>
+<li>访问您的应用程序的仪表板。请参阅<a href="../#view-dashboards">访问仪表板</a></li>
+<li>在仪表板中，点击名为<strong><code>获取</code></strong>的工作表。</li>
 </ol>
-<h2 id="_3">数据来源</h2>
-<p>获取报告是基于 <code>User_Dim_View-&lt;app&gt;-&lt;project&gt;</code> 的 QuickSight 数据集创建的，该数据集连接到分析引擎（即 Redshift）中的 <code>clickstream_user_dim_view</code> 视图。以下是生成视图的 SQL 命令。</p>
-<details class="示例">
-<summary>SQL 命令</summary>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Redshift</label><label for="__tabbed_1_2">Athena</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream-user-dim-view.sql</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">WITH</span><span class="w"> </span><span class="n">user_base</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="k">SELECT</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">user_id</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">_first_visit_date</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_visit_date</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">_first_referer</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_referer</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="k">CASE</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="k">WHEN</span><span class="w"> </span><span class="k">NULLIF</span><span class="p">(</span><span class="n">_first_traffic_source</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;(Direct)&#39;</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">      </span><span class="k">ELSE</span><span class="w"> </span><span class="n">_first_traffic_source</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="k">END</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_traffic_source_source</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="n">_first_traffic_medium</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_traffic_source_medium</span><span class="p">,</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="n">_first_traffic_source_type</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_traffic_source_name</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="k">CASE</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">      </span><span class="k">WHEN</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;Registered&#39;</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">      </span><span class="k">ELSE</span><span class="w"> </span><span class="s1">&#39;Non-registered&#39;</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="k">END</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">registration_status</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">  </span><span class="k">FROM</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">user_m_view</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">),</span><span class="w"> </span><span class="n">device_id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span><span class="k">SELECT</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="n">LISTAGG</span><span class="p">(</span><span class="n">d_id</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39; | &#39;</span><span class="p">)</span><span class="w"> </span><span class="n">WITHIN</span><span class="w"> </span><span class="k">GROUP</span><span class="w"> </span><span class="p">(</span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">device_id</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="k">SELECT</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">      </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">      </span><span class="n">d_id</span><span class="p">::</span><span class="nb">VARCHAR</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span><span class="k">FROM</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">      </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">user_m_view</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">device_id_list</span><span class="w"> </span><span class="n">d_id</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">  </span><span class="p">)</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="n">user_pseudo_id</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="p">)</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="k">SELECT</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="o">*</span><span class="p">,</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_install_source</span><span class="p">,</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_device_language</span><span class="p">,</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_platform</span><span class="p">,</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_country</span><span class="p">,</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_city</span><span class="p">,</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">  </span><span class="n">d</span><span class="p">.</span><span class="n">device_id</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="k">FROM</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">  </span><span class="n">user_base</span><span class="w"> </span><span class="n">u</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">  </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">clickstream_user_first_attr_view_v1</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span>
-</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">  </span><span class="n">device_id</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">d</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="p">;</span>
-</span></code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream-user-query.sql</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">-- run following command to load latest partition</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1">-- msck repair table {{database}}.event_v2;</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">-- msck repair table {{database}}.user_v2;</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">-- msck repair table {{database}}.item_v2;</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1">-- msck repair table {{database}}.session;</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">SELECT</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w"> </span><span class="n">user_id</span><span class="p">,</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w"> </span><span class="n">event_timestamp</span><span class="p">,</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w"> </span><span class="n">first_touch_time_msec</span><span class="p">,</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w"> </span><span class="n">first_visit_date</span><span class="p">,</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w"> </span><span class="n">first_referrer</span><span class="p">,</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w"> </span><span class="n">first_traffic_source</span><span class="p">,</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w"> </span><span class="n">first_traffic_medium</span><span class="p">,</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w"> </span><span class="n">first_traffic_campaign</span><span class="p">,</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w"> </span><span class="n">first_traffic_content</span><span class="p">,</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w"> </span><span class="n">first_traffic_term</span><span class="p">,</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w"> </span><span class="n">first_traffic_campaign_id</span><span class="p">,</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w"> </span><span class="n">first_traffic_clid_platform</span><span class="p">,</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w"> </span><span class="n">first_traffic_clid</span><span class="p">,</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w"> </span><span class="n">first_traffic_channel_group</span><span class="p">,</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w"> </span><span class="n">first_traffic_category</span><span class="p">,</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w"> </span><span class="n">first_app_install_source</span><span class="p">,</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w"> </span><span class="n">user_properties</span><span class="p">,</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w"> </span><span class="n">user_properties_json_str</span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="k">FROM</span><span class="w"> </span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">  </span><span class="err">{{</span><span class="k">database</span><span class="err">}}</span><span class="p">.</span><span class="n">user_v2</span>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="k">where</span><span class="w"> </span><span class="n">partition_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">partition_year</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">partition_month</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">partition_day</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span></code></pre></div>
-</div>
-</div>
-</div>
-</details>
-<h2 id="_4">维度和指标</h2>
-<p>报告包括以下维度和指标。您可以通过在 QuickSight 数据集中创建 <code>calculated field</code> 来添加更多维度或指标。<a href="https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html">了解更多</a>。</p>
+<h2 id="_3">数据源</h2>
+<p>获取报告是基于以下QuickSight数据集创建的：</p>
 <table>
 <thead>
 <tr>
-<th>字段</th>
-<th>类型</th>
-<th>是什么</th>
-<th>如何填充</th>
+<th>QuickSight数据集</th>
+<th>Redshift视图/表</th>
+<th>描述</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>user_pseudo_id</code></td>
-<td>维度</td>
-<td>用户的 SDK 生成的唯一 ID</td>
-<td>从分析引擎查询</td>
+<td><code>User_User_View-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_acquisition_day_user_view_cnt</code></td>
+<td>此数据集存储了每天网站或应用程序上的新用户数和活跃用户数的数据</td>
 </tr>
 <tr>
-<td><code>user_id</code></td>
-<td>维度</td>
-<td>通过 SDK 中的 setUserId API 设置的用户 ID</td>
-<td>从分析引擎查询</td>
+<td><code>Day_Traffic_Source_User-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_acquisition_day_traffic_source_user</code></td>
+<td>此数据集存储了每天每种流量来源类型的新用户数</td>
 </tr>
 <tr>
-<td><code>device_id</code></td>
-<td>维度</td>
-<td>设备的唯一 ID，请参阅 <a href="../../../sdk-manual/">SDK 手册</a> 了解设备 ID 的获取方式</td>
-<td>从分析引擎查询</td>
+<td><code>Day_User_Acquisition-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_acquisition_day_user_acquisition</code></td>
+<td>此数据集存储了每天每种流量来源类型的新用户数、活跃用户数、会话数、参与会话数和事件数</td>
 </tr>
 <tr>
-<td><code>first_visit_date</code></td>
-<td>维度</td>
-<td>用户首次访问您的网站或首次打开应用的日期</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>first_visit_install_source</code></td>
-<td>维度</td>
-<td>用户首次打开应用时的安装来源。Web 为空</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>first_traffic_source_source</code></td>
-<td>维度</td>
-<td>用户首次访问应用或 Web 时的流量来源</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>first_traffic_source_medium</code></td>
-<td>维度</td>
-<td>用户首次访问应用或 Web 时的流量媒介</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>first_traffic_source_name</code></td>
-<td>维度</td>
-<td>用户首次访问应用或 Web 时的流量广告系列名称</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>first_visit_device_language</code></td>
-<td>维度</td>
-<td>用户首次打开应用或首次访问网站时所用设备的系统语言</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>first_platform</code></td>
-<td>维度</td>
-<td>用户首次访问您的网站或首次打开您的应用时的平台</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>first_referer</code></td>
-<td>维度</td>
-<td>用户首次访问您的网站时的引荐来源</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>first_visit_country</code></td>
-<td>维度</td>
-<td>用户首次访问您的网站或首次打开您的应用的国家</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>first_visit_city</code></td>
-<td>维度</td>
-<td>用户首次访问您的网站或首次打开您的应用的城市</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>custom_attr_key</code></td>
-<td>维度</td>
-<td>用户的自定义属性键的名称</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>custom_attr_value</code></td>
-<td>维度</td>
-<td>用户的自定义属性键的值</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>registration_status</code></td>
-<td>维度</td>
-<td>用户是否已注册</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>Logged-in Rate</code></td>
-<td>指标</td>
-<td>不同用户 ID 数除以不同用户伪 ID 数</td>
-<td>QuickSight 中的计算字段</td>
+<td><code>Country_New_User_Acquisition-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_acquisition_country_new_user</code></td>
+<td>此数据集存储了每天每个国家和城市的新用户数</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_5">示例仪表板</h2>
-<p>以下图片是一个示例仪表板供您参考。</p>
-<p><a class="glightbox" href="../../../images/analytics/dashboard/acquisition.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="获取仪表板" src="../../../images/analytics/dashboard/acquisition.png" /></a></p>
+<h2 id="_4">维度</h2>
+<p>获取报告包括以下维度。</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>描述</th>
+<th>计算方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>首次用户流量来源</td>
+<td>获取新用户访问您网站或应用程序的流量来源(例如 google、百度和必应)</td>
+<td>流量来源是从 page_url 的 utm 参数(即 utm_source)或流量来源保留属性(即 _traffic_source_source)中获取,或者根据 referrer url 推导而来(仅限网络)。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>首次用户流量媒介</td>
+<td>获取新用户访问您网站或应用程序的流量媒介(例如有机、付费搜索)</td>
+<td>流量媒介是从 page_url 的 utm 参数(即 utm_medium)或流量来源保留属性(即 _traffic_source_medium)中获取,或者根据 referrer url 推导而来(仅限网络)。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>首次用户流量活动</td>
+<td>获取新用户访问您网站或应用程序的营销活动名称</td>
+<td>流量活动是从 page_url 的 utm 参数(即 utm_campaign)和流量来源保留属性(即 _traffic_source_campaign)中获取,或者根据 referrer url 推导而来(仅限网络)。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>首次用户流量来源/媒介</td>
+<td>获取新用户访问您网站或应用程序的流量来源和媒介组合</td>
+<td>与上面的流量来源和流量媒介相同。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>首次用户流量渠道组</td>
+<td>渠道组是基于规则定义的流量来源。获取新用户访问您网站或应用程序的流量渠道组名称</td>
+<td>流量渠道组是根据流量来源和媒介推导而来。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>首次用户流量 clid 平台</td>
+<td>获取新用户访问您网站或应用程序的点击 ID 平台名称(来自广告平台的自动标记)</td>
+<td>流量来源 clid 平台是从 page_url 的 clid 参数和流量来源保留属性(即 _traffic_source_clid_platform)中获取。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>首次用户应用安装来源</td>
+<td>获取新用户访问您应用程序的应用商店名称,例如 App Store、Google Store</td>
+<td>应用安装来源是从流量来源保留属性(即 _app_install_channel)中获取。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>会话流量来源</td>
+<td>获取用户访问您网站或应用程序新会话的流量来源(例如 google、百度和必应)</td>
+<td>流量来源是从 page_url 的 utm 参数(即 utm_source)或流量来源保留属性(即 _traffic_source_source)中获取,或者根据 referrer url 推导而来(仅限网络)。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>会话流量媒介</td>
+<td>获取用户访问您网站或应用程序新会话的流量媒介(例如有机、付费搜索)</td>
+<td>流量媒介是从 page_url 的 utm 参数(即 utm_medium)或流量来源保留属性(即 _traffic_source_medium)中获取,或者根据 referrer url 推导而来(仅限网络)。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>会话流量活动</td>
+<td>获取用户访问您网站或应用程序新会话的营销活动名称</td>
+<td>流量活动是从 page_url 的 utm 参数(即 utm_campaign)和流量来源保留属性(即 _traffic_source_campaign)中获取,或者根据 referrer url 推导而来(仅限网络)。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>会话流量来源/媒介</td>
+<td>获取用户访问您网站或应用程序新会话的流量来源和媒介组合</td>
+<td>与上面的流量来源和流量媒介相同。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>会话流量渠道组</td>
+<td>渠道组是基于规则定义的流量来源。获取用户访问您网站或应用程序新会话的流量渠道组名称</td>
+<td>流量渠道组是根据流量来源和媒介推导而来。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>会话流量 clid 平台</td>
+<td>获取用户访问您网站或应用程序新会话的点击 ID 平台名称(来自广告平台的自动标记)</td>
+<td>流量 clid 平台是从 page_url 的 clid 参数和流量来源保留属性(即 _traffic_source_clid_platform)中获取。<a href="../../data-mgmt/traffic-source/">了解更多</a></td>
+</tr>
+<tr>
+<td>地理国家</td>
+<td>用户访问您网站或应用程序时所在的国家</td>
+<td>地理位置信息是根据用户 IP 地址推断的。</td>
+</tr>
+<tr>
+<td>地理城市</td>
+<td>用户访问您网站或应用程序时所在的城市</td>
+<td>地理位置信息是根据用户 IP 地址推断的。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">指标</h2>
+<p>获取报告包括以下指标。</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>定义</th>
+<th>计算方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新用户</td>
+<td>首次与您的网站互动或启动您的应用程序的用户数量(触发事件:_first_open)。</td>
+<td>当 event_name 等于 '_first_open' 时,计算不同的 user_id 或 user_pseudo_id(如果 user_id 不可用)的数量。</td>
+</tr>
+<tr>
+<td>活跃用户</td>
+<td>在选定时间范围内触发任何事件的不同用户数量。</td>
+<td>在任何事件中计算不同的 user_id 或 user_pseudo_id(如果 user_id 不可用)的数量。</td>
+</tr>
+<tr>
+<td>会话</td>
+<td>用户创建的会话数量。</td>
+<td>计算不同的 session_id 数量。</td>
+</tr>
+<tr>
+<td>参与会话</td>
+<td>持续时间超过 10 秒或有 1 个或更多页面或屏幕视图的会话数量。</td>
+<td>如果会话是有效参与,则计算不同的 session_id 数量。</td>
+</tr>
+<tr>
+<td>参与率</td>
+<td>有效参与会话占总会话的百分比。</td>
+<td>有效参与会话/总会话数。</td>
+</tr>
+<tr>
+<td>事件</td>
+<td>用户触发事件的次数。</td>
+<td>计算 event_id 的数量。</td>
+</tr>
+<tr>
+<td>平均用户参与时长</td>
+<td>您的网站在用户浏览器中处于焦点状态或应用程序在用户设备的前台的平均时间(每用户)。</td>
+<td>总用户参与时长/活跃用户数</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_6">示例仪表板</h2>
+<p>以下图像是供您参考的示例仪表板。</p>
+<p><a class="glightbox" href="../../../images/analytics/dashboard/acquisition.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="dashboard-acquisition" src="../../../images/analytics/dashboard/acquisition.png" /></a></p>
 
 
 

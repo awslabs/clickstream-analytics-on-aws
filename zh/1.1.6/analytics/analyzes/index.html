@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/analyzes/">
       
       
-        <link rel="prev" href="../explore/retention/">
+        <link rel="prev" href="../explore/attribution/">
       
       
         <link rel="next" href="../data-mgmt/">
@@ -1934,27 +1934,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/activity/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    活动报告
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../dashboard/retention/" class="md-nav__link">
         
   
@@ -1997,32 +1976,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/user/" class="md-nav__link">
+      <a href="../dashboard/details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    用户报告
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../dashboard/crash/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    崩溃报告
+    详细报告
   </span>
   
 
@@ -2152,7 +2110,7 @@
         
   
   <span class="md-ellipsis">
-    转化分析
+    漏斗分析
   </span>
   
 
@@ -2195,6 +2153,27 @@
   
   <span class="md-ellipsis">
     留存分析
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explore/attribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    归因分析
   </span>
   
 
@@ -2389,6 +2368,48 @@
   
   <span class="md-ellipsis">
     概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-mgmt/metadata-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    元数据
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-mgmt/traffic-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    流量
   </span>
   
 
@@ -2815,8 +2836,8 @@
 <h2 id="_2">访问分析</h2>
 <p>要访问分析，请按照以下步骤进行：</p>
 <ol>
-<li>转到 <strong>AWS 控制台上的 Clickstream Analytics</strong>，在 <strong>导航栏</strong> 中，单击 "<strong>分析工作室</strong>"，浏览器将打开一个新的选项卡。</li>
-<li>在分析工作室页面中，单击左侧导航面板中的 <strong>分析</strong> 图标。</li>
+<li>打开<strong>亚马逊云科技点击流分析解决方案的控制台</strong>，在左侧导航栏中单击 <strong>分析工作坊</strong>，浏览器将打开一个新标签页。</li>
+<li>在<strong>分析工作坊</strong>页面中,点击左侧导航面板中的<strong>分析</strong>图标。</li>
 </ol>
 <h2 id="_3">工作原理</h2>
 <p>分析模块本质上是 QuickSight 的作者界面，您可以在其中拥有对所有 QuickSight 功能的管理访问权限，例如创建分析、添加或管理数据集、发布和共享仪表板。</p>
@@ -2834,40 +2855,8 @@
 </thead>
 <tbody>
 <tr>
-<td>Event_View_<code>app_name</code>_<code>project_name</code></td>
-<td>包含所有公共事件参数的事件数据</td>
-</tr>
-<tr>
-<td>Event_Parameter_View_<code>app_name</code>_<code>project_name</code></td>
-<td>包含所有私有事件参数的事件数据</td>
-</tr>
-<tr>
-<td>User_Dim_View_<code>app_name</code>_<code>project_name</code></td>
-<td>包含所有公共属性的用户数据</td>
-</tr>
-<tr>
-<td>User_Attr_View_<code>app_name</code>_<code>project_name</code></td>
-<td>包含所有私有（自定义）属性的用户数据</td>
-</tr>
-<tr>
-<td>Session_View_<code>app_name</code>_<code>project_name</code></td>
-<td>包含有关会话的度量和维度的数据</td>
-</tr>
-<tr>
-<td>Device_View_<code>app_name</code>_<code>project_name</code></td>
-<td>包含有关用户设备的信息的数据</td>
-</tr>
-<tr>
-<td>Retention_View_<code>app_name</code>_<code>project_name</code></td>
-<td>提供每个日期的总用户和返回用户的指标数据</td>
-</tr>
-<tr>
-<td>Lifecycle_Weekly_View_<code>app_name</code>_<code>project_name</code></td>
-<td>每周用户生命周期指标数据</td>
-</tr>
-<tr>
-<td>Lifecycle_Daily_View_<code>app_name</code>_<code>project_name</code></td>
-<td>每天用户生命周期指标数据</td>
+<td>事件_视图_<code>app_name</code>_<code>project_name</code></td>
+<td>包含所有事件参数(通用和自定义)的事件数据,已与用户和会话表联接。</td>
 </tr>
 </tbody>
 </table>

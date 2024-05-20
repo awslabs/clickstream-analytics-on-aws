@@ -16,7 +16,7 @@
         <link rel="prev" href="../acquisition/">
       
       
-        <link rel="next" href="../activity/">
+        <link rel="next" href="../retention/">
       
       
       <link rel="icon" href="../../../images/favicon.ico">
@@ -1972,7 +1972,7 @@
         <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
-      数据来源
+      数据源
     </span>
   </a>
   
@@ -1981,7 +1981,7 @@
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      维度和指标
+      维度
     </span>
   </a>
   
@@ -1989,6 +1989,15 @@
       
         <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      指标
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       示例仪表板
     </span>
@@ -2000,27 +2009,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../activity/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    活动报告
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -2075,32 +2063,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../user/" class="md-nav__link">
+      <a href="../details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    用户报告
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../crash/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    崩溃报告
+    详细报告
   </span>
   
 
@@ -2230,7 +2197,7 @@
         
   
   <span class="md-ellipsis">
-    转化分析
+    漏斗分析
   </span>
   
 
@@ -2273,6 +2240,27 @@
   
   <span class="md-ellipsis">
     留存分析
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explore/attribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    归因分析
   </span>
   
 
@@ -2407,6 +2395,48 @@
   
   <span class="md-ellipsis">
     概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/metadata-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    元数据
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/traffic-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    流量
   </span>
   
 
@@ -2799,7 +2829,7 @@
         <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
-      数据来源
+      数据源
     </span>
   </a>
   
@@ -2808,7 +2838,7 @@
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      维度和指标
+      维度
     </span>
   </a>
   
@@ -2816,6 +2846,15 @@
       
         <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      指标
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       示例仪表板
     </span>
@@ -2841,222 +2880,136 @@
   
 
 
-<h1 id="_1">参与度报告</h1>
-<p>您可以使用参与度报告深入了解用户在使用您的网站和应用时的参与度水平。该报告通过用户触发的会话以及用户访问的网页和应用屏幕来衡量用户参与度。</p>
-<p>注意：本文描述了默认报告。您可以通过应用过滤器或比较，或通过在 QuickSight 中更改维度、指标或图表来自定义报告。<a href="https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html">了解更多</a></p>
+<h1 id="_1">用户参与度报告</h1>
+<p>您可以使用用户参与度报告了解用户如何与您的网站和应用程序互动。它显示了有关用户参与度水平、执行活动以及访问最多的页面/屏幕的指标。</p>
+<p>注意:本文描述了默认报告。您可以通过应用筛选器或比较,或者在 QuickSight 中更改维度、指标或图表来自定义报告。<a href="https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html">了解更多</a></p>
 <h2 id="_2">查看报告</h2>
 <ol>
-<li>访问您应用程序的仪表板。请参阅 <a href="../">访问仪表板</a>。</li>
-<li>在仪表板中，单击名称为 <code>Engagement</code> 的表。</li>
+<li>访问您的应用程序的仪表板。请参阅<a href="../">访问仪表板</a></li>
+<li>在仪表板中,单击名为 <strong><code>Engagement</code></strong> 的工作表。</li>
 </ol>
-<h2 id="_3">数据来源</h2>
-<p>参与度报告是基于 <code>Session_View-&lt;app id&gt;-&lt;project id&gt;</code> 的 QuickSight 数据集创建的，该数据集连接到分析引擎（即 Redshift 或 Athena）中的 <code>clickstream_session_view</code> 视图。以下是生成视图的 SQL 命令。</p>
-<details class="示例">
-<summary>SQL 命令</summary>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Redshift</label><label for="__tabbed_1_2">Athena</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream-session-view.sql</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">WITH</span><span class="w"> </span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">session_part_1</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">es</span><span class="p">.</span><span class="n">session_id</span><span class="p">::</span><span class="nb">VARCHAR</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">platform</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="k">MAX</span><span class="p">(</span><span class="n">session_duration</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_duration</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="p">(</span><span class="k">CASE</span><span class="w"> </span><span class="k">WHEN</span><span class="w"> </span><span class="p">(</span><span class="k">MAX</span><span class="p">(</span><span class="n">session_duration</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">10000</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">SUM</span><span class="p">(</span><span class="k">view</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">ELSE</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">END</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">engaged_session</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="p">(</span><span class="k">CASE</span><span class="w"> </span><span class="k">WHEN</span><span class="w"> </span><span class="p">(</span><span class="k">MAX</span><span class="p">(</span><span class="n">session_duration</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">10000</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">SUM</span><span class="p">(</span><span class="k">view</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">ELSE</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">END</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">bounced_session</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="k">MIN</span><span class="p">(</span><span class="n">session_st</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_start_timestamp</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="k">SUM</span><span class="p">(</span><span class="k">view</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_views</span><span class="p">,</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="k">SUM</span><span class="p">(</span><span class="n">engagement_time</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_engagement_time</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">clickstream_session_duration_attr_view_v1</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">es</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">),</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">session_page_data</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="k">SELECT</span><span class="w"> </span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">      </span><span class="n">session_id</span><span class="p">::</span><span class="nb">VARCHAR</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">      </span><span class="k">view</span><span class="p">,</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">      </span><span class="n">ROW_NUMBER</span><span class="p">()</span><span class="w"> </span><span class="n">OVER</span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">session_id</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">event_timestamp</span><span class="w"> </span><span class="k">ASC</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rank</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">clickstream_session_page_attr_view_v1</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="p">),</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="n">min_max_data</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="n">session_id</span><span class="p">,</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span><span class="k">min</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span><span class="w"> </span><span class="n">min_rank</span><span class="p">,</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span><span class="k">max</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span><span class="w"> </span><span class="n">max_rank</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">session_page_data</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">  </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">session_id</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="p">),</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="n">session_part_2</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">    </span><span class="n">session_page_data</span><span class="p">.</span><span class="n">session_id</span><span class="p">,</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span><span class="k">max</span><span class="p">(</span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">min_rank</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="k">view</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">end</span><span class="p">)</span><span class="w"> </span><span class="n">first_sv_view</span><span class="p">,</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">    </span><span class="k">max</span><span class="p">(</span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max_rank</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="k">view</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">end</span><span class="p">)</span><span class="w"> </span><span class="n">last_sv_view</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">session_page_data</span><span class="w"> </span><span class="k">join</span><span class="w"> </span><span class="n">min_max_data</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">session_page_data</span><span class="p">.</span><span class="n">session_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">min_max_data</span><span class="p">.</span><span class="n">session_id</span><span class="w"> </span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="p">(</span><span class="n">session_page_data</span><span class="p">.</span><span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">min_max_data</span><span class="p">.</span><span class="n">max_rank</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">session_page_data</span><span class="p">.</span><span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">min_max_data</span><span class="p">.</span><span class="n">min_rank</span><span class="p">)</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">  </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">session_page_data</span><span class="p">.</span><span class="n">session_id</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="p">)</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="k">SELECT</span><span class="w"> </span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">  </span><span class="k">CASE</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">    </span><span class="k">WHEN</span><span class="w"> </span><span class="k">session</span><span class="p">.</span><span class="n">session_id</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="k">CAST</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">)</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="w">    </span><span class="k">WHEN</span><span class="w"> </span><span class="k">session</span><span class="p">.</span><span class="n">session_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="k">CAST</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">)</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">    </span><span class="k">ELSE</span><span class="w"> </span><span class="k">session</span><span class="p">.</span><span class="n">session_id</span><span class="w"> </span>
-</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="w">  </span><span class="k">END</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_id</span><span class="p">,</span>
-</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">  </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="w">  </span><span class="n">platform</span><span class="p">,</span>
-</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="w">  </span><span class="n">session_duration</span><span class="p">::</span><span class="nb">BIGINT</span><span class="p">,</span>
-</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="w">  </span><span class="n">session_views</span><span class="p">::</span><span class="nb">BIGINT</span><span class="p">,</span>
-</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="w">  </span><span class="n">engaged_session</span><span class="p">::</span><span class="nb">BIGINT</span><span class="p">,</span>
-</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a><span class="w">  </span><span class="n">bounced_session</span><span class="p">,</span>
-</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a><span class="w">  </span><span class="n">session_start_timestamp</span><span class="p">,</span>
-</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a><span class="w">  </span><span class="k">CASE</span>
-</span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a><span class="w">    </span><span class="k">WHEN</span><span class="w"> </span><span class="k">session</span><span class="p">.</span><span class="n">session_engagement_time</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="k">CAST</span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="nb">BIGINT</span><span class="p">)</span>
-</span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a><span class="w">    </span><span class="k">ELSE</span><span class="w"> </span><span class="k">session</span><span class="p">.</span><span class="n">session_engagement_time</span><span class="w"> </span>
-</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a><span class="w">  </span><span class="k">END</span><span class="p">::</span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_engagement_time</span><span class="p">,</span>
-</span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a><span class="w">  </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;day&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="s1">&#39;epoch&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">session_start_timestamp</span><span class="o">/</span><span class="mi">1000</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;1 second&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_date</span><span class="p">,</span>
-</span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a><span class="w">  </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;hour&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="s1">&#39;epoch&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">session_start_timestamp</span><span class="o">/</span><span class="mi">1000</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;1 second&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_date_hour</span><span class="p">,</span>
-</span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a><span class="w">  </span><span class="n">first_sv_view</span><span class="p">::</span><span class="nb">VARCHAR</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">entry_view</span><span class="p">,</span>
-</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a><span class="w">  </span><span class="n">last_sv_view</span><span class="p">::</span><span class="nb">VARCHAR</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">exit_view</span>
-</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a><span class="k">FROM</span><span class="w"> </span><span class="n">session_part_1</span><span class="w"> </span><span class="k">session</span>
-</span><span id="__span-0-62"><a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a><span class="k">LEFT</span><span class="w"> </span><span class="k">OUTER</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">session_part_2</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">session</span><span class="p">.</span><span class="n">session_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_part_2</span><span class="p">.</span><span class="n">session_id</span>
-</span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a><span class="p">;</span>
-</span></code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream-session-query.sql</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">-- run following command to load latest partition</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1">-- msck repair table {{database}}.event_v2;</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">-- msck repair table {{database}}.user_v2;</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">-- msck repair table {{database}}.item_v2;</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1">-- msck repair table {{database}}.session;</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">SELECT</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="n">event_timestamp</span><span class="p">,</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="n">session_id</span><span class="p">,</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="n">user_id</span><span class="p">,</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="n">session_number</span><span class="p">,</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">  </span><span class="n">session_start_time_msec</span><span class="p">,</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">  </span><span class="n">session_source</span><span class="p">,</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">  </span><span class="n">session_medium</span><span class="p">,</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">  </span><span class="n">session_campaign</span><span class="p">,</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">  </span><span class="n">session_content</span><span class="p">,</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">  </span><span class="n">session_term</span><span class="p">,</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">  </span><span class="n">session_campaign_id</span><span class="p">,</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">  </span><span class="n">session_clid_platform</span><span class="p">,</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">  </span><span class="n">session_clid</span><span class="p">,</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">  </span><span class="n">session_channel_group</span><span class="p">,</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">  </span><span class="n">session_source_category</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="k">FROM</span><span class="w"> </span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">  </span><span class="err">{{</span><span class="k">database</span><span class="err">}}</span><span class="p">.</span><span class="k">session</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="k">where</span><span class="w"> </span><span class="n">partition_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">partition_year</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">partition_month</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">partition_day</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span></code></pre></div>
-</div>
-</div>
-</div>
-</details>
-<h2 id="_4">维度和指标</h2>
-<p>报告包括以下维度和指标。您可以通过在 QuickSight 数据集中创建 <code>calculated field</code> 来添加更多维度或指标。<a href="https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html">了解更多</a>。</p>
+<h2 id="_3">数据源</h2>
+<p>用户参与度报告基于以下 QuickSight 数据集创建:</p>
 <table>
 <thead>
 <tr>
-<th>字段</th>
-<th>类型</th>
-<th>是什么</th>
+<th>QuickSight 数据集</th>
+<th>Redshift 视图/表</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Engagement_KPI-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_engagement_kpi</code></td>
+<td>此数据集存储每天的用户参与度关键绩效指标数据。</td>
+</tr>
+<tr>
+<td><code>Day_Event_View_Engagement-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_engagement_day_event_view</code></td>
+<td>此数据集存储每天的事件数量和视图事件数量数据。</td>
+</tr>
+<tr>
+<td><code>Event_Name-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_engagement_event_name</code></td>
+<td>此数据集存储每个用户每天的事件名称事件数量数据。</td>
+</tr>
+<tr>
+<td><code>Page_Screen_View-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_engagement_page_screen_view</code></td>
+<td>此数据集存储每天每个页面或屏幕的视图数量数据。</td>
+</tr>
+<tr>
+<td><code>Page_Screen_View_Detail-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_engagement_page_screen_detail_view</code></td>
+<td>此数据集存储每个用户每天的页面标题/页面 URL 或屏幕名称/屏幕 ID 的视图事件数据。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_4">维度</h2>
+<p>用户参与度报告包括以下维度。</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>描述</th>
 <th>如何填充</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>session_id</code></td>
-<td>维度</td>
-<td>用户在使用您的网站和应用时触发的会话的 SDK 生成的唯一 ID</td>
-<td>从分析引擎查询</td>
+<td>事件名称</td>
+<td>用户触发的事件名称</td>
+<td>根据您使用 Clickstream SDK 或 HTTP API 为事件设置的事件名称派生。</td>
 </tr>
 <tr>
-<td><code>user_pseudo_id</code></td>
-<td>维度</td>
-<td>用户的 SDK 生成的唯一 ID</td>
-<td>从分析引擎查询</td>
+<td>页面标题</td>
+<td>网页的标题</td>
+<td>页面标题源自您 HTML 中的 <code>title</code> 标签。</td>
 </tr>
 <tr>
-<td><code>platform</code></td>
-<td>维度</td>
-<td>用户在会话期间使用的平台</td>
-<td>从分析引擎查询</td>
+<td>页面 URL 路径</td>
+<td>网页 URL 中的路径</td>
+<td>页面路径源自域名之后的值。例如,如果有人访问 <code>www.example.com/books</code>,则 <code>example.com</code> 是域名, <code>/books</code> 是页面路径。</td>
 </tr>
 <tr>
-<td><code>session_duration</code></td>
-<td>维度</td>
-<td>会话的持续时间（毫秒）</td>
-<td>从分析引擎查询</td>
+<td>屏幕名称</td>
+<td>屏幕的标题</td>
+<td>屏幕名称源自您使用 clickstream SDK 或 HTTP API 为屏幕设置的名称。</td>
 </tr>
 <tr>
-<td><code>session_views</code></td>
-<td>指标</td>
-<td>会话内的屏幕视图或页面视图数量</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>engaged_session</code></td>
-<td>维度</td>
-<td>会话是否参与。</br><code>参与的会话定义为会话持续时间超过 10 秒或有两个或两个以上的屏幕视图页面视图</code></td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>session_start_timestamp</code></td>
-<td>维度</td>
-<td>会话的开始时间戳</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>session_engagement_time</code></td>
-<td>维度</td>
-<td>会话的总参与时间（毫秒）</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>entry_view</code></td>
-<td>维度</td>
-<td>用户在会话中查看的第一个屏幕或页面的屏幕名称或页面标题</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>exit_view</code></td>
-<td>维度</td>
-<td>用户在会话中查看的最后一个屏幕或页面的屏幕名称或页面标题</td>
-<td>从分析引擎查询</td>
-</tr>
-<tr>
-<td><code>Average engaged session per user</code></td>
-<td>指标</td>
-<td>所选时间段内每个用户的平均会话数</td>
-<td>QuickSight 中的计算字段</td>
-</tr>
-<tr>
-<td><code>Average engagement time per session</code></td>
-<td>指标</td>
-<td>每个会话的平均参与时间（毫秒）</td>
-<td>QuickSight 中的计算字段</td>
-</tr>
-<tr>
-<td><code>Average engagement time per user</code></td>
-<td>指标</td>
-<td>每个用户的平均参与时间（毫秒）</td>
-<td>QuickSight 中的计算字段</td>
-</tr>
-<tr>
-<td><code>Average screen view per user</code></td>
-<td>指标</td>
-<td>每个用户的平均屏幕视图数</td>
-<td>QuickSight 中的计算字段</td>
+<td>屏幕类</td>
+<td>屏幕的类名</td>
+<td>屏幕类源自当前处于焦点的 UIViewController 或 Activity 的类名。</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_5">示例仪表板</h2>
-<p>以下图片是一个示例仪表板供您参考。</p>
-<p><a class="glightbox" href="../../../images/analytics/dashboard/engagement.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="参与度仪表板" src="../../../images/analytics/dashboard/engagement.png" /></a></p>
+<h2 id="_5">指标</h2>
+<p>用户参与度报告包括以下指标。</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>定义</th>
+<th>计算方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Avg_session_per_user</td>
+<td>每个活跃用户的平均会话数。</td>
+<td>总会话数/活跃用户总数</td>
+</tr>
+<tr>
+<td>Avg_engagement_time_per_user_minute</td>
+<td>您的网站在用户浏览器中处于焦点状态或应用程序在用户设备的前台的平均时间(每用户)。</td>
+<td>总用户参与时长/活跃用户数</td>
+</tr>
+<tr>
+<td>Avg_engagement_time_per_session_minute</td>
+<td>您的网站在用户浏览器中处于焦点状态或应用程序在用户设备的前台的平均时间(每会话)。</td>
+<td>总用户参与时长/会话数</td>
+</tr>
+<tr>
+<td>Active users</td>
+<td>具有 page_view 或 screen_view 事件的活跃用户数。</td>
+<td>当 event_name 为 '_page_view' 或 '_screen_view' 时,计算不同的 user_id 或 user_pseudo_id(如果 user_id 不可用)的数量。</td>
+</tr>
+<tr>
+<td>Event count</td>
+<td>用户触发 '_page_view' 或 '_screen_view' 事件的次数。</td>
+<td>当 event_name 为 '_page_view' 或 '_screen_view' 时,计算 event_id 的数量。</td>
+</tr>
+<tr>
+<td>Event count per user</td>
+<td>每个用户的平均事件计数。</td>
+<td>Event count / Active users</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_6">示例仪表板</h2>
+<p>以下图像是供您参考的示例仪表板。</p>
+<p><a class="glightbox" href="../../../images/analytics/dashboard/engagement.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="dashboard-activity" src="../../../images/analytics/dashboard/engagement.png" /></a></p>
 
 
 
