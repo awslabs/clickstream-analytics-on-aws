@@ -1953,27 +1953,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/activity/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Activity report
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../dashboard/retention/" class="md-nav__link">
         
   
@@ -2016,32 +1995,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/user/" class="md-nav__link">
+      <a href="../../dashboard/details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    User report
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../dashboard/crash/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Crash report
+    Details report
   </span>
   
 
@@ -2316,6 +2274,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../attribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Attribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2441,6 +2420,48 @@
   
   <span class="md-ellipsis">
     Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/metadata-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Metadata
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/traffic-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Traffic source
   </span>
   
 
@@ -2891,17 +2912,21 @@
 
 
 <h1 id="event-analysis">Event Analysis</h1>
-<p>Event analysis is used to study the frequency of certain behavioral events. You can conduct multi-dimensional analysis of user behavior through custom metrics, groupings, filters, and various visual charts.</p>
+<p>Event analysis is used to study the frequency of certain behavioral events. You can conduct multidimensional analysis of user behavior through custom metrics, groupings, filters, and various visual charts.</p>
 <h2 id="use-cases">Use cases</h2>
 <p>Event analysis are commonly used when analyzing user behaviors, for example:</p>
 <ul>
 <li>Query on user usage of certain product functions (such as adding favorite, video playback, view live stream, etc.);</li>
-<li>Compare different group of users's behaviors, such as number of login per different country</li>
+<li>Compare different group of user's behaviors, such as number of login per different country</li>
 <li>Compare different channel's effectiveness, such as sign-up rate per traffic source.</li>
 </ul>
 <h2 id="key-concept">Key concept:</h2>
 <ul>
-<li><strong>Metric</strong>: perform aggregation on a selected event, such as count number of event, or count number of distinct users perform the event.</li>
+<li><strong>Metric</strong>: perform aggregation on a selected event, support the following metrics:</li>
+<li>User number: count number of event </li>
+<li>Event number: count number of distinct users </li>
+<li>County by: count distinct value of a specified dimension (string type)</li>
+<li>Max/Min/Sum/Avg/Median by: aggregate the values of a specified metric (number type)</li>
 </ul>
 <h2 id="how-to-use">How to use</h2>
 <ol>
@@ -2923,22 +2948,22 @@
 <h3 id="steps">Steps</h3>
 <ol>
 <li>Select the <strong>Event Analysis</strong> model.</li>
-<li>In the left <strong>Define Metrics</strong> area, choose <code>_page_view</code> as the metric for calculating events and select <code>Event number</code> as the metric type.</li>
-<li>Click the <strong>+ Add Event</strong> button to add another metric. Choose <code>_app_end</code> as the metric for calculating events and select <code>User number</code> as the metric type.</li>
-<li>Click the filter icon to the right of <code>_app_end</code> to add a event filter condition:<ul>
-<li>Filter property: <code>event._session_duration</code></li>
+<li>In the left <strong>Define Metrics</strong> area, choose <code>Page view</code> as the metric for calculating events and select <code>Event number</code> as the metric type.</li>
+<li>Click the <strong>+ Add Event</strong> button to add another metric. Choose <code>App end</code> as the metric for calculating events and select <code>User number</code> as the metric type.</li>
+<li>Click the filter icon to the right of <code>App end</code> to add an event filter condition:<ul>
+<li>Filter property: <code>Session</code> / <code>Session duration(msec)</code></li>
 <li>Operation: <code>&gt;=</code></li>
-<li>Value: <code>30000</code> (the unit of <code>event._session_duration</code> is millisecond)</li>
+<li>Value: <code>30000</code> (the unit of <code>Session duration(msec)</code> is millisecond)</li>
 </ul>
 </li>
 <li>Configure a global filter in the right <strong>Filters</strong> area:<ul>
-<li>Choose <code>other.platform</code> as the filter property.</li>
+<li>Choose <code>Event preset</code> / <code>Platform</code> as the filter property.</li>
 <li>Operation: <code>=</code></li>
 <li>Value: <code>Web</code></li>
 </ul>
 </li>
-<li>In the right <strong>Attribute Grouping</strong> area, configure grouping by selecting <code>geo.country</code>.</li>
-<li>In the time selector at the bottom, choose <code>Past Month</code> and click <strong>OK</strong>.</li>
+<li>In the right <strong>Attribute Grouping</strong> area, configure grouping by selecting <code>Geography</code>/<code>Country</code>.</li>
+<li>In the time selector at the bottom, choose <code>Last 1 Month</code> and click <strong>OK</strong>.</li>
 <li>Click the <strong>Save to Dashboard</strong> button in the top right corner. In the pop-up dialog, enter:<ul>
 <li>Chart Name: <code>PV and UV</code></li>
 <li>Chart Description: <code>PV and UV on the web over the past month (at least 30 seconds)</code></li>

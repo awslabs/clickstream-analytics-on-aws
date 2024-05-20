@@ -1968,18 +1968,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#where-the-data-comes-from" class="md-nav__link">
+  <a href="#data-sources" class="md-nav__link">
     <span class="md-ellipsis">
-      Where the data comes from
+      Data sources
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dimensions-and-metrics" class="md-nav__link">
+  <a href="#dimensions" class="md-nav__link">
     <span class="md-ellipsis">
-      Dimensions and metrics
+      Dimensions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metrics
     </span>
   </a>
   
@@ -2015,27 +2024,6 @@
   
   <span class="md-ellipsis">
     Engagement report
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../activity/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Activity report
   </span>
   
 
@@ -2094,32 +2082,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../user/" class="md-nav__link">
+      <a href="../details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    User report
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../crash/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Crash report
+    Details report
   </span>
   
 
@@ -2301,6 +2268,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explore/attribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Attribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2426,6 +2414,48 @@
   
   <span class="md-ellipsis">
     Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/metadata-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Metadata
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/traffic-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Traffic source
   </span>
   
 
@@ -2816,18 +2846,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#where-the-data-comes-from" class="md-nav__link">
+  <a href="#data-sources" class="md-nav__link">
     <span class="md-ellipsis">
-      Where the data comes from
+      Data sources
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dimensions-and-metrics" class="md-nav__link">
+  <a href="#dimensions" class="md-nav__link">
     <span class="md-ellipsis">
-      Dimensions and metrics
+      Dimensions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metrics
     </span>
   </a>
   
@@ -2861,226 +2900,179 @@
 
 
 <h1 id="acquisition-report">Acquisition report</h1>
-<p>You can use the User acquisition report to get insights into how new users find your website or app for the first time. This report also allows you view the detail user profile.</p>
+<p>You can use the acquisition report to get insights into how new users arrive at your website or app for the first time, as well as the sources of everyday traffic. </p>
 <p>Note: This article describes the default report. You can customize the report by applying filters or comparisons or by changing the dimensions, metrics, or charts in QuickSight. <a href="https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html">Learn more</a></p>
 <h2 id="view-the-report">View the report</h2>
 <ol>
 <li>Access the dashboard for your application. Refer to <a href="../#view-dashboards">Access dashboard</a></li>
 <li>In the dashboard, click on the sheet with name of <strong><code>Acquisition</code></strong>.</li>
 </ol>
-<h2 id="where-the-data-comes-from">Where the data comes from</h2>
-<p>Acquisition report are created based on the QuickSight dataset of <code>User_Dim_View-&lt;app&gt;-&lt;project&gt;</code>, which connects to the <code>clickstream_user_dim_view</code> view in analytics engine (i.e., Redshift). Below is the SQL command that generates the view.</p>
-<details class="example">
-<summary>SQL Commands</summary>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Redshift</label><label for="__tabbed_1_2">Athena</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream-user-dim-view.sql</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">WITH</span><span class="w"> </span><span class="n">user_base</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="k">SELECT</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">user_id</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">_first_visit_date</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_visit_date</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">_first_referer</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_referer</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="k">CASE</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="k">WHEN</span><span class="w"> </span><span class="k">NULLIF</span><span class="p">(</span><span class="n">_first_traffic_source</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;(Direct)&#39;</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">      </span><span class="k">ELSE</span><span class="w"> </span><span class="n">_first_traffic_source</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="k">END</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_traffic_source_source</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="n">_first_traffic_medium</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_traffic_source_medium</span><span class="p">,</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="n">_first_traffic_source_type</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_traffic_source_name</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="k">CASE</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">      </span><span class="k">WHEN</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;Registered&#39;</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">      </span><span class="k">ELSE</span><span class="w"> </span><span class="s1">&#39;Non-registered&#39;</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="k">END</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">registration_status</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">  </span><span class="k">FROM</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">user_m_view</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">),</span><span class="w"> </span><span class="n">device_id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span><span class="k">SELECT</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="n">LISTAGG</span><span class="p">(</span><span class="n">d_id</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39; | &#39;</span><span class="p">)</span><span class="w"> </span><span class="n">WITHIN</span><span class="w"> </span><span class="k">GROUP</span><span class="w"> </span><span class="p">(</span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">device_id</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="k">SELECT</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">      </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">      </span><span class="n">d_id</span><span class="p">::</span><span class="nb">VARCHAR</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span><span class="k">FROM</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">      </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">user_m_view</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">device_id_list</span><span class="w"> </span><span class="n">d_id</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">  </span><span class="p">)</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="n">user_pseudo_id</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="p">)</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="k">SELECT</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="o">*</span><span class="p">,</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_install_source</span><span class="p">,</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_device_language</span><span class="p">,</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_platform</span><span class="p">,</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_country</span><span class="p">,</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_city</span><span class="p">,</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">  </span><span class="n">d</span><span class="p">.</span><span class="n">device_id</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="k">FROM</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">  </span><span class="n">user_base</span><span class="w"> </span><span class="n">u</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">  </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">clickstream_user_first_attr_view_v1</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span>
-</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">  </span><span class="n">device_id</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">d</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="p">;</span>
-</span></code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream-user-query.sql</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">-- run following command to load latest partition</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1">-- msck repair table {{database}}.event_v2;</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">-- msck repair table {{database}}.user_v2;</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">-- msck repair table {{database}}.item_v2;</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1">-- msck repair table {{database}}.session;</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">SELECT</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w"> </span><span class="n">user_id</span><span class="p">,</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w"> </span><span class="n">event_timestamp</span><span class="p">,</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w"> </span><span class="n">first_touch_time_msec</span><span class="p">,</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w"> </span><span class="n">first_visit_date</span><span class="p">,</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w"> </span><span class="n">first_referrer</span><span class="p">,</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w"> </span><span class="n">first_traffic_source</span><span class="p">,</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w"> </span><span class="n">first_traffic_medium</span><span class="p">,</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w"> </span><span class="n">first_traffic_campaign</span><span class="p">,</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w"> </span><span class="n">first_traffic_content</span><span class="p">,</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w"> </span><span class="n">first_traffic_term</span><span class="p">,</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w"> </span><span class="n">first_traffic_campaign_id</span><span class="p">,</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w"> </span><span class="n">first_traffic_clid_platform</span><span class="p">,</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w"> </span><span class="n">first_traffic_clid</span><span class="p">,</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w"> </span><span class="n">first_traffic_channel_group</span><span class="p">,</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w"> </span><span class="n">first_traffic_category</span><span class="p">,</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w"> </span><span class="n">first_app_install_source</span><span class="p">,</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w"> </span><span class="n">user_properties</span><span class="p">,</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w"> </span><span class="n">user_properties_json_str</span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="k">FROM</span><span class="w"> </span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">  </span><span class="err">{{</span><span class="k">database</span><span class="err">}}</span><span class="p">.</span><span class="n">user_v2</span>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="k">where</span><span class="w"> </span><span class="n">partition_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">partition_year</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">partition_month</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">partition_day</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span></code></pre></div>
-</div>
-</div>
-</div>
-</details>
-<h2 id="dimensions-and-metrics">Dimensions and metrics</h2>
-<p>The report includes the following dimensions and metrics. You can add more dimensions or metrics by creating <code>calculated field</code> in QuickSight dateset. <a href="https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html">Learn more</a>. </p>
+<h2 id="data-sources">Data sources</h2>
+<p>Acquisition report are created based on the following QuickSight datasets:</p>
 <table>
 <thead>
 <tr>
-<th>Field</th>
-<th>Type</th>
-<th>What is it</th>
+<th>QuickSight dataset</th>
+<th>Redshift view / table</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>User_User_View-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_acquisition_day_user_view_cnt</code></td>
+<td>This dataset stores data on the number of new users and number of active users on your websites or apps for each day</td>
+</tr>
+<tr>
+<td><code>Day_Traffic_Source_User-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_acquisition_day_traffic_source_user</code></td>
+<td>This dataset stores data on the number of new users per each traffic source type for each day</td>
+</tr>
+<tr>
+<td><code>Day_User_Acquisition-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_acquisition_day_user_acquisition</code></td>
+<td>This dataset stores data on the number of new users, number of active users, number of sessions, number of engaged session, and number of events per each traffic source type for each day</td>
+</tr>
+<tr>
+<td><code>Country_New_User_Acquisition-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>clickstream_acquisition_country_new_user</code></td>
+<td>This dataset stores data on the number of new users per each country and city for each day</td>
+</tr>
+</tbody>
+</table>
+<h2 id="dimensions">Dimensions</h2>
+<p>The Acquisition report includes the following dimensions.</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Description</th>
+<th>How it's calculated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First user traffic source</td>
+<td>The source of the traffic that acquires new users to your websites or apps (for example, google, baidu, and bing)</td>
+<td>Traffic source is populated from utm parameters in page_url (i.e., utm_source) or traffic-source preserved attribute (i.e., _traffic_source_source), or derived from referrer url (only for web). <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>First user traffic medium</td>
+<td>The medium of the traffic that acquires new users to your websites or apps (for example, organic, paid search)</td>
+<td>Traffic medium is populated from utm parameters in page_url (i.e., utm_medium) or traffic-source preserved attribute (i.e., _traffic_source_medium), or derived from referrer url (only for web). <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>First user traffic campaign</td>
+<td>The name of a promotion or marketing campaign that acquires new users to your websites or apps.</td>
+<td>Traffic campaign is populated from utm parameters in page_url (i.e., utm_campaign) and traffic-source preserved attribute (i.e., _traffic_source_campaign), or derived from referrer url (only for web). <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>First user traffic source / Medium</td>
+<td>The combination of traffic source and medium that acquires new users to your websites or apps.</td>
+<td>Same as above for traffic source and traffic medium. <a href="">Learn more</a></td>
+</tr>
+<tr>
+<td>First user traffic channel group</td>
+<td>Channel groups are rule-based definitions of the traffic sources. The name of the traffic channel group that acquires new users to your websites or apps.</td>
+<td>Traffic channel group is derived based on the traffic source and medium. <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>First user traffic clid platform</td>
+<td>The name of platform for click id (auto-tagging from advertisement platform) that acquires new users to your websites or apps.</td>
+<td>Traffic source clid platform is populated from clid parameter in page_url and traffic-source preserved attribute (i.e., _traffic_source_clid_platform). <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>First user app install source</td>
+<td>The name of app store that acquires new users to your apps, for example, App Store, Google Store.</td>
+<td>App install source is from traffic-source preserved attribute (i.e., _app_install_channel). <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>Session traffic source</td>
+<td>The traffic source that acquires users into a new session on your websites or apps (for example, google, baidu, and bing)</td>
+<td>Traffic source is populated from utm parameters in page_url (i.e., utm_source) or traffic-source preserved attribute (i.e., _traffic_source_source), or derived from referrer url (only for web). <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>Session traffic medium</td>
+<td>The traffic medium that acquires users into a new session on your websites or apps (for example, organic, paid search)</td>
+<td>Traffic medium is populated from utm parameters in page_url (i.e., utm_medium) or traffic-source preserved attribute (i.e., _traffic_source_medium), or derived from referrer url (only for web). <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>Session traffic campaign</td>
+<td>The name of a promotion or marketing campaign that acquires users into a new session on your websites or apps.</td>
+<td>Traffic campaign is populated from utm parameters in page_url (i.e., utm_campaign) and traffic-source preserved attribute (i.e., _traffic_source_campaign), or derived from referrer url (only for web). <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>Session traffic Source / Medium</td>
+<td>The combination of traffic source and medium that acquires users into a new session on your websites or apps.</td>
+<td>Same as above for traffic source and traffic medium. <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>Session traffic channel group</td>
+<td>Channel groups are rule-based definitions of the traffic sources. The name of the traffic channel group that acquires users into a new session on your websites or apps.</td>
+<td>Traffic channel group is derived based on the traffic-source and medium. <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>Session traffic clid platform</td>
+<td>The name of platform for click id (auto-tagging from advertisement platform) that acquires users into new session on your websites or apps.</td>
+<td>Traffic clid platform is populated from clid parameter in page_url and traffic-source preserved attribute (i.e., _traffic_source_clid_platform). <a href="../../data-mgmt/traffic-source/">Learn more</a></td>
+</tr>
+<tr>
+<td>Geo country</td>
+<td>The country where users are when they are using your websites or apps</td>
+<td>Geo location information is inferred based on user IP address.</td>
+</tr>
+<tr>
+<td>Geo city</td>
+<td>The city where the users are when they are using your websites or apps</td>
+<td>Geo location information is inferred based on user IP address.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="metrics">Metrics</h2>
+<p>The Acquisition report includes the following metrics.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Definition</th>
 <th>How it's populated</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>user_pseudo_id</code></td>
-<td>Dimension</td>
-<td>A SDK-generated unique id for the user</td>
-<td>Query from analytics engine</td>
+<td>New users</td>
+<td>The number of users who interacted with your site or launched your app for the first time (event triggered: _first_open).</td>
+<td>Count distinct user_id or user_pseudo_id (if user_id is not available) when event_name equals '_first_open'.</td>
 </tr>
 <tr>
-<td><code>user_id</code></td>
-<td>Dimension</td>
-<td>The user ID set via the setUserId API in SDK</td>
-<td>Query from analytics engine</td>
+<td>Active users</td>
+<td>The number of distinct users who triggered any event in the selected time range.</td>
+<td>Count distinct user_id or user_pseudo_id (if user_id is not available) at any event</td>
 </tr>
 <tr>
-<td><code>device_id</code></td>
-<td>Dimension</td>
-<td>The unique ID for the device, please refer to <a href="../../../sdk-manual/">SDK Manual</a> for how the device id was obtained</td>
-<td>Query from analytics engine</td>
+<td>Sessions</td>
+<td>The number of sessions users created.</td>
+<td>Count distinct session_id.</td>
 </tr>
 <tr>
-<td><code>first_visit_date</code></td>
-<td>Dimension</td>
-<td>The date that the user first visited your website or first opened the app</td>
-<td>Query from analytics engine</td>
+<td>Engaged Session</td>
+<td>The number of sessions that lasted 10 seconds or longer, or had 1 or more page or screen views.</td>
+<td>Count distinct session_id if the session is engaged.</td>
 </tr>
 <tr>
-<td><code>first_visit_install_source</code></td>
-<td>Dimension</td>
-<td>The installation source when user first opened your app. Blank for web</td>
-<td>Query from analytics engine</td>
+<td>Engaged Rate</td>
+<td>The percentage of sessions that were engaged sessions.</td>
+<td>Engaged sessions / total sessions.</td>
 </tr>
 <tr>
-<td><code>first_traffic_source_source</code></td>
-<td>Dimension</td>
-<td>The traffic source for the user when first visit the app or web</td>
-<td>Query from analytics engine</td>
+<td>Events</td>
+<td>The number of times users triggered an event.</td>
+<td>Count event_id.</td>
 </tr>
 <tr>
-<td><code>first_traffic_source_medium</code></td>
-<td>Dimension</td>
-<td>The traffic medium for the user when first visit the app or web</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_traffic_source_name</code></td>
-<td>Dimension</td>
-<td>The traffic campaign name for the user when first visit the app or web</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_visit_device_language</code></td>
-<td>Dimension</td>
-<td>The system language of the device user used when they first opened your app or first visited your website.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_visit_device_language</code></td>
-<td>Dimension</td>
-<td>The system language of the device user used when they first opened your app or first visited your website.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_platform</code></td>
-<td>Dimension</td>
-<td>The platform when user first visited your website or first opened your app</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_referer</code></td>
-<td>Dimension</td>
-<td>The referer when user first visited your website</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_visit_country</code></td>
-<td>Dimension</td>
-<td>The country where user first visited your website or first opened your app.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_visit_city</code></td>
-<td>Dimension</td>
-<td>The city where user first visited your website or first opened your app.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>custom_attr_key</code></td>
-<td>Dimension</td>
-<td>The name of the custom attribute key of the user.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>custom_attr_value</code></td>
-<td>Dimension</td>
-<td>The value of the custom attribute key of the user.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>registration_status</code></td>
-<td>Dimension</td>
-<td>If user had registered or not</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>Logged-in Rate</code></td>
-<td>Metric</td>
-<td>Number of distinct user_id divide by number of distinct user_pseudo_id</td>
-<td>Calculated field in QuickSight</td>
+<td>Avg_engagement_time_per_user</td>
+<td>The average time per user that your website was in focus in a user's browser or an app was in the foreground of a user's device.</td>
+<td>Total user engagement durations / Number of active users</td>
 </tr>
 </tbody>
 </table>

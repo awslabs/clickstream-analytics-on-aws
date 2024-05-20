@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/analyzes/">
       
       
-        <link rel="prev" href="../explore/retention/">
+        <link rel="prev" href="../explore/attribution/">
       
       
         <link rel="next" href="../data-mgmt/">
@@ -1953,27 +1953,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/activity/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Activity report
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../dashboard/retention/" class="md-nav__link">
         
   
@@ -2016,32 +1995,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/user/" class="md-nav__link">
+      <a href="../dashboard/details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    User report
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../dashboard/crash/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Crash report
+    Details report
   </span>
   
 
@@ -2214,6 +2172,27 @@
   
   <span class="md-ellipsis">
     Retention
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explore/attribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Attribution
   </span>
   
 
@@ -2408,6 +2387,48 @@
   
   <span class="md-ellipsis">
     Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-mgmt/metadata-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Metadata
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-mgmt/traffic-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Traffic source
   </span>
   
 
@@ -2854,39 +2875,7 @@
 <tbody>
 <tr>
 <td>Event_View_<code>app_name</code>_<code>project_name</code></td>
-<td>Event data that includes all public event parameters</td>
-</tr>
-<tr>
-<td>Event_Parameter_View_<code>app_name</code>_<code>project_name</code></td>
-<td>Events data that includes all private event parameters</td>
-</tr>
-<tr>
-<td>User_Dim_View_<code>app_name</code>_<code>project_name</code></td>
-<td>User data that includes all public attributes</td>
-</tr>
-<tr>
-<td>User_Attr_View_<code>app_name</code>_<code>project_name</code></td>
-<td>User data that includes all private(custom) attributes</td>
-</tr>
-<tr>
-<td>Session_View_<code>app_name</code>_<code>project_name</code></td>
-<td>Data contains measures and dimension about session</td>
-</tr>
-<tr>
-<td>Device_View_<code>app_name</code>_<code>project_name</code></td>
-<td>Data contains information about user device</td>
-</tr>
-<tr>
-<td>Retention_View_<code>app_name</code>_<code>project_name</code></td>
-<td>Data provides metrics on total users and returned user for each date</td>
-</tr>
-<tr>
-<td>Lifecycle_Weekly_View_<code>app_name</code>_<code>project_name</code></td>
-<td>User lifecycle metrics for every week</td>
-</tr>
-<tr>
-<td>Lifecycle_Daily_View_<code>app_name</code>_<code>project_name</code></td>
-<td>User lifecycle metrics for every date</td>
+<td>Event data that includes all event parameters (both common and custom) that joined with user and session table.</td>
 </tr>
 </tbody>
 </table>

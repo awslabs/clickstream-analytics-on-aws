@@ -14,7 +14,7 @@
         <link rel="prev" href="../path/">
       
       
-        <link rel="next" href="../../analyzes/">
+        <link rel="next" href="../attribution/">
       
       
       <link rel="icon" href="../../../images/favicon.ico">
@@ -1953,27 +1953,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/activity/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Activity report
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../dashboard/retention/" class="md-nav__link">
         
   
@@ -2016,32 +1995,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/user/" class="md-nav__link">
+      <a href="../../dashboard/details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    User report
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../dashboard/crash/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Crash report
+    Details report
   </span>
   
 
@@ -2301,6 +2259,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../attribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Attribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2426,6 +2405,48 @@
   
   <span class="md-ellipsis">
     Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/metadata-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Metadata
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/traffic-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Traffic source
   </span>
   
 
@@ -2881,14 +2902,14 @@
 </div>
 </li>
 <li>
-<p><strong>Retention Rate</strong>:  retention rate % = the number of users performed the specified starting event on the start date (or week, or month depends on the granularity selection) / the number of the same users performed the specified returning event on the the return date (or week, or month) </p>
+<p><strong>Retention Rate</strong>:  retention rate % = the number of users performed the specified starting event on the start date (or week, or month depends on the granularity selection) / the number of the same users performed the specified returning event on the return date (or week, or month) </p>
 </li>
 </ul>
 <h2 id="how-to-use">How to use</h2>
 <ol>
 <li>Select a <strong>Start</strong> event, you can add filter to the event by clicking the <span class="twemoji filter"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15 19.88c.04.3-.06.62-.29.83a.996.996 0 0 1-1.41 0L9.29 16.7a.989.989 0 0 1-.29-.83v-5.12L4.21 4.62a1 1 0 0 1 .17-1.4c.19-.14.4-.22.62-.22h14c.22 0 .43.08.62.22a1 1 0 0 1 .17 1.4L15 10.75v9.13M7.04 5 11 10.06v5.52l2 2v-7.53L16.96 5H7.04Z"/></svg></span> icon.</li>
 <li>Select a <strong>Revisit</strong> event, you can add filter to the event by clicking the <span class="twemoji filter"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15 19.88c.04.3-.06.62-.29.83a.996.996 0 0 1-1.41 0L9.29 16.7a.989.989 0 0 1-.29-.83v-5.12L4.21 4.62a1 1 0 0 1 .17-1.4c.19-.14.4-.22.62-.22h14c.22 0 .43.08.62.22a1 1 0 0 1 .17 1.4L15 10.75v9.13M7.04 5 11 10.06v5.52l2 2v-7.53L16.96 5H7.04Z"/></svg></span> icon.</li>
-<li>If need to associate parameter, you can toggle on <strong>Associate parameter</strong>, then select parameter for both starting event and return event.</li>
+<li>If you need to associate parameter, you can toggle on <strong>Associate parameter</strong>, then select parameter for both starting event and return event.</li>
 <li>Repeat above step to add more metric if needed.</li>
 <li>If needed, configure global filter by selecting event parameter or user attributes. Similar to event filter, you can add multiple global filters and configure the filter relationship.</li>
 <li>If needed, configure grouping by selecting an event parameter or user attribute</li>
@@ -2914,7 +2935,7 @@
 <li>Choose <code>_first_open</code> as the start event.</li>
 <li>Choose <code>_app_start</code> as the return event.</li>
 <li>Configure a global filter in the right <strong>Filters</strong> area:<ul>
-<li>Choose <code>other.platform</code> as the filter property.</li>
+<li>Choose <code>Event preset</code> / <code>Platform</code> as the filter property.</li>
 <li>Operation: <code>=</code></li>
 <li>Value: <code>Android</code></li>
 </ul>

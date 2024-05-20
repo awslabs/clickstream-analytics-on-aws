@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/dashboard/custom-analysis/">
       
       
-        <link rel="prev" href="../crash/">
+        <link rel="prev" href="../details/">
       
       
         <link rel="next" href="../../explore/">
@@ -1955,27 +1955,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../activity/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Activity report
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../retention/" class="md-nav__link">
         
   
@@ -2018,32 +1997,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../user/" class="md-nav__link">
+      <a href="../details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    User report
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../crash/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Crash report
+    Details report
   </span>
   
 
@@ -2106,13 +2064,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#steps" class="md-nav__link">
+  <a href="#options-1-create-custom-analysis-with-preset-quicksight-dataset" class="md-nav__link">
     <span class="md-ellipsis">
-      Steps
+      Options 1 - create custom analysis with preset QuickSight dataset.
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Steps">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-2-create-custom-view-in-redshift-and-import-to-quicksight" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option 2 - create custom view in Redshift and import to QuickSight
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 2 - create custom view in Redshift and import to QuickSight">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2307,6 +2274,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explore/attribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Attribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2432,6 +2420,48 @@
   
   <span class="md-ellipsis">
     Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/metadata-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Metadata
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-mgmt/traffic-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Traffic source
   </span>
   
 
@@ -2813,13 +2843,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#steps" class="md-nav__link">
+  <a href="#options-1-create-custom-analysis-with-preset-quicksight-dataset" class="md-nav__link">
     <span class="md-ellipsis">
-      Steps
+      Options 1 - create custom analysis with preset QuickSight dataset.
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Steps">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-2-create-custom-view-in-redshift-and-import-to-quicksight" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option 2 - create custom view in Redshift and import to QuickSight
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 2 - create custom view in Redshift and import to QuickSight">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2873,9 +2912,27 @@
 
 
 <h1 id="custom-report">Custom report</h1>
-<p>One of the key benefits of this solution is that you have 100% control over the clickstream data collected from your apps and websites. You have complete flexibility to analyze the data for your specific business needs. 
-This article illustrates the steps of creating a custom report with an example of creating funnel analysis by using Redshift Serverless as analytics engine and QuickSight as reporting tools.</p>
-<h2 id="steps">Steps</h2>
+<p>One of the key benefits of this solution is that you have complete control over the clickstream data collected from your apps and websites. This provides you with the flexibility to analyze the data according to your specific business needs.</p>
+<p>There are two options to create custom analyses. The following examples will guide you through the detailed steps.</p>
+<h2 id="options-1-create-custom-analysis-with-preset-quicksight-dataset">Options 1 - create custom analysis with preset QuickSight dataset.</h2>
+<p>The solution had created a <code>Event_View-&lt;app&gt;-&lt;project&gt;</code> dataset which stores all the raw event data, includes both common and custom dimension, joined with user attributes and session attributes in QuickSight, you can use these datasets to create custom analysis based on your specific requirements.</p>
+<p>For example, let's say you have a custom event <code>view_item</code> that records when a user views an item's detail page. This custom event has a custom attribute <code>event_category</code> to track the promotion spot from which the user came to the item detail page. Now, you want to create a custom analysis that uses a pie chart to show the percentage of each event_category that led user to item detail pages.</p>
+<ol>
+<li>Go to Analyze module in Clickstream Analytics on AWS web console.</li>
+<li>Click on <code>New analysis</code> button in the top-right corner.</li>
+<li>Select <code>Event_View-&lt;app&gt;-&lt;project&gt;</code> dataset.</li>
+<li>Click on <code>USE IN ANALYSIS</code> button.</li>
+<li>Since the <code>event_category</code> is a custom parameter for the <code>view_item</code> event, we need to extract it from the <code>custom_parameters_json_str</code> field, which is a JSON string, we can use <a href="https://docs.aws.amazon.com/quicksight/latest/user/parseJson-function.html"><strong>parseJSON</strong></a> function to extract values from it. Click on <code>+ CALCULATED FIELD</code> button to add a calculated field.</li>
+<li>Input "Event Category" as the name for the calculated field, and input <code>parseJson({custom_parameters_json_str}, "$.event_category")</code> as the formula, then click <code>Save</code> button.</li>
+<li>Now you back to the analysis author console, you can see a new field called <code>Event Category</code> appear in the Data panel.</li>
+<li>In the Visuals panel, click on <code>+ ADD</code> button, and select Pie chart.</li>
+<li>Drag the <code>Event Category</code> field to GROUP/COLOR, drag <code>event_id</code> to VALUE. </li>
+<li>In the Filter panel, add a filter to only include  <code>event_name</code> equals <code>view_item</code>.</li>
+<li>Now you should be able to see a bar chart shows the percentage of each event_category that led to <code>view_item</code> events. </li>
+<li>You can format the analysis according to your need then publish it as dashboard.</li>
+<li>To enable your custom analysis to appear in the Dashboards module of the Clickstream Analytics Studio, you need to add the dashboard into the Shared folder with name of the <code>&lt;project-id&gt;_&lt;app_id&gt;</code>, which was pre-created by the solution. After you added the custom dashboard into the Shared folder, it will automatically display in the Clickstream Analytics Studio.</li>
+</ol>
+<h2 id="option-2-create-custom-view-in-redshift-and-import-to-quicksight">Option 2 - create custom view in Redshift and import to QuickSight</h2>
 <p>Creating a custom report mainly consists of two parts, the first part is to prepare the dataset in your analytics engine, the second part is to create visualization in QuickSight.</p>
 <h3 id="part-1-dataset-preparation">Part 1 - Dataset preparation</h3>
 <ol>
@@ -2883,7 +2940,7 @@ This article illustrates the steps of creating a custom report with an example o
 <li>Click the workgroup starting with <code>clickstream-&lt;project-id&gt;</code> created by the solution.</li>
 <li>Click on the <code>Query data</code> button, you will be directed to the Redshift Query Editor.</li>
 <li>
-<p>In the <code>Editor</code> view on the Redshift Query Editor, right click on the workgroup with name of <code>clickstream-&lt;project-id&gt;</code>. In the prompted drop-down, select <code>Edit connection</code>, you will be asked to provide connection parameters. Follow this <a href="https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html" target="_blank">guide</a> to use an appropriate method to connect.</p>
+<p>In the <code>Editor</code> view on the Redshift Query Editor, right-click on the workgroup with name of <code>clickstream-&lt;project-id&gt;</code>. In the prompted drop-down, select <code>Edit connection</code>, you will be asked to provide connection parameters. Follow this <a href="https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html" target="_blank">guide</a> to use an appropriate method to connect.</p>
 <div class="admonition info">
 <p class="admonition-title">Important</p>
 <p>You will need read and write permissions for the database (with name as <code>&lt;project-id&gt;</code>) to create custom view or table. For example, you can use Admin user to connect to the cluster or workgroup. If you don't know the password for the Admin user, you can reset the admin password in the Redshift Console (<a href="https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-security.html" target="_blank">Learn more</a>). </p>
@@ -2897,49 +2954,48 @@ This article illustrates the steps of creating a custom report with an example o
 <p>Create a new view for funnel analysis. In this example, we used below SQL.</p>
 <details class="example">
 <summary>SQL Commands</summary>
-<div class="language-sql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">VIEW</span><span class="w"> </span><span class="n">notepad</span><span class="p">.</span><span class="n">clickstream_funnel_view</span><span class="w"> </span><span class="k">as</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">SELECT</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">platform</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">step1_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">login_users</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">step2_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">add_button_click_users</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">step3_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">note_create_users</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="k">FROM</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="k">SELECT</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="n">platform</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step1_id</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="n">event_timestamp</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step1_timestamp</span><span class="p">,</span><span class="w"> </span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="n">step2_id</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="n">step2_timestamp</span><span class="p">,</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="n">step3_id</span><span class="p">,</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="n">step3_timestamp</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="k">FROM</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="n">notepad</span><span class="p">.</span><span class="n">ods_events</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="k">SELECT</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step2_id</span><span class="p">,</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="n">event_timestamp</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step2_timestamp</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="k">FROM</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="n">notepad</span><span class="p">.</span><span class="n">ods_events</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="k">WHERE</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="n">event_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;add_button_click&#39;</span><span class="w"> </span><span class="p">)</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="k">ON</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">step2_id</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span><span class="k">AND</span><span class="w"> </span><span class="n">event_timestamp</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">step2_timestamp</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="k">SELECT</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step3_id</span><span class="p">,</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">    </span><span class="n">event_timestamp</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step3_timestamp</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="k">FROM</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span><span class="n">notepad</span><span class="p">.</span><span class="n">ods_events</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="k">WHERE</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">    </span><span class="n">event_name</span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;note_create&#39;</span><span class="w"> </span><span class="p">)</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="k">ON</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">    </span><span class="n">step3_id</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">step2_id</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">    </span><span class="k">AND</span><span class="w"> </span><span class="n">step2_timestamp</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">step3_timestamp</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="k">WHERE</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="n">event_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;user_login&#39;</span><span class="w"> </span><span class="p">)</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="k">group</span><span class="w"> </span><span class="k">by</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="n">platform</span>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="w">    </span><span class="k">SELECT</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">platform</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">step1_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">session_start_users</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">step2_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">page_view_users</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">step3_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">scroll_users</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="k">FROM</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="k">SELECT</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="n">platform</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step1_id</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">        </span><span class="n">event_timestamp</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step1_timestamp</span><span class="p">,</span><span class="w"> </span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="n">step2_id</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="n">step2_timestamp</span><span class="p">,</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">        </span><span class="n">step3_id</span><span class="p">,</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">        </span><span class="n">step3_timestamp</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="k">FROM</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">        </span><span class="err">{{</span><span class="w"> </span><span class="k">schema</span><span class="w"> </span><span class="err">}}</span><span class="p">.</span><span class="n">clickstream_event_base_view</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="k">SELECT</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">        </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step2_id</span><span class="p">,</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">        </span><span class="n">event_timestamp</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step2_timestamp</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="k">FROM</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">        </span><span class="err">{{</span><span class="w"> </span><span class="k">schema</span><span class="w"> </span><span class="err">}}</span><span class="p">.</span><span class="n">clickstream_event_base_view</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="k">WHERE</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">        </span><span class="n">event_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;_page_view&#39;</span><span class="w"> </span><span class="p">)</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="k">ON</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">step2_id</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">        </span><span class="k">AND</span><span class="w"> </span><span class="n">event_timestamp</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">step2_timestamp</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">    </span><span class="k">SELECT</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">        </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step3_id</span><span class="p">,</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">        </span><span class="n">event_timestamp</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">step3_timestamp</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">    </span><span class="k">FROM</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">        </span><span class="err">{{</span><span class="w"> </span><span class="k">schema</span><span class="w"> </span><span class="err">}}</span><span class="p">.</span><span class="n">clickstream_event_base_view</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span><span class="k">WHERE</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">        </span><span class="n">event_name</span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;_scroll&#39;</span><span class="w"> </span><span class="p">)</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">    </span><span class="k">ON</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">        </span><span class="n">step3_id</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">step2_id</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">        </span><span class="k">AND</span><span class="w"> </span><span class="n">step2_timestamp</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">step3_timestamp</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">    </span><span class="k">WHERE</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">    </span><span class="n">event_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;_session_start&#39;</span><span class="w"> </span><span class="p">)</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">    </span><span class="k">group</span><span class="w"> </span><span class="k">by</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">    </span><span class="n">platform</span>
 </span></code></pre></div>
 </details>
 </li>
@@ -2954,15 +3010,15 @@ This article illustrates the steps of creating a custom report with an example o
 <li><strong>Database server</strong>: input the endpoint url of the serverless workgroup, which you can find on the workgroup console.</li>
 <li><strong>Port</strong>: <code>5439</code></li>
 <li><strong>Database name</strong>: <code>&lt;project-id&gt;</code></li>
-<li><strong>User name</strong>: name of the user you used to created the custom view in previous steps</li>
-<li><strong>Password</strong>: password of the user you used to created the custom view in previous steps</li>
+<li><strong>User name</strong>: name of the user you used to create the custom view in previous steps</li>
+<li><strong>Password</strong>: password of the user you used to create the custom view in previous steps</li>
 </ul>
 </li>
 <li>Validated the connection, if ok, click <strong>Create data source</strong> button.</li>
 <li>
 <p>Choose the view from Redshift as data source - "<strong>clickstream_funnel_view</strong>", then</p>
 <ul>
-<li>Schema: select <code>notepad</code> </li>
+<li>Schema: select your schema</li>
 <li>Tables: <code>clickstream_funnel_view</code></li>
 </ul>
 <div class="admonition tip">
@@ -2979,7 +3035,7 @@ This article illustrates the steps of creating a custom report with an example o
 <li>You will be prompt to select a layout for your visualization, select one per your need.</li>
 <li>Click "<strong>+Add</strong>" at the top-left of the screen then click "<strong>Add visual</strong>" button.</li>
 <li>Select a Visual type at the bottom-left of the screen, in this example, select <strong>Vertical bar chart</strong></li>
-<li>In the Field wells, select <code>platform</code> as X axis, <code>login_user</code>, <code>add_button_click_users</code>, and <code>note_create_users</code> as Value.</li>
+<li>In the Field wells, select <code>platform</code> as X axis, <code>session_start_users</code>, <code>page_view_users</code>, and <code>scroll_users</code> as Value.</li>
 <li>You now can publish this analysis as dashboard or continue to format it. Learn more about QuickSight visualization in this <a href="https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html" target="_blank">link</a></li>
 </ol>
 <h3 id="part-3-add-the-custom-dashboard-to-analytic-studio">Part 3 - Add the custom dashboard to Analytic Studio</h3>

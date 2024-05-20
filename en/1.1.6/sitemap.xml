@@ -81,17 +81,12 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/dashboard/activity/</loc>
-         <lastmod>2024-05-20</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/dashboard/crash/</loc>
-         <lastmod>2024-05-20</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/dashboard/custom-analysis/</loc>
+         <lastmod>2024-05-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/dashboard/details/</loc>
          <lastmod>2024-05-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -111,17 +106,27 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/dashboard/user/</loc>
-         <lastmod>2024-05-20</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/data-mgmt/</loc>
          <lastmod>2024-05-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/data-mgmt/metadata-mgmt/</loc>
+         <lastmod>2024-05-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/data-mgmt/traffic-source/</loc>
+         <lastmod>2024-05-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/explore/</loc>
+         <lastmod>2024-05-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/analytics/explore/attribution/</loc>
          <lastmod>2024-05-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
