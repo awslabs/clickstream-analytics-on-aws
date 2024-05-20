@@ -2698,6 +2698,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#how-to-speed-up-the-loading-of-the-default-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to speed up the loading of the default dashboard?
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3085,6 +3094,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#how-to-speed-up-the-loading-of-the-default-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to speed up the loading of the default dashboard?
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3230,6 +3248,22 @@ You pay only for what you use, and there are no minimum or setup fees. Refer to 
 <li>Go back to the Dashboard, refresh the webpage, you should be able to see the Save As button at the upper right.</li>
 <li>Click Save as button, enter a name for the analysis, and click SAVE, now you should be able to see a new analysis in the Analyzes, with which now you can edit and publish a new dashboard.</li>
 </ol>
+<h3 id="how-to-speed-up-the-loading-of-the-default-dashboard">How to speed up the loading of the default dashboard?</h3>
+<p>You can accelerate report loading by converting QuickSight datasets to SPICE mode. Here are the steps to do this:</p>
+<ol>
+<li>Purchase SPICE capacity through the QuickSight console. The required capacity depends on your data volume; it is recommended to enable the auto-purchase option.</li>
+<li>Open the solution console, select the target project, click the pipeline <strong>Active</strong> status on the pipeline details page, and then open the stack detail link of <strong>Reporting</strong> in the CloudFormation console.</li>
+<li>Click the <strong>Update</strong> button and select the <strong>Use existing template</strong> option.</li>
+<li>Find the <strong>Enable QuickSight SPICE Import Mode</strong> parameter and change its value to <strong>yes</strong>. Keep other parameters unchanged.</li>
+<li>Click next to complete the stack update. Once the update is complete, you can start using it.</li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">Important</p>
+<ol>
+<li>Enabling SPICE will result in charges based on the amount of space used. Pricing details can be found in the QuickSight pricing page. If the dashboard is frequently viewed, enabling SPICE can reduce the access load on the Redshift database, but it may also increase data latency.</li>
+<li>By default, the solution refreshes data in SPICE using an incremental update method. The refresh process is scheduled at 6 AM daily in your dashboard's time zone. You can manually adjust the update schedule in QuickSight.</li>
+</ol>
+</div>
 <h2 id="sdk">SDK</h2>
 <h3 id="can-i-use-other-sdk-to-send-data-to-the-pipeline-created-by-this-solution">Can I use other SDK to send data to the pipeline created by this solution</h3>
 <p>Yes, you can. The solution support users using third-party SDK to send data to the pipeline. Note that, if you want to enable data processing and modeling module when using a third-party SDK to send data, you will need to provide an transformation plugin to map third-party SDK's data structure to solution data schema. Please refer to <a href="../pipeline-mgmt/data-processing/configure-plugin/">Custom plugin</a> for more details.</p>
