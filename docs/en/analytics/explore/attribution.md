@@ -22,17 +22,17 @@ Attributions analysis are commonly used when analyzing the contribution of speci
 
 ## How to use
 1. Select an event and metric as conversion goal, you can add filter. Metric types includes:
-   1. Event number: number of conversion times
-   2. SumGroup: sum a value from a numerical parameter that are associated with the event selected as conversion goal
+    1. Event number: number of conversion times
+    2. SumGroup: sum a value from a numerical parameter that are associated with the event selected as conversion goal
 2. Select touchpoint events, you can add filter(s) to each touchpoint.
 3. Click on Query to start calculation
 4. You can change the time range or attribution model according to your need, which will automatically re-run the query.
 5. Analysis result is displayed in a table with the following columns:
-   1. Touchpoint Name: The touchpoint event name for attribution.
-   2. Total Trigger Count: Number of times the touchpoint has been triggered within the specified conversion window.
-   3. Number of Triggers with Conversion: Within the conversion window, number of time the touchpoint occurred simultaneously with the conversion goal.
-   4. Contribution (number/sum...value): The contribution value of this touchpoint attributed to the conversion goal based on the selected model. 
-   5. Contribution Rate: After calculating through the attribution model, the percentage contribution of this touchpoint to the overall total. The calculation logic is the conversion goal metrics under the current attributed event divided by the sum of all conversion goals.
+    1. Touchpoint Name: The touchpoint event name for attribution.
+    2. Total Trigger Count: Number of times the touchpoint has been triggered within the specified conversion window.
+    3. Number of Triggers with Conversion: Within the conversion window, number of time the touchpoint occurred simultaneously with the conversion goal.
+    4. Contribution (number/sum...value): The contribution value of this touchpoint attributed to the conversion goal based on the selected model. 
+    5. Contribution Rate: After calculating through the attribution model, the percentage contribution of this touchpoint to the overall total. The calculation logic is the conversion goal metrics under the current attributed event divided by the sum of all conversion goals.
 
 ## Example
 

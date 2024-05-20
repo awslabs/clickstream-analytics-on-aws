@@ -51,6 +51,7 @@ The Acquisition report includes the following metrics.
 | Engaged Session | The number of sessions that lasted 10 seconds or longer, or had 1 or more page or screen views.| Count distinct session_id if the session is engaged. |
 | Engaged Rate | The percentage of sessions that were engaged sessions.| Engaged sessions / total sessions. |
 | Events | The number of times users triggered an event.| Count event_id. |
+| Avg_engagement_time_per_user | The average time per user that your website was in focus in a user's browser or an app was in the foreground of a user's device.| Total user engagement durations / Number of active users |
   
 ## Sample dashboard
 Below image is a sample dashboard for your reference.

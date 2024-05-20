@@ -48,7 +48,7 @@ Retention analysis are commonly used to understand how well your app or website 
 2. Choose `_first_open` as the start event.
 3. Choose `_app_start` as the return event.
 4. Configure a global filter in the right **Filters** area:
-    - Choose `other.platform` as the filter property.
+    - Choose `Event preset` / `Platform` as the filter property.
     - Operation: `=`
     - Value: `Android`
 5. In the right **Attribute Grouping** area, configure grouping by selecting `app_info.instal_source`.

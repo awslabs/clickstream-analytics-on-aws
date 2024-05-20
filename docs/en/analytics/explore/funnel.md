@@ -46,7 +46,7 @@ Funnel analysis are commonly used when analyzing user behaviors, for example:
 3. In the left **Define Funnel** area, choose `The Day` as the funnel window.
 4. Choose `_session_start`, `view_item`, `add_to_cart`, `purchase` as funnel events.
 5. Configure a global filter in the right **Filters** area:
-    - Choose `other.platform` as the filter property.
+    - Choose `Event preset` / `Platform` as the filter property.
     - Operation: `=`
     - Value: `Web`
 6. Click **Query**.
