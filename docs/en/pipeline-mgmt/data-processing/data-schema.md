@@ -5,13 +5,13 @@ This article explains the data schema and format in {{solution_name}}. This solu
 For each project, the solution creates a database with name of `<project-id>` in Redshift and Athena. Each App will have a schema with name of `app_id`. In Athena, all tables are added partitions of app_id, year, month, and day. Based on the event data, the solution's data-processing module will create the following four base tables:
 
 - **`event-v2`**: This table stores event data, each record represents an individual event. 
-- **`user-v2`** : This table stores latest user attributes, each record represents a visitor (pseudonymous user).
+- **`user-v2`** : This table stores the latest user attributes, each record represents a visitor (pseudonymous user).
 - **`item-v2`** : This table stores event-item data, each record represents an event that is associated with an item.
 - **`session`** : This table stores session data, each record represents a session for each pseudonymous user. 
 
 
 ## Columns
-Each column in the tables represents a specific parameter for a event, user, or item. Note that some parameters are nested within a Super field in Redshift or a Map field in Athena, and those fields (e.g., custom_parameters, user_properties) contains parameters that are repeatable. Table columns are described below.
+Each column in the tables represents a specific parameter for an event, user, or item. Note that some parameters are nested within a Super field in Redshift or a Map field in Athena, and those fields (e.g., custom_parameters, user_properties) contains parameters that are repeatable. Table columns are described below.
 
 ### Event table
 |**Field Name**| **Data Type - Redshift** | **Data Type - Athena** | **Description** |

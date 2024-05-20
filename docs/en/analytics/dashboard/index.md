@@ -12,7 +12,7 @@ You can find the dashboards for each application by following below steps:
 3. Click the **User life cycle - default** dashboard
 
 ## Default Dashboard
-The dashboards contains a set of reports covering the user life cycle, helps you understand how people use your website or app, from acquisition to retention.
+The dashboards contain a set of reports covering the user life cycle, helps you understand how people use your website or app, from acquisition to retention.
 
 | Report name | What it is |
 |-------------|------------|
@@ -24,7 +24,7 @@ The dashboards contains a set of reports covering the user life cycle, helps you
 
 
 ## Custom report
-When you want to investigate certain pieces of data further, you can write SQL to create views in Redshift or Athena, then add dataset into QuickSight to create visualization. Here is an example, [**Custom report**](./custom-analysis.md), to demonstrate how to create a customize report with Redshift. 
+When you want to investigate certain pieces of data further, you can write SQL to create views in Redshift or Athena, then add dataset into QuickSight to create visualization. Here is an example, [**Custom report**](./custom-analysis.md), to demonstrate how to create a customized report with Redshift. 
 
 
 ## Create dashboard

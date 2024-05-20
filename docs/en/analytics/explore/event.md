@@ -1,11 +1,11 @@
 # Event Analysis
-Event analysis is used to study the frequency of certain behavioral events. You can conduct multi-dimensional analysis of user behavior through custom metrics, groupings, filters, and various visual charts.
+Event analysis is used to study the frequency of certain behavioral events. You can conduct multidimensional analysis of user behavior through custom metrics, groupings, filters, and various visual charts.
 
 ## Use cases
 Event analysis are commonly used when analyzing user behaviors, for example:
 
 - Query on user usage of certain product functions (such as adding favorite, video playback, view live stream, etc.);
-- Compare different group of users's behaviors, such as number of login per different country
+- Compare different group of user's behaviors, such as number of login per different country
 - Compare different channel's effectiveness, such as sign-up rate per traffic source.
 
 ## Key concept:
@@ -38,7 +38,7 @@ Event analysis are commonly used when analyzing user behaviors, for example:
 1. Select the **Event Analysis** model.
 2. In the left **Define Metrics** area, choose `Page view` as the metric for calculating events and select `Event number` as the metric type.
 3. Click the **+ Add Event** button to add another metric. Choose `App end` as the metric for calculating events and select `User number` as the metric type.
-4. Click the filter icon to the right of `App end` to add a event filter condition:
+4. Click the filter icon to the right of `App end` to add an event filter condition:
     - Filter property: `Session` / `Session duration(msec)`
     - Operation: `>=`
     - Value: `30000` (the unit of `Session duration(msec)` is millisecond)

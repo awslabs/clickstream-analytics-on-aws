@@ -7,7 +7,7 @@ When you want to explore the clickstream data in more detail, you can use explor
 - focus on the most relevant data by using filters on event parameters and user attributes
 - group metrics by dimension to make it easy to compare
 - easily switch visualization type and drill down or up into data
-- view and export summary data into the excel or csv
+- view and export summary data into the Excel or csv
 - save the exploration analytics results into a dashboard for sharing or regular use
 
 ## Access Explorations

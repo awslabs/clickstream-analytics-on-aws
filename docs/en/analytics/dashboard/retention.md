@@ -14,7 +14,7 @@ Retention report are created based on the following QuickSight dataset:
 |QuickSight dataset | Redshift view / table| Description | 
 |----------|--------------------|------------------|
 |`User_New_Return-<app>-<project>`|`clickstream_retention_user_new_return`| This dataset stores data on the number of new users and number of returning users for each day|
-|`Retention_View-<app>-<project>`|`clickstream_retention_view_v3`| This dataset stores data on the cohorted user return data by first visit date and days from their first visit.|
+|`Retention_View-<app>-<project>`|`clickstream_retention_view_v3`| This dataset stores data on the cohort of user return by their first visit date and days since their first visit.|
 |`Event_Overtime-<app>-<project>`|`clickstream_retention_event_overtime`| This dataset stores data on daily event counts. |
 |`DAU_MAU-<app>-<project>`|`clickstream_retention_dau_wau`| This dataset stores the user_ids of active users for each day.|
 |`Lifecycle_Weekly_View-<app>-<project>`|`clickstream_retention_dau_wau`| This dataset stores data on the number of new users, number of retained users, number of return users, and number of lost users for each week.|

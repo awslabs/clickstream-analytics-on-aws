@@ -65,4 +65,4 @@ Follow the same steps to update display name and description for Event Parameter
 Follow the same steps to customize data dictionary for User Attributes values.
 
 ## Trigger the workflow to scan metadata manually
-You can choose **Scan metadata** at the top right corner of the page to start a workflow to scan the past seven days metadata of the current app.
+You can choose **Scan metadata** in the top right corner of the page to start a workflow to scan the past seven days metadata of the current app.

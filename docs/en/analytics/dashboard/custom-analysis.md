@@ -4,12 +4,12 @@ One of the key benefits of this solution is that you have complete control over 
 There are two options to create custom analyses. The following examples will guide you through the detailed steps.
 
 ## Options 1 - create custom analysis with preset QuickSight dataset.
-The solution had created a `Event_View-<app>-<project>` dataset which stores all the raw event data, includes both common and custom dimension, joined with user attributes and session attributes in QuickSight, you can use this datasets to create custom analysis based on your specific requirements.
+The solution had created a `Event_View-<app>-<project>` dataset which stores all the raw event data, includes both common and custom dimension, joined with user attributes and session attributes in QuickSight, you can use these datasets to create custom analysis based on your specific requirements.
 
 For example, let's say you have a custom event `view_item` that records when a user views an item's detail page. This custom event has a custom attribute `event_category` to track the promotion spot from which the user came to the item detail page. Now, you want to create a custom analysis that uses a pie chart to show the percentage of each event_category that led user to item detail pages.
 
 1. Go to Analyze module in {{solution_name}} web console.
-2. Click on `New analysis` button on the top-right corner.
+2. Click on `New analysis` button in the top-right corner.
 3. Select `Event_View-<app>-<project>` dataset.
 4. Click on `USE IN ANALYSIS` button.
 5. Since the `event_category` is a custom parameter for the `view_item` event, we need to extract it from the `custom_parameters_json_str` field, which is a JSON string, we can use [**parseJSON**](https://docs.aws.amazon.com/quicksight/latest/user/parseJson-function.html) function to extract values from it. Click on `+ CALCULATED FIELD` button to add a calculated field.
@@ -31,7 +31,7 @@ Creating a custom report mainly consists of two parts, the first part is to prep
 1. Open **Redshift Serverless dashboard**
 2. Click the workgroup starting with `clickstream-<project-id>` created by the solution.
 3. Click on the `Query data` button, you will be directed to the Redshift Query Editor.
-4. In the `Editor` view on the Redshift Query Editor, right click on the workgroup with name of `clickstream-<project-id>`. In the prompted drop-down, select `Edit connection`, you will be asked to provide connection parameters. Follow this [guide](https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html){:target="_blank"} to use an appropriate method to connect.
+4. In the `Editor` view on the Redshift Query Editor, right-click on the workgroup with name of `clickstream-<project-id>`. In the prompted drop-down, select `Edit connection`, you will be asked to provide connection parameters. Follow this [guide](https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html){:target="_blank"} to use an appropriate method to connect.
 
     !!! info "Important"
 
@@ -95,8 +95,8 @@ Creating a custom report mainly consists of two parts, the first part is to prep
       - **Database server**: input the endpoint url of the serverless workgroup, which you can find on the workgroup console.
       - **Port**: `5439`
       - **Database name**: `<project-id>`
-      - **User name**: name of the user you used to created the custom view in previous steps
-      - **Password**: password of the user you used to created the custom view in previous steps
+      - **User name**: name of the user you used to create the custom view in previous steps
+      - **Password**: password of the user you used to create the custom view in previous steps
 10. Validated the connection, if ok, click **Create data source** button.
 11. Choose the view from Redshift as data source - "**clickstream_funnel_view**", then
     - Schema: select your schema

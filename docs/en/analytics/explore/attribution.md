@@ -36,7 +36,7 @@ Attributions analysis are commonly used when analyzing the contribution of speci
 
 ## Example
 
-> Assuming you have four live streaming channels on your website, now you want to understand which channel contribute the most for the total purchase amount. 
+> Assuming you have four live-streaming channels on your website, now you want to understand which channel contribute the most for the total purchase amount. 
 
 1. Select the **Attribution Analysis** model.
 2. Choose `purchase` as the conversion event, choose `sumGroup` by `[event]value` as conversion metric

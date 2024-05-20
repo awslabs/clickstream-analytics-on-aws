@@ -47,13 +47,13 @@ Data processing module uses a Source Category mapping table ([learn more](#sourc
 Data processing module uses a set of predefined rules ([learn more](#channel-group-definitions-and-rules)) to categorize the traffics into different groups (e.g., direct, paid search, organic search) based on the key traffic-source dimensions (mainly the source. medium, and campaign). 
 
 ### Step 4 - Populate traffic source dimensions for users and sessions
-While process the traffic-source for each events, the data processing module populate traffic source dimension for each user and session.
+While process the traffic-source for each event, the data processing module populate traffic source dimension for each user and session.
 
 1. User: If there are traffic-source data in the first meaningful events (e.g., first_open, page_view, app_start, app_end) for the first time user visit your website or apps, those traffic-source dimension will be assigned to corresponding user traffic-source attributes, i.e., first_traffic_source, first_traffic_medium.
 2. Session: When user initiate a new session, the data processing module derives traffic-source dimension for the session from the traffic-source dimensions of the first meaningful events in the session (e.g., first_open, page_view, app_start, app_end).
 
 ## Configurations
-{{ solution_name }} allows you configure the channel group rules and source category mapping to customize the traffic source processing to meet your analytics needs.
+{{ solution_name }} allows you to configure the channel group rules and source category mapping to customize the traffic source processing to meet your analytics needs.
 
 ### Channel group definitions and rules
 Below are the default channel groups and the rules that the solution uses to categorize the traffics. 
