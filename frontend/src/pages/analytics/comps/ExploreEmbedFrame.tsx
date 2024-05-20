@@ -13,6 +13,7 @@
 import { Box, SpaceBetween } from '@cloudscape-design/components';
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import ExtendIcon from 'components/common/ExtendIcon';
+import Loading from 'components/common/Loading';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -97,20 +98,15 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
             textAlign="center"
             color="text-status-inactive"
           >
-            <ExtendIcon icon="ClipboardData" color="#666" />
             {embedPage === 'explore' && (
               <SpaceBetween size="m">
+                <ExtendIcon icon="ClipboardData" color="#666" />
                 {t('analytics:emptyDataMessage')}
               </SpaceBetween>
             )}
-            {embedPage === 'dashboard' && (
+            {(embedPage === 'dashboard' || embedPage === 'analyze') && (
               <SpaceBetween size="m">
-                {t('analytics:emptyDashboardMessage')}
-              </SpaceBetween>
-            )}
-            {embedPage === 'analyze' && (
-              <SpaceBetween size="m">
-                {t('analytics:emptyAnalyzeMessage')}
+                <Loading />
               </SpaceBetween>
             )}
           </Box>

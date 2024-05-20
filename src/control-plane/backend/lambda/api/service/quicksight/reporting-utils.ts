@@ -1484,7 +1484,7 @@ export async function getDashboardTitleProps(analysisType: AnalysisType, query: 
   const t = await i18next.changeLanguage(locale);
   let title = '';
   let subTitle = ' ';
-  const tableTitle = t('dashboard.title.tableChart');
+  const tableTitle = query.chartTitle ? `${query.chartTitle} - ${t('dashboard.title.tableChart')}` : t('dashboard.title.tableChart');
 
   if (query.action === ExploreRequestAction.PUBLISH) {
     title = query.chartTitle;
