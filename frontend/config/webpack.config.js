@@ -321,10 +321,10 @@ module.exports = function (webpackEnv) {
         chunks: isEnvDevelopment ? 'async' : 'all',
         minSize: process.env.CHUNK_MIN_SIZE
           ? parseInt(process.env.CHUNK_MIN_SIZE)
-          : 819200, // min 800kb
+          : 409600, // min 400kb
         maxSize: process.env.CHUNK_MAX_SIZE
           ? parseInt(process.env.CHUNK_MAX_SIZE)
-          : 1024000, // max 1024kb
+          : 512000, // max 500kb
         minChunks: 2,
         cacheGroups: {
           vendors: {
