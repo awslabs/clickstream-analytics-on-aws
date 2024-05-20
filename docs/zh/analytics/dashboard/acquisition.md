@@ -1,48 +1,59 @@
 # 获取报告
-您可以使用用户获取报告深入了解新用户如何首次找到您的网站或应用。此报告还允许您查看详细的用户概要。
+您可以使用获取报告来了解新用户首次访问您的网站或应用程序的方式以及日常流量来源。
 
-注意：本文描述了默认报告。您可以通过应用过滤器或比较，或通过在 QuickSight 中更改维度、指标或图表来自定义报告。[了解更多](https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html)
+注意：本文介绍了默认报告。您可以通过应用筛选器或比较，或更改QuickSight中的维度、度量或图表来自定义报告。[了解更多](https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html)
+
 
 ## 查看报告
-1. 访问您应用程序的仪表板。请参阅 [访问仪表板](index.md/#view-dashboards)
-2. 在仪表板中，单击名称为 **`Acquisition`** 的表。
+1. 访问您的应用程序的仪表板。请参阅[访问仪表板](index.md/#view-dashboards)
+2. 在仪表板中，点击名为**`获取`**的工作表。
 
-## 数据来源
-获取报告是基于 `User_Dim_View-<app>-<project>` 的 QuickSight 数据集创建的，该数据集连接到分析引擎（即 Redshift）中的 `clickstream_user_dim_view` 视图。以下是生成视图的 SQL 命令。
-??? 示例 "SQL 命令"
-    === "Redshift"
-        ```sql title="clickstream-user-dim-view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:3"
-        ```
-    === "Athena"
-        ```sql title="clickstream-user-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-user-query.sql"
-        ```
+## 数据源
+获取报告是基于以下QuickSight数据集创建的：
 
-## 维度和指标
-报告包括以下维度和指标。您可以通过在 QuickSight 数据集中创建 `calculated field` 来添加更多维度或指标。[了解更多](https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html)。
+|QuickSight数据集| Redshift视图/表| 描述 |
+|----------|--------------------|------------------|
+|`User_User_View-<app>-<project>`|`clickstream_acquisition_day_user_view_cnt`|此数据集存储了每天网站或应用程序上的新用户数和活跃用户数的数据|
+|`Day_Traffic_Source_User-<app>-<project>`|`clickstream_acquisition_day_traffic_source_user`|此数据集存储了每天每种流量来源类型的新用户数|
+|`Day_User_Acquisition-<app>-<project>`|`clickstream_acquisition_day_user_acquisition`|此数据集存储了每天每种流量来源类型的新用户数、活跃用户数、会话数、参与会话数和事件数|
+|`Country_New_User_Acquisition-<app>-<project>`|`clickstream_acquisition_country_new_user`|此数据集存储了每天每个国家和城市的新用户数|
 
-|字段 | 类型| 是什么 | 如何填充|
-|----------|---|---------|--------------------|
-|`user_pseudo_id`| 维度 | 用户的 SDK 生成的唯一 ID | 从分析引擎查询|
-|`user_id`| 维度 | 通过 SDK 中的 setUserId API 设置的用户 ID  | 从分析引擎查询|
-|`device_id`| 维度 | 设备的唯一 ID，请参阅 [SDK 手册](../../sdk-manual/index.md) 了解设备 ID 的获取方式| 从分析引擎查询|
-|`first_visit_date`| 维度 | 用户首次访问您的网站或首次打开应用的日期  | 从分析引擎查询|
-|`first_visit_install_source`| 维度 | 用户首次打开应用时的安装来源。Web 为空  | 从分析引擎查询|
-|`first_traffic_source_source`| 维度 | 用户首次访问应用或 Web 时的流量来源  | 从分析引擎查询|
-|`first_traffic_source_medium`| 维度 | 用户首次访问应用或 Web 时的流量媒介  | 从分析引擎查询|
-|`first_traffic_source_name`| 维度 | 用户首次访问应用或 Web 时的流量广告系列名称  | 从分析引擎查询|
-|`first_visit_device_language`| 维度 | 用户首次打开应用或首次访问网站时所用设备的系统语言  | 从分析引擎查询|
-|`first_platform`| 维度 | 用户首次访问您的网站或首次打开您的应用时的平台  | 从分析引擎查询|
-|`first_referer`| 维度 | 用户首次访问您的网站时的引荐来源 | 从分析引擎查询|
-|`first_visit_country`| 维度 | 用户首次访问您的网站或首次打开您的应用的国家  | 从分析引擎查询|
-|`first_visit_city`| 维度 | 用户首次访问您的网站或首次打开您的应用的城市  | 从分析引擎查询|
-|`custom_attr_key`| 维度 | 用户的自定义属性键的名称  | 从分析引擎查询|
-|`custom_attr_value`| 维度 | 用户的自定义属性键的值  | 从分析引擎查询|
-|`registration_status`| 维度 | 用户是否已注册  | 从分析引擎查询|
-|`Logged-in Rate`| 指标 | 不同用户 ID 数除以不同用户伪 ID 数 | QuickSight 中的计算字段 |
+
+## 维度
+获取报告包括以下维度。
+
+|维度|描述|计算方式|
+|----|----|-------|
+|首次用户流量来源|获取新用户访问您网站或应用程序的流量来源(例如 google、百度和必应)|流量来源是从 page_url 的 utm 参数(即 utm_source)或流量来源保留属性(即 _traffic_source_source)中获取,或者根据 referrer url 推导而来(仅限网络)。[了解更多](../data-mgmt/traffic-source.md)|
+|首次用户流量媒介|获取新用户访问您网站或应用程序的流量媒介(例如有机、付费搜索)|流量媒介是从 page_url 的 utm 参数(即 utm_medium)或流量来源保留属性(即 _traffic_source_medium)中获取,或者根据 referrer url 推导而来(仅限网络)。[了解更多](../data-mgmt/traffic-source.md)|
+|首次用户流量活动|获取新用户访问您网站或应用程序的营销活动名称|流量活动是从 page_url 的 utm 参数(即 utm_campaign)和流量来源保留属性(即 _traffic_source_campaign)中获取,或者根据 referrer url 推导而来(仅限网络)。[了解更多](../data-mgmt/traffic-source.md)|
+|首次用户流量来源/媒介|获取新用户访问您网站或应用程序的流量来源和媒介组合|与上面的流量来源和流量媒介相同。[了解更多](../data-mgmt/traffic-source.md)|
+|首次用户流量渠道组|渠道组是基于规则定义的流量来源。获取新用户访问您网站或应用程序的流量渠道组名称|流量渠道组是根据流量来源和媒介推导而来。[了解更多](../data-mgmt/traffic-source.md)|
+|首次用户流量 clid 平台|获取新用户访问您网站或应用程序的点击 ID 平台名称(来自广告平台的自动标记)|流量来源 clid 平台是从 page_url 的 clid 参数和流量来源保留属性(即 _traffic_source_clid_platform)中获取。[了解更多](../data-mgmt/traffic-source.md)|
+|首次用户应用安装来源|获取新用户访问您应用程序的应用商店名称,例如 App Store、Google Store|应用安装来源是从流量来源保留属性(即 _app_install_channel)中获取。[了解更多](../data-mgmt/traffic-source.md)|
+|会话流量来源|获取用户访问您网站或应用程序新会话的流量来源(例如 google、百度和必应)|流量来源是从 page_url 的 utm 参数(即 utm_source)或流量来源保留属性(即 _traffic_source_source)中获取,或者根据 referrer url 推导而来(仅限网络)。[了解更多](../data-mgmt/traffic-source.md)|
+|会话流量媒介|获取用户访问您网站或应用程序新会话的流量媒介(例如有机、付费搜索)|流量媒介是从 page_url 的 utm 参数(即 utm_medium)或流量来源保留属性(即 _traffic_source_medium)中获取,或者根据 referrer url 推导而来(仅限网络)。[了解更多](../data-mgmt/traffic-source.md)|
+|会话流量活动|获取用户访问您网站或应用程序新会话的营销活动名称|流量活动是从 page_url 的 utm 参数(即 utm_campaign)和流量来源保留属性(即 _traffic_source_campaign)中获取,或者根据 referrer url 推导而来(仅限网络)。[了解更多](../data-mgmt/traffic-source.md)|
+|会话流量来源/媒介|获取用户访问您网站或应用程序新会话的流量来源和媒介组合|与上面的流量来源和流量媒介相同。[了解更多](../data-mgmt/traffic-source.md)|
+|会话流量渠道组|渠道组是基于规则定义的流量来源。获取用户访问您网站或应用程序新会话的流量渠道组名称|流量渠道组是根据流量来源和媒介推导而来。[了解更多](../data-mgmt/traffic-source.md)|
+|会话流量 clid 平台|获取用户访问您网站或应用程序新会话的点击 ID 平台名称(来自广告平台的自动标记)|流量 clid 平台是从 page_url 的 clid 参数和流量来源保留属性(即 _traffic_source_clid_platform)中获取。[了解更多](../data-mgmt/traffic-source.md)|
+|地理国家|用户访问您网站或应用程序时所在的国家|地理位置信息是根据用户 IP 地址推断的。|
+|地理城市|用户访问您网站或应用程序时所在的城市|地理位置信息是根据用户 IP 地址推断的。|
+
+## 指标
+获取报告包括以下指标。
+
+|指标|定义|计算方式|
+|----|----|-------|
+|新用户|首次与您的网站互动或启动您的应用程序的用户数量(触发事件:_first_open)。|当 event_name 等于 '_first_open' 时,计算不同的 user_id 或 user_pseudo_id(如果 user_id 不可用)的数量。|
+|活跃用户|在选定时间范围内触发任何事件的不同用户数量。|在任何事件中计算不同的 user_id 或 user_pseudo_id(如果 user_id 不可用)的数量。|
+|会话|用户创建的会话数量。|计算不同的 session_id 数量。|
+|参与会话|持续时间超过 10 秒或有 1 个或更多页面或屏幕视图的会话数量。|如果会话是有效参与,则计算不同的 session_id 数量。|
+|参与率|有效参与会话占总会话的百分比。|有效参与会话/总会话数。|
+|事件|用户触发事件的次数。|计算 event_id 的数量。|
+|平均用户参与时长|您的网站在用户浏览器中处于焦点状态或应用程序在用户设备的前台的平均时间(每用户)。|总用户参与时长/活跃用户数|
 
 ## 示例仪表板
-以下图片是一个示例仪表板供您参考。
+以下图像是供您参考的示例仪表板。
 
-![获取仪表板](../../images/analytics/dashboard/acquisition.png)
+![dashboard-acquisition](../../images/analytics/dashboard/acquisition.png)

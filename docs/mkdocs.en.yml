@@ -65,11 +65,9 @@ nav:
         - Overview: analytics/dashboard/index.md
         - Acquisition report: analytics/dashboard/acquisition.md
         - Engagement report: analytics/dashboard/engagement.md
-        - Activity report: analytics/dashboard/activity.md
         - Retention report: analytics/dashboard/retention.md
         - Device report: analytics/dashboard/device.md
-        - User report: analytics/dashboard/user.md
-        - Crash report: analytics/dashboard/crash.md
+        - Details report: analytics/dashboard/details.md
         - Custom report: analytics/dashboard/custom-analysis.md
       - Explore:
         - Overview: analytics/explore/index.md
@@ -77,10 +75,13 @@ nav:
         - Funnel: analytics/explore/funnel.md
         - Path: analytics/explore/path.md
         - Retention: analytics/explore/retention.md
+        - Attribution: analytics/explore/attribution.md
       - Analyzes:
         - Overview: analytics/analyzes/index.md        
       - Data management:
         - Overview: analytics/data-mgmt/index.md
+        - Metadata: analytics/data-mgmt/metadata-mgmt.md
+        - Traffic source: analytics/data-mgmt/traffic-source.md
     - Identity Management: identity-mgmt.md
     - Upgrade the solution: upgrade.md
     - Additional resources:

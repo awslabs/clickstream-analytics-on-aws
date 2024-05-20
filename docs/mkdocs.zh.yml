@@ -68,22 +68,23 @@ nav:
         - 概述: analytics/dashboard/index.md
         - 获取报告: analytics/dashboard/acquisition.md
         - 参与度报告: analytics/dashboard/engagement.md
-        - 活动报告: analytics/dashboard/activity.md
         - 留存报告: analytics/dashboard/retention.md
         - 设备报告: analytics/dashboard/device.md
-        - 用户报告: analytics/dashboard/user.md
-        - 崩溃报告: analytics/dashboard/crash.md
+        - 详细报告: analytics/dashboard/details.md
         - 自定义报告: analytics/dashboard/custom-analysis.md
       - 探索:
         - 概述: analytics/explore/index.md
         - 事件分析: analytics/explore/event.md
-        - 转化分析: analytics/explore/funnel.md
+        - 漏斗分析: analytics/explore/funnel.md
         - 路径分析: analytics/explore/path.md
         - 留存分析: analytics/explore/retention.md
+        - 归因分析: analytics/explore/attribution.md
       - 分析:
         - 概述: analytics/analyzes/index.md        
       - 数据管理:
         - 概述: analytics/data-mgmt/index.md
+        - 元数据: analytics/data-mgmt/metadata-mgmt.md
+        - 流量: analytics/data-mgmt/traffic-source.md
     - 身份管理: identity-mgmt.md
     - 升级解决方案: upgrade.md
     - 附加资源:

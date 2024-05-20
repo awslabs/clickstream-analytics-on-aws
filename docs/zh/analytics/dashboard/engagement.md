@@ -1,45 +1,47 @@
-# 参与度报告
-您可以使用参与度报告深入了解用户在使用您的网站和应用时的参与度水平。该报告通过用户触发的会话以及用户访问的网页和应用屏幕来衡量用户参与度。
+# 用户参与度报告
+您可以使用用户参与度报告了解用户如何与您的网站和应用程序互动。它显示了有关用户参与度水平、执行活动以及访问最多的页面/屏幕的指标。
 
-注意：本文描述了默认报告。您可以通过应用过滤器或比较，或通过在 QuickSight 中更改维度、指标或图表来自定义报告。[了解更多](https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html)
+注意:本文描述了默认报告。您可以通过应用筛选器或比较,或者在 QuickSight 中更改维度、指标或图表来自定义报告。[了解更多](https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html)
 
 ## 查看报告
-1. 访问您应用程序的仪表板。请参阅 [访问仪表板](index.md)。
-2. 在仪表板中，单击名称为 `Engagement` 的表。
+1. 访问您的应用程序的仪表板。请参阅[访问仪表板](index.md)
+2. 在仪表板中,单击名为 **`Engagement`** 的工作表。
 
-## 数据来源
-参与度报告是基于 `Session_View-<app id>-<project id>` 的 QuickSight 数据集创建的，该数据集连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_session_view` 视图。以下是生成视图的 SQL 命令。
-??? 示例 "SQL 命令"
-    === "Redshift"
-        ```sql title="clickstream-session-view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_session_view_v2.sql:3"
-        ```
-    === "Athena"
-        ```sql title="clickstream-session-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-session-query.sql"
-        ```
+## 数据源
+用户参与度报告基于以下 QuickSight 数据集创建:
 
-## 维度和指标
-报告包括以下维度和指标。您可以通过在 QuickSight 数据集中创建 `calculated field` 来添加更多维度或指标。[了解更多](https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html)。
+|QuickSight 数据集|Redshift 视图/表|描述|
+|----------------|-----------------|--------------------|
+|`Engagement_KPI-<app>-<project>`|`clickstream_engagement_kpi`|此数据集存储每天的用户参与度关键绩效指标数据。|
+|`Day_Event_View_Engagement-<app>-<project>`|`clickstream_engagement_day_event_view`|此数据集存储每天的事件数量和视图事件数量数据。|
+|`Event_Name-<app>-<project>`|`clickstream_engagement_event_name`|此数据集存储每个用户每天的事件名称事件数量数据。|
+|`Page_Screen_View-<app>-<project>`|`clickstream_engagement_page_screen_view`|此数据集存储每天每个页面或屏幕的视图数量数据。|
+|`Page_Screen_View_Detail-<app>-<project>`|`clickstream_engagement_page_screen_detail_view`|此数据集存储每个用户每天的页面标题/页面 URL 或屏幕名称/屏幕 ID 的视图事件数据。|
 
-|字段 | 类型| 是什么 | 如何填充|
-|----------|---|---------|--------------------|
-|`session_id`| 维度 | 用户在使用您的网站和应用时触发的会话的 SDK 生成的唯一 ID | 从分析引擎查询|
-|`user_pseudo_id`| 维度 | 用户的 SDK 生成的唯一 ID  | 从分析引擎查询|
-|`platform`| 维度 | 用户在会话期间使用的平台  | 从分析引擎查询|
-|`session_duration`| 维度 | 会话的持续时间（毫秒）  | 从分析引擎查询|
-|`session_views`| 指标 | 会话内的屏幕视图或页面视图数量  | 从分析引擎查询|
-|`engaged_session`| 维度 | 会话是否参与。</br>`参与的会话定义为会话持续时间超过 10 秒或有两个或两个以上的屏幕视图页面视图` | 从分析引擎查询|
-|`session_start_timestamp`| 维度 | 会话的开始时间戳  | 从分析引擎查询|
-|`session_engagement_time`| 维度 | 会话的总参与时间（毫秒）  | 从分析引擎查询|
-|`entry_view`| 维度 | 用户在会话中查看的第一个屏幕或页面的屏幕名称或页面标题  | 从分析引擎查询|
-|`exit_view`| 维度 | 用户在会话中查看的最后一个屏幕或页面的屏幕名称或页面标题  | 从分析引擎查询|
-|`Average engaged session per user`| 指标 | 所选时间段内每个用户的平均会话数  | QuickSight 中的计算字段|
-|`Average engagement time per session`| 指标 | 每个会话的平均参与时间（毫秒）  | QuickSight 中的计算字段|
-|`Average engagement time per user`| 指标 | 每个用户的平均参与时间（毫秒）  | QuickSight 中的计算字段|
-|`Average screen view per user`| 指标 | 每个用户的平均屏幕视图数  | QuickSight 中的计算字段|
+## 维度
+用户参与度报告包括以下维度。
+
+|维度|描述|如何填充|
+|----|----|-------|
+|事件名称|用户触发的事件名称|根据您使用 Clickstream SDK 或 HTTP API 为事件设置的事件名称派生。|
+|页面标题|网页的标题|页面标题源自您 HTML 中的 `title` 标签。|
+|页面 URL 路径|网页 URL 中的路径|页面路径源自域名之后的值。例如,如果有人访问 `www.example.com/books`,则 `example.com` 是域名, `/books` 是页面路径。|
+|屏幕名称|屏幕的标题|屏幕名称源自您使用 clickstream SDK 或 HTTP API 为屏幕设置的名称。|
+|屏幕类|屏幕的类名|屏幕类源自当前处于焦点的 UIViewController 或 Activity 的类名。|
+
+## 指标
+用户参与度报告包括以下指标。
+
+|指标|定义|计算方式|
+|----|----|-------|
+|Avg_session_per_user|每个活跃用户的平均会话数。|总会话数/活跃用户总数|
+|Avg_engagement_time_per_user_minute|您的网站在用户浏览器中处于焦点状态或应用程序在用户设备的前台的平均时间(每用户)。|总用户参与时长/活跃用户数|
+|Avg_engagement_time_per_session_minute|您的网站在用户浏览器中处于焦点状态或应用程序在用户设备的前台的平均时间(每会话)。|总用户参与时长/会话数|
+|Active users|具有 page_view 或 screen_view 事件的活跃用户数。|当 event_name 为 '_page_view' 或 '_screen_view' 时,计算不同的 user_id 或 user_pseudo_id(如果 user_id 不可用)的数量。|
+|Event count|用户触发 '_page_view' 或 '_screen_view' 事件的次数。|当 event_name 为 '_page_view' 或 '_screen_view' 时,计算 event_id 的数量。|
+|Event count per user|每个用户的平均事件计数。|Event count / Active users|
 
 ## 示例仪表板
-以下图片是一个示例仪表板供您参考。
+以下图像是供您参考的示例仪表板。
 
-![参与度仪表板](../../images/analytics/dashboard/engagement.png)
+![dashboard-activity](../../images/analytics/dashboard/engagement.png)

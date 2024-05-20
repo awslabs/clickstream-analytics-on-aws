@@ -1,15 +1,19 @@
 # Event Analysis
-Event analysis is used to study the frequency of certain behavioral events. You can conduct multi-dimensional analysis of user behavior through custom metrics, groupings, filters, and various visual charts.
+Event analysis is used to study the frequency of certain behavioral events. You can conduct multidimensional analysis of user behavior through custom metrics, groupings, filters, and various visual charts.
 
 ## Use cases
 Event analysis are commonly used when analyzing user behaviors, for example:
 
 - Query on user usage of certain product functions (such as adding favorite, video playback, view live stream, etc.);
-- Compare different group of users's behaviors, such as number of login per different country
+- Compare different group of user's behaviors, such as number of login per different country
 - Compare different channel's effectiveness, such as sign-up rate per traffic source.
 
 ## Key concept:
-- **Metric**: perform aggregation on a selected event, such as count number of event, or count number of distinct users perform the event.
+- **Metric**: perform aggregation on a selected event, support the following metrics:
+  - User number: count number of event 
+  - Event number: count number of distinct users 
+  - County by: count distinct value of a specified dimension (string type)
+  - Max/Min/Sum/Avg/Median by: aggregate the values of a specified metric (number type)
 
 ## How to use
 
@@ -32,18 +36,18 @@ Event analysis are commonly used when analyzing user behaviors, for example:
 ### Steps
 
 1. Select the **Event Analysis** model.
-2. In the left **Define Metrics** area, choose `_page_view` as the metric for calculating events and select `Event number` as the metric type.
-3. Click the **+ Add Event** button to add another metric. Choose `_app_end` as the metric for calculating events and select `User number` as the metric type.
-4. Click the filter icon to the right of `_app_end` to add a event filter condition:
-    - Filter property: `event._session_duration`
+2. In the left **Define Metrics** area, choose `Page view` as the metric for calculating events and select `Event number` as the metric type.
+3. Click the **+ Add Event** button to add another metric. Choose `App end` as the metric for calculating events and select `User number` as the metric type.
+4. Click the filter icon to the right of `App end` to add an event filter condition:
+    - Filter property: `Session` / `Session duration(msec)`
     - Operation: `>=`
-    - Value: `30000` (the unit of `event._session_duration` is millisecond)
+    - Value: `30000` (the unit of `Session duration(msec)` is millisecond)
 5. Configure a global filter in the right **Filters** area:
-    - Choose `other.platform` as the filter property.
+    - Choose `Event preset` / `Platform` as the filter property.
     - Operation: `=`
     - Value: `Web`
-6. In the right **Attribute Grouping** area, configure grouping by selecting `geo.country`.
-7. In the time selector at the bottom, choose `Past Month` and click **OK**.
+6. In the right **Attribute Grouping** area, configure grouping by selecting `Geography`/`Country`.
+7. In the time selector at the bottom, choose `Last 1 Month` and click **OK**.
 8. Click the **Save to Dashboard** button in the top right corner. In the pop-up dialog, enter:
     - Chart Name: `PV and UV`
     - Chart Description: `PV and UV on the web over the past month (at least 30 seconds)`
