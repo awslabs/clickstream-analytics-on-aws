@@ -762,6 +762,8 @@ export class ReportingService {
       }, locale);
 
       const tableVisualId = uuidv4();
+
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
       const tableVisualDef = await this._getVisualDefOfEventVisualOnEventProperty(computeMethodProps, tableVisualId,
         viewName, titleProps, query.groupColumn, groupingColName);
 
@@ -924,6 +926,7 @@ export class ReportingService {
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
       };
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(visualId);
 
       const result: CreateDashboardResult = await this.createDashboardVisuals(
         sheetId, viewName, query, pipeline, datasetPropsArray, [visualProps]);

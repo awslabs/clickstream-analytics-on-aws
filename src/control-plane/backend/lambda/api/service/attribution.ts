@@ -174,9 +174,9 @@ export class AttributionAnalysisService {
       visualId: visualId,
       visual: visualDef,
       dataSetIdentifierDeclaration: [],
-      filterControl: visualRelatedParams.filterControl,
-      parameterDeclarations: visualRelatedParams.parameterDeclarations,
-      filterGroup: visualRelatedParams.filterGroup,
+      // filterControl: visualRelatedParams.filterControl,
+      // parameterDeclarations: visualRelatedParams.parameterDeclarations,
+      // filterGroup: visualRelatedParams.filterGroup,
     };
 
     return new ReportingService().createDashboardVisuals(sheetId, viewName, query, pipeline, datasetPropsArray, [visualProps]);
