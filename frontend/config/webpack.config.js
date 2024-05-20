@@ -303,11 +303,22 @@ module.exports = function (webpackEnv) {
           },
         }),
         // This is only used in production mode
-        new CssMinimizerPlugin(),
+        new CssMinimizerPlugin({
+          parallel: true,
+          minimizerOptions: {
+            preset: [
+              'default',
+              {
+                discardComments: { removeAll: true },
+              },
+            ],
+          },
+          minify: CssMinimizerPlugin.cleanCssMinify,
+        }),
       ],
       splitChunks: {
         name: 'common',
-        chunks: isEnvDevelopment ? 'async' : 'initial',
+        chunks: isEnvDevelopment ? 'async' : 'all',
         minSize: process.env.CHUNK_MIN_SIZE
           ? parseInt(process.env.CHUNK_MIN_SIZE)
           : 819200, // min 800kb
@@ -326,6 +337,12 @@ module.exports = function (webpackEnv) {
             minChunks: 2,
             priority: -20,
             reuseExistingChunk: true,
+          },
+          styles: {
+            name: 'styles',
+            test: /\.css$/,
+            chunks: 'all',
+            enforce: true,
           },
         },
       },
