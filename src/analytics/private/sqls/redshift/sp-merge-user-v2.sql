@@ -34,7 +34,7 @@ BEGIN
 			first_traffic_category,
 			first_app_install_source,
 			process_info,
-			created_time
+			CURRENT_TIMESTAMP as created_time
 		FROM (
 				select
 						*,
@@ -45,10 +45,6 @@ BEGIN
 		WHERE
 				row_num = 1
 	);
-			
-	UPDATE user_v2_stage_1 
-	SET
-		created_time = CURRENT_TIMESTAMP;	
 
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Remove duplicates from user v2 stage table successfully.');
 
