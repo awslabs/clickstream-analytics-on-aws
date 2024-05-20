@@ -46,6 +46,16 @@ import AnalyticsFunnel from '../funnel/AnalyticsFunnel';
 import AnalyticsPath from '../path/AnalyticsPath';
 import AnalyticsRetention from '../retention/AnalyticsRetention';
 
+const ExploreRenderCondition = {
+  Loading: 'Loading',
+  Empty: 'Empty',
+  Funnel: 'Funnel',
+  Event: 'Event',
+  Path: 'Path',
+  Retention: 'Retention',
+  Attribution: 'Attribution',
+};
+
 const AnalyticsExplore: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
@@ -99,6 +109,7 @@ const AnalyticsExplore: React.FC = () => {
   ];
 
   const [pipeline, setPipeline] = useState<IPipeline | null>(null);
+  const [renderCondition, setRenderCondition] = useState<string>(ExploreRenderCondition.Loading);
   const { data, loading } = useUserEventParameter();
 
   const [pathNodes, setPathNodes] = useState<{
@@ -162,6 +173,26 @@ const AnalyticsExplore: React.FC = () => {
     }
   };
 
+  const setCondition = () => {
+    if (loadingData) {
+      setRenderCondition(ExploreRenderCondition.Loading);
+    } else if (!pipeline) {
+      setRenderCondition(ExploreRenderCondition.Empty);
+    } else if (!pipeline.templateInfo?.isLatest) {
+      setRenderCondition(ExploreRenderCondition.Empty);
+    }else if (selectedOption?.value === 'Funnel') {
+      setRenderCondition(ExploreRenderCondition.Funnel);
+    } else if (selectedOption?.value === 'Event') {
+      setRenderCondition(ExploreRenderCondition.Event);
+    } else if (selectedOption?.value === 'Path') {
+      setRenderCondition(ExploreRenderCondition.Path);
+    } else if (selectedOption?.value === 'Retention') {
+      setRenderCondition(ExploreRenderCondition.Retention);
+    } else if (selectedOption?.value === 'Attribution') {
+      setRenderCondition(ExploreRenderCondition.Attribution);
+    }
+  };
+
   useEffect(() => {
     if (projectId && appId) {
       loadPipeline();
@@ -173,6 +204,11 @@ const AnalyticsExplore: React.FC = () => {
       getAllPathNodes();
     }
   }, [selectedOption]);
+
+  useEffect(() => {
+    setCondition();
+    console.log('pipeline', renderCondition);
+  }, [pipeline, selectedOption, loadingData]);
 
   useEffect(() => {
     dispatch?.({ type: StateActionType.CLEAR_HELP_PANEL });
@@ -242,8 +278,8 @@ const AnalyticsExplore: React.FC = () => {
                   </div>
                 </div>
               </AnalyticsCustomHeader>
-              {loadingData && <Loading />}
-              {!pipeline && !loadingData && (
+              {renderCondition === ExploreRenderCondition.Loading && <Loading />}
+              {renderCondition === ExploreRenderCondition.Empty && (
                 <SpaceBetween direction="vertical" size="xxl">
                   <Container>
                     <Box textAlign="center" color="inherit">
@@ -258,9 +294,7 @@ const AnalyticsExplore: React.FC = () => {
                   </Container>
                 </SpaceBetween>
               )}
-              {pipeline &&
-                !loadingData &&
-                selectedOption?.value === 'Funnel' && (
+              {pipeline && renderCondition === ExploreRenderCondition.Funnel && (
                   <AnalyticsFunnel
                     loadingEvents={loading}
                     loading={false}
@@ -274,9 +308,7 @@ const AnalyticsExplore: React.FC = () => {
                     groupParameters={data.groupParameters}
                   />
                 )}
-              {pipeline &&
-                !loadingData &&
-                selectedOption?.value === 'Event' && (
+              {pipeline && renderCondition === ExploreRenderCondition.Event && (
                   <AnalyticsEvent
                     loadingEvents={loading}
                     loading={false}
@@ -290,7 +322,7 @@ const AnalyticsExplore: React.FC = () => {
                     groupParameters={data.groupParameters}
                   />
                 )}
-              {pipeline && !loadingData && selectedOption?.value === 'Path' && (
+              {pipeline && renderCondition === ExploreRenderCondition.Path && (
                 <AnalyticsPath
                   loadingEvents={loading}
                   loading={false}
@@ -304,9 +336,7 @@ const AnalyticsExplore: React.FC = () => {
                   nodes={pathNodes}
                 />
               )}
-              {pipeline &&
-                !loadingData &&
-                selectedOption?.value === 'Retention' && (
+              {pipeline && renderCondition === ExploreRenderCondition.Retention && (
                   <AnalyticsRetention
                     loadingEvents={loading}
                     loading={false}
@@ -320,9 +350,7 @@ const AnalyticsExplore: React.FC = () => {
                     groupParameters={data.groupParameters}
                   />
                 )}
-              {pipeline &&
-                !loadingData &&
-                selectedOption?.value === 'Attribution' && (
+              {pipeline && renderCondition === ExploreRenderCondition.Attribution && (
                   <AnalyticsAttribution
                     loadingEvents={loading}
                     loading={false}

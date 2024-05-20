@@ -1133,21 +1133,10 @@ function getIamRoleBoundaryArn(): string | undefined {
 function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
   const redshiftStackVersionStr = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
   const reportStackVersionStr = getStackVersion(pipeline, PipelineStackType.REPORTING);
-  if (!redshiftStackVersionStr || !reportStackVersionStr) {
+  if (!redshiftStackVersionStr || !reportStackVersionStr || !pipeline?.reporting?.quickSight?.accountName) {
     return false;
   }
-  const redshiftStackVersion = SolutionVersion.Of(redshiftStackVersionStr);
-  const reportStackVersion = SolutionVersion.Of(reportStackVersionStr);
-  const pipelineVersion = SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
-  if (
-    pipeline?.reporting?.quickSight?.accountName &&
-    pipelineVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6) &&
-    redshiftStackVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6) &&
-    reportStackVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6)
-  ) {
-    return true;
-  }
-  return false;
+  return true;
 };
 
 function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): string | undefined {
