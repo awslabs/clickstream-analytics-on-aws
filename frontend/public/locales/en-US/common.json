@@ -22,7 +22,7 @@
     "dashboard": "Dashboard",
     "realtime": "Realtime",
     "explore": "Explore",
-    "analyzes": "Analyzes",
+    "analyzes": "Analyses",
     "segments": "Segments",
     "createSegment": "Create Segment",
     "editSegment": "Edit Segment",
@@ -38,7 +38,7 @@
       "realtime": "Realtime",
       "dashboards": "Dashboards",
       "explore": "Explore",
-      "analyzes": "Analyzes",
+      "analyzes": "Analyses",
       "metadata": "Metadata",
       "segments": "Segments",
       "data-management": "Data Management"

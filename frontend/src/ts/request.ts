@@ -252,7 +252,7 @@ export const apiRequest = (
 
 // Error handler
 function errMsg(err: { response: { status: any; data: ApiResponse<null> } }) {
-  if (err && err.response) {
+  if (err && err.response && err.response.status >= 400) {
     switch (err.response.status) {
       case 400:
         alertMsg(err.response?.data?.message);

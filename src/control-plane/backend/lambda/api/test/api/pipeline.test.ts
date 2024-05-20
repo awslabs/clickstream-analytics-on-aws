@@ -1966,7 +1966,7 @@ describe('Pipeline test', () => {
           solutionVersion: FULL_SOLUTION_VERSION,
         },
         templateVersion: 'v1.1.0',
-        analysisStudioEnabled: false,
+        analysisStudioEnabled: true,
       },
     });
   });
