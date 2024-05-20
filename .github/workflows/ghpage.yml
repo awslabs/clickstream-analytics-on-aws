@@ -6,7 +6,6 @@ on:
       - v1.1.x
     paths:
       - docs/**
-      - src/analytics/private/sqls/**
       - .github/workflows/ghpage.yml
   pull_request:
   merge_group: {}
