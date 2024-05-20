@@ -2116,7 +2116,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'avg_session_per_user',
+                      Name: 'avg_engaged_session_per_user',
                       Type: 'DECIMAL',
                     },
                     {
@@ -2143,7 +2143,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                   [
                     'event_date',
                     'platform',
-                    'avg_session_per_user',
+                    'avg_engaged_session_per_user',
                     'avg_engagement_time_per_session_seconds',
                     'avg_engagement_time_per_user_seconds',
                   ],
@@ -3746,7 +3746,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'avg_session_per_user',
+                      Name: 'avg_engaged_session_per_user',
                       Type: 'DECIMAL',
                     },
                     {
@@ -3762,7 +3762,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                   [
                     'event_date',
                     'platform',
-                    'avg_session_per_user',
+                    'avg_engaged_session_per_user',
                     'avg_engagement_time_per_session_seconds',
                     'avg_engagement_time_per_user_seconds',
                   ],

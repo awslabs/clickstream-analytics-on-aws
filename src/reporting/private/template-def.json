@@ -175,7 +175,7 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "avg_session_per_user",
+                "Name": "avg_engaged_session_per_user",
                 "DataType": "DECIMAL"
                 },
                 {
@@ -1450,10 +1450,10 @@
                                     "Values": [
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.avg_session_per_user.1.1711008930258",
+                                                "FieldId": "LogicalTable1.avg_engaged_session_per_user.1.1711008930258",
                                                 "Column": {
                                                     "DataSetIdentifier": "Engagement_KPI",
-                                                    "ColumnName": "avg_session_per_user"
+                                                    "ColumnName": "avg_engaged_session_per_user"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "AVERAGE"
@@ -1558,7 +1558,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.avg_session_per_user.1.1711008930258",
+                                                "FieldId": "LogicalTable1.avg_engaged_session_per_user.1.1711008930258",
                                                 "Visibility": "VISIBLE"
                                             }
                                         },
@@ -5423,10 +5423,10 @@
                                     "Values": [
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.avg_session_per_user.1.1711008930258",
+                                                "FieldId": "LogicalTable1.avg_engaged_session_per_user.1.1711008930258",
                                                 "Column": {
                                                     "DataSetIdentifier": "Engagement_KPI",
-                                                    "ColumnName": "avg_session_per_user"
+                                                    "ColumnName": "avg_engaged_session_per_user"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "AVERAGE"
@@ -5531,7 +5531,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.avg_session_per_user.1.1711008930258",
+                                                "FieldId": "LogicalTable1.avg_engaged_session_per_user.1.1711008930258",
                                                 "Visibility": "VISIBLE"
                                             }
                                         },

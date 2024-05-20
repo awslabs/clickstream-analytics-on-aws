@@ -12,7 +12,7 @@ BEGIN
     INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
         event_date, 
         platform,
-        avg_session_per_user, 
+        avg_engaged_session_per_user, 
         avg_engagement_time_per_session_seconds,
         avg_engagement_time_per_user_seconds
     )
@@ -37,7 +37,7 @@ BEGIN
     select 
       event_date,
       platform,
-      sum(session_indicator)::real/count(distinct merged_user_id) as avg_session_per_user,
+      sum(session_indicator)::real/count(distinct merged_user_id) as avg_engaged_session_per_user,
       sum(case when session_indicator = 1 then user_engagement_time_msec else 0 end)::real/case when sum(session_indicator) = 0 then 1 else sum(session_indicator) end /1000 as avg_engagement_time_per_session_seconds,
       sum(case when session_indicator = 1 then user_engagement_time_msec else 0 end)::real/count(distinct merged_user_id)/1000 avg_engagement_time_per_user_seconds
     from tmp1
