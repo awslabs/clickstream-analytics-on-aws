@@ -6,7 +6,7 @@
 ## 选项1 - 使用预设的QuickSight数据集创建自定义分析。
 该解决方案已创建了一个`Event_View-<app>-<project>`数据集,其中存储了所有原始事件数据,包括常用和自定义维度,并与QuickSight中的用户属性和会话属性相结合,您可以使用此数据集根据特定需求创建自定义分析。
 
-例如,假设您有一个自定义事件`view_item`,用于记录何时用户查看项目的详细页面。此自定义事件具有一个自定义属性`event_category`,用于跟踪用户从哪个促销位置进入项目详细页面。现在,您想创建一个使用饼图显示导致用户查看项目详细页面的各个event_category百分比的自定义分析。
+例如,假设您有一个自定义事件`view_item`,用于记录用户查看商品的详细页面事件。此自定义事件具有一个自定义属性`event_category`,用于跟踪用户从哪个促销位置进入商品的详细页面。现在,您想创建一个饼图来显示导致用户查看项目详细页面的各个event_category百分比的自定义分析。
 
 1. 转到{{solution_name}}网页控制台的Analyze模块。
 2. 单击右上角的"新建分析"按钮。
@@ -114,7 +114,7 @@
 4. 在字段区域,将"platform"选择为X轴,"session_start_users"、"page_view_users"和"scroll_users"选择为值。
 5. 现在您可以将此分析发布为仪表板,或继续进行格式化。更多QuickSight可视化知识请参考[链接](https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html){:target="_blank"}。
 
-### 第3部分 - 将自定义仪表板添加到分析工作室
+### 第3部分 - 将自定义仪表板添加到分析工作坊仪表板
 
 要使您的自定义分析显示在Clickstream Analytics Studio的"仪表板"模块中,您需要将仪表板添加到由解决方案预先创建的名为`<project-id>_<app_id>`的共享文件夹中。
 

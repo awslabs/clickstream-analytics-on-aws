@@ -1,5 +1,5 @@
 # Data schema
-This article explains the data schema and format in {{solution_name}}. This solution uses an **event-based** data model to store and analyze clickstream data, every activity (e.g., click, view) on the clients is modeled as an event with multiple dimensions. Dimensions are common for all events, but customers have the flexibility to use JSON object to store values into some dimensions (e.g., event parameters, user attributes), which will cater for the need of collecting information that are specific for their business. Those JSON will be stored in special data types which allow customers to unnest the values in the analytics engines.
+This article explains the data schema and format in {{solution_name}}. This solution uses an **event-based** data model to store and analyze clickstream data, every activity (e.g., click, view) on the clients is modeled as an event with dimensions, each dimension represents a parameter of the event. Dimensions are common for all events, but customers have the flexibility to use JSON object to store custom event parameter as key-value pairs into special dimensions, which enables users to collect information that are specific for their business. Those JSON will be stored in special data types which allow customers to extract the values in the analytics engines.
 
 ## Database and table
 For each project, the solution creates a database with name of `<project-id>` in Redshift and Athena. Each App will have a schema with name of `app_id`, within which event-related data are stored in `event` and `event_parameter` tables, user-related data are stored in `user` table, item-related data are stored in `item` table. In Athena, all tables are added partitions of app_id, year, month, and day. Below diagram illustrates the table relationship.
@@ -28,7 +28,7 @@ Each column in the tables represents a specific parameter for a event, user, or 
 | device.network_type                  | VARCHAR    |     STRING      | The network_type of the device, e.g., WIFI, 5G                                                                     |
 | device.operating_system              | VARCHAR    |    STRING        | The operating system of the device.                                                                                          |
 | device.operating_system_version      | VARCHAR    |     STRING         | The OS version.                                                                                          |
-| device.vendor_id                     | VARCHAR    |     STRING       | IDFV (present only if IDFA is not collected).                                                            |
+| device.vendor_id                     | VARCHAR    |     STRING       | IDFV in iOS, Android ID (or UUID if Android ID is not available) in Android.                                                |
 | device.advertising_id                | VARCHAR    |      STRING        | Advertising ID/IDFA.                                                                                     |
 | device.system_language               | VARCHAR    |    STRING        | The OS language.                                                                                         |
 | device.time_zone_offset_seconds      | BIGINT   |       BIGINT     | The offset from GMT in seconds.                                                                          |
@@ -54,8 +54,37 @@ Each column in the tables represents a specific parameter for a event, user, or 
 | app_info.version             | VARCHAR               | STRING    | The app's versionName (Android) or short bundle version.                     |
 | platform                 | VARCHAR               | STRING  | The data stream platform (Web, IOS or Android) from which the event originated.                                    |
 | project_id     | VARCHAR               | STRING    | The project id associated with the app.                                 |
-| items      | SUPER               | ARRAY    | Key-value records contain information about items associated with the event                                            |
-| user_id                     | VARCHAR    | STRING| The unique ID assigned to a user through `setUserId()` API.                                            |
+| screen_view_screen_name     | VARCHAR               | STRING    | The screen name associated with the event.                                 |
+| screen_view_screen_id     | VARCHAR               | STRING    | The screen class id associated with the event.                                 |
+| screen_view_screen_unique_id     | VARCHAR               | STRING    | The unique screen id associated with the event.                                 |
+| screen_view_previous_screen_name     | VARCHAR               | STRING    | The previous screen name associated with the event.                                 |
+| screen_view_previous_screen_id     | VARCHAR               | STRING    | The previous screen class id associated with the event.                                 |
+| screen_view_previous_screen_unique_id     | VARCHAR               | STRING    | The previous unique screen id associated with the event.                                 |
+| screen_view_entrances     | BOOLEAN               | BOOLEAN    | Whether the screen is the entrance view of the session.                                 |
+| page_view_page_referrer     | VARCHAR               | STRING    | The referrer page url.                                 |
+| page_view_page_referrer_title     | VARCHAR               | STRING    | The referrer page title.                                 |
+| page_view_previous_time_msec| BIGINT | BIGINT | The timestamp of the previous page_view event. |
+| page_view_engagement_time_msec    | BIGINT               | BIGINT    | The previous page_view duration in milliseconds.                                 |
+| page_view_page_title     | VARCHAR               | STRING    | The title of the webpage associated with the event.                                 |
+| page_view_page_url     | VARCHAR               | STRING    | The url of the webpage associated with the event.                                 |
+| page_view_page_url_path     | VARCHAR               | STRING    | The url path of the webpage associated with the event.                                 |
+| page_view_page_url_query_parameters     | SUPER               | MAP    | The query parameters in key-value pairs of the page url associated with the event.               |
+| page_view_hostname     | VARCHAR               | STRING    | The host name of the web page associated with the event.                                 |
+| page_view_latest_referrer     | VARCHAR               | STRING    | The url of the latest external referrer.                                 |
+| page_view_latest_referrer_host     | VARCHAR               | STRING    | The hostname of the latest external referrer.                                 |
+| page_view_entrances     | BOOLEAN               | BOOLEAN    | Whether the page is the entrance view of the session.                                 |
+| app_start_is_first_time     | BOOLEAN               | BOOLEAN    | Whether the app start is a new app launch.                                 |
+| upgrade_previous_app_version     | VARCHAR               | STRING    | Previous app version before app upgrade event.                                 |
+| upgrade_previous_os_version     | VARCHAR               | STRING    | Previous os version before OS upgrade event.                                 |
+| search_key     | VARCHAR               | STRING    | The name of the keyword in the URL when user perform search on web site.                                 |
+| search_term     | VARCHAR               | STRING    | The search content in the URL when user perform search on web site.                                 |
+| outbound_link_classes     | VARCHAR               | STRING    | The content of class in tag <a> that associated with the outbound link.                                 |
+| outbound_link_domain     | VARCHAR               | STRING    | The domain of href in tag <a> that associated with the outbound link.                                 |
+| outbound_link_id     | VARCHAR               | STRING    | The content of id in tag <a> that associated with the outbound link.                                 |
+| outbound_link_url     | VARCHAR               | STRING    | The content of href in tag <a> that associated with the outbound link.                                 |
+| outbound_link     | BOOLEAN               | BOOLEAN    | Whether the link is outbound link or not.                                 |
+| user_engagement_time_msec    | BIGINT     | BIGINT    | The user engagement duration in milliseconds.                                 |
+| user_id                     | VARCHAR    | STRING| The unique ID assigned to a user through `setUserId()` API.         |
 | user_pseudo_id              | VARCHAR    | STRING| The pseudonymous id generated by SDK for the user.                     |
 
 ### Event_parameter table fields

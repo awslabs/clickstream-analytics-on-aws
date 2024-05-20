@@ -1,13 +1,13 @@
 # Dashboard
 {{ solution_name }} solution collects data from your websites and apps to create dashboards that derive insights. You can use dashboards to monitor traffic, investigate data, and understand your users and their activities.
 
- Depends on your pipeline configuration, the time for data to be available in your dashboard varies. By default, the metrics in the out-of-the-box dashboards are calculated on a daily basis, you should see the data and metrics from previous day (according to your app's timezone).
+Depends on your pipeline configuration, the time for data to be available in your dashboard varies. By default, the metrics in the out-of-the-box dashboards are calculated on a daily basis, you should see the data and metrics from previous day (according to your app's timezone).
 
 
 ## View dashboards
 You can find the dashboards for each application by following below steps:
 
-1. Go to **Clickstream Analytics on AWS Console**, in the **Navigation Bar**, click on "**Analytics Studio**", a new tab will be opened in your browser.
+1. Go to **Clickstream Analytics on AWS Console**, in the left-side **Navigation Bar**, click on "**Analytics Studio**", a new tab will be opened in your browser.
 2. In the Analytics Studio page, select the project and app you just created in the drop-down list in the top of the web page.
 3. Click the **User life cycle - default** dashboard
 

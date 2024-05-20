@@ -57,24 +57,24 @@
 以下是解决方案用于对流量进行分类的默认渠道组和规则。
 
 | 顺序 | 渠道                     | 描述       | 评估规则     |
-|------|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1    | 直接                     | 直接是用户通过保存的链接或输入您的URL到达您网站/应用程序的渠道。                                                                            | 1. traffic_source_category/traffic_source_source/medium/campaign_content/term/campaign_id/clid/全部为空/(未设置), (none) <br> 且 <br> 2. latest_referrer为空     |
-| 2    | 付费搜索                 | 付费搜索是用户通过在必应、百度或谷歌等搜索引擎网站上的广告到达您网站/应用程序的渠道。                                                       | 1. traffic_source_category为搜索 <br> 且 <br> (2. traffic_source_medium匹配正则表达式^(.*cp.*\|ppc\|retargeting\|paid.*)$ <br> 或 clid不为none/空)          |
-| 3    | 自然搜索                 | 自然搜索是用户通过自然搜索结果中的非广告链接到达您网站/应用程序的渠道。                                                                     | 1. traffic_source_category为搜索 <br> 且 <br> (2. medium为空或none或完全匹配organic)           |
-| 4    | 付费社交                 | 付费社交是用户通过在Facebook和Twitter等社交网站上的广告到达您网站/应用程序的渠道。                                                        | 1. traffic_source_category为社交 <br> 且 <br> (2. traffic_source_medium匹配正则表达式^(.*cp.*\|ppc\|retargeting\|paid.*)$ <br> 或 clid不为none/空)                  |
-| 5    | 自然社交                 | 自然社交是用户通过Facebook或Twitter等社交网站上的非广告链接到达您网站/应用程序的渠道。                                                    | 1. traffic_source_category为社交 <br> 或 <br> 2. traffic_source_medium为("social"、"social-network"、"social-media"、"sm"、"social network"、"social media")之一       |
-| 6    | 付费视频                 | 付费视频是用户通过在TikTok、Vimeo和YouTube等视频网站上的广告到达您网站/应用程序的渠道。                                                   | 1. traffic_source_category为视频(即traffic_source_source或latest_referrer_host匹配视频网站列表) <br> 且 <br> (2. traffic_source_medium匹配正则表达式^(.*cp.*\|ppc\|retargeting\|paid.*)$ <br> 或 clid不为none/空)      |
-| 7    | 自然视频                 | 自然视频是用户通过YouTube、TikTok或Vimeo等视频网站上的非广告链接到达您网站/应用程序的渠道。                                               | 1. traffic_source_category为视频 <br> 或 <br> 2. traffic_source_medium匹配正则表达式^(.*video.*)$       |
-| 8    | 付费购物                 | 付费购物是用户通过在亚马逊或易贝等购物网站或个体零售商网站上的付费广告到达您网站/应用程序的渠道。                                         | 1. traffic_source_category为购物 <br> 且 <br> (2. traffic_source_medium匹配正则表达式^(.*cp.*\|ppc\|retargeting\|paid.*)$ <br> 或 clid不为none/空 <br> 或 traffic_source_campaign匹配正则表达式^(.*(([\^a-df-z]\|^)shop\|shopping).*)$)                                                                                                     |
-| 9    | 自然购物                 | 自然购物是用户通过亚马逊或易贝等购物网站上的非广告链接到达您网站/应用程序的渠道。                                                         | 1. traffic_source_category为购物 <br> 或 <br> 2. traffic_source_campaign匹配正则表达式^(.*(([\^a-df-z]\|^)shop\|shopping).*)$       |
-| 10   | 付费其他                 | 付费其他是用户通过广告到达您网站/应用程序的渠道,但不是通过已识别为搜索、社交、购物或视频的广告。                                         | 1. traffic_source_category为none <br> 且 <br> 2. traffic_source_medium匹配正则表达式^(.*cp.*\|ppc\|retargeting\|paid.*)$          |
-| 11   | 电子邮件                 | 电子邮件是用户通过电子邮件中的链接到达您网站/应用程序的渠道。                                                                              | 1. traffic_source_source包含"mail" <br> 或 <br> 2. traffic_source_meidum包含"mail" <br> 或 <br> 3. latest_referrer_host以"mail"开头        |
-| 12   | 短信                     | 短信是用户通过短信链接到达您网站/应用程序的渠道。                                                                                          | 1. traffic_source_source完全匹配sms <br> 或 <br> 2. traffic_source_medium完全匹配"sms"            |
-| 13   | 音频                     | 音频是用户通过音频平台(如播客平台)上的广告到达您网站/应用程序的渠道。                                                                     | 1. traffic_source_medium完全匹配audio      |
-| 14   | 移动推送通知             | 移动推送通知是用户在不主动使用应用程序时通过移动设备上的消息链接到达您网站/应用程序的渠道。                                               | 1. traffic_source_medium以"push"结尾 <br> 或 <br> 2. traffic_source_medium包含"mobile"或"notification"     |
-| 15   | Refferral                | Referral是用户通过其他网站/应用程序(如博客、新闻网站)上的非广告链接到达 |
-| 16    | 内部                     | 来自指定内部域的流量                                                                                                                      | 1. latest_referrer_host 是内部域之一       |
-| 17    | 未分配                   | 无法分配给渠道组的流量                                                                                                                    | 所有其他情况                                                                                                                                                                                                                                                                                                                                             |
+|----|-------|:-----------------|:-------------|
+| 1    | 直接  | 直接是用户通过保存的链接或输入您的URL到达您网站/应用程序的渠道。  | 1. traffic_source_category, traffic_source_source,traffic_source_medium,traffic_source_campaign,traffic_source_content,traffic_source_term,traffic_source_campaign_id,traffic_source_clid 全部为空/(none) <br> 且 <br> 2. latest_referrer为空。     |
+| 2    | 付费搜索                 | 付费搜索是用户通过在必应、百度或谷歌等搜索引擎网站上的广告到达您网站/应用程序的渠道。 | 1. traffic_source_category为搜索 <br> 且 <br> (2. traffic_source_medium匹配正则表达式^(.*cp.*\|ppc\|retargeting\|paid.*)$ <br> 或 clid不为none/空) 。 |
+| 3    | 自然搜索  | 自然搜索是用户通过自然搜索结果中的非广告链接到达您网站/应用程序的渠道。| 1. traffic_source_category为搜索 <br> 且 <br> 2. medium为空或none或完全匹配organic。          |
+| 4    | 付费社交  | 付费社交是用户通过在Facebook和Twitter等社交网站上的广告到达您网站/应用程序的渠道。| 1. traffic_source_category为社交 <br> 且 <br> (2. traffic_source_medium匹配正则表达式^(.*cp.*\|ppc\|retargeting\|paid.*)$ <br> 或 clid不为none/空).  |
+| 5    | 自然社交 | 自然社交是用户通过Facebook或Twitter等社交网站上的非广告链接到达您网站/应用程序的渠道。| 1. traffic_source_category为社交 <br> 或 <br> 2. traffic_source_medium为("social"、"social-network"、"social-media"、"sm"、"social network"、"social media")之一 。|
+| 6    | 付费视频  | 付费视频是用户通过在TikTok、Vimeo和YouTube等视频网站上的广告到达您网站/应用程序的渠道。| 1. traffic_source_category为视频(即traffic_source_source或latest_referrer_host匹配视频网站列表) <br> 且 <br> 2. traffic_source_medium匹配正则表达式^(.*cp.*\|ppc\|retargeting\|paid.*)$ <br> 或 clid不为none/空。      |
+| 7    | 自然视频 | 自然视频是用户通过YouTube、TikTok或Vimeo等视频网站上的非广告链接到达您网站/应用程序的渠道。 | 1. traffic_source_category为视频 <br> 或 <br> 2. traffic_source_medium匹配正则表达式^(.*video.*)$ 。      |
+| 8    | 付费购物 | 付费购物是用户通过在亚马逊或易贝等购物网站或个体零售商网站上的付费广告到达您网站/应用程序的渠道。  | 1. traffic_source_category为购物 <br> 且 <br> (2. traffic_source_medium匹配正则表达式^(.*cp.*\|ppc\|retargeting\|paid.*)$ <br> 或 clid不为none/空 <br> 或 traffic_source_campaign匹配正则表达式^(.*(([\^a-df-z]\|^)shop\|shopping).*)$)。 |
+| 9    | 自然购物 | 自然购物是用户通过亚马逊或易贝等购物网站上的非广告链接到达您网站/应用程序的渠道。 | 1. traffic_source_category为购物 <br> 或 <br> 2. traffic_source_campaign匹配正则表达式^(.*(([\^a-df-z]\|^)shop\|shopping).*)$。       |
+| 10   | 付费其他 | 付费其他是用户通过广告到达您网站/应用程序的渠道,但不是通过已识别为搜索、社交、购物或视频的广告。                                         | 1. traffic_source_category为none <br> 且 <br> 2. traffic_source_medium匹配正则表达式^(.*cp.*\|ppc\|retargeting\|paid.*)$ 。         |
+| 11   | 电子邮件 | 电子邮件是用户通过电子邮件中的链接到达您网站/应用程序的渠道。  | 1. traffic_source_source包含"mail" <br> 或 <br> 2. traffic_source_meidum包含"mail" <br> 或 <br> 3. latest_referrer_host以"mail"开头。        |
+| 12   | 短信  | 短信是用户通过短信链接到达您网站/应用程序的渠道。  | 1. traffic_source_source完全匹配sms <br> 或 <br> 2. traffic_source_medium完全匹配"sms"。           |
+| 13   | 音频  | 音频是用户通过音频平台(如播客平台)上的广告到达您网站/应用程序的渠道。                                                                     | 1. traffic_source_medium完全匹配audio。     |
+| 14   | 移动推送通知 | 移动推送通知是用户在不主动使用应用程序时通过移动设备上的消息链接到达您网站/应用程序的渠道。   | 1. traffic_source_medium以"push"结尾 <br> 或 <br> 2. traffic_source_medium包含"mobile"或"notification"。    |
+| 15   | Referral | Referral是用户通过其他网站/应用程序(如博客、新闻网站)上的非广告链接到达。 | 1. latest_referrer 不为空 且 traffic_source_category为none <br> 且 <br> 2. latest referrer_host不是 内部域名。|
+| 16    | 内部 | 来自指定内部域名的流量   | 1. latest_referrer_host是内部域名之一       |
+| 17    | 未分配 | 无法分配给渠道组的流量。 | 所有其他情况。   |
 
 
 

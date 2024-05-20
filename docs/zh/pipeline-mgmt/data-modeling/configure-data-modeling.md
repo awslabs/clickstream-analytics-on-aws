@@ -2,23 +2,6 @@
 
 数据管道处理完事件数据后，您可以将数据加载到分析引擎进行数据建模，比如Redshift或Athena，其中数据将被汇总并组织成不同的视图（如事件、设备、会话），以及常用的计算指标。
 
-<!-- 以下是如果你选择启用数据建模模块，此解决方案提供的预设数据视图。
-
-## 预设数据视图
-
-| 数据模型名称                 | Redshift | 描述                                                                  |
-|-----------------------------|-----------|----------------------------------------------------------------------|
-| clickstream_device_view_v1    | 物化视图    | 包含所有设备相关信息的视图                     |
-| clickstream_event_view_v2    | 视图    | 包含所有事件维度的视图。      |
-| clickstream_event_parameter_view_v1    | 物化视图      | 包含所有事件参数的视图。        |
-| clickstream_user_dim_view_v1    | 物化视图     | 包含所有用户维度的视图。                     |
-| clickstream_user_attr_view_v1    | 物化视图      | 包含所有用户自定义属性的视图。        |
-| clickstream_session_view_v2    | 视图     | 包含所有会话维度和相关度量，例如，会话持续时间，会话视图。        |
-| clickstream_retention_view_v2    | 物化视图      | 包含按日期和返回日度量的留存指标的视图。       |
-| clickstream_lifecycle_daily_view_v2    | 视图    | 包含按生命周期阶段划分的用户数量的度量指标的日视图，即，新用户，活跃用户，返回用户，流失用户。        |
-| clickstream_lifecycle_weekly_view_v2    | 视图    | 包含按生命周期阶段划分的用户数量的度量指标的周视图，即，新用户，活跃用户，返回用户，流失用户。        | -->
-
-
 您可以选择使用Redshift或Athena，或两者都用。
 
 !!! tip "提示"

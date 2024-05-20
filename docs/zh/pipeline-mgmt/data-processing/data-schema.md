@@ -96,9 +96,9 @@
 |search_key|VARCHAR|STRING|用户在网站上执行搜索时URL中的关键词名称。|
 |search_term|VARCHAR|STRING|用户在网站上执行搜索时URL中的搜索内容。|
 |outbound_link_classes|VARCHAR|STRING|与外部链接关联的a标签中class的内容。|
-|outbound_link_domain|VARCHAR|STRING|与外部链接关联的a标签中herf的域名。|
+|outbound_link_domain|VARCHAR|STRING|与外部链接关联的a标签中hrf的域名。|
 |outbound_link_id|VARCHAR|STRING|与外部链接关联的a标签中id的内容。|
-|outbound_link_url|VARCHAR|STRING|与外部链接关联的a标签中herf的内容。|
+|outbound_link_url|VARCHAR|STRING|与外部链接关联的a标签中href的内容。|
 |outbound_link|BOOLEAN|BOOLEAN|链接是否为外部链接。|
 |user_engagement_time_msec|BIGINT|BIGINT|用户参与时间持续时间(以毫秒为单位)。|
 |user_id|VARCHAR|STRING|通过setUserId()API分配给用户的唯一ID。|

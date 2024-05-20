@@ -75,7 +75,7 @@ nav:
       - 探索:
         - 概述: analytics/explore/index.md
         - 事件分析: analytics/explore/event.md
-        - 转化分析: analytics/explore/funnel.md
+        - 漏斗分析: analytics/explore/funnel.md
         - 路径分析: analytics/explore/path.md
         - 留存分析: analytics/explore/retention.md
         - 归因分析: analytics/explore/attribution.md
