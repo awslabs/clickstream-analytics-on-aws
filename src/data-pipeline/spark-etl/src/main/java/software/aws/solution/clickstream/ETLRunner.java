@@ -452,7 +452,10 @@ public class ETLRunner {
         if ("json".equalsIgnoreCase(runConfig.getOutPutFormat())) {
             partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(saveOutputPath);
         } else {
-            int numPartitions = Math.max((int) (resultCount / 100_000), 1);
+            long partitionCount = partitionedDataset.select(PARTITION_APP, PARTITION_YEAR, PARTITION_MONTH, PARTITION_DAY).distinct().count();
+            log.info("partitionCount: " + partitionCount);
+
+            int numPartitions = Math.max((int) (resultCount / (100_000 * partitionCount)), 1);
             int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
             log.info("calculated numPartitions: " + numPartitions + ", outPartitions:" + outPartitions);
 
