@@ -31,7 +31,7 @@ BEGIN
 			session_channel_group,
 			session_source_category,
 			process_info,
-			created_time
+			CURRENT_TIMESTAMP as created_time
 		FROM (
 			select
 					*,
@@ -42,10 +42,6 @@ BEGIN
 		WHERE
 				row_num = 1
 	);
-
-	UPDATE session_stage_1 
-	SET
-		created_time = CURRENT_TIMESTAMP;	
 
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Remove duplicates from session stage table successfully.');
 
