@@ -1,3 +1,6 @@
+ARG ADAPTER_VERSION=0.8.2
+FROM --platform=linux/aarch64 public.ecr.aws/awsguru/aws-lambda-adapter:$ADAPTER_VERSION-aarch64 AS adapter
+
 FROM public.ecr.aws/docker/library/node:20 AS builder
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
@@ -11,8 +14,8 @@ COPY projenrc projenrc
 COPY pnpm-workspace.yaml pnpm-workspace.yaml
 
 ARG GENERATE_SOURCEMAP=false
-ARG CHUNK_MIN_SIZE=819200
-ARG CHUNK_MAX_SIZE=1024000
+ARG CHUNK_MIN_SIZE=409600
+ARG CHUNK_MAX_SIZE=512000
 ARG REACT_APP_SOLUTION_VERSION
 
 RUN export GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP} && export CHUNK_MIN_SIZE=${CHUNK_MIN_SIZE} && export CHUNK_MAX_SIZE=${CHUNK_MAX_SIZE}
@@ -26,8 +29,8 @@ ENV REACT_APP_SOLUTION_VERSION=$REACT_APP_SOLUTION_VERSION
 RUN pnpm install
 RUN pnpm run crabuild
 
-FROM public.ecr.aws/docker/library/nginx:1.22
-COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.6.1	/lambda-adapter /opt/extensions/lambda-adapter
+FROM --platform=linux/aarch64 public.ecr.aws/docker/library/nginx:1.22
+COPY --from=adapter	/lambda-adapter /opt/extensions/lambda-adapter
 COPY --from=builder /home/node/app/frontend/build/ /usr/share/nginx/public/
 COPY src/control-plane/frontend/config/ /etc/nginx/
 USER nginx
