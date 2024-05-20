@@ -109,7 +109,9 @@ const AnalyticsExplore: React.FC = () => {
   ];
 
   const [pipeline, setPipeline] = useState<IPipeline | null>(null);
-  const [renderCondition, setRenderCondition] = useState<string>(ExploreRenderCondition.Loading);
+  const [renderCondition, setRenderCondition] = useState<string>(
+    ExploreRenderCondition.Loading
+  );
   const { data, loading } = useUserEventParameter();
 
   const [pathNodes, setPathNodes] = useState<{
@@ -180,7 +182,7 @@ const AnalyticsExplore: React.FC = () => {
       setRenderCondition(ExploreRenderCondition.Empty);
     } else if (!pipeline.templateInfo?.isLatest) {
       setRenderCondition(ExploreRenderCondition.Empty);
-    }else if (selectedOption?.value === 'Funnel') {
+    } else if (selectedOption?.value === 'Funnel') {
       setRenderCondition(ExploreRenderCondition.Funnel);
     } else if (selectedOption?.value === 'Event') {
       setRenderCondition(ExploreRenderCondition.Event);
@@ -278,7 +280,9 @@ const AnalyticsExplore: React.FC = () => {
                   </div>
                 </div>
               </AnalyticsCustomHeader>
-              {renderCondition === ExploreRenderCondition.Loading && <Loading />}
+              {renderCondition === ExploreRenderCondition.Loading && (
+                <Loading />
+              )}
               {renderCondition === ExploreRenderCondition.Empty && (
                 <SpaceBetween direction="vertical" size="xxl">
                   <Container>
@@ -294,7 +298,8 @@ const AnalyticsExplore: React.FC = () => {
                   </Container>
                 </SpaceBetween>
               )}
-              {pipeline && renderCondition === ExploreRenderCondition.Funnel && (
+              {pipeline &&
+                renderCondition === ExploreRenderCondition.Funnel && (
                   <AnalyticsFunnel
                     loadingEvents={loading}
                     loading={false}
@@ -309,19 +314,19 @@ const AnalyticsExplore: React.FC = () => {
                   />
                 )}
               {pipeline && renderCondition === ExploreRenderCondition.Event && (
-                  <AnalyticsEvent
-                    loadingEvents={loading}
-                    loading={false}
-                    pipeline={pipeline}
-                    builtInMetadata={data?.builtInMetaData}
-                    metadataEvents={data?.metaDataEvents}
-                    metadataEventParameters={data?.metaDataEventParameters}
-                    metadataUserAttributes={data?.metaDataUserAttributes}
-                    categoryEvents={data?.categoryEvents}
-                    presetParameters={data.presetParameters}
-                    groupParameters={data.groupParameters}
-                  />
-                )}
+                <AnalyticsEvent
+                  loadingEvents={loading}
+                  loading={false}
+                  pipeline={pipeline}
+                  builtInMetadata={data?.builtInMetaData}
+                  metadataEvents={data?.metaDataEvents}
+                  metadataEventParameters={data?.metaDataEventParameters}
+                  metadataUserAttributes={data?.metaDataUserAttributes}
+                  categoryEvents={data?.categoryEvents}
+                  presetParameters={data.presetParameters}
+                  groupParameters={data.groupParameters}
+                />
+              )}
               {pipeline && renderCondition === ExploreRenderCondition.Path && (
                 <AnalyticsPath
                   loadingEvents={loading}
@@ -336,7 +341,8 @@ const AnalyticsExplore: React.FC = () => {
                   nodes={pathNodes}
                 />
               )}
-              {pipeline && renderCondition === ExploreRenderCondition.Retention && (
+              {pipeline &&
+                renderCondition === ExploreRenderCondition.Retention && (
                   <AnalyticsRetention
                     loadingEvents={loading}
                     loading={false}
@@ -350,7 +356,8 @@ const AnalyticsExplore: React.FC = () => {
                     groupParameters={data.groupParameters}
                   />
                 )}
-              {pipeline && renderCondition === ExploreRenderCondition.Attribution && (
+              {pipeline &&
+                renderCondition === ExploreRenderCondition.Attribution && (
                   <AnalyticsAttribution
                     loadingEvents={loading}
                     loading={false}

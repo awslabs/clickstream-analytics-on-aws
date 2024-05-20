@@ -106,7 +106,7 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
             )}
             {(embedPage === 'dashboard' || embedPage === 'analyze') && (
               <SpaceBetween size="m">
-                <Loading/>
+                <Loading />
               </SpaceBetween>
             )}
           </Box>
