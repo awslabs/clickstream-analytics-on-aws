@@ -209,7 +209,6 @@ const AnalyticsExplore: React.FC = () => {
 
   useEffect(() => {
     setCondition();
-    console.log('pipeline', renderCondition);
   }, [pipeline, selectedOption, loadingData]);
 
   useEffect(() => {
