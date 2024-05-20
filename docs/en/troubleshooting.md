@@ -151,9 +151,9 @@ It's caused by the large volume of data to be loaded or the Redshift load being 
 
 The dashboard is likely using views or materialized views that are not yet ready in Redshift. The solution asynchronously creates or updates the views and materialized views used by the dashboard after creating or updating the pipeline of the project. The duration of the creation or update depends on the workload of the Redshift cluster and the existing data volume and can take minutes to hours. You can keep track of progress in the **Redshift Schemas** section in the **Processing** tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via **Actions - Redrive** or **New execution** with the input unchanged.
 
-## Problem: When configuring the data pipeline with data processing enabled, the data processing CloudFormation stack encountered the error "The availability zones for subnets [subnet-xyz] are currently not supported.".
+## Problem: When creating the data pipeline with data processing enabled, the data processing CloudFormation stack encountered error of "The availability zones for subnets [subnet-xyz] are currently not supported.".
 
-The EMR serverless application for processing the clickstream data cannot be deployed in the specified private subnets mentioned in the above error message.
+This is due to the EMR serverless application for processing the clickstream data cannot be deployed in the specified private subnets mentioned in the above error message.
 
 **Resolution:**
 
