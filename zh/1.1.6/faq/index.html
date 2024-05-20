@@ -2673,7 +2673,16 @@
           <li class="md-nav__item">
   <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
-      如何修改默认控制面板？
+      如何修改默认仪表板？
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      如何加快默认仪表板的加载速度?
     </span>
   </a>
   
@@ -2685,7 +2694,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       开发工具包
     </span>
@@ -3060,7 +3069,16 @@
           <li class="md-nav__item">
   <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
-      如何修改默认控制面板？
+      如何修改默认仪表板？
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      如何加快默认仪表板的加载速度?
     </span>
   </a>
   
@@ -3072,7 +3090,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       开发工具包
     </span>
@@ -3200,7 +3218,7 @@
 <li>数据管道的版本不是v1.1或更高版本。您可以尝试升级数据管道，等待升级完成后再重试。</li>
 <li>数据管道上未启用报告模块。</li>
 </ul>
-<h3 id="_13">如何修改默认控制面板？</h3>
+<h3 id="_13">如何修改默认仪表板？</h3>
 <p>您无法直接修改默认仪表板，但是，您可以从默认仪表板创建新分析，然后根据复制的分析创建新仪表盘。以下是从默认仪表板创建分析的步骤：</p>
 <ol>
 <li>在分析工作室中，打开分析模块，然后单击 “控制面板”。</li>
@@ -3210,7 +3228,23 @@
 <li>返回控制面板，刷新网页，你应该能够看到右上角的 “另存为” 按钮。</li>
 <li>单击 “另存为” 按钮，输入分析的名称，然后单击 “保存”，现在您应该可以在分析中看到新的分析，然后进行修改和发布为新的仪表板。</li>
 </ol>
-<h2 id="_14">开发工具包</h2>
+<h3 id="_14">如何加快默认仪表板的加载速度?</h3>
+<p>您可以通过将 QuickSight 数据集转换为 SPICE 模式来加快报表加载。以下是操作步骤:</p>
+<ol>
+<li>通过 QuickSight 控制台购买 SPICE 容量。所需容量取决于您的数据量，建议启用自动购买选项。</li>
+<li>打开解决方案控制台，选择目标项目，单击管道详细信息页面上的管道<strong>活跃</strong>状态，然后打开 <strong>Reporting</strong> 堆栈详情链接，进入 CloudFormation 控制台中。</li>
+<li>单击<strong>更新</strong>按钮，选择<strong>使用现有模板</strong>选项。</li>
+<li>找到 <strong>Enable QuickSight SPICE Import Mode</strong> 参数，将其值更改为 <strong>yes</strong>。保持其他参数不变。</li>
+<li>单击下一步完成堆栈更新。更新完成后，您可以开始使用它。</li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">重要</p>
+<ol>
+<li>启用 SPICE 将根据使用的空间量产生费用。定价详情可在 QuickSight 定价页面上找到。如果频繁查看仪表板，启用 SPICE 可减少对 Redshift 数据库的访问负载，但可能会增加数据延迟。</li>
+<li>默认情况下，该解决方案使用增量更新方法在 SPICE 中刷新数据。刷新过程计划在您的仪表板时区每天上午 6 点进行。您可以在 QuickSight 中手动调整更新时间表。</li>
+</ol>
+</div>
+<h2 id="_15">开发工具包</h2>
 <h3 id="sdk">我可以使用其他SDK向该方案创建的管道发送数据吗？</h3>
 <p>可以。该方案支持用户使用第三方SDK向数据管道发送数据。需要注意的是，如果您想在使用第三方SDK发送数据时，在数据处理和数据建模模块，您需要提供一个转换插件来将第三方SDK的数据结构映射到解决方案数据结构。 详情请参考<a href="../pipeline-mgmt/data-processing/configure-plugin/">自定义插件</a>。</p>
 
