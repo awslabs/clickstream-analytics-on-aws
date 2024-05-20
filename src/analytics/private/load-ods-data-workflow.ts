@@ -664,8 +664,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         'skip-running-workflow.ts',
       ),
       handler: 'handler',
-      memorySize: 128,
-      timeout: Duration.minutes(2),
+      memorySize: 512,
+      timeout: Duration.minutes(15),
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },
