@@ -12,8 +12,8 @@ Event analysis are commonly used when analyzing user behaviors, for example:
 - **Metric**: perform aggregation on a selected event, support the following metrics:
   - User number: count number of event 
   - Event number: count number of distinct users 
-  - County by： count distinct value of a specified dimension (string type)
-  - Max,Min,Sum,Avg,Median by: aggregate the values of a specified metric (number type)
+  - County by: count distinct value of a specified dimension (string type)
+  - Max/Min/Sum/Avg/Median by: aggregate the values of a specified metric (number type)
 
 ## How to use
 
