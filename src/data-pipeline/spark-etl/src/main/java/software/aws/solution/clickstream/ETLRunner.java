@@ -52,7 +52,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.concat;
 import static org.apache.spark.sql.functions.decode;
+import static org.apache.spark.sql.functions.expr;
 import static org.apache.spark.sql.functions.input_file_name;
 import static org.apache.spark.sql.functions.date_format;
 
@@ -74,6 +76,7 @@ public class ETLRunner {
     public static final String TRANSFORM_METHOD_NAME = "transform";
     public static final String EVENT_DATE = "event_date";
     public static final String CONFIG_METHOD = "config";
+    public static final String APP_ID_EVENT_DATE = "app_id_event_date";
     private final SparkSession spark;
     private final ETLRunnerConfig runConfig;
     private TableName eventTableName = null;
@@ -450,12 +453,24 @@ public class ETLRunner {
 
         String[] partitionBy = new String[]{PARTITION_APP, PARTITION_YEAR, PARTITION_MONTH, PARTITION_DAY};
         if ("json".equalsIgnoreCase(runConfig.getOutPutFormat())) {
-            partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(saveOutputPath);
+            partitionedDataset
+                    .drop(APP_ID_EVENT_DATE)
+                    .write()
+                    .partitionBy(partitionBy)
+                    .mode(SaveMode.Append)
+                    .json(saveOutputPath);
         } else {
-            long partitionCount = partitionedDataset.select(PARTITION_APP, PARTITION_YEAR, PARTITION_MONTH, PARTITION_DAY).distinct().count();
-            log.info("partitionCount: " + partitionCount);
+            long outFolderCount = partitionedDataset
+                    .sample(0.15)
+                    .select(APP_ID_EVENT_DATE)
+                    .select(expr("approx_count_distinct(*)").alias("count"))
+                    .first()
+                    .getLong(0);
 
-            int numPartitions = Math.max((int) (resultCount / (100_000 * partitionCount)), 1);
+            outFolderCount = outFolderCount == 0 ? 1 : outFolderCount;
+            log.info("sampled unique app_id and event_date count: " + outFolderCount);
+
+            int numPartitions = (int) (resultCount / (50_000 * outFolderCount)) + 1;
             int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
             log.info("calculated numPartitions: " + numPartitions + ", outPartitions:" + outPartitions);
 
@@ -463,10 +478,14 @@ public class ETLRunner {
                 numPartitions = outPartitions;
             }
             log.info("actual numPartitions: " + numPartitions);
-            partitionedDataset = partitionedDataset.coalesce(numPartitions);
-            partitionedDataset.write()
+            partitionedDataset
+                    .drop(APP_ID_EVENT_DATE)
+                    .coalesce(numPartitions)
+                    .write()
                     .option("compression", "snappy")
-                    .partitionBy(partitionBy).mode(SaveMode.Append).parquet(saveOutputPath);
+                    .partitionBy(partitionBy)
+                    .mode(SaveMode.Append)
+                    .parquet(saveOutputPath);
         }
         return resultCount;
     }
@@ -490,7 +509,9 @@ public class ETLRunner {
         Dataset<Row> dataset1 = dataset.withColumn(PARTITION_APP, appIdCol)
                 .withColumn(PARTITION_YEAR, date_format(col(EVENT_DATE), "yyyy"))
                 .withColumn(PARTITION_MONTH, date_format(col(EVENT_DATE), "MM"))
-                .withColumn(PARTITION_DAY, date_format(col(EVENT_DATE), "dd"));
+                .withColumn(PARTITION_DAY, date_format(col(EVENT_DATE), "dd"))
+                .withColumn(APP_ID_EVENT_DATE, concat(appIdCol, date_format(col(EVENT_DATE), "yyyyMMdd")));
+
         if (Arrays.asList(TableName.USER, TableName.EVEN_PARAMETER, TableName.ITEM).contains(tbName)) {
             return dataset1.drop(EVENT_DATE, appId);
         }
@@ -504,7 +525,8 @@ public class ETLRunner {
                 .withColumn(PARTITION_APP, col(Constant.APP_ID))
                 .withColumn(PARTITION_YEAR, date_format(col(Constant.EVENT_TIMESTAMP), "yyyy"))
                 .withColumn(PARTITION_MONTH, date_format(col(Constant.EVENT_TIMESTAMP), "MM"))
-                .withColumn(PARTITION_DAY, date_format(col(Constant.EVENT_TIMESTAMP), "dd"));
+                .withColumn(PARTITION_DAY, date_format(col(Constant.EVENT_TIMESTAMP), "dd"))
+                .withColumn(APP_ID_EVENT_DATE, concat(col(Constant.APP_ID),  date_format(col(Constant.EVENT_TIMESTAMP), "yyyyMMdd")));
 
         if (tbName == TableName.ITEM_V2) {
             return datasetWithPartition.drop(Constant.APP_ID);
