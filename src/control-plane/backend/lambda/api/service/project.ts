@@ -147,6 +147,7 @@ export class ProjectServ {
         pipeline.region,
         principals.publishUserArn,
         allowedDomain,
+        false,
         dashboardId,
       );
       if (embed?.EmbedUrl) {
@@ -200,7 +201,7 @@ export class ProjectServ {
   public async getAnalyzes(req: any, res: any, next: any) {
     try {
       const { projectId } = req.params;
-      const { allowedDomain } = req.query;
+      const { allowedDomain, q } = req.query;
       const pipeline = await this.getPipelineByProjectId(projectId);
       if (!pipeline) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
@@ -216,6 +217,7 @@ export class ProjectServ {
         pipeline.region,
         principals.publishUserArn,
         allowedDomain,
+        q === 'true',
       );
       return res.json(new ApiSuccess(embed));
     } catch (error) {

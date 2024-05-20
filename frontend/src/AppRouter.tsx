@@ -19,6 +19,7 @@ import CommonAlert from 'components/common/alert';
 import { UserContext } from 'context/UserContext';
 import AlarmsList from 'pages/alarms/AlarmList';
 import AnalyticsHome from 'pages/analytics/AnalyticsHome';
+import AnalyticsAmazonQ from 'pages/analytics/amazonQ/AnalyticsAmazonQ';
 import AnalyticsAnalyzes from 'pages/analytics/analyzes/AnalyticsAnalyzes';
 import AnalyticsAnalyzesFullWindow from 'pages/analytics/analyzes/full/AnalyticsAnalyzesFullWindow';
 import AnalyticsDashboard from 'pages/analytics/dashboard/AnalyticsDashboard';
@@ -386,6 +387,19 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
               >
                 <AnalyticsAnalyzes />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/analytics/:projectId/app/:appId/q"
+            element={
+              <RoleRoute
+                sessionExpired={sessionExpired}
+                layout="analytics"
+                auth={auth}
+                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+              >
+                <AnalyticsAmazonQ />
               </RoleRoute>
             }
           />
