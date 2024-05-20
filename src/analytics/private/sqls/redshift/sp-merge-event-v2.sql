@@ -115,7 +115,7 @@ BEGIN
 					custom_parameters_json_str,
 					custom_parameters,
 					process_info,
-					created_time
+					CURRENT_TIMESTAMP as created_time
 			FROM (
 					select
 							*,
@@ -126,10 +126,6 @@ BEGIN
 			WHERE
 					row_num = 1
 	);	
-
-	UPDATE event_v2_stage_1
-	SET
-		created_time = CURRENT_TIMESTAMP;
 
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Remove duplicates from event v2 stage table successfully.');
 
