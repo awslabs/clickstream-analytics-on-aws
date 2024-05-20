@@ -931,6 +931,38 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
+  test('Check lambda CheckSkippingRunningWorkflowFn', () => {
+    for (const nestedTemplate of allNestedTemplates) {
+      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        Code: {
+          S3Bucket: Match.anyValue(),
+          S3Key: Match.anyValue(),
+        },
+        Role: {
+          'Fn::GetAtt': [
+            Match.anyValue(),
+            'Arn',
+          ],
+        },
+        Environment: {
+          Variables: {
+            PROJECT_ID: Match.anyValue(),
+            DYNAMODB_TABLE_NAME: Match.anyValue(),
+            DYNAMODB_TABLE_INDEX_NAME: Match.anyValue(),
+          },
+        },
+        Handler: 'index.handler',
+        MemorySize: 512,
+        ReservedConcurrentExecutions: 1,
+        Runtime: Match.anyValue(),
+        Timeout: 900,
+        LoggingConfig: {
+          ApplicationLogLevel: 'WARN',
+          LogFormat: 'JSON',
+        },
+      });
+    }
+  });
 
   test('Check LoadODSEventToRedshiftWorkflowODSEventProcessorFn', () => {
     for (const nestedTemplate of allNestedTemplates) {
