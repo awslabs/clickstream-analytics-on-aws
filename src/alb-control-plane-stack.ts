@@ -159,8 +159,8 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
         platform: Platform.LINUX_AMD64,
         buildArgs: {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
-          CHUNK_MIN_SIZE: process.env.CHUNK_MIN_SIZE ?? '819200',
-          CHUNK_MAX_SIZE: process.env.CHUNK_MAX_SIZE ?? '1024000',
+          CHUNK_MIN_SIZE: process.env.CHUNK_MIN_SIZE ?? '409600',
+          CHUNK_MAX_SIZE: process.env.CHUNK_MAX_SIZE ?? '512000',
           REACT_APP_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         },
       },
