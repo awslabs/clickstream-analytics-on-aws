@@ -95,7 +95,7 @@
     SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
     ```
 
-7. 计算迁移的数据在预置仪表板中使用的指标。参考[这个常见问题][faq-recalculate-data]获取执行步骤。
+7. 请遵循[此指南][faq-recalculate-data]，使用迁移后的新数据来计算预设仪表板的指标。
 
 8. 如果您没有其他应用程序使用旧表和视图，您可以运行以下SQL来清理旧视图和表，从而节省Redshift存储空间。
 
