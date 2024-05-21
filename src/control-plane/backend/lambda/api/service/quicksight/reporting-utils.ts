@@ -254,7 +254,7 @@ export const eventVisualColumns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'id',
+    Name: 'Count',
     Type: 'STRING',
   },
 ];
@@ -1045,128 +1045,6 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
 
   return visual;
 }
-
-// export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMethodsProps, visualId: string, viewName: string,
-//   titleProps: DashboardTitleProps, grouppingColName?: string[]) : Visual {
-//   const visualDef = readFileSync(join(__dirname, './templates/event-table-chart.json')).toString('utf-8');
-//   const mustacheEventAnalysisType: MustacheEventTableAnalysisType = {
-//     visualId,
-//     dataSetIdentifier: viewName,
-//     dateDimFieldId: uuidv4(),
-//     nameDimFieldId: uuidv4(),
-//     title: titleProps.tableTitle,
-//     subTitle: titleProps.subTitle,
-//   };
-
-//   const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
-
-//   const fieldWellGroupBy = visual.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells!.GroupBy!;
-
-//   if (grouppingColName !== undefined) {
-
-//     for (const colName of grouppingColName) {
-//       fieldWellGroupBy.push({
-//         CategoricalDimensionField: {
-//           FieldId: uuidv4(),
-//           Column: {
-//             DataSetIdentifier: viewName,
-//             ColumnName: colName,
-//           },
-//         },
-//       });
-//     }
-//   }
-
-//   if (!computeMethodProps.isMixedMethod) {
-//     if (computeMethodProps.hasAggregationPropertyMethod) {
-//       if (!computeMethodProps.isSameAggregationMethod) {
-//         fieldWellGroupBy.push({
-//           NumericalDimensionField: {
-//             FieldId: uuidv4(),
-//             Column: {
-//               DataSetIdentifier: viewName,
-//               ColumnName: 'count/aggregation amount',
-//             },
-//           },
-//         });
-
-//       } else {
-//         fieldWellGroupBy.push({
-//           NumericalDimensionField: {
-//             FieldId: uuidv4(),
-//             Column: {
-//               DataSetIdentifier: viewName,
-//               ColumnName: 'custom_attr_id',
-//             },
-//           },
-//         });
-//       }
-//     } else {
-//       fieldWellGroupBy.push({
-//         CategoricalDimensionField: {
-//           FieldId: uuidv4(),
-//           Column: {
-//             DataSetIdentifier: viewName,
-//             ColumnName: 'id',
-//           },
-//         },
-//       });
-
-//       fieldWellGroupBy.push({
-//         CategoricalDimensionField: {
-//           FieldId: uuidv4(),
-//           Column: {
-//             DataSetIdentifier: viewName,
-//             ColumnName: 'custom_attr_id',
-//           },
-//         },
-//       });
-//     }
-//   } else {
-//     if (computeMethodProps.isCountMixedMethod) {
-//       fieldWellGroupBy.push({
-//         CategoricalDimensionField: {
-//           FieldId: uuidv4(),
-//           Column: {
-//             DataSetIdentifier: viewName,
-//             ColumnName: 'id',
-//           },
-//         },
-//       });
-
-//       fieldWellGroupBy.push({
-//         CategoricalDimensionField: {
-//           FieldId: uuidv4(),
-//           Column: {
-//             DataSetIdentifier: viewName,
-//             ColumnName: 'custom_attr_id',
-//           },
-//         },
-//       });
-//     } else {
-//       fieldWellGroupBy.push({
-//         CategoricalDimensionField: {
-//           FieldId: uuidv4(),
-//           Column: {
-//             DataSetIdentifier: viewName,
-//             ColumnName: 'custom_attr_id',
-//           },
-//         },
-//       });
-
-//       fieldWellGroupBy.push({
-//         NumericalDimensionField: {
-//           FieldId: uuidv4(),
-//           Column: {
-//             DataSetIdentifier: viewName,
-//             ColumnName: 'count/aggregation amount',
-//           },
-//         },
-//       });
-//     }
-//   }
-//   return visual;
-// }
 
 export function getPathAnalysisChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
   const visualDef = readFileSync(join(__dirname, './templates/path-sankey-chart.json')).toString('utf-8');

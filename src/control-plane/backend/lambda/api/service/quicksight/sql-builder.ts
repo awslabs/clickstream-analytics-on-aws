@@ -522,57 +522,21 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
   let baseSQL = _buildEventPropertyAnalysisBaseSql(eventNames, sqlParameters);
 
   let groupColSQL = '';
-  let groupBySQL = '';
   if (isValidGroupingCondition(sqlParameters.groupCondition)) {
     const colNameWithAlias = buildColNameWithPrefix(sqlParameters.groupCondition);
     for ( const colName of colNameWithAlias.colNames) {
       groupColSQL += `${colName}::varchar as ${colName},`;
-      groupBySQL += `${colName},`;
     }
   }
 
-  const computeMethodProps = getComputeMethodProps(sqlParameters);
-  if (!computeMethodProps.isMixedMethod) {
-    if (computeMethodProps.hasAggregationPropertyMethod) {
-      if (!computeMethodProps.isSameAggregationMethod) {
-        resultSql = resultSql.concat(`
-          select 
-            event_date:: date,
-            event_name,
-            ${groupBySQL}
-            "count/aggregation amount":: double precision
-          from join_table
-        `);
-      } else {
-        resultSql = resultSql.concat(`
-            select 
-              day::date as event_date, 
-              event_name, 
-              ${groupColSQL}
-              "count/aggregation amount":: double precision
-            from join_table
-        `);
-      }
-    } else {
-      resultSql = resultSql.concat(`
-          select 
-            day::date as event_date, 
-            event_name, 
-            ${groupColSQL}
-            "count/aggregation amount":: double precision
-          from join_table 
-      `);
-    }
-  } else { // mixed method
-    resultSql = resultSql.concat(`
-        select 
-          event_date:: date,
-          event_name,
-          ${groupBySQL}
-          "count/aggregation amount":: double precision
-        from join_table
-    `);
-  }
+  resultSql = resultSql.concat(`
+      select 
+      event_date::date, 
+        event_name, 
+        ${groupColSQL}
+        "count/aggregation amount":: double precision
+      from join_table 
+  `);
 
   let sql = `
    ${baseSQL}

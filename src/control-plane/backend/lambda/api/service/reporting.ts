@@ -66,7 +66,7 @@ import {
   getQuickSightDataType,
   warmupRedshift,
 } from './quicksight/reporting-utils';
-import { EventAndCondition, EventComputeMethodsProps, ExploreAnalyticsType, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
+import { EventAndCondition, ExploreAnalyticsType, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -441,8 +441,8 @@ export class ReportingService {
     }
   };
 
-  private _getProjectColumnsAndDatasetColumns(computeMethodProps: EventComputeMethodsProps, groupingColName?: string[]) {
-    const projectedColumns = ['event_date', 'event_name'];
+  private _getProjectColumnsAndDatasetColumns(groupingColName?: string[]) {
+    const projectedColumns = ['event_date', 'event_name', 'count/aggregation amount'];
     const datasetColumns: InputColumn[] = [
       {
         Name: 'event_date',
@@ -452,6 +452,10 @@ export class ReportingService {
         Name: 'event_name',
         Type: 'STRING',
       },
+      {
+        Name: 'count/aggregation amount',
+        Type: 'DECIMAL',
+      }
     ];
 
     if (groupingColName != undefined) {
@@ -461,64 +465,6 @@ export class ReportingService {
           Type: 'STRING',
         });
         projectedColumns.push(col);
-      }
-    }
-
-    if (!computeMethodProps.isMixedMethod) {
-      if (computeMethodProps.hasAggregationPropertyMethod) {
-        if (!computeMethodProps.isSameAggregationMethod) {
-          datasetColumns.push({
-            Name: 'custom_attr_id',
-            Type: 'STRING',
-          });
-          projectedColumns.push('custom_attr_id');
-          datasetColumns.push({
-            Name: 'count/aggregation amount',
-            Type: 'DECIMAL',
-          });
-          projectedColumns.push('count/aggregation amount');
-        } else {
-          datasetColumns.push({
-            Name: 'id',
-            Type: 'DECIMAL',
-          });
-          projectedColumns.push('id');
-        }
-      } else {
-        datasetColumns.push({
-          Name: 'id',
-          Type: 'STRING',
-        });
-        projectedColumns.push('id');
-        datasetColumns.push({
-          Name: 'custom_attr_id',
-          Type: 'STRING',
-        });
-        projectedColumns.push('custom_attr_id');
-      }
-    } else {
-      if (computeMethodProps.isCountMixedMethod) {
-        datasetColumns.push({
-          Name: 'id',
-          Type: 'STRING',
-        });
-        projectedColumns.push('id');
-        datasetColumns.push({
-          Name: 'custom_attr_id',
-          Type: 'STRING',
-        });
-        projectedColumns.push('custom_attr_id');
-      } else {
-        datasetColumns.push({
-          Name: 'custom_attr_id',
-          Type: 'STRING',
-        });
-        projectedColumns.push('custom_attr_id');
-        datasetColumns.push({
-          Name: 'count/aggregation amount',
-          Type: 'DECIMAL',
-        });
-        projectedColumns.push('count/aggregation amount');
       }
     }
 
@@ -558,7 +504,7 @@ export class ReportingService {
       const sql = buildEventAnalysisView(sqlParameters);
       logger.debug(`event analysis sql: ${sql}`);
 
-      const projectedColumns = ['event_date', 'event_name', 'id'];
+      const projectedColumns = ['event_date', 'event_name', 'Count'];
       const datasetColumns = [...eventVisualColumns];
 
       const groupCondition = query.groupCondition as GroupingCondition;
@@ -691,9 +637,8 @@ export class ReportingService {
 
       const sql = buildEventPropertyAnalysisView(sqlParameters);
       logger.debug(`event analysis sql: ${sql}`);
-
-      const computeMethodProps = getComputeMethodProps(sqlParameters);
-
+      console.log(sql);
+      
       let groupingColName:string[] = [];
       if ( isValidGroupingCondition(query.groupCondition)) {
         for (const colName of buildColNameWithPrefix(query.groupCondition).colNames) {
@@ -701,7 +646,7 @@ export class ReportingService {
         }
       }
 
-      const projectedColumnsAndDatasetColumns = this._getProjectColumnsAndDatasetColumns(computeMethodProps, groupingColName);
+      const projectedColumnsAndDatasetColumns = this._getProjectColumnsAndDatasetColumns(groupingColName);
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -741,7 +686,7 @@ export class ReportingService {
       const tableVisualId = uuidv4();
 
       visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
-      const tableVisualDef = await getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, 
+      const tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, 
         query.groupColumn, groupingColName);
 
       const tableVisualProps = {
