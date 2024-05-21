@@ -2756,12 +2756,15 @@
 <p>该解决方案创建了一个 Web 服务作为摄取端点，用于收集从您的 SDK 发送的数据。您可以为摄取端点设置以下配置：</p>
 <ul>
 <li>
-<p><strong>公共子网</strong>：选择至少两个现有的 VPC 公共子网，Amazon 应用程序负载均衡器 (ALB) 将部署在这些子网中。</p>
+<p><strong>网络类型</strong>: 指定负载均衡器的方案 (scheme)。选择<strong>标准</strong>为面向互联网，选择<strong>私有</strong>为VPC内部。</p>
+</li>
+<li>
+<p><strong>公共子网 (仅适用于网络类型为标准)</strong>：选择至少两个现有的 VPC 公共子网，Amazon 应用程序负载均衡器 (ALB) 将部署在这些子网中。</p>
 </li>
 <li>
 <p><strong>私有子网</strong>：选择至少两个现有的 VPC 私有子网，运行在 ECS 中的 EC2 实例将部署在这些子网中。</p>
 <div class="admonition tip">
-<p class="admonition-title">提示</p>
+<p class="admonition-title">提示 (仅适用于网络类型为标准)</p>
 <p>公共子网所在的可用区必须与私有子网的可用区保持一致。</p>
 </div>
 </li>

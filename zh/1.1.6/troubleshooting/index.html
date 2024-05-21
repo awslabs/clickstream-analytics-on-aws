@@ -2644,6 +2644,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#cloudformation-the-availability-zones-for-subnets-subnet-xyz-are-currently-not-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      问题: 在创建启用数据处理的数据管道时，数据处理 CloudFormation 堆栈遇到了错误 "The availability zones for subnets [subnet-xyz] are currently not supported."。
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2906,6 +2915,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#cloudformation-the-availability-zones-for-subnets-subnet-xyz-are-currently-not-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      问题: 在创建启用数据处理的数据管道时，数据处理 CloudFormation 堆栈遇到了错误 "The availability zones for subnets [subnet-xyz] are currently not supported."。
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3068,6 +3086,10 @@
 <p>增加 Redshift 的计算资源（例如，Redshift Serverless 的 RPU）或者减少<a href="../pipeline-mgmt/data-processing/configure-execution-para/#_2">数据处理间隔</a>。然后，<a href="../faq/#_7">重新启动数据加载工作流</a>。</p>
 <h2 id="your-database-generated-a-sql-exception-this-can-be-caused-by-query-timeouts-resource-constraints-unexpected-ddl-alterations-before-or-during-a-query-and-other-database-errors">问题: 在分析工作坊查看仪表板时，收到错误"Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors."</h2>
 <p>仪表板可能正在使用尚未在 Redshift 中就绪的视图或物化视图。本解决方案在创建或更新项目的管道时异步创建或更新仪表板使用的视图和物化视图。创建或更新的持续时间取决于 Redshift 集群的工作负载、已有数据量，完成更新可能需要几分钟到几小时。您可以在管道详情页面的<strong>数据处理和建模</strong>选项卡中的 <strong>Redshift Schemas</strong> 部分跟踪进度。如果后期配置作业失败，您可以通过其链接访问工作流的执行，并通过<strong>操作 - 重启</strong>或<strong>新执行</strong>(输入保持不变)来重新运行作业。</p>
+<h2 id="cloudformation-the-availability-zones-for-subnets-subnet-xyz-are-currently-not-supported">问题: 在创建启用数据处理的数据管道时，数据处理 CloudFormation 堆栈遇到了错误 "The availability zones for subnets [subnet-xyz] are currently not supported."。</h2>
+<p>这是因为处理点击流数据的 EMR 无服务器应用程序无法部署在上述错误消息中指定的私有子网中。</p>
+<p><strong>解决方法:</strong></p>
+<p>请在 EMR 无服务器支持的可用区域中重新创建包含私有子网的项目。您可以参考<a href="https://docs.aws.amazon.com/zh_cn/emr/latest/EMR-Serverless-UserGuide/endpoints-quotas.html#endpoints">此文档</a>来检查部署区域中 EMR 无服务器支持的可用区域。</p>
 
 
 
