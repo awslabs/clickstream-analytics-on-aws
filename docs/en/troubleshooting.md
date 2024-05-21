@@ -151,6 +151,15 @@ It's caused by the large volume of data to be loaded or the Redshift load being 
 
 The dashboard is likely using views or materialized views that are not yet ready in Redshift. The solution asynchronously creates or updates the views and materialized views used by the dashboard after creating or updating the pipeline of the project. The duration of the creation or update depends on the workload of the Redshift cluster and the existing data volume and can take minutes to hours. You can keep track of progress in the **Redshift Schemas** section in the **Processing** tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via **Actions - Redrive** or **New execution** with the input unchanged.
 
+## Problem: When creating the data pipeline with data processing enabled, the data processing CloudFormation stack encountered error of "The availability zones for subnets [subnet-xyz] are currently not supported.".
+
+This is due to the EMR serverless application for processing the clickstream data cannot be deployed in the specified private subnets mentioned in the above error message.
+
+**Resolution:**
+
+Please recreate a project with private subnets in the supported available zones of EMR Serverless. You can refer to [this documentation][emr-serverless-endpoints] to check the supported available zones for EMR Serverless in your deployment region.
+
 [log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL
 [data-processing-param]: ./pipeline-mgmt/data-processing/configure-execution-para.md#parameters
 [restart-loading-workflow]: ./faq.md#how-do-i-resume-a-failed-data-loading-workflow
+[emr-serverless-endpoints]: https://docs.aws.amazon.com/zh_cn/emr/latest/EMR-Serverless-UserGuide/endpoints-quotas.html#endpoints
