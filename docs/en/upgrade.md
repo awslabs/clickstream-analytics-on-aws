@@ -2,8 +2,8 @@
 
 !!! warning "Important"
 
-    1. Please be advised that upgrading directly from version 1.0.x to this version is not supported. It is necessary to upgrade to [version 1.1.5][v115] first.
-    2. By upgrading the web console from earlier 1.1 versions before 1.1.6, you could continue to view the dashboards of the project. However, you could not [explore the existing Clickstream data][exploration] due to the feature relying on the updated data schema.
+    1. Please be advised that upgrading directly from version 1.0.x to 1.1.6(+) version is not supported. It is necessary to upgrade to [version 1.1.5][v115] first.
+    2. By upgrading the web console from earlier 1.1 versions before 1.1.6, you could continue to view the dashboards of the project. However, you could not [explore the existing Clickstream data][exploration] due the changes of data schemas. If you wish to continue to use the Explorations, you will need to upgrade the data pipeline as well and migrate the existing data to new data schemas (if you want to explore historical data).
 
 ## Planning and Preparation
 
