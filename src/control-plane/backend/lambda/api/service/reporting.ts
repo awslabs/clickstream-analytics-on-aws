@@ -28,7 +28,7 @@ import {
   SolutionVersion,
   OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME,
 } from '@aws/clickstream-base-lib';
-import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { PipelineServ } from './pipeline';
 import { DataSetProps, waitForDashboardChangeCompleted } from './quicksight/dashboard-ln';
@@ -60,15 +60,13 @@ import {
   checkPathAnalysisParameter,
   checkRetentionAnalysisParameter,
   encodeQueryValueForSql,
-  getEventNormalTableVisualDef,
   getEventPropertyCountPivotTableVisualDef,
-  DashboardTitleProps,
   getTimezoneByAppId,
   isValidGroupingCondition,
   getQuickSightDataType,
   warmupRedshift,
 } from './quicksight/reporting-utils';
-import { EventAndCondition, EventComputeMethodsProps, ExploreAnalyticsType, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
+import { EventAndCondition, ExploreAnalyticsType, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -443,8 +441,8 @@ export class ReportingService {
     }
   };
 
-  private _getProjectColumnsAndDatasetColumns(computeMethodProps: EventComputeMethodsProps, groupingColName?: string[]) {
-    const projectedColumns = ['event_date', 'event_name'];
+  private _getProjectColumnsAndDatasetColumns(groupingColName?: string[]) {
+    const projectedColumns = ['event_date', 'event_name', 'count/aggregation amount'];
     const datasetColumns: InputColumn[] = [
       {
         Name: 'event_date',
@@ -453,6 +451,10 @@ export class ReportingService {
       {
         Name: 'event_name',
         Type: 'STRING',
+      },
+      {
+        Name: 'count/aggregation amount',
+        Type: 'DECIMAL',
       },
     ];
 
@@ -463,64 +465,6 @@ export class ReportingService {
           Type: 'STRING',
         });
         projectedColumns.push(col);
-      }
-    }
-
-    if (!computeMethodProps.isMixedMethod) {
-      if (computeMethodProps.hasAggregationPropertyMethod) {
-        if (!computeMethodProps.isSameAggregationMethod) {
-          datasetColumns.push({
-            Name: 'custom_attr_id',
-            Type: 'STRING',
-          });
-          projectedColumns.push('custom_attr_id');
-          datasetColumns.push({
-            Name: 'count/aggregation amount',
-            Type: 'DECIMAL',
-          });
-          projectedColumns.push('count/aggregation amount');
-        } else {
-          datasetColumns.push({
-            Name: 'id',
-            Type: 'DECIMAL',
-          });
-          projectedColumns.push('id');
-        }
-      } else {
-        datasetColumns.push({
-          Name: 'id',
-          Type: 'STRING',
-        });
-        projectedColumns.push('id');
-        datasetColumns.push({
-          Name: 'custom_attr_id',
-          Type: 'STRING',
-        });
-        projectedColumns.push('custom_attr_id');
-      }
-    } else {
-      if (computeMethodProps.isCountMixedMethod) {
-        datasetColumns.push({
-          Name: 'id',
-          Type: 'STRING',
-        });
-        projectedColumns.push('id');
-        datasetColumns.push({
-          Name: 'custom_attr_id',
-          Type: 'STRING',
-        });
-        projectedColumns.push('custom_attr_id');
-      } else {
-        datasetColumns.push({
-          Name: 'custom_attr_id',
-          Type: 'STRING',
-        });
-        projectedColumns.push('custom_attr_id');
-        datasetColumns.push({
-          Name: 'count/aggregation amount',
-          Type: 'DECIMAL',
-        });
-        projectedColumns.push('count/aggregation amount');
       }
     }
 
@@ -560,7 +504,7 @@ export class ReportingService {
       const sql = buildEventAnalysisView(sqlParameters);
       logger.debug(`event analysis sql: ${sql}`);
 
-      const projectedColumns = ['event_date', 'event_name', 'id'];
+      const projectedColumns = ['event_date', 'event_name', 'Count'];
       const datasetColumns = [...eventVisualColumns];
 
       const groupCondition = query.groupCondition as GroupingCondition;
@@ -665,27 +609,6 @@ export class ReportingService {
     }
   };
 
-  async _getVisualDefOfEventVisualOnEventProperty(computeMethodProps: EventComputeMethodsProps,
-    tableVisualId: string, viewName: string, titleProps:DashboardTitleProps, groupColumn: string, groupingColName?: string[]) {
-
-    let tableVisualDef: Visual;
-    if (computeMethodProps.isSameAggregationMethod) {
-      tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn
-        , groupingColName, computeMethodProps.aggregationMethodName);
-    } else if (
-      (computeMethodProps.isMixedMethod && computeMethodProps.isCountMixedMethod)
-      ||(!computeMethodProps.isMixedMethod && !computeMethodProps.hasAggregationPropertyMethod)) {
-
-      logger.info('create pivot table for mix mode');
-      tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn, groupingColName);
-    } else {
-      logger.info('create normal table for mix mode');
-      tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, groupingColName);
-    }
-
-    return tableVisualDef;
-  }
-
   async createEventVisualOnEventProperty(req: any, res: any, next: any) {
     try {
       logger.info('start to create event analysis visuals', { request: req.body });
@@ -714,8 +637,7 @@ export class ReportingService {
 
       const sql = buildEventPropertyAnalysisView(sqlParameters);
       logger.debug(`event analysis sql: ${sql}`);
-
-      const computeMethodProps = getComputeMethodProps(sqlParameters);
+      console.log(sql);
 
       let groupingColName:string[] = [];
       if ( isValidGroupingCondition(query.groupCondition)) {
@@ -724,7 +646,7 @@ export class ReportingService {
         }
       }
 
-      const projectedColumnsAndDatasetColumns = this._getProjectColumnsAndDatasetColumns(computeMethodProps, groupingColName);
+      const projectedColumnsAndDatasetColumns = this._getProjectColumnsAndDatasetColumns(groupingColName);
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -762,8 +684,10 @@ export class ReportingService {
       }, locale);
 
       const tableVisualId = uuidv4();
-      const tableVisualDef = await this._getVisualDefOfEventVisualOnEventProperty(computeMethodProps, tableVisualId,
-        viewName, titleProps, query.groupColumn, groupingColName);
+
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
+      const tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps,
+        query.groupColumn, groupingColName);
 
       const tableVisualProps = {
         sheetId: sheetId,
@@ -924,6 +848,7 @@ export class ReportingService {
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
       };
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(visualId);
 
       const result: CreateDashboardResult = await this.createDashboardVisuals(
         sheetId, viewName, query, pipeline, datasetPropsArray, [visualProps]);

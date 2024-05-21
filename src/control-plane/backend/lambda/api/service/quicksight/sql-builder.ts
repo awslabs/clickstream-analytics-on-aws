@@ -498,7 +498,7 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
         day::date as event_date, 
         event_name, 
         ${groupColSQL}
-        x_id as id
+        x_id as "Count"
       from join_table 
       where x_id is not null
       group by
@@ -522,69 +522,27 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
   let baseSQL = _buildEventPropertyAnalysisBaseSql(eventNames, sqlParameters);
 
   let groupColSQL = '';
-  let groupBySQL = '';
   if (isValidGroupingCondition(sqlParameters.groupCondition)) {
     const colNameWithAlias = buildColNameWithPrefix(sqlParameters.groupCondition);
     for ( const colName of colNameWithAlias.colNames) {
       groupColSQL += `${colName}::varchar as ${colName},`;
-      groupBySQL += `${colName},`;
     }
   }
 
-  const computeMethodProps = getComputeMethodProps(sqlParameters);
-  if (!computeMethodProps.isMixedMethod) {
-    if (computeMethodProps.hasAggregationPropertyMethod) {
-      if (!computeMethodProps.isSameAggregationMethod) {
-        resultSql = resultSql.concat(`
-          select 
-            event_date:: date,
-            event_name,
-            ${groupBySQL}
-            custom_attr_id,
-            "count/aggregation amount":: double precision
-          from join_table
-        `);
-      } else {
-        resultSql = resultSql.concat(`
-            select 
-              day::date as event_date, 
-              event_name, 
-              ${groupColSQL}
-              custom_attr_id as id
-            from join_table
-            group by
-            day, event_name, ${groupBySQL} custom_attr_id
-        `);
-      }
-    } else {
-      resultSql = resultSql.concat(`
-          select 
-            day::date as event_date, 
-            event_name, 
-            ${groupColSQL}
-            x_id as id,
-            custom_attr_id
-          from join_table 
-          group by
-          day, event_name, ${groupBySQL} x_id, custom_attr_id
-      `);
-    }
-  } else { // mixed method
-    resultSql = resultSql.concat(`
-        select 
-          event_date:: date,
-          event_name,
-          ${groupBySQL}
-          custom_attr_id,
-          "count/aggregation amount":: double precision
-        from join_table
-    `);
-  }
+  resultSql = resultSql.concat(`
+      select 
+      event_date::date, 
+        event_name, 
+        ${groupColSQL}
+        "count/aggregation amount":: double precision
+      from join_table 
+  `);
 
   let sql = `
    ${baseSQL}
    ${resultSql}
    `;
+
   return format(sql, {
     language: 'postgresql',
   });
@@ -1376,60 +1334,19 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
   return sql;
 };
 
-function _buildIDColumnSql(index: number, eventAndCondition: EventAndCondition, extParamProps: ComputeMethodProps) {
-  let idSql = '';
-  if (extParamProps.hasAggregationPropertyMethod) {
-    idSql = `
-    , table_${index}.event_id_${index} as x_id
-    , table_${index}.custom_attr_${index} as custom_attr_id
-    `;
-  } else {
-    if (extParamProps.hasCounntPropertyMethod) {
-
-      if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT) {
-        idSql = `
-        , null as x_id
-        , table_${index}.event_id_${index} as custom_attr_id
-        `;
-      } else if (eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
-        idSql = `
-        , null as x_id
-        , table_${index}.user_pseudo_id_${index} as custom_attr_id
-        `;
-      } else {
-        idSql = `
-        , table_${index}.custom_attr_${index} as x_id
-        , table_${index}.event_id_${index} as custom_attr_id
-        `;
-      }
-    } else {
-      if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT) {
-        idSql = `, table_${index}.event_id_${index} as x_id`;
-      } else if (eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
-        idSql = `, table_${index}.user_pseudo_id_${index} as x_id`;
-      }
-    }
-  }
-
-  return idSql;
-}
-
 function _buildIDColumnSqlMixedMode(index: number, eventAndCondition: EventAndCondition) {
   let idSql = '';
 
   if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT) {
     idSql = `
-    , table_${index}.event_id_${index} as x_id
-    , table_${index}.custom_attr_${index} as custom_attr_id 
+    , table_${index}.event_id_${index} as custom_attr_id 
     `;
   } else if (eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
     idSql = `
-    , table_${index}.user_pseudo_id_${index} as x_id
-    , table_${index}.custom_attr_${index} as custom_attr_id 
+    , table_${index}.user_pseudo_id_${index} as custom_attr_id 
     `;
   } else {
     idSql = `
-    , table_${index}.event_id_${index} as x_id
     , table_${index}.custom_attr_${index} as custom_attr_id
     `;
   }
@@ -1441,24 +1358,15 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
     throw new Error('dateGroupCol is required');
   }
   let sql = '';
-  let groupby = ',custom_attr_id';
   if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT
-      || eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
+      || eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT
+      || eventAndCondition.computeMethod === ExploreComputeMethod.COUNT_PROPERTY
+  ) {
     sql = `
       ${dateGroupCol} as event_date,
       event_name,
       ${groupCol === '' ? '' : groupCol+','}
-      null as custom_attr_id,
-      count(distinct x_id)  as "count/aggregation amount"
-    `;
-    groupby = '';
-  } else if (eventAndCondition.computeMethod === ExploreComputeMethod.COUNT_PROPERTY) {
-    sql = `
-      ${dateGroupCol} as event_date,
-      event_name,
-      ${groupCol === '' ? '' : groupCol+','}
-      custom_attr_id,
-      count(1) as "count/aggregation amount"
+      count(distinct custom_attr_id)  as "count/aggregation amount"
     `;
   } else {
     let method = eventAndCondition.eventExtParameter!.aggregationMethod?.toUpperCase();
@@ -1466,55 +1374,11 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
       ${dateGroupCol} as event_date,
       event_name,
       ${groupCol === '' ? '' : groupCol+','}
-      null as custom_attr_id,
       ${method}(custom_attr_id) as "count/aggregation amount"
     `;
-    groupby = '';
   }
 
-  return {
-    sql,
-    groupby,
-  };
-}
-
-function _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters: SQLParameters, extParamProps: ComputeMethodProps) {
-
-  let joinTableSQL = '';
-
-  for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
-    let unionSql = '';
-    if (index > 0) {
-      unionSql = 'union all';
-    }
-
-    let idSql = _buildIDColumnSql(index, item, extParamProps);
-
-    let groupColSql = '';
-    if (isValidGroupingCondition(sqlParameters.groupCondition)) {
-      for (const colName of buildColNameWithPrefix(sqlParameters.groupCondition).colNames) {
-        groupColSql += `, table_${index}.${colName}_${index} as ${colName}`;
-      }
-    }
-
-    joinTableSQL = joinTableSQL.concat(`
-    ${unionSql}
-    select
-      table_${index}.month
-    , table_${index}.week
-    , table_${index}.day
-    , table_${index}.hour
-    , ${index+1} || '_' || table_${index}.event_name_${index} as event_name
-    , table_${index}.event_timestamp_${index} as event_timestamp
-    ${idSql}
-    ${groupColSql}
-    from table_${index}
-    `);
-
-  }
-
-  return joinTableSQL;
-
+  return sql;
 }
 
 function _buildSqlForGrouping(groupCondition: GroupingCondition | undefined, index: number) {
@@ -1541,23 +1405,20 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
   sql = buildResult.sql;
 
   let joinTableSQL = '';
+  for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
+    let unionSql = '';
+    if (index > 0) {
+      unionSql = 'union all';
+    }
 
-  const extParamProps = getComputeMethodProps(sqlParameters);
-  if (extParamProps.isMixedMethod || (extParamProps.hasAggregationPropertyMethod && !extParamProps.isSameAggregationMethod)) {
-    for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
-      let unionSql = '';
-      if (index > 0) {
-        unionSql = 'union all';
-      }
+    const groupingSql = _buildSqlForGrouping(sqlParameters.groupCondition, index);
+    const idSql = _buildIDColumnSqlMixedMode(index, item);
+    const query = _buildQueryColumnSqlMixedMode(item, groupingSql.groupCol, sqlParameters.groupColumn);
 
-      const groupingSql = _buildSqlForGrouping(sqlParameters.groupCondition, index);
-      const idSql = _buildIDColumnSqlMixedMode(index, item);
-      const query = _buildQueryColumnSqlMixedMode(item, groupingSql.groupCol, sqlParameters.groupColumn);
-
-      joinTableSQL = joinTableSQL.concat(`
+    joinTableSQL = joinTableSQL.concat(`
       ${unionSql}
       select 
-        ${query.sql}
+        ${query}
         from(
           select
             table_${index}.month
@@ -1570,11 +1431,8 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
           ${groupingSql.groupColSql}
           from table_${index}
         ) as union_table_${index}
-        group by ${sqlParameters.groupColumn}, event_name ${groupingSql.groupCol === '' ? '': ',' + groupingSql.groupCol} ${query.groupby}
+        group by ${sqlParameters.groupColumn}, event_name ${groupingSql.groupCol === '' ? '': ',' + groupingSql.groupCol} 
       `);
-    }
-  } else {
-    joinTableSQL = _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters, extParamProps);
   }
 
   sql = sql.concat(`
@@ -2159,7 +2017,11 @@ function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
       if (event.eventExtParameter !== undefined) {
         extCol = `,${buildColNameWithPrefixForOneCondtion(event.eventExtParameter.targetProperty).colName} as custom_attr_${index}`;
       } else {
-        extCol = `,null as custom_attr_${index}`;
+        if (event.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+          extCol = `,event_id as custom_attr_${index}`;
+        } else if (event.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
+          extCol = `,user_pseudo_id as custom_attr_${index}`;
+        }
       }
     }
 
