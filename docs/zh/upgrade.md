@@ -113,7 +113,15 @@
     DROP PROCEDURE "<app-id>".sp_migrate_user_to_v2();
     DROP PROCEDURE "<app-id>".sp_migrate_session_to_v2();
     DROP PROCEDURE "<app-id>".sp_clear_item_and_user();
-    ```        
+    ```
+9. （可选）如果迁移的数据量较大，建议分批次刷新clickstream_event_base_view, 即根据事件的发生时间，分多次调用如下存贮过程，将数据分批次刷新
+   ```sql
+   call "<schema>".clickstream_event_base_view(start_event_timestamp, end_event_timestamp, 1);
+   ```   
+   例如要将2024-05-10 00:00:00至2024-05-12 00:00:00之间的数据刷新，则执行如下SQL：
+   ```sql
+   call "<schema>".clickstream_event_base_view_sp(TIMESTAMP 'epoch' + 1715270400  * INTERVAL '1 second', TIMESTAMP 'epoch' + 1715443200 * INTERVAL '1 second', 1);
+   ```  
 
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/

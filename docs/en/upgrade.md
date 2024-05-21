@@ -118,6 +118,14 @@ The solution automatically and asynchronously upgrades the views and materialize
     DROP PROCEDURE "<app-id>".sp_migrate_session_to_v2();
     DROP PROCEDURE "<app-id>".sp_clear_item_and_user();
     ```
+9. (Optional) If the amount of migrated data is large, it is recommended to refresh the clickstream_event_base_view in batches. That is, based on the occurrence time of the events, call the following stored procedure multiple times to refresh the data in batches
+   ```sql
+   call "<schema>".clickstream_event_base_view(start_event_timestamp, end_event_timestamp, 1);
+   ```
+   For example, to refresh data between 2024-05-10 00:00:00 and 2024-05-12 00:00:00, execute the following SQL:
+   ```sql
+   call "<schema>".clickstream_event_base_view_sp(TIMESTAMP 'epoch' + 1715270400  * INTERVAL '1 second', TIMESTAMP 'epoch' + 1715443200 * INTERVAL '1 second', 1);
+   ```
 
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md
