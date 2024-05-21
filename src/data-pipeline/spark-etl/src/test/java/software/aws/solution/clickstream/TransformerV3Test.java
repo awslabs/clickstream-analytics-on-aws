@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.common.Constant;
+import software.aws.solution.clickstream.model.ModelV2;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.IOException;
@@ -288,5 +289,31 @@ class TransformerV3Test extends BaseSparkTest {
         String expectedJson2 = this.resourceFileAsString("/event_v2/expected/transform_v3_user_max_len.json");
         Assertions.assertEquals(expectedJson2, replaceDynData(datasetUser.first().prettyJson()), "transform_v3_user_max_len");
 
+    }
+
+    @Test
+    void test_extract_session_from_event() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV3Test.test_extract_session_from_event
+        Dataset<Row> dataset =
+                spark.read()
+                        .schema(ModelV2.EVENT_TYPE)
+                        .json(requireNonNull(getClass().getResource("/event_v2/event_v2_session_dataset.json")).getPath());
+
+        Dataset<Row> sessionDataset = transformer.extractSessionFromEvent(dataset);
+        String expectedJson1 = this.resourceFileAsString("/event_v2/expected/test_extract_session_from_event.json");
+        Assertions.assertEquals(expectedJson1, replaceDynData(sessionDataset.first().prettyJson()));
+    }
+
+    @Test
+    void test_extract_session_from_event2() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV3Test.test_extract_session_from_event2
+        Dataset<Row> dataset =
+                spark.read()
+                        .schema(ModelV2.EVENT_TYPE)
+                        .json(requireNonNull(getClass().getResource("/event_v2/event_v2_session_dataset2.json")).getPath());
+
+        Dataset<Row> sessionDataset = transformer.extractSessionFromEvent(dataset);
+        String expectedJson1 = this.resourceFileAsString("/event_v2/expected/test_extract_session_from_event2.json");
+        Assertions.assertEquals(expectedJson1, replaceDynData(sessionDataset.first().prettyJson()));
     }
 }
