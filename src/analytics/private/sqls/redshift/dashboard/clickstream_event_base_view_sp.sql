@@ -8,9 +8,7 @@ DECLARE
 BEGIN
 
   create temp table clickstream_event_base_view_stage (like {{database_name}}.{{schema}}.clickstream_event_base_view); 
-
   IF p_start_time IS NOT NULL and p_end_time IS NOT NULL THEN
-
     EXECUTE 'insert into clickstream_event_base_view_stage 
       select 
         e.event_timestamp,
