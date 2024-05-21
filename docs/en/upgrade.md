@@ -99,7 +99,7 @@ The solution automatically and asynchronously upgrades the views and materialize
     SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
     ```
 
-7. Calculate the metrics for the migrated data used in the out-of-the-box dashboards. Refer to [this FAQ][faq-recalculate-data] for guidance.
+7. Follow [this guide][faq-recalculate-data] to calculate metrics for the new preset dashboard based on the migrated data.
 
 8. If you don't have other applications using the legacy tables and views, you could run the following SQL to clean up the legacy views and tables to save Redshift storage.
 
