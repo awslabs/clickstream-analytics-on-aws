@@ -2775,12 +2775,15 @@
 <p>The solution creates a web service as an ingestion endpoint to collect data sent from your SDKs. You can set below configurations for ingestion endpoint.</p>
 <ul>
 <li>
-<p><strong>Public Subnets</strong>: select at least two existing VPC public subnets, and the Amazon Application Load Balancers (ALBs) will be deployed in these subnets.</p>
+<p><strong>Network type</strong>: specify the <strong>scheme</strong> of the application load balancer, choose <strong>General</strong> for <strong>internet-facing</strong> or <strong>Private</strong> for <strong>internal</strong>.</p>
+</li>
+<li>
+<p><strong>Public Subnets</strong> (only applicable to <strong>General</strong> network type): select at least two existing VPC public subnets, and the Amazon Application Load Balancers (ALBs) will be deployed in these subnets.</p>
 </li>
 <li>
 <p><strong>Private Subnets</strong>: select at least two existing VPC private subnets, and the EC2 instances running in ECS will be deployed in these subnets.</p>
 <div class="admonition tip">
-<p class="admonition-title">Tip</p>
+<p class="admonition-title">Tip (only applicable to <strong>General</strong> network type)</p>
 <p>The availability zones where the public subnets are located must be consistent with those of the private subnets.</p>
 </div>
 </li>
