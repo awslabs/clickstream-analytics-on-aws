@@ -36,12 +36,11 @@ import java.util.Map;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.explode;
 import static org.apache.spark.sql.functions.expr;
-import static org.apache.spark.sql.functions.first;
 import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.map;
 import static org.apache.spark.sql.functions.map_concat;
-import static org.apache.spark.sql.functions.max;
-import static org.apache.spark.sql.functions.min;
+import static org.apache.spark.sql.functions.min_by;
+import static org.apache.spark.sql.functions.struct;
 import static org.apache.spark.sql.functions.when;
 import static software.aws.solution.clickstream.TransformerV3.CLIENT_TIMESTAMP;
 import static software.aws.solution.clickstream.common.BaseEventParser.UPLOAD_TIMESTAMP;
@@ -61,6 +60,7 @@ public abstract class BaseTransformerV3 implements TransformerInterfaceV3 {
     public static final String PROCESS_JOB_ID = "process_job_id";
     public static final String PROCESS_TIME = "process_time";
     public static final String TABLE_VERSION_SUFFIX_V3 = "_v3" ;
+    public static final String DIRECT = "Direct";
 
     public static Column mapConcatSafe(final Column map1, final Column map2) {
         return when(map1.isNull(), map2)
@@ -166,37 +166,64 @@ public abstract class BaseTransformerV3 implements TransformerInterfaceV3 {
                 ).alias(Constant.PROCESS_INFO)
         ).filter(col(Constant.SESSION_ID).isNotNull());
 
-        sessionDataset.cache();
-
-        log.info("sessionDataset count: {}", sessionDataset.count());
         Dataset<Row> sessionEventDataset = sessionDataset
-                .filter(col(Constant.EVENT_NAME).isin(EVENT_SESSION_START, EVENT_PAGE_VIEW, EVENT_USER_ENGAGEMENT, EVENT_SCREEN_VIEW, EVENT_APP_END));
-
-        Column[] aggColumns = new Column[]{
-                max(col(Constant.USER_ID)).alias(Constant.USER_ID),
-                max(col(Constant.SESSION_NUMBER)).alias(Constant.SESSION_NUMBER),
-                min(col(Constant.SESSION_START_TIME_MSEC)).alias(Constant.SESSION_START_TIME_MSEC),
-                max(col(Constant.SESSION_SOURCE)).alias(Constant.SESSION_SOURCE),
-                max(col(Constant.SESSION_MEDIUM)).alias(Constant.SESSION_MEDIUM),
-                max(col(Constant.SESSION_CAMPAIGN)).alias(Constant.SESSION_CAMPAIGN),
-                max(col(Constant.SESSION_CONTENT)).alias(Constant.SESSION_CONTENT),
-                max(col(Constant.SESSION_TERM)).alias(Constant.SESSION_TERM),
-                max(col(Constant.SESSION_CAMPAIGN_ID)).alias(Constant.SESSION_CAMPAIGN_ID),
-                max(col(Constant.SESSION_CLID_PLATFORM)).alias(Constant.SESSION_CLID_PLATFORM),
-                max(col(Constant.SESSION_CLID)).alias(Constant.SESSION_CLID),
-                max(col(Constant.SESSION_CHANNEL_GROUP)).alias(Constant.SESSION_CHANNEL_GROUP),
-                max(col(Constant.SESSION_SOURCE_CATEGORY)).alias(Constant.SESSION_SOURCE_CATEGORY),
-                first(col(Constant.PROCESS_INFO)).alias(Constant.PROCESS_INFO)
-        };
-        Dataset<Row> sessionDatasetAgg = sessionEventDataset
-                .groupBy(Constant.APP_ID, Constant.USER_PSEUDO_ID, Constant.SESSION_ID)
-                .agg(
-                        max(col(Constant.EVENT_TIMESTAMP)).alias(Constant.EVENT_TIMESTAMP),
-                        aggColumns
+                .filter(
+                        col(Constant.EVENT_NAME)
+                                .isin(EVENT_SESSION_START,
+                                        EVENT_PAGE_VIEW,
+                                        EVENT_USER_ENGAGEMENT,
+                                        EVENT_SCREEN_VIEW,
+                                        EVENT_APP_END)
                 );
+
+        sessionEventDataset.cache();
+        log.info("sessionEventDataset count: {}", sessionEventDataset.count());
+
+        Dataset<Row> sessionDatasetNonDirectAgg = getAggSessionDataset(
+                sessionEventDataset.filter(
+                        col(Constant.SESSION_SOURCE).isNotNull()
+                        .and(col(Constant.SESSION_SOURCE).notEqual(DIRECT))
+                )
+        );
+        Dataset<Row> sessionDatasetDirect = sessionEventDataset.join(sessionDatasetNonDirectAgg,
+                new String[]{Constant.APP_ID, Constant.USER_PSEUDO_ID, Constant.SESSION_ID},
+                "leftanti");
+
+
+        Dataset<Row> sessionDatasetDirectAgg = getAggSessionDataset(sessionDatasetDirect);
+
+        Dataset<Row> sessionDatasetAgg = sessionDatasetNonDirectAgg.union(sessionDatasetDirectAgg);
 
         log.info("sessionDatasetAgg count: {}", sessionDatasetAgg.count());
         return addProcessInfo(runMaxLengthTransformerForSession(sessionDatasetAgg));
+    }
+
+    private static Dataset<Row> getAggSessionDataset(final Dataset<Row> sessionDataset) {
+        Dataset<Row> sessionDatasetAgg = sessionDataset
+                .groupBy(Constant.APP_ID, Constant.USER_PSEUDO_ID, Constant.SESSION_ID)
+                .agg(
+                        min_by(
+                                struct(
+                                        col(Constant.EVENT_TIMESTAMP),
+                                        col(Constant.USER_ID),
+                                        col(Constant.SESSION_NUMBER),
+                                        col(Constant.SESSION_START_TIME_MSEC),
+                                        col(Constant.SESSION_SOURCE),
+                                        col(Constant.SESSION_MEDIUM),
+                                        col(Constant.SESSION_CAMPAIGN),
+                                        col(Constant.SESSION_CONTENT),
+                                        col(Constant.SESSION_TERM),
+                                        col(Constant.SESSION_CAMPAIGN_ID),
+                                        col(Constant.SESSION_CLID_PLATFORM),
+                                        col(Constant.SESSION_CLID),
+                                        col(Constant.SESSION_CHANNEL_GROUP),
+                                        col(Constant.SESSION_SOURCE_CATEGORY),
+                                        col(Constant.PROCESS_INFO)
+                                ),
+                                col(Constant.EVENT_TIMESTAMP)
+                        ).alias("t")
+                );
+        return sessionDatasetAgg.select(col(Constant.APP_ID), col(Constant.USER_PSEUDO_ID), col(Constant.SESSION_ID), expr("t.*"));
     }
 
 

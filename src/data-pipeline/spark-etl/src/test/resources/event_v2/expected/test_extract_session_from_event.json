@@ -1,0 +1,25 @@
+{
+  "event_timestamp" : "2024-05-16 19:50:01",
+  "user_pseudo_id" : "412f30bf-a662-4cf8-8548-770816852f55",
+  "session_id" : "16852f55-20240516-195001418",
+  "user_id" : "NULL",
+  "session_number" : null,
+  "session_start_time_msec" : null,
+  "session_source" : "Google",
+  "session_medium" : "Organic",
+  "session_campaign" : "NULL",
+  "session_content" : "NULL",
+  "session_term" : "NULL",
+  "session_campaign_id" : "NULL",
+  "session_clid_platform" : "NULL",
+  "session_clid" : "NULL",
+  "session_channel_group" : "Organic Search",
+  "session_source_category" : "Search",
+  "process_info" : {
+    "event_name" : "_session_start",
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_"
+  },
+  "app_id" : "blog",
+  "created_time" : "_CREATED_TIME_"
+}

@@ -16,7 +16,7 @@
   "session_channel_group" : "Direct",
   "session_source_category" : "Direct",
   "process_info" : {
-    "event_name" : "_user_engagement",
+    "event_name" : "_session_start",
     "ingest_time" : "2024-01-10T06:13:50Z",
     "input_file_name" : "test-convert-session-start.json",
     "process_job_id" : "test-job",
