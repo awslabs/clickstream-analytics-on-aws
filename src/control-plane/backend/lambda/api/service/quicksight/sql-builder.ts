@@ -1334,31 +1334,6 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
   return sql;
 };
 
-// function _buildIDColumnSql(index: number, eventAndCondition: EventAndCondition, extParamProps: ComputeMethodProps) {
-//   let idSql = '';
-//   if (extParamProps.hasAggregationPropertyMethod) {
-//     idSql = `
-//     , table_${index}.custom_attr_${index} as custom_attr_id
-//     `;
-//   } else {
-//     if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT) {
-//       idSql = `
-//       , table_${index}.event_id_${index} as custom_attr_id
-//       `;
-//     } else if (eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
-//       idSql = `
-//       , table_${index}.user_pseudo_id_${index} as custom_attr_id
-//       `;
-//     } else {
-//       idSql = `
-//       , table_${index}.custom_attr_${index} as custom_attr_id
-//       `;
-//     }
-//   }
-
-//   return idSql;
-// }
-
 function _buildIDColumnSqlMixedMode(index: number, eventAndCondition: EventAndCondition) {
   let idSql = '';
 
@@ -1406,45 +1381,6 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
   return sql;
 }
 
-// function _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters: SQLParameters, extParamProps: ComputeMethodProps) {
-
-//   let joinTableSQL = '';
-
-//   for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
-//     let unionSql = '';
-//     if (index > 0) {
-//       unionSql = 'union all';
-//     }
-
-//     let idSql = _buildIDColumnSql(index, item, extParamProps);
-
-//     let groupColSql = '';
-//     if (isValidGroupingCondition(sqlParameters.groupCondition)) {
-//       for (const colName of buildColNameWithPrefix(sqlParameters.groupCondition).colNames) {
-//         groupColSql += `, table_${index}.${colName}_${index} as ${colName}`;
-//       }
-//     }
-
-//     joinTableSQL = joinTableSQL.concat(`
-//     ${unionSql}
-//     select
-//       table_${index}.month
-//     , table_${index}.week
-//     , table_${index}.day
-//     , table_${index}.hour
-//     , ${index+1} || '_' || table_${index}.event_name_${index} as event_name
-//     , table_${index}.event_timestamp_${index} as event_timestamp
-//     ${idSql}
-//     ${groupColSql}
-//     from table_${index}
-//     `);
-
-//   }
-
-//   return joinTableSQL;
-
-// }
-
 function _buildSqlForGrouping(groupCondition: GroupingCondition | undefined, index: number) {
   let groupColSql = '';
   let groupCol = '';
@@ -1469,9 +1405,6 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
   sql = buildResult.sql;
 
   let joinTableSQL = '';
-
-  // const extParamProps = getComputeMethodProps(sqlParameters);
-  // if (extParamProps.isMixedMethod || (extParamProps.hasAggregationPropertyMethod && !extParamProps.isSameAggregationMethod)) {
   for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
     let unionSql = '';
     if (index > 0) {
@@ -1501,9 +1434,6 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
         group by ${sqlParameters.groupColumn}, event_name ${groupingSql.groupCol === '' ? '': ',' + groupingSql.groupCol} 
       `);
   }
-  // } else {
-  //   joinTableSQL = _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters, extParamProps);
-  // }
 
   sql = sql.concat(`
     join_table as (
