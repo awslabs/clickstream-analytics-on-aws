@@ -270,10 +270,6 @@ BEGIN
   END IF
   ;
 
-  
-
-  
-
   MERGE INTO {{database_name}}.{{schema}}.clickstream_event_base_view
   USING clickstream_event_base_view_stage as stage on clickstream_event_base_view.event_timestamp = stage.event_timestamp and clickstream_event_base_view.event_id = stage.event_id
   WHEN MATCHED THEN 
