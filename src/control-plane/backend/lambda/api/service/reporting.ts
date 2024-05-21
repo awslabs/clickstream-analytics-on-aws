@@ -455,7 +455,7 @@ export class ReportingService {
       {
         Name: 'count/aggregation amount',
         Type: 'DECIMAL',
-      }
+      },
     ];
 
     if (groupingColName != undefined) {
@@ -638,7 +638,7 @@ export class ReportingService {
       const sql = buildEventPropertyAnalysisView(sqlParameters);
       logger.debug(`event analysis sql: ${sql}`);
       console.log(sql);
-      
+
       let groupingColName:string[] = [];
       if ( isValidGroupingCondition(query.groupCondition)) {
         for (const colName of buildColNameWithPrefix(query.groupCondition).colNames) {
@@ -686,7 +686,7 @@ export class ReportingService {
       const tableVisualId = uuidv4();
 
       visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
-      const tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, 
+      const tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps,
         query.groupColumn, groupingColName);
 
       const tableVisualProps = {

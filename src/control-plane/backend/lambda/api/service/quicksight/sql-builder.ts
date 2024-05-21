@@ -1386,7 +1386,7 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
   if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT
       || eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT
       || eventAndCondition.computeMethod === ExploreComputeMethod.COUNT_PROPERTY
-    ) {
+  ) {
     sql = `
       ${dateGroupCol} as event_date,
       event_name,
@@ -1472,17 +1472,17 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
 
   // const extParamProps = getComputeMethodProps(sqlParameters);
   // if (extParamProps.isMixedMethod || (extParamProps.hasAggregationPropertyMethod && !extParamProps.isSameAggregationMethod)) {
-    for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
-      let unionSql = '';
-      if (index > 0) {
-        unionSql = 'union all';
-      }
+  for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
+    let unionSql = '';
+    if (index > 0) {
+      unionSql = 'union all';
+    }
 
-      const groupingSql = _buildSqlForGrouping(sqlParameters.groupCondition, index);
-      const idSql = _buildIDColumnSqlMixedMode(index, item);
-      const query = _buildQueryColumnSqlMixedMode(item, groupingSql.groupCol, sqlParameters.groupColumn);
+    const groupingSql = _buildSqlForGrouping(sqlParameters.groupCondition, index);
+    const idSql = _buildIDColumnSqlMixedMode(index, item);
+    const query = _buildQueryColumnSqlMixedMode(item, groupingSql.groupCol, sqlParameters.groupColumn);
 
-      joinTableSQL = joinTableSQL.concat(`
+    joinTableSQL = joinTableSQL.concat(`
       ${unionSql}
       select 
         ${query}
@@ -1500,7 +1500,7 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
         ) as union_table_${index}
         group by ${sqlParameters.groupColumn}, event_name ${groupingSql.groupCol === '' ? '': ',' + groupingSql.groupCol} 
       `);
-    }
+  }
   // } else {
   //   joinTableSQL = _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters, extParamProps);
   // }
@@ -2087,7 +2087,7 @@ function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
       if (event.eventExtParameter !== undefined) {
         extCol = `,${buildColNameWithPrefixForOneCondtion(event.eventExtParameter.targetProperty).colName} as custom_attr_${index}`;
       } else {
-        if(event.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+        if (event.computeMethod === ExploreComputeMethod.EVENT_CNT) {
           extCol = `,event_id as custom_attr_${index}`;
         } else if (event.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
           extCol = `,user_pseudo_id as custom_attr_${index}`;
