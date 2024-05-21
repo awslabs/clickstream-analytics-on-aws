@@ -342,7 +342,7 @@ module.exports = function (webpackEnv) {
             name: 'styles',
             test: /\.css$/,
             chunks: 'all',
-            enforce: true,
+            enforce: !isEnvDevelopment,
           },
         },
       },
