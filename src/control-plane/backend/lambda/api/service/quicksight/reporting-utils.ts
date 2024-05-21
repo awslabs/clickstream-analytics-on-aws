@@ -32,7 +32,6 @@ import {
   QUICKSIGHT_DATASET_INFIX,
   QUICKSIGHT_RESOURCE_NAME_PREFIX,
   QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX,
-  ExploreAggregationMethod,
   DEFAULT_TIMEZONE,
   OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN,
   OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS,
@@ -53,7 +52,6 @@ import {
   ColumnConfiguration,
   SheetDefinition,
   GeoSpatialDataRole,
-  SimpleNumericalAggregationFunction,
   InputColumnDataType,
   DataSetImportMode,
 } from '@aws-sdk/client-quicksight';
@@ -63,7 +61,7 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
 import { ReportingCheck } from './reporting-check';
-import { AttributionTouchPoint, ColumnAttribute, Condition, EVENT_USER_VIEW, EventAndCondition, EventComputeMethodsProps, GroupingCondition, PairEventAndCondition, SQLParameters, buildColNameWithPrefix, buildConditionProps } from './sql-builder';
+import { AttributionTouchPoint, ColumnAttribute, Condition, EVENT_USER_VIEW, EventAndCondition, GroupingCondition, PairEventAndCondition, SQLParameters, buildColNameWithPrefix, buildConditionProps } from './sql-builder';
 import { AttributionSQLParameters } from './sql-builder-attribution';
 import { PipelineStackType } from '../../common/model-ln';
 import { logger } from '../../common/powertools';
@@ -255,7 +253,7 @@ export const eventVisualColumns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'id',
+    Name: 'Count',
     Type: 'STRING',
   },
 ];
@@ -996,7 +994,7 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
 }
 
 export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewName: string,
-  titleProps: DashboardTitleProps, groupColumn: string, grouppingColName?: string[], aggregationMthod?: string) : Visual {
+  titleProps: DashboardTitleProps, groupColumn: string, grouppingColName?: string[]) : Visual {
 
   const props = _getMultipleVisualProps(grouppingColName !== undefined);
 
@@ -1030,172 +1028,20 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
     }
   }
 
-  if (aggregationMthod !== undefined) {
-    let method = aggregationMthod;
-    if (method === ExploreAggregationMethod.AVG) {
-      method = 'AVERAGE';
-    }
-    const values = fieldWells.PivotTableAggregatedFieldWells?.Values!;
-    values[0] = {
-      NumericalMeasureField: {
-        FieldId: uuidv4(),
-        Column: {
-          DataSetIdentifier: viewName,
-          ColumnName: 'id',
-        },
-        AggregationFunction: {
-          SimpleNumericalAggregation: method?.toUpperCase() as SimpleNumericalAggregationFunction,
-        },
+  const values = fieldWells.PivotTableAggregatedFieldWells?.Values!;
+  values[0] = {
+    NumericalMeasureField: {
+      FieldId: uuidv4(),
+      Column: {
+        DataSetIdentifier: viewName,
+        ColumnName: 'count/aggregation amount',
       },
-    };
-
-  } else {
-    const rows = fieldWells.PivotTableAggregatedFieldWells?.Rows!;
-    rows.push({
-      CategoricalDimensionField: {
-        FieldId: uuidv4(),
-        Column: {
-          DataSetIdentifier: viewName,
-          ColumnName: 'id',
-        },
+      AggregationFunction: {
+        SimpleNumericalAggregation: 'SUM',
       },
-    });
-
-    const values = fieldWells.PivotTableAggregatedFieldWells?.Values!;
-    values[0] = {
-      CategoricalMeasureField: {
-        FieldId: uuidv4(),
-        Column: {
-          DataSetIdentifier: viewName,
-          ColumnName: 'custom_attr_id',
-        },
-        AggregationFunction: 'COUNT',
-      },
-    };
-  }
-
-  return visual;
-}
-
-export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMethodsProps, visualId: string, viewName: string,
-  titleProps: DashboardTitleProps, grouppingColName?: string[]) : Visual {
-  const visualDef = readFileSync(join(__dirname, './templates/event-table-chart.json')).toString('utf-8');
-  const mustacheEventAnalysisType: MustacheEventTableAnalysisType = {
-    visualId,
-    dataSetIdentifier: viewName,
-    dateDimFieldId: uuidv4(),
-    nameDimFieldId: uuidv4(),
-    title: titleProps.tableTitle,
-    subTitle: titleProps.subTitle,
+    },
   };
 
-  const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
-
-  const fieldWellGroupBy = visual.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells!.GroupBy!;
-
-  if (grouppingColName !== undefined) {
-
-    for (const colName of grouppingColName) {
-      fieldWellGroupBy.push({
-        CategoricalDimensionField: {
-          FieldId: uuidv4(),
-          Column: {
-            DataSetIdentifier: viewName,
-            ColumnName: colName,
-          },
-        },
-      });
-    }
-  }
-
-  if (!computeMethodProps.isMixedMethod) {
-    if (computeMethodProps.hasAggregationPropertyMethod) {
-      if (!computeMethodProps.isSameAggregationMethod) {
-        fieldWellGroupBy.push({
-          NumericalDimensionField: {
-            FieldId: uuidv4(),
-            Column: {
-              DataSetIdentifier: viewName,
-              ColumnName: 'count/aggregation amount',
-            },
-          },
-        });
-
-      } else {
-        fieldWellGroupBy.push({
-          NumericalDimensionField: {
-            FieldId: uuidv4(),
-            Column: {
-              DataSetIdentifier: viewName,
-              ColumnName: 'custom_attr_id',
-            },
-          },
-        });
-      }
-    } else {
-      fieldWellGroupBy.push({
-        CategoricalDimensionField: {
-          FieldId: uuidv4(),
-          Column: {
-            DataSetIdentifier: viewName,
-            ColumnName: 'id',
-          },
-        },
-      });
-
-      fieldWellGroupBy.push({
-        CategoricalDimensionField: {
-          FieldId: uuidv4(),
-          Column: {
-            DataSetIdentifier: viewName,
-            ColumnName: 'custom_attr_id',
-          },
-        },
-      });
-    }
-  } else {
-    if (computeMethodProps.isCountMixedMethod) {
-      fieldWellGroupBy.push({
-        CategoricalDimensionField: {
-          FieldId: uuidv4(),
-          Column: {
-            DataSetIdentifier: viewName,
-            ColumnName: 'id',
-          },
-        },
-      });
-
-      fieldWellGroupBy.push({
-        CategoricalDimensionField: {
-          FieldId: uuidv4(),
-          Column: {
-            DataSetIdentifier: viewName,
-            ColumnName: 'custom_attr_id',
-          },
-        },
-      });
-    } else {
-      fieldWellGroupBy.push({
-        CategoricalDimensionField: {
-          FieldId: uuidv4(),
-          Column: {
-            DataSetIdentifier: viewName,
-            ColumnName: 'custom_attr_id',
-          },
-        },
-      });
-
-      fieldWellGroupBy.push({
-        NumericalDimensionField: {
-          FieldId: uuidv4(),
-          Column: {
-            DataSetIdentifier: viewName,
-            ColumnName: 'count/aggregation amount',
-          },
-        },
-      });
-    }
-  }
   return visual;
 }
 

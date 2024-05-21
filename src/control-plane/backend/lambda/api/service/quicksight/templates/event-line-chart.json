@@ -35,7 +35,7 @@
                                 "FieldId":"{{catMeasureFieldId}}",
                                 "Column":{
                                     "DataSetIdentifier":"{{dataSetIdentifier}}",
-                                    "ColumnName":"id"
+                                    "ColumnName":"Count"
                                 },
                                 "AggregationFunction":"DISTINCT_COUNT"
                             }

@@ -166,15 +166,14 @@ export class AttributionAnalysisService {
       timeEnd: query.timeEnd,
     }, locale);
 
+    visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(visualId);
+
     const visualProps = {
       sheetId: sheetId,
       name: ExploreVisualName.CHART,
       visualId: visualId,
       visual: visualDef,
       dataSetIdentifierDeclaration: [],
-      filterControl: visualRelatedParams.filterControl,
-      parameterDeclarations: visualRelatedParams.parameterDeclarations,
-      filterGroup: visualRelatedParams.filterGroup,
     };
 
     return new ReportingService().createDashboardVisuals(sheetId, viewName, query, pipeline, datasetPropsArray, [visualProps]);
