@@ -15,7 +15,7 @@ BEGIN
       platform,
       geo_country,
       geo_city,
-      count(distinct new_user_indicator) as user_count
+      SUM(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS new_users,
     from {{database_name}}.{{schema}}.{{baseView}}
     where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
     group by 1,2,3,4

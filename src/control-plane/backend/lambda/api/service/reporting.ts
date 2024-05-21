@@ -28,7 +28,7 @@ import {
   SolutionVersion,
   OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME,
 } from '@aws/clickstream-base-lib';
-import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { PipelineServ } from './pipeline';
 import { DataSetProps, waitForDashboardChangeCompleted } from './quicksight/dashboard-ln';
@@ -60,9 +60,7 @@ import {
   checkPathAnalysisParameter,
   checkRetentionAnalysisParameter,
   encodeQueryValueForSql,
-  getEventNormalTableVisualDef,
   getEventPropertyCountPivotTableVisualDef,
-  DashboardTitleProps,
   getTimezoneByAppId,
   isValidGroupingCondition,
   getQuickSightDataType,
@@ -665,27 +663,6 @@ export class ReportingService {
     }
   };
 
-  async _getVisualDefOfEventVisualOnEventProperty(computeMethodProps: EventComputeMethodsProps,
-    tableVisualId: string, viewName: string, titleProps:DashboardTitleProps, groupColumn: string, groupingColName?: string[]) {
-
-    let tableVisualDef: Visual;
-    if (computeMethodProps.isSameAggregationMethod) {
-      tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn
-        , groupingColName, computeMethodProps.aggregationMethodName);
-    } else if (
-      (computeMethodProps.isMixedMethod && computeMethodProps.isCountMixedMethod)
-      ||(!computeMethodProps.isMixedMethod && !computeMethodProps.hasAggregationPropertyMethod)) {
-
-      logger.info('create pivot table for mix mode');
-      tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn, groupingColName);
-    } else {
-      logger.info('create normal table for mix mode');
-      tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, groupingColName);
-    }
-
-    return tableVisualDef;
-  }
-
   async createEventVisualOnEventProperty(req: any, res: any, next: any) {
     try {
       logger.info('start to create event analysis visuals', { request: req.body });
@@ -764,8 +741,8 @@ export class ReportingService {
       const tableVisualId = uuidv4();
 
       visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
-      const tableVisualDef = await this._getVisualDefOfEventVisualOnEventProperty(computeMethodProps, tableVisualId,
-        viewName, titleProps, query.groupColumn, groupingColName);
+      const tableVisualDef = await getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, 
+        query.groupColumn, groupingColName);
 
       const tableVisualProps = {
         sheetId: sheetId,
