@@ -542,7 +542,7 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
    ${baseSQL}
    ${resultSql}
    `;
-  //  return sql;
+
   return format(sql, {
     language: 'postgresql',
   });
