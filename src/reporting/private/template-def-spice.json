@@ -1497,6 +1497,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -2937,6 +2938,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -3411,6 +3413,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -5468,6 +5471,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -5623,6 +5627,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -6322,6 +6327,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -7410,6 +7416,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -7671,6 +7678,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -7871,6 +7879,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -8028,6 +8037,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -9047,6 +9057,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
@@ -9365,6 +9376,7 @@
                                     }
                                 ],
                                 "CategoryItemsLimitConfiguration": {
+                                    "ItemsLimit": 365,
                                     "OtherCategories": "INCLUDE"
                                 },
                                 "ColorItemsLimitConfiguration": {
