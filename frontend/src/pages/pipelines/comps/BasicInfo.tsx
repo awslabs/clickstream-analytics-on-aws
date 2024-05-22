@@ -54,6 +54,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   const [disableUpgrade, setDisableUpgrade] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [needUpgradeAppIds, setNeedUpgradeAppIds] = useState<string[]>([]);
+  const [refreshCount, setRefreshCount] = useState(0);
 
   const checkStackRollbackFailed = () => {
     const stackDetails = pipelineInfo?.stackDetails ?? [];
@@ -204,6 +205,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                       refresh = 'force';
                     }
                     reloadPipeline(refresh);
+                    setRefreshCount(refreshCount + 1);
                   }}
                 />
                 {(pipelineInfo?.statusType === EPipelineStatus.Failed ||
@@ -214,6 +216,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     loading={loadingRetry}
                     onClick={() => {
                       startRetryPipeline();
+                      setRefreshCount(refreshCount + 1);
                     }}
                   >
                     {t('button.retry')}
@@ -321,12 +324,9 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
               <Box variant="awsui-key-label">{t('pipeline:status')}</Box>
               <div>
                 <PipelineStatus
-                  pipelineId={pipelineInfo?.pipelineId}
                   projectId={pipelineInfo?.projectId}
                   status={pipelineInfo?.statusType}
-                  updatePipelineStatus={(status) => {
-                    reloadPipeline('false');
-                  }}
+                  refreshCount={refreshCount}
                 />
               </div>
             </div>

@@ -26,18 +26,17 @@ import { CLOUDFORMATION_STATUS_MAP, EPipelineStatus } from 'ts/const';
 import { buildCloudFormationStackLink } from 'ts/url';
 import { defaultStr } from 'ts/utils';
 
-const CHECK_TIME_INTERVAL = 5000;
+const CHECK_TIME_INTERVAL = 8000;
 
 interface PipelineStatusProps {
   projectId?: string;
-  pipelineId?: string;
   status?: string;
-  updatePipelineStatus?: (status: EPipelineStatus) => void;
+  refreshCount?: number;
 }
 const PipelineStatus: React.FC<PipelineStatusProps> = (
   props: PipelineStatusProps
 ) => {
-  const { status, projectId, updatePipelineStatus } = props;
+  const { status, projectId, refreshCount } = props;
   const { t } = useTranslation();
   let intervalId: any = 0;
   const [loadingStatus, setLoadingStatus] = useState(false);
@@ -106,8 +105,6 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
           data.statusType === EPipelineStatus.Warning
         ) {
           window.clearInterval(intervalId);
-          // update pipeline status
-          updatePipelineStatus?.(data.statusType);
         }
         setLoadingStatus(false);
       }
@@ -117,10 +114,19 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     }
   };
 
-  useEffect(() => {
+  const setRefreshInterval = () => {
+    window.clearInterval(intervalId);
     intervalId = setInterval(() => {
       checkStatus(true);
     }, CHECK_TIME_INTERVAL);
+  };
+
+  useEffect(() => {
+    setRefreshInterval();
+  }, [refreshCount]);
+
+  useEffect(() => {
+    setRefreshInterval();
     return () => {
       window.clearInterval(intervalId);
     };

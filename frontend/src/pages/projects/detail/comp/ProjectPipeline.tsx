@@ -58,6 +58,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [loadingRetry, setLoadingRetry] = useState(false);
   const [disableRetry, setDisableRetry] = useState(false);
+  const [refreshCount, setRefreshCount] = useState(0);
   const goToCreateApplication = () => {
     navigate(`/project/${pipelineInfo.projectId}/application/create`);
   };
@@ -165,6 +166,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                       refresh = 'force';
                     }
                     reloadPipeline(refresh);
+                    setRefreshCount(refreshCount + 1);
                   }}
                 />
                 {pipelineInfo.statusType === EPipelineStatus.Failed && (
@@ -219,12 +221,9 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
               </Box>
               <div>
                 <PipelineStatus
-                  pipelineId={pipelineInfo.pipelineId}
                   projectId={pipelineInfo.projectId}
                   status={pipelineInfo.statusType}
-                  updatePipelineStatus={() => {
-                    reloadPipeline('false');
-                  }}
+                  refreshCount={refreshCount}
                 />
               </div>
             </div>
