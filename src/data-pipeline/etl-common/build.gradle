@@ -24,8 +24,8 @@ apply from: "${rootProject.projectDir}/gradle/config/scripts/coverage.gradle"
 group = "$group"
 version = "$projectVersion"
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
