@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { SolutionVersion } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Box,
@@ -180,7 +181,11 @@ const AnalyticsExplore: React.FC = () => {
       setRenderCondition(ExploreRenderCondition.Loading);
     } else if (!pipeline) {
       setRenderCondition(ExploreRenderCondition.Empty);
-    } else if (!pipeline.templateInfo?.isLatest) {
+    } else if (
+      !SolutionVersion.Of(pipeline.templateInfo?.pipelineVersion ?? '').equalTo(
+        SolutionVersion.Of(pipeline.templateInfo?.solutionVersion ?? '')
+      )
+    ) {
       setRenderCondition(ExploreRenderCondition.Empty);
     } else if (selectedOption?.value === 'Funnel') {
       setRenderCondition(ExploreRenderCondition.Funnel);
