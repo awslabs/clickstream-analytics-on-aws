@@ -378,14 +378,20 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             }
         }
 
+        boolean isFromInternal = isInternalReferrer || isInternalLatestReferrer;
+
         if (categoryTrafficSource.getSource() == null) {
             categoryTrafficSource.setSource(DIRECT);
             categoryTrafficSource.setCategory(DIRECT);
-            if (isInternalReferrer || isInternalLatestReferrer) {
+            if (isFromInternal) {
                 categoryTrafficSource.setChannelGroup(INTERNAL);
             } else {
                 categoryTrafficSource.setChannelGroup(DIRECT);
             }
+        }
+
+        if (categoryTrafficSource.getMedium() == null && isFromInternal) {
+            categoryTrafficSource.setMedium(NONE);
         }
 
         if (categoryTrafficSource.getSource() != null && categoryTrafficSource.getMedium() == null) {
@@ -393,7 +399,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         }
 
         if (categoryTrafficSource.getMedium() == null) {
-            categoryTrafficSource.setMedium(getMediumByReferrer(pageReferrer, latestReferrer, isInternalReferrer));
+            categoryTrafficSource.setMedium(getMediumByReferrer(pageReferrer, latestReferrer, isFromInternal));
         }
     }
 
@@ -408,10 +414,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         return null;
     }
 
-    String getMediumByReferrer(final String pageReferrer, final String latestReferrer, final boolean isInternalReferrer) {
-        log.debug("getMediumByReferrer() enter pageReferrer: {}, latestReferrer: {}, isInternalReferrer: {}", pageReferrer, latestReferrer, isInternalReferrer);
+    String getMediumByReferrer(final String pageReferrer, final String latestReferrer, final boolean isFromInternal) {
+        log.debug("getMediumByReferrer() enter pageReferrer: {}, latestReferrer: {}, isFromInternal: {}", pageReferrer, latestReferrer, isFromInternal);
 
-        if (isAllEmpty(pageReferrer, latestReferrer)) {
+        if (isAllEmpty(pageReferrer, latestReferrer) || isFromInternal) {
             return NONE;
         }
 
@@ -432,10 +438,6 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             if (knownSearchEngineDomains.contains(referrerHost)) {
                 return ORGANIC;
             }
-        }
-
-        if (isInternalReferrer) {
-            return NONE;
         }
 
         if (pageReferrer != null && !pageReferrer.isEmpty()) {
