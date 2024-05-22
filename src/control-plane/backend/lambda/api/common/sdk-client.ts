@@ -13,7 +13,7 @@
 
 import { REGION_PATTERN, aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { AccessDeniedException, ListUsersCommand, QuickSight, QuickSightClient, QuickSightClientConfig } from '@aws-sdk/client-quicksight';
-import { RedshiftDataClient, RedshiftDataClientConfig } from '@aws-sdk/client-redshift-data';
+import { RedshiftData, RedshiftDataClient, RedshiftDataClientConfig } from '@aws-sdk/client-redshift-data';
 import { STSClient, STSClientConfig } from '@aws-sdk/client-sts';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { awsAccountId, awsRegion } from './constants';
@@ -46,6 +46,24 @@ export class SDKClient {
       return this.cache[key] as RedshiftDataClient;
     }
     const client = new RedshiftDataClient({
+      ...aws_sdk_client_common_config,
+      ...config,
+      credentials: fromTemporaryCredentials({
+        params: {
+          RoleArn: assumeRole,
+        },
+      }),
+    });
+    this.cache[key] = client;
+    return client;
+  };
+
+  public RedshiftData(config: RedshiftDataClientConfig, assumeRole: string): RedshiftData {
+    const key = `RedshiftData-${assumeRole}`;
+    if (this.cache[key]) {
+      return this.cache[key] as RedshiftData;
+    }
+    const client = new RedshiftData({
       ...aws_sdk_client_common_config,
       ...config,
       credentials: fromTemporaryCredentials({
