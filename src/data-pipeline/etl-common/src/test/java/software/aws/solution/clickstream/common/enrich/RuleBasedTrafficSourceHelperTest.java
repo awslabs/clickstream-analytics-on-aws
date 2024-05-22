@@ -374,7 +374,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
         String pageReferrer = "https://example.com";
         String latestReferrer = "https://www.google.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg";
-        boolean internalReferrer = true;
+        boolean internalReferrer = false;
 
         String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
         Assertions.assertEquals(RuleBasedTrafficSourceHelper.ORGANIC, medium);
@@ -437,6 +437,49 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "    }";
         String value = prettyJson(Util.objectToJsonString(cts));
         Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+    @Test
+    void testGetMediumByReferrer10() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer10
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://test.com/posts/2024/redshift-serverless-cost-deep-dive/";
+        String pageReferrer = null;
+        String latestReferrer = "https://test.com/";
+        String latestReferrerHost = "test.com";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
+
+        String expectedValue = "{\n" +
+                "      \"source\" : \"Direct\",\n" +
+                "      \"medium\" : \"None\",\n" +
+                "      \"campaign\" : \"Direct\",\n" +
+                "      \"content\" : null,\n" +
+                "      \"term\" : null,\n" +
+                "      \"campaignId\" : null,\n" +
+                "      \"clidPlatform\" : null,\n" +
+                "      \"clid\" : null,\n" +
+                "      \"channelGroup\" : \"Internal\",\n" +
+                "      \"category\" : \"Direct\"\n" +
+                "    }";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+
+    @Test
+    void testGetMediumByReferrer11() throws IOException {
+        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer11
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageReferrer = "https://example.com";
+        String latestReferrer = "https://www.example.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg";
+        boolean internalReferrer = true;
+
+        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
+        Assertions.assertEquals(RuleBasedTrafficSourceHelper.NONE, medium);
+
     }
 
 }
