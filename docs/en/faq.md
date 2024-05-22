@@ -124,18 +124,20 @@ You can accelerate report loading by converting QuickSight datasets to SPICE mod
     2. By default, the solution refreshes data in SPICE using an incremental update method. The refresh process is scheduled at 6 AM daily in your dashboard's time zone. You can manually adjust the update schedule in QuickSight.
 
 
-### How to use Amazon Redshift data sharing in QuickSight
+### How to implement a dedicated Redshift for Analytics Studio?
 
-Before using Amazon Redshift data sharing, please note the following:
+Redshift supports [sharing data across different Redshift clusters][redshift-share-data], allowing you to use a dedicated Redshift cluster for Analytics Studio to achieve better query performance and cost optimization.
 
-- You can share between cluster types, as well as between configured clusters and serverless ones.
-- Only **Ra3** type clusters and **Redshift serverless** support data sharing.
+Before implementing Amazon Redshift data sharing, please note the following:
 
-Taking Redshift serverless as an example of data sharing. The following are the operational steps:
+- You can share data between cluster types, as well as between configured clusters and serverless ones.
+- Only **RA3** type clusters and **Redshift serverless** support data sharing.
 
-1. [Create][serverless-console-workflows] Redshift serverless as data consumer.
-2. Run SQL in the producer Redshift database (The project database created by the Clickstream solution), create a data sharing, and grant consumer permissions:
-    ```
+Taking Redshift serverless as an example of data sharing, follow these operational steps:
+
+1. [Create a Redshift serverless][serverless-console-workflows] as the data consumer.
+2. Run SQL in the producer Redshift database (The project database configured in the Clickstream solution) to create a data share and grant consumer permissions:
+    ```sql
     -- Create Datashare
 
     CREATE DATASHARE bi SET PUBLICACCESSIBLE FALSE;
@@ -146,9 +148,9 @@ Taking Redshift serverless as an example of data sharing. The following are the 
 
     GRANT USAGE ON DATASHARE bi TO NAMESPACE '<target namespace id>';
     ```
-    `<schema>` is the schema you want to share, `<target namespace id>` is consumer Redshift serverless namespace id.
+    Replace `<schema>` with the schema you want to share, and `<target namespace id>` with the consumer Redshift serverless namespace ID.
 3. Run SQL in the consumer Redshift database:
-    ```
+    ```sql
     -- Create Datashare 
 
     CREATE DATASHARE <new database name> WITH PERMISSIONS FROM DATASHARE bi OF NAMESPACE '<source namespace id>';
@@ -165,20 +167,19 @@ Taking Redshift serverless as an example of data sharing. The following are the 
     SELECT CURRENT_USER;
     SELECT * FROM "<new database name>"."<schema>"."event_v2" limit 1;
     ```
-    `<new database name>` is the database name in the consumer Redshift, allowing inconsistency with the original database name.`<source namespace id>`is producer Redshift serverless namespace id.
-4. Create a new secret for bi_user in Secrets Manager, specify the value as plaintext like below:
-   ```
+    Replace `<new database name>` with the database name in the consumer Redshift (it can be different from the original database name), and `<source namespace id>` with the producer Redshift serverless namespace ID.
+4. Create a new secret for the BI user in Secrets Manager, specifying the value as plaintext like below:
+   ```json
    {"username":"bi_user","password":"<strong password>"}
    ```
-   The key name is like: `/clickstream/reporting/user/bi_user`
-5. Update the reporting stack to use the consumer Redshift.
-   - **Redshift Endpoint Url** (Required): Consumer Redshift access endpoint
-   - **Redshift Default database name** (Required): `dev`
-   - **Redshift Database Name** (Required): `<new database name>`
-   - **Parameter Key Name** (Required): `/clickstream/reporting/user/bi_user`
-   - Comma Delimited Security Group Ids (Optional): The security group for VPC connection to access Redshift
-   - Comma Delimited Subnet Ids (Optional): The subnet IDs for the consumer Redshift
-
+   The key name should be like: `/clickstream/reporting/user/bi_user`.
+5. Update the reporting stack to use the consumer Redshift:
+    - **Redshift Endpoint Url** (Required): Consumer Redshift access endpoint
+    - **Redshift Default database name** (Required): `dev`
+    - **Redshift Database Name** (Required): `<new database name>`
+    - **Parameter Key Name** (Required): `/clickstream/reporting/user/bi_user`
+    - Comma Delimited Security Group Ids (Optional): The security group for VPC connection to access Redshift
+    - Comma Delimited Subnet Ids (Optional): The subnet IDs for the consumer Redshift
 
 ## SDK
 
@@ -191,3 +192,4 @@ Yes, you can. The solution support users using third-party SDK to send data to t
 [redshift-secrets-manager-integration]: https://docs.aws.amazon.com/redshift/latest/mgmt/redshift-secrets-manager-integration.html
 [redshift-grant]: https://docs.aws.amazon.com/redshift/latest/dg/r_GRANT.html
 [serverless-console-workflows]: https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-console-workflows.html
+[redshift-share-data]: https://docs.aws.amazon.com/redshift/latest/dg/datashare-overview.html

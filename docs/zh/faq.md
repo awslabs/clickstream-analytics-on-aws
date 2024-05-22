@@ -123,61 +123,62 @@
     1. 启用 SPICE 将根据使用的空间量产生费用。定价详情可在 QuickSight 定价页面上找到。如果频繁查看仪表板，启用 SPICE 可减少对 Redshift 数据库的访问负载，但可能会增加数据延迟。
     2. 默认情况下，该解决方案使用增量更新方法在 SPICE 中刷新数据。刷新过程计划在您的仪表板时区每天上午 6 点进行。您可以在 QuickSight 中手动调整更新时间表。
    
-### 如何在 QuickSight 中使用 Amazon Redshift 数据共享
+### 如何为 Analytics Studio 实现专用 Redshift？
 
-使用 Amazon Redshift 数据共享之前请注意以下事项：
+Redshift 支持[跨集群共享数据][redshift-share-data]，这样您就可以使用专用的 Redshift 集群为 Analytics Studio 提供更好的查询性能和成本优化。
 
-- 您可以在集群类型之间共享，也可以在已配置的集群和无服务器之间共享。
-- 只有ra3类型的集群和Redshift无服务器支持数据共享。
+在实现 Amazon Redshift 数据共享之前，请注意以下几点：
 
-以 Redshift无服务器 之间共享为例。以下是操作步骤:
+- 您可以在同集群类型之间共享数据，也可以在预置的集群和无服务器集群之间共享数据。
+- 只有 **RA3** 类型的预置集群和 **Redshift 无服务器集群**支持数据共享。
 
-1. [创建][serverless-console-workflows]Redshift无服务器做为数据消费者。
-2. 在生产者Redshift数据库（Clickstream解决方案创建的项目数据库）中运行SQL，创建数据共享并且赋予消费者权限：
-    ```
-    -- Create Datashare
+以 Redshift 无服务器集群作为数据共享的示例，请按照以下操作步骤执行:
+
+1. [创建 Redshift 无服务器集群][serverless-console-workflows]作为数据消费者。
+2. 在生产者 Redshift 数据库(Clickstream 解决方案中配置的项目数据库)中运行 SQL 创建数据共享并授予消费者权限：
+    ```sql
+    -- 创建 Datashare
 
     CREATE DATASHARE bi SET PUBLICACCESSIBLE FALSE;
     ALTER DATASHARE bi ADD SCHEMA <schema>;
     ALTER DATASHARE bi ADD ALL TABLES IN SCHEMA <schema>;
 
-    -- Grant the Datashare to the consumer Redshift.
+    -- 将 Datashare 授权给消费者 Redshift
 
     GRANT USAGE ON DATASHARE bi TO NAMESPACE '<target namespace id>';
     ```
-    其中，`<schema>`是您需要共享的Schema名称，`<target namespace id>`是消费者的namespace id。
-3. 在消费者Redshift数据库中运行SQL：
-    ```
-    -- Create Datashare 
+    将 `<schema>` 替换为您要共享的schema，将 `<target namespace id>` 替换为消费者 Redshift 无服务器命名空间 ID。
+3. 在消费者 Redshift 数据库中运行 SQL:
+    ```sql
+    -- 创建 Datashare 
 
     CREATE DATASHARE <new database name> WITH PERMISSIONS FROM DATASHARE bi OF NAMESPACE '<source namespace id>';
    
-    -- Create bi user
+    -- 创建 bi 用户
     
     CREATE USER bi_user PASSWORD '<strong password>';
     GRANT USAGE ON DATABASE "<new database name>" TO bi_user;
     GRANT USAGE ON SCHEMA "<new database name>"."<schema>" TO bi_user;
     GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO bi_user;
 
-    -- Test bi_user permission (optional)
+    -- 测试 bi_user 权限 (可选)
     SET SESSION AUTHORIZATION bi_user;
     SELECT CURRENT_USER;
     SELECT * FROM "<new database name>"."<schema>"."event_v2" limit 1;
     ```
-    其中，`<new database name>`是消费者Redshift中的数据库名称，允许与原数据库名称不一致。`<source namespace id>`是生产者Redshift对应的namespace id。
-4. 在Secrets Manager中为bi_user创建一个新的secret，将值指定为**明文**，如下所示：
-   ```
+    将 `<new database name>` 替换为消费者 Redshift 中的数据库名称(可以与原始数据库名称不同)，将 `<source namespace id>` 替换为生产者 Redshift 无服务器命名空间 ID。
+4. 在 Secrets Manager 中为 BI 用户创建一个新的机密，将值指定为纯文本，如下所示：
+   ```json
    {"username":"bi_user","password":"<strong password>"}
    ```
-   密钥名称: `/clickstream/reporting/user/bi_user`
-5. 更新报告堆栈以使用消费者Redshift。
-   - **Redshift Endpoint Url** (必填): 消费者Redshift的访问端点
-   - **Redshift Default database name** (必填): `dev`
-   - **Redshift Database Name** (必填): `<new database name>`
-   - **Parameter Key Name** (必填): `/clickstream/reporting/user/bi_user`
-   - Comma Delimited Security Group Ids (可选): VPC连接访问Redshift的安全组
-   - Comma Delimited Subnet Ids (可选): 消费者者Redshift的子网ID
-
+   密钥名称应该类似于：`/clickstream/reporting/user/bi_user`。
+5. 更新报告堆栈以使用消费者 Redshift：
+    - **Redshift Endpoint Url** (必需)：消费者 Redshift 访问端点
+    - **Redshift Default database name** (必需)： `dev`
+    - **Redshift Database Name** (必需)：`<new database name>`
+    - **Parameter Key Name** (必需)：`/clickstream/reporting/user/bi_user`
+    - 逗号分隔的安全组 ID (可选)： 用于访问 Redshift 的 VPC 连接的安全组
+    - 逗号分隔的子网 ID (可选)：消费者 Redshift 的子网 ID
 
 ## 开发工具包
 
@@ -190,3 +191,4 @@
 [redshift-secrets-manager-integration]: https://docs.aws.amazon.com/redshift/latest/mgmt/redshift-secrets-manager-integration.html
 [redshift-grant]: https://docs.aws.amazon.com/redshift/latest/dg/r_GRANT.html
 [serverless-console-workflows]: https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-console-workflows.html
+[redshift-share-data]: https://docs.aws.amazon.com/redshift/latest/dg/datashare-overview.html
