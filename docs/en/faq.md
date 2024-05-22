@@ -123,6 +123,63 @@ You can accelerate report loading by converting QuickSight datasets to SPICE mod
     1. Enabling SPICE will result in charges based on the amount of space used. Pricing details can be found in the QuickSight pricing page. If the dashboard is frequently viewed, enabling SPICE can reduce the access load on the Redshift database, but it may also increase data latency.
     2. By default, the solution refreshes data in SPICE using an incremental update method. The refresh process is scheduled at 6 AM daily in your dashboard's time zone. You can manually adjust the update schedule in QuickSight.
 
+
+### How to use Amazon Redshift data sharing in QuickSight
+
+Before using Amazon Redshift data sharing, please note the following:
+
+- You can share between cluster types, as well as between configured clusters and serverless ones.
+- Only **Ra3** type clusters and **Redshift serverless** support data sharing.
+
+Taking Redshift serverless as an example of data sharing. The following are the operational steps:
+
+1. [Create][serverless-console-workflows] Redshift serverless as data consumer.
+2. Run SQL in the producer Redshift database (The project database created by the Clickstream solution), create a data sharing, and grant consumer permissions:
+    ```
+    -- Create Datashare
+
+    CREATE DATASHARE bi SET PUBLICACCESSIBLE FALSE;
+    ALTER DATASHARE bi ADD SCHEMA <schema>;
+    ALTER DATASHARE bi ADD ALL TABLES IN SCHEMA <schema>;
+
+    -- Grant the Datashare to the consumer Redshift.
+
+    GRANT USAGE ON DATASHARE bi TO NAMESPACE '<target namespace id>';
+    ```
+    `<schema>` is the schema you want to share，`<target namespace id>` is consumer Redshift serverless namespace id.
+3. Run SQL in the consumer Redshift database：
+    ```
+    -- Create Datashare 
+
+    CREATE DATASHARE <new database name> WITH PERMISSIONS FROM DATASHARE bi OF NAMESPACE '<source namespace id>';
+   
+    -- Create bi user
+    
+    CREATE USER bi_user PASSWORD '<strong password>';
+    GRANT USAGE ON DATABASE "<new database name>" TO bi_user;
+    GRANT USAGE ON SCHEMA "<new database name>"."<schema>" TO bi_user;
+    GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO bi_user;
+
+    -- Test bi_user permission (optional)
+    SET SESSION AUTHORIZATION bi_user;
+    SELECT CURRENT_USER;
+    SELECT * FROM "<new database name>"."<schema>"."event_v2" limit 1;
+    ```
+    `<new database name>` is the database name in the consumer Redshift, allowing inconsistency with the original database name.`<source namespace id>`is producer Redshift serverless namespace id.
+4. Create a new secret for bi_user in Secrets Manager, specify the value as plaintext like below:
+   ```
+   {"username":"bi_user","password":"<strong password>"}
+   ```
+   The key name is like: `/clickstream/reporting/user/bi_user`
+5. Update the reporting stack to use the consumer Redshift.
+   - **Redshift Endpoint Url** (Required): Consumer Redshift access endpoint
+   - **Redshift Default database name** (Required): `dev`
+   - **Redshift Database Name** (Required): `<new database name>`
+   - **Parameter Key Name** (Required): `/clickstream/reporting/user/bi_user`
+   - Comma Delimited Security Group Ids (Optional): The security group for VPC connection to access Redshift
+   - Comma Delimited Subnet Ids (Optional): The subnet IDs for the consumer Redshift
+
+
 ## SDK
 
 ### Can I use other SDK to send data to the pipeline created by this solution
@@ -133,3 +190,4 @@ Yes, you can. The solution support users using third-party SDK to send data to t
 [redshift-query-editor]: https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html
 [redshift-secrets-manager-integration]: https://docs.aws.amazon.com/redshift/latest/mgmt/redshift-secrets-manager-integration.html
 [redshift-grant]: https://docs.aws.amazon.com/redshift/latest/dg/r_GRANT.html
+[serverless-console-workflows]: https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-console-workflows.html
