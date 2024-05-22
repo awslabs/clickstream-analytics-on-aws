@@ -286,7 +286,6 @@ const ApplicationDetail: React.FC = () => {
                       </Box>
                       <div>
                         <PipelineStatus
-                          pipelineId={applicationInfo?.pipeline?.id}
                           projectId={pid}
                           status={applicationInfo?.pipeline?.status?.status}
                         />
