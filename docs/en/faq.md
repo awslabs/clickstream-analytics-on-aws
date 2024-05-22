@@ -146,8 +146,8 @@ Taking Redshift serverless as an example of data sharing. The following are the 
 
     GRANT USAGE ON DATASHARE bi TO NAMESPACE '<target namespace id>';
     ```
-    `<schema>` is the schema you want to share，`<target namespace id>` is consumer Redshift serverless namespace id.
-3. Run SQL in the consumer Redshift database：
+    `<schema>` is the schema you want to share, `<target namespace id>` is consumer Redshift serverless namespace id.
+3. Run SQL in the consumer Redshift database:
     ```
     -- Create Datashare 
 
