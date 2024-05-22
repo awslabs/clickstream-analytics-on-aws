@@ -19,6 +19,7 @@ jobs:
       CI: "true"
       iam_role_to_assume: ${{ secrets.ROLE_ARN }}
       JEST_MAX_WORKERS: ${{ vars.JEST_MAX_WORKERS || 'auto' }}
+      DISABLE_V8_COMPILE_CACHE: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

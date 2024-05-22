@@ -14,7 +14,7 @@
 import { POWERTOOLS_ENVS } from '@aws/clickstream-base-lib';
 import { CfnResource, RemovalPolicy } from 'aws-cdk-lib';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { BundlingOptions, NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { LogGroup, LogGroupClass, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from '../common/cfn-nag';
@@ -32,12 +32,7 @@ export class SolutionNodejsFunction extends NodejsFunction {
   constructor(scope: Construct, id: string, props?: SolutionNodejsFunctionProps) {
     super(scope, id, {
       ...props,
-      bundling: props?.bundling ? {
-        ...props.bundling,
-        externalModules: props.bundling.externalModules?.filter(p => p === '@aws-sdk/*') ?? [],
-      } : {
-        externalModules: [],
-      },
+      bundling: _buildBundlingConfig(props?.bundling),
       runtime: Runtime.NODEJS_20_X,
       architecture: Architecture.ARM_64,
       environment: {
@@ -49,6 +44,25 @@ export class SolutionNodejsFunction extends NodejsFunction {
       applicationLogLevel: props?.applicationLogLevel ?? 'INFO',
     });
   }
+}
+
+function _buildBundlingConfig(bundling?: BundlingOptions) {
+  const esbuildOptions = {
+    environment: {
+      NODE_ENV: 'production',
+    },
+    esbuildArgs: { // Pass additional arguments to esbuild
+      '--log-limit': '3000',
+    },
+  };
+  return bundling ? {
+    ...bundling,
+    externalModules: bundling.externalModules?.filter(p => p === '@aws-sdk/*') ?? [],
+    ...esbuildOptions,
+  } : {
+    externalModules: [],
+    ...esbuildOptions,
+  };
 }
 
 function getLogGroup(scope: Construct, id: string, logConf?: {
