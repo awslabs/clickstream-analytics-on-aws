@@ -21,7 +21,7 @@ import { UserContext } from 'context/UserContext';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { getDocumentLink } from 'ts/url';
+import { buildDocumentLink } from 'ts/url';
 import {
   getUserInfoFromLocalStorage,
   isAdminRole,
@@ -96,7 +96,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     {
       type: 'link',
       text: t('nav.doc'),
-      href: getDocumentLink(i18n.language),
+      href: buildDocumentLink(i18n.language, '/'),
       external: true,
     },
   ];

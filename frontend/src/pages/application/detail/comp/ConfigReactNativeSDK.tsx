@@ -111,8 +111,7 @@ const ConfigReactNativeSDK: React.FC<ConfigSDKProps> = (
           <Link
             href={buildDocumentLink(
               i18n.language,
-              '/react-native-sdk.html',
-              '/sdk-manual/react-native'
+              defaultStr(t('help:sdkRNGuideInfo.links.docLink'))
             )}
             external
           >

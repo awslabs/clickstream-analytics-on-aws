@@ -14,11 +14,8 @@
 import { Alert, Link } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  KAFKA_REQUIREMENT_LINK_EN,
-  KAFKA_REQUIREMENT_LINK_CN,
-  buildDocumentLink,
-} from 'ts/url';
+import { buildDocumentLink } from 'ts/url';
+import { defaultStr } from 'ts/utils';
 
 const MSKRequirements: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -29,8 +26,7 @@ const MSKRequirements: React.FC = () => {
         external
         href={buildDocumentLink(
           i18n.language,
-          KAFKA_REQUIREMENT_LINK_EN,
-          KAFKA_REQUIREMENT_LINK_CN
+          defaultStr(t('help:kafkaRequirementsInfo.links.docLink'))
         )}
       >
         {t('learnMore')}

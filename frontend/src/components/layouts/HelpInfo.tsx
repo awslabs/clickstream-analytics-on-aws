@@ -127,7 +127,6 @@ const HelpInfo: React.FC = () => {
         text: t(`help:${currentHelpPanelKey}.links.docLinkName`),
         href: buildDocumentLink(
           i18n.language,
-          defaultStr(t(`help:${currentHelpPanelKey}.links.docLink`)),
           defaultStr(t(`help:${currentHelpPanelKey}.links.docLink`))
         ),
       },

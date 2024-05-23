@@ -31,14 +31,7 @@ import {
 } from 'apis/resource';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import {
-  buildDocumentLink,
-  buildQuickSightSubscriptionLink,
-  PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN,
-  PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN,
-  PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
-  PIPELINE_QUICKSIGHT_GUIDE_LINK_CN,
-} from 'ts/url';
+import { buildDocumentLink, buildQuickSightSubscriptionLink } from 'ts/url';
 import { defaultStr, isReportingDisabled, ternary } from 'ts/utils';
 
 interface ReportingProps {
@@ -183,8 +176,9 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                                 external
                                 href={buildDocumentLink(
                                   i18n.language,
-                                  PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN,
-                                  PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN
+                                  defaultStr(
+                                    t('help:enableReportingInfo.links.docLink')
+                                  )
                                 )}
                               />
                             ),
@@ -193,8 +187,9 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                                 external
                                 href={buildDocumentLink(
                                   i18n.language,
-                                  PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
-                                  PIPELINE_QUICKSIGHT_GUIDE_LINK_CN
+                                  defaultStr(
+                                    t('help:enableQuickSightInfo.links.docLink')
+                                  )
                                 )}
                               />
                             ),

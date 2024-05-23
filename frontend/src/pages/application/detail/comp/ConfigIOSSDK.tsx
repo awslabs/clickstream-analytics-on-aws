@@ -34,7 +34,7 @@ import {
   CLICKSTREAM_IOS_REPO_LINK,
 } from 'ts/guideConst';
 import { buildDocumentLink } from 'ts/url';
-import { alertMsg, generateFileDownloadLink } from 'ts/utils';
+import { alertMsg, defaultStr, generateFileDownloadLink } from 'ts/utils';
 
 interface ConfigSDKProps {
   appInfo?: IApplication;
@@ -148,8 +148,7 @@ const ConfigIOSSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
           <Link
             href={buildDocumentLink(
               i18n.language,
-              '/swift-sdk.html',
-              '/sdk-manual/swift'
+              defaultStr(t('help:sdkIOSGuideInfo.links.docLink'))
             )}
             external
           >

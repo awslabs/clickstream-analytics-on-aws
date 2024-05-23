@@ -99,8 +99,7 @@ const ConfigWebSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
           <Link
             href={buildDocumentLink(
               i18n.language,
-              '/web-sdk.html',
-              '/sdk-manual/web'
+              defaultStr(t('help:sdkWebGuideInfo.links.docLink'))
             )}
             external
           >

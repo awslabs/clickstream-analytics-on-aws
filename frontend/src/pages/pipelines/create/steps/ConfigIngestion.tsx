@@ -55,8 +55,6 @@ import {
   SinkType,
 } from 'ts/const';
 import {
-  PIPELINE_ACCESS_LOG_PERMISSION_LINK_EN,
-  PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN,
   PIPELINE_SINK_CONNECTOR_GUIDE,
   PIPELINE_SINK_CONNECTOR_LINK,
   buildDocumentLink,
@@ -734,8 +732,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                       external
                       href={buildDocumentLink(
                         i18n.language,
-                        PIPELINE_ACCESS_LOG_PERMISSION_LINK_EN,
-                        PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN
+                        defaultStr(t('help:enableALBLogInfo.links.docLink'))
                       )}
                     >
                       {t('learnMore')}
