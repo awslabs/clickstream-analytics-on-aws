@@ -2466,6 +2466,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#planning-and-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planning and Preparation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#upgrade-process" class="md-nav__link">
     <span class="md-ellipsis">
       Upgrade Process
@@ -2485,9 +2494,42 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#upgrade-the-pipeline-of-project" class="md-nav__link">
+  <a href="#upgrade-the-project-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
-      Upgrade the pipeline of project
+      Upgrade the Project Pipeline
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-upgrade-actions-only-applicable-to-data-modeling-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post-Upgrade Actions (only applicable to data modeling enabled)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Post-Upgrade Actions (only applicable to data modeling enabled)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#upgrade-the-data-schema-and-out-of-the-box-dashboards" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrade the Data Schema and Out-of-the-box Dashboards
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migrate-the-existing-data-only-applicable-when-upgrading-from-a-version-earlier-than-v116" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
     </span>
   </a>
   
@@ -2821,6 +2863,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#planning-and-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planning and Preparation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#upgrade-process" class="md-nav__link">
     <span class="md-ellipsis">
       Upgrade Process
@@ -2840,9 +2891,42 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#upgrade-the-pipeline-of-project" class="md-nav__link">
+  <a href="#upgrade-the-project-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
-      Upgrade the pipeline of project
+      Upgrade the Project Pipeline
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-upgrade-actions-only-applicable-to-data-modeling-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post-Upgrade Actions (only applicable to data modeling enabled)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Post-Upgrade Actions (only applicable to data modeling enabled)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#upgrade-the-data-schema-and-out-of-the-box-dashboards" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrade the Data Schema and Out-of-the-box Dashboards
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migrate-the-existing-data-only-applicable-when-upgrading-from-a-version-earlier-than-v116" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
     </span>
   </a>
   
@@ -2875,10 +2959,14 @@
 <div class="admonition warning">
 <p class="admonition-title">Important</p>
 <ol>
-<li>Please be advised that upgrading to this version directly from version 1.0.x is not supported. It is necessary to upgrade to <a href="https://awslabs.github.io/clickstream-analytics-on-aws/en/1.1.5/upgrade/">version 1.1.5</a> first. </li>
-<li>Upgrading from version 1.1.5 or any earlier 1.1 version will rebuild the default analysis dashboard and you will not be able to analyze previous data. If you need to migrate the existing data, it is imperative that you contact the AWS Clickstream team for support through your sales representative.</li>
+<li>Please be advised that upgrading directly from version 1.0.x to 1.1.6(+) version is not supported. It is necessary to upgrade to <a href="https://awslabs.github.io/clickstream-analytics-on-aws/en/1.1.5/upgrade/">version 1.1.5</a> first.</li>
+<li>By upgrading the web console from earlier 1.1 versions before 1.1.6, you could continue to view the dashboards of the project. However, you could not <a href="../analytics/explore/">explore the existing Clickstream data</a> due the changes of data schemas. If you wish to continue to use the Explorations, you will need to upgrade the data pipeline as well and migrate the existing data to new data schemas (if you want to explore historical data).</li>
 </ol>
 </div>
+<h2 id="planning-and-preparation">Planning and Preparation</h2>
+<ol>
+<li><strong>Data Processing Interval</strong> (only applicable when upgrading from a version earlier than v1.1.6 and data processing enabled): The data schema has been updated since version 1.1.6. Ensure no data processing job is running while upgrading the existing pipeline. The pipeline upgrade will take approximately 20 minutes. You can update the existing pipeline to increase the interval and check if there are any running jobs of the EMR Serverless application in the console.</li>
+</ol>
 <h2 id="upgrade-process">Upgrade Process</h2>
 <h3 id="upgrade-web-console-stack">Upgrade web console stack</h3>
 <ol>
@@ -2941,7 +3029,7 @@
 <li>Choose <strong>Execute change set</strong> to deploy the stack.</li>
 </ol>
 <p>You can view the status of the stack in the AWS CloudFormation console in the <strong>Status</strong> column. You should receive an <code>UPDATE_COMPLETE</code> status after a few minutes.</p>
-<h3 id="upgrade-the-pipeline-of-project">Upgrade the pipeline of project</h3>
+<h3 id="upgrade-the-project-pipeline">Upgrade the Project Pipeline</h3>
 <div class="admonition info">
 <p class="admonition-title">Important</p>
 <p>If you encounter any issues during the upgrade process, refer to <a href="../troubleshooting/">Troubleshooting</a> for more information.</p>
@@ -2955,6 +3043,76 @@
 <li>Click on <strong>Confirm</strong>, the pipeline will be in <code>Updating</code> status.</li>
 </ol>
 <p>You can view the status of the pipeline in the solution console in the <strong>Status</strong> column. After a few minutes, you can receive an Active status.</p>
+<h2 id="post-upgrade-actions-only-applicable-to-data-modeling-enabled">Post-Upgrade Actions (only applicable to data modeling enabled)</h2>
+<h3 id="upgrade-the-data-schema-and-out-of-the-box-dashboards">Upgrade the Data Schema and Out-of-the-box Dashboards</h3>
+<p>The solution automatically and asynchronously upgrades the views and materialized views used by the dashboard after upgrading the pipeline of the project. The duration of the update depends on the workload of the Redshift cluster and the existing data volume, and can take minutes to hours. You can track the progress in the <strong>Redshift Schemas</strong> section in the <strong>Processing</strong> tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via <strong>Actions - Redrive</strong> or <strong>New execution</strong> with the input unchanged.</p>
+<h3 id="migrate-the-existing-data-only-applicable-when-upgrading-from-a-version-earlier-than-v116">Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)</h3>
+<div class="admonition info">
+<p class="admonition-title">Important</p>
+<p>The data migration process is CPU-intensive. Before starting the migration, ensure that the load on your Redshift is low. It's also advisable to consider temporarily increasing the RPUs of Redshift Serverless or the cluster size when migrating large volumes of data.</p>
+<p>In our benchmark, we migrated 100 million events in 25 minutes using 32 RPUs of Redshift Serverless.</p>
+</div>
+<ol>
+<li>
+<p>Open <a href="https://aws.amazon.com/redshift/query-editor-v2/">Redshift query editor v2</a>. You can refer to the AWS document <a href="https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html">Working with query editor v2</a> to log in and query data using Redshift query editor v2.</p>
+<div class="admonition info">
+<p class="admonition-title">Note</p>
+<p>You must use the <code>admin</code> user or a user with schema (known as the app ID) ownership permission. See this <a href="../faq/#i-already-enable-data-modeling-on-redshift-so-why-cant-i-see-the-schema-and-tables-created-by-this-solution-in-the-redshift-query-editor">FAQ</a> for more details.</p>
+</div>
+</li>
+<li>
+<p>Select the Serverless workgroup or provisioned cluster, <code>&lt;project-id&gt;</code>-&gt;<code>&lt;app-id&gt;</code>-&gt;Tables, and ensure that tables for the appId are listed there.</p>
+</li>
+<li>
+<p>Create a new SQL Editor, select your project's schema.</p>
+</li>
+<li>
+<p>Customize the date range as desired, and execute the following SQL in the editor to migrate events from the past 180 days, or any number of days up to the present, to the new tables.</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">-- please replace `&lt;app-id&gt;` with your actual app id</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1">-- update the day range based on your needs</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">CALL</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_migrate_data_to_v2</span><span class="p">(</span><span class="mi">180</span><span class="p">);</span>
+</span></code></pre></div>
+</li>
+<li>
+<p>Wait for the SQL to complete. The execution time depends on the volume of data in the <code>events</code> table.</p>
+</li>
+<li>
+<p>Execute the following SQL to check the stored procedure execution log; ensure there are no errors. If there are any interruptions, timeouts, or other errors, you can re-execute step 4 to continue the data migration.</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">-- please replace `&lt;app-id&gt;` with your actual app id</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;clickstream_log&quot;</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">log_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sp_migrate_event_to_v2&#39;</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">log_date</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;clickstream_log&quot;</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">log_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sp_migrate_user_to_v2&#39;</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">log_date</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;clickstream_log&quot;</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">log_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sp_migrate_item_to_v2&#39;</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">log_date</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;clickstream_log&quot;</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">log_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sp_migrate_session_to_v2&#39;</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">log_date</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;clickstream_log&quot;</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">log_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sp_migrate_data_to_v2&#39;</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">log_date</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</span></code></pre></div>
+</li>
+<li>
+<p>Follow <a href="../faq/#how-do-i-recalculate-historical-events-for-out-of-the-box-dashboards">this guide</a> to calculate metrics for the new preset dashboard based on the migrated data.</p>
+</li>
+<li>
+<p>If you don't have other applications using the legacy tables and views, you could run the following SQL to clean up the legacy views and tables to save Redshift storage.</p>
+<p><div class="language-sql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">-- please replace `&lt;app-id&gt;` with your actual app id</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">event</span><span class="w"> </span><span class="k">CASCADE</span><span class="p">;</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">item</span><span class="w"> </span><span class="k">CASCADE</span><span class="p">;</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="k">user</span><span class="w"> </span><span class="k">CASCADE</span><span class="p">;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">event_parameter</span><span class="w"> </span><span class="k">CASCADE</span><span class="p">;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">DROP</span><span class="w"> </span><span class="k">PROCEDURE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_migrate_event_to_v2</span><span class="p">(</span><span class="n">nday</span><span class="w"> </span><span class="nb">integer</span><span class="p">);</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">DROP</span><span class="w"> </span><span class="k">PROCEDURE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_migrate_item_to_v2</span><span class="p">(</span><span class="n">nday</span><span class="w"> </span><span class="nb">integer</span><span class="p">);</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="k">DROP</span><span class="w"> </span><span class="k">PROCEDURE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_clear_expired_events</span><span class="p">(</span><span class="n">retention_range_days</span><span class="w"> </span><span class="nb">integer</span><span class="p">);</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">DROP</span><span class="w"> </span><span class="k">PROCEDURE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_migrate_data_to_v2</span><span class="p">(</span><span class="n">nday</span><span class="w"> </span><span class="nb">integer</span><span class="p">);</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="k">DROP</span><span class="w"> </span><span class="k">PROCEDURE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_migrate_user_to_v2</span><span class="p">();</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="k">DROP</span><span class="w"> </span><span class="k">PROCEDURE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_migrate_session_to_v2</span><span class="p">();</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="k">DROP</span><span class="w"> </span><span class="k">PROCEDURE</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_clear_item_and_user</span><span class="p">();</span>
+</span></code></pre></div>
+9. (Optional) If the amount of migrated data is large, it is recommended to refresh the clickstream_event_base_view in batches. That is, based on the occurrence time of the events, call the following stored procedure multiple times to refresh the data in batches
+   <div class="language-sql highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">call</span><span class="w"> </span><span class="ss">&quot;&lt;schema&gt;&quot;</span><span class="p">.</span><span class="n">clickstream_event_base_view</span><span class="p">(</span><span class="n">start_event_timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">end_event_timestamp</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+</span></code></pre></div>
+   For example, to refresh data between 2024-05-10 00:00:00 and 2024-05-12 00:00:00, execute the following SQL:
+   <div class="language-sql highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">call</span><span class="w"> </span><span class="ss">&quot;&lt;schema&gt;&quot;</span><span class="p">.</span><span class="n">clickstream_event_base_view_sp</span><span class="p">(</span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="s1">&#39;epoch&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1715270400</span><span class="w">  </span><span class="o">*</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;1 second&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="s1">&#39;epoch&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1715443200</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;1 second&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+</span></code></pre></div></p>
+</li>
+</ol>
 
 
 

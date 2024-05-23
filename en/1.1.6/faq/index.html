@@ -2728,6 +2728,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#how-to-implement-a-dedicated-redshift-for-analytics-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to implement a dedicated Redshift for Analytics Studio?
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3124,6 +3133,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#how-to-implement-a-dedicated-redshift-for-analytics-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to implement a dedicated Redshift for Analytics Studio?
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3285,6 +3303,60 @@ You pay only for what you use, and there are no minimum or setup fees. Refer to 
 <li>By default, the solution refreshes data in SPICE using an incremental update method. The refresh process is scheduled at 6 AM daily in your dashboard's time zone. You can manually adjust the update schedule in QuickSight.</li>
 </ol>
 </div>
+<h3 id="how-to-implement-a-dedicated-redshift-for-analytics-studio">How to implement a dedicated Redshift for Analytics Studio?</h3>
+<p>Redshift supports <a href="https://docs.aws.amazon.com/redshift/latest/dg/datashare-overview.html">sharing data across different Redshift clusters</a>, allowing you to use a dedicated Redshift cluster for Analytics Studio to achieve better query performance and cost optimization.</p>
+<p>Before implementing Amazon Redshift data sharing, please note the following:</p>
+<ul>
+<li>You can share data between the same cluster types, as well as between provisioned clusters and serverless clusters.</li>
+<li>Only <strong>Ra3</strong> type clusters and <strong>Redshift serverless</strong> support data sharing.</li>
+</ul>
+<p>Taking Redshift serverless as an example of data sharing, follow these operational steps:</p>
+<ol>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-console-workflows.html">Create a Redshift serverless</a> as the data consumer.</li>
+<li>Run SQL in the producer Redshift database (The project database configured in the Clickstream solution) to create a data share and grant consumer permissions:
+    <div class="language-sql highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">-- Create Data sharing</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">CREATE</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">data</span><span class="w"> </span><span class="k">share</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">PUBLICACCESSIBLE</span><span class="w"> </span><span class="k">FALSE</span><span class="p">;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">ALTER</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">data</span><span class="w"> </span><span class="k">share</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">SCHEMA</span><span class="w"> </span><span class="o">&lt;</span><span class="k">schema</span><span class="o">&gt;</span><span class="p">;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">ALTER</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">data</span><span class="w"> </span><span class="k">share</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">ALL</span><span class="w"> </span><span class="n">TABLES</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="k">SCHEMA</span><span class="w"> </span><span class="o">&lt;</span><span class="k">schema</span><span class="o">&gt;</span><span class="p">;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1">-- Grant the Data sharing to the consumer Redshift.</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="k">GRANT</span><span class="w"> </span><span class="k">USAGE</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">data</span><span class="w"> </span><span class="k">share</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">NAMESPACE</span><span class="w"> </span><span class="s1">&#39;&lt;consumer namespace id&gt;&#39;</span><span class="p">;</span>
+</span></code></pre></div>
+    Replace <code>&lt;data share name&gt;</code> with the name you want to share, <code>&lt;schema&gt;</code> with the schema you want to share, and <code>&lt;consumer namespace id&gt;</code> with the consumer Redshift serverless namespace ID.</li>
+<li>Run SQL in the consumer Redshift database:
+    <div class="language-sql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">-- Create Data sharing </span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">CREATE</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">new</span><span class="w"> </span><span class="k">database</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">PERMISSIONS</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">data</span><span class="w"> </span><span class="k">share</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">OF</span><span class="w"> </span><span class="n">NAMESPACE</span><span class="w"> </span><span class="s1">&#39;&lt;source namespace id&gt;&#39;</span><span class="p">;</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1">-- Create bi user</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="n">bi_user</span><span class="w"> </span><span class="n">PASSWORD</span><span class="w"> </span><span class="s1">&#39;&lt;strong password&gt;&#39;</span><span class="p">;</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">GRANT</span><span class="w"> </span><span class="k">USAGE</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="ss">&quot;&lt;new database name&gt;&quot;</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">bi_user</span><span class="p">;</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="k">GRANT</span><span class="w"> </span><span class="k">USAGE</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">SCHEMA</span><span class="w"> </span><span class="ss">&quot;&lt;new database name&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;&lt;schema&gt;&quot;</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">bi_user</span><span class="p">;</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">GRANT</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">ALL</span><span class="w"> </span><span class="n">TABLES</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="k">SCHEMA</span><span class="w"> </span><span class="ss">&quot;&lt;new database name&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;&lt;schema&gt;&quot;</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">bi_user</span><span class="p">;</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1">-- Test bi_user permission (optional)</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="k">AUTHORIZATION</span><span class="w"> </span><span class="n">bi_user</span><span class="p">;</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">CURRENT_USER</span><span class="p">;</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="ss">&quot;&lt;new database name&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;&lt;schema&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;event_v2&quot;</span><span class="w"> </span><span class="k">limit</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+</span></code></pre></div>
+    Replace <code>&lt;new database name&gt;</code> with the database name in the consumer Redshift (it can be different from the original database name), and <code>&lt;source namespace id&gt;</code> with the producer Redshift serverless namespace ID.</li>
+<li>Create a new secret for the BI user in Secrets Manager, specifying the value as plaintext like below:
+   <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="s2">&quot;bi_user&quot;</span><span class="p">,</span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;strong password&gt;&quot;</span><span class="p">}</span>
+</span></code></pre></div>
+   The <strong>key name</strong> should be like: <code>/clickstream/reporting/user/bi_user</code>.</li>
+<li>Go to Cloudformation in AWS console, update the reporting stack to use the consumer Redshift:<ul>
+<li><strong>Redshift Endpoint Url</strong> (Required): Consumer Redshift access endpoint</li>
+<li><strong>Redshift Default database name</strong> (Required): <code>dev</code></li>
+<li><strong>Redshift Database Name</strong> (Required): <code>&lt;new database name&gt;</code></li>
+<li><strong>Parameter Key Name</strong> (Required): <code>&lt;key name&gt;</code></li>
+<li>Comma Delimited Security Group Ids (Optional): The security group for VPC connection to access Redshift</li>
+<li>Comma Delimited Subnet Ids (Optional): The subnet IDs for the consumer Redshift</li>
+</ul>
+</li>
+</ol>
 <h2 id="sdk">SDK</h2>
 <h3 id="can-i-use-other-sdk-to-send-data-to-the-pipeline-created-by-this-solution">Can I use other SDK to send data to the pipeline created by this solution</h3>
 <p>Yes, you can. The solution support users using third-party SDK to send data to the pipeline. Note that, if you want to enable data processing and modeling module when using a third-party SDK to send data, you will need to provide an transformation plugin to map third-party SDK's data structure to solution data schema. Please refer to <a href="../pipeline-mgmt/data-processing/configure-plugin/">Custom plugin</a> for more details.</p>
