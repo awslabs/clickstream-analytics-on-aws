@@ -5,7 +5,7 @@ Retention rate is a common metric used to assess the user stickiness for an app 
 Retention analysis are commonly used to understand how well your app or website is doing in terms of retaining users, for example:
 
 - Calculate new user retention rate to measure the effectiveness of traffic channel;
-- Calculate the active users retention rate to measure teh effectiveness for a promotion campaign
+- Calculate the active users retention rate to measure teh effectiveness for a promotion campaign;
 - Compare the repurchase rate for different groups of users to identify the most-value customers.
 
 ## Key concept:

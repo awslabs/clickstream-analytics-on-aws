@@ -9,7 +9,7 @@ Note: This article describes the default report. You can customize the report by
 2. In the dashboard, click on the sheet with name of **`Engagement`**.
 
 ## Data sources
-Engagement report are created based on the following QuickSight datasets:
+Engagement report is created based on the following QuickSight datasets:
 
 |QuickSight dataset | Redshift view / table| Description | 
 |----------|--------------------|------------------|

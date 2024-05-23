@@ -47,6 +47,7 @@ nav:
         - Processing plugin: pipeline-mgmt/data-processing/configure-plugin.md
       - Data modeling: pipeline-mgmt/data-modeling/configure-data-modeling.md
       - Reporting: pipeline-mgmt/quicksight/configure-quicksight.md
+      - App registration: pipeline-mgmt/app-registration.md
       - Pipeline maintenance: pipeline-mgmt/pipe-mgmt.md
     - SDK manual:
       - Overview: sdk-manual/index.md
