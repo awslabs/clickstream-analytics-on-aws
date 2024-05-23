@@ -15,13 +15,12 @@ import { Box, Container, Header, Link } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  GETTING_STARTED_LINK_CN,
-  GETTING_STARTED_LINK_EN,
   buildDocumentLink,
   getWorkingWithQuickSightLink,
   getWorkingWithRedshiftLink,
   getWorkshopLink,
 } from 'ts/url';
+import { defaultStr } from 'ts/utils';
 
 const GetStarted: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -33,8 +32,7 @@ const GetStarted: React.FC = () => {
         <Link
           href={buildDocumentLink(
             i18n.language,
-            GETTING_STARTED_LINK_EN,
-            GETTING_STARTED_LINK_CN
+            defaultStr(t('help:getStartInfo.links.docLink'))
           )}
           target="_blank"
         >

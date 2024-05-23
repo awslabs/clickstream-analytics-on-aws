@@ -54,13 +54,7 @@ import {
   SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
   SinkType,
 } from 'ts/const';
-import {
-  DATA_MODELING_LINK_CN,
-  DATA_MODELING_LINK_EN,
-  DATA_PROCESSING_LINK_CN,
-  DATA_PROCESSING_LINK_EN,
-  buildDocumentLink,
-} from 'ts/url';
+import { buildDocumentLink } from 'ts/url';
 import {
   checkDisable,
   defaultSelectOptions,
@@ -423,8 +417,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                 <Link
                   href={buildDocumentLink(
                     i18n.language,
-                    DATA_PROCESSING_LINK_EN,
-                    DATA_PROCESSING_LINK_CN
+                    defaultStr(t('help:enableETLInfo.links.docLink'))
                   )}
                   external
                 >
@@ -587,8 +580,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                     external
                     href={buildDocumentLink(
                       i18n.language,
-                      DATA_MODELING_LINK_EN,
-                      DATA_MODELING_LINK_CN
+                      defaultStr(t('help:enableModelInfo.links.docLink'))
                     )}
                   >
                     {t('learnMore')}

@@ -14,12 +14,8 @@
 import { Box, Container, Header, Link } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  FAQ_LINK_CN,
-  FAQ_LINK_EN,
-  SUBMMIT_ISSUE_LINK,
-  buildDocumentLink,
-} from 'ts/url';
+import { SUBMMIT_ISSUE_LINK, buildDocumentLink } from 'ts/url';
+import { defaultStr } from 'ts/utils';
 
 const MoreResource: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -29,7 +25,10 @@ const MoreResource: React.FC = () => {
     >
       <Box padding={{ vertical: 'xs' }}>
         <Link
-          href={buildDocumentLink(i18n.language, FAQ_LINK_EN, FAQ_LINK_CN)}
+          href={buildDocumentLink(
+            i18n.language,
+            defaultStr(t('help:faqInfo.links.docLink'))
+          )}
           target="_blank"
         >
           {t('home:moreResource.faq')}

@@ -39,7 +39,7 @@ import {
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
 } from 'ts/const';
-import { buildUpdateCloudFormationStackLink, getDocumentLink } from 'ts/url';
+import { buildDocumentLink, buildUpdateCloudFormationStackLink } from 'ts/url';
 import {
   defaultStr,
   getProjectAppFromOptions,
@@ -273,7 +273,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       {
         type: 'button',
         text: defaultStr(t('header.analyticsDocumentation')),
-        href: getDocumentLink(i18n.language),
+        href: buildDocumentLink(i18n.language, '/'),
         external: true,
       },
       {

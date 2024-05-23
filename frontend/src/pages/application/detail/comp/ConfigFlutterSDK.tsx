@@ -94,8 +94,7 @@ const ConfigFlutterSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
           <Link
             href={buildDocumentLink(
               i18n.language,
-              '/flutter-sdk.html',
-              '/sdk-manual/flutter'
+              defaultStr(t('help:sdkFlutterGuideInfo.links.docLink'))
             )}
             external
           >

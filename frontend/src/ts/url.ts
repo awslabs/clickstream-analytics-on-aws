@@ -29,36 +29,6 @@ export const SOLUTION_DOCUMENTS_DOMAIN_EN =
 export const SOLUTION_DOCUMENTS_DOMAIN_CN =
   'https://awslabs.github.io/clickstream-analytics-on-aws/';
 
-export const PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN =
-  '/pipeline-mgmt/ingestion/configure-ingestion-endpoint/';
-export const PIPELINE_ACCESS_LOG_PERMISSION_LINK_EN =
-  '/ingestion-endpoint.html';
-
-export const KAFKA_REQUIREMENT_LINK_CN =
-  '/pipeline-mgmt/ingestion/create-data-sink-w-kafka/';
-export const KAFKA_REQUIREMENT_LINK_EN = '/data-sink-kafka.html';
-
-export const PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN = '/dashboard/';
-export const PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN = '/dashboards-1.html';
-
-export const PIPELINE_QUICKSIGHT_GUIDE_LINK_CN =
-  '/pipeline-mgmt/quicksight/configure-quicksight';
-export const PIPELINE_QUICKSIGHT_GUIDE_LINK_EN = '/reporting.html';
-
-export const DATA_PROCESSING_LINK_CN =
-  '/pipeline-mgmt/data-processing/data-schema/';
-export const DATA_PROCESSING_LINK_EN = '/pipeline-management.html';
-
-export const DATA_MODELING_LINK_CN =
-  '/pipeline-mgmt/data-processing/data-schema/#columns';
-export const DATA_MODELING_LINK_EN = '/data-modeling.html';
-
-export const FAQ_LINK_CN = '/faq/';
-export const FAQ_LINK_EN = '/frequently-asked-questions.html';
-
-export const GETTING_STARTED_LINK_CN = '/getting-started/';
-export const GETTING_STARTED_LINK_EN = '/getting-started.html';
-
 export const SUBMMIT_ISSUE_LINK =
   'https://github.com/awslabs/clickstream-analytics-on-aws/issues';
 
@@ -77,16 +47,12 @@ export const getSolutionVersion = () => {
   return docVersion;
 };
 
-export const buildDocumentLink = (
-  lang: string,
-  enUrl?: string,
-  cnUrl?: string
-) => {
+export const buildDocumentLink = (lang: string, suffix: string) => {
   let urlLang = 'en';
   if (ZH_LANGUAGE_LIST.includes(lang)) {
     urlLang = 'zh';
   }
-  return `${SOLUTION_DOCUMENTS_DOMAIN_CN}${urlLang}/${getSolutionVersion()}${cnUrl}`;
+  return `${SOLUTION_DOCUMENTS_DOMAIN_CN}${urlLang}/${getSolutionVersion()}${suffix}`;
 };
 
 export const buildVPCLink = (region: string, vpcId: string): string => {
@@ -220,14 +186,6 @@ export const buildSecurityGroupLink = (region: string, sgId: string) => {
     return `https://${region}.${CONSOLE_CHINA_DOMAIN}/ec2/home?region=${region}#SecurityGroup:securityGroupId=${sgId}`;
   }
   return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/ec2/home?region=${region}#SecurityGroup:securityGroupId=${sgId}`;
-};
-
-// Document link
-export const getDocumentLink = (lang: string) => {
-  if (ZH_LANGUAGE_LIST.includes(lang)) {
-    return `${SOLUTION_DOCUMENTS_DOMAIN_CN}/${getSolutionVersion()}`;
-  }
-  return `${SOLUTION_DOCUMENTS_DOMAIN_EN}/solution-overview.html`;
 };
 
 // Getting started link

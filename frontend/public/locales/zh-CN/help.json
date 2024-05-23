@@ -147,5 +147,70 @@
       "docLinkName": "用户属性",
       "docLink": "/analytics/data-mgmt/#_7"
     }
+  },
+  "sdkAndroidGuideInfo": {
+    "links": {
+      "docLink": "/sdk-manual/android"
+    }
+  },
+  "sdkFlutterGuideInfo": {
+    "links": {
+      "docLink": "/sdk-manual/flutter"
+    }
+  },
+  "sdkIOSGuideInfo": {
+    "links": {
+      "docLink": "/sdk-manual/swift"
+    }
+  },
+  "sdkRNGuideInfo": {
+    "links": {
+      "docLink": "/sdk-manual/react-native"
+    }
+  },
+  "sdkWebGuideInfo": {
+    "links": {
+      "docLink": "/sdk-manual/web"
+    }
+  },
+  "getStartInfo": {
+    "links": {
+      "docLink": "/getting-started/"
+    }
+  },
+  "faqInfo": {
+    "links": {
+      "docLink": "/faq/"
+    }
+  },
+  "enableALBLogInfo": {
+    "links": {
+      "docLink": "/pipeline-mgmt/ingestion/configure-ingestion-endpoint/"
+    }
+  },
+  "enableETLInfo": {
+    "links": {
+      "docLink": "/pipeline-mgmt/data-processing/data-schema/"
+    }
+  },
+  "enableModelInfo": {
+    "links": {
+      "docLink": "/pipeline-mgmt/data-processing/data-schema/#columns"
+    }
+  },
+  "enableReportingInfo": {
+    "links": {
+      "docLink": "/analytics/dashboard/"
+    }
+  },
+  "enableQuickSightInfo": {
+    "links": {
+      "docLink": "/pipeline-mgmt/quicksight/configure-quicksight"
+    }
+  },
+  "kafkaRequirementsInfo": {
+    "links": {
+      "docLink": "/pipeline-mgmt/ingestion/create-data-sink-w-kafka/"
+    }
   }
 }
