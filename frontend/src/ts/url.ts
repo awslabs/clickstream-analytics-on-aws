@@ -27,7 +27,7 @@ export const PIPELINE_SINK_CONNECTOR_GUIDE =
 export const SOLUTION_DOCUMENTS_DOMAIN_EN =
   'https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws';
 export const SOLUTION_DOCUMENTS_DOMAIN_CN =
-  'https://awslabs.github.io/clickstream-analytics-on-aws/zh';
+  'https://awslabs.github.io/clickstream-analytics-on-aws';
 
 export const PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN =
   '/pipeline-mgmt/ingestion/configure-ingestion-endpoint/';
@@ -82,10 +82,11 @@ export const buildDocumentLink = (
   enUrl?: string,
   cnUrl?: string
 ) => {
+  let urlLang = 'en';
   if (ZH_LANGUAGE_LIST.includes(lang)) {
-    return `${SOLUTION_DOCUMENTS_DOMAIN_CN}/${getSolutionVersion()}${cnUrl}`;
+    urlLang = 'zh';
   }
-  return SOLUTION_DOCUMENTS_DOMAIN_EN + (enUrl ?? '');
+  return `${SOLUTION_DOCUMENTS_DOMAIN_CN}/${urlLang}/${getSolutionVersion()}${cnUrl}`;
 };
 
 export const buildVPCLink = (region: string, vpcId: string): string => {
