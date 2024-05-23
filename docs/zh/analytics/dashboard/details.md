@@ -15,12 +15,11 @@
 |`Event_View-<app>-<project>`|`clickstream_event_view_v3`| 该数据集存储所有与用户属性和会话属性关联的原始事件数据。|
 
 ## 维度
-报告包含以下维度。您可以通过在QuickSight数据集中创建`计算字段`添加更多维度或指标。[了解更多](https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html)。
 
-此报告包括事件、用户和会话的所有可用维度。请参考[数据模式](../../pipeline-mgmt/data-processing/data-schema.md)了解每个维度。
+此报告包括事件、用户和会话表里的所有可用维度。请参考[数据模式](../../pipeline-mgmt/data-processing/data-schema.md)了解每个维度。
 
 ## 指标
-默认情况下，报告不包含任何指标。您可以通过在QuickSight数据集中创建`计算字段`添加更多维度或指标。[了解更多](https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html)。
+默认情况下，该报告不包含任何指标。您可以通过在QuickSight数据集中创建`计算字段`添加更多维度或指标。[了解更多](https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html)。
 
 ## 示例仪表板
 下图是一个供您参考的示例仪表板。

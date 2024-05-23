@@ -11,7 +11,7 @@ Note: This article describes the default report. You can customize the report by
 
 ## Where the data comes from
 
-Device report are created based on the following QuickSight dataset:
+Device report is created based on the following QuickSight dataset:
 
 |QuickSight dataset | Redshift view / table| Description | 
 |----------|--------------------|------------------|

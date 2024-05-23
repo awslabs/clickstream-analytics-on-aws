@@ -5,7 +5,7 @@ Path analysis refers to the distribution of the behavior of a group of users aft
 Path analysis are commonly used when analyzing user navigation pattern, for example:
 
 - Analyze the behavioral path distribution of users after entering the product or arriving at landing page;
-- Analyze the transition steps or screen within a specific processes (such as registration, login, payment, etc.) or product modules;
+- Analyze the transition steps or screen within a specific processes (such as registration, login, payment, etc.) or product modules.
 
 ## Key concepts
 
@@ -48,14 +48,15 @@ Path analysis are commonly used when analyzing user navigation pattern, for exam
 3. Choose `Session ID` as the session definition.
 4. Choose `Event` as the node type.
 5. In the left **Select Nodes** area, choose `_session_start` as the starting node.
-6. Choose `sign_up`, `login`, `product_exposure`, `search`, `view_item`, `add_to_cart`, `begin_checkout`, `purchase` in sequence as path nodes.
-7. Enable **Include Other Events**.
-8. Enable **Merge Consecutive Events**.
-9. Configure a global filter in the right **Filters** area:
+6. Select `Show selected nodes`
+7. Choose `sign_up`, `login`, `product_exposure`, `search`, `view_item`, `add_to_cart`, `begin_checkout`, `purchase` in sequence as path nodes.
+8. Enable **Include Other Events**.
+9. Enable **Merge Consecutive Events**.
+10. Configure a global filter in the right **Filters** area:
     - Choose `Event preset` / `Platform` as the filter property.
     - Operation: `=`
     - Value: `Web`
-10. Click **Query**.
+11. Click **Query**.
 
 All configurations are as shown in the image below:
 ![explore-funnel](../../images/analytics/explore/explore-path-en.png)

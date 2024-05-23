@@ -3,8 +3,8 @@ One of the key benefits of this solution is that you have complete control over 
 
 There are two options to create custom analyses. The following examples will guide you through the detailed steps.
 
-## Options 1 - create custom analysis with preset QuickSight dataset.
-The solution had created a `Event_View-<app>-<project>` dataset which stores all the raw event data, includes both common and custom dimension, joined with user attributes and session attributes in QuickSight, you can use these datasets to create custom analysis based on your specific requirements.
+## Option 1 - create custom analysis with preset QuickSight dataset
+The solution had created a `Event_View-<app>-<project>` dataset which stores all the raw event data, includes both common and custom dimension, joined with user attributes and session attributes in QuickSight, you can use this datasets to create custom analysis based on your specific requirements.
 
 For example, let's say you have a custom event `view_item` that records when a user views an item's detail page. This custom event has a custom attribute `event_category` to track the promotion spot from which the user came to the item detail page. Now, you want to create a custom analysis that uses a pie chart to show the percentage of each event_category that led user to item detail pages.
 
@@ -43,6 +43,7 @@ Creating a custom report mainly consists of two parts, the first part is to prep
   
     ??? example "SQL Commands"
         ```sql
+            CREATE OR REPLACE VIEW {{schema}}.clickstream_funnel_view as 
             SELECT
             platform,
             COUNT(DISTINCT step1_id) AS session_start_users,

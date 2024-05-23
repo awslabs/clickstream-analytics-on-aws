@@ -9,16 +9,15 @@ Note: This article describes the default report. You can customize the report by
 2. In the dashboard, click on the sheet with name of **`Details`**.
 
 ## Data sources
-Details report are created based on the following QuickSight dataset:
+Details report is created based on the following QuickSight dataset:
 
 |QuickSight dataset | Redshift view / table| Description | 
 |----------|--------------------|------------------|
 |`Event_View-<app>-<project>`|`clickstream_event_view_v3` | This datasets stores all the raw event data joined with user attributes and session attributes.|
 
 ## Dimensions
-The report includes the following dimensions. You can add more dimensions or metrics by creating `calculated field` in QuickSight dateset. [Learn more](https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html). 
 
-This report includes all the available dimensions for event, user, and session. Please refer to [Data Schema](../../pipeline-mgmt/data-processing/data-schema.md) for each dimension.
+This report includes all the available dimensions for event, user, and session tables. Please refer to [Data Schema](../../pipeline-mgmt/data-processing/data-schema.md) for each dimension.
 
 
 ## Metrics

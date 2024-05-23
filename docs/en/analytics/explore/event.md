@@ -5,7 +5,7 @@ Event analysis is used to study the frequency of certain behavioral events. You 
 Event analysis are commonly used when analyzing user behaviors, for example:
 
 - Query on user usage of certain product functions (such as adding favorite, video playback, view live stream, etc.);
-- Compare different group of user's behaviors, such as number of login per different country
+- Compare different group of users' behaviors, such as number of login per different country;
 - Compare different channel's effectiveness, such as sign-up rate per traffic source.
 
 ## Key concept:

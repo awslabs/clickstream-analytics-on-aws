@@ -21,7 +21,7 @@ Analyzes module is essentially the author interface of QuickSight, in which you 
     Only the user with `Administrator` or `Analyst` role can access this module.
 
 
-The solution automatically added the following datasets for each project and app:
+The solution automatically added the following datasets for each project and app, which contains all fields of event, user, and session tables, making it easy for you do custom analysis.
 
 | Dataset name | What it is |
 |-------------|------------|

@@ -49,14 +49,15 @@
 3. 选择 `会话 ID` 作为会话定义。
 4. 选择 `事件` 作为节点类型。
 5. 在左侧 **选择节点** 区域，选择 `_session_start` 作为起始节点。
-6. 依次选择 `sign_up`、`login`、`product_exposure`、`search`、`view_item`、`add_to_cart`、`begin_checkout`、`purchase` 作为路径节点。
-7. 启用 **包括其他事件**。
-8. 启用 **合并连续事件**。
-9. 在右侧 **过滤器** 区域配置全局过滤器：
+6. 选择 `显示选择的节点`
+7. 依次选择 `sign_up`、`login`、`product_exposure`、`search`、`view_item`、`add_to_cart`、`begin_checkout`、`purchase` 作为路径节点。
+8. 启用 **包括其他事件**。
+9. 启用 **合并连续事件**。
+10. 在右侧 **过滤器** 区域配置全局过滤器：
     - 选择 `事件预置属性` / `平台` 作为过滤器属性。
     - 操作：`=`
     - 值：`Web`
-10. 点击 **查询**。
+11. 点击 **查询**。
 
 所有配置如下图所示：
 ![explore-funnel](../../images/analytics/explore/explore-path-en.png)

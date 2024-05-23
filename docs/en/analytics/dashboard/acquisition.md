@@ -9,13 +9,13 @@ Note: This article describes the default report. You can customize the report by
 2. In the dashboard, click on the sheet with name of **`Acquisition`**.
 
 ## Data sources
-Acquisition report are created based on the following QuickSight datasets:
+Acquisition report is created based on the following QuickSight datasets:
 
 |QuickSight dataset | Redshift view / table| Description | 
 |----------|--------------------|------------------|
 |`User_User_View-<app>-<project>`|`clickstream_acquisition_day_user_view_cnt` | This dataset stores data on the number of new users and number of active users on your websites or apps for each day|
 |`Day_Traffic_Source_User-<app>-<project>`|`clickstream_acquisition_day_traffic_source_user`|This dataset stores data on the number of new users per each traffic source type for each day|
-|`Day_User_Acquisition-<app>-<project>`|`clickstream_acquisition_day_user_acquisition` |This dataset stores data on the number of new users, number of active users, number of sessions, number of engaged session, and number of events per each traffic source type for each day |
+|`Day_User_Acquisition-<app>-<project>`|`clickstream_acquisition_day_user_acquisition` |This dataset stores data on the number of new users, number of active users, number of sessions, number of engaged sessions, and number of events per each traffic source type for each day |
 |`Country_New_User_Acquisition-<app>-<project>`|`clickstream_acquisition_country_new_user`|This dataset stores data on the number of new users per each country and city for each day|
 
 

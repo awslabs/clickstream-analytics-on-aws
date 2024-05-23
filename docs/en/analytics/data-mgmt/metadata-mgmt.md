@@ -1,5 +1,5 @@
 # Metadata management
-The solution automatically scans clickstream data to generate metadata and then stored them in Redshift on a daily basis. There are three type of metadata:
+The solution automatically scans clickstream data to generate metadata and then stored them in Redshift on a daily basis. There are three types of metadata:
 
 1. **Event**: metadata describes clickstream events, which are stored in `event_metadata` table in Redshift.
 2. **Event Parameter**: metadata describes clickstream event parameters.

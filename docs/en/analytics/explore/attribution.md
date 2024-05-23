@@ -5,7 +5,7 @@ Attribution analysis is an analytics technique to assign credit to the touchpoin
 Attributions analysis are commonly used when analyzing the contribution of specific touchpoints, for example:
 
 - Identify the most important promotion slots within an app/website in terms of their contribution to a purchase goal;
-- Identify the most important traffic channels for an app/website based on the contribution to a conversion goal;
+- Identify the most important traffic channels for an app/website based on the contribution to a conversion goal
 
 ## Key concepts
 
@@ -42,7 +42,7 @@ Attributions analysis are commonly used when analyzing the contribution of speci
 2. Choose `purchase` as the conversion event, choose `sumGroup` by `[event]value` as conversion metric
 3. Choose `The day` as conversion window.
 4. Select `view_live` as touchpoint event, add filter of `live_id` = `live_1`.
-5. Repeat step 4 to add touchpoints for the rest of three live channel.
+5. Repeat step 4 to add touchpoints for the rest of two live channel.
 6. Click **Query**.
 7. Select `Last touch` model to see the attribution results.  
 

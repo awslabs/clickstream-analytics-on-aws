@@ -9,7 +9,7 @@ Note: This article describes the default report. You can customize the report by
 2. In the dashboard, click on the sheet with name of **`Retention`**.
 
 ## Data sources
-Retention report are created based on the following QuickSight dataset:
+Retention report is created based on the following QuickSight dataset:
 
 |QuickSight dataset | Redshift view / table| Description | 
 |----------|--------------------|------------------|

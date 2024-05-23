@@ -4,7 +4,7 @@ Traffic source describes the channel through which the users arrive at your webs
 ## Traffic-source data fields
 Traffic source includes the following key dimension to describe how the users arrives at your website or app.
 
-1. Source -  where the traffic originates (source, e.g., google, baidu, bing)
+1. Source -  where the traffic originates (e.g., google, baidu, bing)
 2. Medium - the methods by which users arrive at your site/app (medium, e.g., organic, cpc/ppc, email)
 3. Campaign - the specific marketing efforts you use to drive that traffic (e.g., campaign, creative format, keywords).
 4. Auto-tagged Click ID - the parameter generated and appended by ad platform automatically when ad are showed and clicked. (e.g., gclid)
@@ -46,8 +46,8 @@ Data processing module uses a Source Category mapping table ([learn more](#sourc
 ### Step 3 - Derive channel group
 Data processing module uses a set of predefined rules ([learn more](#channel-group-definitions-and-rules)) to categorize the traffics into different groups (e.g., direct, paid search, organic search) based on the key traffic-source dimensions (mainly the source. medium, and campaign). 
 
-### Step 4 - Populate traffic source dimensions for users and sessions
-While process the traffic-source for each event, the data processing module populate traffic source dimension for each user and session.
+### Step 4 - Populate traffic source dimensions for user and session tables
+While process the traffic-source for each events, the data processing module populate traffic source dimension for each user and session.
 
 1. User: If there are traffic-source data in the first meaningful events (e.g., first_open, page_view, app_start, app_end) for the first time user visit your website or apps, those traffic-source dimension will be assigned to corresponding user traffic-source attributes, i.e., first_traffic_source, first_traffic_medium.
 2. Session: When user initiate a new session, the data processing module derives traffic-source dimension for the session from the traffic-source dimensions of the first meaningful events in the session (e.g., first_open, page_view, app_start, app_end).

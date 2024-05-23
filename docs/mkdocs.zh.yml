@@ -50,7 +50,8 @@ nav:
         - 执行参数: pipeline-mgmt/data-processing/configure-execution-para.md
         - 处理插件: pipeline-mgmt/data-processing/configure-plugin.md
       - 数据建模: pipeline-mgmt/data-modeling/configure-data-modeling.md
-      - 报告: pipeline-mgmt/quicksight/configure-quicksight.md
+      - 报表: pipeline-mgmt/quicksight/configure-quicksight.md
+      - 应用注册: pipeline-mgmt/app-registration.md
       - 管道维护: pipeline-mgmt/pipe-mgmt.md
     - SDK手册:
       - 概述: sdk-manual/index.md
