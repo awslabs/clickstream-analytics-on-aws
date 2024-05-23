@@ -60,7 +60,10 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
             <div>
               {t('analytics:information.introducingAnalyticsContent')}
               <br />
-              <Link href="#" variant="primary">
+              <Link
+                href={buildDocumentLink(i18n.language, '/analytics/')}
+                variant="primary"
+              >
                 {t('learnMore')}
               </Link>
             </div>
