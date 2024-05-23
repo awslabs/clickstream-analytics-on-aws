@@ -123,6 +123,64 @@ You can accelerate report loading by converting QuickSight datasets to SPICE mod
     1. Enabling SPICE will result in charges based on the amount of space used. Pricing details can be found in the QuickSight pricing page. If the dashboard is frequently viewed, enabling SPICE can reduce the access load on the Redshift database, but it may also increase data latency.
     2. By default, the solution refreshes data in SPICE using an incremental update method. The refresh process is scheduled at 6 AM daily in your dashboard's time zone. You can manually adjust the update schedule in QuickSight.
 
+
+### How to implement a dedicated Redshift for Analytics Studio?
+
+Redshift supports [sharing data across different Redshift clusters][redshift-share-data], allowing you to use a dedicated Redshift cluster for Analytics Studio to achieve better query performance and cost optimization.
+
+Before implementing Amazon Redshift data sharing, please note the following:
+
+- You can share data between the same cluster types, as well as between provisioned clusters and serverless clusters.
+- Only **Ra3** type clusters and **Redshift serverless** support data sharing.
+
+Taking Redshift serverless as an example of data sharing, follow these operational steps:
+
+1. [Create a Redshift serverless][serverless-console-workflows] as the data consumer.
+2. Run SQL in the producer Redshift database (The project database configured in the Clickstream solution) to create a data share and grant consumer permissions:
+    ```sql
+    -- Create Data sharing
+
+    CREATE DATASHARE <data share name> SET PUBLICACCESSIBLE FALSE;
+    ALTER DATASHARE <data share name> ADD SCHEMA <schema>;
+    ALTER DATASHARE <data share name> ADD ALL TABLES IN SCHEMA <schema>;
+
+    -- Grant the Data sharing to the consumer Redshift.
+
+    GRANT USAGE ON DATASHARE <data share name> TO NAMESPACE '<consumer namespace id>';
+    ```
+    Replace `<data share name>` with the name you want to share, `<schema>` with the schema you want to share, and `<consumer namespace id>` with the consumer Redshift serverless namespace ID.
+3. Run SQL in the consumer Redshift database:
+    ```sql
+    -- Create Data sharing 
+
+    CREATE DATASHARE <new database name> WITH PERMISSIONS FROM DATASHARE <data share name> OF NAMESPACE '<source namespace id>';
+   
+    -- Create bi user
+    
+    CREATE USER bi_user PASSWORD '<strong password>';
+    GRANT USAGE ON DATABASE "<new database name>" TO bi_user;
+    GRANT USAGE ON SCHEMA "<new database name>"."<schema>" TO bi_user;
+    GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO bi_user;
+
+    -- Test bi_user permission (optional)
+    SET SESSION AUTHORIZATION bi_user;
+    SELECT CURRENT_USER;
+    SELECT * FROM "<new database name>"."<schema>"."event_v2" limit 1;
+    ```
+    Replace `<new database name>` with the database name in the consumer Redshift (it can be different from the original database name), and `<source namespace id>` with the producer Redshift serverless namespace ID.
+4. Create a new secret for the BI user in Secrets Manager, specifying the value as plaintext like below:
+   ```json
+   {"username":"bi_user","password":"<strong password>"}
+   ```
+   The **key name** should be like: `/clickstream/reporting/user/bi_user`.
+5. Go to Cloudformation in AWS console, update the reporting stack to use the consumer Redshift:
+    - **Redshift Endpoint Url** (Required): Consumer Redshift access endpoint
+    - **Redshift Default database name** (Required): `dev`
+    - **Redshift Database Name** (Required): `<new database name>`
+    - **Parameter Key Name** (Required): `<key name>`
+    - Comma Delimited Security Group Ids (Optional): The security group for VPC connection to access Redshift
+    - Comma Delimited Subnet Ids (Optional): The subnet IDs for the consumer Redshift
+
 ## SDK
 
 ### Can I use other SDK to send data to the pipeline created by this solution
@@ -133,3 +191,5 @@ Yes, you can. The solution support users using third-party SDK to send data to t
 [redshift-query-editor]: https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html
 [redshift-secrets-manager-integration]: https://docs.aws.amazon.com/redshift/latest/mgmt/redshift-secrets-manager-integration.html
 [redshift-grant]: https://docs.aws.amazon.com/redshift/latest/dg/r_GRANT.html
+[serverless-console-workflows]: https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-console-workflows.html
+[redshift-share-data]: https://docs.aws.amazon.com/redshift/latest/dg/datashare-overview.html
