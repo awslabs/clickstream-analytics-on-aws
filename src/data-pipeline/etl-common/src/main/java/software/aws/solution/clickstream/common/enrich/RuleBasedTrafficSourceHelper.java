@@ -377,8 +377,13 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
                 categoryTrafficSource.setChannelGroup(ChannelListEvaluator.UNASSIGNED);
             }
         }
+        boolean isFromInternal = false;
 
-        boolean isFromInternal = isInternalReferrer || isInternalLatestReferrer;
+        if (!isEmpty(latestReferrer)) {
+            isFromInternal = isInternalLatestReferrer;
+        } else if (!isEmpty(pageReferrer)) {
+            isFromInternal = isInternalReferrer;
+        }
 
         if (categoryTrafficSource.getSource() == null) {
             categoryTrafficSource.setSource(DIRECT);
@@ -388,10 +393,6 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             } else {
                 categoryTrafficSource.setChannelGroup(DIRECT);
             }
-        }
-
-        if (categoryTrafficSource.getMedium() == null && isFromInternal) {
-            categoryTrafficSource.setMedium(NONE);
         }
 
         if (categoryTrafficSource.getSource() != null && categoryTrafficSource.getMedium() == null) {
@@ -417,7 +418,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     String getMediumByReferrer(final String pageReferrer, final String latestReferrer, final boolean isFromInternal) {
         log.debug("getMediumByReferrer() enter pageReferrer: {}, latestReferrer: {}, isFromInternal: {}", pageReferrer, latestReferrer, isFromInternal);
 
-        if (isAllEmpty(pageReferrer, latestReferrer) || isFromInternal) {
+        if (isAllEmpty(pageReferrer, latestReferrer)) {
             return NONE;
         }
 
@@ -448,6 +449,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             if (knownSearchEngineDomains.contains(referrerHost)) {
                 return ORGANIC;
             }
+        }
+
+        if (isFromInternal) {
+            return NONE;
         }
 
         return REFERRAL;
