@@ -2709,6 +2709,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#analytics-studio-redshift" class="md-nav__link">
+    <span class="md-ellipsis">
+      如何为 Analytics Studio 实现专用 Redshift？
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3105,6 +3114,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#analytics-studio-redshift" class="md-nav__link">
+    <span class="md-ellipsis">
+      如何为 Analytics Studio 实现专用 Redshift？
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3265,6 +3283,60 @@
 <li>默认情况下，该解决方案使用增量更新方法在 SPICE 中刷新数据。刷新过程计划在您的仪表板时区每天上午 6 点进行。您可以在 QuickSight 中手动调整更新时间表。</li>
 </ol>
 </div>
+<h3 id="analytics-studio-redshift">如何为 Analytics Studio 实现专用 Redshift？</h3>
+<p>Redshift 支持<a href="https://docs.aws.amazon.com/redshift/latest/dg/datashare-overview.html">跨集群共享数据</a>，这样您就可以使用专用的 Redshift 集群为 Analytics Studio 提供更好的查询性能和成本优化。</p>
+<p>在实现 Amazon Redshift 数据共享之前，请注意以下几点：</p>
+<ul>
+<li>您可以在同集群类型之间共享数据，也可以在预置的集群和无服务器集群之间共享数据。</li>
+<li>只有 <strong>RA3</strong> 类型的预置集群和 <strong>Redshift 无服务器集群</strong>支持数据共享。</li>
+</ul>
+<p>以 Redshift 无服务器集群作为数据共享的示例，请按照以下操作步骤执行:</p>
+<ol>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-console-workflows.html">创建 Redshift 无服务器集群</a>作为数据消费者。</li>
+<li>在生产者 Redshift 数据库(Clickstream 解决方案中配置的项目数据库)中运行 SQL 创建数据共享并授予消费者权限：
+    <div class="language-sql highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">-- 创建 Data sharing</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">CREATE</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">data</span><span class="w"> </span><span class="k">share</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">PUBLICACCESSIBLE</span><span class="w"> </span><span class="k">FALSE</span><span class="p">;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">ALTER</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">data</span><span class="w"> </span><span class="k">share</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">SCHEMA</span><span class="w"> </span><span class="o">&lt;</span><span class="k">schema</span><span class="o">&gt;</span><span class="p">;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">ALTER</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">data</span><span class="w"> </span><span class="k">share</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">ALL</span><span class="w"> </span><span class="n">TABLES</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="k">SCHEMA</span><span class="w"> </span><span class="o">&lt;</span><span class="k">schema</span><span class="o">&gt;</span><span class="p">;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1">-- 将 Data sharing 授权给消费者 Redshift</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="k">GRANT</span><span class="w"> </span><span class="k">USAGE</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">data</span><span class="w"> </span><span class="k">share</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">NAMESPACE</span><span class="w"> </span><span class="s1">&#39;&lt;consumer namespace id&gt;&#39;</span><span class="p">;</span>
+</span></code></pre></div>
+    将 <code>&lt;data share name&gt;</code> 替换为共享名称，将 <code>&lt;schema&gt;</code> 替换为您要共享的schema，将 <code>&lt;consumer namespace id&gt;</code> 替换为消费者 Redshift 无服务器命名空间 ID。</li>
+<li>在消费者 Redshift 数据库中运行 SQL:
+    <div class="language-sql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">-- 创建 Data sharing </span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">CREATE</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">new</span><span class="w"> </span><span class="k">database</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">PERMISSIONS</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">DATASHARE</span><span class="w"> </span><span class="o">&lt;</span><span class="k">data</span><span class="w"> </span><span class="k">share</span><span class="w"> </span><span class="n">name</span><span class="o">&gt;</span><span class="w"> </span><span class="k">OF</span><span class="w"> </span><span class="n">NAMESPACE</span><span class="w"> </span><span class="s1">&#39;&lt;source namespace id&gt;&#39;</span><span class="p">;</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1">-- 创建 bi 用户</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="n">bi_user</span><span class="w"> </span><span class="n">PASSWORD</span><span class="w"> </span><span class="s1">&#39;&lt;strong password&gt;&#39;</span><span class="p">;</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">GRANT</span><span class="w"> </span><span class="k">USAGE</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="ss">&quot;&lt;new database name&gt;&quot;</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">bi_user</span><span class="p">;</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="k">GRANT</span><span class="w"> </span><span class="k">USAGE</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">SCHEMA</span><span class="w"> </span><span class="ss">&quot;&lt;new database name&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;&lt;schema&gt;&quot;</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">bi_user</span><span class="p">;</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">GRANT</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">ALL</span><span class="w"> </span><span class="n">TABLES</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="k">SCHEMA</span><span class="w"> </span><span class="ss">&quot;&lt;new database name&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;&lt;schema&gt;&quot;</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">bi_user</span><span class="p">;</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1">-- 测试 bi_user 权限 (可选)</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="k">AUTHORIZATION</span><span class="w"> </span><span class="n">bi_user</span><span class="p">;</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">CURRENT_USER</span><span class="p">;</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="ss">&quot;&lt;new database name&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;&lt;schema&gt;&quot;</span><span class="p">.</span><span class="ss">&quot;event_v2&quot;</span><span class="w"> </span><span class="k">limit</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+</span></code></pre></div>
+    将 <code>&lt;new database name&gt;</code> 替换为消费者 Redshift 中的数据库名称(可以与原始数据库名称不同)，将 <code>&lt;source namespace id&gt;</code> 替换为生产者 Redshift 无服务器命名空间 ID。</li>
+<li>在 Secrets Manager 中为 BI 用户创建一个新的机密，将值指定为纯文本，如下所示：
+   <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="s2">&quot;bi_user&quot;</span><span class="p">,</span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;strong password&gt;&quot;</span><span class="p">}</span>
+</span></code></pre></div>
+   <strong>密钥名称</strong>应该类似于：<code>/clickstream/reporting/user/bi_user</code>。</li>
+<li>转到AWS控制台中的Cloudformation，更新报告堆栈以使用消费者Redshift：<ul>
+<li><strong>Redshift Endpoint Url</strong> (必需)：消费者 Redshift 访问端点</li>
+<li><strong>Redshift Default database name</strong> (必需)： <code>dev</code></li>
+<li><strong>Redshift Database Name</strong> (必需)：<code>&lt;new database name&gt;</code></li>
+<li><strong>Parameter Key Name</strong> (必需)：<code>&lt;密钥名称&gt;</code></li>
+<li>逗号分隔的安全组 ID (可选)： 用于访问 Redshift 的 VPC 连接的安全组</li>
+<li>逗号分隔的子网 ID (可选)：消费者 Redshift 的子网 ID</li>
+</ul>
+</li>
+</ol>
 <h2 id="_15">开发工具包</h2>
 <h3 id="sdk">我可以使用其他SDK向该方案创建的管道发送数据吗？</h3>
 <p>可以。该方案支持用户使用第三方SDK向数据管道发送数据。需要注意的是，如果您想在使用第三方SDK发送数据时，在数据处理和数据建模模块，您需要提供一个转换插件来将第三方SDK的数据结构映射到解决方案数据结构。 详情请参考<a href="../pipeline-mgmt/data-processing/configure-plugin/">自定义插件</a>。</p>
