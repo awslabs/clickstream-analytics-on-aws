@@ -130,30 +130,30 @@ Redshift supports [sharing data across different Redshift clusters][redshift-sha
 
 Before implementing Amazon Redshift data sharing, please note the following:
 
-- You can share data between cluster types, as well as between configured clusters and serverless ones.
-- Only **RA3** type clusters and **Redshift serverless** support data sharing.
+- You can share data between the same cluster types, as well as between provisioned clusters and serverless clusters.
+- Only **Ra3** type clusters and **Redshift serverless** support data sharing.
 
 Taking Redshift serverless as an example of data sharing, follow these operational steps:
 
 1. [Create a Redshift serverless][serverless-console-workflows] as the data consumer.
 2. Run SQL in the producer Redshift database (The project database configured in the Clickstream solution) to create a data share and grant consumer permissions:
     ```sql
-    -- Create Datashare
+    -- Create Data sharing
 
-    CREATE DATASHARE bi SET PUBLICACCESSIBLE FALSE;
-    ALTER DATASHARE bi ADD SCHEMA <schema>;
-    ALTER DATASHARE bi ADD ALL TABLES IN SCHEMA <schema>;
+    CREATE DATASHARE <data share name> SET PUBLICACCESSIBLE FALSE;
+    ALTER DATASHARE <data share name> ADD SCHEMA <schema>;
+    ALTER DATASHARE <data share name> ADD ALL TABLES IN SCHEMA <schema>;
 
-    -- Grant the Datashare to the consumer Redshift.
+    -- Grant the Data sharing to the consumer Redshift.
 
-    GRANT USAGE ON DATASHARE bi TO NAMESPACE '<target namespace id>';
+    GRANT USAGE ON DATASHARE <data share name> TO NAMESPACE '<consumer namespace id>';
     ```
-    Replace `<schema>` with the schema you want to share, and `<target namespace id>` with the consumer Redshift serverless namespace ID.
+    Replace `<data share name>` with the name you want to share, `<schema>` with the schema you want to share, and `<consumer namespace id>` with the consumer Redshift serverless namespace ID.
 3. Run SQL in the consumer Redshift database:
     ```sql
-    -- Create Datashare 
+    -- Create Data sharing 
 
-    CREATE DATASHARE <new database name> WITH PERMISSIONS FROM DATASHARE bi OF NAMESPACE '<source namespace id>';
+    CREATE DATASHARE <new database name> WITH PERMISSIONS FROM DATASHARE <data share name> OF NAMESPACE '<source namespace id>';
    
     -- Create bi user
     
@@ -172,12 +172,12 @@ Taking Redshift serverless as an example of data sharing, follow these operation
    ```json
    {"username":"bi_user","password":"<strong password>"}
    ```
-   The key name should be like: `/clickstream/reporting/user/bi_user`.
-5. Update the reporting stack to use the consumer Redshift:
+   The **key name** should be like: `/clickstream/reporting/user/bi_user`.
+5. Go to Cloudformation in AWS console, update the reporting stack to use the consumer Redshift:
     - **Redshift Endpoint Url** (Required): Consumer Redshift access endpoint
     - **Redshift Default database name** (Required): `dev`
     - **Redshift Database Name** (Required): `<new database name>`
-    - **Parameter Key Name** (Required): `/clickstream/reporting/user/bi_user`
+    - **Parameter Key Name** (Required): `<key name>`
     - Comma Delimited Security Group Ids (Optional): The security group for VPC connection to access Redshift
     - Comma Delimited Subnet Ids (Optional): The subnet IDs for the consumer Redshift
 

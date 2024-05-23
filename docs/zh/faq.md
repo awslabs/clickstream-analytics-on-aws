@@ -137,22 +137,22 @@ Redshift 支持[跨集群共享数据][redshift-share-data]，这样您就可以
 1. [创建 Redshift 无服务器集群][serverless-console-workflows]作为数据消费者。
 2. 在生产者 Redshift 数据库(Clickstream 解决方案中配置的项目数据库)中运行 SQL 创建数据共享并授予消费者权限：
     ```sql
-    -- 创建 Datashare
+    -- 创建 Data sharing
 
-    CREATE DATASHARE bi SET PUBLICACCESSIBLE FALSE;
-    ALTER DATASHARE bi ADD SCHEMA <schema>;
-    ALTER DATASHARE bi ADD ALL TABLES IN SCHEMA <schema>;
+    CREATE DATASHARE <data share name> SET PUBLICACCESSIBLE FALSE;
+    ALTER DATASHARE <data share name> ADD SCHEMA <schema>;
+    ALTER DATASHARE <data share name> ADD ALL TABLES IN SCHEMA <schema>;
 
-    -- 将 Datashare 授权给消费者 Redshift
+    -- 将 Data sharing 授权给消费者 Redshift
 
-    GRANT USAGE ON DATASHARE bi TO NAMESPACE '<target namespace id>';
+    GRANT USAGE ON DATASHARE <data share name> TO NAMESPACE '<consumer namespace id>';
     ```
-    将 `<schema>` 替换为您要共享的schema，将 `<target namespace id>` 替换为消费者 Redshift 无服务器命名空间 ID。
+    将 `<data share name>` 替换为共享名称，将 `<schema>` 替换为您要共享的schema，将 `<consumer namespace id>` 替换为消费者 Redshift 无服务器命名空间 ID。
 3. 在消费者 Redshift 数据库中运行 SQL:
     ```sql
-    -- 创建 Datashare 
+    -- 创建 Data sharing 
 
-    CREATE DATASHARE <new database name> WITH PERMISSIONS FROM DATASHARE bi OF NAMESPACE '<source namespace id>';
+    CREATE DATASHARE <new database name> WITH PERMISSIONS FROM DATASHARE <data share name> OF NAMESPACE '<source namespace id>';
    
     -- 创建 bi 用户
     
@@ -171,12 +171,12 @@ Redshift 支持[跨集群共享数据][redshift-share-data]，这样您就可以
    ```json
    {"username":"bi_user","password":"<strong password>"}
    ```
-   密钥名称应该类似于：`/clickstream/reporting/user/bi_user`。
-5. 更新报告堆栈以使用消费者 Redshift：
+   **密钥名称**应该类似于：`/clickstream/reporting/user/bi_user`。
+5. 转到AWS控制台中的Cloudformation，更新报告堆栈以使用消费者Redshift：
     - **Redshift Endpoint Url** (必需)：消费者 Redshift 访问端点
     - **Redshift Default database name** (必需)： `dev`
     - **Redshift Database Name** (必需)：`<new database name>`
-    - **Parameter Key Name** (必需)：`/clickstream/reporting/user/bi_user`
+    - **Parameter Key Name** (必需)：`<密钥名称>`
     - 逗号分隔的安全组 ID (可选)： 用于访问 Redshift 的 VPC 连接的安全组
     - 逗号分隔的子网 ID (可选)：消费者 Redshift 的子网 ID
 
