@@ -387,10 +387,10 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer8
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
-        String pageUrl = "https://test.com/posts/2022/build-serverless-app-on-aws/protect-website-with-cognito/";
-        String pageReferrer = "https://test.com/posts/2022/build-serverless-app-on-aws/federated-oidc-login-with-cognito-and-amplify/";
-        String latestReferrer = "https://test.com/posts/2022/build-serverless-app-on-aws/federated-oidc-login-with-cognito-and-amplify/";
-        String latestReferrerHost = "test.com";
+        String pageUrl = "https://example.com/posts/2022/build-serverless-app-on-aws/protect-website-with-cognito/";
+        String pageReferrer = "https://example.com/posts/2022/build-serverless-app-on-aws/federated-oidc-login-with-cognito-and-amplify/";
+        String latestReferrer = "https://example.com/posts/2022/build-serverless-app-on-aws/federated-oidc-login-with-cognito-and-amplify/";
+        String latestReferrerHost = "example.com";
 
         CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
 
@@ -416,7 +416,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer9
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
-        String pageUrl = "https://test.com/posts/2022/build-serverless-app-on-aws/protect-website-with-cognito/";
+        String pageUrl = "https://example.com/posts/2022/build-serverless-app-on-aws/protect-website-with-cognito/";
         String pageReferrer = null;
         String latestReferrer = "https://i.search.google.se";
         String latestReferrerHost = "i.search.google.se";
@@ -444,10 +444,10 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer10
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
-        String pageUrl = "https://test.com/posts/2024/redshift-serverless-cost-deep-dive/";
+        String pageUrl = "https://example.com/posts/2024/redshift-serverless-cost-deep-dive/";
         String pageReferrer = null;
-        String latestReferrer = "https://test.com/";
-        String latestReferrerHost = "test.com";
+        String latestReferrer = "https://example.com/";
+        String latestReferrerHost = "example.com";
 
         CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
 
@@ -488,8 +488,8 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer12
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
-        String pageUrl = "https://test.com/posts/2024/redshift-serverless-cost-deep-dive/";
-        String pageReferrer = "https://test.com";
+        String pageUrl = "https://example.com/posts/2024/redshift-serverless-cost-deep-dive/";
+        String pageReferrer = "https://example.com";
         String latestReferrer = "https://www.google.com/";
         String latestReferrerHost = "google.com";
 
