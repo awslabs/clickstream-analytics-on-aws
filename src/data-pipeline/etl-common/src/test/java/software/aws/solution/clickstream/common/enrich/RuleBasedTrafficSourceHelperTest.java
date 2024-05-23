@@ -482,4 +482,33 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
     }
 
+
+    @Test
+    void testGetMediumByReferrer12() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer12
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://test.com/posts/2024/redshift-serverless-cost-deep-dive/";
+        String pageReferrer = "https://test.com";
+        String latestReferrer = "https://www.google.com/";
+        String latestReferrerHost = "google.com";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
+
+        String expectedValue = "{\n" +
+                "      \"source\" : \"Google\",\n" +
+                "      \"medium\" : \"Organic\",\n" +
+                "      \"campaign\" : null,\n" +
+                "      \"content\" : null,\n" +
+                "      \"term\" : null,\n" +
+                "      \"campaignId\" : null,\n" +
+                "      \"clidPlatform\" : null,\n" +
+                "      \"clid\" : null,\n" +
+                "      \"channelGroup\" : \"Organic Search\",\n" +
+                "      \"category\" : \"Search\"\n" +
+                "    }";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
 }
