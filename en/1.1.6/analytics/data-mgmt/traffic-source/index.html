@@ -1506,6 +1506,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../pipeline-mgmt/app-registration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    App registration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../pipeline-mgmt/pipe-mgmt/" class="md-nav__link">
         
   
@@ -2458,9 +2479,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-4-populate-traffic-source-dimensions-for-users-and-sessions" class="md-nav__link">
+  <a href="#step-4-populate-traffic-source-dimensions-for-user-and-session-tables" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 4 - Populate traffic source dimensions for users and sessions
+      Step 4 - Populate traffic source dimensions for user and session tables
     </span>
   </a>
   
@@ -2931,9 +2952,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-4-populate-traffic-source-dimensions-for-users-and-sessions" class="md-nav__link">
+  <a href="#step-4-populate-traffic-source-dimensions-for-user-and-session-tables" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 4 - Populate traffic source dimensions for users and sessions
+      Step 4 - Populate traffic source dimensions for user and session tables
     </span>
   </a>
   
@@ -3000,7 +3021,7 @@
 <h2 id="traffic-source-data-fields">Traffic-source data fields</h2>
 <p>Traffic source includes the following key dimension to describe how the users arrives at your website or app.</p>
 <ol>
-<li>Source -  where the traffic originates (source, e.g., google, baidu, bing)</li>
+<li>Source -  where the traffic originates (e.g., google, baidu, bing)</li>
 <li>Medium - the methods by which users arrive at your site/app (medium, e.g., organic, cpc/ppc, email)</li>
 <li>Campaign - the specific marketing efforts you use to drive that traffic (e.g., campaign, creative format, keywords).</li>
 <li>Auto-tagged Click ID - the parameter generated and appended by ad platform automatically when ad are showed and clicked. (e.g., gclid)</li>
@@ -3106,8 +3127,8 @@
 <p>Data processing module uses a Source Category mapping table (<a href="#source-category-mapping-table">learn more</a>) to classify the source into different categories (i.e., search, shopping, video, social). For example, source with values of "google" or "bing" will be classified into Search category.</p>
 <h3 id="step-3-derive-channel-group">Step 3 - Derive channel group</h3>
 <p>Data processing module uses a set of predefined rules (<a href="#channel-group-definitions-and-rules">learn more</a>) to categorize the traffics into different groups (e.g., direct, paid search, organic search) based on the key traffic-source dimensions (mainly the source. medium, and campaign). </p>
-<h3 id="step-4-populate-traffic-source-dimensions-for-users-and-sessions">Step 4 - Populate traffic source dimensions for users and sessions</h3>
-<p>While process the traffic-source for each event, the data processing module populate traffic source dimension for each user and session.</p>
+<h3 id="step-4-populate-traffic-source-dimensions-for-user-and-session-tables">Step 4 - Populate traffic source dimensions for user and session tables</h3>
+<p>While process the traffic-source for each events, the data processing module populate traffic source dimension for each user and session.</p>
 <ol>
 <li>User: If there are traffic-source data in the first meaningful events (e.g., first_open, page_view, app_start, app_end) for the first time user visit your website or apps, those traffic-source dimension will be assigned to corresponding user traffic-source attributes, i.e., first_traffic_source, first_traffic_medium.</li>
 <li>Session: When user initiate a new session, the data processing module derives traffic-source dimension for the session from the traffic-source dimensions of the first meaningful events in the session (e.g., first_open, page_view, app_start, app_end).</li>

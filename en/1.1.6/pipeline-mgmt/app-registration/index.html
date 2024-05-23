@@ -8,28 +8,28 @@
       
       
       
-        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/source/">
+        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/pipeline-mgmt/app-registration/">
       
       
-        <link rel="prev" href="../uninstall/">
+        <link rel="prev" href="../quicksight/configure-quicksight/">
       
       
-        <link rel="next" href="../revisions/">
+        <link rel="next" href="../pipe-mgmt/">
       
       
-      <link rel="icon" href="../images/favicon.ico">
+      <link rel="icon" href="../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.18">
     
     
       
-        <title>Source code - Clickstream Analytics on AWS</title>
+        <title>App registration - Clickstream Analytics on AWS</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -50,7 +50,7 @@
     
       <link rel="stylesheet" href="/stylesheets/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -74,7 +74,7 @@
     
     
     
-   <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
     html.glightbox-open { overflow: initial; height: 100%; }
     .gslide-title { margin-top: 0px; user-select: text; }
     .gslide-desc { color: #666; user-select: text; }
@@ -83,7 +83,7 @@
     .gdesc-inner { font-size: 0.75rem; }
     body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
     body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
-    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../assets/javascripts/glightbox.min.js"></script></head>
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
   
   
     
@@ -101,6 +101,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#app-registration" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -115,7 +120,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="Clickstream Analytics on AWS" class="md-header__button md-logo" aria-label="Clickstream Analytics on AWS" data-md-component="logo">
+    <a href="../.." title="Clickstream Analytics on AWS" class="md-header__button md-logo" aria-label="Clickstream Analytics on AWS" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -135,7 +140,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Source code
+              App registration
             
           </span>
         </div>
@@ -297,7 +302,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../solution-overview/" class="md-tabs__link">
+        <a href="../../solution-overview/" class="md-tabs__link">
           
   
   Implementation Guide
@@ -350,7 +355,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Clickstream Analytics on AWS" class="md-nav__button md-logo" aria-label="Clickstream Analytics on AWS" data-md-component="logo">
+    <a href="../.." title="Clickstream Analytics on AWS" class="md-nav__button md-logo" aria-label="Clickstream Analytics on AWS" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -461,7 +466,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../solution-overview/" class="md-nav__link">
+      <a href="../../solution-overview/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -482,7 +487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../solution-overview/features-and-benefits/" class="md-nav__link">
+      <a href="../../solution-overview/features-and-benefits/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -503,7 +508,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../solution-overview/use-cases/" class="md-nav__link">
+      <a href="../../solution-overview/use-cases/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -570,7 +575,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../architecture/" class="md-nav__link">
+      <a href="../../architecture/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -591,7 +596,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../well-architected-pillars/" class="md-nav__link">
+      <a href="../../well-architected-pillars/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -658,7 +663,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../aws-services/" class="md-nav__link">
+      <a href="../../aws-services/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -679,7 +684,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../architecture-details/" class="md-nav__link">
+      <a href="../../architecture-details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -746,7 +751,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../plan-deployment/cost/" class="md-nav__link">
+      <a href="../../plan-deployment/cost/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -767,7 +772,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../plan-deployment/security/" class="md-nav__link">
+      <a href="../../plan-deployment/security/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -788,7 +793,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../plan-deployment/regions/" class="md-nav__link">
+      <a href="../../plan-deployment/regions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -855,7 +860,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment/" class="md-nav__link">
+      <a href="../../deployment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -876,7 +881,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment/with-cognito/" class="md-nav__link">
+      <a href="../../deployment/with-cognito/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -897,7 +902,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment/with-oidc/" class="md-nav__link">
+      <a href="../../deployment/with-oidc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -918,7 +923,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment/within-vpc/" class="md-nav__link">
+      <a href="../../deployment/within-vpc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -985,7 +990,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1006,7 +1011,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/1.create-project/" class="md-nav__link">
+      <a href="../../getting-started/1.create-project/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1027,7 +1032,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/2.config-pipeline/" class="md-nav__link">
+      <a href="../../getting-started/2.config-pipeline/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1048,7 +1053,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/3.integrate-sdk/" class="md-nav__link">
+      <a href="../../getting-started/3.integrate-sdk/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1069,7 +1074,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/4.view-dashboard/" class="md-nav__link">
+      <a href="../../getting-started/4.view-dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1095,6 +1100,8 @@
                 
   
   
+    
+  
   
   
     
@@ -1104,11 +1111,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
         
           
           <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="0">
@@ -1122,7 +1129,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1_7">
             <span class="md-nav__icon md-icon"></span>
             Pipeline management
@@ -1136,7 +1143,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1157,7 +1164,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/basic/" class="md-nav__link">
+      <a href="../basic/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1216,7 +1223,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/ingestion/" class="md-nav__link">
+      <a href="../ingestion/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1237,7 +1244,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/ingestion/configure-ingestion-endpoint/" class="md-nav__link">
+      <a href="../ingestion/configure-ingestion-endpoint/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1258,7 +1265,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/ingestion/create-data-sink-w-kafka/" class="md-nav__link">
+      <a href="../ingestion/create-data-sink-w-kafka/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1279,7 +1286,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
+      <a href="../ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1300,7 +1307,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/ingestion/create-data-sink-w-s3/" class="md-nav__link">
+      <a href="../ingestion/create-data-sink-w-s3/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1367,7 +1374,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/data-processing/" class="md-nav__link">
+      <a href="../data-processing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1388,7 +1395,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/data-processing/data-schema/" class="md-nav__link">
+      <a href="../data-processing/data-schema/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1409,7 +1416,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/data-processing/configure-execution-para/" class="md-nav__link">
+      <a href="../data-processing/configure-execution-para/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1430,7 +1437,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/data-processing/configure-plugin/" class="md-nav__link">
+      <a href="../data-processing/configure-plugin/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1459,7 +1466,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/data-modeling/configure-data-modeling/" class="md-nav__link">
+      <a href="../data-modeling/configure-data-modeling/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1480,7 +1487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/quicksight/configure-quicksight/" class="md-nav__link">
+      <a href="../quicksight/configure-quicksight/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1498,10 +1505,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../pipeline-mgmt/app-registration/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    App registration
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1510,6 +1537,35 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1522,7 +1578,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/pipe-mgmt/" class="md-nav__link">
+      <a href="../pipe-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1589,7 +1645,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/" class="md-nav__link">
+      <a href="../../sdk-manual/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1610,7 +1666,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/android/" class="md-nav__link">
+      <a href="../../sdk-manual/android/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1631,7 +1687,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/swift/" class="md-nav__link">
+      <a href="../../sdk-manual/swift/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1652,7 +1708,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/web/" class="md-nav__link">
+      <a href="../../sdk-manual/web/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1673,7 +1729,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/flutter/" class="md-nav__link">
+      <a href="../../sdk-manual/flutter/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1694,7 +1750,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/react-native/" class="md-nav__link">
+      <a href="../../sdk-manual/react-native/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1715,7 +1771,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/wechat/" class="md-nav__link">
+      <a href="../../sdk-manual/wechat/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1736,7 +1792,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/http-api/" class="md-nav__link">
+      <a href="../../sdk-manual/http-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1757,7 +1813,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/user-identifier/" class="md-nav__link">
+      <a href="../../sdk-manual/user-identifier/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1778,7 +1834,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/migrate-from-third-party-sdks/" class="md-nav__link">
+      <a href="../../sdk-manual/migrate-from-third-party-sdks/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1845,7 +1901,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/" class="md-nav__link">
+      <a href="../../analytics/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1904,7 +1960,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/dashboard/" class="md-nav__link">
+      <a href="../../analytics/dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1925,7 +1981,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/dashboard/acquisition/" class="md-nav__link">
+      <a href="../../analytics/dashboard/acquisition/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1946,7 +2002,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/dashboard/engagement/" class="md-nav__link">
+      <a href="../../analytics/dashboard/engagement/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1967,7 +2023,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/dashboard/retention/" class="md-nav__link">
+      <a href="../../analytics/dashboard/retention/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1988,7 +2044,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/dashboard/device/" class="md-nav__link">
+      <a href="../../analytics/dashboard/device/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2009,7 +2065,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/dashboard/details/" class="md-nav__link">
+      <a href="../../analytics/dashboard/details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2030,7 +2086,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/dashboard/custom-analysis/" class="md-nav__link">
+      <a href="../../analytics/dashboard/custom-analysis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2097,7 +2153,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/explore/" class="md-nav__link">
+      <a href="../../analytics/explore/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2118,7 +2174,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/explore/event/" class="md-nav__link">
+      <a href="../../analytics/explore/event/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2139,7 +2195,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/explore/funnel/" class="md-nav__link">
+      <a href="../../analytics/explore/funnel/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2160,7 +2216,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/explore/path/" class="md-nav__link">
+      <a href="../../analytics/explore/path/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2181,7 +2237,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/explore/retention/" class="md-nav__link">
+      <a href="../../analytics/explore/retention/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2202,7 +2258,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/explore/attribution/" class="md-nav__link">
+      <a href="../../analytics/explore/attribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2269,7 +2325,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/analyzes/" class="md-nav__link">
+      <a href="../../analytics/analyzes/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2336,7 +2392,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/data-mgmt/" class="md-nav__link">
+      <a href="../../analytics/data-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2357,7 +2413,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/data-mgmt/metadata-mgmt/" class="md-nav__link">
+      <a href="../../analytics/data-mgmt/metadata-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2378,7 +2434,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../analytics/data-mgmt/traffic-source/" class="md-nav__link">
+      <a href="../../analytics/data-mgmt/traffic-source/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2415,7 +2471,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../identity-mgmt/" class="md-nav__link">
+      <a href="../../identity-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2436,7 +2492,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../upgrade/" class="md-nav__link">
+      <a href="../../upgrade/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2495,7 +2551,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../resources/aws-china-prerequisites/" class="md-nav__link">
+      <a href="../../resources/aws-china-prerequisites/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2516,7 +2572,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../resources/upload-ssl-certificate/" class="md-nav__link">
+      <a href="../../resources/upload-ssl-certificate/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2545,7 +2601,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/" class="md-nav__link">
+      <a href="../../faq/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2566,7 +2622,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
+      <a href="../../troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2587,7 +2643,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../uninstall/" class="md-nav__link">
+      <a href="../../uninstall/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2605,8 +2661,6 @@
                 
   
   
-    
-  
   
   
     
@@ -2616,11 +2670,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_16" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_16" >
         
           
           <label class="md-nav__link" for="__nav_1_16" id="__nav_1_16_label" tabindex="0">
@@ -2634,7 +2688,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_16_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_16_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_16">
             <span class="md-nav__icon md-icon"></span>
             Developer guide
@@ -2645,17 +2699,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../source/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2664,7 +2711,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -2685,7 +2731,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../revisions/" class="md-nav__link">
+      <a href="../../revisions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2706,7 +2752,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../notices/" class="md-nav__link">
+      <a href="../../notices/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2764,6 +2810,25 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -2781,9 +2846,32 @@
   
 
 
-  <h1>Source code</h1>
-
-<p>Visit our <a href="https://github.com/awslabs/clickstream-analytics-on-aws">GitHub repository</a> to download the source code for this solution. The Clickstream Analytics on AWS template is generated using the <a href="http://aws.amazon.com/cdk/">AWS Cloud Development Kit (CDK)</a>. Refer to the <a href="https://github.com/awslabs/clickstream-analytics-on-aws/blob/main/README.md">README.md</a> file for additional information.</p>
+<h1 id="app-registration">App registration</h1>
+<p>Once the data pipeline transitions to an <code>Active</code> state, it's necessary to register your application(s) with the pipeline to enable the reception of clickstream data. After the application is added, you can integrate the SDK into your application to send data to the pipeline. Below, you'll find the steps for registering an application to a data pipeline.</p>
+<h2 id="steps">Steps</h2>
+<ol>
+<li>Log into <strong>Clickstream Analytics on AWS Console</strong>.</li>
+<li>In the left navigation pane, choose <strong>Projects</strong>, then select a project you want to register app, click its title, and it will bring you to the project page.</li>
+<li>Choose <strong>+ Add application</strong> to start adding application to the pipeline.</li>
+<li>
+<p>Complete the form by filling in the following fields:</p>
+<ul>
+<li>App name: Provide a name for your app.</li>
+<li>App ID: The system will generate one ID based on the name, which you can customize it if needed.</li>
+<li>App reporting time zone: Specify a reporting time zone for your app; this time zone is used by the preset dashboard to calculate daily metrics. </li>
+<li>Description: Provide a description for your app.</li>
+<li>Android package name: Provide a package name if your app has an Android client.</li>
+<li>App Bundle ID: Provide the bundle ID if your app has an iOS client.</li>
+</ul>
+</li>
+<li>
+<p>Choose <strong>Register App &amp; Generate SDK Instruction</strong>, and wait for the registration to be completed.</p>
+</li>
+<li>
+<p>You should now see tabs for SDK integration for different platforms. Click on the relevant tab to view detailed instructions on adding the SDK to your application. Follow the provided steps to integrate the SDK. For certain platforms, you can click the <strong>Download the config json file</strong> button to obtain the configuration file.</p>
+</li>
+</ol>
+<p>The pipeline update with the newly added application may take approximately 3 to 5 minutes. Once the pipeline status returns to <code>Active</code>, it is ready to receive data from your application.</p>
 
 
 
@@ -2837,10 +2925,10 @@
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.3220b9d7.min.js"></script>
+      <script src="../../assets/javascripts/bundle.3220b9d7.min.js"></script>
       
     
   <script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
