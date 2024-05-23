@@ -172,7 +172,7 @@ Taking Redshift serverless as an example of data sharing, follow these operation
     SELECT CURRENT_USER;
     SELECT * FROM "<new database name>"."<schema>"."event_v2" limit 1;
     ```
-    Replace `<new database name>` with the database name in the consumer Redshift (it can be different from the original database name), replace `<source namespace id>` with the producer Redshift serverless namespace ID, and replace `<data api role name>` with with the name of Data Api Role, which can be obtained from the output **RedshiftDataApiRoleArn** of the Reporting stack.
+    Replace `<new database name>` with the database name in the consumer Redshift (it can be different from the original database name), replace `<source namespace id>` with the producer Redshift serverless namespace ID, and replace `<data api role name>` with the name of Data Api Role, which can be obtained from the output **RedshiftDataApiRoleArn** of the Reporting stack.
 4. Create a new secret for the BI user in Secrets Manager, specifying the value as plaintext like below:
    ```json
    {"username":"bi_user","password":"<strong password>"}
