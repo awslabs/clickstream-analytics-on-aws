@@ -1731,8 +1731,8 @@ export async function warmupRedshift(pipeline: IPipeline, appId: string, execute
   const queryId = await waitExecuteWarmupStatement(
     redshiftData,
     workgroupName,
-    redshiftDatabaseName,
-    `select * from ${appId}.${EVENT_USER_VIEW} limit 1`,
+    'dev',
+    `select * from ${redshiftDatabaseName}.${appId}.${EVENT_USER_VIEW} limit 1`,
     executeId,
   );
   return queryId;
