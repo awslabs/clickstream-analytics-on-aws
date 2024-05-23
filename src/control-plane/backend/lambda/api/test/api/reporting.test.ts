@@ -2338,9 +2338,9 @@ describe('reporting test', () => {
     expect(redshiftClientMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
     expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
-      Sql: `select * from app1.${EVENT_USER_VIEW} limit 1`,
+      Sql: `select * from mock-database-name.app1.${EVENT_USER_VIEW} limit 1`,
       WorkgroupName: 'redshift-workgroup-1',
-      Database: 'mock-database-name',
+      Database: 'dev',
     });
   });
 
