@@ -162,12 +162,17 @@ Taking Redshift serverless as an example of data sharing, follow these operation
     GRANT USAGE ON SCHEMA "<new database name>"."<schema>" TO bi_user;
     GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO bi_user;
 
+    -- Grant permission to data api role
+    GRANT USAGE ON DATABASE "<new database name>" TO "IAMR:<data api role name>";
+    GRANT USAGE ON SCHEMA "<new database name>"."<schema>" TO "IAMR:<data api role name>";
+    GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO "IAMR:<data api role name>";
+
     -- Test bi_user permission (optional)
     SET SESSION AUTHORIZATION bi_user;
     SELECT CURRENT_USER;
     SELECT * FROM "<new database name>"."<schema>"."event_v2" limit 1;
     ```
-    Replace `<new database name>` with the database name in the consumer Redshift (it can be different from the original database name), and `<source namespace id>` with the producer Redshift serverless namespace ID.
+    Replace `<new database name>` with the database name in the consumer Redshift (it can be different from the original database name), replace `<source namespace id>` with the producer Redshift serverless namespace ID, and replace `<data api role name>` with with the name of Data Api Role, which can be obtained from the output **RedshiftDataApiRoleArn** of the Reporting stack.
 4. Create a new secret for the BI user in Secrets Manager, specifying the value as plaintext like below:
    ```json
    {"username":"bi_user","password":"<strong password>"}

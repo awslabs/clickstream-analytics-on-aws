@@ -161,12 +161,17 @@ Redshift 支持[跨集群共享数据][redshift-share-data]，这样您就可以
     GRANT USAGE ON SCHEMA "<new database name>"."<schema>" TO bi_user;
     GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO bi_user;
 
+    -- 给Data api role赋予权限
+    GRANT USAGE ON DATABASE "<new database name>" TO "IAMR:<data api role name>";
+    GRANT USAGE ON SCHEMA "<new database name>"."<schema>" TO "IAMR:<data api role name>";
+    GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO "IAMR:<data api role name>";
+
     -- 测试 bi_user 权限 (可选)
     SET SESSION AUTHORIZATION bi_user;
     SELECT CURRENT_USER;
     SELECT * FROM "<new database name>"."<schema>"."event_v2" limit 1;
     ```
-    将 `<new database name>` 替换为消费者 Redshift 中的数据库名称(可以与原始数据库名称不同)，将 `<source namespace id>` 替换为生产者 Redshift 无服务器命名空间 ID。
+    将 `<new database name>` 替换为消费者 Redshift 中的数据库名称(可以与原始数据库名称不同)，将 `<source namespace id>` 替换为生产者 Redshift 无服务器命名空间 ID，将`<data api role name>`替换为Data Api Role的名称，这个值可以从Reporting堆栈的输出**RedshiftDataApiRoleArn**获得。
 4. 在 Secrets Manager 中为 BI 用户创建一个新的机密，将值指定为纯文本，如下所示：
    ```json
    {"username":"bi_user","password":"<strong password>"}
