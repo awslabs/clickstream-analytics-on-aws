@@ -5,7 +5,7 @@ Attribution analysis is an analytics technique to assign credit to the touchpoin
 Attributions analysis are commonly used when analyzing the contribution of specific touchpoints, for example:
 
 - Identify the most important promotion slots within an app/website in terms of their contribution to a purchase goal;
-- Identify the most important traffic channels for an app/website based on the contribution to a conversion goal;
+- Identify the most important traffic channels for an app/website based on the contribution to a conversion goal
 
 ## Key concepts
 
