@@ -12,10 +12,12 @@
  */
 
 package software.aws.solution.clickstream.common;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Cache<T> {
+public class Cache<T> implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final Map<String, T> dataCached;
     private final int size;
 

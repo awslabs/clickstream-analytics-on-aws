@@ -23,26 +23,44 @@ import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.util.OutputTag;
+import software.aws.solution.clickstream.common.ClickstreamEventParser;
+import software.aws.solution.clickstream.common.EventParser;
+import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.function.ExplodeDataFlatMapFunction;
 import software.aws.solution.clickstream.function.RouteProcessFunction;
 import software.aws.solution.clickstream.function.TransformDataMapFunction;
+import software.aws.solution.clickstream.function.TransformEventFlatMapFunctionV2;
+import software.aws.solution.clickstream.plugin.enrich.ClickstreamEventEnrichment;
+import software.aws.solution.clickstream.plugin.enrich.IPEnrichmentV2;
+import software.aws.solution.clickstream.plugin.enrich.UAEnrichmentV2;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class StreamingJob {
+    public static final String TMP_GEO_LITE_2_CITY_MMDB = "/tmp/GeoLite2-City.mmdb";
     private final StreamSourceAndSinkProvider streamProvider;
     private final ApplicationParameters props;
     private final HashMap<String, Sink<String>> appSinkMap = new HashMap<>();
     private final ArrayList<String> appIds = new ArrayList<>();
     private final StreamExecutionEnvironment env;
+    private final EventParser eventParser;
 
-    public StreamingJob(final StreamExecutionEnvironment env, final StreamSourceAndSinkProvider streamSourceAndSinkProvider, final ApplicationParameters props) {
+    public StreamingJob(final StreamExecutionEnvironment env,
+                        final StreamSourceAndSinkProvider streamSourceAndSinkProvider,
+                        final ApplicationParameters props,
+                        final EventParser eventParser) {
         this.streamProvider = streamSourceAndSinkProvider;
         this.props = props;
         this.env = env;
+        this.eventParser = eventParser;
 
         log.info("Application properties: {}", this.props);
 
@@ -60,14 +78,57 @@ public class StreamingJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         ApplicationParameters props = ApplicationParameters.loadApplicationParameters(args, env instanceof LocalStreamEnvironment);
         StreamSourceAndSinkProvider streamSourceAndSinkProvider = new StreamSourceAndSinkProviderImpl(props);
-        StreamingJob job = new StreamingJob(env, streamSourceAndSinkProvider, props);
+
+        EventParser eventParser = getEventParser(props);
+        StreamingJob job = new StreamingJob(env, streamSourceAndSinkProvider, props, eventParser);
         if (job.executeStreamJob()) {
             env.execute("Clickstream application " + String.join("-", job.appIds));
         }
     }
 
+    static EventParser getEventParser(final ApplicationParameters props) throws IOException {
+        TransformConfig transformConfig = new TransformConfig();
+        transformConfig.setTrafficSourceEnrichmentDisabled(!props.isTrafficSourceEnrich());
+        transformConfig.setAppRuleConfig(getAppRuleConfig(props));
+        return ClickstreamEventParser.getInstance(transformConfig);
+    }
 
-    public boolean executeStreamJob() {
+    private static Map<String, RuleConfig> getAppRuleConfig(final ApplicationParameters props) throws IOException {
+        String s3Path = props.getAppRuleConfigPath();
+        String region = props.getRegion();
+        log.info("getAppRuleConfig rule config from s3: {}", s3Path);
+        List<String> appIds = props.getAppIdStreamList().stream().map(AppIdStream::getAppId).collect(Collectors.toList());
+        String categoryRuleFile ="traffic_source_category_rule_v1.json";
+        String channelRuleFile = "traffic_source_channel_rule_v1.json";
+
+        Map<String, RuleConfig> ruleConfigMap = new HashMap<>();
+        for (String appId : appIds) {
+            RuleConfig ruleConfig = new RuleConfig();
+            ruleConfig.setOptChannelRuleJson(getRuleConfig(appId, s3Path, channelRuleFile, region));
+            ruleConfig.setOptCategoryRuleJson(getRuleConfig(appId, s3Path, categoryRuleFile, region));
+            ruleConfigMap.put(appId, ruleConfig);
+        }
+        return ruleConfigMap;
+    }
+
+    private static String getRuleConfig(final String appId, final String s3PathInput, final String fileName, final String region) {
+        String s3Path = s3PathInput;
+        if (!s3Path.endsWith("/")) {
+            s3Path += "/";
+        }
+        String s3ObjectPath = s3Path + appId  + "/" +  fileName;
+        try {
+            log.info("Get rule config from s3: {}", s3ObjectPath);
+            String contentStr = Utils.getInstance().readS3TextFile(s3ObjectPath, region);
+            log.info("Rule config content.length: {}", contentStr.length());
+            return contentStr;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public boolean executeStreamJob() throws IOException {
         if (appIds.isEmpty()) {
             log.error("No appId is enabled, exit");
             return false;
@@ -80,7 +141,7 @@ public class StreamingJob {
         return true;
     }
 
-    private void runWithFlink(final DataStream<String> inputStream) {
+    private void runWithFlink(final DataStream<String> inputStream) throws IOException {
 
         RouteProcessFunction processFunction = new RouteProcessFunction(appIds);
         Map<String, OutputTag<JsonNode>> sideAppOutputTagMap = processFunction.getSideAppOutputTagMap();
@@ -99,6 +160,15 @@ public class StreamingJob {
     }
 
     private void transformAndSink(final String appId, final DataStream<JsonNode> inputStream,
+                                  final Sink<String> outKinesisSink) throws IOException {
+        if ("v2".equals(props.getTransformVersion())) {
+            transformAndSinkV2(appId, inputStream, outKinesisSink);
+        } else {
+            transformAndSinkV1(appId, inputStream, outKinesisSink);
+        }
+    }
+
+    private void transformAndSinkV1(final String appId, final DataStream<JsonNode> inputStream,
                                   final Sink<String> outKinesisSink) {
         String projectId = props.getProjectId();
         String bucketName = props.getDataBucketName();
@@ -110,6 +180,35 @@ public class StreamingJob {
         DataStream<String> transformedData = explodedData.map(new TransformDataMapFunction(appId, projectId, bucketName, geoFileKey, region))
                 .name("TransformDataMapFunction" + appId);
         transformedData.sinkTo(outKinesisSink).name(appId);
+    }
+
+    private void transformAndSinkV2(final String appId, final DataStream<JsonNode> inputStream,
+                                  final Sink<String> outKinesisSink) throws IOException {
+        String projectId = props.getProjectId();
+        log.info("transformAndSinkV2 appId: {}", appId);
+        DataStream<String> transformedData = inputStream.flatMap(
+                new TransformEventFlatMapFunctionV2(projectId, appId, eventParser, getEnrichments())).name("TransformEventFlatMapFunctionV2-" + appId);
+        transformedData.sinkTo(outKinesisSink).name(appId);
+    }
+
+    private List<ClickstreamEventEnrichment> getEnrichments() throws IOException {
+        String bucketName = this.props.getDataBucketName();
+        String geoFileKey = this.props.getGeoFileKey();
+        String region = this.props.getRegion();
+
+        List<ClickstreamEventEnrichment> enrichments = new ArrayList<>();
+        if (this.props.isIpEnrich()) {
+            File dbFile = new File(TMP_GEO_LITE_2_CITY_MMDB);
+            if (!dbFile.exists()) {
+                dbFile = Utils.getInstance().dowloadS3File(bucketName, geoFileKey, region, TMP_GEO_LITE_2_CITY_MMDB);
+            }
+           enrichments.add(IPEnrichmentV2.getInstance(dbFile));
+        }
+        if (this.props.isUaEnrich()) {
+            enrichments.add(new UAEnrichmentV2());
+        }
+        return enrichments;
+
     }
 
 }

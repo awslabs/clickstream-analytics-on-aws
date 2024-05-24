@@ -38,6 +38,7 @@ import static software.aws.solution.clickstream.common.Util.deCodeUri;
 
 @Slf4j
 public final class GTMEventParser extends BaseEventParser {
+    private static final long serialVersionUID = 1L;
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
     private static GTMEventParser instance;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

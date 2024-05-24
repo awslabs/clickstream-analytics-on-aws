@@ -104,6 +104,9 @@ dependencies {
     // test related
     testImplementation("org.assertj:assertj-core:$assertJVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+
+    // /tmp/etl-common/lib/etl-common-1.2.0.jar
+    implementation files("/tmp/etl-common/lib/etl-common-${projectVersion}.jar")
 }
 
 test {

@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.zip.GZIPInputStream;
 
@@ -88,9 +90,16 @@ public final class Utils {
     }
 
     public String readS3TextFile(final String s3Path, final String region) throws IOException {
-        String bucketName = s3Path.split("/")[2];
-        String key = s3Path.substring(s3Path.indexOf(bucketName) + bucketName.length() + 1);
-        return readS3TextFile(bucketName, key, region);
+        if (s3Path.startsWith("s3://")) {
+            String bucketName = s3Path.split("/")[2];
+            String key = s3Path.substring(s3Path.indexOf(bucketName) + bucketName.length() + 1);
+            return readS3TextFile(bucketName, key, region);
+        }
+        return readLocalTextFile(s3Path);
+    }
+
+    public String readLocalTextFile(final String fileName) throws IOException {
+        return Files.readString(Path.of(fileName), StandardCharsets.UTF_8);
     }
 
     public String readS3TextFile(final String bucket, final String key, final String awsRegion) throws IOException {
@@ -113,6 +122,7 @@ public final class Utils {
 
     public byte[] readS3BinaryFile(final String bucket, final String key, final String awsRegion) throws IOException {
         // for test local, set bucket to "_" and key to local file
+        log.info("readS3BinaryFile bucket: {}, key: {}", bucket, key);
         if ("_".equals(bucket)) {
             File localfile = new File(key);
             return IOUtils.toByteArray(localfile.toURI());
@@ -124,6 +134,19 @@ public final class Utils {
             log.error(e.getMessage());
             throw e;
         }
+    }
+
+    public File dowloadS3File(final String bucket, final String key, final String awsRegion, final String localPath) {
+        File file = new File(localPath);
+        try {
+            byte[] bytes = Utils.getInstance().readS3BinaryFile(bucket, key, awsRegion);
+            Files.write(file.toPath(), bytes);
+            return file;
+        } catch (IOException e) {
+            log.error("Failed to download file from S3: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+
     }
 
     public static long getCurrentTimeMillis() {

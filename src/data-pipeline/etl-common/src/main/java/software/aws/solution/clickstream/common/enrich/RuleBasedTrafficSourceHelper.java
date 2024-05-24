@@ -115,14 +115,14 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         try {
             this.categoryListEvaluator = CategoryListEvaluator.fromJson(categoryRuleJson);
         } catch (JsonProcessingException e) {
-            log.error("Failed to load category or channel rules categoryRuleJson: {}, error: {}", categoryRuleJson, Util.getStackTrace(e));
+            log.error("Failed to load category rules categoryRuleJson: {}, error: {}", categoryRuleJson, Util.getStackTrace(e));
             throw new ExtractDataException(e);
         }
 
         try {
             this.channelListEvaluator = ChannelListEvaluator.fromJson(channelRuleJson);
         } catch (JsonProcessingException e) {
-            log.error("Failed to load category or channel rules  channelRuleJson: {}, error: {}", channelRuleJson, Util.getStackTrace(e));
+            log.error("Failed to load channel rules channelRuleJson: {}, error: {}", channelRuleJson, Util.getStackTrace(e));
             throw new ExtractDataException(e);
         }
     }

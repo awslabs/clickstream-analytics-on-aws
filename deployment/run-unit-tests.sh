@@ -27,5 +27,5 @@ docker run -i --rm -v `pwd`/src/data-pipeline/:/data --workdir /data \
   public.ecr.aws/docker/library/gradle:7.6-jdk17 sh -c 'cd /data/etl-common/ && gradle clean test jacocoAggregatedReport install && cd /data/spark-etl/ && gradle clean test jacocoAggregatedReport'
 
 # flink-etl
-docker run -i --rm -v `pwd`/src/streaming-ingestion/flink-etl/:/data --workdir /data \
-  public.ecr.aws/docker/library/gradle:7.6-jdk11 gradle clean build jacocoAggregatedReport
+docker run -i --rm -v `pwd`/src/:/src --workdir /src \
+  public.ecr.aws/docker/library/gradle:7.6-jdk11 sh -c 'cd /src/data-pipeline/etl-common/ && gradle clean test jacocoAggregatedReport install && cd /src/streaming-ingestion/flink-etl/ && gradle clean build jacocoAggregatedReport'
