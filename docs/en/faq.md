@@ -24,7 +24,7 @@ If the data pipeline meets the below criteria, Redshift serverless is preferred.
 - Redshift is not used for streaming ingestion.
 - The estimated cost is lower than the provisioned cluster.
 
-### I already enable data modeling on Redshift, so why can't I see the schema and tables created by this solution in the Redshift query editor?
+### I already enable data modeling on Redshift, why can't I see the schema and tables created by this solution in the Redshift query editor?
 
 This solution creates a separate database and schema within your Amazon Redshift cluster for storing and processing clickstream events. By default, the schema, tables, and views are only owned by the user who created them and are not visible to other users who log into the Redshift [query editor][redshift-query-editor].
 
@@ -190,7 +190,7 @@ Taking Redshift serverless as an example of data sharing, follow these operation
 
 ### Can I use other SDK to send data to the pipeline created by this solution
 
-Yes, you can. The solution support users using third-party SDK to send data to the pipeline. Note that, if you want to enable data processing and modeling module when using a third-party SDK to send data, you will need to provide an transformation plugin to map third-party SDK's data structure to solution data schema. Please refer to [Custom plugin](./pipeline-mgmt/data-processing/configure-plugin.md) for more details.
+Yes, you can. The solution support users using third-party SDK to send data to the pipeline. Note that, if you want to enable data processing and modeling module when using a third-party SDK to send data, you will need to provide a transformation plugin to map third-party SDK's data structure to solution data schema. Please refer to [Custom plugin](./pipeline-mgmt/data-processing/configure-plugin.md) for more details.
 
 [monitoring-dashboard]: ./pipeline-mgmt/pipe-mgmt.md#monitoring-and-alarms
 [redshift-query-editor]: https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html
