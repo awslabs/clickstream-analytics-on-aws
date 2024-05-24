@@ -56,8 +56,8 @@ extra:
       lang: zh
   aws_bucket: solutions-reference
   aws_cn_bucket: aws-gcr-solutions
-  aws_version: latest
-  aws_cn_version: latest/cn
+  aws_version: v1.1.5
+  aws_cn_version: v1.1.5-202403070738-4a220005/cn
   aws_prefix: clickstream-analytics-on-aws
   aws_cn_prefix: clickstream-analytics-on-aws
   solution: clickstream-analytics-on-aws
