@@ -128,7 +128,7 @@ BEGIN
       from {{database_name}}.{{schema}}.event_v2 e
       left join {{database_name}}.{{schema}}.session s 
         on e.user_pseudo_id = s.user_pseudo_id and e.session_id = s.session_id
-      where e.event_timestamp >= ''' || p_start_time || ''' and e.event_timestamp <= ''' || p_start_time || ''''
+      where e.event_timestamp >= ''' || p_start_time || ''' and e.event_timestamp <= ''' || p_end_time || ''''
       ;
 
     call {{database_name}}.{{schema}}.sp_clickstream_log('clickstream_event_base_view', 'info', 'refresh with custom time range:' || p_start_time || ' - ' || p_end_time);
