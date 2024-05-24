@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] - 2024-05-24
+
+### Updated
+
+* optimize data schema for improving query performance
+* support out-of-box traffic source analysis
+* new out-of-box dashboard look
+* out-of-box dashboard supports timezone
+* explore query improvements
+* allow creating an internal load balancer as the ingestion endpoint
+* improve stability of loading data into Redshift
+* React Native SDK support
+
+### Fixed
+
+* inconsistent pipeline status in edge cases
+
 ## [1.1.5] - 2024-03-08
 
 ### Updated

@@ -6,7 +6,8 @@
 
 !!! info "Important"
     The {{ solution_name }} console is served via CloudFront distribution which is considered as an Internet information service.
-    If you are deploying the solution in **AWS China Regions**, the domain must have a valid [ICP Recordal][icp].
+
+    If deploying the solution in **AWS China Regions**, a valid [ICP Recordal][icp] is required. Check [this documentation][china-prerequisites] for additional prerequisites.
 
 * A domain. You will use this domain to access the {{ solution_name }} console. This is required for AWS China Regions, and is optional for AWS Regions.
 * An SSL certificate in AWS IAM. The SSL must be associated with the given domain. Follow [this guide](../resources/upload-ssl-certificate.md) to upload SSL certificate to IAM. This is required for AWS China Regions only.
@@ -181,9 +182,10 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
 
         | Parameter  | Default          | Description                                                  |
         | ---------- | ---------------- | ------------------------------------------------------------ |
-        | OIDCClientId | `<Requires input>` | OpenID Connect client Id. |
-        | OIDCProvider  | `<Requires input>` | OpenID Connect provider issuer. The issuer must begin with `https://` |
-        | Email | `<Requires input>` | Specify the email of the Administrator. |
+        {% 
+          include-markdown "./oidc-parameters.md"
+          comments=false
+        %}
 
         !!! info "Important"
             {%
@@ -192,18 +194,17 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
 
     * If you are launching the solution with custom domain in AWS Regions, this solution has the following additional parameters:
 
-        | Parameter  | Default          | Description                                                  |
-        | ---------- | ---------------- | ------------------------------------------------------------ |
-        | Hosted Zone ID | `<Requires input>` | Choose the public hosted zone ID of Amazon Route 53. |
-        | Hosted Zone Name | `<Requires input>` | The domain name of the public hosted zone, for example, `example.com`. |
-        | Record Name | `<Requires input>` | The sub name (as known as record name in R53) of the domain name of console. For example, enter `clickstream` if you want to use custom domain `clickstream.example.com` for the console. |
+        {% 
+          include-markdown "./domain-parameters.md"
+          comments=false
+        %}
 
     * If you are launching the solution in AWS China Regions, this solution has the following additional parameters:
 
         | Parameter  | Default          | Description                                                  |
         | ---------- | ---------------- | ------------------------------------------------------------ |
-        | Domain | `<Requires input>` | Custom domain for {{ solution_name }} console. Do NOT add `http(s)` prefix. |
-        | IamCertificateID | `<Requires input>` | The ID of the SSL certificate in IAM. The ID is composed of 21 characters of capital letters and digits. Use the [`list-server-certificates`][iam-list-cert]{target='_blank'} command to retrieve the ID. |
+        | Domain Name (`Domain`) | `<Requires input>` | Custom domain for {{ solution_name }} console. Do NOT add `http(s)` prefix. |
+        | Certificate Id (`IamCertificateID`) | `<Requires input>` | The ID of the SSL certificate in IAM. The ID is composed of 21 characters of capital letters and digits. Use the [`list-server-certificates`][iam-list-cert]{target='_blank'} command to retrieve the ID. |
 
 6. Choose **Next**.
 7. On the **Configure stack options** page, choose **Next**.
@@ -271,3 +272,4 @@ Once you have logged into the {{ solution_name }} console, you can start to [cre
 [cloudformation]: https://console.aws.amazon.com/cloudformation/
 [create-project]: ../getting-started/1.create-project.md
 [iam-list-cert]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html#list-server-certificates
+[china-prerequisites]: ../resources/aws-china-prerequisites.md

@@ -5,7 +5,7 @@ Retention rate is a common metric used to assess the user stickiness for an app 
 Retention analysis are commonly used to understand how well your app or website is doing in terms of retaining users, for example:
 
 - Calculate new user retention rate to measure the effectiveness of traffic channel;
-- Calculate the active users retention rate to measure teh effectiveness for a promotion campaign
+- Calculate the active users retention rate to measure teh effectiveness for a promotion campaign;
 - Compare the repurchase rate for different groups of users to identify the most-value customers.
 
 ## Key concept:
@@ -17,7 +17,7 @@ Retention analysis are commonly used to understand how well your app or website 
 
         The two associated parameter must both have value, and the value types must be consistent.
 
-- **Retention Rate**:  retention rate % = the number of users performed the specified starting event on the start date (or week, or month depends on the granularity selection) / the number of the same users performed the specified returning event on the the return date (or week, or month) 
+- **Retention Rate**:  retention rate % = the number of users performed the specified starting event on the start date (or week, or month depends on the granularity selection) / the number of the same users performed the specified returning event on the return date (or week, or month) 
 
 
 
@@ -25,7 +25,7 @@ Retention analysis are commonly used to understand how well your app or website 
 
 1. Select a **Start** event, you can add filter to the event by clicking the :material-filter-outline:{ .filter } icon.
 2. Select a **Revisit** event, you can add filter to the event by clicking the :material-filter-outline:{ .filter } icon.
-3. If need to associate parameter, you can toggle on **Associate parameter**, then select parameter for both starting event and return event.
+3. If you need to associate parameter, you can toggle on **Associate parameter**, then select parameter for both starting event and return event.
 4. Repeat above step to add more metric if needed.
 5. If needed, configure global filter by selecting event parameter or user attributes. Similar to event filter, you can add multiple global filters and configure the filter relationship.
 6. If needed, configure grouping by selecting an event parameter or user attribute
@@ -48,7 +48,7 @@ Retention analysis are commonly used to understand how well your app or website 
 2. Choose `_first_open` as the start event.
 3. Choose `_app_start` as the return event.
 4. Configure a global filter in the right **Filters** area:
-    - Choose `other.platform` as the filter property.
+    - Choose `Event preset` / `Platform` as the filter property.
     - Operation: `=`
     - Value: `Android`
 5. In the right **Attribute Grouping** area, configure grouping by selecting `app_info.instal_source`.

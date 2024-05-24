@@ -76,25 +76,38 @@ ClickstreamAnalytics.record({ name: 'button_click' });
 ```
 
 #### Add global attribute
-1. Add global attributes when initializing the SDK
-   ```typescript
-   ClickstreamAnalytics.init({
-      appId: "your appId",
-      endpoint: "https://example.com/collect",
-      globalAttributes:{
-        _traffic_source_medium: "Search engine",
-        _traffic_source_name: "Summer promotion",
-      }
-   });
-   ```
+1. Add global attributes when initializing the SDK.
 
-2. Add global attributes after initializing the SDK
-   ``` typescript
-   ClickstreamAnalytics.setGlobalAttributes({
-     _traffic_source_medium: "Search engine",
-     level: 10,
-   });
-   ```
+    The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
+   
+    ```typescript
+    import { ClickstreamAnalytics, Attr } from '@aws/clickstream-web';
+    
+    ClickstreamAnalytics.init({
+       appId: "your appId",
+       endpoint: "https://example.com/collect",
+       globalAttributes:{
+         [Attr.TRAFFIC_SOURCE_SOURCE]: 'amazon',
+         [Attr.TRAFFIC_SOURCE_MEDIUM]: 'cpc',
+         [Attr.TRAFFIC_SOURCE_CAMPAIGN]: 'summer_promotion',
+         [Attr.TRAFFIC_SOURCE_CAMPAIGN_ID]: 'summer_promotion_01',
+         [Attr.TRAFFIC_SOURCE_TERM]: 'running_shoes',
+         [Attr.TRAFFIC_SOURCE_CONTENT]: 'banner_ad_1',
+         [Attr.TRAFFIC_SOURCE_CLID]: 'amazon_ad_123',
+         [Attr.TRAFFIC_SOURCE_CLID_PLATFORM]: 'amazon_ads',
+       }
+    });
+    ```
+
+2. Add global attributes after initializing the SDK.
+    ``` typescript
+    import { ClickstreamAnalytics, Attr } from '@aws/clickstream-web';
+    
+    ClickstreamAnalytics.setGlobalAttributes({
+      [Attr.TRAFFIC_SOURCE_MEDIUM]: "Search engine",
+      level: 10,
+    });
+    ```
 
 It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events that occur after it is set, you also can remove a global attribute by setting its value to `null`.
 
@@ -119,7 +132,7 @@ ClickstreamAnalytics.setUserAttributes({
 });
 ```
 
-Current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same API `ClickstreamAnalytics.setUserAttributes()` to update the current user's attribute when it changes.
+Current logged-in user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same API `ClickstreamAnalytics.setUserAttributes()` to update the current user's attribute when it changes.
 
 !!! info "Important"
 
@@ -130,7 +143,7 @@ Current login user's attributes will be cached in localStorage, so the next time
 You can add the following code to log an event with an item.
 
 ```typescript
-import { ClickstreamAnalytics, Item } from '@aws/clickstream-web';
+import { ClickstreamAnalytics, Item, Attr } from '@aws/clickstream-web';
 
 const itemBook: Item = {
   id: '123',
@@ -143,7 +156,8 @@ const itemBook: Item = {
 ClickstreamAnalytics.record({
   name: 'view_item',
   attributes: {
-    currency: 'USD',
+    [Attr.CURRENCY]: 'USD',
+    [Attr.VALUE]: 99,
     event_category: 'recommended',
   },
   items: [itemBook],
@@ -188,10 +202,14 @@ ClickstreamAnalytics.init({
    isTrackClickEvents: true,
    isTrackSearchEvents: true,
    isTrackScrollEvents: true,
+   isTrackPageLoadEvents: true,
+   isTrackAppStartEvents: true,
+   isTrackAppEndEvents: true,
    pageType: PageType.SPA,
    isLogEvents: false,
    authCookie: "your auth cookie",
    sessionTimeoutDuration: 1800000,
+   idleTimeoutDuration: 120000,
    searchKeyWords: ['product', 'class'],
    domainList: ['example1.com', 'example2.com'],
 });
@@ -199,23 +217,27 @@ ClickstreamAnalytics.init({
 
 Here is an explanation of each option:
 
-| Name                        | Required | Default value | Description                                                  |
-| --------------------------- | -------- | ------------- | ------------------------------------------------------------ |
-| appId                       | true     | --            | the app id of your application in control plane              |
-| endpoint                    | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server |
-| sendMode                    | false    | Immediate     | there are two ways for send events `Immediate` and `Batch`   |
-| sendEventsInterval          | false    | 5000          | event sending interval millisecond, works only in `Batch` mode |
-| isTrackPageViewEvents       | false    | true          | whether auto record page view events in browser              |
-| isTrackUserEngagementEvents | false    | true          | whether auto record user engagement events in browser        |
-| isTrackClickEvents          | false    | true          | whether auto record link click events in browser             |
-| isTrackSearchEvents         | false    | true          | whether auto record search result page events in browser     |
-| isTrackScrollEvents         | false    | true          | whether auto record page scroll events in browser            |
-| pageType                    | false    | SPA           | the website type, `SPA` for single page application, `multiPageApp` for multiple page application. This attribute works only when the value of attribute `isTrackPageViewEvents` is `true` |
-| isLogEvents                 | false    | false         | whether to print out event json in console for debugging     |
-| authCookie                  | false    | --            | your auth cookie for AWS application load balancer auth cookie |
-| sessionTimeoutDuration      | false    | 1800000       | the duration for session timeout milliseconds                |
-| searchKeyWords              | false    | --            | the customized Keywords for trigger the `_search` event, by default we detect `q`, `s`, `search`, `query` and `keyword` in query parameters |
-| domainList                  | false    | --            | if your website cross multiple domain, you can customize the domain list. The `_outbound` attribute of the `_click` event will be true when a link leads to a website that's not a part of your configured domain. |
+| Name                        | Required | Default value | Description                                                                                                                                                                                                                                                    |
+|-----------------------------|----------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| appId                       | true     | --            | the app id of your application in control plane                                                                                                                                                                                                                |
+| endpoint                    | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                                                                                                                                                                                    |
+| sendMode                    | false    | Immediate     | there are two ways for send events `Immediate` and `Batch`                                                                                                                                                                                                     |
+| sendEventsInterval          | false    | 5000          | event sending interval millisecond, works only in `Batch` mode                                                                                                                                                                                                 |
+| isTrackPageViewEvents       | false    | true          | whether auto record page view events in browser                                                                                                                                                                                                                |
+| isTrackUserEngagementEvents | false    | true          | whether auto record user engagement events in browser                                                                                                                                                                                                          |
+| isTrackClickEvents          | false    | true          | whether auto record link click events in browser                                                                                                                                                                                                               |
+| isTrackSearchEvents         | false    | true          | whether auto record search result page events in browser                                                                                                                                                                                                       |
+| isTrackScrollEvents         | false    | true          | whether auto record page scroll events in browser                                                                                                                                                                                                              |
+| isTrackPageLoadEvents       | false    | false         | whether auto record page load performance events in browser                                                                                                                                                                                                    |
+| isTrackAppStartEvents       | false    | false         | whether auto record app start events in browser when pages becomes visible                                                                                                                                                                                     |
+| isTrackAppEndEvents         | false    | false         | whether auto record app end events in browser when pages becomes invisible                                                                                                                                                                                     |
+| pageType                    | false    | SPA           | the website type, `SPA` for single page application, `multiPageApp` for multiple page application. This attribute works only when the value of attribute `isTrackPageViewEvents` is `true`                                                                     |
+| isLogEvents                 | false    | false         | whether to print out event json in console for debugging                                                                                                                                                                                                       |
+| authCookie                  | false    | --            | your auth cookie for AWS application load balancer auth cookie                                                                                                                                                                                                 |
+| sessionTimeoutDuration      | false    | 1800000       | the duration for session timeout milliseconds                                                                                                                                                                                                                  |
+| idleTimeoutDuration         | false    | 120000        | the maximum duration of user inactivity(no page scroll, mouse move, click event) before triggering an idle state, default is 120000 millisecond, Any idle duration exceeding this threshold will be removed in the user_engagement events on the current page. |
+| searchKeyWords              | false    | --            | the customized Keywords for trigger the `_search` event, by default we detect `q`, `s`, `search`, `query` and `keyword` in query parameters                                                                                                                    |
+| domainList                  | false    | --            | if your website cross multiple domain, you can customize the domain list. The `_outbound` attribute of the `_click` event will be true when a link leads to a website that's not a part of your configured domain.                                             |
 
 #### Configuration update
 
@@ -252,7 +274,7 @@ Clickstream Web SDK supports the following data types:
 | Data type | Range                       | Sample                 |
 |-----------|-----------------------------|------------------------|
 | number    | 5e-324~1.79e+308            | 12, 26854775808, 3.14  |
-| boolean   | true, false                  | true                   |
+| boolean   | true, false                 | true                   |
 | string    | max support 1024 characters | "clickstream"          |
 
 ### Naming rules
@@ -274,7 +296,7 @@ In order to improve the efficiency of querying and analysis, we apply limits to 
 | Length of event attribute name           | under 25 characters        | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
 | Attribute name invalid                   | --                         | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
 | Length of event attribute value          | under 100 characters       | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
-| Event attribute per event                | under 50 attributes        | 500 evnet attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
+| Event attribute per event                | under 50 attributes        | 500 event attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
 | User attribute number                    | under 25 attributes        | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
 | Length of User attribute name            | under 25 characters        | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
 | User attribute name invalid              | --                         | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
@@ -297,19 +319,20 @@ In order to improve the efficiency of querying and analysis, we apply limits to 
 
 ### Automatically collected events
 
-| Event name         | Triggered                                                                                                                                                                       | Event Attributes                                             |
-| ------------------ |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| ------------------------------------------------------------ |
-| _first_open        | the first time user launches the site in a browser                                                                                                                              |                                                              |
-| _session_start     | when a user first visit the site or a user returns to the website after 30 minutes of inactivity period, [Learn more](#session-definition)                                      | 1. _session_id <br>2. _session_start_timestamp               |
-| _page_view         | when new page is opens, [Learn more](#page-view-definition)                                                                                                                     | 1. _page_referrer<br/>2. _page_referrer_title<br>3. _entrances<br>4. _previous_timestamp<br>5. _engagement_time_msec |
-| _user_engagement   | when user navigates away from current webpage and the page is in focus for at least one second, [Learn more](#user-engagement-definition)                                       | 1._engagement_time_msec<br>                                  |
-| _app_start         | every time the browser goes to visible                                                                                                                                          | 1. _is_first_time(when it is the first `_app_start` event after the application starts, the value is `true`) |
-| _app_end           | every time the browser goes to invisible                                                                                                                                        |                                                              |
-| _profile_set       | when the `addUserAttributes()` or `setUserId()` API called                                                                                                                      |                                                              |
-| _scroll            | the first time a user reaches the bottom of each page (i.e., when a 90% vertical depth becomes visible)                                                                         | 1. _engagement_time_msec                                     |
-| _search            | each time a user performs a site search, indicated by the presence of a URL query parameter, by default we detect `q`, `s`, `search`, `query` and `keyword` in query parameters | 1. _search_key (the keyword name)<br>2. _search_term (the search content) |
-| _click             | each time a user clicks a link that leads away from the current domain (or configured domain list)                                                                              | 1. _link_classes (the content of `class` in tag `<a>` )<br>2. _link_domain (the domain of `herf` in tag `<a>` )<br>3. _link_id (the content of `id` in tag `<a>` )<br>4. _link_url (the content of `herf` in tag `<a>` )<br>5. _outbound (if the domain is not in configured domain list, the attribute value is `true`) |
-| _clickstream_error | event_name is invalid or user attribute is invalid                                                                                                                              | 1. _error_code <br>2. _error_message                         |
+| Event name         | Triggered                                                                                                                                                                                     | Event Attributes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _first_open        | the first time user launches the site in a browser                                                                                                                                            |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| _session_start     | when a user first visit the site or a user returns to the website after 30 minutes of inactivity period, [Learn more](#session-definition)                                                    | 1. _session_id <br>2. _session_start_timestamp                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| _page_view         | when new page is opens, [Learn more](#page-view-definition)                                                                                                                                   | 1. _page_referrer<br/>2. _page_referrer_title<br>3. _entrances<br>4. _previous_timestamp<br>5. _engagement_time_msec                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| _user_engagement   | when user navigates away from current webpage and the page is in focus for at least one second, [Learn more](#user-engagement-definition)                                                     | 1._engagement_time_msec<br>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| _app_start         | every time the browser goes to visible                                                                                                                                                        | 1. _is_first_time(when it is the first `_app_start` event after the application starts, the value is `true`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| _app_end           | every time the browser goes to invisible                                                                                                                                                      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| _profile_set       | when the `addUserAttributes()` or `setUserId()` API called                                                                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| _scroll            | the first time a user reaches the bottom of each page (i.e., when a 90% vertical depth becomes visible)                                                                                       | 1. _engagement_time_msec                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| _search            | each time a user performs a site search, indicated by the presence of a URL query parameter, by default we detect `q`, `s`, `search`, `query` and `keyword` in query parameters               | 1. _search_key (the keyword name)<br>2. _search_term (the search content)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| _click             | each time a user clicks a link that leads away from the current domain (or configured domain list)                                                                                            | 1. _link_classes (the content of `class` in tag `<a>` )<br>2. _link_domain (the domain of `herf` in tag `<a>` )<br>3. _link_id (the content of `id` in tag `<a>` )<br>4. _link_url (the content of `herf` in tag `<a>` )<br>5. _outbound (if the domain is not in configured domain list, the attribute value is `true`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| _page_load         | each time a new page loaded, and browser [PerformanceObserver](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceNavigationTiming/toJSON#examples) triggered `navigation` event.    | 1. duration<br>2. deliveryType<br>3. nextHopProtocol<br>4. renderBlockingStatus<br>5. startTime<br>6. redirectStart<br>7. redirectEnd<br>8. workerStart<br>9. fetchStart<br>10. domainLookupStart<br>11. domainLookupEnd<br>12. connectStart<br>13. secureConnectionStart<br>14. connectEnd<br>15. requestStart<br>16. firstInterimResponseStart<br>17. responseStart<br>18. responseEnd<br>19. transferSize<br>20. encodedBodySize<br>21. decodedBodySize<br>22. responseStatus<br>23. unloadEventStart<br>24. unloadEventEnd<br>25. domInteractive<br>26. domContentLoadedEventStart<br>27. domContentLoadedEventEnd<br>28. domComplete<br>29. loadEventStart<br>30. loadEventEnd<br>31. type<br>32. redirectCount<br>33. activationStart<br>34. criticalCHRestart<br>35. serverTiming<br>for more detail you can refer [PerformanceNavigationTiming](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceNavigationTiming) and [toJson](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceNavigationTiming/toJSON) Method |
+| _clickstream_error | event_name is invalid or user attribute is invalid                                                                                                                                            | 1. _error_code <br>2. _error_message                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ### Session definition
 
@@ -329,7 +352,7 @@ The `_session_start` event triggered when the website open for the first time, o
 
 In Clickstream Web SDK, we define the `_page_view` as an event that records a user's browsing path of page, when a page transition started, the `_page_view` event will be recorded when meet any of the following conditions:
 
-1. No page was previously set.
+ 1. No page was previously set.
 2. The new page title differs from the previous page title.
 3. The new page url differ from the previous page url.
 
@@ -352,7 +375,7 @@ We define that users leave the page in the following situations.
 3. When user click another browser tab or minimize the current browser window.
 4. When user close the website tab or close the browser application.
 
-**engagement_time_msec**: We calculate the milliseconds from when a page is visible to when the user leave the page.
+**engagement_time_msec**: We calculate the milliseconds from when the current page is visible to when the user leaves the current page excluding the idle time in between.
 
 ## Event attributes
 
@@ -451,19 +474,24 @@ All user attributes will be stored in `user` object, and all custom attributes a
 
 ### Event attributes
 
-| Attribute name           | Data type | Auto   track | Description                                                                                                                                                 |
-|--------------------------|-----------|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| _traffic_source_medium   | string    | false        | Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine. |
-| _traffic_source_name     | string    | false        | Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion.        |
-| _traffic_source_source   | string    | false        | Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu.        |
-| _session_id              | string    | true         | Added in all events.                                                                                                                                        |
-| _session_start_timestamp | number    | true         | Added in all events. The value is millisecond.                                                                                                              |
-| _session_duration        | number    | true         | Added in all events. The value is millisecond.                                                                                                              |
-| _session_number          | number    | true         | Added in all events.                                                                                                                                        |
-| _page_title              | string    | true         | Added in all events.                                                                                                                                        |
-| _page_url                | string    | true         | Added in all events.                                                                                                                                        |
-| _latest_referrer         | string    | true         | Added in all events. The last off-site url.                                                                                                                 |
-| _latest_referrer_host    | string    | true         | Added in all events. The last off-site domain name.                                                                                                         |
+| Attribute name                | Data type | Auto   track | Description                                                                                                                                                       |
+|-------------------------------|-----------|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _traffic_source_source        | String    | false        | Reserved for traffic source source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu        |
+| _traffic_source_medium        | String    | false        | Reserved for traffic source medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine |
+| _traffic_source_campaign      | String    | false        | Reserved for traffic source campaign. Use this attribute to store the campaign of your traffic source. Example: summer_sale, holiday_specials                     |
+| _traffic_source_campaign_id   | String    | false        | Reserved for traffic source campaign id. Use this attribute to store the campaign id of your traffic source. Example: campaign_1, campaign_2                      |
+| _traffic_source_term          | String    | false        | Reserved for traffic source term. Use this attribute to store the term of your traffic source. Example: running_shoes, fitness_tracker                            |
+| _traffic_source_content       | String    | false        | Reserved for traffic source content. Use this attribute to store the content of your traffic source. Example: banner_ad_1, text_ad_2                              |
+| _traffic_source_clid          | String    | false        | Reserved for traffic source clid. Use this attribute to store the clid of your traffic source. Example: amazon_ad_123, google_ad_456                              |
+| _traffic_source_clid_platform | String    | false        | Reserved for traffic source clid platform. Use this attribute to store the clid platform of your traffic source. Example: amazon_ads, google_ads                  |
+| _session_id                   | string    | true         | Added in all events.                                                                                                                                              |
+| _session_start_timestamp      | number    | true         | Added in all events. The value is millisecond.                                                                                                                    |
+| _session_duration             | number    | true         | Added in all events. The value is millisecond.                                                                                                                    |
+| _session_number               | number    | true         | Added in all events.                                                                                                                                              |
+| _page_title                   | string    | true         | Added in all events.                                                                                                                                              |
+| _page_url                     | string    | true         | Added in all events.                                                                                                                                              |
+| _latest_referrer              | string    | true         | Added in all events. The last off-site url.                                                                                                                       |
+| _latest_referrer_host         | string    | true         | Added in all events. The last off-site domain name.                                                                                                               |
 
 ### Item attributes
 
@@ -507,6 +535,9 @@ You can use the above preset item attributes, of course, you can also add custom
 ## Change log
 
 [GitHub Change log](https://github.com/awslabs/clickstream-web/releases)
+
+## Sample project
+Sample [Web Project](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/web) for SDK integration.
 
 ## Reference link
 

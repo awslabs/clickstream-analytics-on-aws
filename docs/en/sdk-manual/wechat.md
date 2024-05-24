@@ -74,7 +74,7 @@ ClickstreamAnalytics.setUserId("UserId");
 ClickstreamAnalytics.setUserId(null);
 ```
 
-Current login user's attributes will be cached in wxStorage.
+Current logged-in user's attributes will be cached in wxStorage.
 
 #### Record Event
 

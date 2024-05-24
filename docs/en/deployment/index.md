@@ -19,7 +19,7 @@ For more information about supported regions, see [Regional deployments](../plan
 
 ## Deployment in AWS China Regions
 
-AWS China Regions do not have Cognito User Pool. You must launch the solution with OpenID Connect.
+AWS China Regions do not have Cognito User Pool. You must launch the solution with OpenID Connect. Please check [those additional prerequisites][china-prerequisites] before your deployment.
 
 - [Launch with OpenID Connect][oidc]
 
@@ -32,3 +32,4 @@ AWS China Regions do not have Cognito User Pool. You must launch the solution wi
 [cognito]: ./with-cognito.md
 [oidc]: ./with-oidc.md
 [intranet]: ./within-vpc.md
+[china-prerequisites]: ../resources/aws-china-prerequisites.md

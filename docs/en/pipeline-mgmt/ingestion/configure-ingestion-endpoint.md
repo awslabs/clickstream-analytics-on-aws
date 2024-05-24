@@ -1,11 +1,13 @@
 # Ingestion endpoint settings
 The solution creates a web service as an ingestion endpoint to collect data sent from your SDKs. You can set below configurations for ingestion endpoint.
 
-* **Public Subnets**: select at least two existing VPC public subnets, and the Amazon Application Load Balancers (ALBs) will be deployed in these subnets.
+* **Network type**: specify the **scheme** of the application load balancer, choose **General** for **internet-facing** or **Private** for **internal**.
+
+* **Public Subnets** (only applicable to **General** network type): select at least two existing VPC public subnets, and the Amazon Application Load Balancers (ALBs) will be deployed in these subnets.
 
 * **Private Subnets**: select at least two existing VPC private subnets, and the EC2 instances running in ECS will be deployed in these subnets.
 
-    !!! tip "Tip"
+    !!! tip "Tip (only applicable to **General** network type)"
 
         The availability zones where the public subnets are located must be consistent with those of the private subnets.
 

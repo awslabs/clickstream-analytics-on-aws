@@ -73,17 +73,42 @@ analytics.record(name: "button_click");
 
 #### 添加全局属性
 
+1. 在初始化 SDK 时添加全局属性。
+
+    以下示例代码展示了如何在初始化 SDK 时添加 traffic source 相关字段作为全局属性。
+    ```dart
+    analytics.init({
+      appId: "your appId",
+      endpoint: "https://example.com/collect",
+      globalAttributes: {
+        Attr.TRAFFIC_SOURCE_SOURCE: "amazon",
+        Attr.TRAFFIC_SOURCE_MEDIUM: "cpc",
+        Attr.TRAFFIC_SOURCE_CAMPAIGN: "summer_promotion",
+        Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: "summer_promotion_01",
+        Attr.TRAFFIC_SOURCE_TERM: "running_shoes",
+        Attr.TRAFFIC_SOURCE_CONTENT: "banner_ad_1",
+        Attr.TRAFFIC_SOURCE_CLID: "amazon_ad_123",
+        Attr.TRAFFIC_SOURCE_CLID_PLATFORM: "amazon_ads",
+        Attr.APP_INSTALL_CHANNEL: "amazon_store"
+      }
+    });
+    ```
+
+2. 在初始化 SDK 后添加全局属性。
+    ```dart
+    analytics.addGlobalAttributes({
+      Attr.TRAFFIC_SOURCE_MEDIUM: "Search engine",
+      "level": 10
+    });
+    ```
+
+建议在初始化 SDK 时设置全局属性，设置后记录的所有事件都会包含全局属性。
+
+#### 删除全局属性
+
 ```dart
-analytics.addGlobalAttributes({
-  "_traffic_source_medium": "Search engine",
-  "_traffic_source_name": "Summer promotion",
-  "level": 10
-});
-// 删除全局属性
 analytics.deleteGlobalAttributes(["level"]);
 ```
-
-建议每次 SDK 初始化后设置全局属性，全局属性将包含在设置后产生的所有事件中。
 
 #### 登录和登出
 
@@ -104,12 +129,18 @@ analytics.setUserAttributes({
 });
 ```
 
-当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的
+当前登录用户的属性会进行缓存，因此在下次 App 打开时不需要再次设置所有的用户属性，当然您可以使用相同的
 API `analytics.setUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
+
+!!! info "重要提示"
+
+    如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstream SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。
 
 #### 记录带有 Item 的事件
 
-您可以添加以下代码来记录带有 Item 的事件，同时您可以在 `attributes` Map 中添加自定义 Item 属性。 除了预置属性外，一个 Item 最多可以添加 10 个自定义属性。
+您可以添加以下代码来记录带有 Item 的事件，同时您可以在 `attributes` Map 中添加自定义 Item 属性。 除了预置属性外，一个 Item
+最多可以添加 10 个自定义属性。
+
 ```dart
 var itemBook = ClickstreamItem(
     id: "123",
@@ -124,12 +155,14 @@ var itemBook = ClickstreamItem(
 analytics.record(
     name: "view_item", 
     attributes: {
-        "currency": 'USD',
-        "event_category": 'recommended'
+        Attr.VALUE: 99,
+        Attr.CURRENCY: "USD"
+        "event_category": "recommended"
     }, 
     items: [itemBook]
 );
 ```
+
 要记录 Item 中的更多属性，请参阅 [Item 属性](android.md#item_1)。
 
 !!! warning "重要提示"
@@ -137,6 +170,26 @@ analytics.record(
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
     
     ITEM_ID 为必需字段，如果不设置，该 Item 将被丢弃。
+
+#### 手动记录 Screen View 事件
+
+默认情况下，当 Android Activity 触发 `onResume` 或 iOS ViewController 触发 `viewDidAppear` 时，SDK
+会自动记录预置的 `_screen_view` 事件。
+
+无论是否启用预置的 `_screen_view` 事件，您都可以手动记录屏幕浏览事件。添加以下代码以记录带有如下两个属性的 `_screen_view`
+事件。
+
+* `screenName` 必需字段，屏幕的名称。
+* `screenUniqueId` 可选字段，设置为您组件的 id。如果不设置，SDK会以当前原生 Activity 或原生 ViewController 的 hashcode
+  作为默认值。
+
+```dart
+analytics.recordScreenView(
+  screenName: 'Main',
+  screenUniqueId: '123adf',
+  attributes: { ... }
+);
+```
 
 #### 其他配置项
 
@@ -154,7 +207,10 @@ analytics.init(
   isTrackUserEngagementEvents: true,
   isTrackAppExceptionEvents: false,
   authCookie: "your auth cookie",
-  sessionTimeoutDuration: 1800000
+  sessionTimeoutDuration: 1800000,
+  globalAttributes: {
+    "_traffic_source_medium": "Search engine",
+  }
 );
 ```
 
@@ -172,6 +228,7 @@ analytics.init(
 | isTrackAppExceptionEvents   | 否     | false   | 是否自动记录应用崩溃事件                        |
 | authCookie                  | 否     | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie         |
 | sessionTimeoutDuration      | 否     | 1800000 | 会话超时的时长（毫秒）                         |
+| globalAttributes            | 否     | --      | 初始化SDK时的全局属性                        |
 
 #### 更新配置
 
@@ -187,7 +244,6 @@ analytics.updateConfigure(
     isTrackScreenViewEvents: false
     isTrackUserEngagementEvents: false,
     isTrackAppExceptionEvents: false,
-    sessionTimeoutDuration: 100000,
     authCookie: "test cookie");
 ```
 
@@ -253,18 +309,23 @@ Clickstream Flutter SDK 支持以下数据类型：
 
 为了提高查询和分析的效率，我们需要对事件进行以下限制：
 
-| 名称        | 建议         | 硬限制          | 超过限制的处理策略                               | 错误码   |
-|:----------|:-----------|:-------------|:----------------------------------------|:------|
-| 事件名称合规    | --         | --           | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1001  |
-| 事件名称长度    | 25 个字符以下   | 50 个字符       | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1002  |
-| 事件属性名称的长度 | 25 个字符以下   | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2001  |
-| 属性名称合规    | --         | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2002  |
-| 事件属性值的长度  | 少于 100 个字符 | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2003  |
-| 每个事件的事件属性 | 50 属性以下    | 500 event 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004  |
-| 用户属性数     | 25岁以下属性    | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件 | 3001  |
-| 用户属性名称的长度 | 25 个字符以下   | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3002  |
-| 用户属性名称合规  | --         | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3003  |
-| 用户属性值的长度  | 50 个字符以下   | 256 个字符      | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3004  |
+| 名称                | 建议           | 硬限制          | 超过限制的处理策略                               | 错误码  |
+|-------------------|--------------|--------------|-----------------------------------------|------|
+| 事件名称合规            | --           | --           | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1001 |
+| 事件名称长度            | 25 个字符以下     | 50 个字符       | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1002 |
+| 事件属性名称的长度         | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2001 |
+| 属性名称合规            | --           | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2002 |
+| 事件属性值的长度          | 少于 100 个字符   | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2003 |
+| 每个事件的事件属性         | 50 属性以下      | 500 event 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004 |
+| 用户属性数             | 25岁以下属性      | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件 | 3001 |
+| 用户属性名称的长度         | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3002 |
+| 用户属性名称合规          | --           | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3003 |
+| 用户属性值的长度          | 50 个字符以下     | 256 个字符      | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3004 |
+| 事件中 Item 的个数      | 50 个 Item 以下 | 100 个 Item   | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4001 |
+| Item 属性值的长度       | 少于 100 个字符   | 256 个字符      | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4002 |
+| 一个 Item 中自定义属性的个数 | 少于 10 个自定义属性 | 10 个自定义属性    | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4003 |
+| Item 属性名的长度       | 25 个字符以下     | 50 个字符       | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4004 |
+| Item 属性名称合规       | --           | --           | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4005 |
 
 !!! info "重要提示"
 
@@ -275,15 +336,15 @@ Clickstream Flutter SDK 支持以下数据类型：
 
 ## 预置事件
 
-Android: 参考 [Android SDK 预置事件](./android.md#preset-events)
+Android: 参考 [Android SDK 预置事件](./android.md#_13)
 
-iOS: 参考 [Swift SDK 预置事件](./swift.md#preset-events)
+iOS: 参考 [Swift SDK 预置事件](./swift.md#_13)
 
 ## 事件属性
 
-Android: 参考 [Android SDK 事件属性](./android.md#event-attributes)
+Android: 参考 [Android SDK 事件属性](./android.md#_18)
 
-iOS: 参考 [Swift SDK 事件属性](./swift.md#event-attributes)
+iOS: 参考 [Swift SDK 事件属性](./swift.md#_18)
 
 ## SDK更新日志
 
@@ -291,10 +352,11 @@ iOS: 参考 [Swift SDK 事件属性](./swift.md#event-attributes)
 
 原生 SDK 版本依赖关系
 
-| Flutter SDK 版本  | Android SDK 版本 | Swift SDK 版本 |
-|-----------------|----------------|--------------|
-| 0.2.0           | 0.10.0         | 0.9.1        |
-| 0.1.0           | 0.9.0          | 0.8.0        |
+| Flutter SDK 版本   | Android SDK 版本     | Swift SDK 版本 |
+|------------------|--------------------|--------------|
+| 0.3.0 ~ 0.4.0    | 0.12.0             | 0.11.0       |
+| 0.2.0            | 0.10.0             | 0.9.1        |
+| 0.1.0            | 0.9.0              | 0.8.0        |
 
 ## 参考链接
 
