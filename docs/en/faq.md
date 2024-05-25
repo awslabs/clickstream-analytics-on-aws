@@ -65,7 +65,7 @@ The dashboard displays metrics for different components of your data pipeline, i
 
 Occasionally, the data processing job fails. You can re-run the failed job to reprocess the data in that given period. The steps are:
 
-1. Open the failed job in **EMR Studio** - **Applications** - **Clickstream-<project id>**.
+1. Open the failed job in **EMR Studio** - **Applications** - **Clickstream-<project id\>**.
 2. Click the **Clone** action.
 3. Keep all parameters unchanged, then click the **Submit job run** button.
 
