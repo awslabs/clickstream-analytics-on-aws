@@ -88,11 +88,11 @@
 
     ```sql
     -- 请用您的实际应用程序ID替换 `<app-id>`
-    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_event_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_event_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
     ```
 
 7. 请遵循[此指南][faq-recalculate-data]，使用迁移后的新数据来计算预设仪表板的指标。

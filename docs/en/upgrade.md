@@ -92,11 +92,11 @@ The solution automatically and asynchronously upgrades the views and materialize
 
     ```sql
     -- please replace `<app-id>` with your actual app id
-    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_event_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_event_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
     ```
 
 7. Follow [this guide][faq-recalculate-data] to calculate metrics for the new preset dashboard based on the migrated data.
