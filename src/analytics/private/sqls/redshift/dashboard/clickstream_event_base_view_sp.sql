@@ -135,7 +135,7 @@ BEGIN
 
   ELSE
     EXECUTE 'SELECT
-      COALESCE(max(created_time), CURRENT_TIMESTAMP - INTERVAL ''1 days'') as start_time,
+      COALESCE(max(created_time), CURRENT_TIMESTAMP - INTERVAL ''7 days'') as start_time,
       CURRENT_TIMESTAMP + INTERVAL ''1 days'' as end_time
     FROM {{database_name}}.{{schema}}.clickstream_event_base_view
     WHERE event_timestamp >= CURRENT_TIMESTAMP - INTERVAL ''' || fressness_in_hours || ' hours'' --reduce scan range' into rec
