@@ -54,7 +54,7 @@ describe('Lambda - check the clear status in Redshift Serverless', () => {
       detail: {
         appId: 'app1',
         status: StatusString.FINISHED,
-        message: [],
+        message: 'clearing expired events ran successfully.',
       },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
@@ -179,7 +179,7 @@ describe('Lambda - check the clear status in Redshift Provisioned', () => {
       detail: {
         appId: 'app1',
         status: StatusString.FINISHED,
-        message: [],
+        message: 'clearing expired events ran successfully.',
       },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
