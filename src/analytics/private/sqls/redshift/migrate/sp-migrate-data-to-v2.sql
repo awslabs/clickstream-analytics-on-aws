@@ -30,7 +30,7 @@ BEGIN
         SELECT
             1
         FROM
-            {{schema}}.clickstream_log
+            {{schema}}.{{table_clickstream_log}}
         WHERE
             log_msg = 'backfill event_v2 is done'
             AND log_date > start_dt
@@ -85,7 +85,7 @@ BEGIN
             SELECT
                 1
             FROM
-                {{schema}}.clickstream_log
+                {{schema}}.{{table_clickstream_log}}
             WHERE
                 log_msg = 'backfill item_v2 is done'
                 AND log_date > start_dt
