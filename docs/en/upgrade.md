@@ -81,8 +81,8 @@ The solution automatically and asynchronously upgrades the views and materialize
 4. Customize the date range as desired, and execute the following SQL in the editor to migrate events from the past 180 days, or any number of days up to the present, to the new tables.
 
     ```sql
-    -- please replace `<app-id>` with your actual app id
-    -- update the day range based on your needs
+    -- please replace <app-id> with your actual app id
+    -- update the day range(180 days in below example) based on your needs
     CALL "<app-id>".sp_migrate_data_to_v2(180);
     ```
 
@@ -91,17 +91,41 @@ The solution automatically and asynchronously upgrades the views and materialize
 6. Execute the following SQL to check the stored procedure execution log; ensure there are no errors. If there are any interruptions, timeouts, or other errors, you can re-execute step 4 to continue the data migration.
 
     ```sql
-    -- please replace `<app-id>` with your actual app id
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_event_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
+    -- please replace <app-id> with your actual app id
+    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_event_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
     ```
 
-7. Follow [this guide][faq-recalculate-data] to calculate metrics for the new preset dashboard based on the migrated data.
+7. populate the event data to `clickstream_event_base_view` table.
 
-8. If you don't have other applications using the legacy tables and views, you could run the following SQL to clean up the legacy views and tables to save Redshift storage.
+    ```sql
+    -- please replace <app-id> with your actual app id
+    -- update the day range(180 days in below example) based on your needs
+    CALL "<app-id>".clickstream_event_base_view_sp(NULL, NULL, 24*180);
+    ```
+
+    !!! info "Note"
+
+        It is recommended to refresh the `clickstream_event_base_view` in batches, especially in the following scenarios:
+
+        - When there are new event load jobs coming in before the migration job completes.
+        - When the volume of migrated data is large (e.g., 100 millions in a batch).
+        
+        Noe that refreshing the data in batches needs to be done based on the event timestamp. Call the following stored procedure multiple times, in order from old to new event timestamps.
+        ```sql
+        call "<schema>".clickstream_event_base_view(start_event_timestamp, end_event_timestamp, 1);
+        ```
+        For example, to refresh data between 2024-05-10 00:00:00 and 2024-05-12 00:00:00, execute the following SQL:
+        ```sql
+        call "<schema>".clickstream_event_base_view_sp(TIMESTAMP 'epoch' + 1715270400  * INTERVAL '1 second', TIMESTAMP 'epoch' + 1715443200 * INTERVAL '1 second', 1);
+        ```
+
+8. Follow [this guide][faq-recalculate-data] to calculate metrics for the new preset dashboard based on the migrated data.
+
+9. If you don't have other applications using the legacy tables and views, you could run the following SQL to clean up the legacy views and tables to save Redshift storage.
 
     ```sql
     -- please replace `<app-id>` with your actual app id
@@ -118,14 +142,6 @@ The solution automatically and asynchronously upgrades the views and materialize
     DROP PROCEDURE "<app-id>".sp_migrate_session_to_v2();
     DROP PROCEDURE "<app-id>".sp_clear_item_and_user();
     ```
-9. (Optional) If the amount of migrated data is large, it is recommended to refresh the clickstream_event_base_view in batches. That is, based on the occurrence time of the events, call the following stored procedure multiple times to refresh the data in batches
-   ```sql
-   call "<schema>".clickstream_event_base_view(start_event_timestamp, end_event_timestamp, 1);
-   ```
-   For example, to refresh data between 2024-05-10 00:00:00 and 2024-05-12 00:00:00, execute the following SQL:
-   ```sql
-   call "<schema>".clickstream_event_base_view_sp(TIMESTAMP 'epoch' + 1715270400  * INTERVAL '1 second', TIMESTAMP 'epoch' + 1715443200 * INTERVAL '1 second', 1);
-   ```
 
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md
