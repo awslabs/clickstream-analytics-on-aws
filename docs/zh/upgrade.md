@@ -77,8 +77,8 @@
 4. 根据需要自定义日期范围，并在编辑器中执行以下SQL，将过去180天或任意天数前到现在的事件迁移到新表中。
 
     ```sql
-    -- 请用您的实际应用程序ID替换 `<app-id>`
-    -- 根据需要更新天数范围
+    -- 请用您的实际应用程序ID替换 <app-id>
+    -- 根据需要更新天数范围（如下例中的 180 天）
     CALL "<app-id>".sp_migrate_data_to_v2(180);
     ```
 
@@ -87,17 +87,41 @@
 6. 执行以下SQL来检查存储过程执行日志，确保没有错误。如遇中断，超时，其他错误，可重新执行第 4 步继续执行数据迁移。
 
     ```sql
-    -- 请用您的实际应用程序ID替换 `<app-id>`
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_event_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
-    SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
+    -- 请用您的实际应用程序ID替换 <app-id>
+    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_event_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_user_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_item_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_session_to_v2' ORDER BY log_date DESC;
+    SELECT * FROM "<app-id>"."clickstream_log_v2" WHERE log_name = 'sp_migrate_data_to_v2' ORDER BY log_date DESC;
     ```
 
-7. 请遵循[此指南][faq-recalculate-data]，使用迁移后的新数据来计算预设仪表板的指标。
+7. 将原始事件表转化为`clickstream_event_base_view`表。
 
-8. 如果您没有其他应用程序使用旧表和视图，您可以运行以下SQL来清理旧视图和表，从而节省Redshift存储空间。
+    ```sql
+    -- 请用您的实际应用程序ID替换 <app-id>
+    -- 根据需要更新天数范围（如下例中的 180 天）
+    CALL "<app-id>".clickstream_event_base_view_sp(NULL, NULL, 24*180);
+    ```
+
+    !!! info "注意"
+
+        建议分批刷新`clickstream_event_base_view`，尤其在以下情况下:
+
+        - 在迁移作业完成之前有新的事件加载作业到来时。
+        - 当要迁移的数据量很大时(例如,每批10000万条记录)。
+
+        注意，分批刷新数据需要根据事件时间戳来完成。按事件时间戳从旧到新的顺序，多次调用以下存储过程。
+        ```sql
+        call "<schema>".clickstream_event_base_view(start_event_timestamp, end_event_timestamp, 1);
+        ```
+        例如要将2024-05-10 00:00:00至2024-05-12 00:00:00之间的数据刷新，则执行如下SQL：
+        ```sql
+        call "<schema>".clickstream_event_base_view_sp(TIMESTAMP 'epoch' + 1715270400  * INTERVAL '1 second', TIMESTAMP 'epoch' + 1715443200 * INTERVAL '1 second', 1);
+        ```
+
+8. 请遵循[此指南][faq-recalculate-data]，使用迁移后的新数据来计算预设仪表板的指标。
+
+9. 如果您没有其他应用程序使用旧表和视图，您可以运行以下SQL来清理旧视图和表，从而节省Redshift存储空间。
 
     ```sql
     -- 请用您的实际应用程序ID替换 `<app-id>`
@@ -114,14 +138,6 @@
     DROP PROCEDURE "<app-id>".sp_migrate_session_to_v2();
     DROP PROCEDURE "<app-id>".sp_clear_item_and_user();
     ```
-9. （可选）如果迁移的数据量较大，建议分批次刷新clickstream_event_base_view, 即根据事件的发生时间，分多次调用如下存贮过程，将数据分批次刷新
-   ```sql
-   call "<schema>".clickstream_event_base_view(start_event_timestamp, end_event_timestamp, 1);
-   ```   
-   例如要将2024-05-10 00:00:00至2024-05-12 00:00:00之间的数据刷新，则执行如下SQL：
-   ```sql
-   call "<schema>".clickstream_event_base_view_sp(TIMESTAMP 'epoch' + 1715270400  * INTERVAL '1 second', TIMESTAMP 'epoch' + 1715443200 * INTERVAL '1 second', 1);
-   ```  
 
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
