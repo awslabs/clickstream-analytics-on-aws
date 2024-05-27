@@ -1188,7 +1188,7 @@ describe('Attribution SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
-      timeWindowInSeconds: 600,
+      timeWindowInSeconds: 60*60*24*30,
       globalEventCondition: {
         conditions: [
           {
@@ -1395,7 +1395,7 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-09-30'
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-09-01'
           and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
@@ -1542,11 +1542,11 @@ describe('Attribution SQL Builder test', () => {
               epoch
               FROM
                 target_data.event_timestamp - touch_point_data_3.event_timestamp
-            ) <= cast(600 as bigint)
+            ) <= cast(2592000 as bigint)
           )
         where
           touch_point_data_3.event_name <> 'purchase'
-          and target_data.event_timestamp >= date '2023-09-30'
+          and target_data.event_timestamp >= date '2023-10-01'
       ),
       touch_point_names as (
         select
