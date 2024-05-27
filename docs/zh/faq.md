@@ -161,7 +161,7 @@ Redshift 支持[跨集群共享数据][redshift-share-data]，这样您就可以
     GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO bi_user;
 
     -- 给Data api role赋予权限
-    CREATE USER "IAMR:<data api role name>" PASSWORD DISABLE CREATEDB;
+    CREATE USER "IAMR:<data api role name>" PASSWORD DISABLE;
     GRANT USAGE ON DATABASE "<new database name>" TO "IAMR:<data api role name>";
     GRANT USAGE ON SCHEMA "<new database name>"."<schema>" TO "IAMR:<data api role name>";
     GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO "IAMR:<data api role name>";
