@@ -163,6 +163,7 @@ Taking Redshift serverless as an example of data sharing, follow these operation
     GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO bi_user;
 
     -- Grant permission to data api role
+    CREATE USER "IAMR:<data api role name>" PASSWORD DISABLE CREATEDB;
     GRANT USAGE ON DATABASE "<new database name>" TO "IAMR:<data api role name>";
     GRANT USAGE ON SCHEMA "<new database name>"."<schema>" TO "IAMR:<data api role name>";
     GRANT SELECT ON ALL TABLES IN SCHEMA "<new database name>"."<schema>" TO "IAMR:<data api role name>";
