@@ -9,14 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
-* optimize data schema for improving query performance
-* support out-of-box traffic source analysis
-* new out-of-box dashboard look
-* out-of-box dashboard supports timezone
-* explore query improvements
-* allow creating an internal load balancer as the ingestion endpoint
+* optimize data schema to improve query performance in Explorations, Analyzes, and ad-hoc query
+* support automatic traffic source detection, classification, and dashboard
+* revamp out-of-the-box dashboard
+* support timezone in out-of-the-box dashboard
+* add more metric types to Event analysis
+* support "show all nodes" in Path analysis
+* add new analysis model - attribution analysis in Exploration
+* support using internal load balancer as the ingestion endpoint
 * improve stability of loading data into Redshift
-* React Native SDK support
+* add React Native SDK
 
 ### Fixed
 
