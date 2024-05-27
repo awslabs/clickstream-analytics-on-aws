@@ -150,9 +150,9 @@ Redshift 支持[跨集群共享数据][redshift-share-data]，这样您就可以
     将 `<data share name>` 替换为共享名称，将 `<schema>` 替换为您要共享的schema，将 `<consumer namespace id>` 替换为消费者 Redshift 无服务器命名空间 ID。
 3. 在消费者 Redshift 数据库中运行 SQL:
     ```sql
-    -- 创建 Data sharing 
+    -- 创建 database 
 
-    CREATE DATASHARE <new database name> WITH PERMISSIONS FROM DATASHARE <data share name> OF NAMESPACE '<source namespace id>';
+    CREATE DATABASE <new database name> WITH PERMISSIONS FROM DATASHARE <data share name> OF NAMESPACE '<source namespace id>';
    
     -- 创建 bi 用户
     

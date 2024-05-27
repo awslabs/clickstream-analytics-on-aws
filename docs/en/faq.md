@@ -151,9 +151,9 @@ Taking Redshift serverless as an example of data sharing, follow these operation
     Replace `<data share name>` with the name you want to share, `<schema>` with the schema you want to share, and `<consumer namespace id>` with the consumer Redshift serverless namespace ID.
 3. Run SQL in the consumer Redshift database:
     ```sql
-    -- Create Data sharing 
+    -- Create database 
 
-    CREATE DATASHARE <new database name> WITH PERMISSIONS FROM DATASHARE <data share name> OF NAMESPACE '<source namespace id>';
+    CREATE DATABASE <new database name> WITH PERMISSIONS FROM DATASHARE <data share name> OF NAMESPACE '<source namespace id>';
    
     -- Create bi user
     
