@@ -1838,9 +1838,10 @@ function _getStartDateForFixDateRange(date: Date | undefined, timeWindowInSecond
   if (!date || !timeWindowInSeconds) {
     throw new Error('date and timeWindowInSeconds are required');
   }
+  const newDate = new Date(date);
   const dayCount = Math.ceil(timeWindowInSeconds / 86400);
-  date.setDate(date.getDate() - dayCount);
-  return formatDateToYYYYMMDD(date);
+  newDate.setDate(newDate.getDate() - dayCount);
+  return formatDateToYYYYMMDD(newDate);
 }
 
 function _getStartDateForRelativeDateRange(
