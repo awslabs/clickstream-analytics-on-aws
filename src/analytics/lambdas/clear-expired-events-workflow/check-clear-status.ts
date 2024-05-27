@@ -13,12 +13,10 @@
 
 import { logger } from '@aws/clickstream-base-lib';
 import { StatusString } from '@aws-sdk/client-redshift-data';
-import { SP_CLEAR_EXPIRED_DATA } from '../../private/constant';
 import { ClearExpiredEventsEventDetail } from '../../private/model';
-import { describeStatement, executeStatementsWithWait, getRedshiftClient, getRedshiftProps, getStatementResult } from '../redshift-data';
+import { describeStatement, getRedshiftClient } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
-const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
 
 // Create an Amazon service client object.
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
@@ -43,12 +41,11 @@ export const handler = async (event: ClearExpiredEventsEvent) => {
 
   if (response.Status == StatusString.FINISHED) {
     logger.info('Clear expired events success.');
-    const queryResult = await queryClearLog(appId);
     return {
       detail: {
         appId: appId,
         status: response.Status,
-        message: queryResult.detail.message,
+        message: 'clearing expired events ran successfully.',
       },
     };
   } else if (response.Status == StatusString.FAILED || response.Status == StatusString.ABORTED) {
@@ -70,44 +67,5 @@ export const handler = async (event: ClearExpiredEventsEvent) => {
         status: response.Status,
       },
     };
-  }
-};
-
-export const queryClearLog = async (appId: string) => {
-  const redshiftProps = getRedshiftProps(
-    process.env.REDSHIFT_MODE!,
-    REDSHIFT_DATABASE,
-    REDSHIFT_DATA_API_ROLE_ARN,
-    process.env.REDSHIFT_DB_USER!,
-    process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
-    process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
-  );
-
-  const schema = appId;
-
-  try {
-    const querySqlStatement = `SELECT * FROM ${schema}.clickstream_log WHERE log_name='${SP_CLEAR_EXPIRED_DATA}' ORDER BY log_date, id`;
-    const queryId = await executeStatementsWithWait(
-      redshiftDataApiClient, [querySqlStatement], redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-
-    const response = await getStatementResult(redshiftDataApiClient, queryId!);
-
-    logger.info('Clear log response:', { response });
-
-    const delSqlStatement = `DELETE FROM ${schema}.clickstream_log WHERE log_name='${SP_CLEAR_EXPIRED_DATA}'`;
-    await executeStatementsWithWait(
-      redshiftDataApiClient, [delSqlStatement], redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-    return {
-      detail: {
-        appId: schema,
-        message: response.Records,
-      },
-    };
-
-  } catch (err) {
-    if (err instanceof Error) {
-      logger.error('Error when query clear expired events log.', err);
-    }
-    throw err;
   }
 };
