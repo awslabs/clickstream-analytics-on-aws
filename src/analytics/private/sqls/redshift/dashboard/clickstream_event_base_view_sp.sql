@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}}(p_start_time timestamp without time zone, p_end_time timestamp without time zone, fressness_in_hours integer)
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}}(p_start_time timestamp, p_end_time timestamp, fressness_in_hours integer)
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
