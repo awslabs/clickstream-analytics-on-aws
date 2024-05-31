@@ -39,7 +39,6 @@ import static software.aws.solution.clickstream.common.Util.deCodeUri;
 @Slf4j
 public final class GTMEventParser extends BaseEventParser {
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
-    private static GTMEventParser instance;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final TransformConfig transformConfig;
@@ -48,14 +47,11 @@ public final class GTMEventParser extends BaseEventParser {
     }
     public static GTMEventParser getInstance() {
         // use default config rule in java resource file
-        return getInstance(null);
+        return newInstance(null);
     }
 
-    public static GTMEventParser getInstance(final TransformConfig transformConfig) {
-        if (instance == null) {
-            instance = new GTMEventParser(transformConfig);
-        }
-        return instance;
+    public static GTMEventParser newInstance(final TransformConfig transformConfig) {
+        return new GTMEventParser(transformConfig);
     }
 
     public static Map<String, String> createEventNameMap() {

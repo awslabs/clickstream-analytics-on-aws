@@ -28,11 +28,11 @@ public final class EventParserFactory {
     public static EventParser getEventParser(final TransformerNameEnum parserName, final TransformConfig transformConfig) {
         switch (parserName) {
             case GTM_SERVER_DATA:
-                return GTMEventParser.getInstance(transformConfig);
+                return GTMEventParser.newInstance(transformConfig);
             case SENSORS_DATA:
-                return SensorsEventParser.getInstance(transformConfig);
+                return SensorsEventParser.newInstance(transformConfig);
             case CLICKSTREAM:
-                return ClickstreamEventParser.getInstance(transformConfig);
+                return ClickstreamEventParser.newInstance(transformConfig);
             default:
                 throw new ExecuteTransformerException("Unknown parser name: " + parserName);
         }
