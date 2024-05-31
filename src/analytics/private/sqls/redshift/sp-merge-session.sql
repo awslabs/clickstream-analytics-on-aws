@@ -31,11 +31,16 @@ BEGIN
 			session_channel_group,
 			session_source_category,
 			process_info,
-			CURRENT_TIMESTAMP as created_time
+			CURRENT_TIMESTAMP AS created_time
 		FROM (
 			select
 					*,
-					row_number() over (partition by user_pseudo_id, session_id, event_timestamp order by created_time desc) as row_num
+					ROW_NUMBER() OVER (
+						PARTITION BY user_pseudo_id, session_id 
+						ORDER BY
+							CASE WHEN session_source = 'Direct' OR session_source IS NULL OR session_source = '' THEN 1 ELSE 0 END,
+							created_time
+					) AS row_num
 			FROM
 					session_stage
 		)
@@ -48,10 +53,178 @@ BEGIN
 	MERGE INTO {{schema}}.session
 	USING session_stage_1 AS stage ON (
 		{{schema}}.session.user_pseudo_id = stage.user_pseudo_id AND 
-		{{schema}}.session.session_id = stage.session_id AND
-		{{schema}}.session.event_timestamp = stage.event_timestamp
+		{{schema}}.session.session_id = stage.session_id
 	)
-	REMOVE DUPLICATES;
+	WHEN MATCHED THEN
+		UPDATE SET
+			event_timestamp = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.event_timestamp
+				ELSE {{schema}}.session.event_timestamp
+			END,
+			user_id = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.user_id
+				ELSE {{schema}}.session.user_id
+			END,
+			session_number = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_number
+				ELSE {{schema}}.session.session_number
+			END,
+			session_start_time_msec = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_start_time_msec
+				ELSE {{schema}}.session.session_start_time_msec
+			END,
+			session_source = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_source
+				ELSE {{schema}}.session.session_source
+			END,
+			session_medium = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_medium
+				ELSE {{schema}}.session.session_medium
+			END,
+			session_campaign = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_campaign
+				ELSE {{schema}}.session.session_campaign
+			END,
+			session_content = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_content
+				ELSE {{schema}}.session.session_content
+			END,
+			session_term = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_term
+				ELSE {{schema}}.session.session_term
+			END,
+			session_campaign_id = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_campaign_id
+				ELSE {{schema}}.session.session_campaign_id
+			END,
+			session_clid_platform = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_clid_platform
+				ELSE {{schema}}.session.session_clid_platform
+			END,
+			session_clid = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_clid
+				ELSE {{schema}}.session.session_clid
+			END,
+			session_channel_group = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_channel_group
+				ELSE {{schema}}.session.session_channel_group
+			END,
+			session_source_category = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.session_source_category
+				ELSE {{schema}}.session.session_source_category
+			END,
+			process_info = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.process_info
+				ELSE {{schema}}.session.process_info
+			END,
+			created_time = CASE
+				WHEN 
+					{{schema}}.session.session_source = 'Direct'
+					OR {{schema}}.session.session_source IS NULL
+					OR {{schema}}.session.session_source = ''
+				THEN stage.created_time
+				ELSE {{schema}}.session.created_time
+			END
+	WHEN NOT MATCHED THEN
+		INSERT (
+			event_timestamp,
+			user_pseudo_id,
+			session_id,
+			user_id,
+			session_number,
+			session_start_time_msec,
+			session_source,
+			session_medium,
+			session_campaign,
+			session_content,
+			session_term,
+			session_campaign_id,
+			session_clid_platform,
+			session_clid,
+			session_channel_group,
+			session_source_category,
+			process_info,
+			created_time
+		) VALUES (
+			stage.event_timestamp,
+			stage.user_pseudo_id,
+			stage.session_id,
+			stage.user_id,
+			stage.session_number,
+			stage.session_start_time_msec,
+			stage.session_source,
+			stage.session_medium,
+			stage.session_campaign,
+			stage.session_content,
+			stage.session_term,
+			stage.session_campaign_id,
+			stage.session_clid_platform,
+			stage.session_clid,
+			stage.session_channel_group,
+			stage.session_source_category,
+			stage.process_info,
+			stage.created_time
+		);
 
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Merge data into session table successfully.');
 
