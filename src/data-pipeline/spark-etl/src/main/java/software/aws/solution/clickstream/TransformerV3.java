@@ -248,7 +248,7 @@ public class TransformerV3 extends BaseTransformerV3 {
     @Override
     public void config(final TransformConfig transformConfig) {
         this.transformConfig = transformConfig;
-        log.info("TransformConfig is set");
+        log.info("TransformConfig is set config, isTrafficSourceEnrichmentDisabled: {}", transformConfig.isTrafficSourceEnrichmentDisabled());
     }
 
     @Override

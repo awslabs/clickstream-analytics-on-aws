@@ -60,7 +60,7 @@ public class ClickstreamEventParserTest extends BaseTest {
 
     private static ClickstreamEventParser getClickstreamEventParser() {
         TransformConfig transformConfig = new TransformConfig();
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance(transformConfig);
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.newInstance(transformConfig);
         return clickstreamEventParser;
     }
 
@@ -230,7 +230,7 @@ public class ClickstreamEventParserTest extends BaseTest {
         TransformConfig transformConfig = new TransformConfig();
         transformConfig.setAppRuleConfig(ruleConfigMap);
 
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance(transformConfig);
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.newInstance(transformConfig);
         String projectId = "test_project_id";
         String fileName = "original_data_page_url.json";
 

@@ -34,7 +34,6 @@ import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSo
 
 @Slf4j
 public final class ClickstreamEventParser extends BaseEventParser {
-    private static ClickstreamEventParser instance;
     public static final String ENABLE_EVENT_TIME_SHIFT_PROP =  "enable.event.time.shift";
     public static final String EVENT_PROFILE_SET = "_profile_set";
     public static final String EVENT_PAGE_VIEW = "_page_view";
@@ -55,15 +54,13 @@ public final class ClickstreamEventParser extends BaseEventParser {
 
     public static ClickstreamEventParser getInstance() {
         // use default config rule in java resource file
-        return getInstance(null);
+        return newInstance(null);
     }
 
-    public static ClickstreamEventParser getInstance(final TransformConfig transformConfig) {
-        if (instance == null) {
-            instance = new ClickstreamEventParser(transformConfig);
-        }
-         return instance;
+    public static ClickstreamEventParser newInstance(final TransformConfig transformConfig) {
+        return new ClickstreamEventParser(transformConfig);
     }
+
     Event ingestDataToEvent(final String data) throws JsonProcessingException {
         return getObjectMapper().readValue(data, Event.class);
     }

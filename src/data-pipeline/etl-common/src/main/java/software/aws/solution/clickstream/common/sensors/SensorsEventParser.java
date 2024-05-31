@@ -59,24 +59,19 @@ public final class SensorsEventParser extends BaseEventParser {
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
     private static final String GZIP_DATA_LIST = "data_list=";
     private static final String GZIP_DATA = "data=";
-    private static SensorsEventParser instance;
     private final TransformConfig transformConfig;
 
     private SensorsEventParser(final TransformConfig transformConfig) {
         this.transformConfig = transformConfig;
     }
 
-    public static SensorsEventParser getInstance() {
-        return getInstance(null);
+    public static SensorsEventParser newInstance() {
+        return newInstance(null);
     }
 
-    public static SensorsEventParser getInstance(final TransformConfig transformConfig) {
-        if (instance == null) {
-            instance = new SensorsEventParser(transformConfig);
-        }
-        return instance;
+    public static SensorsEventParser newInstance(final TransformConfig transformConfig) {
+        return new SensorsEventParser(transformConfig);
     }
-
 
     public static Map<String, String> createEventNameMap() {
         Map<String, String> eventNameMap = new HashMap<>();

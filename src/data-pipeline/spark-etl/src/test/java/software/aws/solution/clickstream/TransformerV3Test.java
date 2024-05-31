@@ -321,14 +321,15 @@ class TransformerV3Test extends BaseSparkTest {
     @Test
     void test_transform_with_traffic_source_disabled() throws IOException {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV3Test.test_transform_with_traffic_source_disabled
-        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(APP_IDS_PROP, "appTS1");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         String testWarehouseDir = "/tmp/warehouse/test_transform_with_traffic_source_disabled/" + new Date().getTime();
         System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
-        TransformConfig config = getTestTransformConfig("uba-app");
+        TransformConfig config = getTestTransformConfig("appTS1");
         config.setTrafficSourceEnrichmentDisabled(true);
-        TransformerV3 transformerV3 = new TransformerV3(config);
+        TransformerV3 transformerV3 = new TransformerV3();
+        transformerV3.config(config);
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_single_no_ts.json")).getPath());
