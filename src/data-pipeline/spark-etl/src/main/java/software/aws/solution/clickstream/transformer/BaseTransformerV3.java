@@ -33,6 +33,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.spark.sql.functions.coalesce;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.explode;
 import static org.apache.spark.sql.functions.expr;
@@ -53,6 +54,7 @@ import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PAGE_VIEW
 import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_SCREEN_VIEW;
 import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_SESSION_START;
 import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_USER_ENGAGEMENT;
+import static software.aws.solution.clickstream.util.DatasetUtil.TRAFFIC_SOURCE_SOURCE;
 import static software.aws.solution.clickstream.util.DatasetUtil.deDupDataset;
 
 @Slf4j
@@ -84,6 +86,7 @@ public abstract class BaseTransformerV3 implements TransformerInterfaceV3 {
         List<String> allFields = ModelV2.getEventFields();
         Dataset<Row> eventDataset = convertedDataset.select(explode(expr("dataOut.events")).alias("event"))
                 .select("event.*")
+                .withColumn(TRAFFIC_SOURCE_SOURCE, coalesce(col(TRAFFIC_SOURCE_SOURCE), lit(DIRECT)))
                 .select(toColumnArray(allFields));
         return addProcessInfo(runMaxLengthTransformerForEventV2(eventDataset));
     }
@@ -181,8 +184,7 @@ public abstract class BaseTransformerV3 implements TransformerInterfaceV3 {
 
         Dataset<Row> sessionDatasetNonDirectAgg = getAggSessionDataset(
                 sessionEventDataset.filter(
-                        col(Constant.SESSION_SOURCE).isNotNull()
-                        .and(col(Constant.SESSION_SOURCE).notEqual(DIRECT))
+                        col(Constant.SESSION_SOURCE).notEqual(DIRECT)
                 )
         );
         Dataset<Row> sessionDatasetDirect = sessionEventDataset.join(sessionDatasetNonDirectAgg,
