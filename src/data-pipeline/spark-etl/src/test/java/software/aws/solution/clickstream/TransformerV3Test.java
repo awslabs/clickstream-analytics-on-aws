@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.common.Constant;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.model.ModelV2;
 import software.aws.solution.clickstream.util.*;
 
@@ -315,5 +316,26 @@ class TransformerV3Test extends BaseSparkTest {
         Dataset<Row> sessionDataset = transformer.extractSessionFromEvent(dataset);
         String expectedJson1 = this.resourceFileAsString("/event_v2/expected/test_extract_session_from_event2.json");
         Assertions.assertEquals(expectedJson1, replaceDynData(sessionDataset.first().prettyJson()));
+    }
+
+    @Test
+    void test_transform_with_traffic_source_disabled() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV3Test.test_transform_with_traffic_source_disabled
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        String testWarehouseDir = "/tmp/warehouse/test_transform_with_traffic_source_disabled/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
+
+        TransformConfig config = getTestTransformConfig("uba-app");
+        config.setTrafficSourceEnrichmentDisabled(true);
+        TransformerV3 transformerV3 = new TransformerV3(config);
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_single_no_ts.json")).getPath());
+        Map<TableName, Dataset<Row>> transformedDatasets = transformerV3.transform(dataset);
+        Dataset<Row> datasetEvent = transformedDatasets.get(TableName.EVENT_V2);
+
+        String expectedJson = this.resourceFileAsString("/event_v2/expected/transform_v3_ts_disabled.json");
+        Assertions.assertEquals(expectedJson, replaceDynData(datasetEvent.first().prettyJson()));
     }
 }
