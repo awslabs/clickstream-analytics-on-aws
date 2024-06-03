@@ -14,24 +14,16 @@ BEGIN
 
     --  clean table_event_v2 expired records
     EXECUTE 'SELECT event_timestamp FROM {{schema}}.{{table_event_v2}} ORDER BY event_timestamp DESC LIMIT 1' INTO latest_timestamp_record;
-    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'get event_timestamp = ' || latest_timestamp_record.event_timestamp || ' from {{schema}}.{{table_event_v2}}');
-    IF latest_timestamp_record.event_timestamp is null THEN
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'no event_timestamp found in {{schema}}.{{table_event_v2}}');
-    ELSE
+    IF latest_timestamp_record.event_timestamp IS NOT NULL THEN
         DELETE FROM {{schema}}.{{table_event_v2}} WHERE event_timestamp < (latest_timestamp_record.event_timestamp - retention_range_days * interval '1 day');
         GET DIAGNOSTICS record_number := ROW_COUNT;
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' expired records from {{schema}}.{{table_event_v2}} for retention_range_days='||retention_range_days);
     END IF;
 
     --  clean table_item_v2 expired records
     EXECUTE 'SELECT event_timestamp FROM {{schema}}.{{table_item_v2}} ORDER BY event_timestamp DESC LIMIT 1' INTO latest_timestamp_record;
-    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'get event_timestamp = ' || latest_timestamp_record.event_timestamp || ' from {{schema}}.{{table_item_v2}}');
-    IF latest_timestamp_record.event_timestamp is null THEN
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'no event_timestamp found in {{schema}}.{{table_item_v2}}');
-    ELSE
+    IF latest_timestamp_record.event_timestamp IS NOT NULL THEN
         DELETE FROM {{schema}}.{{table_item_v2}} WHERE event_timestamp < (latest_timestamp_record.event_timestamp - retention_range_days * interval '1 day');
         GET DIAGNOSTICS record_number := ROW_COUNT;
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' expired records from {{schema}}.{{table_item_v2}} for retention_range_days='||retention_range_days);
     END IF;
 
     --  clean table_session duplicate records
@@ -44,41 +36,27 @@ BEGIN
     where {{schema}}.{{table_session}}.session_id = session_id_rank.session_id
         and {{schema}}.{{table_session}}.user_pseudo_id = session_id_rank.user_pseudo_id
         and session_id_rank.et_rank != 1;
-
     GET DIAGNOSTICS record_number := ROW_COUNT;
-    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' from {{schema}}.{{table_session}}');
 
     --  clean table_session expired records
     EXECUTE 'SELECT event_timestamp FROM {{schema}}.{{table_session}} ORDER BY event_timestamp DESC LIMIT 1' INTO latest_timestamp_record;
-    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'get event_timestamp = ' || latest_timestamp_record.event_timestamp || ' from {{schema}}.{{table_session}}');
-    IF latest_timestamp_record.event_timestamp is null THEN
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'no event_timestamp found in {{schema}}.{{table_session}}');
-    ELSE
+    IF latest_timestamp_record.event_timestamp IS NOT NULL THEN
         DELETE FROM {{schema}}.{{table_session}} WHERE event_timestamp < (latest_timestamp_record.event_timestamp - retention_range_days * interval '1 day');
         GET DIAGNOSTICS record_number := ROW_COUNT;
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' expired records from {{schema}}.{{table_session}} for retention_range_days='||retention_range_days);
     END IF; 
 
     --  clean clickstream_log expired records
     EXECUTE 'SELECT log_date FROM {{schema}}.{{table_clickstream_log}} ORDER BY log_date DESC LIMIT 1' INTO latest_timestamp_record;
-    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'get log_date = ' || latest_timestamp_record.log_date || ' from {{schema}}.{{table_clickstream_log}}');
-    IF latest_timestamp_record.log_date is null THEN
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'no log_date found in {{schema}}.{{table_clickstream_log}}');
-    ELSE
+    IF latest_timestamp_record.log_date IS NOT NULL THEN
         DELETE FROM {{schema}}.{{table_clickstream_log}} WHERE log_date < (latest_timestamp_record.log_date - retention_range_days * interval '1 day');
         GET DIAGNOSTICS record_number := ROW_COUNT;
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' expired records from {{schema}}.{{table_clickstream_log}} for retention_range_days='||retention_range_days);
     END IF; 
 
     --  clean refresh_mv_sp_status expired records
     EXECUTE 'SELECT log_date FROM {{schema}}.{{table_refresh_mv_sp_status}} ORDER BY log_date DESC LIMIT 1' INTO latest_timestamp_record;
-    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'get log_date = ' || latest_timestamp_record.log_date || ' from {{schema}}.{{table_refresh_mv_sp_status}}');
-    IF latest_timestamp_record.log_date is null THEN
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'no log_date found in {{schema}}.{{table_refresh_mv_sp_status}}');
-    ELSE
+    IF latest_timestamp_record.log_date IS NOT NULL THEN
         DELETE FROM {{schema}}.{{table_refresh_mv_sp_status}} WHERE log_date < (latest_timestamp_record.log_date - retention_range_days * interval '1 day');
         GET DIAGNOSTICS record_number := ROW_COUNT;
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' expired records from {{schema}}.{{table_refresh_mv_sp_status}} for retention_range_days='||retention_range_days);
     END IF;
 
     -- clean sp tables expired records
@@ -86,13 +64,9 @@ BEGIN
     FOR rec_index IN 1..num_tables LOOP
         current_table_name := SPLIT_PART(table_names, ',', rec_index);
         EXECUTE 'SELECT event_date FROM {{schema}}.' || quote_ident(current_table_name) || ' ORDER BY event_date DESC LIMIT 1' INTO latest_timestamp_record;
-        CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'get event_date = ' || latest_timestamp_record.event_date || ' from {{schema}}.' || current_table_name );
-        IF latest_timestamp_record.event_date is null THEN
-            CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'no event_date found in from {{schema}}.' || current_table_name );
-        ELSE
+        IF latest_timestamp_record.event_date IS NOT NULL THEN
             EXECUTE 'DELETE FROM {{schema}}.' || quote_ident(current_table_name) || ' WHERE event_date < ''' || (latest_timestamp_record.event_date - retention_range_days * interval '1 day')::text || '''';
             GET DIAGNOSTICS record_number := ROW_COUNT;
-            CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' expired records from {{schema}}.' || current_table_name || ' for retention_range_days='||retention_range_days);
         END IF;        
 	END LOOP;
 
