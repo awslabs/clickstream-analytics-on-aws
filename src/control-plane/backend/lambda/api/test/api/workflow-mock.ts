@@ -1122,7 +1122,7 @@ export const STREAMING_BASE_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftMode',
-    ParameterValue: 'New_Serverless',
+    ParameterValue: 'Serverless',
   },
   {
     ParameterKey: 'RedshiftClusterIdentifier',

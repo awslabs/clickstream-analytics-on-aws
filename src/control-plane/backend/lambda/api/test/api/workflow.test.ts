@@ -2957,7 +2957,6 @@ describe('Workflow test', () => {
                                   Input: {
                                     Action: 'Create',
                                     Region: 'ap-southeast-1',
-
                                     Parameters: removeParameters(
                                       [
                                         ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
