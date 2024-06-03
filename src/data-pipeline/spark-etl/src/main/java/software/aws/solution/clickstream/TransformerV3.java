@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
@@ -31,9 +30,6 @@ import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 import software.aws.solution.clickstream.util.ContextUtil;
 import software.aws.solution.clickstream.util.DatasetUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.expr;
@@ -347,24 +343,4 @@ public class TransformerV3 extends BaseTransformerV3 {
         return CLICKSTREAM;
     }
 
-
-    @Override
-    public Dataset<Row> postTransform(final Dataset<Row> dataset) {
-        SparkSession sparkSession = dataset.sparkSession();
-        mergeIncrementalTables(sparkSession);
-        return dataset.drop(Constant.UA, Constant.IP);
-    }
-
-    private void mergeIncrementalTables(final SparkSession sparkSession) {
-        log.info("start merging incremental tables");
-        int userKeepDays = ContextUtil.getUserKeepDays();
-
-        List<DatasetUtil.TableInfo> l = new ArrayList<>();
-
-        l.add(new DatasetUtil.TableInfo(
-                getUserPropsTableName(), TABLE_VERSION_SUFFIX_V3, userKeepDays
-        ));
-
-        DatasetUtil.mergeIncrementalTables(sparkSession, l);
-    }
 }
