@@ -197,12 +197,12 @@ public class ETLRunner {
         String mName = "postTransform";
         Dataset<Row> resultDataset = dataset;
         try {
-            Method postTransform = transformClass.getDeclaredMethod(mName, Dataset.class);
+            Method postTransform = transformClass.getMethod(mName, Dataset.class);
             log.info("find method: " + postTransform.getName());
             Object instance = transformClass.getDeclaredConstructor().newInstance();
             resultDataset = (Dataset<Row>) postTransform.invoke(instance, dataset);
         } catch (NoSuchMethodException ignored) {
-            log.info("did not find method: " + mName);
+            log.info("transformClass: {}, did not find method {}",  transformClass, mName);
         }
         return resultDataset;
     }

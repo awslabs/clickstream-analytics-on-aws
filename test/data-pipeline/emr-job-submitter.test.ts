@@ -388,7 +388,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
   test('test getEstimatedSparkConfig()', () => {
     const size_1G = 1024 * 1024 * 1024;
 
-    [1, 11, 31, 51, 101, 201, 501, 1001, 2001].forEach(n => {
+    [0.5, 1, 11, 31, 51, 101, 201, 501, 1001, 2001].forEach(n => {
       let config: CustomSparkConfig = getEstimatedSparkConfig({
         sizeTotal: size_1G * n,
         objectCount: 10 * n,
