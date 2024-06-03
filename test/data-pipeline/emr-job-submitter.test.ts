@@ -214,14 +214,14 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
 --files s3://test/test1.txt,s3://test/test2.txt \
 --conf spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory \
---conf spark.driver.cores=4 \
---conf spark.driver.memory=14g \
+--conf spark.driver.cores=2 \
+--conf spark.driver.memory=7g \
 --conf spark.executor.cores=4 \
 --conf spark.executor.memory=14g \
 --conf spark.emr-serverless.driver.disk=20g \
 --conf spark.emr-serverless.executor.disk=20g \
 --conf spark.dynamicAllocation.enabled=true \
---conf spark.dynamicAllocation.initialExecutors=3 --conf spark.executor.instances=3',
+--conf spark.dynamicAllocation.initialExecutors=2 --conf spark.executor.instances=2',
         },
       },
       tags: functionTags,
@@ -297,15 +297,15 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
 --files s3://test/test1.txt,s3://test/test2.txt \
 --conf spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory \
---conf spark.driver.cores=4 \
---conf spark.driver.memory=14g \
+--conf spark.driver.cores=2 \
+--conf spark.driver.memory=7g \
 --conf spark.executor.cores=8 \
 --conf spark.executor.memory=50g \
 --conf spark.emr-serverless.driver.disk=20g \
 --conf spark.emr-serverless.executor.disk=20g \
 --conf spark.dynamicAllocation.enabled=true \
---conf spark.dynamicAllocation.initialExecutors=3 \
---conf spark.executor.instances=3 \
+--conf spark.dynamicAllocation.initialExecutors=2 \
+--conf spark.executor.instances=2 \
 --conf spark.executor.test=test001',
         },
       },
