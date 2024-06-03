@@ -1059,11 +1059,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   changeEnableStreaming(detail.checked);
                 }}
                 checked={pipelineInfo.enableStreaming}
-                description={
-                  <div>
-                    <Trans i18nKey="pipeline:create.enableStreamingDesc" />
-                  </div>
-                }
+                description={defaultStr(
+                  t('pipeline:create.enableStreamingDesc')
+                )}
               >
                 <b>{t('pipeline:create.enableStreaming')}</b>
               </Toggle>

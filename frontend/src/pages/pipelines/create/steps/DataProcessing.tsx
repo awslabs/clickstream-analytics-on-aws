@@ -41,7 +41,7 @@ import Divider from 'components/common/Divider';
 import { defaultTo } from 'lodash';
 import PluginTable from 'pages/plugins/comps/PluginTable';
 import React, { useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import {
   DEFAULT_TRANSFORM_SDK_IDS,
   EVENT_REFRESH_UNIT_LIST,
@@ -1091,11 +1091,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                       changeEnableStreaming(detail.checked);
                     }}
                     checked={pipelineInfo.enableStreaming}
-                    description={
-                      <div>
-                        <Trans i18nKey="pipeline:create.enableStreamingDesc" />
-                      </div>
-                    }
+                    description={defaultStr(
+                      t('pipeline:create.enableStreamingDesc')
+                    )}
                   >
                     <b>{t('pipeline:create.enableStreaming')}</b>
                   </Toggle>
