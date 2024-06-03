@@ -69,5 +69,10 @@
     "pipelineInfo": "Pipeline Information",
     "serverEdp": "Server Endpoint",
     "serverDomain": "Server Domain"
+  },
+  "delete": {
+    "title": "Delete Application",
+    "tip1": "Are you sure you want to delete the application ",
+    "tip2": " ?"
   }
 }

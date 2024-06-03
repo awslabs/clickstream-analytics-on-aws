@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON } from '@aws/clickstream-base-lib';
 import moment from 'moment-timezone';
 import { PipelineServ } from './pipeline';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
@@ -260,6 +260,11 @@ export class ApplicationServ {
       if (!flinkAppName) {
         return res.status(404).json(new ApiFail('The flink application not found.'));
       }
+      // TODO: wait stack update and get output
+      const sinkKinesis = getStackOutputFromPipelineStatus(
+        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+        PipelineStackType.STREAMING, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON);
+      console.log('sinkKinesis', sinkKinesis);
       const streamAppIds = latestPipeline.streaming?.appIdStreamList ?? [];
       if (enable && !streamAppIds.includes(id)) {
         streamAppIds.push(id);

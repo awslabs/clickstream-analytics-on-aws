@@ -24,6 +24,7 @@ import {
   Link as CloudScapeLink,
   StatusIndicator,
   ButtonDropdown,
+  Modal,
 } from '@cloudscape-design/components';
 import {
   deleteApplication,
@@ -61,6 +62,9 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   const [loadingRetry, setLoadingRetry] = useState(false);
   const [disableRetry, setDisableRetry] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const goToCreateApplication = () => {
     navigate(`/project/${pipelineInfo.projectId}/application/create`);
   };
@@ -91,6 +95,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   };
 
   const confirmDeleteApplication = async () => {
+    setLoadingDelete(true);
     try {
       const resData: ApiResponse<null> = await deleteApplication({
         pid: defaultStr(pipelineInfo.projectId),
@@ -99,9 +104,11 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
       if (resData.success) {
         setSelectedItems([]);
         listApplicationByProject();
+        setShowDeleteModal(false);
+        setLoadingDelete(false);
       }
     } catch (error) {
-      console.error(error);
+      setLoadingDelete(false);
     }
   };
 
@@ -178,258 +185,292 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   };
 
   return (
-    <SpaceBetween direction="vertical" size="l">
-      <Container
-        header={
-          <Header
-            variant="h2"
-            description={t('project:pipeline.healthDesc')}
-            actions={
-              <SpaceBetween direction="horizontal" size="xs">
-                <Button
-                  iconName="refresh"
-                  loading={loadingRefresh}
-                  onClick={(e) => {
-                    let refresh = 'false';
-                    if (
-                      e.detail.altKey ||
-                      e.detail.ctrlKey ||
-                      e.detail.metaKey ||
-                      e.detail.shiftKey
-                    ) {
-                      refresh = 'force';
-                    }
-                    reloadPipeline(refresh);
-                    setRefreshCount(refreshCount + 1);
-                  }}
-                />
-                {pipelineInfo.statusType === EPipelineStatus.Failed && (
+    <>
+      <SpaceBetween direction="vertical" size="l">
+        <Container
+          header={
+            <Header
+              variant="h2"
+              description={t('project:pipeline.healthDesc')}
+              actions={
+                <SpaceBetween direction="horizontal" size="xs">
                   <Button
-                    iconName="redo"
-                    disabled={disableRetry}
-                    loading={loadingRetry}
+                    iconName="refresh"
+                    loading={loadingRefresh}
+                    onClick={(e) => {
+                      let refresh = 'false';
+                      if (
+                        e.detail.altKey ||
+                        e.detail.ctrlKey ||
+                        e.detail.metaKey ||
+                        e.detail.shiftKey
+                      ) {
+                        refresh = 'force';
+                      }
+                      reloadPipeline(refresh);
+                      setRefreshCount(refreshCount + 1);
+                    }}
+                  />
+                  {pipelineInfo.statusType === EPipelineStatus.Failed && (
+                    <Button
+                      iconName="redo"
+                      disabled={disableRetry}
+                      loading={loadingRetry}
+                      onClick={() => {
+                        startRetryPipeline();
+                      }}
+                    >
+                      {t('button.retry')}
+                    </Button>
+                  )}
+
+                  <Button
+                    href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
+                    iconAlign="right"
+                    iconName="external"
+                    target="_blank"
+                  >
+                    {t('button.viewDetails')}
+                  </Button>
+                </SpaceBetween>
+              }
+            >
+              {t('project:pipeline.health')}
+            </Header>
+          }
+        >
+          <ColumnLayout columns={3} variant="text-grid">
+            <SpaceBetween direction="vertical" size="l">
+              <div>
+                <Box variant="awsui-key-label">
+                  {t('project:pipeline.pipeline')}
+                </Box>
+                <div>
+                  <CloudScapeLink
+                    external
+                    externalIconAriaLabel="Opens in a new tab"
+                    href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
+                  >
+                    {pipelineInfo.pipelineId}
+                  </CloudScapeLink>
+                </div>
+              </div>
+            </SpaceBetween>
+            <SpaceBetween direction="vertical" size="l">
+              <div>
+                <Box variant="awsui-key-label">
+                  {t('project:pipeline.status')}
+                </Box>
+                <div>
+                  <PipelineStatus
+                    projectId={pipelineInfo.projectId}
+                    status={pipelineInfo.statusType}
+                    refreshCount={refreshCount}
+                  />
+                </div>
+              </div>
+            </SpaceBetween>
+            <SpaceBetween direction="vertical" size="l">
+              <div>
+                <Box variant="awsui-key-label">
+                  {t('project:pipeline.region')}
+                </Box>
+                <div>{pipelineInfo.region}</div>
+              </div>
+            </SpaceBetween>
+          </ColumnLayout>
+        </Container>
+
+        <Table
+          onSelectionChange={({ detail }) =>
+            setSelectedItems(detail.selectedItems)
+          }
+          selectedItems={selectedItems}
+          columnDefinitions={[
+            {
+              id: 'name',
+              header: t('project:pipeline.appName'),
+              cell: (e) => renderAppName(e),
+            },
+            {
+              id: 'appId',
+              header: t('project:pipeline.appId'),
+              cell: (e) => e.appId,
+            },
+            {
+              id: 'desc',
+              header: t('project:pipeline.appDesc'),
+              cell: (e) => e.description,
+            },
+            {
+              id: 'timezone',
+              header: t('application:appTimezone'),
+              cell: (e) => renderAppTimezone(e.appId),
+            },
+            {
+              id: 'stream',
+              header: t('project:pipeline.appStreamEnable'),
+              cell: (e) => renderAppEnable(e),
+            },
+            {
+              id: 'time',
+              header: t('project:pipeline.time'),
+              cell: (e) => moment(e.createAt).format(TIME_FORMAT),
+            },
+          ]}
+          loading={loadingApp}
+          items={applicationList}
+          loadingText={defaultStr(t('project:pipeline.loading'))}
+          selectionType="single"
+          trackBy="appId"
+          empty={
+            <Box textAlign="center" color="inherit">
+              <b>{t('project:pipeline.noApp')}</b>
+              <Box padding={{ bottom: 's' }} variant="p" color="inherit">
+                {t('project:pipeline.noAppDisplay')}
+              </Box>
+              <Button
+                disabled={pipelineInfo?.statusType !== EPipelineStatus.Active}
+                iconName="add-plus"
+                onClick={() => {
+                  goToCreateApplication();
+                }}
+              >
+                {t('button.addApplication')}
+              </Button>
+            </Box>
+          }
+          filter={
+            <TextFilter
+              filteringPlaceholder={defaultStr(t('project:pipeline.findApp'))}
+              filteringText=""
+            />
+          }
+          header={
+            <Header
+              counter={
+                selectedItems.length
+                  ? '(' + selectedItems.length + '/' + totalCount + ')'
+                  : ''
+              }
+              description={t('project:pipeline.yourAppDesc')}
+              actions={
+                <SpaceBetween direction="horizontal" size="xs">
+                  <Button
+                    loading={loadingApp}
+                    iconName="refresh"
                     onClick={() => {
-                      startRetryPipeline();
+                      listApplicationByProject();
+                    }}
+                  />
+                  <Button
+                    disabled={selectedItems.length <= 0}
+                    onClick={() => {
+                      goToApplicationDetail();
                     }}
                   >
-                    {t('button.retry')}
+                    {t('button.viewDetails')}
                   </Button>
-                )}
-
-                <Button
-                  href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
-                  iconAlign="right"
-                  iconName="external"
-                  target="_blank"
-                >
-                  {t('button.viewDetails')}
-                </Button>
-              </SpaceBetween>
-            }
-          >
-            {t('project:pipeline.health')}
-          </Header>
-        }
-      >
-        <ColumnLayout columns={3} variant="text-grid">
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">
-                {t('project:pipeline.pipeline')}
-              </Box>
-              <div>
-                <CloudScapeLink
-                  external
-                  externalIconAriaLabel="Opens in a new tab"
-                  href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
-                >
-                  {pipelineInfo.pipelineId}
-                </CloudScapeLink>
-              </div>
-            </div>
-          </SpaceBetween>
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">
-                {t('project:pipeline.status')}
-              </Box>
-              <div>
-                <PipelineStatus
-                  projectId={pipelineInfo.projectId}
-                  status={pipelineInfo.statusType}
-                  refreshCount={refreshCount}
-                />
-              </div>
-            </div>
-          </SpaceBetween>
-          <SpaceBetween direction="vertical" size="l">
-            <div>
-              <Box variant="awsui-key-label">
-                {t('project:pipeline.region')}
-              </Box>
-              <div>{pipelineInfo.region}</div>
-            </div>
-          </SpaceBetween>
-        </ColumnLayout>
-      </Container>
-
-      <Table
-        onSelectionChange={({ detail }) =>
-          setSelectedItems(detail.selectedItems)
-        }
-        selectedItems={selectedItems}
-        columnDefinitions={[
-          {
-            id: 'name',
-            header: t('project:pipeline.appName'),
-            cell: (e) => renderAppName(e),
-          },
-          {
-            id: 'appId',
-            header: t('project:pipeline.appId'),
-            cell: (e) => e.appId,
-          },
-          {
-            id: 'desc',
-            header: t('project:pipeline.appDesc'),
-            cell: (e) => e.description,
-          },
-          {
-            id: 'timezone',
-            header: t('application:appTimezone'),
-            cell: (e) => renderAppTimezone(e.appId),
-          },
-          {
-            id: 'stream',
-            header: t('project:pipeline.appStreamEnable'),
-            cell: (e) => renderAppEnable(e),
-          },
-          {
-            id: 'time',
-            header: t('project:pipeline.time'),
-            cell: (e) => moment(e.createAt).format(TIME_FORMAT),
-          },
-        ]}
-        loading={loadingApp}
-        items={applicationList}
-        loadingText={defaultStr(t('project:pipeline.loading'))}
-        selectionType="single"
-        trackBy="appId"
-        empty={
-          <Box textAlign="center" color="inherit">
-            <b>{t('project:pipeline.noApp')}</b>
-            <Box padding={{ bottom: 's' }} variant="p" color="inherit">
-              {t('project:pipeline.noAppDisplay')}
-            </Box>
-            <Button
-              disabled={pipelineInfo?.statusType !== EPipelineStatus.Active}
-              iconName="add-plus"
-              onClick={() => {
-                goToCreateApplication();
-              }}
+                  <Button
+                    disabled={
+                      pipelineInfo?.statusType !== EPipelineStatus.Active
+                    }
+                    variant="primary"
+                    iconName="add-plus"
+                    onClick={() => {
+                      goToCreateApplication();
+                    }}
+                  >
+                    {t('button.addApplication')}
+                  </Button>
+                  <ButtonDropdown
+                    onItemClick={(e) => {
+                      if (e.detail.id === 'rm') {
+                        setShowDeleteModal(true);
+                      }
+                      if (e.detail.id === 'stream-enable') {
+                        confirmStreamingApplication(true);
+                      }
+                      if (e.detail.id === 'stream-disable') {
+                        confirmStreamingApplication(false);
+                      }
+                    }}
+                    items={[
+                      {
+                        text: defaultStr(t('button.delete')),
+                        id: 'rm',
+                        disabled: !selectedItems.length,
+                      },
+                      {
+                        text: defaultStr(t('button.streamEnable')),
+                        id: 'stream-enable',
+                        disabled: !disableStreamEnableButton(),
+                      },
+                      {
+                        text: defaultStr(t('button.streamDisable')),
+                        id: 'stream-disable',
+                        disabled: disableStreamEnableButton(),
+                      },
+                    ]}
+                  >
+                    {t('button.actions')}
+                  </ButtonDropdown>
+                </SpaceBetween>
+              }
             >
-              {t('button.addApplication')}
-            </Button>
+              {t('project:pipeline.yourApp')}
+            </Header>
+          }
+          pagination={
+            <Pagination
+              currentPageIndex={currentPage}
+              onChange={(e) => {
+                setCurrentPage(e.detail.currentPageIndex);
+              }}
+              pagesCount={Math.floor(totalCount / PAGE_SIZE)}
+              ariaLabels={{
+                nextPageLabel: defaultStr(t('nextPage')),
+                previousPageLabel: defaultStr(t('prePage')),
+                pageLabel: (pageNumber) =>
+                  `${t('page')} ${pageNumber} ${t('allPages')}`,
+              }}
+            />
+          }
+        />
+      </SpaceBetween>
+
+      <Modal
+        onDismiss={() => setShowDeleteModal(false)}
+        visible={showDeleteModal}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                }}
+                variant="link"
+              >
+                {t('button.cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  confirmDeleteApplication();
+                }}
+                loading={loadingDelete}
+              >
+                {t('button.confirm')}
+              </Button>
+            </SpaceBetween>
           </Box>
         }
-        filter={
-          <TextFilter
-            filteringPlaceholder={defaultStr(t('project:pipeline.findApp'))}
-            filteringText=""
-          />
-        }
-        header={
-          <Header
-            counter={
-              selectedItems.length
-                ? '(' + selectedItems.length + '/' + totalCount + ')'
-                : ''
-            }
-            description={t('project:pipeline.yourAppDesc')}
-            actions={
-              <SpaceBetween direction="horizontal" size="xs">
-                <Button
-                  loading={loadingApp}
-                  iconName="refresh"
-                  onClick={() => {
-                    listApplicationByProject();
-                  }}
-                />
-                <Button
-                  disabled={selectedItems.length <= 0}
-                  onClick={() => {
-                    goToApplicationDetail();
-                  }}
-                >
-                  {t('button.viewDetails')}
-                </Button>
-                <Button
-                  disabled={pipelineInfo?.statusType !== EPipelineStatus.Active}
-                  variant="primary"
-                  iconName="add-plus"
-                  onClick={() => {
-                    goToCreateApplication();
-                  }}
-                >
-                  {t('button.addApplication')}
-                </Button>
-                <ButtonDropdown
-                  onItemClick={(e) => {
-                    if (e.detail.id === 'rm') {
-                      confirmDeleteApplication();
-                    }
-                    if (e.detail.id === 'stream-enable') {
-                      confirmStreamingApplication(true);
-                    }
-                    if (e.detail.id === 'stream-disable') {
-                      confirmStreamingApplication(false);
-                    }
-                  }}
-                  items={[
-                    {
-                      text: defaultStr(t('button.delete')),
-                      id: 'rm',
-                      disabled: !selectedItems.length,
-                    },
-                    {
-                      text: defaultStr(t('button.streamEnable')),
-                      id: 'stream-enable',
-                      disabled:
-                        !selectedItems.length || !disableStreamEnableButton(),
-                    },
-                    {
-                      text: defaultStr(t('button.streamDisable')),
-                      id: 'stream-disable',
-                      disabled:
-                        !selectedItems.length || disableStreamEnableButton(),
-                    },
-                  ]}
-                >
-                  {t('button.actions')}
-                </ButtonDropdown>
-              </SpaceBetween>
-            }
-          >
-            {t('project:pipeline.yourApp')}
-          </Header>
-        }
-        pagination={
-          <Pagination
-            currentPageIndex={currentPage}
-            onChange={(e) => {
-              setCurrentPage(e.detail.currentPageIndex);
-            }}
-            pagesCount={Math.floor(totalCount / PAGE_SIZE)}
-            ariaLabels={{
-              nextPageLabel: defaultStr(t('nextPage')),
-              previousPageLabel: defaultStr(t('prePage')),
-              pageLabel: (pageNumber) =>
-                `${t('page')} ${pageNumber} ${t('allPages')}`,
-            }}
-          />
-        }
-      />
-    </SpaceBetween>
+        header={t('application:delete.title')}
+      >
+        {t('application:delete.tip1')} <b>{selectedItems[0]?.appId}</b>
+        {t('application:delete.tip2')}
+      </Modal>
+    </>
   );
 };
 

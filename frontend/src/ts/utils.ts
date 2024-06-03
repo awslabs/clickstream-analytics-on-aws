@@ -14,6 +14,7 @@
 import {
   IMetadataBuiltInList,
   ServerlessRedshiftRPUByRegionMapping,
+  SolutionVersion,
 } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
@@ -375,14 +376,10 @@ export const isStreamingVisible = (
   pipelineInfo?: IExtPipeline
 ) => {
   if (update) {
-    return !(
-      pipelineInfo?.templateVersion?.startsWith('v1.0') ||
-      pipelineInfo?.templateVersion?.startsWith('v1.1.1') ||
-      pipelineInfo?.templateVersion?.startsWith('v1.1.2') ||
-      pipelineInfo?.templateVersion?.startsWith('v1.1.3') ||
-      pipelineInfo?.templateVersion?.startsWith('v1.1.4') ||
-      pipelineInfo?.templateVersion?.startsWith('v1.1.5')
+    const templateVersion = SolutionVersion.Of(
+      pipelineInfo?.templateVersion ?? ''
     );
+    return templateVersion.greaterThan(SolutionVersion.V_1_1_5);
   }
   return true;
 };
