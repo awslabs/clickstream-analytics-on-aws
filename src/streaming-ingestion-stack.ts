@@ -90,6 +90,14 @@ export class StreamingIngestionStack extends Stack {
       'streaming-ingestion',
       `built-in-${getShortIdOfStack(Stack.of(this))}`,
     ])]);
+
+    const version = SolutionInfo.SOLUTION_VERSION_SHORT;
+
+    let commonLibCommands = [
+      'cd /tmp/data-pipeline/etl-common/',
+      `gradle clean build install -PprojectVersion=${version} -x test -x coverageCheck`,
+    ];
+
     const {
       entryPointJar: applicationJar,
       files: builtInFiles,
@@ -104,6 +112,7 @@ export class StreamingIngestionStack extends Stack {
         destinationBucket: dataBucket,
         destinationKeyPrefix: appPrefix,
         buildImage: 'public.ecr.aws/docker/library/gradle:7.6-jdk11',
+        commonLibs: commonLibCommands,
       },
     );
 
