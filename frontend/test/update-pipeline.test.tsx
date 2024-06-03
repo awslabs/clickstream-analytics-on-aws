@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { SolutionVersion } from '@aws/clickstream-base-lib';
 import { render } from '@testing-library/react';
 import DataProcessing from 'pages/pipelines/create/steps/DataProcessing';
 import Reporting from 'pages/pipelines/create/steps/Reporting';
@@ -118,6 +119,9 @@ describe('Test update pipeline when not enable data processing or data modeling'
         changeDBUser={() => {
           return;
         }}
+        changeEnableStreaming={() => {
+          return;
+        }}
         changeDataLoadCronExp={() => {
           return;
         }}
@@ -181,6 +185,7 @@ describe('Test update pipeline when not enable data processing or data modeling'
         status: EPipelineStatus.Failed,
         stackDetails: [],
       },
+      templateVersion: SolutionVersion.Of('v1.2.0').fullVersion,
     };
     const dataProcessingDom = render(
       <DataProcessing
@@ -247,6 +252,9 @@ describe('Test update pipeline when not enable data processing or data modeling'
           return;
         }}
         changeDBUser={() => {
+          return;
+        }}
+        changeEnableStreaming={() => {
           return;
         }}
         changeDataLoadCronExp={() => {

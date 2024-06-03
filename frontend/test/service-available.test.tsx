@@ -582,6 +582,9 @@ describe('Test EMR Serverless service available', () => {
         changeDBUser={() => {
           return;
         }}
+        changeEnableStreaming={() => {
+          return;
+        }}
         changeDataLoadCronExp={() => {
           return;
         }}
@@ -694,6 +697,9 @@ describe('Test EMR Serverless service available', () => {
           return;
         }}
         changeDBUser={() => {
+          return;
+        }}
+        changeEnableStreaming={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -810,6 +816,9 @@ describe('Test Redsfhift Serverless service available', () => {
           return;
         }}
         changeDBUser={() => {
+          return;
+        }}
+        changeEnableStreaming={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -929,6 +938,9 @@ describe('Test Redsfhift Serverless service available', () => {
           return;
         }}
         changeDBUser={() => {
+          return;
+        }}
+        changeEnableStreaming={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
