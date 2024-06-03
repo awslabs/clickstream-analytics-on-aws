@@ -82,6 +82,7 @@ describe('User segments workflow execute-segment-query lambda tests', () => {
     expect(redshiftDataClientMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: 'workgroup-test',
       Sql: expect.any(String),
+      Database: expect.any(String),
     });
   });
 
@@ -98,6 +99,7 @@ describe('User segments workflow execute-segment-query lambda tests', () => {
       expect(redshiftDataClientMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
         WorkgroupName: 'workgroup-test',
         Sql: expect.any(String),
+        Database: expect.any(String),
       });
     }
   });

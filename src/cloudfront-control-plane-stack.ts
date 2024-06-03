@@ -50,6 +50,7 @@ import { suppressWarningsForCloudFrontS3Portal as suppressWarningsForCloudFrontS
 import { SolutionCognito } from './control-plane/private/solution-cognito';
 import { generateSolutionConfig, SOLUTION_CONFIG_PATH } from './control-plane/private/solution-config';
 import { SolutionNodejsFunction } from './private/function';
+import { ApplicationLogLevel } from 'aws-cdk-lib/aws-lambda';
 
 export interface CloudFrontControlPlaneStackProps extends StackProps {
   /**
@@ -419,7 +420,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       logConf: {
         retention: RetentionDays.TEN_YEARS,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
       role: createLambdaRole(this, 'AuthorizerFunctionRole', false, []),
     });
     addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [

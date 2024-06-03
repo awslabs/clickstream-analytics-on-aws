@@ -676,7 +676,6 @@ describe('DataReportingQuickSightStack resource test', () => {
         POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
         POWERTOOLS_LOGGER_LOG_EVENT: 'true',
         LOG_LEVEL: 'WARN',
-        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       },
     },
     LoggingConfig: {

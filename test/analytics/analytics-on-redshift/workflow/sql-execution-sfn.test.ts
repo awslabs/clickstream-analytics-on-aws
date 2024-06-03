@@ -67,7 +67,6 @@ test('SQLExecutionStepFn is created as expected', () => {
             'Workgroup.WorkgroupName',
           ],
         },
-        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       },
     },
     Handler: 'index.handler',

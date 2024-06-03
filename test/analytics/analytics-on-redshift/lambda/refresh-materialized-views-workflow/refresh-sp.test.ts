@@ -60,6 +60,7 @@ describe('Lambda - do refresh in Redshift Serverless', () => {
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
       Sql: `CALL ${refreshSpEvent.timezoneWithAppId.appId}.${refreshSpEvent.sp.name}('${refreshSpEvent.refreshDate}', '${refreshSpEvent.timezoneWithAppId.timezone}', ${refreshSpEvent.refreshSpDays});`,
+      Database: expect.any(String),
     });
   });
 
@@ -78,6 +79,7 @@ describe('Lambda - do refresh in Redshift Serverless', () => {
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
       Sql: `CALL ${refreshSpEvent.timezoneWithAppId.appId}.${refreshSpEvent.sp.name}('${refreshSpEvent.refreshDate}', ${refreshSpEvent.refreshSpDays});`,
+      Database: expect.any(String),
     });
   });
 
@@ -89,6 +91,8 @@ describe('Lambda - do refresh in Redshift Serverless', () => {
     } catch (error) {
       expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
         WorkgroupName: workGroupName,
+        Database: expect.any(String),
+        Sql: expect.any(String),
       });
     }
   });

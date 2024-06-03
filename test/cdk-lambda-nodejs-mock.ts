@@ -41,7 +41,7 @@ export class NodejsFunction extends Function {
       // Use other props
       ...props,
       // Required values if not set for LambdaFunction
-      runtime: props.runtime ?? Runtime.NODEJS_18_X,
+      runtime: props.runtime ?? Runtime.NODEJS_20_X,
       // https://github.com/aws/aws-cdk/blob/main/packages/aws-cdk-lib/aws-lambda-nodejs/lib/function.ts#L116C16-L116C79
       handler: handler.indexOf('.') !== -1 ? `${handler}` : `index.${handler}`,
       // Set code with mock s3 location
