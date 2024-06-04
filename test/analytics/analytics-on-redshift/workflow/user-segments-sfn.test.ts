@@ -59,7 +59,6 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
             CLICKSTREAM_METADATA_DDB_ARN: {
               Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
             },
-            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
           },
         },
         Handler: 'index.handler',
@@ -153,7 +152,6 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
             POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
             POWERTOOLS_LOGGER_LOG_EVENT: 'true',
             LOG_LEVEL: 'WARN',
-            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
           },
         },
         Handler: 'index.handler',
@@ -242,7 +240,6 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
           CLICKSTREAM_METADATA_DDB_ARN: {
             Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
           },
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
         },
       },
       Handler: 'index.handler',
@@ -334,7 +331,6 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
           SEGMENTS_S3_PREFIX: {
             Ref: Match.stringLikeRegexp('SegmentsS3Prefix'),
           },
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
         },
       },
       Handler: 'index.handler',

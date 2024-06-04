@@ -58,6 +58,7 @@ describe('Lambda - do clear expired events in Redshift Serverless', () => {
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
       Sql: `CALL app1.${SP_CLEAR_EXPIRED_DATA}(365, '${spTablesStr}')`,
+      Database: expect.any(String),
     });
   });
 
@@ -69,6 +70,8 @@ describe('Lambda - do clear expired events in Redshift Serverless', () => {
     } catch (error) {
       expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
         WorkgroupName: workGroupName,
+        Database: expect.any(String),
+        Sql: expect.any(String),
       });
     }
   });
@@ -102,6 +105,8 @@ describe('Lambda - do clear expire events in Redshift Provisioned', () => {
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       ClusterIdentifier: clusterIdentifier,
       DbUser: dbUser,
+      Sql: expect.any(String),
+      Database: expect.any(String),
     });
   });
 });

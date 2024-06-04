@@ -704,7 +704,7 @@ describe('reporting test', () => {
     expect(res2.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res2.statusCode).toBe(201);
     expect(res2.body.success).toEqual(true);
-    expect(quickSightMock).toHaveReceivedNthSpecificCommandWith(2, CreateDataSetCommand, {});
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 3);
   });
 

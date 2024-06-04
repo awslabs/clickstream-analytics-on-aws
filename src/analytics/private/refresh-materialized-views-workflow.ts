@@ -15,7 +15,7 @@ import { join } from 'path';
 import { Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { IFunction } from 'aws-cdk-lib/aws-lambda';
+import { ApplicationLogLevel, IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays, LogGroup } from 'aws-cdk-lib/aws-logs';
 import { StateMachine, LogLevel, IStateMachine, DefinitionBody, Wait, WaitTime, Succeed, Condition, Choice, Fail, TaskInput, Pass, Map, IntegrationPattern } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke, StepFunctionsStartExecution } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -304,7 +304,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       environment: {
         TIMEZONE_WITH_APPID_LIST: props.timezoneWithAppId,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -329,7 +329,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       environment: {
         TIMEZONE_WITH_APPID_LIST: props.timezoneWithAppId,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     return fn;
   }
@@ -354,7 +354,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         REFRESH_MODE: props.refreshMode,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -382,7 +382,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
         DATA_REFRESHNESS_IN_HOUR: props.dataFreshnessInHour.toString(),
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -411,7 +411,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         REFRESH_MODE: props.refreshMode,
         REFRESH_SP_DAYS: props.refreshReportDays.toString(),
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -437,7 +437,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -464,7 +464,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -491,7 +491,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;

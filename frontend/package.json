@@ -64,7 +64,7 @@
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.0.0",
-    "ts-jest": "^29.1.2",
+    "ts-jest": "^29.1.4",
     "typescript": "^4.9.5",
     "vm-browserify": "^1.1.2",
     "webpack": "^5.85.0",
@@ -141,6 +141,7 @@
   "license": "Apache-2.0",
   "version": "1.2.0",
   "jest": {
+    "coverageProvider": "v8",
     "roots": [
       "<rootDir>/src",
       "<rootDir>/test"
@@ -154,7 +155,7 @@
       "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
       "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}",
       "<rootDir>/src/**/__tests__/**/*.ts?(x)",
-      "<rootDir>/(test|src)/**/*(*.)@(spec|test).ts?(x)"
+      "<rootDir>/@(test|src)/**/*(*.)@(spec|test).ts?(x)"
     ],
     "setupFiles": [
       "react-app-polyfill/jsdom"

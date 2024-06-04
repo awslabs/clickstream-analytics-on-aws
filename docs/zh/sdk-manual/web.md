@@ -78,24 +78,36 @@ ClickstreamAnalytics.record({ name: 'button_click' });
 
 #### 添加全局属性
 1. 在 SDK 初始化时添加全局属性。
-   ```typescript
-   ClickstreamAnalytics.init({
-      appId: "your appId",
-      endpoint: "https://example.com/collect",
-      globalAttributes:{
-        _traffic_source_medium: "Search engine",
-        _traffic_source_name: "Summer promotion",
-      }
-   });
-   ```
+
+    以下示例代码展示了如何在初始化 SDK 时添加 traffic source 相关字段作为全局属性。
+    ```typescript
+    import { ClickstreamAnalytics, Attr } from '@aws/clickstream-web';
+    
+    ClickstreamAnalytics.init({
+       appId: "your appId",
+       endpoint: "https://example.com/collect",
+       globalAttributes:{
+         [Attr.TRAFFIC_SOURCE_SOURCE]: 'amazon',
+         [Attr.TRAFFIC_SOURCE_MEDIUM]: 'cpc',
+         [Attr.TRAFFIC_SOURCE_CAMPAIGN]: 'summer_promotion',
+         [Attr.TRAFFIC_SOURCE_CAMPAIGN_ID]: 'summer_promotion_01',
+         [Attr.TRAFFIC_SOURCE_TERM]: 'running_shoes',
+         [Attr.TRAFFIC_SOURCE_CONTENT]: 'banner_ad_1',
+         [Attr.TRAFFIC_SOURCE_CLID]: 'amazon_ad_123',
+         [Attr.TRAFFIC_SOURCE_CLID_PLATFORM]: 'amazon_ads',
+       }
+    });
+    ```
 
 2. 在 SDK 初始化完成后添加全局属性。
-   ``` typescript
-   ClickstreamAnalytics.setGlobalAttributes({
-     _traffic_source_medium: "Search engine",
-     level: 10,
-   });
-   ```
+    ``` typescript
+    import { ClickstreamAnalytics, Attr } from '@aws/clickstream-web';
+    
+    ClickstreamAnalytics.setGlobalAttributes({
+      [Attr.TRAFFIC_SOURCE_MEDIUM]: "Search engine",
+      level: 10,
+    });
+    ```
 
 建议在 SDK 初始化时添加全局属性，全局属性将会出现在其设置后生成的每一个事件中。您也可以通过设置全局属性的值为 `null` 从而删除某个全局属性。
 
@@ -132,7 +144,7 @@ ClickstreamAnalytics.setUserAttributes({
 您可以添加以下代码来记录带有 Item 的事件。
 
 ```typescript
-import { ClickstreamAnalytics, Item } from '@aws/clickstream-web';
+import { ClickstreamAnalytics, Item, Attr } from '@aws/clickstream-web';
 
 const itemBook: Item = {
   id: '123',
@@ -145,7 +157,8 @@ const itemBook: Item = {
 ClickstreamAnalytics.record({
   name: 'view_item',
   attributes: {
-    currency: 'USD',
+    [Attr.CURRENCY]: 'USD',
+    [Attr.VALUE]: 99,
     event_category: 'recommended',
   },
   items: [itemBook],
@@ -190,10 +203,14 @@ ClickstreamAnalytics.init({
    isTrackClickEvents: true,
    isTrackSearchEvents: true,
    isTrackScrollEvents: true,
+   isTrackPageLoadEvents: true,
+   isTrackAppStartEvents: true,
+   isTrackAppEndEvents: true,
    pageType: PageType.SPA,
    isLogEvents: false,
    authCookie: "your auth cookie",
    sessionTimeoutDuration: 1800000,
+   idleTimeoutDuration: 120000,
    searchKeyWords: ['product', 'class'],
    domainList: ['example1.com', 'example2.com'],
 });
@@ -201,23 +218,27 @@ ClickstreamAnalytics.init({
 
 以下是每个参数的说明
 
-| 参数名称                        | 是否必需 | 默认值       | 解释                                                                                            |
-|-----------------------------|------|-----------|-----------------------------------------------------------------------------------------------|
-| appId                       | 是    | --        | 在解决方案控制平面中您应用程序的 ID                                                                           |
-| endpoint                    | 是    | --        | 您将事件上传到 Clickstream 摄取服务器的URL请求路径                                                             |
-| sendMode                    | 否    | Immediate | 发送事件的两种模式 `Immediate` (立即发送)和 `Batch`（批量发送）                                                   |
-| sendEventsInterval          | 否    | 5000      | 事件发送间隔毫秒数，仅在`Batch`（批量发送）模式时生效                                                                |
-| isTrackPageViewEvents       | 否    | true      | 是否自动记录 page view（页面浏览） 事件                                                                     |
-| isTrackUserEngagementEvents | 否    | true      | 是否自动记录 user engagement（用户参与） 事件                                                               |
-| isTrackClickEvents          | 否    | true      | 是否自动记录 click（点击） 事件                                                                           |
-| isTrackSearchEvents         | 否    | true      | 是否自动记录 search（搜索） 事件                                                                          |
-| isTrackScrollEvents         | 否    | true      | 是否自动记录 scroll（页面滚动） 事件                                                                        |
-| pageType                    | 否    | SPA       | 网站类型，`SPA`表示单页面应用程序，`multiPageApp`表示多页面应用程序。 仅当属性 `sTrackPageViewEvents` 的值为 `true` 时，此属性才起作用 |
-| isLogEvents                 | 否    | false     | 是否在控制台打印事件json内容以进行调试                                                                         |
-| authCookie                  | 否    | --        | 您的AWS ALB（应用程序负载均衡器）身份验证的 cookie                                                              |
-| sessionTimeoutDuration      | 否    | 1800000   | 会话超时的时长（毫秒）                                                                                   |
-| searchKeyWords              | 否    | --        | 自定义的关键字用于触发`_search`事件，默认情况下我们检测查询参数中的`q`，`s`，`search`，`query`和`keyword`                      |
-| domainList                  | 否    | --        | 如果您的网站跨多个域名，您可以自定义域名列表。 当链接指向不属于您配置的域名网站时，`_click ` 事件的 `_outbound  `属性将为 ` true`             |
+| 参数名称                        | 是否必需 | 默认值       | 解释                                                                                             |
+|-----------------------------|------|-----------|------------------------------------------------------------------------------------------------|
+| appId                       | 是    | --        | 在解决方案控制平面中您应用程序的 ID                                                                            |
+| endpoint                    | 是    | --        | 您将事件上传到 Clickstream 摄取服务器的URL请求路径                                                              |
+| sendMode                    | 否    | Immediate | 发送事件的两种模式 `Immediate` (立即发送)和 `Batch`（批量发送）                                                    |
+| sendEventsInterval          | 否    | 5000      | 事件发送间隔毫秒数，仅在`Batch`（批量发送）模式时生效                                                                 |
+| isTrackPageViewEvents       | 否    | true      | 是否自动记录 page view（页面浏览） 事件                                                                      |
+| isTrackUserEngagementEvents | 否    | true      | 是否自动记录 user engagement（用户参与） 事件                                                                |
+| isTrackClickEvents          | 否    | true      | 是否自动记录 click（点击） 事件                                                                            |
+| isTrackSearchEvents         | 否    | true      | 是否自动记录 search（搜索） 事件                                                                           |
+| isTrackScrollEvents         | 否    | true      | 是否自动记录 scroll（页面滚动） 事件                                                                         |
+| isTrackPageLoadEvents       | 否    | false     | 是否自动记录 page load（页面加载性能） 事件                                                                    |
+| isTrackAppStartEvents       | 否    | false     | 是否自动记录 app start（应用的页面变为可见状态） 事件                                                               |
+| isTrackAppEndEvents         | 否    | false     | 是否自动记录 app end（应用的页面变为不可见状态） 事件                                                                |
+| pageType                    | 否    | SPA       | 网站类型，`SPA`表示单页面应用程序，`multiPageApp`表示多页面应用程序。 仅当属性 `sTrackPageViewEvents` 的值为 `true` 时，此属性才起作用  |
+| isLogEvents                 | 否    | false     | 是否在控制台打印事件json内容以进行调试                                                                          |
+| authCookie                  | 否    | --        | 您的AWS ALB（应用程序负载均衡器）身份验证的 cookie                                                               |
+| sessionTimeoutDuration      | 否    | 1800000   | 会话超时的时长（毫秒）                                                                                    |
+| idleTimeoutDuration         | 否    | 120000    | 触发空闲状态之前用户不活动（无页面滚动、鼠标移动、点击事件）的最长时间，默认为 120000 毫秒，任何超过此阈值的空闲时间都将在当前页面的 user_engagement 事件中被排除去 |
+| searchKeyWords              | 否    | --        | 自定义的关键字用于触发`_search`事件，默认情况下我们检测查询参数中的`q`，`s`，`search`，`query`和`keyword`                       |
+| domainList                  | 否    | --        | 如果您的网站跨多个域名，您可以自定义域名列表。 当链接指向不属于您配置的域名网站时，`_click ` 事件的 `_outbound  `属性将为 ` true`              |
 
 #### 更新配置
 
@@ -300,19 +321,20 @@ Clickstream Web SDK 支持以下数据类型：
 
 ### 自动收集的事件
 
-| 事件名                | 触发时机                                                                                    | 事件属性                                                                                                                                                                                              |
-|--------------------|-----------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| _first_open        | 用户在一个浏览器中第一次打开网站                                                                        |                                                                                                                                                                                                   |
-| _session_start     | 当用户首次访问该网站或用户离开网站30 分钟后返回该网站时，[了解更多](#_16)                                              | 1. _session_id <br>2. _session_start_timestamp                                                                                                                                                    |
-| _page_view         | 当新页面打开时，[了解更多](#_17)                                                                    | 1. _page_referrer<br/>2. _page_referrer_title<br/>3. _entrances<br/>4. _previous_timestamp<br/>5. _engagement_time_msec                                                                           |
-| _user_engagement   | 当用户离开当前页面，并且该页面处于焦点超过一秒时，[了解更多](#_18)                                                   | 1 ._engagement_time_msec<br>                                                                                                                                                                      |
-| _app_start         | 每次浏览器从不可见到进入可见状态时                                                                       | 1. _is_first_time（当应用程序启动后第一个`_app_start`事件时，值为`true`）                                                                                                                                            |
-| _app_end           | 每次浏览器从可见到进入不可见状态时                                                                       |                                                                                                                                                                                                   |
-| _profile_set       | 当调用 `addUserAttributes()` 或 `setUserId()` API 时                                         |                                                                                                                                                                                                   |
-| _scroll            | 用户第一次到达每个页面的底部时（即当 90% 的垂直深度变得可见时）                                                      | 1. _engagement_time_msec                                                                                                                                                                          |
-| _search            | 每次用户执行站点搜索时，根据 URL 查询参数的存在来判断，默认情况下，我们在查询参数中检测 `q`, `s`, `search`, `query` 和 `keyword`。 | 1. _search_key (搜索参数名称)<br>2. _search_term (搜索内容)                                                                                                                                                 |
-| _click             | 每次用户单击将其带离当前域名（或配置的域名列表）的链接时                                                            | 1. _link_classes（标签 `<a>`中`class`里的内容）<br>2. _link_domain（标签 `<a>`中`herf`里的域名）<br>3. _link_id（标签 `<a>`中`id`里的内容）<br>4. _link_url（标签 `<a>`中`herf`里的内容）<br>5. _outbound（如果该域不在配置的域名列表中，则属性值为“true”） |
-| _clickstream_error | event_name 不合规或用户属性不合规时                                                                 | 1. _error_code <br>2. _error_message                                                                                                                                                              |
+| 事件名                | 触发时机                                                                                                                                                   | 事件属性                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _first_open        | 用户在一个浏览器中第一次打开网站                                                                                                                                       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| _session_start     | 当用户首次访问该网站或用户离开网站30 分钟后返回该网站时，[了解更多](#_17)                                                                                                             | 1. _session_id <br>2. _session_start_timestamp                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| _page_view         | 当新页面打开时，[了解更多](#_18)                                                                                                                                   | 1. _page_referrer<br/>2. _page_referrer_title<br/>3. _entrances<br/>4. _previous_timestamp<br/>5. _engagement_time_msec                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| _user_engagement   | 当用户离开当前页面，并且该页面处于焦点超过一秒时，[了解更多](#_19)                                                                                                                  | 1 ._engagement_time_msec<br>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| _app_start         | 每次浏览器从不可见到进入可见状态时                                                                                                                                      | 1. _is_first_time（当应用程序启动后第一个`_app_start`事件时，值为`true`）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| _app_end           | 每次浏览器从可见到进入不可见状态时                                                                                                                                      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| _profile_set       | 当调用 `addUserAttributes()` 或 `setUserId()` API 时                                                                                                        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| _scroll            | 用户第一次到达每个页面的底部时（即当 90% 的垂直深度变得可见时）                                                                                                                     | 1. _engagement_time_msec                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| _search            | 每次用户执行站点搜索时，根据 URL 查询参数的存在来判断，默认情况下，我们在查询参数中检测 `q`, `s`, `search`, `query` 和 `keyword`。                                                                | 1. _search_key (搜索参数名称)<br>2. _search_term (搜索内容)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| _click             | 每次用户单击将其带离当前域名（或配置的域名列表）的链接时                                                                                                                           | 1. _link_classes（标签 `<a>`中`class`里的内容）<br>2. _link_domain（标签 `<a>`中`herf`里的域名）<br>3. _link_id（标签 `<a>`中`id`里的内容）<br>4. _link_url（标签 `<a>`中`herf`里的内容）<br>5. _outbound（如果该域不在配置的域名列表中，则属性值为“true”）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| _page_load         | 每次新页面加载完成并回调浏览器 [PerformanceObserver](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceNavigationTiming/toJSON#examples) 的 `navigation` 事件时 | 1. duration<br>2. deliveryType<br>3. nextHopProtocol<br>4. renderBlockingStatus<br>5. startTime<br>6. redirectStart<br>7. redirectEnd<br>8. workerStart<br>9. fetchStart<br>10. domainLookupStart<br>11. domainLookupEnd<br>12. connectStart<br>13. secureConnectionStart<br>14. connectEnd<br>15. requestStart<br>16. firstInterimResponseStart<br>17. responseStart<br>18. responseEnd<br>19. transferSize<br>20. encodedBodySize<br>21. decodedBodySize<br>22. responseStatus<br>23. unloadEventStart<br>24. unloadEventEnd<br>25. domInteractive<br>26. domContentLoadedEventStart<br>27. domContentLoadedEventEnd<br>28. domComplete<br>29. loadEventStart<br>30. loadEventEnd<br>31. type<br>32. redirectCount<br>33. activationStart<br>34. criticalCHRestart<br>35. serverTiming<br> 更多详细信息请参考 [PerformanceNavigationTiming](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceNavigationTiming) 和 [toJson](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceNavigationTiming/toJSON) 方法  |
+| _clickstream_error | event_name 不合规或用户属性不合规时                                                                                                                                | 1. _error_code <br>2. _error_message                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ### 会话定义
 
@@ -323,7 +345,7 @@ Clickstream Web SDK 支持以下数据类型：
 1. _session_id：我们通过uniqueId的后8个字符和当前毫秒值拼接来计算会话id，例如：dc7a7a18-20230905-131926703
 2. _session_duration：我们通过减去当前事件创建时间戳和会话的`_session_start_timestamp`来计算会话持续时间，该属性将添加到会话期间的每个事件中。
 3. _session_number：当前浏览器中session的自增数，初始值为1
-4. 会话超时时间：默认为 30 分钟，可以通过[configuration](#_7) API 自定义。
+4. 会话超时时间：默认为 30 分钟，可以通过[configuration](#_8) API 自定义。
 
 ### 页面浏览定义
 
@@ -353,7 +375,7 @@ Clickstream Web SDK 支持以下数据类型：
 3. 当用户点击浏览器另一个选项卡或最小化当前浏览器窗口时。
 4. 当用户关闭网站选项卡或关闭浏览器应用程序时。
 
-**engagement_time_msec**：我们计算从当前页面可见到用户离开当前页面的时长（单位毫秒）。
+**engagement_time_msec**：我们计算从当前页面可见到用户离开当前页面排除中间空闲时间的时长（单位毫秒）。
 
 ## 事件属性
 
@@ -419,27 +441,27 @@ Clickstream Web SDK 支持以下数据类型：
 
 ### 公共属性
 
-| 属性              | 数据类型    | 描述                        | 如何生成                                                                                                             | 用途和目的                     |
-|-----------------|---------|---------------------------|------------------------------------------------------------------------------------------------------------------|---------------------------|
-| app_id          | string  | 点击流app id                 | 控制平面创建点击流应用程序时生成                                                                                                 | 区分不同app的事件                |
-| unique_id       | string  | 用户唯一id                    | sdk 第一次初始化时从 `uuidV4()` 生成<br> 当用户重新登录到另一个从未登录过的用户后，它会被更改，并且当用户在同一浏览器中重新登录到之前的用户时，unique_id 将重置为之前 用户的 unique_id | 标识不同用户的唯一性，并关联登录和未登录用户的行为 |
-| device_id       | string  | 浏览器唯一id                   | 网站首次打开时生成`uuidV4()`形式，然后uuid将存储在localStorage中, 并且不会修改                                                            | 区分不同设备                    |
-| event_type      | string  | 事件名称                      | 由开发者或SDK设置                                                                                                       | 区分不同的事件名称                 |
-| event_id        | string  | 事件的唯一id                   | 事件创建时从 `uuidV4()` 生成                                                                                             | 区分每个事件                    |
-| timestamp       | number  | 事件创建时的时间戳                 | 事件创建时从 `new Date().getTime()` 生成，单位：毫秒                                                                           | 数据分析需要                    |
-| platform        | string  | 平台名称                      | 对于浏览器一直是 `Web`                                                                                                   | 数据分析需要                    |
-| make            | string  | 浏览器制造商                    | 从`window.navigator.product`或`window.navigator.vendor` 生成                                                         | 数据分析需要                    |
-| screen_height   | number  | 屏幕高度（以像素为单位）              | 通过 `window.screen.height` 生成                                                                                     | 数据分析需要                    |
-| screen_width    | number  | 屏幕宽度（以像素为单位）              | 通过 `window.screen.width` 生成                                                                                      | 数据分析需要                    |
-| viewport_height | number  | 视区高度（以像素为单位）              | 通过 `window.innerHeight` 生成                                                                                       | 数据分析需要                    |
-| viewport_width  | number  | 视区宽度（以像素为单位）              | 通过 `window.innerWidth` 生成                                                                                        | 数据分析需要                    |
+| 属性              | 数据类型    | 描述                          | 如何生成                                                                                                             | 用途和目的                     |
+|-----------------|---------|-----------------------------|------------------------------------------------------------------------------------------------------------------|---------------------------|
+| app_id          | string  | 点击流app id                   | 控制平面创建点击流应用程序时生成                                                                                                 | 区分不同app的事件                |
+| unique_id       | string  | 用户唯一id                      | sdk 第一次初始化时从 `uuidV4()` 生成<br> 当用户重新登录到另一个从未登录过的用户后，它会被更改，并且当用户在同一浏览器中重新登录到之前的用户时，unique_id 将重置为之前 用户的 unique_id | 标识不同用户的唯一性，并关联登录和未登录用户的行为 |
+| device_id       | string  | 浏览器唯一id                     | 网站首次打开时生成`uuidV4()`形式，然后uuid将存储在localStorage中, 并且不会修改                                                            | 区分不同设备                    |
+| event_type      | string  | 事件名称                        | 由开发者或SDK设置                                                                                                       | 区分不同的事件名称                 |
+| event_id        | string  | 事件的唯一id                     | 事件创建时从 `uuidV4()` 生成                                                                                             | 区分每个事件                    |
+| timestamp       | number  | 事件创建时的时间戳                   | 事件创建时从 `new Date().getTime()` 生成，单位：毫秒                                                                           | 数据分析需要                    |
+| platform        | string  | 平台名称                        | 对于浏览器一直是 `Web`                                                                                                   | 数据分析需要                    |
+| make            | string  | 浏览器制造商                      | 从`window.navigator.product`或`window.navigator.vendor` 生成                                                         | 数据分析需要                    |
+| screen_height   | number  | 屏幕高度（以像素为单位）                | 通过 `window.screen.height` 生成                                                                                     | 数据分析需要                    |
+| screen_width    | number  | 屏幕宽度（以像素为单位）                | 通过 `window.screen.width` 生成                                                                                      | 数据分析需要                    |
+| viewport_height | number  | 视区高度（以像素为单位）                | 通过 `window.innerHeight` 生成                                                                                       | 数据分析需要                    |
+| viewport_width  | number  | 视区宽度（以像素为单位）                | 通过 `window.innerWidth` 生成                                                                                        | 数据分析需要                    |
 | zone_offset     | number  | device 与 GMT 的原始偏移量（以毫秒为单位） | 通过 `-currentDate.getTimezoneOffset()*60000` 生成                                                                   | 数据分析需要                    |
-| locale          | string  | 浏览器的默认区域设置（语言、国家/地区和变体）   | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
-| system_language | string  | 浏览器本地语言                   | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
-| country_code    | string  | 浏览器的国家/地区代码               | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
-| sdk_version     | string  | 点击流SDK版本                  | 通过 `package.json` 生成                                                                                             | 数据分析需要                    |
-| sdk_name        | string  | Clickstream SDK 名称        | 一直是 `aws-solution-clickstream-sdk`                                                                               | 数据分析需要                    |
-| host_name       | string  | 网站主机名                     | 通过 `window.location.hostname` 生成                                                                                 | 数据分析需要                    |
+| locale          | string  | 浏览器的默认区域设置（语言、国家/地区和变体）     | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
+| system_language | string  | 浏览器本地语言                     | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
+| country_code    | string  | 浏览器的国家/地区代码                 | 通过 `window.navigator.language` 生成                                                                                | 数据分析需要                    |
+| sdk_version     | string  | 点击流SDK版本                    | 通过 `package.json` 生成                                                                                             | 数据分析需要                    |
+| sdk_name        | string  | Clickstream SDK 名称          | 一直是 `aws-solution-clickstream-sdk`                                                                               | 数据分析需要                    |
+| host_name       | string  | 网站主机名                       | 通过 `window.location.hostname` 生成                                                                                 | 数据分析需要                    |
 
 ### 用户属性
 
@@ -452,20 +474,25 @@ Clickstream Web SDK 支持以下数据类型：
 
 ### 事件属性
 
-| 属性名称                     | 数据类型    | 描述                                                        |
-|--------------------------|---------|-----------------------------------------------------------|
-| _traffic_source_medium   | string  | 保留给流量媒介，使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎             |
-| _traffic_source_name     | string  | 保留给流量名称，使用此属性存储事件记录时获取用户的营销活动，例如：夏季促销                     |
-| _traffic_source_source   | string  | 保留给流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu  |
-| _entrances               | string  | 在 `_page_view` 事件中添加。会话中的第一个 `_page_view` 事件具有值 1，其他事件为 0 |
-| _session_id              | string  | 在所有事件中添加                                                  |
-| _session_start_timestamp | number  | 在所有事件中添加，单位：毫秒                                            |
-| _session_duration        | number  | 在所有事件中添加，单位：毫秒                                            |
-| _session_number          | number  | 在所有事件中添加                                                  |
-| _page_title              | string  | 在所有事件中添加                                                  |
-| _page_url                | string  | 在所有事件中添加                                                  |
-| _latest_referrer         | string  | 在所有事件中添加，最近一次站外链接                                         |
-| _latest_referrer_host    | string  | 在所有事件中添加，最近一次站外域名                                         |
+| 属性名称                          | 数据类型    | 是否自动采集 | 描述                                                          |
+|-------------------------------|---------|--------|-------------------------------------------------------------|
+| _traffic_source_source        | String  | 否      | 流量来源保留字段。事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu   |
+| _traffic_source_medium        | String  | 否      | 流量来源保留字段。使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎              |
+| _traffic_source_campaign      | String  | 否      | 流量来源保留字段。使用此属性来存储您的流量来源的活动，例如：summer_sale, holiday_specials |
+| _traffic_source_campaign_id   | String  | 否      | 流量来源保留字段。使用此属性来存储流量来源的营销活动 ID，例如：campaign_1, campaign_2     |
+| _traffic_source_term          | String  | 否      | 流量来源保留字段。使用此属性来存储流量来源的术语，例如：running_shoes, fitness_tracker  |
+| _traffic_source_content       | String  | 否      | 流量来源保留字段。使用此属性来存储流量来源的内容，例如：banner_ad_1, text_ad_2          |
+| _traffic_source_clid          | String  | 否      | 流量来源保留字段。使用此属性来存储流量源的 CLID，例如：amazon_ad_123, google_ad_456  |
+| _traffic_source_clid_platform | String  | 否      | 流量来源保留字段。使用此属性来存储您的流量来源的clid平台，例如：amazon_ads, google_ads    |
+| _entrances                    | string  | 是      | 在 `_page_view` 事件中添加。会话中的第一个 `_page_view` 事件具有值 1，其他事件为 0   |
+| _session_id                   | string  | 是      | 在所有事件中添加                                                    |
+| _session_start_timestamp      | number  | 是      | 在所有事件中添加，单位：毫秒                                              |
+| _session_duration             | number  | 是      | 在所有事件中添加，单位：毫秒                                              |
+| _session_number               | number  | 是      | 在所有事件中添加                                                    |
+| _page_title                   | string  | 是      | 在所有事件中添加                                                    |
+| _page_url                     | string  | 是      | 在所有事件中添加                                                    |
+| _latest_referrer              | string  | 是      | 在所有事件中添加，最近一次站外链接                                           |
+| _latest_referrer_host         | string  | 是      | 在所有事件中添加，最近一次站外域名                                           |
 
 ### Item 属性
 
@@ -509,6 +536,9 @@ Clickstream Web SDK 支持以下数据类型：
 ## SDK更新日志
 
 参考：[GitHub 更新日志](https://github.com/awslabs/clickstream-web/releases)
+
+## 示例项目
+集成 SDK 的示例 [Web 项目](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/web)
 
 ## 参考链接
 

@@ -1,18 +1,5 @@
 # Data modeling settings
-Once the data pipeline processes the event data, you can load the data into an analytics engine (i.e., Redshift) for data modeling, where data will be aggregated and organized into different views (such as event, device, session), as well as calculated metrics that are commonly used. Below are the preset data views this solution provides if you choose to enable data modeling module. 
-
-## Preset data views
-| Data model name                 | Redshift | Description                                                                  |
-|-----------------------------|-----------|----------------------------------------------------------------------|
-| clickstream_device_view_v1    | Materialized view    | A view contains all device dimensions.                     |
-| clickstream_event_view_v2    | view    | A view contains all event dimensions      |
-| clickstream_event_parameter_view_v1    | Materialized view      | A view contains all event parameters.        |
-| clickstream_user_dim_view_v1    | Materialized view     | A view contains all user dimensions.                     |
-| clickstream_user_attr_view_v1    | Materialized view      | A view contains all user custom attributes.        |
-| clickstream_session_view_v2    | view     | A view contains all session dimension and relevant metrics, e.g.,session duration, session views.        |
-| clickstream_retention_view_v2    | Materialized view      | A view contains metrics of retentions by dates and return days.        |
-| clickstream_lifecycle_daily_view_v2    | view    | A view contains metrics of user number by lifecycle stages by day, i.e., New, Active, Return, Churn.        |
-| clickstream_lifecycle_weekly_view_v2    | view    | A view contains metrics of user number by lifecycle stages by week, i.e., New, Active, Return, Churn.        |
+Once the data pipeline processes the event data, you can load the data into an analytics engine (i.e., Redshift) for data modeling, where data will be aggregated and organized into different views (such as event, device, session), as well as calculated metrics that are commonly used. 
 
 You can choose to use Redshift or Athena, or both. 
 
@@ -30,13 +17,21 @@ You can set below configurations for Redshift.
 
         * **VPC**: A virtual private cloud (VPC) based on the Amazon VPC service is your private, logically isolated network in the AWS Cloud.
 
-            > **Note**: If you place the cluster within the isolated subnets, the VPC must have VPC endpoints for S3, Logs, Dynamodb, STS, States, Redshift and Redshift-data service.
+            !!! info "Note"
+
+                If you place the cluster within the isolated subnets, the VPC must have VPC endpoints for S3, Logs, Dynamodb, STS, States, Redshift and Redshift-data service.
 
         * **Security Group**: This VPC security group defines which subnets and IP ranges can access the endpoint of Redshift cluster.
 
         * **Subnets**: Select at least three existing VPC subnets.
 
-            > **Note**: We recommend using private subnets to deploy for following security best practices.
+            !!! info "Note"
+            
+                We recommend using private subnets to deploy for following security best practices.
+
+            !!! info "Note"
+            
+                Please ensure that your subnets have enough available IP addresses to create Redshift Serverless, and check [the number of free IP addresses required for each subnet][serverless-usage-considerations].
 
     * **Provisioned mode**
 
@@ -47,3 +42,5 @@ You can set below configurations for Redshift.
     * **Data range**: Considering the cost performance issue of having Redshift to save all the data, we recommend that Redshift save hot data and that all data are stored in S3. It is necessary to delete expired data in Redshift on a regular basis.
 
 * **Athena**: Choose Athena to query all data on S3 using the table created in the Glue Data Catalog.
+
+[serverless-usage-considerations]: https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-usage-considerations.html

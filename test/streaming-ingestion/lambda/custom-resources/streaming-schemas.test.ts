@@ -104,21 +104,33 @@ describe('Custom resource - manage stream schema in Redshift', () => {
     const streamSchemaName = `${appId}${STREAMING_SCHEMA_SUFFIX}`;
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(1, PutObjectCommand, {
       Body: `CREATE EXTERNAL SCHEMA IF NOT EXISTS ${streamSchemaName} FROM KINESIS IAM_ROLE '${streamingRoleArn}'`,
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(2, PutObjectCommand, {
       Body: expect.stringContaining(`CREATE MATERIALIZED VIEW ${appId}.ods_events_streaming_mv`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(2, PutObjectCommand, {
       Body: expect.stringContaining(`FROM ${streamSchemaName}.${streamName}`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(3, PutObjectCommand, {
       Body: expect.stringContaining(`CREATE OR REPLACE VIEW ${appId}.ods_events_streaming_view as`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(3, PutObjectCommand, {
       Body: expect.stringContaining(`from ${appId}.ods_events_streaming_mv;`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(4, PutObjectCommand, {
       Body: expect.stringContaining(`GRANT SELECT ON ${appId}.ods_events_streaming_view TO ${biUsername};`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(sfnMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
     expect(sfnMock).toHaveReceivedNthCommandWith(1, StartExecutionCommand, {
@@ -151,25 +163,39 @@ describe('Custom resource - manage stream schema in Redshift', () => {
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 8);
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(1, PutObjectCommand, {
       Body: `CREATE EXTERNAL SCHEMA IF NOT EXISTS ${appId1 + STREAMING_SCHEMA_SUFFIX} FROM KINESIS IAM_ROLE '${streamingRoleArn}'`,
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     const streamSchemaName = `${appId2}${STREAMING_SCHEMA_SUFFIX}`;
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(5, PutObjectCommand, {
       Body: `CREATE EXTERNAL SCHEMA IF NOT EXISTS ${streamSchemaName} FROM KINESIS IAM_ROLE '${streamingRoleArn}'`,
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(6, PutObjectCommand, {
       Body: expect.stringContaining(`CREATE MATERIALIZED VIEW ${appId2}.ods_events_streaming_mv`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(6, PutObjectCommand, {
       Body: expect.stringContaining(`FROM ${streamSchemaName}.${streamName}`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(7, PutObjectCommand, {
       Body: expect.stringContaining(`CREATE OR REPLACE VIEW ${appId2}.ods_events_streaming_view as`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(7, PutObjectCommand, {
       Body: expect.stringContaining(`from ${appId2}.ods_events_streaming_mv;`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(8, PutObjectCommand, {
       Body: expect.stringContaining(`GRANT SELECT ON ${appId2}.ods_events_streaming_view TO ${biUsername};`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(sfnMock).toHaveReceivedCommandTimes(StartExecutionCommand, 2);
   });
@@ -201,21 +227,33 @@ describe('Custom resource - manage stream schema in Redshift', () => {
     const streamSchemaName = `${newAppId}${STREAMING_SCHEMA_SUFFIX}`;
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(1, PutObjectCommand, {
       Body: `CREATE EXTERNAL SCHEMA IF NOT EXISTS ${streamSchemaName} FROM KINESIS IAM_ROLE '${streamingRoleArn}'`,
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(2, PutObjectCommand, {
       Body: expect.stringContaining(`CREATE MATERIALIZED VIEW ${newAppId}.ods_events_streaming_mv`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(2, PutObjectCommand, {
       Body: expect.stringContaining(`FROM ${streamSchemaName}.${streamName}`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(3, PutObjectCommand, {
       Body: expect.stringContaining(`CREATE OR REPLACE VIEW ${newAppId}.ods_events_streaming_view as`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(3, PutObjectCommand, {
       Body: expect.stringContaining(`from ${newAppId}.ods_events_streaming_mv;`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedNthSpecificCommandWith(4, PutObjectCommand, {
       Body: expect.stringContaining(`GRANT SELECT ON ${newAppId}.ods_events_streaming_view TO ${biUsername};`),
+      Bucket: expect.any(String),
+      Key: expect.any(String),
     });
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 8);
 
@@ -252,6 +290,7 @@ describe('Custom resource - manage stream schema in Redshift', () => {
 
     expect(redshiftDataMock).toHaveReceivedNthCommandWith(1, ExecuteStatementCommand, {
       Sql: `DROP SCHEMA IF EXISTS ${streamSchemaName} CASCADE;`,
+      Database: projectId,
     });
   });
 
@@ -275,10 +314,12 @@ describe('Custom resource - manage stream schema in Redshift', () => {
 
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
       Sql: `DROP SCHEMA IF EXISTS ${appId2}${STREAMING_SCHEMA_SUFFIX} CASCADE;`,
+      Database: projectId,
     });
 
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(2, ExecuteStatementCommand, {
       Sql: `DROP SCHEMA IF EXISTS ${appId}${STREAMING_SCHEMA_SUFFIX} CASCADE;`,
+      Database: projectId,
     });
 
     expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 2);

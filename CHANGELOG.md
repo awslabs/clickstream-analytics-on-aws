@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] - 2024-05-24
+
+### Updated
+
+* optimize data schema to improve query performance in Explorations, Analyzes, and ad-hoc query
+* support automatic traffic source detection, classification, and dashboard
+* revamp out-of-the-box dashboard
+* support timezone in out-of-the-box dashboard
+* add more metric types to Event analysis
+* support "show all nodes" in Path analysis
+* add new analysis model - attribution analysis in Exploration
+* support using internal load balancer as the ingestion endpoint
+* improve stability of loading data into Redshift
+* add React Native SDK
+
+### Fixed
+
+* inconsistent pipeline status in edge cases
+
 ## [1.1.5] - 2024-03-08
 
 ### Updated

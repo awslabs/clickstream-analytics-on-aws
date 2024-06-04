@@ -35,5 +35,5 @@ public class ClickstreamUA implements Serializable {
     @JsonProperty("device_ua_device_category")
     private String uaDeviceCategory;
     @JsonProperty("device_ua")
-    private HashMap<String, Object> uaMap; // NOSONAR
+    private Map<String, Object> uaMap; // NOSONAR
 }

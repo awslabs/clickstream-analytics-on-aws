@@ -6,7 +6,8 @@
 
 !!! info "重要提示"
     {{ solution_name }} 控制台是通过 CloudFront 分发提供的，它被视为一项互联网信息服务。
-    如果您在 **AWS 中国区域** 部署解决方案，域名必须具有有效的 [ICP 备案][icp]。
+
+    如果您在 **AWS 中国区域**部署解决方案,需要有效的[ICP备案][icp]。请查看[此文档][china-prerequisites]了解更多先决条件。
 
 * 域名。您将使用该域名访问 {{ solution_name }} 控制台。对于 AWS 中国区域，这是必需的，而对于 AWS 区域则是可选的。
 * 在 AWS IAM 中的 SSL 证书。SSL 必须与给定的域名关联。按照 [此指南](../resources/upload-ssl-certificate.md) 将 SSL 证书上传到 IAM。这仅适用于 AWS 中国区域。
@@ -186,9 +187,10 @@
 
         | 参数  | 默认值          | 描述                                                  |
         | ---------- | ---------------- | ------------------------------------------------------------ |
-        | OIDCClientId | `<输入>` | OpenID Connect 客户端 ID。 |
-        | OIDCProvider  | `<输入>` | OpenID Connect 提供程序发行方。发行方必须以 `https://` 开头 |
-        | Email | `<需要输入>` | 指定管理员的电子邮件地址。|
+        {% 
+          include-markdown "./oidc-parameters.md"
+          comments=false
+        %}
 
         !!! info "重要提示"
             {%
@@ -198,18 +200,17 @@
 
     * 如果您在 AWS 区域中使用自定义域名启动解决方案，则还有以下附加参数：
 
-        | 参数  | 默认值          | 描述                                                  |
-        | ---------- | ---------------- | ------------------------------------------------------------ |
-        | Hosted Zone ID | `<输入>` | 选择 Amazon Route 53 的公共托管区域的 ID。 |
-        | Hosted Zone Name | `<输入>` | 公共托管区域的域名，例如 `example.com`。 |
-        | Record Name | `<输入>` | 控制台的子名称（在 R53 中称为记录名称）。例如，如果您想为控制台使用自定义域名 `clickstream.example.com`，则输入 `clickstream`。 |
+        {% 
+          include-markdown "./domain-parameters.md"
+          comments=false
+        %}
 
     * 如果您在 AWS 中国区域中启动解决方案，则还有以下附加参数：
 
         | 参数  | 默认值          | 描述                                                  |
         | ---------- | ---------------- | ------------------------------------------------------------ |
-        | Domain | `<输入>` | Centralized Logging with OpenSearch 控制台的自定义域名。不要添加 `http(s)` 前缀。 |
-        | IamCertificateID | `<输入>` | 在 IAM 中 SSL 证书的 ID。ID 由 21 个大写字母和数字组成。使用 [`list-server-certificates`][iam-list-cert]{target='_blank'} 命令检索 ID。 |
+        | Domain Name (`Domain`) | `<输入>` | {{solution_name}}控制台的自定义域名。不要添加 `http(s)` 前缀。 |
+        | Certificate Id (`IamCertificateID`) | `<输入>` | 在 IAM 中 SSL 证书的 ID。ID 由 21 个大写字母和数字组成。使用 [`list-server-certificates`][iam-list-cert]{target='_blank'} 命令检索 ID。 |
 
 6. 选择**下一步**。
 7. 在**配置堆栈选项**页面上，选择**下一步**。
@@ -277,3 +278,4 @@
 [cloudformation]: https://console.aws.amazon.com/cloudformation/
 [create-project]: ../getting-started/1.create-project.md
 [iam-list-cert]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html#list-server-certificates
+[china-prerequisites]: ../resources/aws-china-prerequisites.md

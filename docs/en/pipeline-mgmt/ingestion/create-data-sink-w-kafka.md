@@ -1,5 +1,5 @@
 # Apache Kafka
-This data sink will stream the clickstream data collected by the ingestion endpoint into an topic in a Kafka cluster.
+This data sink will stream the clickstream data collected by the ingestion endpoint into a topic in a Kafka cluster.
 Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MSK) and Self-hosted Kafka cluster.
 
 ## Amazon MSK

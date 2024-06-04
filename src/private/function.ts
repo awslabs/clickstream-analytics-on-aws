@@ -13,7 +13,7 @@
 
 import { POWERTOOLS_ENVS } from '@aws/clickstream-base-lib';
 import { CfnResource, RemovalPolicy } from 'aws-cdk-lib';
-import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { ApplicationLogLevel, Architecture, LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { BundlingOptions, NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { LogGroup, LogGroupClass, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
@@ -40,8 +40,8 @@ export class SolutionNodejsFunction extends NodejsFunction {
         ...(props?.environment ?? {}),
       },
       logGroup: props?.logGroup ?? getLogGroup(scope, id, props?.logConf),
-      logFormat: 'JSON',
-      applicationLogLevel: props?.applicationLogLevel ?? 'INFO',
+      loggingFormat: LoggingFormat.JSON,
+      applicationLogLevelV2: props?.applicationLogLevelV2 ?? ApplicationLogLevel.INFO,
     });
   }
 }

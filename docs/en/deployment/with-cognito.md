@@ -33,7 +33,11 @@ This AWS CloudFormation template automatically deploys the {{ solution_name }} s
 
         | Parameter  | Default          | Description                                                  |
         | ---------- | ---------------- | ------------------------------------------------------------ |
-        | Email | `<Requires input>` | Specify the email of the Administrator. This email address will receive a temporary password to access the {{ solution_name }} web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution. |
+        {% 
+          include-markdown "./common-parameters.md"
+          comments=false
+        %}
+
 
         !!! info "Important"
             {%
@@ -42,11 +46,10 @@ This AWS CloudFormation template automatically deploys the {{ solution_name }} s
 
     - If you are launching the solution with custom domain in AWS regions, this solution uses the additional following parameters:
 
-        | Parameter  | Default          | Description                                                  |
-        | ---------- | ---------------- | ------------------------------------------------------------ |
-        | Hosted Zone ID | `<Requires input>` | Choose the public hosted zone ID of Amazon Route 53. |
-        | Hosted Zone Name | `<Requires input>` | The domain name of the public hosted zone, for example, `example.com`. |
-        | Record Name | `<Requires input>` | The sub name (as known as record name in R53) of the domain name of console. For example, enter `clickstream`, if you want to use custom domain `clickstream.example.com` for the console. |
+        {% 
+          include-markdown "./domain-parameters.md"
+          comments=false
+        %}
 
 6. Choose **Next**.
 

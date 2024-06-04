@@ -33,6 +33,7 @@ nav:
       - Step 4. Analyze data: getting-started/4.view-dashboard.md
     - Pipeline management:
       - Overview: pipeline-mgmt/index.md
+      - Basic configuration: pipeline-mgmt/basic.md
       - Data ingestion:
         - Overview: pipeline-mgmt/ingestion/index.md
         - Ingestion endpoint: pipeline-mgmt/ingestion/configure-ingestion-endpoint.md
@@ -46,6 +47,7 @@ nav:
         - Processing plugin: pipeline-mgmt/data-processing/configure-plugin.md
       - Data modeling: pipeline-mgmt/data-modeling/configure-data-modeling.md
       - Reporting: pipeline-mgmt/quicksight/configure-quicksight.md
+      - App registration: pipeline-mgmt/app-registration.md
       - Pipeline maintenance: pipeline-mgmt/pipe-mgmt.md
     - SDK manual:
       - Overview: sdk-manual/index.md
@@ -53,6 +55,7 @@ nav:
       - Swift SDK: sdk-manual/swift.md
       - Web SDK: sdk-manual/web.md
       - Flutter SDK: sdk-manual/flutter.md
+      - React Native SDK: sdk-manual/react-native.md
       - WeChat Miniprogram SDK: sdk-manual/wechat.md
       - HTTP API: sdk-manual/http-api.md
       - User identifier: sdk-manual/user-identifier.md
@@ -63,11 +66,9 @@ nav:
         - Overview: analytics/dashboard/index.md
         - Acquisition report: analytics/dashboard/acquisition.md
         - Engagement report: analytics/dashboard/engagement.md
-        - Activity report: analytics/dashboard/activity.md
         - Retention report: analytics/dashboard/retention.md
         - Device report: analytics/dashboard/device.md
-        - User report: analytics/dashboard/user.md
-        - Crash report: analytics/dashboard/crash.md
+        - Details report: analytics/dashboard/details.md
         - Custom report: analytics/dashboard/custom-analysis.md
       - Explore:
         - Overview: analytics/explore/index.md
@@ -75,13 +76,17 @@ nav:
         - Funnel: analytics/explore/funnel.md
         - Path: analytics/explore/path.md
         - Retention: analytics/explore/retention.md
+        - Attribution: analytics/explore/attribution.md
       - Analyzes:
         - Overview: analytics/analyzes/index.md        
       - Data management:
         - Overview: analytics/data-mgmt/index.md
+        - Metadata: analytics/data-mgmt/metadata-mgmt.md
+        - Traffic source: analytics/data-mgmt/traffic-source.md
     - Identity Management: identity-mgmt.md
     - Upgrade the solution: upgrade.md
     - Additional resources:
+      - AWS China Prerequisites: resources/aws-china-prerequisites.md
       - Upload Certificate: resources/upload-ssl-certificate.md
     - FAQ: faq.md
     - Troubleshooting: troubleshooting.md

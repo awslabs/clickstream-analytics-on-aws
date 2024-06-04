@@ -7,10 +7,9 @@ When you want to explore the clickstream data in more detail, you can use explor
 - focus on the most relevant data by using filters on event parameters and user attributes
 - group metrics by dimension to make it easy to compare
 - easily switch visualization type and drill down or up into data
-- view and export summary data into the excel or csv
-- save the exploration analytics results into a dashboard for share or regular use
+- view and export summary data into the Excel or csv
+- save the exploration analytics results into a dashboard for sharing or regular use
 
-s
 ## Access Explorations
 To access Explorations, follow below steps:
 
@@ -26,7 +25,8 @@ Explorations currently provides 4 analytics models:
 |[Event Analysis](./event.md) | Event analysis is used to study the frequency of certain behavioral events. You can conduct multi-dimensional analysis of user behavior through custom metrics, groupings, filters, and various visual charts. |
 |[Funnel Analysis](./funnel.md) | Funnel analysis, or conversion analysis, is mainly used to analyze the conversion status of users in a specified process. The model first breaks down the entire process into steps and then counts the conversion rate from each step to the next. It can be used to measure the performance of each step. Common usage scenarios include analyzing registration conversion rates, purchase conversion rates, etc. |
 |[Path Analysis](./path.md) | Funnel analysis, or conversion analysis, is mainly used to analyze the conversion status of users in a specified process. The model first breaks down the entire process into steps and then counts the conversion rate from each step to the next. It can be used to measure the performance of each step. Common usage scenarios include analyzing registration conversion rates, purchase conversion rates, etc. |
-|[Retention Analysis](./retention.md) | Retention analysis support configuring initial event and returning event to calculate the retention or attrition rate of target user groups. It also supports setting associated attributes for initial event and return event. |
+|[Retention Analysis](./retention.md) | Retention analysis supports configuring initial event and returning event to calculate the retention or attrition rate of target user groups. It also supports setting associated attributes for initial event and return event. |
+|[Attribution Analysis](./attribution.md) | Attribution analysis allows you to understand the importance of different touchpoints for a specific goal in your website and apps. |
 
 
 ## How to use Explorations

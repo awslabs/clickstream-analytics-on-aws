@@ -59,6 +59,7 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
       Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name};`,
+      Database: expect.any(String),
     });
   });
 
@@ -70,6 +71,8 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
     } catch (error) {
       expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
         WorkgroupName: workGroupName,
+        Database: expect.any(String),
+        Sql: expect.any(String),
       });
     }
   });
@@ -91,6 +94,7 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
       Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name};`,
+      Database: expect.any(String),
     });
   });
 });
@@ -126,6 +130,7 @@ describe('Lambda - refresh in Redshift Provisioned', () => {
       ClusterIdentifier: clusterIdentifier,
       DbUser: dbUser,
       Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name};`,
+      Database: expect.any(String),
     });
   });
 
@@ -138,6 +143,8 @@ describe('Lambda - refresh in Redshift Provisioned', () => {
       expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
         ClusterIdentifier: clusterIdentifier,
         DbUser: dbUser,
+        Database: expect.any(String),
+        Sql: expect.any(String),
       });
     }
   });
