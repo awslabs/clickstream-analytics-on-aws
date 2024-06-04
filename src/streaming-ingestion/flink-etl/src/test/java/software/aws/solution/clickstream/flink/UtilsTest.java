@@ -101,7 +101,7 @@ public class UtilsTest {
     }
 
     @Test
-    void testDownloadS3File() {
+    void testDownloadS3File() throws IOException {
         String bucket = "testBucket";
         String key = "testKey/t.txt";
         String awsRegion = "us-east-1";

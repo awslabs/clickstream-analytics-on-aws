@@ -113,10 +113,11 @@ public class StreamingJob {
 
     private static String getRuleConfig(final String appId, final String s3PathInput, final String fileName, final String region) {
         String s3Path = s3PathInput;
-        if (!s3Path.endsWith("/")) {
-            s3Path += "/";
+        String delimiter = "/";
+        if (!s3Path.endsWith(delimiter)) {
+            s3Path += delimiter;
         }
-        String s3ObjectPath = s3Path + appId  + "/" +  fileName;
+        String s3ObjectPath = s3Path + appId  + delimiter +  fileName;
         try {
             log.info("Get rule config from s3: {}", s3ObjectPath);
             String contentStr = Utils.getInstance().readS3TextFile(s3ObjectPath, region);
@@ -198,9 +199,10 @@ public class StreamingJob {
 
         List<ClickstreamEventEnrichment> enrichments = new ArrayList<>();
         if (this.props.isIpEnrich()) {
-            File dbFile = new File(TMP_GEO_LITE_2_CITY_MMDB);
+            File dbFile = new File(TMP_GEO_LITE_2_CITY_MMDB); // NOSONAR
             if (!dbFile.exists()) {
                 dbFile = Utils.getInstance().dowloadS3File(bucketName, geoFileKey, region, TMP_GEO_LITE_2_CITY_MMDB);
+                log.info("Downloaded {} to {}, file size: {}", geoFileKey, dbFile.getAbsolutePath(), dbFile.length());
             }
            enrichments.add(IPEnrichmentV2.getInstance(dbFile));
         }

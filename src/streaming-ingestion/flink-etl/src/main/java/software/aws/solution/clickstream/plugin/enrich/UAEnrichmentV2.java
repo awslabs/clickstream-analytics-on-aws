@@ -24,7 +24,7 @@ import software.aws.solution.clickstream.common.model.ClickstreamUA;
 public class UAEnrichmentV2 implements ClickstreamEventEnrichment {
 
     private static final long serialVersionUID = 17054589439690001L;
-    private final Cache<ClickstreamUA> cache = new Cache();
+    private final Cache<ClickstreamUA> cache = new Cache<>();
 
     public void enrich(final ClickstreamEvent event) {
         String uaString = event.getUa();

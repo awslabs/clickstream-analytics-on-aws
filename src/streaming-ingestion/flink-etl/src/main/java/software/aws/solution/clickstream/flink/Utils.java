@@ -136,15 +136,15 @@ public final class Utils {
         }
     }
 
-    public File dowloadS3File(final String bucket, final String key, final String awsRegion, final String localPath) {
+    public File dowloadS3File(final String bucket, final String key, final String awsRegion, final String localPath) throws IOException {
         File file = new File(localPath);
         try {
             byte[] bytes = Utils.getInstance().readS3BinaryFile(bucket, key, awsRegion);
             Files.write(file.toPath(), bytes);
             return file;
         } catch (IOException e) {
-            log.error("Failed to download file from S3: {}", e.getMessage());
-            throw new RuntimeException(e);
+            log.warn("Failed to download file from S3: {}", e.getMessage());
+            throw e;
         }
 
     }

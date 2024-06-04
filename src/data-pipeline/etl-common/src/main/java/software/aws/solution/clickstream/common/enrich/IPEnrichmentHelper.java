@@ -20,47 +20,57 @@ import com.maxmind.db.MaxMindDbParameter;
 import com.maxmind.db.Reader;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import software.aws.solution.clickstream.common.Cache;
 import software.aws.solution.clickstream.common.model.ClickstreamIPEnrichResult;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
 public final class IPEnrichmentHelper implements Serializable {
     private static final long serialVersionUID = 17054589439690001L;
-    private final File dbFile;
-
+    private final byte[] dbFileBytes;
     private static IPEnrichmentHelper instance;
+    private static final Cache<ClickstreamIPEnrichResult> CACHED_IP = new Cache<>(1024 * 1024 * 256);
 
-    private IPEnrichmentHelper(final File dbFile) {
-        this.dbFile = dbFile;
+    private IPEnrichmentHelper(final byte[] dbFileBytes) {
+        this.dbFileBytes = dbFileBytes;
     }
 
    public static IPEnrichmentHelper from(final File dbFile) throws IOException {
         if (instance == null) {
-            instance = new IPEnrichmentHelper(dbFile);
+            byte[] dbFileBytes = Files.readAllBytes(dbFile.toPath());
+            instance = new IPEnrichmentHelper(dbFileBytes);
         }
        return instance;
     }
 
     public ClickstreamIPEnrichResult enrich(final String ip) {
         log.debug("Enriching IP: {}", ip);
-        String firstIpd = ip.split(",")[0];
+        String firstIp = ip.split(",")[0];
+
+        if (CACHED_IP.containsKey(firstIp)) {
+            return CACHED_IP.get(firstIp);
+        }
         try {
             try (Reader reader = new Reader(
-                    dbFile,
+                    new ByteArrayInputStream(dbFileBytes),
                     new CHMCache(1024 * 128))) {
-                final InetAddress ipAddress = InetAddress.getByName(firstIpd);
+                final InetAddress ipAddress = InetAddress.getByName(firstIp);
                 LookupResult result = reader.get(ipAddress, LookupResult.class);
 
                 String city = Optional.ofNullable(result.getCity()).map(LookupResult.City::getName).orElse(null);
                 String continent = Optional.ofNullable(result.getContinent()).map(LookupResult.Continent::getName).orElse(null);
                 String country = Optional.ofNullable(result.getCountry()).map(LookupResult.Country::getName).orElse(null);
-                return new ClickstreamIPEnrichResult(city, continent, country);
+                ClickstreamIPEnrichResult ipEnriched = new ClickstreamIPEnrichResult(city, continent, country);
+                CACHED_IP.put(firstIp, ipEnriched);
+                return ipEnriched;
             }
         } catch (Exception e) {
             log.warn(e.getMessage(), e);

@@ -29,7 +29,6 @@ public final class IPEnrichmentV2 implements ClickstreamEventEnrichment {
     private static final long serialVersionUID = 17054589439690001L;
     private final IPEnrichmentHelper helper;
 
-
     private IPEnrichmentV2(final File dbFile) throws IOException {
         this.helper = IPEnrichmentHelper.from(dbFile);
     }

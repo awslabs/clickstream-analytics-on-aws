@@ -265,7 +265,7 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
     private void transformUser(final JsonNode userNode, final ObjectNode data) {
         List<UserKvObjectNode> userProperty = new ArrayList<>();
         Iterator<String> userIterator = userNode.fieldNames();
-        while (userIterator.hasNext()) {
+        while (userIterator.hasNext()) { // NOSONAR
             String attrName = userIterator.next();
             if (!userNode.get(attrName).hasNonNull(VALUE)) {
                 continue;

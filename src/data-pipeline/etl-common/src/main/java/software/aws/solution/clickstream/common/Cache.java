@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Cache<T> implements Serializable {
+public class Cache<T extends Serializable> implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Map<String, T> dataCached;
     private final int size;

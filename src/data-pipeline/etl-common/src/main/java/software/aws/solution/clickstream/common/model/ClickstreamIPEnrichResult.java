@@ -16,9 +16,11 @@ package software.aws.solution.clickstream.common.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.io.Serializable;
+
 @Getter
 @AllArgsConstructor
-public class ClickstreamIPEnrichResult {
+public class ClickstreamIPEnrichResult implements Serializable {
     private String city;
     private String continent;
     private String country;

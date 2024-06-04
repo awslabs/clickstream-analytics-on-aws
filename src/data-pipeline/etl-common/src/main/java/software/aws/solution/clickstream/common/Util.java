@@ -136,7 +136,7 @@ public final class Util {
 
     public static Map<String, String> convertUriParamsToStrMap(final Map<String, List<String>> uriParams) {
         if (uriParams == null) {
-            return null;
+            return null; // NOSONAR
         }
         Map<String, String> result = new HashMap<>();
 
@@ -149,7 +149,7 @@ public final class Util {
 
     public static Map<String, String> convertStringObjectMapToStringStringMap(final Map<String, Object> inputMap) {
         if (inputMap == null) {
-            return null;
+            return null; // NOSONAR
         }
         Map<String, String> result = new HashMap<>();
 
@@ -173,7 +173,7 @@ public final class Util {
     public static Map<String, ClickstreamEventPropValue> convertStringObjectMapToStringEventPropMap(final Map<String, Object> inputMap)
             throws JsonProcessingException {
         if (inputMap == null) {
-            return null;
+            return null; // NOSONAR
         }
         Map<String, ClickstreamEventPropValue> result = new HashMap<>();
 
@@ -203,7 +203,7 @@ public final class Util {
     public static Map<String, ClickstreamUserPropValue> convertStringObjectMapToStringUserPropMap(final Map<String, Object> inputMap)
             throws JsonProcessingException {
         if (inputMap == null) {
-            return null;
+            return null; // NOSONAR
         }
         Map<String, ClickstreamUserPropValue> result = new HashMap<>();
         for (Map.Entry<String, Object> entry : inputMap.entrySet()) {

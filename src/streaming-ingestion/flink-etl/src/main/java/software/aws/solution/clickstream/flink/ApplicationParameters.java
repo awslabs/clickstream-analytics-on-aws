@@ -84,12 +84,13 @@ public class ApplicationParameters {
         }
         parameters.setTransformVersion(transformVersion);
 
-        String defaultConfigS3Path = "s3://" + bucket + "/clickstream/" + projectId + "/config/flink/appIdStreamConfig.json";
+         String s3Schema = "s3://";
+         String defaultConfigS3Path = s3Schema + bucket + "/clickstream/" + projectId + "/config/flink/appIdStreamConfig.json";
         String appIdStreamConfig = props.getProperty(APP_ID_STREAM_CONFIG, defaultConfigS3Path);
         log.info("AppIdStreamConfig: {}", appIdStreamConfig);
         parameters.setAppIdStreamConfig(appIdStreamConfig);
 
-        String defaultAppRuleConfigPath = "s3://" + bucket + "/clickstream/" + projectId + "/rules/";
+        String defaultAppRuleConfigPath = s3Schema + bucket + "/clickstream/" + projectId + "/rules/";
         String appRuleConfigPath = props.getProperty(APP_RULE_CONFIG_PATH, defaultAppRuleConfigPath);
         log.info("appRuleConfigPath: {}", appRuleConfigPath);
         parameters.setAppRuleConfigPath(appRuleConfigPath);
