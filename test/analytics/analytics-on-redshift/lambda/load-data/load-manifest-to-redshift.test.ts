@@ -120,6 +120,8 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
+      Database: 'project1',
+      Sql: expect.stringContaining(`CALL ${loadManifestEvent.detail.appId}.sp_merge_${loadManifestEvent.odsTableName}`),
     });
     expect(addMetricMock).toBeCalledTimes(1);
     expect(addMetricMock.mock.calls).toEqual([
@@ -180,6 +182,8 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
       expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
       expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
         WorkgroupName: workGroupName,
+        Database: 'project1',
+        Sql: expect.stringContaining(`CALL ${loadManifestEvent.detail.appId}.sp_merge_${loadManifestEvent.odsTableName}`),
       });
       expect(addMetricMock).toBeCalledTimes(0);
     }
@@ -221,6 +225,8 @@ describe('Lambda - do loading manifest to Provisioned Redshift via MERGE command
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       ClusterIdentifier: clusterIdentifier,
       DbUser: dbUser,
+      Database: 'project1',
+      Sql: expect.stringContaining(`CALL ${loadManifestEvent.detail.appId}.sp_merge_${loadManifestEvent.odsTableName}`),
     });
     expect(addMetricMock).toBeCalledTimes(1);
   });

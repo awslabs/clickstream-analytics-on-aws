@@ -136,9 +136,11 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
       Key: {
         s3_uri: loadStatusEvent.detail.jobList.entries[0].url,
       },
+      TableName: expect.any(String),
     });
     expect(s3ClientMock).toHaveReceivedCommandWith(DeleteObjectCommand, {
       Key: 'manifest/app150be34be-fdec-4b45-8b14-63c38f910a56.manifest',
+      Bucket: expect.any(String),
     });
   });
 
@@ -261,6 +263,7 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
         Key: {
           s3_uri: loadStatusEvent.detail.jobList.entries[0].url,
         },
+        TableName: expect.any(String),
       });
       expect(s3ClientMock).toHaveReceivedCommandTimes(DeleteObjectCommand, 0);
     }
@@ -289,6 +292,7 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
       Key: {
         s3_uri: loadStatusEvent.detail.jobList.entries[0].url,
       },
+      TableName: expect.any(String),
     });
     expect(s3ClientMock).toHaveReceivedCommandWith(DeleteObjectCommand, {
       Bucket: 'DOC-EXAMPLE-BUCKET',

@@ -15,7 +15,7 @@ import { join } from 'path';
 import { Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { IFunction, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
+import { IFunction, LayerVersion, Code, ApplicationLogLevel } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Fail, Choice, Map, Condition, Pass, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
@@ -260,7 +260,7 @@ export class ScanMetadataWorkflow extends Construct {
         WORKFLOW_MIN_INTERVAL: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         PROJECT_ID: props.projectId,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     bucket.grantRead(fn, `${props.scanMetadataWorkflowData.pipelineS3Prefix}*`);
@@ -290,7 +290,7 @@ export class ScanMetadataWorkflow extends Construct {
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
         TOP_FREQUENT_PROPERTIES_LIMIT: props.scanMetadataWorkflowData.topFrequentPropertiesLimit,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
       layers: [sqlLayer],
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
@@ -332,7 +332,7 @@ export class ScanMetadataWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         METADATA_DDB_TABLE_ARN: props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     bucket.grantPut(fn, `${props.scanMetadataWorkflowData.pipelineS3Prefix}*`);
@@ -373,7 +373,7 @@ export class ScanMetadataWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -416,7 +416,7 @@ export class ScanMetadataWorkflow extends Construct {
         METADATA_DDB_TABLE_ARN: props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn,
         PROJECT_ID: props.projectId,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
       layers: [sqlLayer],
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);

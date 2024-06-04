@@ -14,7 +14,7 @@
 import { join } from 'path';
 import { CfnResource, Duration } from 'aws-cdk-lib';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { Function } from 'aws-cdk-lib/aws-lambda';
+import { ApplicationLogLevel, Function } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -55,7 +55,7 @@ export function createKinesisToS3Lambda(
       S3_BUCKET: props.s3DataBucket.bucketName,
       S3_PREFIX: props.s3DataPrefix,
     },
-    applicationLogLevel: 'WARN',
+    applicationLogLevelV2: ApplicationLogLevel.WARN,
   });
 
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [

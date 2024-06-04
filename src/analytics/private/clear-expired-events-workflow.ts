@@ -17,7 +17,7 @@ import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
-import { IFunction } from 'aws-cdk-lib/aws-lambda';
+import { ApplicationLogLevel, IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Fail, Choice, Map, Condition, Pass, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -175,7 +175,7 @@ export class ClearExpiredEventsWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -215,7 +215,7 @@ export class ClearExpiredEventsWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
 
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);

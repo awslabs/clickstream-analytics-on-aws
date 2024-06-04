@@ -82,6 +82,7 @@ describe('Custom resource - Create redshift serverless namespace', () => {
         'GRANT create user to role clickstream',
         `GRANT ROLE clickstream TO "IAMR:${dataRoleName}"`,
       ]),
+      Database: expect.any(String),
     });
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
   });
@@ -102,6 +103,7 @@ describe('Custom resource - Create redshift serverless namespace', () => {
         'GRANT create user to role clickstream',
         `GRANT ROLE clickstream TO "IAMR:${newRoleName}"`,
       ]),
+      Database: expect.any(String),
     });
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 2);
   });

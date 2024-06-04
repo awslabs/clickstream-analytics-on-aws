@@ -31,6 +31,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
+import { ApplicationLogLevel } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
@@ -419,7 +420,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       logConf: {
         retention: RetentionDays.TEN_YEARS,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
       role: createLambdaRole(this, 'AuthorizerFunctionRole', false, []),
     });
     addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [

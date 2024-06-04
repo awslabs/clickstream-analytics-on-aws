@@ -92,6 +92,7 @@ describe('Lambda - check the refresh status in Redshift Serverless', () => {
     expect(redshiftDataMock).toHaveReceivedNthCommandWith(2, ExecuteStatementCommand, {
       Sql: `INSERT INTO ${checkRefreshSpStatusEvent.timezoneWithAppId.appId}.refresh_mv_sp_status (refresh_name, refresh_type, refresh_date, triggerred_by)\
  VALUES ('${checkRefreshSpStatusEvent.detail.spName}', 'SP', '${checkRefreshSpStatusEvent.detail.refreshDate}', 'MANUALLY');`,
+      Database: expect.any(String),
     });
   });
 
@@ -123,6 +124,7 @@ describe('Lambda - check the refresh status in Redshift Serverless', () => {
     expect(redshiftDataMock).toHaveReceivedNthCommandWith(2, ExecuteStatementCommand, {
       Sql: `INSERT INTO ${checkRefreshSpStatusEvent.timezoneWithAppId.appId}.refresh_mv_sp_status (refresh_name, refresh_type, refresh_date, triggerred_by)\
  VALUES ('${checkRefreshSpStatusEvent.detail.spName}', 'SP', '${checkRefreshSpStatusEvent.detail.refreshDate}', 'WORK_FLOW');`,
+      Database: expect.any(String),
     });
   });
 

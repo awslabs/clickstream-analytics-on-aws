@@ -16,7 +16,7 @@ import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Duration, Stack, CfnResource } from 'aws-cdk-lib';
 
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { Tracing, Function } from 'aws-cdk-lib/aws-lambda';
+import { Tracing, Function, ApplicationLogLevel } from 'aws-cdk-lib/aws-lambda';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
@@ -115,7 +115,7 @@ export class LambdaUtil {
         },
         ...functionSettings,
         memorySize: 256,
-        applicationLogLevel: 'WARN',
+        applicationLogLevelV2: ApplicationLogLevel.WARN,
       },
     );
     addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
@@ -180,7 +180,7 @@ export class LambdaUtil {
       },
       ...functionSettings,
       memorySize: 1024,
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     attachListTagsPolicyForFunction(this.scope, 'EmrSparkJobSubmitterFunction', fn);
     return fn;
@@ -209,7 +209,7 @@ export class LambdaUtil {
       },
       ...functionSettings,
       memorySize: 1024,
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     return fn;
   }

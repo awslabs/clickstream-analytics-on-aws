@@ -84,10 +84,12 @@ describe('Lambda - do scan metadata in Redshift Serverless', () => {
           expect.stringMatching(/INSERT INTO app1\.property_array_temp_table \(category, property_name, value_type, property_type, scan_value\) VALUES \((.*)\);/),
         ],
       ),
+      Database: expect.any(String),
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
       Sql: "CALL app1.sp_scan_metadata(20, '2023-10-26T00:00:00.000Z', '2023-10-10T00:00:00.000Z')",
+      Database: expect.any(String),
     });
   });
 
@@ -115,10 +117,12 @@ describe('Lambda - do scan metadata in Redshift Serverless', () => {
           expect.stringMatching(/INSERT INTO app1\.property_array_temp_table \(category, property_name, value_type, property_type, scan_value\) VALUES \((.*)\);/),
         ],
       ),
+      Database: expect.any(String),
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
       Sql: "CALL app1.sp_scan_metadata(20, '2023-10-26T00:00:00.000Z', NULL)",
+      Database: expect.any(String),
     });
   });
 
@@ -130,6 +134,8 @@ describe('Lambda - do scan metadata in Redshift Serverless', () => {
     } catch (error) {
       expect(redshiftDataMock).toHaveReceivedCommandWith(BatchExecuteStatementCommand, {
         WorkgroupName: workGroupName,
+        Database: expect.any(String),
+        Sqls: expect.any(Array),
       });
     }
   });
@@ -175,6 +181,8 @@ describe('Lambda - scan metadata in Redshift Provisioned', () => {
     expect(redshiftDataMock).toHaveReceivedCommandWith(BatchExecuteStatementCommand, {
       ClusterIdentifier: clusterIdentifier,
       DbUser: dbUser,
+      Database: expect.any(String),
+      Sqls: expect.any(Array),
     });
   });
 });

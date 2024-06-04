@@ -17,7 +17,7 @@ import { Aws, Duration } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { IFunction } from 'aws-cdk-lib/aws-lambda';
+import { ApplicationLogLevel, IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
@@ -205,7 +205,7 @@ export class UserSegmentsWorkflow extends Construct {
       ...this.props.networkConfig,
       securityGroups: [this.props.securityGroupForLambda],
       environment: env,
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
   }
 }

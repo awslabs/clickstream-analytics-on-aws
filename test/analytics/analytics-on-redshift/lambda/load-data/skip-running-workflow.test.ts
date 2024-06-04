@@ -198,12 +198,15 @@ test('Should get no other running workflow', async () => {
 
   expect(ddbClientMock).toHaveReceivedNthCommandWith(1, QueryCommand, {
     ExpressionAttributeValues: { ':job_status': 'event_v2#ENQUEUE', ':s3_uri': 's3://bucket_test/test/prefix1/event_v2/' },
+    TableName: expect.any(String),
   });
   expect(ddbClientMock).toHaveReceivedNthCommandWith(2, QueryCommand, {
     ExpressionAttributeValues: { ':job_status': 'event_v2#PROCESSING', ':s3_uri': 's3://bucket_test/test/prefix1/event_v2/' },
+    TableName: expect.any(String),
   });
   expect(ddbClientMock).toHaveReceivedNthCommandWith(3, QueryCommand, {
     ExpressionAttributeValues: { ':job_status': 'event_v2#NEW', ':s3_uri': 's3://bucket_test/test/prefix1/event_v2/' },
+    TableName: expect.any(String),
   });
 });
 

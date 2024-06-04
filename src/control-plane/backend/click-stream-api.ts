@@ -48,7 +48,7 @@ import {
   IVpc, SubnetType,
 } from 'aws-cdk-lib/aws-ec2';
 import { ArnPrincipal, Effect, PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Architecture, Code, Function as LambdaFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { ApplicationLogLevel, Architecture, Code, Function as LambdaFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -353,7 +353,7 @@ export class ClickStreamApiConstruct extends Construct {
       role,
       logRetention: RetentionDays.ONE_MONTH,
       logFormat: 'JSON',
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
       ...lambdaFunctionNetwork,
     });
 

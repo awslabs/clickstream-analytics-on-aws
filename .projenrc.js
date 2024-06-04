@@ -40,8 +40,8 @@ const commonDeps = [
 const commonDevDeps = [
   '@types/aws-lambda@^8.10.110',
   '@types/uuid@^9.0.0',
-  'aws-sdk-client-mock@^3.0.1',
-  'aws-sdk-client-mock-jest@^3.0.1',
+  'aws-sdk-client-mock@^4.0.1',
+  'aws-sdk-client-mock-jest@^4.0.1',
   '@types/mustache@^4.2.2',
   'mock-fs@^5.2.0',
   '@types/mock-fs@^4.13.1',
@@ -50,18 +50,18 @@ const commonDevDeps = [
   '@types/node-fetch@^2.6.4',
 ];
 
-const smithyPackagesVersion = '2.0.7';
+const smithyPackagesVersion = '3.0.0';
 const smithyPackagesDeps = [
   '@smithy/node-http-handler',
   '@smithy/util-stream-node',
   '@smithy/types',
 ].map(dep => `${dep}@^${smithyPackagesVersion}`);
-const awsSDKPackagesVersion = '3.523.0';
+const awsSDKPackagesVersion = '3.577.0';
 const awsSDKPackagesDeps = [
   '@aws-sdk/types',
   '@aws-sdk/credential-providers',
 ].map(dep => `${dep}@^${awsSDKPackagesVersion}`);
-const awsSDKServicesVersion = '3.523.0';
+const awsSDKServicesVersion = '3.577.0';
 const awsSDKServicesDeps = [
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',

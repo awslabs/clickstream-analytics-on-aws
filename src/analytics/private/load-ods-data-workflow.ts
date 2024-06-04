@@ -18,7 +18,7 @@ import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Match } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine, LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { IFunction } from 'aws-cdk-lib/aws-lambda';
+import { ApplicationLogLevel, IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays, LogGroup } from 'aws-cdk-lib/aws-logs';
 import {
   StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map,
@@ -152,7 +152,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         DYNAMODB_TABLE_NAME: taskTable.tableName,
         REDSHIFT_ODS_TABLE_NAME: redshiftTable,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
 
     return fn;
@@ -523,7 +523,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
 
     // Update the job_status from NEW to ENQUEUE.
@@ -563,7 +563,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         REDSHIFT_ROLE: copyRole.roleArn,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     // Update the job_status from ENQUEUE to PROCESSING.
     ddbTable.grantReadWriteData(fn);
@@ -610,7 +610,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
 
     ddbTable.grantWriteData(fn);
@@ -647,7 +647,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     ddbTable.grantReadData(fn);
     return fn;
@@ -678,7 +678,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     ddbTable.grantReadData(fn);
     return fn;
@@ -726,7 +726,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         PIPELINE_EMR_STATUS_S3_PREFIX: props.pipelineEmrStatusS3Prefix,
         REDSHIFT_ROLE: copyRole.roleArn,
       },
-      applicationLogLevel: 'WARN',
+      applicationLogLevelV2: ApplicationLogLevel.WARN,
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     props.workflowBucketInfo.s3Bucket.grantPut(fn, `${props.workflowBucketInfo.prefix}*`);
