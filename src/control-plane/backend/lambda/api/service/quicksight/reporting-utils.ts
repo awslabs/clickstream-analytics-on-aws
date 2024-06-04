@@ -1267,24 +1267,6 @@ export function formatDateToYYYYMMDD(date: any): string {
   return `'${year.toString().trim()}-${month.trim()}-${day.trim()}'`;
 }
 
-export function formatDatesInObject(inputObject: any): any {
-  if (typeof inputObject === 'object') {
-    if (inputObject instanceof Date) {
-      return formatDateToYYYYMMDD(inputObject);
-    } else if (Array.isArray(inputObject)) {
-      return inputObject.map(item => formatDatesInObject(item));
-    } else {
-      const formattedObject: any = {};
-      for (const key in inputObject) {
-        formattedObject[key] = formatDatesInObject(inputObject[key]);
-      }
-      return formattedObject;
-    }
-  } else {
-    return inputObject;
-  }
-}
-
 export function getQuickSightUnitFromTimeUnit(timeUnit: string | undefined) : string {
   let unit = 'DAY';
   if (timeUnit == ExploreRelativeTimeUnit.WK) {
