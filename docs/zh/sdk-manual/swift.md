@@ -82,7 +82,7 @@ Clickstream Swift SDK 需要 Xcode 13.4 或更高版本才能构建。
 === "Objective-C"
     ```objective-c
     @import Clickstream;
-    
+
     - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions { 
         NSError *error = nil;
         [ClickstreamObjc initSDKAndReturnError:&error];
@@ -93,7 +93,10 @@ Clickstream Swift SDK 需要 Xcode 13.4 或更高版本才能构建。
     }
     ```
 
-如果您的项目是使用 SwiftUI 开发的，您需要创建一个`application` 代理并通过 `UIApplicationDelegateAdaptor` 将其附加到您的 App。
+#### SwiftUI 配置
+
+如果您的项目是使用 SwiftUI 开发的，您需要创建一个 `application` 代理并通过 `UIApplicationDelegateAdaptor` 将其附加到您的
+App。
 
 ```swift
 @main
@@ -107,7 +110,8 @@ struct YourApp: App {
 }
 ```
 
-对于 SwiftUI，我们尚不支持自动收集屏幕浏览事件，您需要通过设置 `configuration.isTrackScreenViewEvents = false` 来禁用屏幕浏览事件，请参阅[更新SDK配置](#sdk_1)。
+Clickstream Swift SDK 依靠方法交换来自动记录屏幕视图。 SwiftUI 应用程序必须 [手动记录 Screen View 事件](#screen-view)
+，并在初始化 SDK 时通过设置 `configuration.withTrackScreenViewEvents(false)` 来禁用 Screen View 事件的自动跟踪。
 
 ### 4.开始使用
 
@@ -147,18 +151,89 @@ struct YourApp: App {
     ```
 
 #### 添加全局属性
+1. 在 SDK 初始化时添加全局属性。
 
+    以下示例代码展示了如何在初始化 SDK 时添加 traffic source 相关字段作为全局属性。
+
+    === "Swift"
+         ```swift
+         import Clickstream
+
+         let configuration = ClickstreamConfiguration()
+             .withAppId("your appId")
+             .withEndpoint("https://example.com/collect")
+             .withInitialGlobalAttributes([
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE: "amazon",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_MEDIUM: "cpc",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN: "summer_promotion",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: "summer_promotion_01",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_TERM: "running_shoes",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CONTENT: "banner_ad_1",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID: "amazon_ad_123",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID_PLATFORM: "amazon_ads",
+                 ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store"
+         ])
+         try ClickstreamAnalytics.initSDK(configuration)
+         ```
+
+    === "Objective-C"
+         ```objective-c
+         @import Clickstream;
+
+         NSDictionary *globalAttributes = @{
+             Attr.TRAFFIC_SOURCE_SOURCE: @"amazon",
+             Attr.TRAFFIC_SOURCE_MEDIUM: @"cpc",
+             Attr.TRAFFIC_SOURCE_CAMPAIGN: @"summer_promotion",
+             Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: @"summer_promotion_01",
+             Attr.TRAFFIC_SOURCE_TERM: @"running_shoes",
+             Attr.TRAFFIC_SOURCE_CONTENT: @"banner_ad_1",
+             Attr.TRAFFIC_SOURCE_CLID: @"amazon_ad_123",
+             Attr.TRAFFIC_SOURCE_CLID_PLATFORM: @"amazon_ads",
+             Attr.APP_INSTALL_CHANNEL: @"App Store",
+         };
+         ClickstreamConfiguration *configuration = [[[[[ClickstreamConfiguration alloc] init]
+             withAppId:@"your appId"]
+             withEndpoint:@"https://example.com/collect"]
+             withInitialGlobalAttributesObjc:globalAttributes];
+         [ClickstreamObjc initSDK:configuration error: &error];
+         ```
+
+2. 在 SDK 初始化完成后添加全局属性。
+
+    === "Swift"
+         ```swift
+         import Clickstream
+
+         let globalAttribute: ClickstreamAttribute = [
+             ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store",
+             "class": 6,
+             "level": 5.1,
+             "isOpenNotification": true,
+         ]
+         ClickstreamAnalytics.addGlobalAttributes(globalAttribute)
+         
+         // for delete an global attribute
+         ClickstreamAnalytics.deleteGlobalAttributes("level")
+         ```
+    === "Objective-C"
+         ```objective-c
+         @import Clickstream;
+
+         NSDictionary *attributes =@{
+             Attr.APP_INSTALL_CHANNEL: @"App Store",
+             @"class": @6,
+             @"level": @5.1,
+             @"isOpenNotification": @YES
+         };
+         [ClickstreamObjc addGlobalAttributes :attributes];
+         ```
+
+建议在 SDK 初始化时添加全局属性，全局属性将会出现在其设置后生成的每一个事件中。
+
+#### 删除全局属性
 === "Swift"
     ```swift
     import Clickstream
-    
-    let globalAttribute: ClickstreamAttribute = [
-        "channel": "apple",
-        "class": 6,
-        "level": 5.1,
-        "isOpenNotification": true,
-    ]
-    ClickstreamAnalytics.addGlobalAttributes(globalAttribute)
     
     // 删除全局属性
     ClickstreamAnalytics.deleteGlobalAttributes("level")
@@ -167,19 +242,9 @@ struct YourApp: App {
     ```objective-c
     @import Clickstream;
     
-    NSDictionary *attributes =@{
-        @"channel": @"apple",
-        @"class": @6,
-        @"level": @5.1,
-        @"isOpenNotification": @YES
-    };
-    [ClickstreamObjc addGlobalAttributes :attributes];
-    
     // 删除全局属性
     [ClickstreamObjc deleteGlobalAttributes: @[@"level"]];
     ```
-
-请在SDK初始化完成后添加全局属性，全局属性将添加到所有事件的属性对象中。
 
 #### 登录和登出
 
@@ -247,8 +312,8 @@ struct YourApp: App {
     import Clickstream
     
     let attributes: ClickstreamAttribute = [
-        ClickstreamAnalytics.Item.ITEM_ID: "123",
-        ClickstreamAnalytics.Item.CURRENCY: "USD",
+        ClickstreamAnalytics.Attr.VALUE: 99.9,
+        ClickstreamAnalytics.Attr.CURRENCY: "USD",
         "event_category": "recommended"
     ]
     
@@ -268,8 +333,8 @@ struct YourApp: App {
     @import Clickstream;
     
     NSDictionary *attributes = @{
-        ClickstreamItemKey.ITEM_ID: @"123",
-        ClickstreamItemKey.CURRENCY: @"USD",
+        Attr.VALUE: @99.9,
+        Attr.CURRENCY: @"USD",
         "event_category": @"recommended"
     };
     NSDictionary *item_book = @{
@@ -368,6 +433,61 @@ struct YourApp: App {
     [ClickstreamObjc enable];
     ```
 
+#### 其他配置项
+除了必需的 `appId` 和 `endpoint` 之外，您还可以在初始化 SDK 时配置其他参数以满足更多定制化的使用：
+
+=== "Swift"
+    ```swift
+    import Clickstream
+
+    let configuration = ClickstreamConfiguration()
+        .withAppId("your appId")
+        .withEndpoint("https://example.com/collect")
+        .withLogEvents(true)
+        .withCompressEvents(true)
+        .withSendEventInterval(10000)
+        .withSessionTimeoutDuration(1800000)
+        .withTrackScreenViewEvents(true)
+        .withTrackUserEngagementEvents(true)
+        .withTrackAppExceptionEvents(true)
+        .withAuthCookie("your authentication cookie")
+        .withInitialGlobalAttributes([ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE: "amazon"])
+    try ClickstreamAnalytics.initSDK(configuration)
+    ```
+
+=== "Objective-C"
+    ```objective-c
+    @import Clickstream;
+
+    ClickstreamConfiguration *configuration = [[[[[[[[[[[[[ClickstreamConfiguration alloc] init]
+        withAppId:@"your appId"]
+        withEndpoint:@"https://example.com/collect"]
+        withLogEvents:TRUE]
+        withCompressEvents:TRUE]
+        withSendEventInterval: 10000]
+        withSessionTimeoutDuration: 1800000]
+        withTrackScreenViewEvents:TRUE]
+        withTrackUserEngagementEvents:TRUE]
+        withTrackAppExceptionEvents:TRUE]
+        withAuthCookie: @"your auth cookie"]
+        withInitialGlobalAttributesObjc:@{Attr.TRAFFIC_SOURCE_SOURCE: @"amazon"}];
+    [ClickstreamObjc initSDK:configuration error: &error];
+    ```
+以下是每个方法的说明:
+
+| 名称                              | 参数类型   | 是否必填 | 默认值     | 描述                                |
+|---------------------------------|--------|------|---------|-----------------------------------|
+| withAppId()                     | String | 是    | --      | 在解决方案控制平面中您应用程序的 ID               |
+| withEndpoint()                  | String | 是    | --      | 您将事件上传到 Clickstream 摄取服务器的URL请求路径 |
+| withLogEvents()                 | Bool   | 否    | false   | 是否自动打印事件 json以调试事件, [了解更多](#_9)   |
+| withCompressEvents()            | Bool   | 否    | true    | 上传事件时是否通过gzip压缩事件内容               |
+| withSendEventsInterval()        | Int    | 否    | 100000  | 事件发送间隔（毫秒）                        |
+| withSessionTimeoutDuration()    | Int64  | 否    | 1800000 | 会话超时的时长（毫秒）                       |
+| withTrackScreenViewEvents()     | Bool   | 否    | true    | 是否自动记录 screen view（屏幕浏览） 事件       |
+| withTrackUserEngagementEvents() | Bool   | 否    | true    | 是否自动记录 user engagement（用户参与） 事件   |
+| withTrackAppExceptionEvents()   | Bool   | 否    | true    | 是否自动记录应用崩溃事件                      |
+| withAuthCookie()                | String | 否    | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie       |
+
 #### SDK 配置更新
 
 在初始化 SDK 后，您可以使用以下代码对其进行自定义配置。
@@ -380,14 +500,14 @@ struct YourApp: App {
     // 在初始化后更新SDK配置
     do {
         var configuration = try ClickstreamAnalytics.getClickstreamConfiguration()
-        configuration.appId = "your appId"
-        configuration.endpoint = "https://example.com/collect"
-        configuration.authCookie = "your authentication cookie"
-        configuration.sessionTimeoutDuration = 1800000
-        configuration.isTrackScreenViewEvents = false
-        configuration.isTrackUserEngagementEvents = false
-        configuration.isLogEvents = true
-        configuration.isCompressEvents = true
+        configuration.withAppId("your appId")
+            .withEndpoint("https://example.com/collect")
+            .withLogEvents(true)
+            .withCompressEvents(true)
+            .withTrackAppExceptionEvents(true)
+            .withTrackScreenViewEvents(true)
+            .withTrackUserEngagementEvents(true)
+            .withAuthCookie("your authentication cookie")
     } catch {
         print("Failed to config ClickstreamAnalytics: \(error)")
     }
@@ -399,36 +519,15 @@ struct YourApp: App {
     @import Clickstream;
     
     // 在初始化后更新SDK配置
-    ClickstreamContextConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
-    if (configuration) {
-        [configuration setAppId:@"your appId"];
-        [configuration setEndpoint:@"https://example.com/collect"];
-        [configuration setAuthCookie:@"your authentication cookie"];
-        [configuration setSessionTimeoutDuration:1800000];
-        [configuration setIsTrackScreenViewEvents:0];
-        [configuration setIsTrackUserEngagementEvents:0];
-        [configuration setIsLogEvents:1];
-        [configuration setIsCompressEvents:1];
-    }else{
-        NSLog(@"Failed to get configuration: %@", error.localizedDescription);
-    }
+    ClickstreamConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
+    configuration = [[[[[[[configuration withAppId:@"your appId"]
+        withEndpoint:@"https://example.com/collect"]
+        withLogEvents:TRUE]
+        withCompressEvents:TRUE]
+        withTrackScreenViewEvents:TRUE]
+        withTrackUserEngagementEvents:TRUE]
+        withTrackAppExceptionEvents:TRUE];
     ```
-
-!!! info "重要提示"
-    此配置将覆盖 `amplifyconfiguration.json` 文件中的默认配置。
-
-以下是每个配置项的说明
-
-| 名称                          | 参数类型     | 是否必填     | 默认值     | 描述                                |
-|-----------------------------|----------|----------|---------|-----------------------------------|
-| appId                       | String   | 是        | --      | 在解决方案控制平面中您应用程序的 ID               |
-| endpoint                    | String   | 是        | --      | 您将事件上传到 Clickstream 摄取服务器的URL请求路径 |
-| authCookie                  | String   | 否        | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie       |
-| sessionTimeoutDuration      | Int64    | 否        | 1800000 | 会话超时的时长（毫秒）                       |
-| isTrackScreenViewEvents     | Bool     | 否        | true    | 是否自动记录 screen view（屏幕浏览） 事件       |
-| isTrackUserEngagementEvents | Bool     | 否        | true    | 是否自动记录 user engagement（用户参与） 事件   |
-| isLogEvents                 | Bool     | 否        | false   | 是否自动打印事件 json以调试事件, [了解更多](#_9)   |
-| isCompressEvents            | Bool     | 否        | true    | 上传事件时是否通过gzip压缩事件内容               |
 
 #### 调试事件
 
@@ -466,23 +565,24 @@ Clickstream Swift SDK 支持以下数据类型：
 
 为了提高查询和分析的效率，我们需要对事件进行以下限制：
 
-| 名称                | 建议           | 硬限制          | 超过限制的处理策略                               | 错误码   |
-|:------------------|:-------------|:-------------|:----------------------------------------|:------|
-| 事件名称合规            | --           | --           | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1001  |
-| 事件名称长度            | 25 个字符以下     | 50 个字符       | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1002  |
-| 事件属性名称的长度         | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2001  |
-| 属性名称合规            | --           | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2002  |
-| 事件属性值的长度          | 少于 100 个字符   | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2003  |
-| 每个事件的事件属性         | 50 属性以下      | 500 evnet 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004  |
-| 用户属性数             | 25岁以下属性      | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件 | 3001  |
-| 用户属性名称的长度         | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3002  |
-| 用户属性名称合规          | --           | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3003  |
-| 用户属性值的长度          | 50 个字符以下     | 256 个字符      | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3004  |
-| 事件中 Item 的个数      | 50 个 Item 以下 | 100 个 Item   | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4001  |
-| Item 属性值的长度       | 少于 100 个字符   | 256 个字符      | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4002  |
-| 一个 Item 中自定义属性的个数 | 少于 10 个自定义属性 | 10 个自定义属性    | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4003  |
-| Item 属性名的长度       | 25 个字符以下     | 50 个字符       | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4004  |
-| Item 属性名称合规       | --           | --           | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4005  |
+| 名称                                                   | 建议           | 硬限制          | 超过限制的处理策略                               | 错误码     |
+|:-----------------------------------------------------|:-------------|:-------------|:----------------------------------------|:--------|
+| 事件名称合规                                               | --           | --           | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1001    |
+| 事件名称长度                                               | 25 个字符以下     | 50 个字符       | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1002    |
+| 事件属性名称的长度                                            | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2001    |
+| 属性名称合规                                               | --           | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2002    |
+| 事件属性值的长度                                             | 少于 100 个字符   | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2003    |
+| 每个事件的事件属性                                            | 50 属性以下      | 500 event 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004    |
+| 事件属性值为无限（当 Double 或 Decimal 的 isFinite 属性为 false 时）  | --           | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2005    |
+| 用户属性数                                                | 25岁以下属性      | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件 | 3001    |
+| 用户属性名称的长度                                            | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3002    |
+| 用户属性名称合规                                             | --           | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3003    |
+| 用户属性值的长度                                             | 50 个字符以下     | 256 个字符      | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3004    |
+| 事件中 Item 的个数                                         | 50 个 Item 以下 | 100 个 Item   | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4001    |
+| Item 属性值的长度                                          | 少于 100 个字符   | 256 个字符      | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4002    |
+| 一个 Item 中自定义属性的个数                                    | 少于 10 个自定义属性 | 10 个自定义属性    | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4003    |
+| Item 属性名的长度                                          | 25 个字符以下     | 50 个字符       | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4004    |
+| Item 属性名称合规                                          | --           | --           | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4005    |
 
 !!! info "重要提示"
 
@@ -650,18 +750,23 @@ Clickstream Swift SDK 支持以下数据类型：
 
 ### 事件属性
 
-| 属性名称                     | 数据类型     | 是否自动采集 | 描述                                                       |
-|--------------------------|----------|--------|----------------------------------------------------------|
-| _traffic_source_medium   | String   | 否      | 保留给流量媒介，使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎            |
-| _traffic_source_name     | String   | 否      | 保留给流量名称，使用此属性存储事件记录时获取用户的营销活动，例如：夏季促销                    |
-| _traffic_source_source   | String   | 否      | 保留给流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu |
-| _channel                 | String   | 否      | 预留安装源，app下载的渠道                                           |
-| _session_id              | String   | 是      | 在所有事件中添加                                                 |
-| _session_start_timestamp | long     | 是      | 在所有事件中添加                                                 |
-| _session_duration        | long     | 是      | 在所有事件中添加                                                 |
-| _session_number          | int      | 是      | 在所有事件中添加                                                 |
-| _screen_name             | String   | 是      | 在所有事件中添加                                                 |
-| _screen_unique_id        | String   | 是      | 在所有事件中添加                                                 |
+| 属性名称                          | 数据类型     | 是否自动采集 | 描述                                                          |
+|-------------------------------|----------|--------|-------------------------------------------------------------|
+| _traffic_source_source        | String   | 否      | 流量来源保留字段。事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu   |
+| _traffic_source_medium        | String   | 否      | 流量来源保留字段。使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎              |
+| _traffic_source_campaign      | String   | 否      | 流量来源保留字段。使用此属性来存储您的流量来源的活动，例如：summer_sale, holiday_specials |
+| _traffic_source_campaign_id   | String   | 否      | 流量来源保留字段。使用此属性来存储流量来源的营销活动 ID，例如：campaign_1, campaign_2     |
+| _traffic_source_term          | String   | 否      | 流量来源保留字段。使用此属性来存储流量来源的术语，例如：running_shoes, fitness_tracker  |
+| _traffic_source_content       | String   | 否      | 流量来源保留字段。使用此属性来存储流量来源的内容，例如：banner_ad_1, text_ad_2          |
+| _traffic_source_clid          | String   | 否      | 流量来源保留字段。使用此属性来存储流量源的 CLID，例如：amazon_ad_123, google_ad_456  |
+| _traffic_source_clid_platform | String   | 否      | 流量来源保留字段。使用此属性来存储您的流量来源的clid平台，例如：amazon_ads, google_ads    |
+| _app_install_channel          | String   | 否      | 预留安装源，app下载的渠道                                              |
+| _session_id                   | String   | 是      | 在所有事件中添加                                                    |
+| _session_start_timestamp      | long     | 是      | 在所有事件中添加                                                    |
+| _session_duration             | long     | 是      | 在所有事件中添加                                                    |
+| _session_number               | int      | 是      | 在所有事件中添加                                                    |
+| _screen_name                  | String   | 是      | 在所有事件中添加                                                    |
+| _screen_unique_id             | String   | 是      | 在所有事件中添加                                                    |
 
 ### Item 属性
 
@@ -687,6 +792,9 @@ Clickstream Swift SDK 支持以下数据类型：
 ## SDK更新日志
 
 参考：[GitHub 更新日志](https://github.com/awslabs/clickstream-swift/releases)
+
+## 示例项目
+集成 SDK 的示例 [iOS 项目](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/ios)
 
 ## 参考链接
 

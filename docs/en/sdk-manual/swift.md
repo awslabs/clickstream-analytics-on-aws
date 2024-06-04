@@ -82,7 +82,7 @@ Once you have configured the parameters, you need to initialize it in AppDelegat
 === "Objective-C"
     ```objective-c
     @import Clickstream;
-    
+
     - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions { 
         NSError *error = nil;
         [ClickstreamObjc initSDKAndReturnError:&error];
@@ -93,7 +93,10 @@ Once you have configured the parameters, you need to initialize it in AppDelegat
     }
     ```
 
-If your project is developed with SwiftUI, you need to create an application delegate and attach it to your `App` through `UIApplicationDelegateAdaptor`.
+#### SwiftUI configuration
+
+If your project is developed with SwiftUI, you need to create an application delegate and attach it to your `App`
+through `UIApplicationDelegateAdaptor`.
 
 ```swift
 @main
@@ -107,9 +110,11 @@ struct YourApp: App {
 }
 ```
 
-For SwiftUI, we do not yet support automatic collection of screen view events, you need to disable screen view event by setting `configuration.isTrackScreenViewEvents = false`, see the [configuration](#configuration-update) steps.
+Clickstream Swift SDK depends on method swizzling to automatically record screen views. SwiftUI apps
+must [record screen view events manually](#record-screen-view-events-manually), and disable automatic tracking of screen
+view events by setting `configuration.withTrackScreenViewEvents(false)` when the SDK is initialized.
 
-### 4.Start  using
+### 4.Start using
 
 #### Record event
 
@@ -148,38 +153,88 @@ Add the following code where you need to record event.
 
 #### Add global attribute
 
-=== "Swift"
-    ```swift
-    import Clickstream
-    
-    let globalAttribute: ClickstreamAttribute = [
-        "channel": "apple",
-        "class": 6,
-        "level": 5.1,
-        "isOpenNotification": true,
-    ]
-    ClickstreamAnalytics.addGlobalAttributes(globalAttribute)
-    
-    // for delete an global attribute
-    ClickstreamAnalytics.deleteGlobalAttributes("level")
-    ```
-=== "Objective-C"
-    ```objective-c
-    @import Clickstream;
-    
-    NSDictionary *attributes =@{
-        @"channel": @"apple",
-        @"class": @6,
-        @"level": @5.1,
-        @"isOpenNotification": @YES
-    };
-    [ClickstreamObjc addGlobalAttributes :attributes];
-    
-    // for delete an global attribute
-    [ClickstreamObjc deleteGlobalAttributes: @[@"level"]];
-    ```
+1. Add global attributes when initializing the SDK.
 
-Please add the global attribute after the SDK initialization is completed, the global attribute will be added to the attribute object in all events.
+    The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
+
+    === "Swift"
+         ```swift
+         import Clickstream
+    
+         let configuration = ClickstreamConfiguration()
+             .withAppId("your appId")
+             .withEndpoint("https://example.com/collect")
+             .withInitialGlobalAttributes([
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE: "amazon",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_MEDIUM: "cpc",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN: "summer_promotion",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: "summer_promotion_01",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_TERM: "running_shoes",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CONTENT: "banner_ad_1",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID: "amazon_ad_123",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID_PLATFORM: "amazon_ads",
+                 ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store"
+         ])
+         try ClickstreamAnalytics.initSDK(configuration)
+         ```
+    
+    === "Objective-C"
+         ```objective-c
+         @import Clickstream;
+    
+         NSDictionary *globalAttributes = @{
+             Attr.TRAFFIC_SOURCE_SOURCE: @"amazon",
+             Attr.TRAFFIC_SOURCE_MEDIUM: @"cpc",
+             Attr.TRAFFIC_SOURCE_CAMPAIGN: @"summer_promotion",
+             Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: @"summer_promotion_01",
+             Attr.TRAFFIC_SOURCE_TERM: @"running_shoes",
+             Attr.TRAFFIC_SOURCE_CONTENT: @"banner_ad_1",
+             Attr.TRAFFIC_SOURCE_CLID: @"amazon_ad_123",
+             Attr.TRAFFIC_SOURCE_CLID_PLATFORM: @"amazon_ads",
+             Attr.APP_INSTALL_CHANNEL: @"App Store",
+         };
+         ClickstreamConfiguration *configuration = [[[[[ClickstreamConfiguration alloc] init]
+             withAppId:@"your appId"]
+             withEndpoint:@"https://example.com/collect"]
+             withInitialGlobalAttributesObjc:globalAttributes];
+         [ClickstreamObjc initSDK:configuration error: &error];
+         ```
+
+2. Add global attributes after initializing the SDK.
+
+    === "Swift"
+         ```swift
+         import Clickstream
+    
+         let globalAttribute: ClickstreamAttribute = [
+             ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store",
+             "class": 6,
+             "level": 5.1,
+             "isOpenNotification": true,
+         ]
+         ClickstreamAnalytics.addGlobalAttributes(globalAttribute)
+         
+         // for delete an global attribute
+         ClickstreamAnalytics.deleteGlobalAttributes("level")
+         ```
+    === "Objective-C"
+         ```objective-c
+         @import Clickstream;
+    
+         NSDictionary *attributes =@{
+             Attr.APP_INSTALL_CHANNEL: @"App Store",
+             @"class": @6,
+             @"level": @5.1,
+             @"isOpenNotification": @YES
+         };
+         [ClickstreamObjc addGlobalAttributes :attributes];
+         
+         // for delete an global attribute
+         [ClickstreamObjc deleteGlobalAttributes: @[@"level"]];
+         ```
+
+It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events
+that occur after it is set.
 
 #### Login and logout
 
@@ -231,7 +286,7 @@ Please add the global attribute after the SDK initialization is completed, the g
     [ClickstreamObjc addUserAttributes:userAttributes];
     ```
 
-Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same API `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
+Current logged-in user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same API `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
 
 !!! info "Important"
 
@@ -247,8 +302,8 @@ You can add the following code to log an event with an item.
     import Clickstream
     
     let attributes: ClickstreamAttribute = [
-        ClickstreamAnalytics.Item.ITEM_ID: "123",
-        ClickstreamAnalytics.Item.CURRENCY: "USD",
+        ClickstreamAnalytics.Attr.VALUE: 99.9,
+        ClickstreamAnalytics.Attr.CURRENCY: "USD",
         "event_category": "recommended"
     ]
     
@@ -268,8 +323,8 @@ You can add the following code to log an event with an item.
     @import Clickstream;
     
     NSDictionary *attributes = @{
-        ClickstreamItemKey.ITEM_ID: @"123",
-        ClickstreamItemKey.CURRENCY: @"USD",
+        Attr.VALUE: @99.9,
+        Attr.CURRENCY: @"USD",
         "event_category": @"recommended"
     };
     NSDictionary *item_book = @{
@@ -368,6 +423,64 @@ You can disable the SDK in the scenario you need. After disabling the SDK, the S
     [ClickstreamObjc enable];
     ```
 
+#### Other configuration
+
+In addition to the required appId and endpoint, you can configure other information to get more customized usage when
+initializing the SDK:
+
+=== "Swift"
+    ```swift
+    import Clickstream
+
+    let configuration = ClickstreamConfiguration()
+        .withAppId("your appId")
+        .withEndpoint("https://example.com/collect")
+        .withLogEvents(true)
+        .withCompressEvents(true)
+        .withSendEventInterval(10000)
+        .withSessionTimeoutDuration(1800000)
+        .withTrackScreenViewEvents(true)
+        .withTrackUserEngagementEvents(true)
+        .withTrackAppExceptionEvents(true)
+        .withAuthCookie("your authentication cookie")
+        .withInitialGlobalAttributes([ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE: "amazon"])
+    try ClickstreamAnalytics.initSDK(configuration)
+    ```
+
+=== "Objective-C"
+    ```objective-c
+    @import Clickstream;
+
+    ClickstreamConfiguration *configuration = [[[[[[[[[[[[[ClickstreamConfiguration alloc] init]
+        withAppId:@"your appId"]
+        withEndpoint:@"https://example.com/collect"]
+        withLogEvents:TRUE]
+        withCompressEvents:TRUE]
+        withSendEventInterval: 10000]
+        withSessionTimeoutDuration: 1800000]
+        withTrackScreenViewEvents:TRUE]
+        withTrackUserEngagementEvents:TRUE]
+        withTrackAppExceptionEvents:TRUE]
+        withAuthCookie: @"your auth cookie"]
+        withInitialGlobalAttributesObjc:@{Attr.TRAFFIC_SOURCE_SOURCE: @"amazon"}];
+    [ClickstreamObjc initSDK:configuration error: &error];
+    ```
+
+Here is an explanation of each option.
+
+| Method name                     | Parameter type | Required | Default value | Description                                                                                 |
+|---------------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
+| withAppId()                     | String         | true     | --            | the app id of your application in web console                                               |
+| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
+| withLogEvents()                 | Bool           | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
+| withCompressEvents()            | Bool           | false    | true          | whether to compress event content by gzip when uploading events                             |
+| withSendEventsInterval()        | Int            | false    | 10000         | event sending interval in milliseconds                                                      |
+| withSessionTimeoutDuration()    | Int64          | false    | 1800000       | the duration of the session timeout in milliseconds                                         |
+| withTrackScreenViewEvents()     | Bool           | false    | true          | whether to auto-record screen view events                                                   |
+| withTrackUserEngagementEvents() | Bool           | false    | true          | whether to auto-record user engagement events                                               |
+| withTrackAppExceptionEvents()   | Bool           | false    | true          | whether to auto-record app exception events                                                 |
+| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
+
 #### Configuration update
 
 After initializing the SDK, you can use the following code to customize the configuration of the SDK.
@@ -380,14 +493,14 @@ After initializing the SDK, you can use the following code to customize the conf
     // config the sdk after initialize.
     do {
         var configuration = try ClickstreamAnalytics.getClickstreamConfiguration()
-        configuration.appId = "your appId"
-        configuration.endpoint = "https://example.com/collect"
-        configuration.authCookie = "your authentication cookie"
-        configuration.sessionTimeoutDuration = 1800000
-        configuration.isTrackScreenViewEvents = false
-        configuration.isTrackUserEngagementEvents = false
-        configuration.isLogEvents = true
-        configuration.isCompressEvents = true
+        configuration.withAppId("your appId")
+            .withEndpoint("https://example.com/collect")
+            .withLogEvents(true)
+            .withCompressEvents(true)
+            .withTrackAppExceptionEvents(true)
+            .withTrackScreenViewEvents(true)
+            .withTrackUserEngagementEvents(true)
+            .withAuthCookie("your authentication cookie")
     } catch {
         print("Failed to config ClickstreamAnalytics: \(error)")
     }
@@ -399,35 +512,15 @@ After initializing the SDK, you can use the following code to customize the conf
     @import Clickstream;
     
     // config the sdk after initialize.
-    ClickstreamContextConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
-    if (configuration) {
-        [configuration setAppId:@"your appId"];
-        [configuration setEndpoint:@"https://example.com/collect"];
-        [configuration setAuthCookie:@"your authentication cookie"];
-        [configuration setSessionTimeoutDuration:1800000];
-        [configuration setIsTrackScreenViewEvents:0];
-        [configuration setIsTrackUserEngagementEvents:0];
-        [configuration setIsLogEvents:1];
-        [configuration setIsCompressEvents:1];
-    }else{
-        NSLog(@"Failed to get configuration: %@", error.localizedDescription);
-    }
+    ClickstreamConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
+    configuration = [[[[[[[configuration withAppId:@"your appId"]
+        withEndpoint:@"https://example.com/collect"]
+        withLogEvents:TRUE]
+        withCompressEvents:TRUE]
+        withTrackScreenViewEvents:TRUE]
+        withTrackUserEngagementEvents:TRUE]
+        withTrackAppExceptionEvents:TRUE];
     ```
-
-> Note: this configuration will override the default configuration in `amplifyconfiguration.json` file
-
-Here is an explanation of each option.
-
-| Method name                 | Parameter type | Required | Default value | Description                                                                                 |
-|-----------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
-| appId                       | String         | true     | --            | the app id of your application in web console                                               |
-| endpoint                    | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
-| authCookie                  | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
-| sessionTimeoutDuration      | Int64          | false    | 1800000       | the duration for session timeout in milliseconds                                            |
-| isTrackScreenViewEvents     | Bool           | false    | true          | whether to auto-record screen view events                                                   |
-| isTrackUserEngagementEvents | Bool           | false    | true          | whether to auto-record user engagement events                                               |
-| isLogEvents                 | Bool           | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
-| isCompressEvents            | Bool           | false    | true          | whether to compress event content by gzip when uploading events                             |
 
 #### Debug events
 
@@ -463,23 +556,24 @@ Clickstream Swift SDK supports the following data types:
 
 In order to improve the efficiency of querying and analysis, we need to limit events as follows:
 
-| Name                                     | Suggestion                 | Hard limit           | Strategy                                                                           | Error code |
-|------------------------------------------|----------------------------|----------------------|------------------------------------------------------------------------------------|------------|
-| Event name invalid                       | --                         | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
-| Length of event name                     | under 25 characters        | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
-| Length of event attribute name           | under 25 characters        | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
-| Attribute name invalid                   | --                         | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
-| Length of event attribute value          | under 100 characters       | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
-| Event attribute per event                | under 50 attributes        | 500 event attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
-| User attribute number                    | under 25 attributes        | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
-| Length of User attribute name            | under 25 characters        | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
-| User attribute name invalid              | --                         | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
-| Length of User attribute value           | under 50 characters        | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
-| Item number in one event                 | under 50 items             | 100 items            | discard the item, print log and record error in event attribute                    | 4001       |
-| Length of item attribute value           | under 100 characters       | 256 characters       | discard the item, print log and record error in event attribute                    | 4002       |
-| Custom item attribute number in one item | under 10 custom attributes | 10 custom attributes | discard the item, print log and record error in event attribute                    | 4003       |
-| Length of item attribute name            | under 25 characters        | 50 characters        | discard the item, print log and record error in event attribute                    | 4004       |
-| Item attribute name invalid              | --                         | --                   | discard the item, print log and record error in event attribute                    | 4005       |
+| Name                                                                                   | Suggestion                 | Hard limit           | Strategy                                                                           | Error code |
+|----------------------------------------------------------------------------------------|----------------------------|----------------------|------------------------------------------------------------------------------------|------------|
+| Event name invalid                                                                     | --                         | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
+| Length of event name                                                                   | under 25 characters        | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
+| Length of event attribute name                                                         | under 25 characters        | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
+| Attribute name invalid                                                                 | --                         | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
+| Length of event attribute value                                                        | under 100 characters       | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
+| Event attribute per event                                                              | under 50 attributes        | 500 event attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
+| Event attribute value is infinite (When Double or Decimal isFinite attribute is false) | --                         | --                   | discard the attribute, print log and record error in event attribute               | 2005       |
+| User attribute number                                                                  | under 25 attributes        | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
+| Length of User attribute name                                                          | under 25 characters        | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
+| User attribute name invalid                                                            | --                         | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
+| Length of User attribute value                                                         | under 50 characters        | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
+| Item number in one event                                                               | under 50 items             | 100 items            | discard the item, print log and record error in event attribute                    | 4001       |
+| Length of item attribute value                                                         | under 100 characters       | 256 characters       | discard the item, print log and record error in event attribute                    | 4002       |
+| Custom item attribute number in one item                                               | under 10 custom attributes | 10 custom attributes | discard the item, print log and record error in event attribute                    | 4003       |
+| Length of item attribute name                                                          | under 25 characters        | 50 characters        | discard the item, print log and record error in event attribute                    | 4004       |
+| Item attribute name invalid                                                            | --                         | --                   | discard the item, print log and record error in event attribute                    | 4005       |
 
 !!! info "Important"
 
@@ -648,18 +742,23 @@ All user attributes will be included in `user` object, and all custom and global
 
 ### Event attributes
 
-| Attribute name           | Data type | Auto track | Description                                                                                                                                                |
-|--------------------------|-----------|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| _traffic_source_medium   | String    | false      | Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine |
-| _traffic_source_name     | String    | false      | Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion        |
-| _traffic_source_source   | String    | false      | Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu        |
-| _channel                 | String    | false      | Reserved for install source, it is the channel for app was downloaded                                                                                      |
-| _session_id              | String    | true       | Added in all events.                                                                                                                                       |
-| _session_start_timestamp | long      | true       | Added in all events.                                                                                                                                       |
-| _session_duration        | long      | true       | Added in all events.                                                                                                                                       |
-| _session_number          | int       | true       | Added in all events.                                                                                                                                       |
-| _screen_name             | String    | true       | Added in all events.                                                                                                                                       |
-| _screen_unique_id        | String    | true       | Added in all events.                                                                                                                                       |
+| Attribute name                | Data type | Auto track | Description                                                                                                                                                       |
+|-------------------------------|-----------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _traffic_source_source        | String    | false      | Reserved for traffic source source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu        |
+| _traffic_source_medium        | String    | false      | Reserved for traffic source medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine |
+| _traffic_source_campaign      | String    | false      | Reserved for traffic source campaign. Use this attribute to store the campaign of your traffic source. Example: summer_sale, holiday_specials                     |
+| _traffic_source_campaign_id   | String    | false      | Reserved for traffic source campaign id. Use this attribute to store the campaign id of your traffic source. Example: campaign_1, campaign_2                      |
+| _traffic_source_term          | String    | false      | Reserved for traffic source term. Use this attribute to store the term of your traffic source. Example: running_shoes, fitness_tracker                            |
+| _traffic_source_content       | String    | false      | Reserved for traffic source content. Use this attribute to store the content of your traffic source. Example: banner_ad_1, text_ad_2                              |
+| _traffic_source_clid          | String    | false      | Reserved for traffic source clid. Use this attribute to store the clid of your traffic source. Example: amazon_ad_123, google_ad_456                              |
+| _traffic_source_clid_platform | String    | false      | Reserved for traffic source clid platform. Use this attribute to store the clid platform of your traffic source. Example: amazon_ads, google_ads                  |
+| _app_install_channel          | String    | false      | Reserved for install source, it is the channel for app was downloaded                                                                                             |
+| _session_id                   | String    | true       | Added in all events.                                                                                                                                              |
+| _session_start_timestamp      | long      | true       | Added in all events.                                                                                                                                              |
+| _session_duration             | long      | true       | Added in all events.                                                                                                                                              |
+| _session_number               | int       | true       | Added in all events.                                                                                                                                              |
+| _screen_name                  | String    | true       | Added in all events.                                                                                                                                              |
+| _screen_unique_id             | String    | true       | Added in all events.                                                                                                                                              |
 
 ### Item attributes
 
@@ -685,6 +784,9 @@ You can use the above preset item attributes, of course, you can also add custom
 ## Change log
 
 [GitHub change log](https://github.com/awslabs/clickstream-swift/releases)
+
+## Sample project
+Sample [iOS Project](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/ios) for SDK integration.
 
 ## Reference link
 

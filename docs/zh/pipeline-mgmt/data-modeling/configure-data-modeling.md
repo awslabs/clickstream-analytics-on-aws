@@ -1,21 +1,6 @@
 # 数据建模设置
 
-数据管道处理完事件数据后，您可以将数据加载到分析引擎进行数据建模，比如Redshift或Athena，其中数据将被汇总并组织成不同的视图（如事件、设备、会话），以及常用的计算指标。以下是如果你选择启用数据建模模块，此解决方案提供的预设数据视图。
-
-## 预设数据视图
-
-| 数据模型名称                 | Redshift | 描述                                                                  |
-|-----------------------------|-----------|----------------------------------------------------------------------|
-| clickstream_device_view_v1    | 物化视图    | 包含所有设备相关信息的视图                     |
-| clickstream_event_view_v2    | 视图    | 包含所有事件维度的视图。      |
-| clickstream_event_parameter_view_v1    | 物化视图      | 包含所有事件参数的视图。        |
-| clickstream_user_dim_view_v1    | 物化视图     | 包含所有用户维度的视图。                     |
-| clickstream_user_attr_view_v1    | 物化视图      | 包含所有用户自定义属性的视图。        |
-| clickstream_session_view_v2    | 视图     | 包含所有会话维度和相关度量，例如，会话持续时间，会话视图。        |
-| clickstream_retention_view_v2    | 物化视图      | 包含按日期和返回日度量的留存指标的视图。       |
-| clickstream_lifecycle_daily_view_v2    | 视图    | 包含按生命周期阶段划分的用户数量的度量指标的日视图，即，新用户，活跃用户，返回用户，流失用户。        |
-| clickstream_lifecycle_weekly_view_v2    | 视图    | 包含按生命周期阶段划分的用户数量的度量指标的周视图，即，新用户，活跃用户，返回用户，流失用户。        |
-
+数据管道处理完事件数据后，您可以将数据加载到分析引擎进行数据建模，比如Redshift或Athena，其中数据将被汇总并组织成不同的视图（如事件、设备、会话），以及常用的计算指标。
 
 您可以选择使用Redshift或Athena，或两者都用。
 
@@ -33,13 +18,21 @@
 
         * **VPC**：基于 Amazon VPC 服务的虚拟私有云（VPC）是您在 AWS 云中的私有、逻辑隔离的网络。
 
-            > **注意**：如部署在逻辑隔离的网络中，VPC 必须为 S3，Logs，Dynamodb，STS，States, Redshift 以及 Redshift-data 服务拥有 VPC 终端。
+            !!! info "注意"
+            
+                如部署在逻辑隔离的网络中，VPC 必须为 S3，Logs，Dynamodb，STS，States, Redshift 以及 Redshift-data 服务拥有 VPC 终端。
 
         * **安全组**：此 VPC 安全组定义了可以在 VPC 中使用的哪些子网和 IP 范围可访问 Redshift 服务端点。
 
         * **子网**：选择至少三个现有的 VPC 子网。
 
-            > **注意**：我们建议出于最佳安全实践使用私有子网进行部署。
+            !!! info "注意"
+            
+                我们建议出于最佳安全实践使用私有子网进行部署。
+
+            !!! info "注意"
+            
+                请确保您的子网有足够的可用 IP 地址来创建 Redshift Serverless，请查阅[每个子网所需的可用 IP 地址数量][serverless-usage-considerations]。
 
     * **预设模式**
 
@@ -50,3 +43,5 @@
     * **数据范围**：考虑到让 Redshift 保存所有数据的成本效益问题，我们建议 Redshift 仅保存热数据，而所有数据都存储在 S3 中。需要定期在 Redshift 中删除过期数据。
 
 * **Athena**：选择 Athena 使用在 Glue 数据目录中创建的表查询 S3 上的所有数据。
+
+[serverless-usage-considerations]: https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-usage-considerations.html

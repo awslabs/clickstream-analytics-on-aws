@@ -6,13 +6,13 @@ Funnel analysis are commonly used when analyzing user behaviors, for example:
 
 - Analysis of the conversion rate of the key process in a product: such as order to purchase rate, registration completion rate;
 - Analysis of the conversion rate of promotion: for example, conversion rate of different in-app promotion spot;
-- Analysis of marketing channels's effectiveness: for example, purchase rate of new users brought by different ad campaigns.
+- Analysis of marketing channel's effectiveness: for example, purchase rate of new users brought by different ad campaigns.
 
 ## Key concepts
 
 - **Metric**: the entity used for funnel analysis, such as event number or user number.
 - **Funnel**: a funnel is a sequence of events that represents a process, it contains at least two events, each event represents a step in the funnel.
-- **Funnel window**: he funnel Window refers to the time for the user to complete the entire process. Only when the user completes all the selected steps within the set window period is considered a successful conversion.
+- **Funnel window**: the funnel Window refers to the time for the user to complete the entire process. Only when the user completes all the selected steps within the set window period is considered a successful conversion.
 
 ## How to use
 
@@ -23,9 +23,9 @@ Funnel analysis are commonly used when analyzing user behaviors, for example:
     1. Custom: you can define any duration as the funnel window.
     2. The day: complete the funnel within the same date of the first step.
 3. Select event for as the step, click the `+Add Step` button to add more steps. You can add up to 10 steps.
-4. Click on the :material-filter-outline:{ .filter } to filter the event. Only the event meet with the filter criterial that will be counted as pass through the funnel. You can add multiple filters to one event.
+4. Click on the :material-filter-outline:{ .filter } to filter the event. Only the events that meet the filter criteria will be counted as passing through the funnel. You can add multiple filters to one event.
 5. If needed, configure global filter by selecting event parameter or user attributes. Similar to event filter, you can add multiple global filters and configure the filter relationship.
-6. If needed, configure grouping by selecting an event parameter or an user attribute.
+6. If needed, configure grouping by selecting an event parameter or a user attribute.
    
     !!! note
 
@@ -46,7 +46,7 @@ Funnel analysis are commonly used when analyzing user behaviors, for example:
 3. In the left **Define Funnel** area, choose `The Day` as the funnel window.
 4. Choose `_session_start`, `view_item`, `add_to_cart`, `purchase` as funnel events.
 5. Configure a global filter in the right **Filters** area:
-    - Choose `other.platform` as the filter property.
+    - Choose `Event preset` / `Platform` as the filter property.
     - Operation: `=`
     - Value: `Web`
 6. Click **Query**.

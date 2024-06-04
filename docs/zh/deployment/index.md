@@ -19,7 +19,7 @@
 
 ## 在 AWS 中国区域中部署
 
-AWS 中国区域不支持 Cognito 用户池。您必须使用 OpenID Connect 来启动解决方案。
+AWS 中国区域不支持 Cognito 用户池。您必须使用 OpenID Connect 来启动解决方案。请在部署之前查看[这些额外的先决条件][china-prerequisites]。
 
 - [使用 OpenID Connect 启动][oidc]
 
@@ -32,3 +32,4 @@ AWS 中国区域不支持 Cognito 用户池。您必须使用 OpenID Connect 来
 [cognito]: ./with-cognito.md
 [oidc]: ./with-oidc.md
 [intranet]: ./within-vpc.md
+[china-prerequisites]: ../resources/aws-china-prerequisites.md
