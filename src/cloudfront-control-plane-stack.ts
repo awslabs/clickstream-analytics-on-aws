@@ -31,6 +31,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
+import { ApplicationLogLevel } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
@@ -50,7 +51,6 @@ import { suppressWarningsForCloudFrontS3Portal as suppressWarningsForCloudFrontS
 import { SolutionCognito } from './control-plane/private/solution-cognito';
 import { generateSolutionConfig, SOLUTION_CONFIG_PATH } from './control-plane/private/solution-config';
 import { SolutionNodejsFunction } from './private/function';
-import { ApplicationLogLevel } from 'aws-cdk-lib/aws-lambda';
 
 export interface CloudFrontControlPlaneStackProps extends StackProps {
   /**
