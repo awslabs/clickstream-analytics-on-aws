@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, EXPLORE_SEGMENT_DUMMY_PROPERTY, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { format } from 'sql-formatter';
 import { formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks, isValidGroupingCondition } from './reporting-utils';
 import { logger } from '../../common/powertools';
@@ -188,6 +188,7 @@ export interface EventNonNestColProps {
 }
 
 export const EVENT_USER_VIEW = 'clickstream_event_view_v3';
+export const USER_SEGMENT_TABLE = 'segment_user';
 
 export function buildFunnelTableView(sqlParameters: SQLParameters, requestAciton: string) : string {
 
@@ -1817,6 +1818,66 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
   let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
   globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
 
+  let whereClause = '';
+  let userSegmentBaseSQl = '';
+  let segments: string[] = [];
+  if(sqlParameters.globalEventCondition?.conditions !== undefined && sqlParameters.globalEventCondition?.conditions.length > 0)  {
+
+    for (const condition of sqlParameters.globalEventCondition.conditions) {
+      if(condition.category === ConditionCategory.USER_OUTER
+        && condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY) {
+          segments.push(`'${condition.value}'`);
+        }
+    }
+
+    if(sqlParameters.globalEventCondition.conditionOperator === 'or') {
+      whereClause = 'and segment_id in (' + segments.join(',') + ')'
+      userSegmentBaseSQl = `
+        with user_segment_base as (
+          select 
+            user_id 
+          from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+          where 1=1
+          ${whereClause}
+          group by user_id
+        ),
+      `
+    } else {
+      userSegmentBaseSQl = `
+        with user_segment_base as (
+          select 
+            user_id 
+          from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+          where 1=1
+          ${whereClause}
+          group by user_id having count(distinct segment_id) = ${segments.length}
+        ),
+      `
+    }
+
+    return `
+      ${userSegmentBaseSQl}
+      base_data as (
+        select
+          event.event_id,
+          event.event_name,
+          event.event_timestamp,
+          event.merged_user_id as user_pseudo_id,
+          event.user_id,
+          ${eventColumnSql}
+          ${userColumnSql}
+          ${buildDateUnitsSql(sqlParameters.timezone)}
+        from
+          ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_USER_VIEW} as event
+          join user_segment_base as user_segment on event.user_pseudo_id = user_segment.user_id
+        where
+          ${eventDateSQL}
+          ${eventNameClause}
+          ${globalConditionSql}
+      ),
+    `;
+  } 
+
   return `
     with base_data as (
       select
@@ -2256,6 +2317,9 @@ export function buildAllConditionSql(sqlCondition: SQLCondition | undefined) {
 
   let sql = '';
   for (const condition of sqlCondition.conditions) {
+    if(condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY && condition.category === ConditionCategory.USER_OUTER) {
+      continue;
+    }
     const conditionSql = _getOneConditionSql(condition);
 
     sql = sql.concat(`
@@ -2439,10 +2503,12 @@ export function buildConditionProps(conditions: Condition[]) {
   let hasUserOuterAttribute =false;
   let hasEventAttribute = false;
   let hasEventNonNestAttribute = false;
+  let hasSegmentAttribute = false;
   const userAttributes: ColumnAttribute[] = [];
   const eventAttributes: ColumnAttribute[] = [];
   const userOuterAttributes: ColumnAttribute[] = [];
   const eventNonNestAttributes: ColumnAttribute[] = [];
+  const segmenttAttributes: ColumnAttribute[] = [];
 
   for (const condition of conditions) {
     if (condition.category === ConditionCategory.USER) {
@@ -2460,12 +2526,21 @@ export function buildConditionProps(conditions: Condition[]) {
         dataType: condition.dataType,
       });
     } else if (condition.category === ConditionCategory.USER_OUTER) {
-      hasUserOuterAttribute = true;
-      userOuterAttributes.push({
-        property: condition.property,
-        category: condition.category,
-        dataType: condition.dataType,
-      });
+      if( condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY){
+        hasSegmentAttribute = true;
+        segmenttAttributes.push({
+          property: condition.property,
+          category: condition.category,
+          dataType: MetadataValueType.STRING,
+        });
+      } else {
+        hasUserOuterAttribute = true;
+        userOuterAttributes.push({
+          property: condition.property,
+          category: condition.category,
+          dataType: condition.dataType,
+        });
+      }
     } else {
       hasEventNonNestAttribute = true;
       eventNonNestAttributes.push({
@@ -2480,11 +2555,13 @@ export function buildConditionProps(conditions: Condition[]) {
     hasEventAttribute,
     hasUserAttribute,
     hasUserOuterAttribute,
+    hasSegmentAttribute,
     userAttributes,
     eventAttributes,
     userOuterAttributes,
     hasEventNonNestAttribute,
     eventNonNestAttributes,
+    segmenttAttributes,
   };
 }
 
