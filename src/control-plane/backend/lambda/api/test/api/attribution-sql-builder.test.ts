@@ -232,8 +232,8 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+          event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -690,8 +690,11 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date_trunc('month', current_date - interval '23 months')
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
+          event.event_timestamp >= DATE_TRUNC(
+            'month',
+            CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Shanghai' - interval '23 months'
+          )
+          and event.event_timestamp <= CURRENT_TIMESTAMP
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -984,8 +987,8 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       target_data as (
@@ -1395,8 +1398,8 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-09-01'
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+          event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai' - interval '2592000 seconds'
+          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -1842,8 +1845,8 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -2266,8 +2269,11 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date_trunc('month', current_date - interval '19 months')
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
+          event.event_timestamp >= DATE_TRUNC(
+            'month',
+            CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Shanghai' - interval '19 months'
+          )
+          and event.event_timestamp <= CURRENT_TIMESTAMP
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       target_data as (
@@ -2695,12 +2701,15 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= DATEADD (
+          event.event_timestamp >= DATEADD (
             DAY,
             -1,
-            date_trunc('month', current_date - interval '19 months')
+            date_trunc(
+              'month',
+              CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Shanghai' - interval '19 months'
+            )
           )
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
+          and event.event_timestamp <= CURRENT_TIMESTAMP
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       target_data as (
@@ -3129,12 +3138,15 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= DATEADD (
+          event.event_timestamp >= DATEADD (
             DAY,
             -1,
-            date_trunc('month', current_date - interval '19 months')
+            date_trunc(
+              'month',
+              CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Shanghai' - interval '19 months'
+            )
           )
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
+          and event.event_timestamp <= CURRENT_TIMESTAMP
           and event.event_name in (
             'view_item',
             'add_to_cart',
@@ -3617,12 +3629,15 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= DATEADD (
+          event.event_timestamp >= DATEADD (
             DAY,
             -7,
-            date_trunc('week', current_date - interval '3 weeks')
+            date_trunc(
+              'week',
+              CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Shanghai' - interval '3 weeks'
+            )
           )
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
+          and event.event_timestamp <= CURRENT_TIMESTAMP
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -4071,12 +4086,15 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= DATEADD (
+          event.event_timestamp >= DATEADD (
             DAY,
             -7,
-            date_trunc('week', current_date - interval '3 weeks')
+            date_trunc(
+              'week',
+              CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Shanghai' - interval '3 weeks'
+            )
           )
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
+          and event.event_timestamp <= CURRENT_TIMESTAMP
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -4505,12 +4523,15 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= DATEADD (
+          event.event_timestamp >= DATEADD (
             DAY,
             -1,
-            date_trunc('month', current_date - interval '19 months')
+            date_trunc(
+              'month',
+              CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Shanghai' - interval '19 months'
+            )
           )
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
+          and event.event_timestamp <= CURRENT_TIMESTAMP
           and event.event_name in (
             'view_item',
             'add_to_cart',
@@ -4992,8 +5013,8 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
-          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'''
