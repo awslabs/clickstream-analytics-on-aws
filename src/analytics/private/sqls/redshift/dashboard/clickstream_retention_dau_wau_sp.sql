@@ -19,7 +19,7 @@ BEGIN
       platform,
       merged_user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date 
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone 
     group by 1, 2, 3
     ;
 

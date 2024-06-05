@@ -21,11 +21,11 @@ BEGIN
       current_date::date AS event_date,
       platform,
       merged_user_id as active_users, 
-      SUM(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS new_users,
-      SUM(CASE WHEN event_name = '_screen_view' OR event_name = '_page_view' THEN 1 ELSE 0 END) AS view_count
+      count(distinct CASE WHEN event_name = '_first_open' THEN user_pseudo_id ELSE null END) AS new_users,
+      count(distinct CASE WHEN event_name = '_screen_view' OR event_name = '_page_view' THEN event_id ELSE null END) AS view_count
     FROM 
       {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     GROUP BY 
       1,2,3
     ;

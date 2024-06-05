@@ -21,10 +21,10 @@ BEGIN
       platform,
       'Page Title' as aggregation_type,
       page_view_page_title as aggregation_dim,
-      count(1) as entrance_count
+      count(distinct event_id) as entrance_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
-      DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+      event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
       and event_name = '_page_view'
       and page_view_entrances = 'true'
       and page_view_page_title is not null
@@ -43,10 +43,10 @@ BEGIN
       platform,
       'Page URL Path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
-      count(1) as entrance_count
+      count(distinct event_id) as entrance_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
-      DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+      event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
       and event_name = '_page_view'
       and page_view_entrances = 'true'
       and page_view_page_url_path is not null
@@ -65,10 +65,10 @@ BEGIN
       platform,
       'Screen Name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
-      count(1) as entrance_count
+      count(distinct event_id) as entrance_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
-      DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+      event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
       and event_name = '_screen_view'
       and page_view_entrances = 'true'
       and screen_view_screen_name is not null
@@ -87,10 +87,10 @@ BEGIN
       platform,
       'Screen Class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
-      count(1) as entrance_count
+      count(distinct event_id) as entrance_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
-      DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+      event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
       and event_name = '_screen_view'
       and page_view_entrances = 'true'
       and screen_view_screen_id is not null
