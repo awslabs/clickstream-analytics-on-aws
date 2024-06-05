@@ -1,6 +1,3 @@
-ARG ADAPTER_VERSION=0.8.2
-FROM --platform=linux/aarch64 public.ecr.aws/awsguru/aws-lambda-adapter:$ADAPTER_VERSION-aarch64 AS adapter
-
 FROM public.ecr.aws/docker/library/node:20 AS builder
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
@@ -29,9 +26,13 @@ ENV REACT_APP_SOLUTION_VERSION=$REACT_APP_SOLUTION_VERSION
 RUN pnpm install
 RUN pnpm run crabuild
 
-FROM --platform=linux/aarch64 public.ecr.aws/docker/library/nginx:1.22
-COPY --from=adapter	/lambda-adapter /opt/extensions/lambda-adapter
-COPY --from=builder /home/node/app/frontend/build/ /usr/share/nginx/public/
-COPY src/control-plane/frontend/config/ /etc/nginx/
-USER nginx
-CMD ["nginx", "-g", "daemon off;"]
+WORKDIR /home/node/app/frontend/serve
+RUN npm install -g @vercel/ncc@0.38.1
+RUN npm install && npm run ncc-build
+
+FROM --platform=linux/aarch64 public.ecr.aws/docker/library/node:20
+COPY --from=builder /home/node/app/frontend/run.sh /asset/run.sh
+COPY --from=builder /home/node/app/frontend/serve/ncc /asset/
+COPY --from=builder /home/node/app/frontend/build/ /asset/public
+
+USER node

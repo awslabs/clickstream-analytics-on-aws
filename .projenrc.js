@@ -468,6 +468,9 @@ const frontendProject = new typescript.TypeScriptProject({
     'aws-exports.json',
     'src/setupProxy.js',
     'build/',
+    'node_modules/',
+    'ncc/',
+    'dist/',
   ],
   tsconfig: {
     ...frontendTSConfig,

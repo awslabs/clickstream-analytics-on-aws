@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import path from 'path';
 import {
   Duration,
-  IgnoreMode,
   Fn, CfnResource,
 } from 'aws-cdk-lib';
 import { Certificate, ICertificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
@@ -42,14 +42,16 @@ import {
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import {
-  DockerImageFunction,
-  DockerImageCode,
   Architecture,
+  Code,
+  Function as LambdaFunction,
+  Runtime,
 } from 'aws-cdk-lib/aws-lambda';
 import { IHostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { IBucket, Bucket, BucketEncryption, BlockPublicAccess } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { LambdaAdapterLayer } from './backend/layer/lambda-web-adapter/layer';
 import { Constant } from './private/constant';
 import { LogProps, setAccessLogForApplicationLoadBalancer } from '../common/alb';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
@@ -360,8 +362,6 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
   }
 
   private createFrontendFunction(props: ApplicationLoadBalancerLambdaPortalProps) {
-    const dockerFile = props.frontendProps.dockerfile ?? 'Dockerfile';
-
     const frontendLambdaSG = new SecurityGroup(this, 'frontend_function_sg', {
       vpc: props.networkProps.vpc,
       allowAllOutbound: false,
@@ -376,21 +376,22 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       ],
     );
 
-    const lambdaFn = new DockerImageFunction(this, 'portal_fn', {
+    const lambdaFn = new LambdaFunction(this, 'portal_fn', {
       description: 'Lambda function for console plane of solution Clickstream Analytics on AWS',
-      code: DockerImageCode.fromImageAsset(props.frontendProps.directory, {
-        file: dockerFile,
-        ignoreMode: IgnoreMode.DOCKER,
-        buildArgs: props.frontendProps.buildArgs,
-        platform: props.frontendProps.platform,
-      }),
+      code: this.getLambdaCode(),
+      handler: 'run.sh',
+      runtime: Runtime.NODEJS_20_X,
+      architecture: Architecture.ARM_64,
+      layers: [new LambdaAdapterLayer(this, 'LambdaAdapterLayer')],
+      environment: {
+        AWS_LWA_PORT: '3000',
+      },
       role: createLambdaRole(this, 'portal_fn_role', true, []),
       vpc: props.networkProps.vpc,
       timeout: Duration.seconds(10),
       allowPublicSubnet: props.applicationLoadBalancerProps.internetFacing,
       vpcSubnets: props.networkProps.subnets,
       securityGroups: [frontendLambdaSG],
-      architecture: Architecture.ARM_64,
     });
 
     addCfnNagSuppressRules(lambdaFn.node.defaultChild as CfnResource, [
@@ -398,6 +399,16 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     ]);
 
     return lambdaFn;
+  }
+
+  private getLambdaCode() {
+    if (process.env.LOCAL_TESTING === 'true') {
+      return Code.fromAsset('./src/control-plane/frontend/');
+    } else {
+      return Code.fromDockerBuild(path.join(__dirname, '../../'), {
+        file: './src/control-plane/frontend/Dockerfile',
+      });
+    }
   }
 
   private doValidation(props: ApplicationLoadBalancerLambdaPortalProps) {
