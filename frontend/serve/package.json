@@ -11,11 +11,9 @@
   "license": "Apache-2.0",
   "dependencies": {
     "express": "^4.19.2",
-    "ncc": "^0.3.6",
-    "serve-static": "^1.15.0"
+    "ncc": "^0.3.6"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/serve-static": "^1.15.7"
+    "@types/express": "^4.17.21"
   }
 }

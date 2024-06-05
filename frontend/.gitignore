@@ -22,7 +22,6 @@ coverage
 *.lcov
 .nyc_output
 build/Release
-node_modules/
 jspm_packages/
 *.tsbuildinfo
 .eslintcache
@@ -32,6 +31,9 @@ jspm_packages/
 aws-exports.json
 src/setupProxy.js
 build/
+node_modules/
+ncc/
+dist/
 /test-reports/
 junit.xml
 /coverage/

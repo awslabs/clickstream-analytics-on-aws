@@ -12,23 +12,14 @@
  */
 
 import express from 'express';
-import serveStatic from 'serve-static';
 import path from 'path';
 
 const app: express.Express = express();
 
 const port = process.env.PORT || 3000;
 
-app.use(serveStatic(path.join(__dirname, 'public'), {
-    maxAge: '1d',
-    setHeaders: setCustomCacheControl
-  }))
-  
-app.listen(port, () => console.log(`Listening on port ${port}`));
-  
-function setCustomCacheControl (res: any, path: any) {
-    if (serveStatic.mime.lookup(path) === 'text/html') {
-      // Custom Cache-Control for HTML files
-      res.setHeader('Cache-Control', 'public, max-age=0')
-    }
-  }
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

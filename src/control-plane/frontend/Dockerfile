@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:20 AS builder
+FROM public.ecr.aws/docker/library/node:20
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 COPY frontend frontend
@@ -30,9 +30,10 @@ WORKDIR /home/node/app/frontend/serve
 RUN npm install -g @vercel/ncc@0.38.1
 RUN npm install && npm run ncc-build
 
-FROM --platform=linux/aarch64 public.ecr.aws/docker/library/node:20
-COPY --from=builder /home/node/app/frontend/run.sh /asset/run.sh
-COPY --from=builder /home/node/app/frontend/serve/ncc /asset/
-COPY --from=builder /home/node/app/frontend/build/ /asset/public
+RUN cp -r /home/node/app/frontend/build /home/node/app/frontend/serve/ncc/public
+
+RUN mkdir -p /asset
+RUN cp -r /home/node/app/frontend/serve/ncc /asset/
+RUN cp /home/node/app/frontend/run.sh /asset/run.sh
 
 USER node
