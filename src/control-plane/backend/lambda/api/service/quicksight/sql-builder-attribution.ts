@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
-import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
+import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { format } from 'sql-formatter';
 import { buildEventConditionPropsFromEvents, formatDateToYYYYMMDD } from './reporting-utils';
-import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_USER_VIEW, EventAndCondition, buildAllConditionSql, buildColNameWithPrefixForOneCondtion, buildColumnConditionProps, buildColumnsSqlFromConditions, buildConditionProps, buildConditionSql, buildDateUnitsSql, buildEventDateSql, buildEventsNameFromConditions } from './sql-builder';
+import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_USER_VIEW, EventAndCondition, ExploreAnalyticsType, buildAllConditionSql, buildColNameWithPrefixForOneCondtion, buildColumnConditionProps, buildColumnsSqlFromConditions, buildConditionProps, buildConditionSql, buildDateUnitsSql, buildEventDateSql, buildEventsNameFromConditions } from './sql-builder';
 import { defaultValueFunc } from '../../common/utils';
 
 export interface AttributionSQLParameters extends BaseSQLParameters {
@@ -27,14 +27,14 @@ export interface AttributionSQLParameters extends BaseSQLParameters {
   touchPointNames?: string[];
 }
 
-export function buildSQLForSinglePointModel(params: AttributionSQLParameters): string {
+export function buildSQLForSinglePointModel(params: AttributionSQLParameters, requestAction: string): string {
 
   const eventNames = [];
   for (const eventAndCondition of params.eventAndConditions) {
     eventNames.push(eventAndCondition.eventName);
   }
 
-  const commonPartSql = buildCommonSqlForAttribution([...new Set(eventNames)], params);
+  const commonPartSql = buildCommonSqlForAttribution([...new Set(eventNames)], params, requestAction);
 
   let modelBaseDataSql = '';
   if (params.modelType === AttributionModelType.LAST_TOUCH) {
@@ -152,10 +152,10 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
   });
 }
 
-export function buildSQLForLinearModel(params: AttributionSQLParameters): string {
+export function buildSQLForLinearModel(params: AttributionSQLParameters, requestAction: string): string {
 
   const eventNames = buildEventsNameFromConditions(params.eventAndConditions as EventAndCondition[]);
-  const commonPartSql = buildCommonSqlForAttribution(eventNames, params);
+  const commonPartSql = buildCommonSqlForAttribution(eventNames, params, requestAction);
 
   let modelDataSql = '';
   let attributionDataSql = '';
@@ -305,10 +305,10 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
   });
 }
 
-export function buildSQLForPositionModel(params: AttributionSQLParameters): string {
+export function buildSQLForPositionModel(params: AttributionSQLParameters, requestAction: string): string {
 
   const eventNames = buildEventsNameFromConditions(params.eventAndConditions as EventAndCondition[]);
-  const commonPartSql = buildCommonSqlForAttribution(eventNames, params);
+  const commonPartSql = buildCommonSqlForAttribution(eventNames, params, requestAction);
 
   let attributionDataSql = '';
   let modelDataSql = '';
@@ -462,7 +462,7 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
   });
 }
 
-export function buildBaseDataForAttribution(eventNames: string[], sqlParameters: AttributionSQLParameters) : string {
+export function buildBaseDataForAttribution(eventNames: string[], sqlParameters: AttributionSQLParameters, requestAction: string) : string {
 
   // build column sql from event condition
   const eventConditionProps = buildAttributionEventConditionProps(sqlParameters);
@@ -475,7 +475,11 @@ export function buildBaseDataForAttribution(eventNames: string[], sqlParameters:
   // build base data sql
   const baseDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, eventColumnSql, userColumnSql.columnsSql);
 
-  return format(baseDataSql, { language: 'postgresql' });
+  const comment_prefix = `
+  -- clickstream-explorative-${requestAction === ExploreRequestAction.PUBLISH ? 'dashboard' : 'analytics'}-${ExploreAnalyticsType.ATTRIBUTION}
+  `;
+
+  return format(comment_prefix + baseDataSql, { language: 'postgresql' });
 }
 
 function getCustomTouchPointNamesSql(params: AttributionSQLParameters) {
@@ -502,9 +506,9 @@ function getCustomTouchPointNamesSql(params: AttributionSQLParameters) {
   return touchPointNamesSql;
 }
 
-export function buildCommonSqlForAttribution(eventNames: string[], params: AttributionSQLParameters) : string {
+export function buildCommonSqlForAttribution(eventNames: string[], params: AttributionSQLParameters, requestAction: string) : string {
 
-  const commonPartSql = buildBaseDataForAttribution(eventNames.concat(params.targetEventAndCondition.eventName), params);
+  const commonPartSql = buildBaseDataForAttribution(eventNames.concat(params.targetEventAndCondition.eventName), params, requestAction);
 
   let sumValueColSql = '';
   let sumValueColName = '';

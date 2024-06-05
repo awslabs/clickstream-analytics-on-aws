@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { AttributionModelType, ConditionCategory, ExploreAnalyticsOperators, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
+import { AttributionModelType, ConditionCategory, ExploreAnalyticsOperators, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { buildSQLForLinearModel, buildSQLForPositionModel, buildSQLForSinglePointModel } from '../../service/quicksight/sql-builder-attribution';
 
 describe('Attribution SQL Builder test', () => {
@@ -194,7 +194,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
-    });
+    },ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -651,7 +651,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.RELATIVE,
       lastN: 24,
       timeUnit: ExploreRelativeTimeUnit.MM,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -954,7 +954,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -1360,7 +1360,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -1806,7 +1806,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -2231,7 +2231,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.RELATIVE,
       lastN: 20,
       timeUnit: ExploreRelativeTimeUnit.MM,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -2663,7 +2663,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.RELATIVE,
       lastN: 20,
       timeUnit: ExploreRelativeTimeUnit.MM,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -3100,7 +3100,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.RELATIVE,
       lastN: 20,
       timeUnit: ExploreRelativeTimeUnit.MM,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -3591,7 +3591,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.RELATIVE,
       lastN: 4,
       timeUnit: ExploreRelativeTimeUnit.WK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -4048,7 +4048,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.RELATIVE,
       lastN: 4,
       timeUnit: ExploreRelativeTimeUnit.WK,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -4485,7 +4485,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.RELATIVE,
       lastN: 20,
       timeUnit: ExploreRelativeTimeUnit.MM,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -4975,7 +4975,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with

@@ -12,7 +12,7 @@
  */
 
 import { afterEach } from 'node:test';
-import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
 import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, _buildCommonPartSql, daysBetweenDates, buildEventPropertyAnalysisView, ExploreAnalyticsType } from '../../service/quicksight/sql-builder';
 
@@ -54,7 +54,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -221,7 +221,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(
       `
@@ -390,7 +390,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -549,7 +549,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -741,7 +741,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -960,7 +960,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -1247,7 +1247,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -1450,7 +1450,7 @@ describe('SQL Builder test', () => {
         lagSeconds: 3600,
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -1678,7 +1678,7 @@ describe('SQL Builder test', () => {
         nodeType: ExplorePathNodeType.EVENT,
         lagSeconds: 3600,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -1903,7 +1903,7 @@ describe('SQL Builder test', () => {
         nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -2097,7 +2097,7 @@ describe('SQL Builder test', () => {
         nodes: ['LoginActivity'],
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -2284,7 +2284,7 @@ describe('SQL Builder test', () => {
         mergeConsecutiveEvents: true,
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -2500,7 +2500,7 @@ describe('SQL Builder test', () => {
         nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
         includingOtherEvents: false,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -2698,7 +2698,7 @@ describe('SQL Builder test', () => {
         nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -2947,7 +2947,7 @@ describe('SQL Builder test', () => {
         mergeConsecutiveEvents: true,
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -3215,7 +3215,7 @@ describe('SQL Builder test', () => {
         nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
         includingOtherEvents: false,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -3545,7 +3545,7 @@ describe('SQL Builder test', () => {
         },
       ],
 
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -3842,7 +3842,7 @@ describe('SQL Builder test', () => {
         },
       ],
 
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -4138,7 +4138,7 @@ describe('SQL Builder test', () => {
         },
       ],
 
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -4435,7 +4435,7 @@ describe('SQL Builder test', () => {
         },
       ],
 
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -4699,7 +4699,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -4990,7 +4990,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -5325,7 +5325,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -5613,7 +5613,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -5903,7 +5903,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -6164,7 +6164,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -6463,7 +6463,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -6881,7 +6881,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -7287,7 +7287,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-20'),
       timeEnd: new Date('2023-11-04'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -7718,7 +7718,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     const expectResult = `
     with
@@ -8010,7 +8010,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -8212,7 +8212,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -8414,7 +8414,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -8678,7 +8678,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -8942,7 +8942,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -9156,7 +9156,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -9242,7 +9242,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -9349,7 +9349,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -9440,7 +9440,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -9537,7 +9537,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -9635,7 +9635,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -9747,7 +9747,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -9834,7 +9834,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -9913,7 +9913,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -10015,7 +10015,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -10135,7 +10135,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -10287,7 +10287,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -10449,7 +10449,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -10641,7 +10641,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -11032,7 +11032,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -11392,7 +11392,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -11624,7 +11624,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -11902,7 +11902,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -12201,7 +12201,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -12501,7 +12501,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -12798,7 +12798,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -12979,7 +12979,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -13253,7 +13253,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -13643,7 +13643,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-24'),
       timeEnd: new Date('2023-10-30'),
       groupColumn: ExploreGroupColumn.MONTH,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -13905,7 +13905,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.includes('shopping.shopping.')).toEqual(true);
 
@@ -14240,7 +14240,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -14465,7 +14465,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -14629,7 +14629,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -14841,7 +14841,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -15064,7 +15064,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    }, true);
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -15291,7 +15291,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    }, true);
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -15555,7 +15555,7 @@ describe('SQL Builder test', () => {
       lastN: 1,
       timeUnit: ExploreRelativeTimeUnit.WK,
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -15789,8 +15789,7 @@ describe('SQL Builder test', () => {
           },
         },
       ],
-
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -16069,7 +16068,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -16341,7 +16340,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -16580,7 +16579,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -16782,8 +16781,7 @@ describe('SQL Builder test', () => {
           },
         },
       ],
-
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -17066,8 +17064,7 @@ describe('SQL Builder test', () => {
           },
         },
       ],
-
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -17300,7 +17297,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -17516,7 +17513,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -17732,7 +17729,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -17947,7 +17944,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -18148,7 +18145,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -18360,7 +18357,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -18619,7 +18616,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -18886,7 +18883,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -19195,7 +19192,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -19517,7 +19514,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -19730,7 +19727,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -20065,7 +20062,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-24'),
       timeEnd: new Date('2023-10-30'),
       groupColumn: ExploreGroupColumn.MONTH,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -20402,7 +20399,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -20713,7 +20710,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -20938,7 +20935,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -21187,7 +21184,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -21485,7 +21482,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -21702,7 +21699,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -22074,7 +22071,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-24'),
       timeEnd: new Date('2023-10-30'),
       groupColumn: ExploreGroupColumn.MONTH,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -22499,7 +22496,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-24'),
       timeEnd: new Date('2023-10-30'),
       groupColumn: ExploreGroupColumn.MONTH,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
     with
@@ -22782,7 +22779,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with

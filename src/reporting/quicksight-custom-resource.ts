@@ -168,6 +168,7 @@ function _getDataSetDefs(
       tableName: CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
       useSpice: 'no',
       customSql: `
+        -- clickstream-builtin-dashboard
         select 
           ${eventViewColumns} 
         from {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME}
@@ -219,7 +220,9 @@ function _getDataSetDefs(
     {
       tableName: CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER,
       useSpice: 'no',
-      customSql: `SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.${CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME} where triggerred_by = 'WORK_FLOW'`,
+      customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT max(refresh_date) as "Latest refresh date" FROM {{schema}}.${CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME} where triggerred_by = 'WORK_FLOW'`,
       columns: [
         {
           Name: 'Latest refresh date',
@@ -239,7 +242,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT} `,
         columns: [
           {
             Name: 'event_date',
@@ -273,7 +278,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER} `,
         columns: [
           {
             Name: 'event_date',
@@ -307,7 +314,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION} `,
         columns: [
           {
             Name: 'event_date',
@@ -376,7 +385,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER}`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER}`,
         columns: [
           {
             Name: 'event_date',
@@ -421,7 +432,9 @@ function _getDataSetDefs(
         tableName: CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
         useSpice: 'yes',
         refreshInterval: RefreshInterval.HOURLY,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} `,
         columns: [
           {
             Name: 'event_date',
@@ -452,7 +465,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW} `,
         columns: [
           {
             Name: 'event_date',
@@ -481,7 +496,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_KPI} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_KPI} `,
         columns: [
           {
             Name: 'event_date',
@@ -515,7 +532,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW} `,
         columns: [
           {
             Name: 'event_date',
@@ -549,7 +568,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL} `,
         columns: [
           {
             Name: 'event_date',
@@ -603,7 +624,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_ENTRANCE_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_ENTRANCE} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_ENTRANCE} `,
         columns: [
           {
             Name: 'event_date',
@@ -637,7 +660,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_EXIT_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EXIT} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EXIT} `,
         columns: [
           {
             Name: 'event_date',
@@ -671,7 +696,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_EVENT_NAME_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EVENT_NAME} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EVENT_NAME} `,
         columns: [
           {
             Name: 'event_date',
@@ -712,7 +739,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_RETENTION_USER_NEW_RETURN_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_USER_NEW_RETURN} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_USER_NEW_RETURN} `,
         columns: [
           {
             Name: 'event_date',
@@ -741,7 +770,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_RETENTION_EVENT_OVERTIME_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_EVENT_OVERTIME} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_EVENT_OVERTIME} `,
         columns: [
           {
             Name: 'event_date',
@@ -765,7 +796,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_RETENTION_DAU_WAU_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_DAU_WAU} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_DAU_WAU} `,
         columns: [
           {
             Name: 'event_date',
@@ -790,7 +823,9 @@ function _getDataSetDefs(
         tableName: CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER,
         useSpice: 'yes',
         lookbackColumn: 'first_date',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} `,
         columns: [
           {
             Name: 'platform',
@@ -825,7 +860,9 @@ function _getDataSetDefs(
         tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
         useSpice: 'yes',
         lookbackColumn: 'time_period',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} `,
         columns: [
           {
             Name: 'time_period',
@@ -856,7 +893,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_DEVICE_CRASH_RATE_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_CRASH_RATE} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_CRASH_RATE} `,
         columns: [
           {
             Name: 'event_date',
@@ -890,7 +929,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_DEVICE_USER_DEVICE_PLACEHOLDER,
         useSpice: 'yes',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_USER_DEVICE} `,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_USER_DEVICE} `,
         columns: [
           {
             Name: 'event_date',
@@ -966,7 +1007,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT} where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT} where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1012,7 +1055,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER} where event_date >= <<$startDate05>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate05>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER} where event_date >= <<$startDate05>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate05>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1058,7 +1103,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION} where event_date >= <<$startDate07>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate07>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION} where event_date >= <<$startDate07>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate07>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1139,7 +1186,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER} where event_date >= <<$startDate08>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate08>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER} where event_date >= <<$startDate08>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate08>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1195,7 +1244,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} where event_date >= date_trunc('day', <<$endDate23>>) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} where event_date >= date_trunc('day', <<$endDate23>>) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1233,7 +1284,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW} where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_EVENT_VIEW} where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1274,7 +1327,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_KPI} where event_date >= <<$startDate10>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate10>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_KPI} where event_date >= <<$startDate10>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate10>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1320,7 +1375,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW} where event_date >= <<$startDate11>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate11>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW} where event_date >= <<$startDate11>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate11>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1366,7 +1423,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL} where event_date >= <<$startDate12>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate12>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL} where event_date >= <<$startDate12>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate12>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1432,7 +1491,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_ENTRANCE_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_ENTRANCE} where event_date >= <<$startDate13>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate13>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_ENTRANCE} where event_date >= <<$startDate13>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate13>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1478,7 +1539,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_EXIT_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EXIT} where event_date >= <<$startDate14>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate14>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EXIT} where event_date >= <<$startDate14>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate14>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1524,7 +1587,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_EVENT_NAME_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EVENT_NAME} where event_date >= <<$startDate22>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate22>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EVENT_NAME} where event_date >= <<$startDate22>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate22>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1577,7 +1642,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_RETENTION_USER_NEW_RETURN_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_USER_NEW_RETURN} where event_date >= <<$startDate15>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate15>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_USER_NEW_RETURN} where event_date >= <<$startDate15>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate15>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1618,7 +1685,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_RETENTION_EVENT_OVERTIME_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_EVENT_OVERTIME} where event_date >= <<$startDate16>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate16>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_EVENT_OVERTIME} where event_date >= <<$startDate16>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate16>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1654,7 +1723,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_RETENTION_DAU_WAU_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_DAU_WAU} where event_date >= <<$startDate17>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate17>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_DAU_WAU} where event_date >= <<$startDate17>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate17>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1690,7 +1761,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))`,
         columns: [
           {
             Name: 'platform',
@@ -1736,7 +1809,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} where time_period >= <<$startDate20>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate20>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} where time_period >= <<$startDate20>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate20>>))`,
         columns: [
           {
             Name: 'time_period',
@@ -1779,7 +1854,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_DEVICE_CRASH_RATE_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_CRASH_RATE} where event_date >= <<$startDate18>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate18>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_CRASH_RATE} where event_date >= <<$startDate18>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate18>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -1825,7 +1902,9 @@ function _getDataSetDefs(
       {
         tableName: CLICKSTREAM_DEVICE_USER_DEVICE_PLACEHOLDER,
         useSpice: 'no',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_USER_DEVICE} where event_date >= <<$startDate21>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate21>>))`,
+        customSql: `
+        -- clickstream-builtin-dashboard
+        SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_USER_DEVICE} where event_date >= <<$startDate21>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate21>>))`,
         columns: [
           {
             Name: 'event_date',
