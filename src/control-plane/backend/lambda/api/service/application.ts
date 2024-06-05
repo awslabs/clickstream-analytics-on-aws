@@ -20,7 +20,7 @@ import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getPipelineStatusType, getStackOutputFromPipelineStatus, isEmpty, paginateData } from '../common/utils';
 import { IApplication } from '../model/application';
-import { CPipeline, IAppTimezone } from '../model/pipeline';
+import { CPipeline, IAppTimezone, IPipeline } from '../model/pipeline';
 import { updateFlinkApplicationEnvironmentProperties } from '../store/aws/flink';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -260,27 +260,23 @@ export class ApplicationServ {
       if (!flinkAppName) {
         return res.status(404).json(new ApiFail('The flink application not found.'));
       }
-      // TODO: wait stack update and get output
-      const sinkKinesis = getStackOutputFromPipelineStatus(
-        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-        PipelineStackType.STREAMING, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON);
-      console.log('sinkKinesis', sinkKinesis);
-      const streamAppIds = latestPipeline.streaming?.appIdStreamList ?? [];
-      if (enable && !streamAppIds.includes(id)) {
-        streamAppIds.push(id);
-      } else if (!enable && streamAppIds.includes(id)) {
-        const index = streamAppIds.indexOf(id);
+      const streamEnableAppIds = latestPipeline.streaming?.appIdStreamList ?? [];
+      if (enable && !streamEnableAppIds.includes(id)) {
+        streamEnableAppIds.push(id);
+      } else if (!enable && streamEnableAppIds.includes(id)) {
+        const index = streamEnableAppIds.indexOf(id);
         if (index > -1) {
-          streamAppIds.splice(index, 1);
+          streamEnableAppIds.splice(index, 1);
         }
       }
-      const updateRes = await updateFlinkApplicationEnvironmentProperties(latestPipeline.region, flinkAppName, streamAppIds);
+      const streamingSinkKinesisConfig = this.getStreamingSinkKinesisConfig(latestPipeline, streamEnableAppIds);
+      const updateRes = await updateFlinkApplicationEnvironmentProperties(latestPipeline.region, flinkAppName, streamingSinkKinesisConfig);
       if (!updateRes) {
         return res.status(500).json(new ApiFail('Failed to update Flink application environment properties.'));
       }
       latestPipeline.streaming = {
         ...latestPipeline.streaming,
-        appIdStreamList: streamAppIds,
+        appIdStreamList: streamEnableAppIds,
       };
       await store.updatePipelineAtCurrentVersion(latestPipeline);
       return res.status(200).json(new ApiSuccess(null, 'Application streaming updated.'));
@@ -288,4 +284,29 @@ export class ApplicationServ {
       next(error);
     }
   };
+
+  private getStreamingSinkKinesisConfig(pipeline: IPipeline, streamingSinkKinesis: string[]) {
+    const enableConfigs: any[] = [];
+    try {
+      const sinkKinesis = getStackOutputFromPipelineStatus(
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
+        PipelineStackType.STREAMING, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON);
+      if (!sinkKinesis) {
+        return enableConfigs;
+      }
+      const sinks = JSON.parse(sinkKinesis);
+      for (let [key, value] of Object.entries(sinks)) {
+        if (streamingSinkKinesis.includes(key)) {
+          enableConfigs.push({
+            appId: key,
+            streamArn: value,
+          });
+        }
+      }
+      return enableConfigs;
+    } catch (error) {
+      logger.error('Failed to parse sink kinesis');
+      return enableConfigs;
+    }
+  }
 }

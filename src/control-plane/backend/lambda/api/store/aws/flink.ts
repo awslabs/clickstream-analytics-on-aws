@@ -17,7 +17,7 @@ import { logger } from '../../common/powertools';
 
 
 export const updateFlinkApplicationEnvironmentProperties = async (
-  region: string, applicationName: string, streamAppIds: string[],
+  region: string, applicationName: string, streamingSinkKinesisConfig: any[],
 ) => {
   const kinesisAnalytics = new KinesisAnalyticsV2({
     ...aws_sdk_client_common_config,
@@ -30,7 +30,7 @@ export const updateFlinkApplicationEnvironmentProperties = async (
     const propertyGroupDescriptions =
       flinkApplication.ApplicationDetail?.ApplicationConfigurationDescription?.EnvironmentPropertyDescriptions?.PropertyGroupDescriptions;
     const appIdStreamListStr = JSON.stringify({
-      appIdStreamList: streamAppIds,
+      appIdStreamList: streamingSinkKinesisConfig,
     });
     for (const propertyGroup of propertyGroupDescriptions || []) {
       if (propertyGroup.PropertyGroupId === 'EnvironmentProperties' && propertyGroup.PropertyMap) {
