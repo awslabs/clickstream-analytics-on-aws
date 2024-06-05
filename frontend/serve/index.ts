@@ -12,14 +12,31 @@
  */
 
 import express from 'express';
+import serveStatic from 'serve-static';
 import path from 'path';
 
 const app: express.Express = express();
 
 const port = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, 'public')));
+// serve static assets normally
+app.use(serveStatic(path.join(__dirname, 'public'), {
+    maxAge: '1d',
+    index: ['index.html'],
+    setHeaders: setCustomCacheControl
+  }))
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// handle every other route with index.html, which will contain
+// a script tag to your application's JavaScript file(s).
+app.get('/*', function (_req, res) {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+app.listen(port, () => console.log(`Listening on port ${port}`));
+  
+function setCustomCacheControl (res: any, path: any) {
+    if (serveStatic.mime.lookup(path) === 'text/html') {
+      // Custom Cache-Control for HTML files
+      res.setHeader('Cache-Control', 'public, max-age=0')
+    }
+  }

@@ -384,6 +384,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       architecture: Architecture.ARM_64,
       layers: [new LambdaAdapterLayer(this, 'LambdaAdapterLayer')],
       environment: {
+        AWS_LAMBDA_EXEC_WRAPPER: '/opt/bootstrap',
         AWS_LWA_PORT: '3000',
       },
       role: createLambdaRole(this, 'portal_fn_role', true, []),
