@@ -1834,17 +1834,7 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
   `;
 };
 
-function _getStartDateForFixDateRange(date: Date | undefined, timeWindowInSeconds: number) {
-  if (!date || !timeWindowInSeconds) {
-    throw new Error('date and timeWindowInSeconds are required');
-  }
-  const newDate = new Date(date);
-  const dayCount = Math.ceil(timeWindowInSeconds / 86400);
-  newDate.setDate(newDate.getDate() - dayCount);
-  return formatDateToYYYYMMDD(newDate);
-}
-
-function _getStartDateForRelativeDateRange(
+function _getStartDateForRelativeDateRange(timezone: string,
   lastN: number | undefined, timeUnit: ExploreRelativeTimeUnit | undefined, timeWindowInSeconds: number | undefined) {
   if (!lastN || !timeWindowInSeconds) {
     throw new Error('lastN, timeUnit and timeWindowInSeconds are required');
@@ -1853,13 +1843,13 @@ function _getStartDateForRelativeDateRange(
   const dayCount = Math.ceil(timeWindowInSeconds / 86400);
 
   if (timeUnit === ExploreRelativeTimeUnit.WK) {
-    return `DATEADD(DAY, -${dayCount}, date_trunc('week', current_date - interval '${lastN - 1} weeks'))` ;
+    return `DATEADD(DAY, -${dayCount}, date_trunc('week', CURRENT_TIMESTAMP AT TIME ZONE '${timezone}' - interval '${lastN - 1} weeks' ))`;
   } else if (timeUnit === ExploreRelativeTimeUnit.MM) {
-    return `DATEADD(DAY, -${dayCount}, date_trunc('month', current_date - interval '${lastN - 1} months'))`;
+    return `DATEADD(DAY, -${dayCount}, date_trunc('month', CURRENT_TIMESTAMP AT TIME ZONE '${timezone}' - interval '${lastN - 1} months' ))`;
   } else if (timeUnit === ExploreRelativeTimeUnit.YY) {
-    return `DATEADD(DAY, -${dayCount}, date_trunc('year', current_date - interval '${lastN - 1} years'))`;
+    return `DATEADD(DAY, -${dayCount}, date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE '${timezone}' - interval '${lastN - 1} years' ))`;
   } else {
-    return `DATEADD(DAY, -${dayCount}, date_trunc('day', current_date - interval '${lastN - 1} days'))`;
+    return `DATEADD(DAY, -${dayCount}, date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE '${timezone}' - interval '${lastN - 1} days' ))`;
   }
 }
 
@@ -1867,22 +1857,22 @@ export function buildEventDateSql(sqlParameters: BaseSQLParameters, prefix: stri
   let eventDateSQL = '';
   if (timeWindowInSeconds) {
     if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
-      eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date ${_getStartDateForFixDateRange(sqlParameters.timeStart, timeWindowInSeconds)} and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= (date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)})::timestamp AT TIME ZONE '${sqlParameters.timezone}' - interval '${timeWindowInSeconds} seconds' and ${prefix}event_timestamp <= (date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)} + interval '1 days' )::timestamp AT TIME ZONE '${sqlParameters.timezone}'`);
     } else {
-      eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= ${_getStartDateForRelativeDateRange(sqlParameters.lastN, sqlParameters.timeUnit, timeWindowInSeconds)} and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= CURRENT_DATE`);
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= ${_getStartDateForRelativeDateRange(sqlParameters.timezone, sqlParameters.lastN, sqlParameters.timeUnit, timeWindowInSeconds)} and ${prefix}event_timestamp <= CURRENT_TIMESTAMP `);
     }
   } else {
     if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
-      eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)} and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= (date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)})::timestamp AT TIME ZONE '${sqlParameters.timezone}' and ${prefix}event_timestamp <= (date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)} + interval '1 days' )::timestamp AT TIME ZONE '${sqlParameters.timezone}' `);
     } else {
       if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
-        eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date_trunc('week', current_date - interval '${sqlParameters.lastN! - 1} weeks') and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= CURRENT_DATE`);
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= DATE_TRUNC('week', CURRENT_TIMESTAMP AT TIME ZONE '${sqlParameters.timezone}' - interval '${sqlParameters.lastN! - 1} weeks') and ${prefix}event_timestamp <= CURRENT_TIMESTAMP`);
       } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.MM) {
-        eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date_trunc('month', current_date - interval '${sqlParameters.lastN! - 1} months') and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= CURRENT_DATE`);
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE '${sqlParameters.timezone}' - interval '${sqlParameters.lastN! - 1} months') and ${prefix}event_timestamp <= CURRENT_TIMESTAMP`);
       } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.YY) {
-        eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date_trunc('year', current_date - interval '${sqlParameters.lastN! - 1} years') and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= CURRENT_DATE`);
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= DATE_TRUNC('year', CURRENT_TIMESTAMP AT TIME ZONE '${sqlParameters.timezone}' - interval '${sqlParameters.lastN! - 1} years') and ${prefix}event_timestamp <= CURRENT_TIMESTAMP`);
       } else {
-        eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date_trunc('day', current_date - interval '${sqlParameters.lastN! - 1} days') and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= CURRENT_DATE`);
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= DATE_TRUNC('day', CURRENT_TIMESTAMP AT TIME ZONE '${sqlParameters.timezone}' - interval '${sqlParameters.lastN! - 1} days') and ${prefix}event_timestamp <= CURRENT_TIMESTAMP`);
       }
     }
   }
@@ -2185,7 +2175,7 @@ function _buildDateListSQL(sqlParameters: SQLParameters) {
     dateList.push(...generateDateList(new Date(sqlParameters.timeStart!), new Date(sqlParameters.timeEnd!)));
   } else {
     const daysCount = getLastNDayNumber(sqlParameters.lastN!-1, sqlParameters.timeUnit);
-    for (let n = 0; n < daysCount; n++) {
+    for (let n = 0; n <= daysCount; n++) {
       dateList.push(`
        (CURRENT_DATE - INTERVAL '${n} day') 
       `);
@@ -2273,7 +2263,7 @@ export function buildAllConditionSql(sqlCondition: SQLCondition | undefined) {
 }
 
 export function getLastNDayNumber(lastN: number | undefined, timeUnit: ExploreRelativeTimeUnit | undefined) : number {
-  if (!lastN || !timeUnit) {
+  if (lastN === undefined || timeUnit === undefined) {
     throw new Error('lastN and timeUnit are required');
   }
   const currentDate = new Date();
