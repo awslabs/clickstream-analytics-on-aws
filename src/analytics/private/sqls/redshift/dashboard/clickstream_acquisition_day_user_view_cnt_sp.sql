@@ -25,7 +25,7 @@ BEGIN
       count(distinct CASE WHEN event_name = '_screen_view' OR event_name = '_page_view' THEN event_id ELSE null END) AS view_count
     FROM 
       {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     GROUP BY 
       1,2,3
     ;

@@ -37,7 +37,7 @@ BEGIN
       device_ua_device_category,
       count(distinct event_id) as event_count
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     group by 1,2,3,4,5,6,7,8,9,10,11
     ;
 

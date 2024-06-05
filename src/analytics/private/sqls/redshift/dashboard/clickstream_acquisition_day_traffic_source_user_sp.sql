@@ -24,7 +24,7 @@ BEGIN
       first_traffic_source as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     and event_name = '_first_open'
     group by 1,2,3,4,5
     ;
@@ -44,7 +44,7 @@ BEGIN
       first_traffic_source || ' / ' || first_traffic_medium as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     and event_name = '_first_open'
     group by 1,2,3,4,5
     ;
@@ -64,7 +64,7 @@ BEGIN
       first_traffic_medium as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     and event_name = '_first_open'
     group by 1,2,3,4,5
     ;
@@ -84,7 +84,7 @@ BEGIN
       first_traffic_campaign as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     and event_name = '_first_open'
     group by 1,2,3,4,5
     ;
@@ -104,7 +104,7 @@ BEGIN
       first_traffic_clid_platform as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     and event_name = '_first_open'
     group by 1,2,3,4,5
     ;
@@ -124,7 +124,7 @@ BEGIN
       first_traffic_channel_group as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     and event_name = '_first_open'
     group by 1,2,3,4,5
     ;
@@ -144,7 +144,7 @@ BEGIN
       first_app_install_source as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     and event_name = '_first_open'
     group by 1,2,3,4,5
     ;
@@ -164,7 +164,7 @@ BEGIN
       session_source as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     group by 1,2,3,4,5
     ;
 
@@ -183,7 +183,7 @@ BEGIN
       session_medium as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     group by 1,2,3,4,5
     ;
 
@@ -202,7 +202,7 @@ BEGIN
       session_source || ' / ' || session_medium as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     group by 1,2,3,4,5
     ;
 
@@ -221,7 +221,7 @@ BEGIN
       session_campaign as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     group by 1,2,3,4,5
     ;
     -- session_clid_platform
@@ -239,7 +239,7 @@ BEGIN
       session_clid_platform as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     group by 1,2,3,4,5
     ;
     -- session_channel_group
@@ -257,7 +257,7 @@ BEGIN
       session_channel_group as aggregation_dim,
       merged_user_id as user_id
     from {{database_name}}.{{schema}}.{{baseView}}
-    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+    where event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     group by 1,2,3,4,5
     ;
 
