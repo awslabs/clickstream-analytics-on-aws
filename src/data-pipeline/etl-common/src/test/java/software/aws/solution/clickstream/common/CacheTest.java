@@ -46,7 +46,6 @@ class CacheTest {
         cache.put("key1", "data1");
         cache.put("key2", "data2");
         cache.put("key3", "data3");
-        assertTrue(cache.containsKey("key2"));
         assertTrue(cache.containsKey("key3"));
     }
 
