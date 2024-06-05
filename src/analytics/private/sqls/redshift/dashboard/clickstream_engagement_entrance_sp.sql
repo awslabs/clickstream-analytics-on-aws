@@ -21,7 +21,7 @@ BEGIN
       platform,
       'Page Title' as aggregation_type,
       page_view_page_title as aggregation_dim,
-      count(1) as entrance_count
+      count(distinct event_id) as entrance_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
@@ -43,7 +43,7 @@ BEGIN
       platform,
       'Page URL Path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
-      count(1) as entrance_count
+      count(distinct event_id) as entrance_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
@@ -65,7 +65,7 @@ BEGIN
       platform,
       'Screen Name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
-      count(1) as entrance_count
+      count(distinct event_id) as entrance_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
@@ -87,7 +87,7 @@ BEGIN
       platform,
       'Screen Class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
-      count(1) as entrance_count
+      count(distinct event_id) as entrance_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date

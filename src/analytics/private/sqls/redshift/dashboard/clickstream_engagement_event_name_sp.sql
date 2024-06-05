@@ -23,7 +23,7 @@ BEGIN
       merged_user_id as user_id,
       event_name,
       sum(event_value) as event_value,
-      count(event_id) as event_count
+      count(distinct event_id) as event_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
     group by 1,2,3,4

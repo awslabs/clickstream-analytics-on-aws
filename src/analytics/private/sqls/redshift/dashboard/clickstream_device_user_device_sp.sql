@@ -35,7 +35,7 @@ BEGIN
       coalesce(device_screen_width::varchar, '') || ' x ' || coalesce(device_screen_height::varchar, '')   as device_screen_resolution,
       device_ua_device,
       device_ua_device_category,
-      count(event_id) as event_count
+      count(distinct event_id) as event_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
     group by 1,2,3,4,5,6,7,8,9,10,11
