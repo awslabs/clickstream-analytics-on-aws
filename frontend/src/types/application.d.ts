@@ -36,6 +36,11 @@ declare global {
       endpoint: string;
       dns: string;
       customDomain: string;
+      ingestionServer: {
+        loadBalancer: {
+          protocol: string;
+        };
+      };
     };
     createAt?: number;
     updateAt?: number;
