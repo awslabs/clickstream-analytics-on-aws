@@ -24,7 +24,7 @@ import software.aws.solution.clickstream.plugin.enrich.IPEnrichmentV2;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class IPEnrichmentV2Test  extends BaseFlinkTest {
+public class IPEnrichmentV2Test extends BaseFlinkTest {
 
 
     private IPEnrichmentV2 ipEnrichment;

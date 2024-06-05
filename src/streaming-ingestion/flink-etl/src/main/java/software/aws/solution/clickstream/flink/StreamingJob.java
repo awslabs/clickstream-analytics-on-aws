@@ -111,22 +111,18 @@ public class StreamingJob {
         return ruleConfigMap;
     }
 
-    private static String getRuleConfig(final String appId, final String s3PathInput, final String fileName, final String region) {
+    private static String getRuleConfig(final String appId, final String s3PathInput, final String fileName, final String region) throws IOException {
         String s3Path = s3PathInput;
         String delimiter = "/";
         if (!s3Path.endsWith(delimiter)) {
             s3Path += delimiter;
         }
         String s3ObjectPath = s3Path + appId  + delimiter +  fileName;
-        try {
-            log.info("Get rule config from s3: {}", s3ObjectPath);
-            String contentStr = Utils.getInstance().readS3TextFile(s3ObjectPath, region);
-            log.info("Rule config content.length: {}", contentStr.length());
-            return contentStr;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
+
+        log.info("Get rule config from s3: {}", s3ObjectPath);
+        String contentStr = Utils.getInstance().readS3TextFile(s3ObjectPath, region);
+        log.info("Rule config content.length: {}", contentStr.length());
+        return contentStr;
     }
 
     public boolean executeStreamJob() throws IOException {
