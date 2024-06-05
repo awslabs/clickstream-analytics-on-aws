@@ -254,7 +254,7 @@ BEGIN
 
   ELSE
     EXECUTE 'SELECT
-      COALESCE(max(created_time), CURRENT_TIMESTAMP - INTERVAL ''7 days'') as start_time,
+      COALESCE(max(created_time), CURRENT_TIMESTAMP - INTERVAL ''365 days'') as start_time,
       CURRENT_TIMESTAMP as end_time
     FROM {{database_name}}.{{schema}}.clickstream_event_base_view
     WHERE event_timestamp >= CURRENT_TIMESTAMP - INTERVAL ''' || fressness_in_hours || ' hours'' --reduce scan range' into rec
@@ -496,7 +496,7 @@ BEGIN
         from {{database_name}}.{{schema}}.event_v2 e
         left join {{database_name}}.{{schema}}.session s 
           on e.user_pseudo_id = s.user_pseudo_id and e.session_id = s.session_id
-        where e.created_time > ''' || rec.start_time || ''' and e.created_time <= ''' || rec.end_time || ''' 
+        where e.created_time >= ''' || rec.start_time || ''' and e.created_time <= ''' || rec.end_time || ''' 
         and e.event_timestamp >= CURRENT_TIMESTAMP - INTERVAL ''' || fressness_in_hours || ' hours'' --reduce scan range
       ) where row_num = 1
       '

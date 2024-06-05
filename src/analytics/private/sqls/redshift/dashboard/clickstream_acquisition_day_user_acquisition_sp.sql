@@ -26,7 +26,7 @@ BEGIN
       FROM 
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE
-        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+        event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
       GROUP BY 1,2
     );
 
@@ -49,7 +49,7 @@ BEGIN
         FROM 
             {{database_name}}.{{schema}}.{{baseView}}
         WHERE 
-            DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+            event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
         GROUP BY 
             1, 2
     );
