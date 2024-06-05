@@ -126,6 +126,11 @@ export class ApplicationServ {
           endpoint: outputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
           dns: outputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
           customDomain: latestPipelines[0].ingestionServer.domain?.domainName ?? '',
+          ingestionServer: {
+            loadBalancer: {
+              protocol: latestPipelines[0].ingestionServer.loadBalancer.protocol,
+            },
+          },
         },
       }));
     } catch (error) {

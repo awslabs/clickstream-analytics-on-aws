@@ -39,7 +39,7 @@ import DomainNameWithStatus from 'pages/common/DomainNameWithStatus';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { TIME_FORMAT } from 'ts/const';
+import { ProtocalType, TIME_FORMAT } from 'ts/const';
 import { addTimezoneUtcOffset, defaultStr, getTimezoneOptions } from 'ts/utils';
 import ConfigAndroidSDK from './comp/ConfigAndroidSDK';
 import ConfigFlutterSDK from './comp/ConfigFlutterSDK';
@@ -293,18 +293,21 @@ const ApplicationDetail: React.FC = () => {
                     </div>
                   </SpaceBetween>
                   <SpaceBetween direction="vertical" size="l">
-                    <div>
-                      <Box variant="awsui-key-label">
-                        {t('pipeline:detail.domainName')}
-                      </Box>
-                      <DomainNameWithStatus
-                        type="domain"
-                        projectId={applicationInfo?.projectId}
-                        pipelineId={applicationInfo?.pipeline?.id}
-                        customDomain={applicationInfo?.pipeline?.customDomain}
-                        fetch
-                      />
-                    </div>
+                    {applicationInfo?.pipeline?.ingestionServer.loadBalancer
+                      .protocol === ProtocalType.HTTPS && (
+                      <div>
+                        <Box variant="awsui-key-label">
+                          {t('pipeline:detail.domainName')}
+                        </Box>
+                        <DomainNameWithStatus
+                          type="domain"
+                          projectId={applicationInfo?.projectId}
+                          pipelineId={applicationInfo?.pipeline?.id}
+                          customDomain={applicationInfo?.pipeline?.customDomain}
+                          fetch
+                        />
+                      </div>
+                    )}
 
                     <div>
                       <InfoTitle
