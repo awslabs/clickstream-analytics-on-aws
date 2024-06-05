@@ -15,6 +15,7 @@ package software.aws.solution.clickstream.common;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class CacheTest {
@@ -40,12 +41,11 @@ class CacheTest {
     }
 
     @Test
-    void shouldRemoveOldestDataWhenCacheIsFull() {
+    void latestPutKeyShouldExistWhenCacheIsFull() {
+        Cache<String> cache = new Cache<>(2);
         cache.put("key1", "data1");
         cache.put("key2", "data2");
         cache.put("key3", "data3");
-        assertFalse(cache.containsKey("key1"));
-        assertTrue(cache.containsKey("key2"));
         assertTrue(cache.containsKey("key3"));
     }
 

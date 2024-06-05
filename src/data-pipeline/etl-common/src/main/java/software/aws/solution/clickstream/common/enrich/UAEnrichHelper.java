@@ -31,7 +31,6 @@ public final class UAEnrichHelper {
     public static final String UA_STRING = "string";
     public static final String BOT = "Bot";
     private static final Cache<ClickstreamUA> CACHED_UA = new Cache<>();
-
     private UAEnrichHelper() {
     }
     public static ClickstreamUA parserUA(final String userAgent) {
