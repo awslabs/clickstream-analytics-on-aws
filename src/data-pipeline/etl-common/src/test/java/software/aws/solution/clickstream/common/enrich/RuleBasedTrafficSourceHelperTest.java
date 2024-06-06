@@ -428,8 +428,8 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
 
     @Test
-    void testGetMediumByReferrer8() throws IOException {
-        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer8
+    void testGetMediumByInternalReferrer() throws IOException {
+        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByInternalReferrer
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
         String pageReferrer = "https://example.com";
