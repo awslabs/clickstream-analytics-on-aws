@@ -30,16 +30,13 @@ import software.aws.solution.clickstream.common.enrich.ts.rule.SourceCategoryAnd
 import software.aws.solution.clickstream.common.exception.ExtractDataException;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static software.aws.solution.clickstream.common.Util.getUriParams;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 import static software.aws.solution.clickstream.common.Util.parseUrl;
-
 
 @Slf4j
 public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
@@ -409,13 +406,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (REFERRAL.equals(category)) {
             return REFERRAL;
         }
-        Pattern pattern = Pattern.compile(".*(google|bing|yahoo|duckduckgo|baidu|yandex).*", Pattern.CASE_INSENSITIVE); // NOSONAR
-        if (pattern.matcher(source).matches()) {
+        if (category != null
+                && !category.equals(DIRECT)
+                && !category.equals(CategoryListEvaluator.UNASSIGNED)) {
             return ORGANIC;
-        }
-        Pattern patternSocial = Pattern.compile(".*(facebook).*", Pattern.CASE_INSENSITIVE); // NOSONAR
-        if (patternSocial.matcher(source).matches() || SOCIAL.equals(category)) {
-            return SOCIAL;
         }
         return null;
     }
@@ -426,40 +420,9 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (isAllEmpty(pageReferrer, latestReferrer)) {
             return NONE;
         }
-
-        List<String> knownSearchEngineDomains = Arrays.asList(
-                "google.com",
-                "bing.com",
-                "yahoo.com",
-                "duckduckgo.com",
-                "baidu.com",
-                "yandex.com"
-        );
-
-        if (latestReferrer != null && !latestReferrer.isEmpty()) {
-            String referrerHost = parseUrl(latestReferrer).getHostName();
-            if (referrerHost.startsWith("www.")) {
-                referrerHost = referrerHost.substring(4);
-            }
-            if (knownSearchEngineDomains.contains(referrerHost)) {
-                return ORGANIC;
-            }
-        }
-
-        if (pageReferrer != null && !pageReferrer.isEmpty()) {
-            String referrerHost = parseUrl(pageReferrer).getHostName();
-            if (referrerHost.startsWith("www.")) {
-                referrerHost = referrerHost.substring(4);
-            }
-            if (knownSearchEngineDomains.contains(referrerHost)) {
-                return ORGANIC;
-            }
-        }
-
         if (isFromInternal) {
             return NONE;
         }
-
         return REFERRAL;
     }
 
