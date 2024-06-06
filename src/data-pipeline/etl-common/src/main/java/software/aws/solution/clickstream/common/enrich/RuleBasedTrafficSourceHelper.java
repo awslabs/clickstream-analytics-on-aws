@@ -413,10 +413,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (pattern.matcher(source).matches()) {
             return ORGANIC;
         }
-        Pattern patternSocial = Pattern.compile(".*(facebook).*", Pattern.CASE_INSENSITIVE); // NOSONAR
-        if (patternSocial.matcher(source).matches() || SOCIAL.equals(category)) {
-            return SOCIAL;
-        }
+
         return null;
     }
 
@@ -427,31 +424,23 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             return NONE;
         }
 
-        List<String> knownSearchEngineDomains = Arrays.asList(
-                "google.com",
-                "bing.com",
-                "yahoo.com",
-                "duckduckgo.com",
-                "baidu.com",
-                "yandex.com"
-        );
+
 
         if (latestReferrer != null && !latestReferrer.isEmpty()) {
             String referrerHost = parseUrl(latestReferrer).getHostName();
             if (referrerHost.startsWith("www.")) {
                 referrerHost = referrerHost.substring(4);
             }
-            if (knownSearchEngineDomains.contains(referrerHost)) {
+            if (isKnownPublicDomain(referrerHost)) {
                 return ORGANIC;
             }
         }
-
         if (pageReferrer != null && !pageReferrer.isEmpty()) {
             String referrerHost = parseUrl(pageReferrer).getHostName();
             if (referrerHost.startsWith("www.")) {
                 referrerHost = referrerHost.substring(4);
             }
-            if (knownSearchEngineDomains.contains(referrerHost)) {
+            if (isKnownPublicDomain(referrerHost)) {
                 return ORGANIC;
             }
         }
@@ -461,6 +450,27 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         }
 
         return REFERRAL;
+    }
+
+    private boolean isKnownPublicDomain(final String referrerHost) {
+        List<String> knownSearchEngineDomains = Arrays.asList(
+                "google.com",
+                "bing.com",
+                "yahoo.com",
+                "duckduckgo.com",
+                "baidu.com",
+                "yandex.com",
+                "facebook.com"
+        );
+        if (knownSearchEngineDomains.contains(referrerHost)) {
+            return true;
+        }
+        for (String domain : knownSearchEngineDomains) {
+            if (referrerHost.contains(domain)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isAllEmpty(final String pageReferrer, final String latestReferrer) {

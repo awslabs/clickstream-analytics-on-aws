@@ -541,7 +541,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
     @Test
     void testGetMediumByReferrer14() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer15
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer14
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
         String pageUrl = "https://www.example.com/entertainment/中文--plt6/14?method=lazyload";
@@ -551,7 +551,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
         String expectedValue = "{\n" +
                 "      \"source\" : \"Facebook\",\n" +
-                "      \"medium\" : \"Social\",\n" +
+                "      \"medium\" : \"Organic\",\n" +
                 "      \"campaign\" : null,\n" +
                 "      \"content\" : null,\n" +
                 "      \"term\" : null,\n" +
