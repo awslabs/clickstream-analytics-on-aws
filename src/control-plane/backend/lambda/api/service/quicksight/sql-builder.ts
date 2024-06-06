@@ -1818,43 +1818,9 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
   let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
   globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
 
-  let whereClause = '';
-  let userSegmentBaseSQl = '';
-  let segments: string[] = [];
-  if(sqlParameters.globalEventCondition?.conditions !== undefined && sqlParameters.globalEventCondition?.conditions.length > 0)  {
+  const userSegmentBaseSQl = buildSegmentBaseSql(sqlParameters);
 
-    for (const condition of sqlParameters.globalEventCondition.conditions) {
-      if(condition.category === ConditionCategory.USER_OUTER
-        && condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY) {
-          segments.push(`'${condition.value}'`);
-        }
-    }
-
-    if(sqlParameters.globalEventCondition.conditionOperator === 'or') {
-      whereClause = 'and segment_id in (' + segments.join(',') + ')'
-      userSegmentBaseSQl = `
-        with user_segment_base as (
-          select 
-            user_id 
-          from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-          where 1=1
-          ${whereClause}
-          group by user_id
-        ),
-      `
-    } else {
-      userSegmentBaseSQl = `
-        with user_segment_base as (
-          select 
-            user_id 
-          from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-          where 1=1
-          ${whereClause}
-          group by user_id having count(distinct segment_id) = ${segments.length}
-        ),
-      `
-    }
-
+  if(userSegmentBaseSQl !== '') {
     return `
       ${userSegmentBaseSQl}
       base_data as (
@@ -1862,21 +1828,21 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          event.merged_user_id as user_pseudo_id,
+          event.user_pseudo_id,
           event.user_id,
           ${eventColumnSql}
           ${userColumnSql}
           ${buildDateUnitsSql(sqlParameters.timezone)}
         from
           ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_USER_VIEW} as event
-          join user_segment_base as user_segment on event.user_pseudo_id = user_segment.user_id
+          join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
         where
           ${eventDateSQL}
           ${eventNameClause}
           ${globalConditionSql}
       ),
     `;
-  } 
+  }
 
   return `
     with base_data as (
@@ -1898,6 +1864,151 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
     ),
   `;
 };
+
+export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
+
+  let userSegmentBaseSQl = '';
+  let segments: string[] = [];
+  let segmentsNotIn: string[] = [];
+  if(sqlParameters.globalEventCondition?.conditions !== undefined && sqlParameters.globalEventCondition?.conditions.length > 0)  {
+
+    for (const condition of sqlParameters.globalEventCondition.conditions) {
+      if(condition.category === ConditionCategory.USER_OUTER
+        && condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY) {
+          segments.push(`'${condition.value}'`);
+
+          if(condition.operator === ExploreAnalyticsOperators.NOT_IN) {
+            segmentsNotIn.push(`'${condition.value}'`);
+          } else {
+            segments.push(`'${condition.value}'`);
+          }
+        }
+    }
+
+    if(segments.length !== 0 && segmentsNotIn.length === 0) {
+      if(sqlParameters.globalEventCondition.conditionOperator === 'or') {
+        userSegmentBaseSQl = `
+          with user_segment_base as (
+            select 
+              user_id 
+            from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+            where segment_id in (${segments.join(',')})
+            group by user_id
+          ),
+        `
+      } else {
+        userSegmentBaseSQl = `
+          with user_segment_base as (
+            select 
+              user_id 
+            from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+            where segment_id in (${segments.join(',')})
+            group by user_id having (count(distinct segment_id) = ${segments.length})
+          ),
+        `
+      }
+    }
+    else if(segments.length === 0 && segmentsNotIn.length !== 0) {
+      if(sqlParameters.globalEventCondition.conditionOperator === 'or') {
+        userSegmentBaseSQl = `
+          with user_segment_base as (
+            select 
+              a.user_id
+            from (
+              select 
+                user_id 
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+              group by user_id
+            ) a
+            left join (
+              select 
+                user_id 
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+              where segment_id in (${segmentsNotIn.join(',')})
+              group by user_id having (count(distinct segment_id) = ${segmentsNotIn.length})
+            ) b
+            where b.user_id is not null
+            group by 1
+          ),
+        `
+      } else {
+        userSegmentBaseSQl = `
+          with user_segment_base as (
+            select 
+              user_id 
+            from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+            where segment_id not in (${segmentsNotIn.join(',')})
+            group by user_id
+          ),
+        `
+      }
+    } else if(segments.length !== 0 && segmentsNotIn.length !== 0) {
+      if(sqlParameters.globalEventCondition.conditionOperator === 'or') {
+
+        userSegmentBaseSQl = `
+          with user_segment_base as (
+            select 
+              user_id
+            from (
+              select 
+                a.user_id
+              from (
+                select 
+                  user_id 
+                from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+                group by user_id
+              ) a
+              left join (
+                select 
+                  user_id 
+                from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+                where segment_id in (${segmentsNotIn.join(',')})
+                group by user_id having (count(distinct segment_id) = ${segmentsNotIn.length})
+              ) b
+              where b.user_id is not null
+              group by 1
+
+              union all
+
+              select 
+                user_id 
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+              where segment_id in (${segments.join(',')})
+              group by user_id 
+            ) t
+            group by 1
+          ),
+        `
+      } else {
+        userSegmentBaseSQl = `
+          with user_segment_base as (
+            select
+              user_id
+            from (
+              select 
+                user_id 
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+              where segment_id not in (${segmentsNotIn.join(',')})
+              group by user_id
+            ) a
+            join 
+            (
+              select 
+                user_id 
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+              where segment_id in (${segments.join(',')})
+              group by user_id  having (count(distinct segment_id) = ${segments.length})
+            ) b
+            on a.user_id = b.user_id
+            group by 1
+          ),
+        `
+      }
+    }
+  }
+
+  return userSegmentBaseSQl;
+}
 
 function _getStartDateForRelativeDateRange(timezone: string,
   lastN: number | undefined, timeUnit: ExploreRelativeTimeUnit | undefined, timeWindowInSeconds: number | undefined) {
