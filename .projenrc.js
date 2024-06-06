@@ -460,7 +460,6 @@ const frontendServeProject = new typescript.TypeScriptProject({
   sampleCode: false,
   deps: [
     'express@^4.19.2',
-    'ncc@^0.3.6',
     'serve-static@^1.15.0',
   ],
   devDeps: [
