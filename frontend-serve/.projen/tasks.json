@@ -115,7 +115,7 @@
           "exec": "pnpm i --no-frozen-lockfile"
         },
         {
-          "exec": "pnpm update @types/express @types/jest @types/node @types/serve-static jest jest-junit ts-jest typescript express ncc serve-static"
+          "exec": "pnpm update @types/express @types/jest @types/node @types/serve-static jest jest-junit ts-jest typescript express serve-static"
         },
         {
           "exec": "pnpm dlx projen"
