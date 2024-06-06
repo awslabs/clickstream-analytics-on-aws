@@ -24,6 +24,7 @@ import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.flink.ClickstreamException;
 import software.aws.solution.clickstream.plugin.enrich.ClickstreamEventEnrichment;
 
+import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -51,6 +52,7 @@ public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<JsonNode
             ParseRowResult result = this.eventParser.parseLineToDBRow(value.toString(), projectId, fileName);
             List<ClickstreamEvent> eventList = result.getClickstreamEventList();
             for (ClickstreamEvent clickstreamEvent : eventList) {
+                clickstreamEvent.getProcessInfo().put("process_time", Instant.now().toString());
                 for (ClickstreamEventEnrichment enrichment : enrichments) {
                     enrichment.enrich(clickstreamEvent);
                 }
