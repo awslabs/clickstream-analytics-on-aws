@@ -30,16 +30,13 @@ import software.aws.solution.clickstream.common.enrich.ts.rule.SourceCategoryAnd
 import software.aws.solution.clickstream.common.exception.ExtractDataException;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static software.aws.solution.clickstream.common.Util.getUriParams;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 import static software.aws.solution.clickstream.common.Util.parseUrl;
-
 
 @Slf4j
 public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
@@ -409,11 +406,9 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (REFERRAL.equals(category)) {
             return REFERRAL;
         }
-        Pattern pattern = Pattern.compile(".*(google|bing|yahoo|duckduckgo|baidu|yandex).*", Pattern.CASE_INSENSITIVE); // NOSONAR
-        if (pattern.matcher(source).matches()) {
+        if (category != null && !category.equals(DIRECT)) {
             return ORGANIC;
         }
-
         return null;
     }
 
@@ -423,54 +418,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (isAllEmpty(pageReferrer, latestReferrer)) {
             return NONE;
         }
-
-
-
-        if (latestReferrer != null && !latestReferrer.isEmpty()) {
-            String referrerHost = parseUrl(latestReferrer).getHostName();
-            if (referrerHost.startsWith("www.")) {
-                referrerHost = referrerHost.substring(4);
-            }
-            if (isKnownPublicDomain(referrerHost)) {
-                return ORGANIC;
-            }
-        }
-        if (pageReferrer != null && !pageReferrer.isEmpty()) {
-            String referrerHost = parseUrl(pageReferrer).getHostName();
-            if (referrerHost.startsWith("www.")) {
-                referrerHost = referrerHost.substring(4);
-            }
-            if (isKnownPublicDomain(referrerHost)) {
-                return ORGANIC;
-            }
-        }
-
         if (isFromInternal) {
             return NONE;
         }
-
         return REFERRAL;
-    }
-
-    private boolean isKnownPublicDomain(final String referrerHost) {
-        List<String> knownSearchEngineDomains = Arrays.asList(
-                "google.com",
-                "bing.com",
-                "yahoo.com",
-                "duckduckgo.com",
-                "baidu.com",
-                "yandex.com",
-                "facebook.com"
-        );
-        if (knownSearchEngineDomains.contains(referrerHost)) {
-            return true;
-        }
-        for (String domain : knownSearchEngineDomains) {
-            if (referrerHost.contains(domain)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static boolean isAllEmpty(final String pageReferrer, final String latestReferrer) {
