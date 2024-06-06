@@ -194,7 +194,7 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
-    },ExploreRequestAction.PREVIEW);
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     --clickstream-explorative-analytics-ATTRIBUTION
@@ -5274,14 +5274,14 @@ describe('Attribution SQL Builder test', () => {
             category: ConditionCategory.USER_OUTER,
             property: 'segment_id',
             operator: 'in',
-            value: ['111111','33333'],
+            value: ['111111', '33333'],
             dataType: MetadataValueType.STRING,
           },
           {
             category: ConditionCategory.USER_OUTER,
             property: 'segment_id',
             operator: 'not_in',
-            value: ['22222','44444'],
+            value: ['22222', '44444'],
             dataType: MetadataValueType.STRING,
           },
         ],
@@ -5766,14 +5766,14 @@ describe('Attribution SQL Builder test', () => {
             category: ConditionCategory.USER_OUTER,
             property: 'segment_id',
             operator: 'in',
-            value: ['111111','33333'],
+            value: ['111111', '33333'],
             dataType: MetadataValueType.STRING,
           },
           {
             category: ConditionCategory.USER_OUTER,
             property: 'segment_id',
             operator: 'not_in',
-            value: ['22222','44444'],
+            value: ['22222', '44444'],
             dataType: MetadataValueType.STRING,
           },
         ],

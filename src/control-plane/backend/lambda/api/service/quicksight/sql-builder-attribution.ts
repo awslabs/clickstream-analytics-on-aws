@@ -746,10 +746,10 @@ function _buildBaseEventDataSql(eventNames: string[], sqlParameters: Attribution
   const eventNameClause = _buildEventNameClause(eventNames);
   let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
   globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
-  
+
   const userSegmentBaseSQl = buildSegmentBaseSql(sqlParameters);
 
-  if(userSegmentBaseSQl !== '') {
+  if (userSegmentBaseSQl !== '') {
     return `
       ${userSegmentBaseSQl}
       base_data as (

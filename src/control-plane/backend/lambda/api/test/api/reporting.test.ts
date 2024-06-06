@@ -4002,7 +4002,7 @@ describe('reporting test', () => {
             },
           },
         ],
-      });
+      }, 'PUBLISH');
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -4048,7 +4048,6 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -4199,7 +4198,7 @@ describe('reporting test', () => {
             },
           },
         ],
-      });
+      }, 'PUBLISH');
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);

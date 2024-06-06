@@ -463,7 +463,7 @@ export function buildFunnelView(sqlParameters: SQLParameters, requestAciton: str
 
   const applyToFirst = isValidGroupingCondition(sqlParameters.groupCondition) && (sqlParameters.groupCondition?.applyTo === 'FIRST');
 
-  let baseSQL = _buildFunnelBaseSql(eventNames, sqlParameters, requestAciton ,applyToFirst, groupCondition);
+  let baseSQL = _buildFunnelBaseSql(eventNames, sqlParameters, requestAciton, applyToFirst, groupCondition);
   const resultSql = _buildFunnelChartViewResultSql(sqlParameters, prefix, appendGroupingCol, applyToFirst, colNameWithAlias);
 
   let sql = `
@@ -1712,7 +1712,8 @@ export function buildColumnsSqlFromConditions(columns: ColumnAttribute[], prefix
   };
 }
 
-export function _buildCommonPartSql(analyticsType: ExploreAnalyticsType, eventNames: string[], sqlParameters: SQLParameters, requestAction: string) : string {
+export function _buildCommonPartSql(analyticsType: ExploreAnalyticsType, eventNames: string[],
+  sqlParameters: SQLParameters, requestAction: string) : string {
 
   // build column sql from event condition
   const eventConditionProps = _getEventConditionProps(sqlParameters);
@@ -1820,7 +1821,7 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
 
   const userSegmentBaseSQl = buildSegmentBaseSql(sqlParameters);
 
-  if(userSegmentBaseSQl !== '') {
+  if (userSegmentBaseSQl !== '') {
     return `
       ${userSegmentBaseSQl}
       base_data as (
@@ -1870,21 +1871,21 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
   let userSegmentBaseSQl = '';
   let segments: string[] = [];
   let segmentsNotIn: string[] = [];
-  if(sqlParameters.globalEventCondition?.conditions !== undefined && sqlParameters.globalEventCondition?.conditions.length > 0)  {
+  if (sqlParameters.globalEventCondition?.conditions !== undefined && sqlParameters.globalEventCondition?.conditions.length > 0) {
 
     for (const condition of sqlParameters.globalEventCondition.conditions) {
-      if(condition.category === ConditionCategory.USER_OUTER
+      if (condition.category === ConditionCategory.USER_OUTER
         && condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY) {
-          if(condition.operator === ExploreAnalyticsOperators.NOT_IN) {
-            segmentsNotIn.push(...condition.value);
-          } else {
-            segments.push(...condition.value);
-          }
+        if (condition.operator === ExploreAnalyticsOperators.NOT_IN) {
+          segmentsNotIn.push(...condition.value);
+        } else {
+          segments.push(...condition.value);
         }
+      }
     }
 
-    if(segments.length !== 0 && segmentsNotIn.length === 0) {
-      if(sqlParameters.globalEventCondition.conditionOperator === 'or') {
+    if (segments.length !== 0 && segmentsNotIn.length === 0) {
+      if (sqlParameters.globalEventCondition.conditionOperator === 'or') {
         userSegmentBaseSQl = `
           with user_segment_base as (
             select 
@@ -1893,7 +1894,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             where segment_id in ('${segments.join('\',\'')}')
             group by user_id
           ),
-        `
+        `;
       } else {
         userSegmentBaseSQl = `
           with user_segment_base as (
@@ -1903,11 +1904,10 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             where segment_id in ('${segments.join('\',\'')}')
             group by user_id having (count(distinct segment_id) = ${segments.length})
           ),
-        `
+        `;
       }
-    }
-    else if(segments.length === 0 && segmentsNotIn.length !== 0) {
-      if(sqlParameters.globalEventCondition.conditionOperator === 'or') {
+    } else if (segments.length === 0 && segmentsNotIn.length !== 0) {
+      if (sqlParameters.globalEventCondition.conditionOperator === 'or') {
         userSegmentBaseSQl = `
           with user_segment_base as (
             select 
@@ -1928,7 +1928,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             where b.user_id is not null
             group by 1
           ),
-        `
+        `;
       } else {
         userSegmentBaseSQl = `
           with user_segment_base as (
@@ -1938,10 +1938,10 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             where segment_id not in ('${segmentsNotIn.join('\',\'')}')
             group by user_id
           ),
-        `
+        `;
       }
-    } else if(segments.length !== 0 && segmentsNotIn.length !== 0) {
-      if(sqlParameters.globalEventCondition.conditionOperator === 'or') {
+    } else if (segments.length !== 0 && segmentsNotIn.length !== 0) {
+      if (sqlParameters.globalEventCondition.conditionOperator === 'or') {
 
         userSegmentBaseSQl = `
           with user_segment_base as (
@@ -1976,7 +1976,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             ) t
             group by 1
           ),
-        `
+        `;
       } else {
         userSegmentBaseSQl = `
           with user_segment_base as (
@@ -2000,7 +2000,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             on a.user_id = b.user_id
             group by 1
           ),
-        `
+        `;
       }
     }
   }
@@ -2426,7 +2426,7 @@ export function buildAllConditionSql(sqlCondition: SQLCondition | undefined) {
 
   let sql = '';
   for (const condition of sqlCondition.conditions) {
-    if(condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY && condition.category === ConditionCategory.USER_OUTER) {
+    if (condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY && condition.category === ConditionCategory.USER_OUTER) {
       continue;
     }
     const conditionSql = _getOneConditionSql(condition);
@@ -2635,7 +2635,7 @@ export function buildConditionProps(conditions: Condition[]) {
         dataType: condition.dataType,
       });
     } else if (condition.category === ConditionCategory.USER_OUTER) {
-      if( condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY){
+      if ( condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY) {
         hasSegmentAttribute = true;
         segmenttAttributes.push({
           property: condition.property,
