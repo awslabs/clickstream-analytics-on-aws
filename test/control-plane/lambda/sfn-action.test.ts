@@ -38,7 +38,16 @@ describe('SFN Action Lambda Function', () => {
     Input: {
       Region: 'ap-southeast-1',
       TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
-      Parameters: [],
+      Parameters: [
+        {
+          ParameterKey: 'A',
+          ParameterValue: 'a',
+        },
+        {
+          ParameterKey: 'B',
+          ParameterValue: 'b',
+        },
+      ],
       StackName: 'Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf',
       Tags: [],
     },
@@ -52,7 +61,20 @@ describe('SFN Action Lambda Function', () => {
     StackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
     StackName: 'Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf',
     Description: '(SO0219) Clickstream Analytics on AWS - DataPipeline (Version v0.5.1-main-202305111513-852d242c)',
-    Parameters: [],
+    Parameters: [
+      {
+        ParameterKey: 'A',
+        ParameterValue: 'a',
+      },
+      {
+        ParameterKey: 'B',
+        ParameterValue: 'b',
+      },
+      {
+        ParameterKey: 'C',
+        ParameterValue: 'c',
+      },
+    ],
     CreationTime: new Date(),
     DeletionTime: new Date(),
     RollbackConfiguration: {},
@@ -121,6 +143,13 @@ describe('SFN Action Lambda Function', () => {
     cloudFormationMock.on(UpdateStackCommand).resolves({
       StackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
     });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          ...stackResult,
+        },
+      ],
+    });
     const resp = await handler(event, context) as CdkCustomResourceResponse;
     expect(resp.Action).toEqual(StackAction.DESCRIBE);
     expect(resp.Result.StackId).toEqual('arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60');
@@ -129,7 +158,14 @@ describe('SFN Action Lambda Function', () => {
     expect(cloudFormationMock).toHaveReceivedCommandTimes(UpdateStackCommand, 1);
     expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, UpdateStackCommand, {
       StackName: event.Input.StackName,
-      Parameters: event.Input.Parameters,
+      Parameters: [
+        event.Input.Parameters[0],
+        event.Input.Parameters[1],
+        {
+          ParameterKey: 'C',
+          UsePreviousValue: true,
+        },
+      ],
       DisableRollback: false,
       UsePreviousTemplate: true,
       Capabilities: [
@@ -162,6 +198,14 @@ describe('SFN Action Lambda Function', () => {
       .resolves({
         StackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
       });
+
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          ...stackResult,
+        },
+      ],
+    });
     const resp = await handler(event, context) as CdkCustomResourceResponse;
     expect(resp.Action).toEqual(StackAction.DESCRIBE);
     expect(resp.Result.StackId).toEqual('');
@@ -170,7 +214,14 @@ describe('SFN Action Lambda Function', () => {
     expect(cloudFormationMock).toHaveReceivedCommandTimes(UpdateStackCommand, 1);
     expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, UpdateStackCommand, {
       StackName: event.Input.StackName,
-      Parameters: event.Input.Parameters,
+      Parameters: [
+        event.Input.Parameters[0],
+        event.Input.Parameters[1],
+        {
+          ParameterKey: 'C',
+          UsePreviousValue: true,
+        },
+      ],
       DisableRollback: false,
       UsePreviousTemplate: true,
       Capabilities: [
@@ -203,6 +254,14 @@ describe('SFN Action Lambda Function', () => {
       .resolves({
         StackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
       });
+
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          ...stackResult,
+        },
+      ],
+    });
     const resp = await handler(event, context) as CdkCustomResourceResponse;
     expect(resp.Action).toEqual(StackAction.DESCRIBE);
     expect(resp.Result.StackId).toEqual('arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60');
@@ -211,7 +270,14 @@ describe('SFN Action Lambda Function', () => {
     expect(cloudFormationMock).toHaveReceivedCommandTimes(UpdateStackCommand, 2);
     expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, UpdateStackCommand, {
       StackName: event.Input.StackName,
-      Parameters: event.Input.Parameters,
+      Parameters: [
+        event.Input.Parameters[0],
+        event.Input.Parameters[1],
+        {
+          ParameterKey: 'C',
+          UsePreviousValue: true,
+        },
+      ],
       DisableRollback: false,
       UsePreviousTemplate: true,
       Capabilities: [
@@ -223,7 +289,14 @@ describe('SFN Action Lambda Function', () => {
     });
     expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(2, UpdateStackCommand, {
       StackName: event.Input.StackName,
-      Parameters: event.Input.Parameters,
+      Parameters: [
+        event.Input.Parameters[0],
+        event.Input.Parameters[1],
+        {
+          ParameterKey: 'C',
+          UsePreviousValue: true,
+        },
+      ],
       DisableRollback: true,
       RetainExceptOnCreate: true,
       UsePreviousTemplate: true,
@@ -245,6 +318,13 @@ describe('SFN Action Lambda Function', () => {
     cloudFormationMock.on(UpdateStackCommand).resolves({
       StackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
     });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          ...stackResult,
+        },
+      ],
+    });
     const resp = await handler(event, context) as CdkCustomResourceResponse;
     expect(resp.Action).toEqual(StackAction.DESCRIBE);
     expect(resp.Result.StackId).toEqual('arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60');
@@ -252,6 +332,26 @@ describe('SFN Action Lambda Function', () => {
     expect(resp.Result.StackStatus).toEqual(StackStatus.UPDATE_IN_PROGRESS);
     expect(cloudFormationMock).toHaveReceivedCommandTimes(UpdateStackCommand, 1);
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+    expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, UpdateStackCommand, {
+      StackName: event.Input.StackName,
+      Parameters: [
+        event.Input.Parameters[0],
+        event.Input.Parameters[1],
+        {
+          ParameterKey: 'C',
+          UsePreviousValue: true,
+        },
+      ],
+      DisableRollback: false,
+      UsePreviousTemplate: false,
+      Capabilities: [
+        Capability.CAPABILITY_IAM,
+        Capability.CAPABILITY_NAMED_IAM,
+        Capability.CAPABILITY_AUTO_EXPAND,
+      ],
+      Tags: event.Input.Tags,
+      TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+    });
   });
 
   test('Callback', async () => {
