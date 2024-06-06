@@ -406,7 +406,9 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (REFERRAL.equals(category)) {
             return REFERRAL;
         }
-        if (category != null && !category.equals(DIRECT)) {
+        if (category != null
+                && !category.equals(DIRECT)
+                && !category.equals(CategoryListEvaluator.UNASSIGNED)) {
             return ORGANIC;
         }
         return null;
