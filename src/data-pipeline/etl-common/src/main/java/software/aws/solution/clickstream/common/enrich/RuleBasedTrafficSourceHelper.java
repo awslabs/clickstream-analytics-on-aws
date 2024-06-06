@@ -57,7 +57,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     public static final String MICROSOFT = "Microsoft";
     public static final String PINTEREST = "Pinterest";
     public static final String BING = "Bing";
-    public static final String SCOCIAL = "Scocial";
+    public static final String SOCIAL = "Social";
     public static final String VIDEO = "Video";
     public static final String CPC = "CPC";
     public static final String DISPLAY = "Display";
@@ -140,7 +140,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         Map<String, SourceMedium> clidTypeToSourceMediumMap = new HashMap<>();
         clidTypeToSourceMediumMap.put(GCLID, new SourceMedium(GOOGLE, CPC));
         clidTypeToSourceMediumMap.put("dclid", new SourceMedium(GOOGLE, DISPLAY));
-        clidTypeToSourceMediumMap.put("fbclid", new SourceMedium(FACEBOOK, SCOCIAL));
+        clidTypeToSourceMediumMap.put("fbclid", new SourceMedium(FACEBOOK, SOCIAL));
         clidTypeToSourceMediumMap.put("msclid", new SourceMedium(MICROSOFT, CPC));
         clidTypeToSourceMediumMap.put("twclid", new SourceMedium(TWITTER, CPC));
         clidTypeToSourceMediumMap.put("pintclid", new SourceMedium(PINTEREST, CPC));
@@ -405,12 +405,17 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     }
 
     private String getMediumBySourceAndCategory(final String source, final String category) {
+        log.debug("getMediumBySourceAndCategory() enter source: {}, category: {}", source, category);
         if (REFERRAL.equals(category)) {
             return REFERRAL;
         }
         Pattern pattern = Pattern.compile(".*(google|bing|yahoo|duckduckgo|baidu|yandex).*", Pattern.CASE_INSENSITIVE); // NOSONAR
         if (pattern.matcher(source).matches()) {
             return ORGANIC;
+        }
+        Pattern patternSocial = Pattern.compile(".*(facebook).*", Pattern.CASE_INSENSITIVE); // NOSONAR
+        if (patternSocial.matcher(source).matches() || SOCIAL.equals(category)) {
+            return SOCIAL;
         }
         return null;
     }
