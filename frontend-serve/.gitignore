@@ -28,8 +28,6 @@ jspm_packages/
 *.tgz
 .yarn-integrity
 .cache
-aws-exports.json
-src/setupProxy.js
 build/
 node_modules/
 ncc/
@@ -42,5 +40,4 @@ junit.xml
 !/tsconfig.json
 !/tsconfig.dev.json
 !/src/
-/lib
 /dist/

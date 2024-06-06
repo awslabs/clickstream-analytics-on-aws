@@ -648,7 +648,7 @@ describe('ALBPortalStack - exist vpc & private & no custom domain', () => {
         'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
       ]);
     template.hasResourceProperties('AWS::Lambda::Function', {
-      PackageType: 'Image',
+      Handler: 'run.sh',
       Timeout: 10,
     });
 
