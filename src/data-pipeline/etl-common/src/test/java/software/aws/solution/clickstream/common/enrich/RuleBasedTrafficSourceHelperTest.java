@@ -26,6 +26,8 @@ import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
 
 import java.io.IOException;
 
+import static software.aws.solution.clickstream.common.Util.encodeUriQueryString;
+
 
 @Slf4j
 public class RuleBasedTrafficSourceHelperTest extends BaseTest {
@@ -506,6 +508,58 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "      \"clid\" : null,\n" +
                 "      \"channelGroup\" : \"Organic Search\",\n" +
                 "      \"category\" : \"Search\"\n" +
+                "    }";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+    @Test
+    void testGetMediumByReferrer13() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer14
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://www.example.com/travel/航空-786138/?utm_source=feedYahoo{{1|||{[}]]][[<,,,,>M<$#@~^\\;`#~;/:+, }AA_【中文测试 | 中文 测试 @test&utm_medium=referral&utm_campaign=nmgYahoo";
+        String pageReferrer = "https://hk.news.yahoo.com/借錢-{[}]]][[-test-070840890.html";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
+
+        String expectedValue = "{\n" +
+                "  \"source\" : \"feedYahoo{{1|||{[}]]][[<,,,,>M<$#@~^\\\\;`#~;/: , }AA_【中文测试 | 中文 测试 @test\",\n" +
+                "  \"medium\" : \"referral\",\n" +
+                "  \"campaign\" : \"nmgYahoo\",\n" +
+                "  \"content\" : null,\n" +
+                "  \"term\" : null,\n" +
+                "  \"campaignId\" : null,\n" +
+                "  \"clidPlatform\" : null,\n" +
+                "  \"clid\" : null,\n" +
+                "  \"channelGroup\" : \"Referral\",\n" +
+                "  \"category\" : \"Unassigned\"\n" +
+                "}";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+    @Test
+    void testGetMediumByReferrer14() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer15
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://www.example.com/entertainment/中文--plt6/14?method=lazyload";
+        String pageReferrer = "http://m.facebook.com/";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
+
+        String expectedValue = "{\n" +
+                "      \"source\" : \"Facebook\",\n" +
+                "      \"medium\" : \"Social\",\n" +
+                "      \"campaign\" : null,\n" +
+                "      \"content\" : null,\n" +
+                "      \"term\" : null,\n" +
+                "      \"campaignId\" : null,\n" +
+                "      \"clidPlatform\" : null,\n" +
+                "      \"clid\" : null,\n" +
+                "      \"channelGroup\" : \"Organic Social\",\n" +
+                "      \"category\" : \"Social\"\n" +
                 "    }";
         String value = prettyJson(Util.objectToJsonString(cts));
         Assertions.assertEquals(prettyJson(expectedValue), value);
