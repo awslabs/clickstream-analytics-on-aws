@@ -197,6 +197,7 @@ describe('Attribution SQL Builder test', () => {
     },ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-analytics-ATTRIBUTION
     with
       base_data as (
         select
@@ -654,6 +655,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-analytics-ATTRIBUTION
     with
       base_data as (
         select
@@ -957,6 +959,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-analytics-ATTRIBUTION
     with
       base_data as (
         select
@@ -1363,6 +1366,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-analytics-ATTRIBUTION
     with
       base_data as (
         select
@@ -1809,6 +1813,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-dashboard-ATTRIBUTION
     with
       base_data as (
         select
@@ -2234,6 +2239,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-dashboard-ATTRIBUTION
     with
       base_data as (
         select
@@ -2666,6 +2672,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-dashboard-ATTRIBUTION
     with
       base_data as (
         select
@@ -3103,6 +3110,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-dashboard-ATTRIBUTION
     with
       base_data as (
         select
@@ -3594,6 +3602,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-analytics-ATTRIBUTION
     with
       base_data as (
         select
@@ -4051,6 +4060,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-dashboard-ATTRIBUTION
     with
       base_data as (
         select
@@ -4488,6 +4498,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-analytics-ATTRIBUTION
     with
       base_data as (
         select
@@ -4978,6 +4989,7 @@ describe('Attribution SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    --clickstream-explorative-dashboard-ATTRIBUTION
     with
       base_data as (
         select

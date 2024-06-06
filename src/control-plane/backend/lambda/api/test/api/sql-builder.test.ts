@@ -57,6 +57,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -225,7 +226,8 @@ describe('SQL Builder test', () => {
 
     expect(sql.trim().replace(/ /g, '')).toEqual(
       `
-      with
+      -- clickstream-explorative-dashboard-FUNNEL
+    with
       base_data as (
         select
           event.event_id,
@@ -393,6 +395,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -552,6 +555,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -744,6 +748,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -963,6 +968,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -1250,6 +1256,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -1453,6 +1460,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT_PATH
     with
     base_data as (
       select
@@ -1681,6 +1689,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT_PATH
     with
       base_data as (
         select
@@ -1906,6 +1915,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -2100,6 +2110,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -2287,6 +2298,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -2503,6 +2515,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -2701,6 +2714,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -2950,6 +2964,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -3218,6 +3233,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -3548,6 +3564,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -3845,6 +3862,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -4141,6 +4159,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -4438,6 +4457,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -4702,6 +4722,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -4993,6 +5014,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -5328,6 +5350,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -5616,6 +5639,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -5906,6 +5930,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -6167,6 +6192,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -6466,6 +6492,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -6884,6 +6911,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -7290,6 +7318,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -7721,6 +7750,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     const expectResult = `
+    -- clickstream-explorative-dashboard-NODE_PATH
     with
       base_data as (
         select
@@ -8013,6 +8043,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
     base_data as (
       select
@@ -8215,6 +8246,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -8417,6 +8449,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -8681,6 +8714,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -8945,6 +8979,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -9159,6 +9194,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -9245,6 +9281,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -9352,6 +9389,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -9443,6 +9481,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -9540,6 +9579,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -9638,6 +9678,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -9750,6 +9791,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -9837,6 +9879,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -9916,6 +9959,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -10018,6 +10062,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -10138,6 +10183,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -10290,6 +10336,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -10452,6 +10499,7 @@ describe('SQL Builder test', () => {
       }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -10644,6 +10692,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -11035,6 +11084,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -11395,6 +11445,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -11627,6 +11678,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -11905,6 +11957,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -12204,6 +12257,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -12504,6 +12558,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -12801,6 +12856,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -12982,6 +13038,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -13256,6 +13313,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-NODE_PATH
     with
       base_data as (
         select
@@ -13646,6 +13704,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -13910,6 +13969,7 @@ describe('SQL Builder test', () => {
     expect(sql.includes('shopping.shopping.')).toEqual(true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -14243,6 +14303,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -14468,6 +14529,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -14632,6 +14694,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-FUNNEL
     with
       base_data as (
         select
@@ -14844,6 +14907,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-FUNNEL
     with
       base_data as (
         select
@@ -15064,9 +15128,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    }, ExploreRequestAction.PREVIEW);
+    }, ExploreRequestAction.PREVIEW, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-FUNNEL
     with
       base_data as (
         select
@@ -15291,9 +15356,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    }, ExploreRequestAction.PREVIEW);
+    }, ExploreRequestAction.PREVIEW, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-FUNNEL
     with
       base_data as (
         select
@@ -15558,6 +15624,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -15792,6 +15859,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -16071,6 +16139,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -16343,6 +16412,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -16582,6 +16652,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -16784,6 +16855,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -17067,6 +17139,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -17300,6 +17373,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -17516,6 +17590,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -17732,6 +17807,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -17947,6 +18023,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -18148,6 +18225,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -18360,6 +18438,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -18619,6 +18698,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -18886,6 +18966,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -19195,6 +19276,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -19517,6 +19599,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -19730,6 +19813,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -20065,6 +20149,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -20402,6 +20487,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -20713,6 +20799,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -20938,6 +21025,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -21187,6 +21275,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -21485,6 +21574,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -21702,6 +21792,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -22074,6 +22165,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -22499,6 +22591,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -22782,6 +22875,7 @@ describe('SQL Builder test', () => {
     }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
