@@ -2,5 +2,6 @@
 
 packages:
   - src/base-lib
+  - frontend-serve
   - frontend
   - src/control-plane/backend/lambda/api
