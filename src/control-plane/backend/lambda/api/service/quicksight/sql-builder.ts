@@ -1875,12 +1875,10 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
     for (const condition of sqlParameters.globalEventCondition.conditions) {
       if(condition.category === ConditionCategory.USER_OUTER
         && condition.property === EXPLORE_SEGMENT_DUMMY_PROPERTY) {
-          segments.push(`'${condition.value}'`);
-
           if(condition.operator === ExploreAnalyticsOperators.NOT_IN) {
-            segmentsNotIn.push(`'${condition.value}'`);
+            segmentsNotIn.push(...condition.value);
           } else {
-            segments.push(`'${condition.value}'`);
+            segments.push(...condition.value);
           }
         }
     }
@@ -1892,7 +1890,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             select 
               user_id 
             from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-            where segment_id in (${segments.join(',')})
+            where segment_id in ('${segments.join('\',\'')}')
             group by user_id
           ),
         `
@@ -1902,7 +1900,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             select 
               user_id 
             from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-            where segment_id in (${segments.join(',')})
+            where segment_id in ('${segments.join('\',\'')}')
             group by user_id having (count(distinct segment_id) = ${segments.length})
           ),
         `
@@ -1924,9 +1922,9 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
               select 
                 user_id 
               from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-              where segment_id in (${segmentsNotIn.join(',')})
+              where segment_id in ('${segmentsNotIn.join('\',\'')}')
               group by user_id having (count(distinct segment_id) = ${segmentsNotIn.length})
-            ) b
+            ) b on a.user_id = b.user_id
             where b.user_id is not null
             group by 1
           ),
@@ -1937,7 +1935,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             select 
               user_id 
             from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-            where segment_id not in (${segmentsNotIn.join(',')})
+            where segment_id not in ('${segmentsNotIn.join('\',\'')}')
             group by user_id
           ),
         `
@@ -1948,7 +1946,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
         userSegmentBaseSQl = `
           with user_segment_base as (
             select 
-              user_id
+              t.user_id
             from (
               select 
                 a.user_id
@@ -1962,9 +1960,9 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
                 select 
                   user_id 
                 from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-                where segment_id in (${segmentsNotIn.join(',')})
+                where segment_id in ('${segmentsNotIn.join('\',\'')}')
                 group by user_id having (count(distinct segment_id) = ${segmentsNotIn.length})
-              ) b
+              ) b on a.user_id = b.user_id
               where b.user_id is not null
               group by 1
 
@@ -1973,7 +1971,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
               select 
                 user_id 
               from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-              where segment_id in (${segments.join(',')})
+              where segment_id in ('${segments.join('\',\'')}')
               group by user_id 
             ) t
             group by 1
@@ -1983,12 +1981,12 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
         userSegmentBaseSQl = `
           with user_segment_base as (
             select
-              user_id
+              a.user_id
             from (
               select 
                 user_id 
               from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-              where segment_id not in (${segmentsNotIn.join(',')})
+              where segment_id not in ('${segmentsNotIn.join('\',\'')}')
               group by user_id
             ) a
             join 
@@ -1996,7 +1994,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
               select 
                 user_id 
               from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-              where segment_id in (${segments.join(',')})
+              where segment_id in ('${segments.join('\',\'')}')
               group by user_id  having (count(distinct segment_id) = ${segments.length})
             ) b
             on a.user_id = b.user_id
