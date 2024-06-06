@@ -25,7 +25,7 @@ BEGIN
       FROM 
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
-        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+        event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
         and event_name = '_screen_view'
         and screen_view_screen_name is not null
     ), 
@@ -65,7 +65,7 @@ BEGIN
       FROM 
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
-        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+        event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
         and event_name = '_screen_view'
         and screen_view_screen_id is not null
     ), 
@@ -105,7 +105,7 @@ BEGIN
       FROM 
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE
-        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date 
+        event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone 
         and event_name = '_page_view'
         and page_view_page_title is not null
     ), 
@@ -145,7 +145,7 @@ BEGIN
       FROM 
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
-        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+        event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
         and event_name = '_page_view'
         and page_view_page_url_path is not null
     ), 

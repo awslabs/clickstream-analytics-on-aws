@@ -24,22 +24,13 @@ import java.io.IOException;
 
 @Slf4j
 public final class IPEnrichmentV2 implements ClickstreamEventEnrichment {
-    private static IPEnrichmentV2 instance;
 
     private static final long serialVersionUID = 17054589439690001L;
     private final IPEnrichmentHelper helper;
 
-    private IPEnrichmentV2(final File dbFile) throws IOException {
+    public IPEnrichmentV2(final File dbFile) throws IOException {
         this.helper = IPEnrichmentHelper.from(dbFile);
     }
-
-    public static synchronized IPEnrichmentV2 getInstance(final File dbFile) throws IOException {
-        if (instance == null) {
-            instance = new IPEnrichmentV2(dbFile);
-        }
-        return instance;
-    }
-
 
     public void enrich(final ClickstreamEvent event) {
         String ip = event.getIp();
@@ -50,6 +41,5 @@ public final class IPEnrichmentV2 implements ClickstreamEventEnrichment {
         event.setGeoCity(result.getCity());
         event.setGeoContinent(result.getContinent());
         event.setGeoCountry(result.getCountry());
-
     }
 }

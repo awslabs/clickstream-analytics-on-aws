@@ -200,7 +200,7 @@ public class StreamingJob {
                 dbFile = Utils.getInstance().dowloadS3File(bucketName, geoFileKey, region, TMP_GEO_LITE_2_CITY_MMDB);
                 log.info("Downloaded {} to {}, file size: {}", geoFileKey, dbFile.getAbsolutePath(), dbFile.length());
             }
-           enrichments.add(IPEnrichmentV2.getInstance(dbFile));
+           enrichments.add(new IPEnrichmentV2(dbFile));
         }
         if (this.props.isUaEnrich()) {
             enrichments.add(new UAEnrichmentV2());

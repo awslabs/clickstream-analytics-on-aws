@@ -22,7 +22,6 @@ import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.plugin.enrich.IPEnrichmentV2;
 
 import java.io.IOException;
-import java.nio.file.Files;
 
 public class IPEnrichmentV2Test extends BaseFlinkTest {
 
@@ -31,7 +30,7 @@ public class IPEnrichmentV2Test extends BaseFlinkTest {
 
     @BeforeEach
     public void setup() throws IOException {
-        ipEnrichment = IPEnrichmentV2.getInstance(new java.io.File(TMP_GEO_LITE_2_CITY_MMDB));
+        ipEnrichment = new IPEnrichmentV2(new java.io.File(TMP_GEO_LITE_2_CITY_MMDB));
     }
 
     @Test

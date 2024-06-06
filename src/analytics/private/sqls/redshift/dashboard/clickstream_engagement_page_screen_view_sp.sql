@@ -21,10 +21,10 @@ BEGIN
       platform,
       'Page Title' as aggregation_type,
       page_view_page_title as aggregation_dim,
-      sum(case when event_name = '_page_view' then 1 else 0 end) as view_count
+      count(distinct case when event_name = '_page_view' then event_id else null end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
-      DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date  
+      event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
     group by 1, 2, 3, 4
     ;
 
@@ -40,10 +40,10 @@ BEGIN
       platform,
       'Page URL Path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
-      sum(case when event_name = '_page_view' then 1 else 0 end) as view_count
+      count(distinct case when event_name = '_page_view' then event_id else null end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
-      DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date 
+      event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone 
     group by 1, 2, 3, 4
     ;
 
@@ -59,10 +59,10 @@ BEGIN
       platform,
       'Screen Name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
-      sum(case when event_name = '_screen_view' then 1 else 0 end) as view_count
+      count(distinct case when event_name = '_screen_view' then event_id else null end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
-      DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date 
+      event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone 
     group by 1, 2, 3, 4
     ;
 
@@ -78,11 +78,12 @@ BEGIN
       platform,
       'Screen Class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
-      sum(case when event_name = '_screen_view' then 1 else 0 end) as view_count
+      count(distinct case when event_name = '_screen_view' then event_id else null end) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
-      DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date 
+      event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone 
     group by 1, 2, 3, 4
+
     ;
     current_date := current_date - 1;
     i := i + 1;

@@ -12,33 +12,31 @@
  */
 
 package software.aws.solution.clickstream.common;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
-public class Cache<T extends Serializable> implements Serializable {
-    private static final long serialVersionUID = 1L;
-    private final Map<String, T> dataCached;
-    private final int size;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import java.time.Duration;
 
+public class Cache<T> {
+    private final com.github.benmanes.caffeine.cache.Cache<String, T> dataCached;
     public Cache() {
-        this(Integer.MAX_VALUE/2);
+        this(Integer.MAX_VALUE/8); //255M
     }
+
     public Cache(final int size) {
-        this.dataCached = new HashMap<>(1024 * 1024);
-        this.size = size;
+        this.dataCached =  Caffeine.newBuilder()
+                .maximumSize(size)
+                .expireAfterWrite(Duration.ofMinutes(5))
+                .expireAfterAccess(Duration.ofMinutes(5))
+                .build();
     }
     public boolean containsKey(final String key) {
-        return dataCached.containsKey(key);
+        return dataCached.getIfPresent(key) != null;
     }
     public T get(final String key) {
-        return dataCached.get(key);
+        return dataCached.getIfPresent(key);
     }
 
     public void put(final String key, final T data) {
-        if (dataCached.size() >= size) {
-            dataCached.remove(dataCached.keySet().iterator().next());
-        }
         dataCached.put(key, data);
     }
 }

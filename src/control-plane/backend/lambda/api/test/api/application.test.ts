@@ -24,7 +24,7 @@ import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { PipelineStackType, PipelineStatusType } from '../../common/model-ln';
-import { WorkflowStateType } from '../../common/types';
+import { PipelineServerProtocol, WorkflowStateType } from '../../common/types';
 import { getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -638,6 +638,9 @@ describe('Application test', () => {
           ],
           ingestionServer: {
             sinkType: 's3',
+            loadBalancer: {
+              protocol: PipelineServerProtocol.HTTPS,
+            },
           },
           executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
         },
@@ -688,6 +691,11 @@ describe('Application test', () => {
           executionDetail: {
             name: MOCK_EXECUTION_ID,
             status: ExecutionStatus.RUNNING,
+          },
+          ingestionServer: {
+            loadBalancer: {
+              protocol: PipelineServerProtocol.HTTPS,
+            },
           },
         },
       },

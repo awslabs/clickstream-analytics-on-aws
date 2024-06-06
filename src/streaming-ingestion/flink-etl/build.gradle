@@ -95,6 +95,10 @@ dependencies {
     // For UA.
     implementation "com.github.ua-parser:uap-java:$uapJavaVersion"
 
+    // Cache
+    implementation  "com.github.ben-manes.caffeine:caffeine:$caffeineVersion"
+
+
     // lombok related.
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")

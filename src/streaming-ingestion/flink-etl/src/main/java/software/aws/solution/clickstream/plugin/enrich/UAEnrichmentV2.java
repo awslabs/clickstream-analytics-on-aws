@@ -15,7 +15,6 @@
 package software.aws.solution.clickstream.plugin.enrich;
 
 import lombok.extern.slf4j.Slf4j;
-import software.aws.solution.clickstream.common.Cache;
 import software.aws.solution.clickstream.common.enrich.UAEnrichHelper;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.common.model.ClickstreamUA;
@@ -24,25 +23,13 @@ import software.aws.solution.clickstream.common.model.ClickstreamUA;
 public class UAEnrichmentV2 implements ClickstreamEventEnrichment {
 
     private static final long serialVersionUID = 17054589439690001L;
-    private final Cache<ClickstreamUA> cache = new Cache<>();
 
     public void enrich(final ClickstreamEvent event) {
         String uaString = event.getUa();
         if (uaString == null || uaString.isEmpty()) {
             return;
         }
-        ClickstreamUA uaInfo = null;
-        if (cache.containsKey(uaString)) {
-            uaInfo = cache.get(uaString);
-        } else {
-            try {
-                uaInfo = UAEnrichHelper.parserUA(uaString);
-                cache.put(uaString, uaInfo);
-            } catch (Exception e) {
-                log.warn(e.getMessage(), e);
-            }
-        }
-
+        ClickstreamUA uaInfo = UAEnrichHelper.parserUA(uaString);
         if (uaInfo != null) {
             event.setDeviceUa(uaInfo.getUaMap());
             event.setDeviceUaBrowser(uaInfo.getUaBrowser());
