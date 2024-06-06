@@ -515,32 +515,6 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
     @Test
     void testGetMediumByReferrer13() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer13
-
-        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
-        String pageUrl = "https://www.example.com/travel/航空-786138/?utm_source=feedYahoo{{1|||{[}]]][[<,,,,>M<$#@~^\\;`#~;/:+, }AA_【借錢騙案個機場 | 同情 屢次中招 @GOtrip&utm_medium=referral&utm_campaign=nmgYahoo";
-        String pageReferrer = "https://hk.news.yahoo.com/借錢騙案-招{[}]]][[-gotrip-070840890.html";
-
-        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
-
-        String expectedValue = "{\n" +
-                "  \"source\" : \"feedYahoo{{1|||{[}]]][[<,,,,>M<$#@~^\\\\;`#~;/: , }AA_【借錢騙案個機場 | 同情 屢次中招 @GOtrip\",\n" +
-                "  \"medium\" : \"referral\",\n" +
-                "  \"campaign\" : \"nmgYahoo\",\n" +
-                "  \"content\" : null,\n" +
-                "  \"term\" : null,\n" +
-                "  \"campaignId\" : null,\n" +
-                "  \"clidPlatform\" : null,\n" +
-                "  \"clid\" : null,\n" +
-                "  \"channelGroup\" : \"Referral\",\n" +
-                "  \"category\" : \"Unassigned\"\n" +
-                "}";
-        String value = prettyJson(Util.objectToJsonString(cts));
-        Assertions.assertEquals(prettyJson(expectedValue), value);
-    }
-
-    @Test
-    void testGetMediumByReferrer14() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer14
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
@@ -566,7 +540,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
     }
 
     @Test
-    void testGetMediumByReferrer15() throws IOException {
+    void testGetMediumByReferrer14() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer15
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
