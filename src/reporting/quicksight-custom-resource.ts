@@ -100,7 +100,14 @@ export function createQuicksightCustomResource(
   clickstream_realtime_event_view_columns.forEach( item => realtimeEventViewProjectedColumns.push(item.Name!));
 
   const eventViewColumns = `
+    *,
+    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
+    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date
+  `;
+
+  const eventViewColumnsRT = `
     *, 
+    CASE WHEN event_name = '_first_open' THEN COALESCE(e.user_id, e.user_pseudo_id) ELSE NULL END as new_user_indicator,
     DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
     DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date
   `;
@@ -114,8 +121,8 @@ export function createQuicksightCustomResource(
     realtimeTemplateArn: props.realtimeTemplateArn,
     dataSourceArn: props.dataSourceArn,
     databaseName: databaseName,
-    dataSets: _getDataSetDefs('no', eventViewColumns, eventViewProjectedColumns, realtimeEventViewProjectedColumns, tenYearsAgo, futureDate),
-    dataSetsSpice: _getDataSetDefs('yes', eventViewColumns, eventViewProjectedColumns, realtimeEventViewProjectedColumns, tenYearsAgo, futureDate),
+    dataSets: _getDataSetDefs('no', eventViewColumns, eventViewColumnsRT, eventViewProjectedColumns, realtimeEventViewProjectedColumns, tenYearsAgo, futureDate),
+    dataSetsSpice: _getDataSetDefs('yes', eventViewColumns, eventViewColumnsRT, eventViewProjectedColumns, realtimeEventViewProjectedColumns, tenYearsAgo, futureDate),
   };
 
   const cr = new CustomResource(scope, 'QuicksightCustomResource', {
@@ -164,6 +171,7 @@ function createQuicksightLambda(
 function _getDataSetDefs(
   useSpice: string,
   eventViewColumns: string,
+  eventViewColumnsRT: string,
   eventViewProjectedColumns: string[],
   realtimeEventViewProjectedColumns: string[],
   tenYearsAgo: Date,
@@ -234,7 +242,7 @@ function _getDataSetDefs(
       realtime: 'yes',
       customSql: `
         select 
-          ${eventViewColumns} 
+          ${eventViewColumnsRT} 
         from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
         where 
           event_timestamp >= event_timestamp >= (date <<$startDate01>>)::timestamp AT TIME ZONE '{{{timezone}}}' 
@@ -249,6 +257,10 @@ function _getDataSetDefs(
         {
           Name: 'event_date',
           Type: 'DATETIME',
+        },
+        {
+          Name: 'new_user_indicator',
+          Type: 'STRING',
         },
       ],
       dateTimeDatasetParameter: [
@@ -277,7 +289,7 @@ function _getDataSetDefs(
           columnGeographicRoles: ['STATE'],
         },
       ],
-      projectedColumns: [...realtimeEventViewProjectedColumns, 'event_timestamp_local', 'event_date'],
+      projectedColumns: [...realtimeEventViewProjectedColumns, 'event_timestamp_local', 'event_date', 'new_user_indicator'],
     },
   );
 

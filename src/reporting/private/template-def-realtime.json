@@ -2,7 +2,7 @@
 {
     "DataSetConfigurations": [
         {
-        "Placeholder": "Event_View",
+        "Placeholder": "Realtime_Event",
         "DataSetSchema": {
             "ColumnSchemaList": [
                 {
@@ -455,6 +455,14 @@
                 {
                 "Name": "event_timestamp_local",
                 "DataType": "DATETIME"
+                },
+                {
+                "Name": "event_date",
+                "DataType": "DATETIME"
+                },
+                {
+                "Name": "new_user_indicator",
+                "DataType": "STRING"
                 }
             ]
         },
@@ -481,19 +489,19 @@
                                     "Rows": [
                                         {
                                             "CategoricalDimensionField": {
-                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.country.1.1715868432002",
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
-                                                    "ColumnName": "country"
+                                                    "DataSetIdentifier": "Realtime_Event",
+                                                    "ColumnName": "geo_country"
                                                 }
                                             }
                                         },
                                         {
                                             "CategoricalDimensionField": {
-                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.city.2.1717558096880",
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_city.2.1717558096880",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
-                                                    "ColumnName": "city"
+                                                    "DataSetIdentifier": "Realtime_Event",
+                                                    "ColumnName": "geo_city"
                                                 }
                                             }
                                         }
@@ -504,7 +512,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868143523",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -552,11 +560,11 @@
                             "FieldOptions": {
                                 "SelectedFieldOptions": [
                                     {
-                                        "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.country.1.1715868432002",
+                                        "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
                                         "Visibility": "VISIBLE"
                                     },
                                     {
-                                        "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.city.2.1717558096880",
+                                        "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_city.2.1717558096880",
                                         "Visibility": "VISIBLE"
                                     },
                                     {
@@ -589,7 +597,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.platform.1.1717557799344",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "platform"
                                                 }
                                             }
@@ -600,7 +608,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -684,8 +692,8 @@
                                             "DateDimensionField": {
                                                 "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.0.1715857356710",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
-                                                    "ColumnName": "event_time_local"
+                                                    "DataSetIdentifier": "Realtime_Event",
+                                                    "ColumnName": "event_timestamp_local"
                                                 },
                                                 "DateGranularity": "MINUTE",
                                                 "HierarchyId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.0.1715857356710",
@@ -703,7 +711,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715857362639",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -715,7 +723,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.new_user_indicator.2.1715857385989",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "new_user_indicator"
                                                 }
                                             }
@@ -813,10 +821,10 @@
                                     "Geospatial": [
                                         {
                                             "CategoricalDimensionField": {
-                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.country.1.1715868432002",
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
-                                                    "ColumnName": "country"
+                                                    "DataSetIdentifier": "Realtime_Event",
+                                                    "ColumnName": "geo_country"
                                                 },
                                                 "HierarchyId": "4a8c6739-c42d-4ec1-9e2e-9d68368dd043"
                                             }
@@ -827,7 +835,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868143523",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -852,7 +860,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.country.1.1715868432002",
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
                                                 "Visibility": "VISIBLE"
                                             }
                                         }
@@ -878,12 +886,12 @@
                                     "HierarchyId": "4a8c6739-c42d-4ec1-9e2e-9d68368dd043",
                                     "Columns": [
                                         {
-                                            "DataSetIdentifier": "real_time_demo",
-                                            "ColumnName": "country"
+                                            "DataSetIdentifier": "Realtime_Event",
+                                            "ColumnName": "geo_country"
                                         },
                                         {
-                                            "DataSetIdentifier": "real_time_demo",
-                                            "ColumnName": "city"
+                                            "DataSetIdentifier": "Realtime_Event",
+                                            "ColumnName": "geo_city"
                                         }
                                     ],
                                     "DrillDownFilters": []
@@ -913,8 +921,8 @@
                                             "DateDimensionField": {
                                                 "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1716899533887",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
-                                                    "ColumnName": "event_time_local"
+                                                    "DataSetIdentifier": "Realtime_Event",
+                                                    "ColumnName": "event_timestamp_local"
                                                 },
                                                 "DateGranularity": "MINUTE",
                                                 "HierarchyId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1716899533887",
@@ -932,7 +940,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868483622",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -944,7 +952,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.event_name.0.1715868468558",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -1043,8 +1051,8 @@
                                             "DateDimensionField": {
                                                 "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1717558027378",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
-                                                    "ColumnName": "event_time_local"
+                                                    "DataSetIdentifier": "Realtime_Event",
+                                                    "ColumnName": "event_timestamp_local"
                                                 },
                                                 "DateGranularity": "MINUTE",
                                                 "HierarchyId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1717558027378",
@@ -1062,7 +1070,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -1074,7 +1082,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.traffic_source_source.1.1716899723929",
                                                 "Column": {
-                                                    "DataSetIdentifier": "real_time_demo",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "traffic_source_source"
                                                 }
                                             }
@@ -1169,7 +1177,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1717558169970",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View-shopping-summit_fkmt",
+                                                    "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "LogicalTable1.event_date.0.1717558169970",
@@ -1187,11 +1195,8 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.view_count.1.1717558189271",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View-shopping-summit_fkmt",
-                                                    "ColumnName": "view_count"
-                                                },
-                                                "AggregationFunction": {
-                                                    "SimpleNumericalAggregation": "SUM"
+                                                    "DataSetIdentifier": "Realtime_Event",
+                                                    "ColumnName": "View count"
                                                 }
                                             }
                                         }
@@ -1201,8 +1206,8 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_dim.2.1717558195224",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View-shopping-summit_fkmt",
-                                                    "ColumnName": "aggregation_dim"
+                                                    "DataSetIdentifier": "Realtime_Event",
+                                                    "ColumnName": "Page title/Screen name"
                                                 }
                                             }
                                         }
@@ -1389,9 +1394,14 @@
     ],
     "CalculatedFields": [
         {
-            "DataSetIdentifier": "real_time_demo",
-            "Name": "event_time_local",
-            "Expression": "epochDate({event_timestamp}+8*3600*1000)"
+            "DataSetIdentifier": "Realtime_Event",
+            "Name": "Page title/Screen name",
+            "Expression": "coalesce({traffic_source_source}, {traffic_source_medium}, '')"
+        },
+        {
+            "DataSetIdentifier": "Realtime_Event",
+            "Name": "Page title/Screen name",
+            "Expression": "distinct_countIf({user_pseudo_id},({event_name}='_page_view' OR {event_name}='_screen_view'))"
         }
     ],
     "ParameterDeclarations": [],
@@ -1403,8 +1413,8 @@
                     "TimeRangeFilter": {
                         "FilterId": "9f0ff024-37e5-4e03-9307-2882d6d527b0",
                         "Column": {
-                            "DataSetIdentifier": "real_time_demo",
-                            "ColumnName": "event_time_local"
+                            "DataSetIdentifier": "Realtime_Event",
+                            "ColumnName": "event_timestamp_local"
                         },
                         "IncludeMinimum": true,
                         "RangeMinimumValue": {
@@ -1431,60 +1441,21 @@
             "CrossDataset": "SINGLE_DATASET"
         },
         {
-            "FilterGroupId": "25569649-5c43-4576-bb27-b494d39eece2",
-            "Filters": [
-                {
-                    "CategoryFilter": {
-                        "FilterId": "3ad15b53-f678-4059-876a-89725069462b",
-                        "Column": {
-                            "DataSetIdentifier": "Page_Screen_View-shopping-summit_fkmt",
-                            "ColumnName": "aggregation_type"
-                        },
-                        "Configuration": {
-                            "FilterListConfiguration": {
-                                "MatchOperator": "CONTAINS",
-                                "CategoryValues": [
-                                    "Page Title",
-                                    "Screen Name"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
-                            }
-                        }
-                    }
-                }
-            ],
-            "ScopeConfiguration": {
-                "SelectedSheets": {
-                    "SheetVisualScopingConfigurations": [
-                        {
-                            "SheetId": "23e36552-6eaf-4ed7-a353-da18d2620d30",
-                            "Scope": "SELECTED_VISUALS",
-                            "VisualIds": [
-                                "5c0a75bb-988a-43f9-89c5-7b4f19504a83"
-                            ]
-                        }
-                    ]
-                }
-            },
-            "Status": "ENABLED",
-            "CrossDataset": "SINGLE_DATASET"
-        },
-        {
             "FilterGroupId": "a822fb88-ac84-41c8-ad1a-c49966c71707",
             "Filters": [
                 {
                     "TopBottomFilter": {
                         "FilterId": "b51ec9e7-b1e0-41df-8f58-87b9724f71b1",
                         "Column": {
-                            "DataSetIdentifier": "Page_Screen_View-shopping-summit_fkmt",
+                            "DataSetIdentifier": "Realtime_Event",
                             "ColumnName": "aggregation_dim"
                         },
                         "Limit": 10,
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Page_Screen_View-shopping-summit_fkmt",
-                                    "ColumnName": "view_count"
+                                    "DataSetIdentifier": "Realtime_Event",
+                                    "ColumnName": "View count"
                                 },
                                 "SortDirection": "DESC",
                                 "AggregationFunction": {
