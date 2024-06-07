@@ -73,13 +73,65 @@ public final class Util {
 
 
     public static Map<String, List<String>> getUriParams(final String uri) {
-        try {
-            URI uriObj = new URI(uri);
-            return getUriParams(uriObj);
-        } catch (URISyntaxException e) {
-            log.warn("cannot parse uri: " + uri + ERROR_LOG + e.getMessage());
+        if (uri == null) {
+            return new HashMap<>();
         }
-        return new HashMap<>();
+        URI uriObj = null;
+        try {
+             uriObj = new URI(uri);
+        } catch (URISyntaxException e) {
+            if (e.getMessage().contains("Illegal character")) {
+                String encodedUri = encodeUriQueryString(uri);
+                try {
+                    uriObj = new URI(encodedUri);
+                } catch (URISyntaxException ex) {
+                    log.warn("cannot parse encoded uri: " + encodedUri + ERROR_LOG + ex.getMessage());
+                    return new HashMap<>();
+                }
+            }
+        }
+
+        if (uriObj == null) {
+            return new HashMap<>();
+        }
+        return getUriParams(uriObj);
+    }
+
+    public static String encodeUriQueryString(final String pageUrlInput) {
+        String pageUrl = pageUrlInput;
+
+        if (pageUrl == null) {
+            return null; // NOSONAR
+        }
+        String[] uriParts = pageUrl.split("\\?");
+
+        if (uriParts.length == 1) {
+            return pageUrl;
+        }
+        String queryString = uriParts[1];
+        queryString = queryString.replace("|", "%7C")
+                .replace("<", "%3C")
+                .replace(">", "%3E")
+                .replace("#", "%23")
+                .replace("{", "%7B")
+                .replace("}", "%7D")
+                .replace("\\", "%5C")
+                .replace("^", "%5E")
+                .replace("~", "%7E")
+                .replace("[", "%5B")
+                .replace("]", "%5D")
+                .replace("`", "%60")
+                .replace(";", "%3B")
+                .replace("/", "%2F")
+                .replace("?", "%3F")
+                .replace(":", "%3A")
+                .replace("@", "%40")
+                .replace("$", "%24")
+                .replace("+", "%2B")
+                .replace(",", "%2C")
+                .replace(" ", "%20");
+        pageUrl = uriParts[0] + "?" + queryString;
+        return pageUrl;
     }
 
     public static Map<String, List<String>> getUriParams(final URI uriObj) {
@@ -101,7 +153,7 @@ public final class Util {
     }
 
     public static UrlParseResult parseUrl(final String url) {
-        if (url == null) {
+        if (url == null || url.isEmpty()) {
             return null;
         }
         String schemaUrl = url;

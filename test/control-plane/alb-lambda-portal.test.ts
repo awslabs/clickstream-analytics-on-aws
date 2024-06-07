@@ -245,7 +245,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         'testportalportalfn1F095E03',
       ]);
     template.hasResourceProperties('AWS::Lambda::Function', {
-      PackageType: 'Image',
+      Handler: 'run.sh',
       VpcConfig: Match.objectLike({
         SubnetIds: Match.anyValue(),
         SecurityGroupIds: Match.anyValue(),

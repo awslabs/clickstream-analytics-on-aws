@@ -449,6 +449,37 @@ const frontendTSConfig = {
   },
 };
 
+const frontendServeProject = new typescript.TypeScriptProject({
+  parent: project,
+  name: '@aws/clickstream-web-console-serve',
+  outdir: './frontend-serve',
+  libdir: 'dist/',
+  defaultReleaseBranch: defaultBranch,
+  readme: undefined,
+  eslint: false,
+  sampleCode: false,
+  deps: [
+    'express@^4.19.2',
+    'serve-static@^1.15.0',
+  ],
+  devDeps: [
+    '@types/express@^4.17.21',
+    '@types/serve-static@^1.15.7',
+  ],
+  gitignore: [
+    'build/',
+    'node_modules/',
+    'ncc/',
+    'dist/',
+  ],
+  minNodeVersion,
+  pnpmVersion,
+  packageManager: project.package.packageManager,
+  projenCommand: project.projenCommand,
+});
+frontendServeProject.setScript('ncc-build', 'tsc && ncc build dist/index.js -o ncc');
+frontendServeProject.setScript('start', 'pnpm run ncc-build && node ncc/index.js');
+
 const frontendProject = new typescript.TypeScriptProject({
   parent: project,
   name: '@aws/clickstream-web-console',
@@ -468,6 +499,9 @@ const frontendProject = new typescript.TypeScriptProject({
     'aws-exports.json',
     'src/setupProxy.js',
     'build/',
+    'node_modules/',
+    'ncc/',
+    'dist/',
   ],
   tsconfig: {
     ...frontendTSConfig,
