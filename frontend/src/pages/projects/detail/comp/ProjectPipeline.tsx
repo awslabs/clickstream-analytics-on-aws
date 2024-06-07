@@ -121,7 +121,6 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
       });
       if (resData.success) {
         setSelectedItems([]);
-        startRetryPipeline();
         listApplicationByProject();
       }
     } catch (error) {

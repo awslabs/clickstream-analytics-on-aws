@@ -67,8 +67,6 @@ import {
   defaultStr,
   generateRedshiftRPUOptionListByRegion,
   isDisabled,
-  isStreamingDisabled,
-  isStreamingVisible,
   ternary,
 } from 'ts/utils';
 
@@ -98,7 +96,6 @@ interface DataProcessingProps {
   changeRedshiftSubnets: (subnets: readonly SelectProps.Option[]) => void;
   changeBaseCapacity: (capacity: SelectProps.Option) => void;
   changeDBUser: (user: string) => void;
-  changeEnableStreaming: (enable: boolean) => void;
   changeDataLoadCronExp: (cron: string) => void;
   dataProcessorIntervalCronInvalidError: boolean;
   dataProcessorIntervalInvalidError: boolean;
@@ -140,7 +137,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeRedshiftSubnets: changeReshiftSubnets,
     changeBaseCapacity,
     changeDBUser,
-    changeEnableStreaming,
     dataProcessorIntervalCronInvalidError,
     dataProcessorIntervalInvalidError,
     redshiftServerlessVpcEmptyError,
@@ -1071,36 +1067,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               </SpaceBetween>
             </SpaceBetween>
           </Container>
-
-          {isStreamingVisible(update, pipelineInfo) && (
-            <Container
-              header={
-                <Header
-                  variant="h2"
-                  description={t('pipeline:create.streamingDesc')}
-                >
-                  {t('pipeline:create.streamingTitle')}
-                </Header>
-              }
-            >
-              <SpaceBetween direction="vertical" size="s">
-                <SpaceBetween direction="horizontal" size="xs">
-                  <Toggle
-                    disabled={isStreamingDisabled(update, pipelineInfo)}
-                    onChange={({ detail }) => {
-                      changeEnableStreaming(detail.checked);
-                    }}
-                    checked={pipelineInfo.enableStreaming}
-                    description={defaultStr(
-                      t('pipeline:create.enableStreamingDesc')
-                    )}
-                  >
-                    <b>{t('pipeline:create.enableStreaming')}</b>
-                  </Toggle>
-                </SpaceBetween>
-              </SpaceBetween>
-            </Container>
-          )}
         </>
       )}
     </SpaceBetween>
