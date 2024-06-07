@@ -141,7 +141,7 @@
   "license": "Apache-2.0",
   "version": "1.2.0",
   "jest": {
-    "coverageProvider": "v8",
+    "coverageProvider": "babel",
     "roots": [
       "<rootDir>/src",
       "<rootDir>/test"
