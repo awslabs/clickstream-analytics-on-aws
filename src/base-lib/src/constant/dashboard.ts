@@ -99,8 +99,6 @@ export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [
   'clickstream_event_attr_view_v1',
   'clickstream_session_view_v1',
   'clickstream_event_view_v1',
-  'user_m_view',
-  'item_m_view',
 ];
 
 export const CLICKSTREAM_DEPRECATED_VIEW_LIST = [
