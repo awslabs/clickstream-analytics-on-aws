@@ -26,6 +26,8 @@ export interface QuickSightProps {
 };
 
 export interface QuicksightCustomResourceProps {
+  readonly realtimeTemplateArn: string;
+  readonly realtimeTemplateId: string;
   readonly templateArn: string;
   readonly templateId: string;
   readonly dataSourceArn: string;

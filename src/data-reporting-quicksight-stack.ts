@@ -120,6 +120,24 @@ export class DataReportingQuickSightStack extends Stack {
       ),
     });
 
+    const realtimeTemplateId = `clickstream_template_rt_${stackParams.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
+    const realtimeTemplate = new CfnTemplate(this, 'Clickstream-Template-Def-Realtime', {
+      templateId: realtimeTemplateId,
+      awsAccountId: Aws.ACCOUNT_ID,
+      permissions: [{
+        principal: stackParams.quickSightOwnerPrincipalParam.valueAsString,
+        actions: [
+          'quicksight:UpdateTemplatePermissions',
+          'quicksight:DescribeTemplatePermissions',
+          'quicksight:DescribeTemplate',
+          'quicksight:DeleteTemplate',
+          'quicksight:UpdateTemplate',
+        ],
+      }],
+
+      definition: JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-realtime.json')).toString('utf-8')),
+    });
+
     const userSecret = Secret.fromSecretNameV2(this, 'Clickstream-Redshift-Secret', `${stackParams.redshiftParameterKeyParam.valueAsString}`);
 
     const dataSourceId = `clickstream_datasource_${stackParams.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
@@ -147,10 +165,13 @@ export class DataReportingQuickSightStack extends Stack {
     });
     dataSource.node.addDependency(interfaceCheckCR);
     dataSource.node.addDependency(template);
+    dataSource.node.addDependency(realtimeTemplate);
 
     const cr = createQuicksightCustomResource(this, {
       templateArn: template.attrArn,
       templateId: template.templateId,
+      realtimeTemplateArn: realtimeTemplate.attrArn,
+      realtimeTemplateId: realtimeTemplate.templateId,
       dataSourceArn: dataSource.attrArn,
       databaseName: stackParams.redshiftDBParam.valueAsString,
       timezone: stackParams.quickSightTimezoneParam.valueAsString,
@@ -167,6 +188,7 @@ export class DataReportingQuickSightStack extends Stack {
     });
     cr.node.addDependency(vPCConnectionResource);
     cr.node.addDependency(template);
+    cr.node.addDependency(realtimeTemplate);
 
     this.templateOptions.metadata = {
       'AWS::CloudFormation::Interface': {
