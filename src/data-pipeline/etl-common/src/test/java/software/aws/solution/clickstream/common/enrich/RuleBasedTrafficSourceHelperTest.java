@@ -26,6 +26,8 @@ import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
 
 import java.io.IOException;
 
+import static software.aws.solution.clickstream.common.Util.encodeUriQueryString;
+
 
 @Slf4j
 public class RuleBasedTrafficSourceHelperTest extends BaseTest {
@@ -246,7 +248,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "https://search.imesh.com/search?q=flowers&si=foo&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"iMesh\",\n" +
-                "  \"medium\" : \"Referral\",\n" +
+                "  \"medium\" : \"Organic\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,foo\",\n" +
@@ -269,7 +271,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "https://search.imesh.com/search?q=flowers&si=foo&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"iMesh\",\n" +
-                "  \"medium\" : \"Referral\",\n" +
+                "  \"medium\" : \"Organic\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,foo\",\n" +
@@ -285,20 +287,6 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
     @Test
     void testGetMediumByReferrer1() throws IOException {
-        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer1
-
-        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
-        String pageReferrer = "https://example.com";
-        String latestReferrer = "https://www.google.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg";
-        boolean internalReferrer = false;
-
-        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
-        Assertions.assertEquals(RuleBasedTrafficSourceHelper.ORGANIC, medium);
-
-    }
-
-    @Test
-    void testGetMediumByReferrer2() throws IOException {
         //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer2
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
@@ -312,7 +300,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
     }
 
     @Test
-    void testGetMediumByReferrer3() throws IOException {
+    void testGetMediumByReferrer2() throws IOException {
         //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer3
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
@@ -326,8 +314,8 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
     }
 
     @Test
-    void testGetMediumByReferrer4() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer4
+    void testGetMediumByReferrerInternal() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrerInternal
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
         String pageReferrer = "https://example.com";
@@ -340,7 +328,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
     }
 
     @Test
-    void testGetMediumByReferrer5() throws IOException {
+    void testGetMediumByReferrerNull() throws IOException {
         //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer5
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
@@ -353,38 +341,9 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
     }
 
-
     @Test
-    void testGetMediumByReferrer6() throws IOException {
-        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer6
-
-        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
-        String pageReferrer = "https://www.baidu.com";
-        String latestReferrer = null;
-        boolean internalReferrer = false;
-
-        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
-        Assertions.assertEquals(RuleBasedTrafficSourceHelper.ORGANIC, medium);
-    }
-
-    @Test
-    void testGetMediumByReferrer7() throws IOException {
-        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer7
-
-        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
-        String pageReferrer = "https://example.com";
-        String latestReferrer = "https://www.google.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg";
-        boolean internalReferrer = false;
-
-        String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
-        Assertions.assertEquals(RuleBasedTrafficSourceHelper.ORGANIC, medium);
-
-    }
-
-
-    @Test
-    void testGetMediumByReferrer8() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer8
+    void testParseDirectInternal() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseDirectInternal
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
         String pageUrl = "https://example.com/posts/2022/build-serverless-app-on-aws/protect-website-with-cognito/";
@@ -412,8 +371,8 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
 
     @Test
-    void testGetMediumByReferrer9() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer9
+    void testParseGoogleSearch() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseGoogleSearch
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
         String pageUrl = "https://example.com/posts/2022/build-serverless-app-on-aws/protect-website-with-cognito/";
@@ -440,8 +399,8 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
     }
 
     @Test
-    void testGetMediumByReferrer10() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer10
+    void testParseDirect() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseDirect
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
         String pageUrl = "https://example.com/posts/2024/redshift-serverless-cost-deep-dive/";
@@ -469,8 +428,8 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
 
     @Test
-    void testGetMediumByReferrer11() throws IOException {
-        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer11
+    void testGetMediumByReferrer8() throws IOException {
+        //./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer8
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
         String pageReferrer = "https://example.com";
@@ -484,8 +443,8 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
 
     @Test
-    void testGetMediumByReferrer12() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByReferrer12
+    void testParseGoogleOrganic() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseGoogleOrganic
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
         String pageUrl = "https://example.com/posts/2024/redshift-serverless-cost-deep-dive/";
@@ -506,6 +465,58 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "      \"clid\" : null,\n" +
                 "      \"channelGroup\" : \"Organic Search\",\n" +
                 "      \"category\" : \"Search\"\n" +
+                "    }";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+    @Test
+    void testParseCNChars() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseCNChars
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://www.example.com/travel/航空-786138/?utm_source=feedYahoo{{1|||{[}]]][[<,,,,>M<$#@~^\\;`#~;/:+, }AA_【中文测试 | 中文 测试 @test&utm_medium=referral&utm_campaign=nmgYahoo";
+        String pageReferrer = "https://hk.news.yahoo.com/借錢-{[}]]][[-test-070840890.html";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
+
+        String expectedValue = "{\n" +
+                "  \"source\" : \"feedYahoo{{1|||{[}]]][[<,,,,>M<$#@~^\\\\;`#~;/: , }AA_【中文测试 | 中文 测试 @test\",\n" +
+                "  \"medium\" : \"referral\",\n" +
+                "  \"campaign\" : \"nmgYahoo\",\n" +
+                "  \"content\" : null,\n" +
+                "  \"term\" : null,\n" +
+                "  \"campaignId\" : null,\n" +
+                "  \"clidPlatform\" : null,\n" +
+                "  \"clid\" : null,\n" +
+                "  \"channelGroup\" : \"Referral\",\n" +
+                "  \"category\" : \"Unassigned\"\n" +
+                "}";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+    @Test
+    void testParseFacebookOrganic() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseFacebookOrganic
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://www.example.com/entertainment/中文--plt6/14?method=lazyload";
+        String pageReferrer = "http://m.facebook.com/";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
+
+        String expectedValue = "{\n" +
+                "      \"source\" : \"Facebook\",\n" +
+                "      \"medium\" : \"Organic\",\n" +
+                "      \"campaign\" : null,\n" +
+                "      \"content\" : null,\n" +
+                "      \"term\" : null,\n" +
+                "      \"campaignId\" : null,\n" +
+                "      \"clidPlatform\" : null,\n" +
+                "      \"clid\" : null,\n" +
+                "      \"channelGroup\" : \"Organic Social\",\n" +
+                "      \"category\" : \"Social\"\n" +
                 "    }";
         String value = prettyJson(Util.objectToJsonString(cts));
         Assertions.assertEquals(prettyJson(expectedValue), value);

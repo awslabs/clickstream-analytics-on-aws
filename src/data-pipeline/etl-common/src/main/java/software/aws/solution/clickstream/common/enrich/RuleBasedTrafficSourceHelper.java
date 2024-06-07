@@ -30,16 +30,13 @@ import software.aws.solution.clickstream.common.enrich.ts.rule.SourceCategoryAnd
 import software.aws.solution.clickstream.common.exception.ExtractDataException;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static software.aws.solution.clickstream.common.Util.getUriParams;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 import static software.aws.solution.clickstream.common.Util.parseUrl;
-
 
 @Slf4j
 public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
@@ -57,7 +54,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     public static final String MICROSOFT = "Microsoft";
     public static final String PINTEREST = "Pinterest";
     public static final String BING = "Bing";
-    public static final String SCOCIAL = "Scocial";
+    public static final String SOCIAL = "Social";
     public static final String VIDEO = "Video";
     public static final String CPC = "CPC";
     public static final String DISPLAY = "Display";
@@ -140,7 +137,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         Map<String, SourceMedium> clidTypeToSourceMediumMap = new HashMap<>();
         clidTypeToSourceMediumMap.put(GCLID, new SourceMedium(GOOGLE, CPC));
         clidTypeToSourceMediumMap.put("dclid", new SourceMedium(GOOGLE, DISPLAY));
-        clidTypeToSourceMediumMap.put("fbclid", new SourceMedium(FACEBOOK, SCOCIAL));
+        clidTypeToSourceMediumMap.put("fbclid", new SourceMedium(FACEBOOK, SOCIAL));
         clidTypeToSourceMediumMap.put("msclid", new SourceMedium(MICROSOFT, CPC));
         clidTypeToSourceMediumMap.put("twclid", new SourceMedium(TWITTER, CPC));
         clidTypeToSourceMediumMap.put("pintclid", new SourceMedium(PINTEREST, CPC));
@@ -405,11 +402,13 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     }
 
     private String getMediumBySourceAndCategory(final String source, final String category) {
+        log.debug("getMediumBySourceAndCategory() enter source: {}, category: {}", source, category);
         if (REFERRAL.equals(category)) {
             return REFERRAL;
         }
-        Pattern pattern = Pattern.compile(".*(google|bing|yahoo|duckduckgo|baidu|yandex).*", Pattern.CASE_INSENSITIVE); // NOSONAR
-        if (pattern.matcher(source).matches()) {
+        if (category != null
+                && !category.equals(DIRECT)
+                && !category.equals(CategoryListEvaluator.UNASSIGNED)) {
             return ORGANIC;
         }
         return null;
@@ -421,40 +420,9 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (isAllEmpty(pageReferrer, latestReferrer)) {
             return NONE;
         }
-
-        List<String> knownSearchEngineDomains = Arrays.asList(
-                "google.com",
-                "bing.com",
-                "yahoo.com",
-                "duckduckgo.com",
-                "baidu.com",
-                "yandex.com"
-        );
-
-        if (latestReferrer != null && !latestReferrer.isEmpty()) {
-            String referrerHost = parseUrl(latestReferrer).getHostName();
-            if (referrerHost.startsWith("www.")) {
-                referrerHost = referrerHost.substring(4);
-            }
-            if (knownSearchEngineDomains.contains(referrerHost)) {
-                return ORGANIC;
-            }
-        }
-
-        if (pageReferrer != null && !pageReferrer.isEmpty()) {
-            String referrerHost = parseUrl(pageReferrer).getHostName();
-            if (referrerHost.startsWith("www.")) {
-                referrerHost = referrerHost.substring(4);
-            }
-            if (knownSearchEngineDomains.contains(referrerHost)) {
-                return ORGANIC;
-            }
-        }
-
         if (isFromInternal) {
             return NONE;
         }
-
         return REFERRAL;
     }
 
