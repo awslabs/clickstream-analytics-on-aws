@@ -84,6 +84,7 @@ export interface DataSetProps {
   tableName: string;
   columns: InputColumn[];
   useSpice: string;
+  realtime?: string;
   lookbackColumn?: string;
   refreshInterval?: RefreshInterval;
   columnGroups?: ColumnGroupsProps[];
@@ -98,6 +99,8 @@ export interface QuickSightDashboardDefProps {
   analysisName: string;
   templateArn: string;
   templateId: string;
+  realtimeTemplateId: string;
+  realtimeTemplateArn: string;
   dataSourceArn: string;
   databaseName: string;
   dataSets: DataSetProps[];

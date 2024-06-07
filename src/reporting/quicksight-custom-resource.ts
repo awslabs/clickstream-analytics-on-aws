@@ -110,6 +110,8 @@ export function createQuicksightCustomResource(
     dashboardName: 'Clickstream Dashboard',
     templateArn: props.templateArn,
     templateId: props.templateId,
+    realtimeTemplateId: props.realtimeTemplateId,
+    realtimeTemplateArn: props.realtimeTemplateArn,
     dataSourceArn: props.dataSourceArn,
     databaseName: databaseName,
     dataSets: _getDataSetDefs('no', eventViewColumns, eventViewProjectedColumns, realtimeEventViewProjectedColumns, tenYearsAgo, futureDate),
@@ -229,6 +231,7 @@ function _getDataSetDefs(
     {
       tableName: CLICKSTREAM_REALTIME_EVENT_VIEW_PLACEHOLDER,
       useSpice: 'no',
+      realtime: 'yes',
       customSql: `
         select 
           ${eventViewColumns} 
