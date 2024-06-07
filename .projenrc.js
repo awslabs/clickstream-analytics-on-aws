@@ -517,6 +517,7 @@ const frontendProject = new typescript.TypeScriptProject({
   pnpmVersion,
   jestOptions: {
     jestConfig: {
+      coverageProvider: 'babel',
       roots: ['<rootDir>/src', '<rootDir>/test'],
       testEnvironment: 'jsdom',
       moduleDirectories: ['node_modules', 'src'],
