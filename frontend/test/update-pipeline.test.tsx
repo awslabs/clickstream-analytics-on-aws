@@ -119,9 +119,6 @@ describe('Test update pipeline when not enable data processing or data modeling'
         changeDBUser={() => {
           return;
         }}
-        changeEnableStreaming={() => {
-          return;
-        }}
         changeDataLoadCronExp={() => {
           return;
         }}
@@ -252,9 +249,6 @@ describe('Test update pipeline when not enable data processing or data modeling'
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeEnableStreaming={() => {
           return;
         }}
         changeDataLoadCronExp={() => {

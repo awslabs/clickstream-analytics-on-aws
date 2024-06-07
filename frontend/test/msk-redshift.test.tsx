@@ -116,9 +116,6 @@ describe('Test data processing settings', () => {
         changeDBUser={() => {
           return;
         }}
-        changeEnableStreaming={() => {
-          return;
-        }}
         changeDataLoadCronExp={() => {
           return;
         }}
@@ -246,9 +243,6 @@ describe('Test redshift settings', () => {
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeEnableStreaming={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -435,9 +429,6 @@ describe('Test redshift settings', () => {
         changeDBUser={() => {
           return;
         }}
-        changeEnableStreaming={() => {
-          return;
-        }}
         changeDataLoadCronExp={() => {
           return;
         }}
@@ -561,9 +552,6 @@ describe('Test MSK kafkaConnector settings', () => {
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeEnableStreaming={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -698,9 +686,6 @@ describe('Test MSK kafkaConnector settings', () => {
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeEnableStreaming={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
