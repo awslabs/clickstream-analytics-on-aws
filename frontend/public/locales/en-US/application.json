@@ -72,7 +72,6 @@
   },
   "delete": {
     "title": "Delete Application",
-    "tip1": "Are you sure you want to delete the application ",
-    "tip2": " ?"
+    "tip": "Are you sure you want to delete the application {{appId}} ?"
   }
 }

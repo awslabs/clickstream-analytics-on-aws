@@ -379,7 +379,7 @@ export const isStreamingVisible = (
     const templateVersion = SolutionVersion.Of(
       pipelineInfo?.templateVersion ?? ''
     );
-    return templateVersion.greaterThan(SolutionVersion.V_1_1_5);
+    return templateVersion.greaterThanOrEqualTo(SolutionVersion.V_1_2_0);
   }
   return true;
 };

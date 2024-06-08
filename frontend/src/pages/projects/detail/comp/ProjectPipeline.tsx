@@ -466,8 +466,9 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
         }
         header={t('application:delete.title')}
       >
-        {t('application:delete.tip1')} <b>{selectedItems[0]?.appId}</b>
-        {t('application:delete.tip2')}
+        {t('application:delete.tip', {
+          appId: selectedItems[0]?.appId,
+        })}
       </Modal>
     </>
   );
