@@ -165,6 +165,9 @@ declare global {
       };
     };
     timezone?: IAppTimezone[];
+    streaming?: {
+      appIdStreamList: string[];
+    };
     statusType?: PipelineStatusType;
     stackDetails?: PipelineStatusDetail[];
     executionDetail?: ExecutionDetail;
@@ -212,16 +215,20 @@ declare global {
     enableRedshift: boolean;
 
     eventFreshValue: string;
+    streamingDataRangeValue: string;
 
     redshiftExecutionValue: string;
     selectedExcutionType: SelectProps.Option | null;
     selectedExcutionUnit: SelectProps.Option | null;
+    selectedStreamingDataRangeUnit: SelectProps.Option | null;
     selectedEventFreshUnit: SelectProps.Option | null;
     selectedRedshiftCluster: SelectProps.Option | null;
     selectedRedshiftRole: SelectProps.Option | null;
     selectedRedshiftExecutionUnit: SelectProps.Option | null;
     selectedTransformPlugins: IPlugin[];
     selectedEnrichPlugins: IPlugin[];
+
+    enableStreaming: boolean;
 
     enableReporting: boolean;
     arnAccountId: string;

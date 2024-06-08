@@ -180,7 +180,8 @@ export class PipelineServ {
       const newPipeline = { ...curPipeline };
       newPipeline.statusType = getPipelineStatusType(newPipeline);
       // Check pipeline status
-      if (newPipeline.statusType !== PipelineStatusType.ACTIVE) {
+      if (newPipeline.statusType !== PipelineStatusType.ACTIVE &&
+        newPipeline.statusType !== PipelineStatusType.WARNING) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow upgrade.'));
       }
       const pipeline = new CPipeline(newPipeline);
@@ -241,5 +242,19 @@ export class PipelineServ {
       next(error);
     }
   };
+
+  public async streamEnable(req: any, res: any, next: any) {
+    try {
+      const { id } = req.params;
+      const { pid } = req.query;
+      const ddbPipeline = await store.getPipeline(pid, id);
+      if (!ddbPipeline) {
+        return res.status(404).send(new ApiFail('Pipeline not found'));
+      }
+      return res.status(201).send(new ApiSuccess(null, 'App stream setting.'));
+    } catch (error) {
+      next(error);
+    }
+  }
 
 }

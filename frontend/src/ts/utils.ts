@@ -14,6 +14,7 @@
 import {
   IMetadataBuiltInList,
   ServerlessRedshiftRPUByRegionMapping,
+  SolutionVersion,
 } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
@@ -30,6 +31,7 @@ import {
   ExecutionType,
   FILTER_TIME_ZONE,
   IUserRole,
+  SinkType,
 } from './const';
 
 /**
@@ -344,6 +346,42 @@ export const isReportingDisabled = (
       )
     );
   }
+};
+
+export const isStreamingDisabled = (
+  update?: boolean,
+  pipelineInfo?: IExtPipeline
+) => {
+  if (!update) {
+    return (
+      !pipelineInfo?.enableRedshift ||
+      pipelineInfo?.ingestionServer?.sinkType !== SinkType.KDS
+    );
+  } else {
+    return (
+      pipelineInfo?.enableStreaming ||
+      !pipelineInfo?.enableRedshift ||
+      pipelineInfo?.ingestionServer?.sinkType !== SinkType.KDS ||
+      !(
+        pipelineInfo?.statusType === EPipelineStatus.Failed ||
+        pipelineInfo?.statusType === EPipelineStatus.Active ||
+        pipelineInfo?.statusType === EPipelineStatus.Warning
+      )
+    );
+  }
+};
+
+export const isStreamingVisible = (
+  update?: boolean,
+  pipelineInfo?: IExtPipeline
+) => {
+  if (update) {
+    const templateVersion = SolutionVersion.Of(
+      pipelineInfo?.templateVersion ?? ''
+    );
+    return templateVersion.greaterThanOrEqualTo(SolutionVersion.V_1_2_0);
+  }
+  return true;
 };
 
 // Validate subnets cross N AZs

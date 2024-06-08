@@ -97,6 +97,12 @@ describe('Test AGA service available', () => {
             QUICK_SIGHT: quickSightAvailable,
           },
         }}
+        changeEnableStreaming={() => {
+          return;
+        }}
+        changeStreamingDataRangeValue={() => {
+          return;
+        }}
         changePublicSubnets={() => {
           return;
         }}
@@ -251,6 +257,12 @@ describe('Test AGA service available', () => {
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
           },
+        }}
+        changeEnableStreaming={() => {
+          return;
+        }}
+        changeStreamingDataRangeValue={() => {
+          return;
         }}
         changePublicSubnets={() => {
           return;
@@ -977,6 +989,12 @@ describe('Test MSK service available', () => {
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
           },
+        }}
+        changeEnableStreaming={() => {
+          return;
+        }}
+        changeStreamingDataRangeValue={() => {
+          return;
         }}
         changePublicSubnets={() => {
           return;

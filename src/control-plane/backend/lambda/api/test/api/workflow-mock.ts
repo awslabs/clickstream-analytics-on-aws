@@ -1083,6 +1083,77 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
 ];
 
+export const STREAMING_BASE_PARAMETERS = [
+  {
+    ParameterKey: 'ProjectId',
+    ParameterValue: 'project_8888_8888',
+  },
+  {
+    ParameterKey: 'AppIds',
+    ParameterValue: 'app_7777_7777_1,app_7777_7777_2',
+  },
+  {
+    ParameterKey: 'VpcId',
+    ParameterValue: 'vpc-00000000000000001',
+  },
+  {
+    ParameterKey: 'WorkerSubnets',
+    ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+  },
+  {
+    ParameterKey: 'IngestionPipelineS3BucketArn',
+    ParameterValue: 'arn:aws:s3:::EXAMPLE_BUCKET',
+  },
+  {
+    ParameterKey: 'KinesisStreamMode',
+    ParameterValue: 'ON_DEMAND',
+  },
+  {
+    ParameterKey: 'KinesisShardCount',
+    ParameterValue: '3',
+  },
+  {
+    ParameterKey: 'KinesisSourceStreamArn.#',
+    ParameterValue: `#.${getStackPrefix()}-Ingestion-kinesis-6666-6666.KinesisArn`,
+  },
+  {
+    ParameterKey: 'KinesisEncryptionKMSKeyArn',
+    ParameterValue: 'arn:aws:kms:ap-southeast-1:555555555555:key/e5a7d4e3-7f7e-4d0b-9b4f-5d2e0f9d3e4d',
+  },
+  {
+    ParameterKey: 'RedshiftMode',
+    ParameterValue: 'Serverless',
+  },
+  {
+    ParameterKey: 'RedshiftClusterIdentifier',
+    ParameterValue: '',
+  },
+  {
+    ParameterKey: 'RedshiftDbUser',
+    ParameterValue: '',
+  },
+  {
+    ParameterKey: 'RedshiftServerlessWorkgroupName',
+    ParameterValue: 'clickstream-project-8888-8888',
+  },
+  {
+    ParameterKey: 'RedshiftServerlessNamespaceId',
+    ParameterValue: '',
+  },
+  {
+    ParameterKey: 'RedshiftServerlessWorkgroupId',
+    ParameterValue: '',
+  },
+  {
+    ParameterKey: 'RedshiftDataAPIRole.#',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.RedshiftDataApiRoleArn`,
+  },
+  {
+    ParameterKey: 'RedshiftUserParam.#',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserName`,
+  },
+];
+
 export const BASE_METRICS_PARAMETERS = [
   {
     ParameterKey: 'ProjectId',

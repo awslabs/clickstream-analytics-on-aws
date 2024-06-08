@@ -29,6 +29,7 @@ import {
   SelectProps,
   SpaceBetween,
   Tiles,
+  Toggle,
 } from '@cloudscape-design/components';
 import { getCertificates, getSSMSecrets, getSubnetList } from 'apis/resource';
 import { defaultTo } from 'lodash';
@@ -41,6 +42,7 @@ import {
   DEFAULT_MSK_SINK_INTERVAL,
   EIngestionType,
   ENetworkType,
+  EXCUTION_UNIT_LIST,
   MAX_KDS_BATCH_SIZE,
   MAX_KDS_SINK_INTERVAL,
   MAX_MSK_BATCH_SIZE,
@@ -62,7 +64,15 @@ import {
   PIPELINE_SINK_CONNECTOR_LINK,
   buildDocumentLink,
 } from 'ts/url';
-import { checkDisable, defaultStr, isDisabled, ternary } from 'ts/utils';
+import {
+  checkDisable,
+  defaultSelectOptions,
+  defaultStr,
+  isDisabled,
+  isStreamingDisabled,
+  isStreamingVisible,
+  ternary,
+} from 'ts/utils';
 import BufferKDS from './buffer/BufferKDS';
 import BufferMSK from './buffer/BufferMSK';
 import BufferS3 from './buffer/BufferS3';
@@ -107,6 +117,9 @@ interface ConfigIngestionProps {
   changeKDSShardNumber: (num: string) => void;
   changeEnableALBAuthentication: (enable: boolean) => void;
   changeAckownledge: () => void;
+
+  changeEnableStreaming: (enable: boolean) => void;
+  changeStreamingDataRangeValue: (value: string) => void;
 
   publicSubnetError: boolean;
   privateSubnetError: boolean;
@@ -172,6 +185,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeKDSShardNumber,
     changeAckownledge,
     changeEnableALBAuthentication,
+    changeEnableStreaming,
+    changeStreamingDataRangeValue,
     publicSubnetError,
     privateSubnetError,
     privateSubnetDiffWithPublicError,
@@ -207,6 +222,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     useState<SelectProps.Options>([]);
   const [ssmSecretOptionList, setSsmSecretOptionList] =
     useState<SelectProps.Options>([]);
+  const [selectedStreamingDataRangeUnit, setSelectedStreamingDataRangeUnit] =
+    useState(
+      defaultSelectOptions(
+        EXCUTION_UNIT_LIST[2],
+        pipelineInfo.selectedStreamingDataRangeUnit
+      )
+    );
 
   // get subnet list
   const getSubnetListByRegionAndVPC = async (region: string, vpcId: string) => {
@@ -470,32 +492,30 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               </FormField>
               {pipelineInfo.ingestionServer.ingestionType ===
                 EIngestionType.EC2 && (
-                <>
-                  <FormField
-                    stretch
-                    errorText={ternary(
-                      warmPoolError,
-                      t('pipeline:valid.warmPoolError'),
-                      undefined
-                    )}
-                  >
-                    <div>{t('pipeline:create.warmPool')}</div>
-                    <Input
-                      type="number"
-                      value={pipelineInfo.ingestionServer.size.warmPoolSize.toString()}
-                      onChange={(e) => {
-                        if (
-                          !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(
-                            e.detail.value
-                          )
-                        ) {
-                          return false;
-                        }
-                        changeWarmSize(e.detail.value);
-                      }}
-                    />
-                  </FormField>
-                </>
+                <FormField
+                  stretch
+                  errorText={ternary(
+                    warmPoolError,
+                    t('pipeline:valid.warmPoolError'),
+                    undefined
+                  )}
+                >
+                  <div>{t('pipeline:create.warmPool')}</div>
+                  <Input
+                    type="number"
+                    value={pipelineInfo.ingestionServer.size.warmPoolSize.toString()}
+                    onChange={(e) => {
+                      if (
+                        !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(
+                          e.detail.value
+                        )
+                      ) {
+                        return false;
+                      }
+                      changeWarmSize(e.detail.value);
+                    }}
+                  />
+                </FormField>
               )}
             </ColumnLayout>
           </FormField>
@@ -1020,6 +1040,68 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
           )}
         </SpaceBetween>
       </Container>
+      {isStreamingVisible(update, pipelineInfo) && (
+        <Container
+          header={
+            <Header
+              variant="h2"
+              description={t('pipeline:create.streamingDesc')}
+            >
+              {t('pipeline:create.streamingTitle')}
+            </Header>
+          }
+        >
+          <SpaceBetween direction="vertical" size="s">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Toggle
+                disabled={isStreamingDisabled(update, pipelineInfo)}
+                onChange={({ detail }) => {
+                  changeEnableStreaming(detail.checked);
+                }}
+                checked={pipelineInfo.enableStreaming}
+                description={defaultStr(
+                  t('pipeline:create.enableStreamingDesc')
+                )}
+              >
+                <b>{t('pipeline:create.enableStreaming')}</b>
+              </Toggle>
+              <FormField
+                label={t('pipeline:create.streamingDataRangeTitle')}
+                description={t('pipeline:create.streamingDataRangeDesc')}
+              >
+                <div className="flex">
+                  <div style={{ width: 250 }}>
+                    <Input
+                      disabled={isStreamingDisabled(update, pipelineInfo)}
+                      type="number"
+                      placeholder="3"
+                      value={pipelineInfo.streamingDataRangeValue}
+                      onChange={(e) => {
+                        if (!POSITIVE_INTEGER_REGEX.test(e.detail.value)) {
+                          return false;
+                        }
+                        changeStreamingDataRangeValue(e.detail.value);
+                      }}
+                    />
+                  </div>
+                  <div className="ml-10">
+                    <Select
+                      disabled={isStreamingDisabled(update, pipelineInfo)}
+                      selectedOption={selectedStreamingDataRangeUnit}
+                      onChange={({ detail }) => {
+                        setSelectedStreamingDataRangeUnit(
+                          detail.selectedOption
+                        );
+                      }}
+                      options={EXCUTION_UNIT_LIST}
+                    />
+                  </div>
+                </div>
+              </FormField>
+            </SpaceBetween>
+          </SpaceBetween>
+        </Container>
+      )}
     </SpaceBetween>
   );
 };

@@ -233,7 +233,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     {t('button.edit')}
                   </Button>
                 )}
-                {pipelineInfo?.statusType === EPipelineStatus.Active && (
+                {(pipelineInfo?.statusType === EPipelineStatus.Active ||
+                  pipelineInfo?.statusType === EPipelineStatus.Warning) && (
                   <Button
                     iconName="upload-download"
                     disabled={

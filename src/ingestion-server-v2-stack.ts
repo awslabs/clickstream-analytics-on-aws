@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, SolutionInfo } from '@aws/clickstream-base-lib';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_KINESIS_ARN_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   CfnCondition,
   CfnOutput,
@@ -353,7 +353,7 @@ function createNestedStackWithCondition(
   serverURLOutput.condition = condition;
 
   if (conditionName == 'K1' || conditionName == 'K2') {
-    const kdsOutput = new CfnOutput(scope, id + 'KinesisArn', {
+    const kdsOutput = new CfnOutput(scope, id + OUTPUT_INGESTION_SERVER_KINESIS_ARN_SUFFIX, {
       value: props.kinesisDataStreamArn || '',
       description: 'Kinesis Arn',
     });
