@@ -69,5 +69,9 @@
     "pipelineInfo": "数据管道信息",
     "serverEdp": "服务器端点",
     "serverDomain": "服务器域"
+  },
+  "delete": {
+    "title": "删除应用程序",
+    "tip": "您确定要删除该应用程序  {{appId}} 吗？"
   }
 }

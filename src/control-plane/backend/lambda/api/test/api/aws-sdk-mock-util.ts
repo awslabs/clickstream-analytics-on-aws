@@ -16,6 +16,7 @@ import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
 import { EC2Client } from '@aws-sdk/client-ec2';
 import { IAMClient } from '@aws-sdk/client-iam';
 import { KafkaClient } from '@aws-sdk/client-kafka';
+import { KinesisAnalyticsV2Client } from '@aws-sdk/client-kinesis-analytics-v2';
 import { QuickSightClient } from '@aws-sdk/client-quicksight';
 import { RedshiftClient } from '@aws-sdk/client-redshift';
 import { RedshiftServerlessClient } from '@aws-sdk/client-redshift-serverless';
@@ -39,6 +40,7 @@ const s3Mock = mockClient(S3Client);
 const iamMock = mockClient(IAMClient);
 const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
 const snsMock = mockClient(SNSClient);
+const kinesisAnalyticsV2Mock = mockClient(KinesisAnalyticsV2Client);
 
 export const mockClients = {
   ddbMock,
@@ -54,6 +56,7 @@ export const mockClients = {
   iamMock,
   cloudWatchEventsMock,
   snsMock,
+  kinesisAnalyticsV2Mock,
 };
 
 export function resetAllMockClient(): void {
@@ -70,6 +73,7 @@ export function resetAllMockClient(): void {
   mockClients.iamMock.reset();
   mockClients.cloudWatchEventsMock.reset();
   mockClients.snsMock.reset();
+  mockClients.kinesisAnalyticsV2Mock.reset();
 }
 
 

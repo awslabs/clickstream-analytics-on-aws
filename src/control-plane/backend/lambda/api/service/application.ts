@@ -11,19 +11,22 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN } from '@aws/clickstream-base-lib';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON } from '@aws/clickstream-base-lib';
 import moment from 'moment-timezone';
+import { PipelineServ } from './pipeline';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getPipelineStatusType, isEmpty, paginateData } from '../common/utils';
+import { getPipelineStatusType, getStackOutputFromPipelineStatus, isEmpty, paginateData } from '../common/utils';
 import { IApplication } from '../model/application';
-import { CPipeline, IAppTimezone } from '../model/pipeline';
+import { CPipeline, IAppTimezone, IPipeline } from '../model/pipeline';
+import { updateFlinkApplicationEnvironmentProperties } from '../store/aws/flink';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
+const pipelineServ: PipelineServ = new PipelineServ();
 
 export class ApplicationServ {
   public async list(req: any, res: any, next: any) {
@@ -197,6 +200,7 @@ export class ApplicationServ {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
       let latestPipeline = latestPipelines[0];
+
       // Check pipeline status
       const statusType = getPipelineStatusType(latestPipeline);
       if (statusType === PipelineStatusType.CREATING ||
@@ -204,6 +208,7 @@ export class ApplicationServ {
         statusType === PipelineStatusType.UPDATING) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
+
       const appTimezone : IAppTimezone = {
         appId: id,
         timezone: timezone,
@@ -231,4 +236,77 @@ export class ApplicationServ {
       next(error);
     }
   };
+
+  public async appStreamEnable(req: any, res: any, next: any) {
+    try {
+      const { id } = req.params;
+      const { pid, enable } = req.body;
+      // Check pipeline status
+      const latestPipeline = await pipelineServ.getPipelineByProjectId(pid);
+      if (!latestPipeline) {
+        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+      }
+      // Check pipeline status
+      const statusType = getPipelineStatusType(latestPipeline);
+      if (statusType === PipelineStatusType.CREATING ||
+        statusType === PipelineStatusType.DELETING ||
+        statusType === PipelineStatusType.UPDATING) {
+        return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
+      }
+      const flinkAppArn = getStackOutputFromPipelineStatus(
+        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+        PipelineStackType.STREAMING, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN);
+      const flinkAppName = flinkAppArn?.split('/').pop();
+      if (!flinkAppName) {
+        return res.status(404).json(new ApiFail('The flink application not found.'));
+      }
+      const streamEnableAppIds = latestPipeline.streaming?.appIdStreamList ?? [];
+      if (enable && !streamEnableAppIds.includes(id)) {
+        streamEnableAppIds.push(id);
+      } else if (!enable && streamEnableAppIds.includes(id)) {
+        const index = streamEnableAppIds.indexOf(id);
+        if (index > -1) {
+          streamEnableAppIds.splice(index, 1);
+        }
+      }
+      const streamingSinkKinesisConfig = this.getStreamingSinkKinesisConfig(latestPipeline, streamEnableAppIds);
+      const updateRes = await updateFlinkApplicationEnvironmentProperties(latestPipeline.region, flinkAppName, streamingSinkKinesisConfig);
+      if (!updateRes) {
+        return res.status(500).json(new ApiFail('Failed to update Flink application environment properties.'));
+      }
+      latestPipeline.streaming = {
+        ...latestPipeline.streaming,
+        appIdStreamList: streamEnableAppIds,
+      };
+      await store.updatePipelineAtCurrentVersion(latestPipeline);
+      return res.status(200).json(new ApiSuccess(null, 'Application streaming updated.'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  private getStreamingSinkKinesisConfig(pipeline: IPipeline, streamingSinkKinesis: string[]) {
+    const enableConfigs: any[] = [];
+    try {
+      const sinkKinesis = getStackOutputFromPipelineStatus(
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
+        PipelineStackType.STREAMING, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON);
+      if (!sinkKinesis) {
+        return enableConfigs;
+      }
+      const sinks = JSON.parse(sinkKinesis);
+      for (let [key, value] of Object.entries(sinks)) {
+        if (streamingSinkKinesis.includes(key)) {
+          enableConfigs.push({
+            appId: key,
+            streamArn: value,
+          });
+        }
+      }
+      return enableConfigs;
+    } catch (error) {
+      logger.error('Failed to parse sink kinesis');
+      return enableConfigs;
+    }
+  }
 }

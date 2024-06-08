@@ -312,7 +312,13 @@
     "redshiftProvisionedDesc": "Provisioned Redshift cluster that meet your cost and performance specifications",
     "reportNotSupported": "Not Supported",
     "reportNotSupportedDesc": "Reporting is not supported if data processing is not enabled.",
-    "notSupportedServices": "These service(s): {{unSupportedServices}} are not available in this region, some of features may not supported."
+    "notSupportedServices": "These service(s): {{unSupportedServices}} are not available in this region, some of features may not supported.",
+    "streamingTitle": "Real-time analysis settings",
+    "streamingDesc": "Enable real-time analysis for this pipeline",
+    "enableStreaming": "Enable real-time analysis",
+    "enableStreamingDesc": "Enabling real-time analysis will create the real-time data processing resources (i.e., Lambda) for this pipeline. Note that additional cost apply.",
+    "streamingDataRangeTitle": "Real-time data range",
+    "streamingDataRangeDesc": "Real-time data range is the period to keep the real-time data for, data exceed the data range will be deleted from the real-time data table and won’t be displayed in the dashboard."
   },
   "detail": {
     "ingestion": "Ingestion",

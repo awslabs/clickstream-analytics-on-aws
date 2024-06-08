@@ -920,6 +920,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         createPipelineObj.dataModeling.redshift.provisioned = null;
       }
     }
+
+    // set streaming
+    if (!pipelineInfo.enableStreaming || !pipelineInfo.enableRedshift) {
+      createPipelineObj.streaming = null;
+    } else {
+      createPipelineObj.streaming = {
+        appIdStreamList: pipelineInfo.streaming?.appIdStreamList ?? [],
+      };
+    }
     return createPipelineObj;
   };
 
@@ -995,6 +1004,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       'kafkaBrokers',
       'arnAccountId',
       'enableReporting',
+      'enableStreaming',
       'selectedQuickSightUser',
       'dataConnectionType',
       'quickSightVpcConnection',
@@ -1296,6 +1306,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               kafkaSGEmptyError={kafkaSGEmptyError}
               bufferKDSModeEmptyError={bufferKDSModeEmptyError}
               bufferKDSShardNumFormatError={bufferKDSShardNumFormatError}
+              changeEnableStreaming={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    enableStreaming: enable,
+                  };
+                });
+              }}
               changeNetworkType={(type) => {
                 setPipelineInfo((prev) => {
                   return {
@@ -1536,6 +1554,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeBufferType={(type) => {
                 let sinkInterval = '';
                 let sinkBatchSize = '';
+                let tmpEnableStream = false;
                 if (type === SinkType.KDS) {
                   sinkInterval = DEFAULT_KDS_SINK_INTERVAL;
                   sinkBatchSize = DEFAULT_KDS_BATCH_SIZE;
@@ -1567,11 +1586,16 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   }
                 }
 
+                if (type === SinkType.S3 || type === SinkType.MSK) {
+                  tmpEnableStream = false;
+                }
+
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
                     enableDataProcessing: tmpEnableProcessing,
                     enableReporting: tmpEnableQuickSight,
+                    enableStreaming: tmpEnableStream,
                     ingestionServer: {
                       ...prev.ingestionServer,
                       sinkType: type,
@@ -1816,6 +1840,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         kinesisShardCount: parseInt(num),
                       },
                     },
+                  };
+                });
+              }}
+              changeStreamingDataRangeValue={(value) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    streamingDataRangeValue: value,
                   };
                 });
               }}
@@ -2635,6 +2667,11 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     )[0];
   };
 
+  const setUpdateStreaming = async (pipelineInfo: IExtPipeline) => {
+    pipelineInfo.enableStreaming =
+      pipelineInfo.streaming?.appIdStreamList !== undefined;
+  };
+
   const setUpdateQuickSightUser = async (pipelineInfo: IExtPipeline) => {
     if (!pipelineInfo.reporting?.quickSight.user) {
       return;
@@ -2850,6 +2887,8 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           newServerless: data.dataModeling?.redshift?.newServerless ?? null,
         },
       },
+      streaming: data.streaming,
+      reporting: data.reporting,
       statusType: data.statusType,
       stackDetails: defaultGenericsValue(data.stackDetails, []),
       executionDetail: data.executionDetail,
@@ -2894,6 +2933,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
               : setUpdateMSKCluster(extPipeline),
             setUpdateKDSType(extPipeline),
             setUpdateETL(extPipeline),
+            setUpdateStreaming(extPipeline),
             setUpdateReport(extPipeline),
           ])
             .then(() => {

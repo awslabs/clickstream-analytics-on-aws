@@ -11,7 +11,9 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
 import { StackStatus } from '@aws-sdk/client-cloudformation';
+import { DescribeApplicationCommand, UpdateApplicationCommand } from '@aws-sdk/client-kinesis-analytics-v2';
 import { ExecutionStatus, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
   PutCommand,
@@ -1218,6 +1220,118 @@ describe('Application test', () => {
     expect(res.body.success).toEqual(true);
     expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
     expect(mockClients.ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
+  });
+  it('Enable stream on application', async () => {
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            appIds: [MOCK_APP_ID],
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            stackDetails: [
+              {
+                stackName: `Clickstream-Streaming-${MOCK_PIPELINE_ID}`,
+                stackType: PipelineStackType.STREAMING,
+                stackStatus: StackStatus.CREATE_COMPLETE,
+                stackStatusReason: '',
+                stackTemplateVersion: MOCK_SOLUTION_VERSION,
+                outputs: [
+                  {
+                    OutputKey: OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
+                    OutputValue: 'arn:aws:kinesisanalytics:us-east-1:555555555555:application/ClickstreamStreamingIngestion204CC39E-F3mJRaAOKJaL',
+                  },
+                ],
+              },
+            ],
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            workflow: {
+              Version: '2022-03-15',
+              Workflow: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: '/ingestion',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Parameters: [],
+                            StackName: 'clickstream-ingestion1',
+                            TemplateURL: 'https://example.com',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      });
+    mockClients.ddbMock.on(UpdateCommand).resolves({});
+    mockClients.kinesisAnalyticsV2Mock.on(DescribeApplicationCommand).resolves({
+      ApplicationDetail: {
+        ApplicationARN: 'arn:aws:kinesisanalytics:us-east-1:555555555555:application/ClickstreamStreamingIngestion204CC39E-F3',
+        ApplicationStatus: 'READY',
+        ApplicationDescription: 'ClickstreamStreamingIngestion204CC39E-F3',
+        ApplicationName: 'ClickstreamStreamingIngestion204CC39E-F3',
+        ApplicationVersionId: 1,
+        RuntimeEnvironment: 'FLINK-1_13',
+        ApplicationConfigurationDescription: {
+          EnvironmentPropertyDescriptions: {
+            PropertyGroupDescriptions: [
+              {
+                PropertyGroupId: 'EnvironmentProperties',
+                PropertyMap: {
+                  'FlinkApplicationProperties::FlinkParallelism': '1',
+                  'FlinkApplicationProperties::JobPlan': 'xxxx',
+                  'FlinkApplicationProperties::RuntimeMode': 'STREAMING',
+                  'FlinkApplicationProperties::SavepointConfiguration': 'xxxx',
+                  'FlinkApplicationProperties::CheckpointConfiguration': 'xxxx',
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    mockClients.kinesisAnalyticsV2Mock.on(UpdateApplicationCommand).resolves({});
+    const res = await request(app)
+      .put(`/api/app/${MOCK_APP_ID}/stream`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        pid: MOCK_PROJECT_ID,
+        enable: true,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Application streaming updated.',
+    });
+    expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(DescribeApplicationCommand, 1);
+    expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(UpdateApplicationCommand, 1);
   });
   afterAll((done) => {
     server.close();

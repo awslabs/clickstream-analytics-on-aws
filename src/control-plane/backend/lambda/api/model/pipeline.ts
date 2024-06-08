@@ -37,9 +37,11 @@ import {
   CKafkaConnectorStack,
   CMetricsStack,
   CReportingStack,
+  CStreamingStack,
   getStackParameters,
 } from './stacks';
 import {
+  AFTER_REDSHIFT_STACKS,
   CFN_RULE_PREFIX,
   CFN_TOPIC_PREFIX,
   FULL_SOLUTION_VERSION,
@@ -102,6 +104,7 @@ import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
+import { getKeyArnByAlias } from '../store/aws/kms';
 import { QuickSightUserArns, getClickstreamUserArn, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
 import { isBucketExist } from '../store/aws/s3';
@@ -231,6 +234,11 @@ export interface Reporting {
   };
 }
 
+export interface Streaming {
+  readonly appIdStreamList: string[];
+  readonly bucket?: S3Bucket;
+}
+
 export interface ITag {
   readonly key: string;
   readonly value: string;
@@ -269,6 +277,7 @@ export interface IPipeline {
   readonly dataModeling?: DataModeling;
   readonly reporting?: Reporting;
   readonly timezone?: IAppTimezone[];
+  streaming?: Streaming;
 
   lastAction?: string;
   status?: PipelineStatus;
@@ -298,6 +307,7 @@ export interface CPipelineResources {
   quickSightSubnetIds?: string[];
   quickSightUser?: QuickSightUserArns;
   stackTags?: Tag[];
+  kinesisKeyARN?: string;
 }
 
 export class CPipeline {
@@ -415,7 +425,9 @@ export class CPipeline {
     // update parameters
     await this._mergeUpdateParameters(oldPipeline);
     // enable reporting
-    await this._updateReporting(oldPipeline);
+    await this._enableReporting(oldPipeline);
+    // enable streaming
+    await this._enableStreaming(oldPipeline);
     // update tags
     this.pipeline.tags = getUpdateTags(this.pipeline, oldPipeline);
     if (this._editStackTags(oldPipeline)) {
@@ -432,7 +444,7 @@ export class CPipeline {
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
-  private async _updateReporting(oldPipeline: IPipeline) {
+  private async _enableReporting(oldPipeline: IPipeline) {
     if (oldPipeline.reporting?.quickSight?.accountName === this.pipeline.reporting?.quickSight?.accountName) {
       return;
     }
@@ -441,8 +453,19 @@ export class CPipeline {
       if (!reportingState) {
         return;
       }
-      this.stackManager.updateWorkflowReporting(reportingState);
+      this.stackManager.patchStateAfterRedshiftWorkflow(reportingState, PipelineStackType.REPORTING);
     }
+  }
+
+  private async _enableStreaming(oldPipeline: IPipeline) {
+    if (!isEmpty(oldPipeline.streaming) || isEmpty(this.pipeline.streaming)) {
+      return;
+    }
+    const streamingState = await this.getStreamingState();
+    if (!streamingState) {
+      return;
+    }
+    this.stackManager.patchStateAfterRedshiftWorkflow(streamingState, PipelineStackType.STREAMING);
   }
 
   private async _mergeUpdateParameters(oldPipeline: IPipeline): Promise<void> {
@@ -647,6 +670,11 @@ export class CPipeline {
       parameterKey: 'QuickSightTimezoneParam',
       parameterValue: this.pipeline.timezone ? JSON.stringify(this.pipeline.timezone) : '',
     });
+    updateList.push({
+      stackType: PipelineStackType.STREAMING,
+      parameterKey: 'AppIds',
+      parameterValue: appIds.join(','),
+    });
     // update workflow
     this.stackManager.updateWorkflowForApp(updateList);
     // create new execution
@@ -755,6 +783,14 @@ export class CPipeline {
       this.resources = {
         ...this.resources,
         quickSightUser: quickSightUser,
+      };
+    }
+
+    if (this.pipeline.streaming) {
+      const keyARN = await getKeyArnByAlias(this.pipeline.region, 'alias/aws/kinesis');
+      this.resources = {
+        ...this.resources,
+        kinesisKeyARN: keyARN,
       };
     }
   }
@@ -1103,10 +1139,10 @@ export class CPipeline {
         delete branch.States[PipelineStackType.DATA_PROCESSING].End;
       }
     }
-    const reportingState = await this.getReportingState();
-    if (reportingState && dataModelingState) {
-      branch.States[PipelineStackType.REPORTING] = reportingState;
-      branch.States[PipelineStackType.DATA_MODELING_REDSHIFT].Next = PipelineStackType.REPORTING;
+    const parallelAfterRedshift = await this._generateParallelAfterRedshift();
+    if (parallelAfterRedshift.Branches && parallelAfterRedshift.Branches?.length > 0) {
+      branch.States[AFTER_REDSHIFT_STACKS] = parallelAfterRedshift;
+      branch.States[PipelineStackType.DATA_MODELING_REDSHIFT].Next = AFTER_REDSHIFT_STACKS;
       delete branch.States[PipelineStackType.DATA_MODELING_REDSHIFT].End;
     }
     return branch;
@@ -1226,6 +1262,34 @@ export class CPipeline {
     return dataModelingState;
   }
 
+  private async _generateParallelAfterRedshift(): Promise<WorkflowState> {
+    const state: WorkflowState = {
+      Type: WorkflowStateType.PARALLEL,
+      End: true,
+      Branches: [],
+    };
+    const streamingState = await this.getStreamingState();
+    if (streamingState) {
+      state.Branches?.push({
+        StartAt: PipelineStackType.STREAMING,
+        States: {
+          [PipelineStackType.STREAMING]: streamingState,
+        },
+      });
+    }
+    const reportingState = await this.getReportingState();
+    if (reportingState) {
+      state.Branches?.push({
+        StartAt: PipelineStackType.REPORTING,
+        States: {
+          [PipelineStackType.REPORTING]: reportingState,
+        },
+      });
+    }
+
+    return state;
+  }
+
   private async getReportingState(): Promise<WorkflowState | undefined> {
     if (isEmpty(this.pipeline.reporting)) {
       return undefined;
@@ -1257,6 +1321,39 @@ export class CPipeline {
     };
 
     return reportState;
+  }
+
+  private async getStreamingState(): Promise<WorkflowState | undefined> {
+    if (isEmpty(this.pipeline.streaming)) {
+      return undefined;
+    }
+    const streamingTemplateURL = await this.getTemplateUrl(PipelineStackType.STREAMING);
+    if (!streamingTemplateURL) {
+      throw new ClickStreamBadRequestError('Template: streaming not found in dictionary.');
+    }
+    const streamingStack = new CStreamingStack(this.pipeline, this.resources!);
+    const streamingStackParameters = getStackParameters(streamingStack, SolutionVersion.Of(this.pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
+    const streamingStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.STREAMING, this.pipeline.ingestionServer.sinkType);
+    const streamingState: WorkflowState = {
+      Type: WorkflowStateType.STACK,
+      Data: {
+        Input: {
+          Action: 'Create',
+          Region: this.pipeline.region,
+          StackName: streamingStackName,
+          TemplateURL: streamingTemplateURL,
+          Parameters: streamingStackParameters,
+          Tags: this.stackTags,
+        },
+        Callback: {
+          BucketName: stackWorkflowS3Bucket ?? '',
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
+        },
+      },
+      End: true,
+    };
+
+    return streamingState;
   }
 
   private async getAthenaState(): Promise<WorkflowState | undefined> {
