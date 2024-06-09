@@ -23,11 +23,16 @@ import {
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
+import fetch, { Response } from 'node-fetch';
 import { handler, SfnStackEvent, StackAction } from '../../../src/control-plane/backend/lambda/sfn-action/index';
 import { getMockContext } from '../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 
+jest.mock('node-fetch');
+
 describe('SFN Action Lambda Function', () => {
+
+  const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
 
   const context = getMockContext();
   const s3Mock = mockClient(S3Client);
@@ -73,6 +78,10 @@ describe('SFN Action Lambda Function', () => {
       {
         ParameterKey: 'C',
         ParameterValue: 'c',
+      },
+      {
+        ParameterKey: 'D',
+        ParameterValue: 'd',
       },
     ],
     CreationTime: new Date(),
@@ -150,6 +159,14 @@ describe('SFN Action Lambda Function', () => {
         },
       ],
     });
+    doMockFetch({
+      Parameters: {
+        A: 'a',
+        B: 'b',
+        C: 'c',
+      },
+      Metadata: {},
+    });
     const resp = await handler(event, context) as CdkCustomResourceResponse;
     expect(resp.Action).toEqual(StackAction.DESCRIBE);
     expect(resp.Result.StackId).toEqual('arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60');
@@ -206,6 +223,14 @@ describe('SFN Action Lambda Function', () => {
         },
       ],
     });
+    doMockFetch({
+      Parameters: {
+        A: 'a',
+        B: 'b',
+        C: 'c',
+      },
+      Metadata: {},
+    });
     const resp = await handler(event, context) as CdkCustomResourceResponse;
     expect(resp.Action).toEqual(StackAction.DESCRIBE);
     expect(resp.Result.StackId).toEqual('');
@@ -261,6 +286,14 @@ describe('SFN Action Lambda Function', () => {
           ...stackResult,
         },
       ],
+    });
+    doMockFetch({
+      Parameters: {
+        A: 'a',
+        B: 'b',
+        C: 'c',
+      },
+      Metadata: {},
     });
     const resp = await handler(event, context) as CdkCustomResourceResponse;
     expect(resp.Action).toEqual(StackAction.DESCRIBE);
@@ -324,6 +357,14 @@ describe('SFN Action Lambda Function', () => {
           ...stackResult,
         },
       ],
+    });
+    doMockFetch({
+      Parameters: {
+        A: 'a',
+        B: 'b',
+        C: 'c',
+      },
+      Metadata: {},
     });
     const resp = await handler(event, context) as CdkCustomResourceResponse;
     expect(resp.Action).toEqual(StackAction.DESCRIBE);
@@ -534,4 +575,10 @@ describe('SFN Action Lambda Function', () => {
     });
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
   });
+
+  function doMockFetch(content: {}) {
+    const fn = jest.fn() as jest.MockedFunction<any>;
+    fn.mockResolvedValue(content);
+    mockFetch.mockResolvedValue({ ok: true, status: 200, json: fn } as Response);
+  }
 });
