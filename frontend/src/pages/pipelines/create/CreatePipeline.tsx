@@ -18,7 +18,12 @@ import {
   KAFKA_TOPIC_PATTERN,
   REDSHIFT_DB_USER_NAME_PATTERN,
 } from '@aws/clickstream-base-lib';
-import { AppLayout, SelectProps, Wizard } from '@cloudscape-design/components';
+import {
+  AppLayout,
+  ContentLayout,
+  SelectProps,
+  Wizard,
+} from '@cloudscape-design/components';
 import {
   createProjectPipeline,
   getPipelineDetail,
@@ -2921,12 +2926,15 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
 
   return (
     <AppLayout
+      headerVariant="high-contrast"
       toolsHide
       content={
         loadingData ? (
           <Loading />
         ) : (
-          <Content update={update} updatePipeline={updatePipeline} />
+          <ContentLayout headerVariant="high-contrast" disableOverlap>
+            <Content update={update} updatePipeline={updatePipeline} />
+          </ContentLayout>
         )
       }
       headerSelector="#header"

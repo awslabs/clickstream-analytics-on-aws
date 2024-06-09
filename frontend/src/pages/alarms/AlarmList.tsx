@@ -37,9 +37,10 @@ const AlarmsList: React.FC = () => {
   ];
   return (
     <AppLayout
+      headerVariant="high-contrast"
       toolsHide
       content={
-        <ContentLayout header={<AlarmsHeader />}>
+        <ContentLayout headerVariant="high-contrast" header={<AlarmsHeader />}>
           <Container>
             <AlarmsTable />
           </Container>

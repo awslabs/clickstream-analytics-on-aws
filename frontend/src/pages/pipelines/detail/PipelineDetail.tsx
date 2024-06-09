@@ -124,9 +124,11 @@ const PipelineDetail: React.FC = () => {
 
   return (
     <AppLayout
+      headerVariant="high-contrast"
       toolsHide
       content={
         <ContentLayout
+          headerVariant="high-contrast"
           header={
             <SpaceBetween size="m">
               <Header variant="h1">{projectPipeline?.pipelineId}</Header>

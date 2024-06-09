@@ -64,9 +64,10 @@ const Home: React.FC = () => {
   ];
   return (
     <AppLayout
+      headerVariant="high-contrast"
       toolsHide
       content={
-        <ContentLayout header={<HomeHeader />}>
+        <ContentLayout headerVariant="high-contrast" header={<HomeHeader />}>
           <Content />
         </ContentLayout>
       }

@@ -131,9 +131,11 @@ const ApplicationDetail: React.FC = () => {
 
   return (
     <AppLayout
+      headerVariant="high-contrast"
       toolsHide
       content={
         <ContentLayout
+          headerVariant="high-contrast"
           header={
             <SpaceBetween size="m">
               <Header variant="h1">{applicationInfo?.name}</Header>
@@ -293,7 +295,7 @@ const ApplicationDetail: React.FC = () => {
                     </div>
                   </SpaceBetween>
                   <SpaceBetween direction="vertical" size="l">
-                    {applicationInfo?.pipeline?.ingestionServer.loadBalancer
+                    {applicationInfo?.pipeline?.ingestionServer?.loadBalancer
                       .protocol === ProtocalType.HTTPS && (
                       <div>
                         <Box variant="awsui-key-label">
