@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Alert, AppLayout } from '@cloudscape-design/components';
+import { Alert, AppLayout, ContentLayout } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
 import Loading from 'components/common/Loading';
 import AnalyticsLayout from 'components/layouts/AnalyticsLayout';
@@ -117,13 +117,15 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
             toolsHide
             navigationHide
             content={
-              <Alert
-                statusIconAriaLabel="Error"
-                type="error"
-                header={t('analytics:noDataAvailableTitle')}
-              >
-                {t('analytics:noDataAvailableMessage')}
-              </Alert>
+              <ContentLayout headerVariant="high-contrast">
+                <Alert
+                  statusIconAriaLabel="Error"
+                  type="error"
+                  header={t('analytics:noDataAvailableTitle')}
+                >
+                  {t('analytics:noDataAvailableMessage')}
+                </Alert>
+              </ContentLayout>
             }
             headerSelector="#header"
           />
