@@ -114,10 +114,12 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
       />
       <div className="flex-1">
         <AppLayout
+          headerVariant="high-contrast"
           tools={<HelpInfo />}
           navigationHide
           content={
             <ContentLayout
+              headerVariant="high-contrast"
               header={
                 <Header description={t('analytics:segment.comp.desc')}>
                   {t('analytics:segment.comp.title')}

@@ -332,6 +332,7 @@ function Content() {
 
   return (
     <ContentLayout
+      headerVariant="high-contrast"
       header={<Header variant="h1">{t('plugin:create.createPlugin')}</Header>}
     >
       <form onSubmit={(event) => event.preventDefault()}>
@@ -571,6 +572,7 @@ const CreatePlugin: React.FC = () => {
   ];
   return (
     <AppLayout
+      headerVariant="high-contrast"
       content={<Content />}
       headerSelector="#header"
       breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}

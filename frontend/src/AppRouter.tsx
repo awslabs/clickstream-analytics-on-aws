@@ -244,19 +244,6 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             }
           />
           <Route
-            path="/pipelines/create"
-            element={
-              <RoleRoute
-                sessionExpired={sessionExpired}
-                layout="common"
-                auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
-              >
-                <CreatePipeline />
-              </RoleRoute>
-            }
-          />
-          <Route
             path="/project/:id/application/create"
             element={
               <RoleRoute

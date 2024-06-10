@@ -104,6 +104,7 @@ const AnalyticsAnalyzes: React.FC = () => {
       />
       <div className="flex-1">
         <AppLayout
+          headerVariant="high-contrast"
           toolsOpen={state?.showHelpPanel}
           onToolsChange={(e) => {
             if (e.detail.open && state?.helpPanelType === HelpPanelType.NONE) {
@@ -126,6 +127,7 @@ const AnalyticsAnalyzes: React.FC = () => {
           navigationHide
           content={
             <ContentLayout
+              headerVariant="high-contrast"
               header={
                 <SpaceBetween size="m">
                   <Header

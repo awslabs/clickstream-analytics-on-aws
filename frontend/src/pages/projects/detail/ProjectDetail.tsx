@@ -112,9 +112,11 @@ const ProjectDetail: React.FC = () => {
 
   return (
     <AppLayout
+      headerVariant="high-contrast"
       toolsHide
       content={
         <ContentLayout
+          headerVariant="high-contrast"
           header={
             <SpaceBetween size="m">
               {projectInfo && <Header variant="h1">{projectInfo?.name}</Header>}

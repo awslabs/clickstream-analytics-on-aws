@@ -14,6 +14,7 @@
 import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
+  ContentLayout,
   Input,
   Multiselect,
   SelectProps,
@@ -243,29 +244,32 @@ const UserList: React.FC = () => {
 
   return (
     <AppLayout
+      headerVariant="high-contrast"
       toolsHide
       content={
-        <UserTable
-          tableColumnDefinitions={COLUMN_DEFINITIONS}
-          tableContentDisplay={CONTENT_DISPLAY}
-          tableFilteringProperties={FILTERING_PROPERTIES}
-          tableI18nStrings={{
-            loadingText: t('user:labels.tableLoading') || 'Loading',
-            emptyText: t('user:labels.tableEmpty'),
-            headerTitle: t('user:labels.title'),
-            filteringAriaLabel: t('user:labels.filteringAriaLabel'),
-            filteringPlaceholder: t('user:labels.filteringPlaceholder'),
-            groupPropertiesText: t('button.groupPropertiesText'),
-            operatorsText: t('button.operatorsText'),
-            clearFiltersText: t('button.clearFiltersText'),
-            applyActionText: t('button.applyActionText'),
-            useText: t('common:table.useText'),
-            matchText: t('common:table.matchText'),
-            matchesText: t('common:table.matchesText'),
-          }}
-          fetchDataFunc={listAllUsers}
-          fetchUpdateFunc={updateUserInfo}
-        ></UserTable>
+        <ContentLayout headerVariant="high-contrast">
+          <UserTable
+            tableColumnDefinitions={COLUMN_DEFINITIONS}
+            tableContentDisplay={CONTENT_DISPLAY}
+            tableFilteringProperties={FILTERING_PROPERTIES}
+            tableI18nStrings={{
+              loadingText: t('user:labels.tableLoading') || 'Loading',
+              emptyText: t('user:labels.tableEmpty'),
+              headerTitle: t('user:labels.title'),
+              filteringAriaLabel: t('user:labels.filteringAriaLabel'),
+              filteringPlaceholder: t('user:labels.filteringPlaceholder'),
+              groupPropertiesText: t('button.groupPropertiesText'),
+              operatorsText: t('button.operatorsText'),
+              clearFiltersText: t('button.clearFiltersText'),
+              applyActionText: t('button.applyActionText'),
+              useText: t('common:table.useText'),
+              matchText: t('common:table.matchText'),
+              matchesText: t('common:table.matchesText'),
+            }}
+            fetchDataFunc={listAllUsers}
+            fetchUpdateFunc={updateUserInfo}
+          ></UserTable>
+        </ContentLayout>
       }
       headerSelector="#header"
       breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}

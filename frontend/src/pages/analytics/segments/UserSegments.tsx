@@ -151,10 +151,12 @@ const UserSegments: React.FC = () => {
       />
       <div className="flex-1">
         <AppLayout
+          headerVariant="high-contrast"
           tools={<HelpInfo />}
           navigationHide
           content={
             <ContentLayout
+              headerVariant="high-contrast"
               header={<Header>{t('nav.analytics.segments')}</Header>}
             >
               <Table

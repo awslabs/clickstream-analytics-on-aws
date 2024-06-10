@@ -16,6 +16,7 @@ import {
   AppLayout,
   Box,
   Cards,
+  ContentLayout,
   Pagination,
 } from '@cloudscape-design/components';
 import {
@@ -38,9 +39,13 @@ import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
 
 const PAGE_SIZE = 12;
-const AnalyticsDashboardCard: React.FC<any> = () => {
+
+const AnalyticsDashboard: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
+  const state = useContext(StateContext);
+  const dispatch = useContext(DispatchContext);
+
   const [loadingData, setLoadingData] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -49,6 +54,17 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
   const [analyticsDashboardList, setAnalyticsDashboardList] = useState<
     IAnalyticsDashboard[]
   >([]);
+
+  const breadcrumbItems = [
+    {
+      text: t('breadCrumb.analyticsStudio'),
+      href: '/analytics',
+    },
+    {
+      text: t('breadCrumb.dashboard'),
+      href: `/analytics/${projectId}/app/${appId}/dashboards`,
+    },
+  ];
 
   const buildCardHeader = (item: IAnalyticsDashboard) => {
     return (
@@ -154,84 +170,6 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
     }
   }, [currentPage]);
 
-  return (
-    <div className="pb-30">
-      <Cards
-        loading={loadingData}
-        selectedItems={selectedItems}
-        onSelectionChange={(event) => {
-          setSelectedItems(event.detail.selectedItems);
-        }}
-        stickyHeader={false}
-        cardDefinition={CARD_DEFINITIONS}
-        loadingText={defaultStr(t('analytics:list.loading'))}
-        items={analyticsDashboardList}
-        variant="full-page"
-        selectionType="single"
-        empty={
-          <Box textAlign="center" color="inherit">
-            <Box padding={{ bottom: 's' }} variant="p" color="inherit">
-              <b>{t('analytics:list.noDashboard')}</b>
-            </Box>
-          </Box>
-        }
-        header={
-          <DashboardHeader
-            totalNum={totalCount}
-            dashboard={selectedItems?.[0]}
-            setSelectItemEmpty={() => {
-              setSelectedItems([]);
-            }}
-            onClickCreate={() => {
-              setCreateDashboardVisible(true);
-            }}
-            refreshPage={() => {
-              setSelectedItems([]);
-              listAnalyticsDashboards();
-            }}
-          />
-        }
-        pagination={
-          <Pagination
-            currentPageIndex={currentPage}
-            pagesCount={Math.ceil(totalCount / PAGE_SIZE)}
-            onChange={(e) => {
-              setCurrentPage(e.detail.currentPageIndex);
-            }}
-          />
-        }
-      />
-      <CreateDashboard
-        projectId={defaultStr(projectId)}
-        appId={defaultStr(appId)}
-        openModel={createDashboardVisible}
-        closeModel={() => setCreateDashboardVisible(false)}
-        refreshPage={() => {
-          setSelectedItems([]);
-          listAnalyticsDashboards();
-        }}
-      />
-    </div>
-  );
-};
-
-const AnalyticsDashboard: React.FC = () => {
-  const { t } = useTranslation();
-  const { projectId, appId } = useParams();
-  const state = useContext(StateContext);
-  const dispatch = useContext(DispatchContext);
-
-  const breadcrumbItems = [
-    {
-      text: t('breadCrumb.analyticsStudio'),
-      href: '/analytics',
-    },
-    {
-      text: t('breadCrumb.dashboard'),
-      href: `/analytics/${projectId}/app/${appId}/dashboards`,
-    },
-  ];
-
   useEffect(() => {
     dispatch?.({ type: StateActionType.CLEAR_HELP_PANEL });
   }, []);
@@ -243,6 +181,7 @@ const AnalyticsDashboard: React.FC = () => {
       />
       <div className="flex-1">
         <AppLayout
+          headerVariant="high-contrast"
           onToolsChange={(e) => {
             if (e.detail.open && state?.helpPanelType === HelpPanelType.NONE) {
               dispatch?.({
@@ -263,7 +202,74 @@ const AnalyticsDashboard: React.FC = () => {
           toolsOpen={state?.showHelpPanel}
           tools={<HelpInfo />}
           navigationHide
-          content={<AnalyticsDashboardCard />}
+          content={
+            <ContentLayout
+              disableOverlap
+              headerVariant="high-contrast"
+              header={
+                <DashboardHeader
+                  totalNum={totalCount}
+                  dashboard={selectedItems?.[0]}
+                  setSelectItemEmpty={() => {
+                    setSelectedItems([]);
+                  }}
+                  onClickCreate={() => {
+                    setCreateDashboardVisible(true);
+                  }}
+                  refreshPage={() => {
+                    setSelectedItems([]);
+                    listAnalyticsDashboards();
+                  }}
+                />
+              }
+            >
+              <div className="pb-30">
+                <Cards
+                  loading={loadingData}
+                  selectedItems={selectedItems}
+                  onSelectionChange={(event) => {
+                    setSelectedItems(event.detail.selectedItems);
+                  }}
+                  stickyHeader={false}
+                  cardDefinition={CARD_DEFINITIONS}
+                  loadingText={defaultStr(t('analytics:list.loading'))}
+                  items={analyticsDashboardList}
+                  variant="full-page"
+                  selectionType="single"
+                  empty={
+                    <Box textAlign="center" color="inherit">
+                      <Box
+                        padding={{ bottom: 's' }}
+                        variant="p"
+                        color="inherit"
+                      >
+                        <b>{t('analytics:list.noDashboard')}</b>
+                      </Box>
+                    </Box>
+                  }
+                  pagination={
+                    <Pagination
+                      currentPageIndex={currentPage}
+                      pagesCount={Math.ceil(totalCount / PAGE_SIZE)}
+                      onChange={(e) => {
+                        setCurrentPage(e.detail.currentPageIndex);
+                      }}
+                    />
+                  }
+                />
+                <CreateDashboard
+                  projectId={defaultStr(projectId)}
+                  appId={defaultStr(appId)}
+                  openModel={createDashboardVisible}
+                  closeModel={() => setCreateDashboardVisible(false)}
+                  refreshPage={() => {
+                    setSelectedItems([]);
+                    listAnalyticsDashboards();
+                  }}
+                />
+              </div>
+            </ContentLayout>
+          }
           breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
           headerSelector="#header"
         />

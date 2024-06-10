@@ -33,9 +33,10 @@ const PluginList: React.FC = () => {
   ];
   return (
     <AppLayout
+      headerVariant="high-contrast"
       toolsHide
       content={
-        <ContentLayout header={<PluginHeader />}>
+        <ContentLayout headerVariant="high-contrast" header={<PluginHeader />}>
           <PluginTable
             selectionType="single"
             title={t('plugin:list.pluginList')}
