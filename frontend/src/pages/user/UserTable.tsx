@@ -177,7 +177,7 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
     <div>
       <Table
         {...tableCollectionProps}
-        variant="full-page"
+        variant="container"
         resizableColumns={true}
         selectionType="single"
         loading={loadingData}

@@ -16,6 +16,7 @@ import {
   Box,
   Button,
   Cards,
+  ContentLayout,
   Pagination,
 } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
@@ -36,11 +37,13 @@ interface ContentProps {
   refresh: number;
   selectedItems: IProject[];
   changeSelectedItems: (item: IProject[]) => void;
+  updateTotalCount: (count: number) => void;
 }
 
 const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const { t } = useTranslation();
-  const { selectedItems, refresh, changeSelectedItems } = props;
+  const { selectedItems, refresh, changeSelectedItems, updateTotalCount } =
+    props;
   const [pageSize] = useState(12);
   const [loadingData, setLoadingData] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,6 +101,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       if (success) {
         setProjectList(data.items);
         setTotalCount(data.totalCount);
+        updateTotalCount(data.totalCount);
         setLoadingData(false);
       }
     } catch (error) {
@@ -145,19 +149,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         items={projectList}
         selectionType="single"
         variant="full-page"
-        header={
-          <ProjectsHeader
-            totalProject={totalCount}
-            project={selectedItems?.[0]}
-            setSelectItemEmpty={() => {
-              changeSelectedItems([]);
-            }}
-            refreshPage={() => {
-              changeSelectedItems([]);
-              listProjects();
-            }}
-          />
-        }
         pagination={
           <Pagination
             currentPageIndex={currentPage}
@@ -188,6 +179,7 @@ const Projects: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<IProject[]>([]);
   const [curProject, setCurProject] = useState<IProject | null>();
   const [refreshPage, setRefreshPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     if (selectedItems.length >= 1) {
@@ -201,15 +193,36 @@ const Projects: React.FC = () => {
 
   return (
     <AppLayout
+      headerVariant="high-contrast"
       toolsHide
       content={
-        <Content
-          refresh={refreshPage}
-          selectedItems={selectedItems}
-          changeSelectedItems={(items) => {
-            setSelectedItems(items);
-          }}
-        />
+        <ContentLayout
+          headerVariant="high-contrast"
+          header={
+            <ProjectsHeader
+              totalProject={totalCount}
+              project={selectedItems?.[0]}
+              setSelectItemEmpty={() => {
+                setSelectedItems([]);
+              }}
+              refreshPage={() => {
+                setSelectedItems([]);
+                setRefreshPage((prev) => prev + 1);
+              }}
+            />
+          }
+        >
+          <Content
+            refresh={refreshPage}
+            selectedItems={selectedItems}
+            changeSelectedItems={(items) => {
+              setSelectedItems(items);
+            }}
+            updateTotalCount={(count) => {
+              setTotalCount(count);
+            }}
+          />
+        </ContentLayout>
       }
       headerSelector="#header"
       breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}

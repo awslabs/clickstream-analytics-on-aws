@@ -242,12 +242,14 @@ const UserSegmentDetails: React.FC = () => {
       />
       <div className="flex-1">
         <AppLayout
+          headerVariant="high-contrast"
           tools={<HelpInfo />}
           navigationHide
           headerSelector="#header"
           breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
           content={
             <ContentLayout
+              headerVariant="high-contrast"
               header={
                 <Header description={t('analytics:segment.details.desc')}>
                   {t('analytics:segment.details.title')}
