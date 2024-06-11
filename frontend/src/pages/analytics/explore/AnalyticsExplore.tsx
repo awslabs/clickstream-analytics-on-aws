@@ -182,8 +182,8 @@ const AnalyticsExplore: React.FC = () => {
     } else if (!pipeline) {
       setRenderCondition(ExploreRenderCondition.Empty);
     } else if (
-      !SolutionVersion.Of(pipeline.templateInfo?.pipelineVersion ?? '').equalTo(
-        SolutionVersion.Of(pipeline.templateInfo?.solutionVersion ?? '')
+      SolutionVersion.Of(pipeline.templateInfo?.pipelineVersion ?? '').lessThan(
+        SolutionVersion.V_1_1_6
       )
     ) {
       setRenderCondition(ExploreRenderCondition.Empty);
