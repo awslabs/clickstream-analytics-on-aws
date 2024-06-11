@@ -16,6 +16,7 @@ package software.aws.solution.clickstream.common.enrich;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +24,20 @@ import software.aws.solution.clickstream.BaseTest;
 import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.Util;
 import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
+import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceUtm;
+import software.aws.solution.clickstream.common.enrich.ts.rule.CategoryListEvaluator;
 
 import java.io.IOException;
 
 import static software.aws.solution.clickstream.common.Util.encodeUriQueryString;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.CPC;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.DIRECT;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.ORGANIC;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.REFERRAL;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.SEARCH;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.SHOPPING;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.SOCIAL;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.VIDEO;
 
 
 @Slf4j
@@ -80,7 +91,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "  \"campaignId\" : \"shopping_id\",\n" +
                 "  \"clidPlatform\" : \"clidPlatform\",\n" +
                 "  \"clid\" : \"{\\\"type\\\":\\\"gclid\\\",\\\"value\\\":\\\"gcidxxxx\\\"}\",\n" +
-                "  \"channelGroup\" : \"Organic Shopping\",\n" +
+                "  \"channelGroup\" : \"Paid Search\",\n" +
                 "  \"category\" : \"Search\"\n" +
                 "}";
         String value = prettyJson(Util.objectToJsonString(trafficSource));
@@ -295,7 +306,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         boolean internalReferrer = false;
 
         String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
-        Assertions.assertEquals(RuleBasedTrafficSourceHelper.REFERRAL, medium);
+        Assertions.assertEquals(REFERRAL, medium);
 
     }
 
@@ -309,7 +320,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         boolean internalReferrer = false;
 
         String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
-        Assertions.assertEquals(RuleBasedTrafficSourceHelper.REFERRAL, medium);
+        Assertions.assertEquals(REFERRAL, medium);
 
     }
 
@@ -497,8 +508,8 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
     }
 
     @Test
-    void testParseFacebookOrganic() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseFacebookOrganic
+    void testParseFacebookReferral() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseFacebookReferral
 
         RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
         String pageUrl = "https://www.example.com/entertainment/中文--plt6/14?method=lazyload";
@@ -507,19 +518,76 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
 
         String expectedValue = "{\n" +
-                "      \"source\" : \"Facebook\",\n" +
-                "      \"medium\" : \"Organic\",\n" +
-                "      \"campaign\" : null,\n" +
-                "      \"content\" : null,\n" +
-                "      \"term\" : null,\n" +
-                "      \"campaignId\" : null,\n" +
-                "      \"clidPlatform\" : null,\n" +
-                "      \"clid\" : null,\n" +
-                "      \"channelGroup\" : \"Organic Social\",\n" +
-                "      \"category\" : \"Social\"\n" +
-                "    }";
+                "  \"source\" : \"Facebook\",\n" +
+                "  \"medium\" : \"Referral\",\n" +
+                "  \"campaign\" : null,\n" +
+                "  \"content\" : null,\n" +
+                "  \"term\" : null,\n" +
+                "  \"campaignId\" : null,\n" +
+                "  \"clidPlatform\" : null,\n" +
+                "  \"clid\" : null,\n" +
+                "  \"channelGroup\" : \"Organic Social\",\n" +
+                "  \"category\" : \"Social\"\n" +
+                "}";
         String value = prettyJson(Util.objectToJsonString(cts));
         Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+    @Test
+    void testGetMediumByCategory() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testGetMediumByCategory
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        TrafficSourceUtm trafficSourceUtm1 = new TrafficSourceUtm();
+
+        String medium = parser.getMediumByCategory(trafficSourceUtm1, SOCIAL);
+        Assertions.assertEquals(REFERRAL, medium);
+
+        medium = parser.getMediumByCategory(trafficSourceUtm1, SOCIAL);
+        Assertions.assertEquals(REFERRAL, medium);
+
+        medium = parser.getMediumByCategory(trafficSourceUtm1, VIDEO);
+        Assertions.assertEquals(REFERRAL, medium);
+
+        medium = parser.getMediumByCategory(trafficSourceUtm1, SHOPPING);
+        Assertions.assertEquals(REFERRAL, medium);
+
+        medium = parser.getMediumByCategory(trafficSourceUtm1, REFERRAL);
+        Assertions.assertEquals(REFERRAL, medium);
+
+        medium = parser.getMediumByCategory(trafficSourceUtm1, SEARCH);
+        Assertions.assertEquals(ORGANIC, medium);
+
+        // clid is not emtpy
+        TrafficSourceUtm trafficSourceUtm2 = new TrafficSourceUtm();
+        trafficSourceUtm2.setClid("clid");
+
+        medium = parser.getMediumByCategory(trafficSourceUtm2, SOCIAL);
+        Assertions.assertEquals(CPC, medium);
+
+        medium = parser.getMediumByCategory(trafficSourceUtm2, SEARCH);
+        Assertions.assertEquals(CPC, medium);
+
+        // Medium is not empty
+        TrafficSourceUtm trafficSourceUtm3 = new TrafficSourceUtm();
+        trafficSourceUtm3.setMedium("medium1");
+
+        medium = parser.getMediumByCategory(trafficSourceUtm3, SOCIAL);
+        Assertions.assertEquals("medium1", medium);
+
+        medium = parser.getMediumByCategory(trafficSourceUtm3, SEARCH);
+        Assertions.assertEquals("medium1", medium);
+
+        // Category is not empty, DIRECT, UNASSIGNED
+        TrafficSourceUtm trafficSourceUtm4 = new TrafficSourceUtm();
+        medium = parser.getMediumByCategory(trafficSourceUtm4, null);
+        Assertions.assertNull(medium);
+
+        medium = parser.getMediumByCategory(trafficSourceUtm4, DIRECT);
+        Assertions.assertNull(medium);
+
+        medium = parser.getMediumByCategory(trafficSourceUtm4, CategoryListEvaluator.UNASSIGNED);
+        Assertions.assertNull(medium);
     }
 
 }
