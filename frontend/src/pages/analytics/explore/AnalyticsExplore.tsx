@@ -182,8 +182,10 @@ const AnalyticsExplore: React.FC = () => {
     } else if (!pipeline) {
       setRenderCondition(ExploreRenderCondition.Empty);
     } else if (
-      SolutionVersion.Of(pipeline.templateInfo?.pipelineVersion ?? '').shortVersion !==
-        SolutionVersion.Of(pipeline.templateInfo?.solutionVersion ?? '').shortVersion
+      SolutionVersion.Of(pipeline.templateInfo?.pipelineVersion ?? '')
+        .shortVersion !==
+      SolutionVersion.Of(pipeline.templateInfo?.solutionVersion ?? '')
+        .shortVersion
     ) {
       setRenderCondition(ExploreRenderCondition.Empty);
     } else if (selectedOption?.value === 'Funnel') {
