@@ -116,7 +116,9 @@ export class StackManager {
     for (let stackDetail of stackDetails) {
       if (!stackDetail.stackStatus ||
         stackDetail.stackStatus?.endsWith('_FAILED') ||
-        stackDetail.stackStatus?.endsWith('_ROLLBACK_COMPLETE') ) {
+        stackDetail.stackStatus?.endsWith('_ROLLBACK_COMPLETE') ||
+        stackDetail.stackTemplateVersion !== this.pipeline.templateVersion
+      ) {
         retryStackNames.push(stackDetail.stackName);
         retryStackTypes.push(stackDetail.stackType);
       }
@@ -458,6 +460,9 @@ export class StackManager {
   private getStackStatusByName(stackName: string, statusDetail: PipelineStatusDetail[]) {
     for (let detail of statusDetail) {
       if (detail.stackName === stackName) {
+        if (detail.stackTemplateVersion !== this.pipeline.templateVersion) {
+          return StackStatus.UPDATE_FAILED;
+        }
         return detail.stackStatus;
       }
     }
