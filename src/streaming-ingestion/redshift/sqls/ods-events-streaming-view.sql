@@ -1,30 +1,107 @@
 CREATE OR REPLACE VIEW {{app_schema}}.ods_events_streaming_view as
-select approximate_arrival_timestamp
-, event_data.project_id::VARCHAR as project_id
-, event_data.event_name::VARCHAR as event_name
-, event_data.event_id::VARCHAR as event_id
-, event_data.app_id::VARCHAR as app_id
-, event_data.user_pseudo_id::VARCHAR as user_pseudo_id
-, event_data.event_timestamp::BIGINT as event_timestamp
-, event_data.device::SUPER as device
-, event_data.app_info::SUPER as app_info
-, event_data.ecommerce::SUPER as ecommerce
-, event_data.event_bundle_sequence_id::BIGINT as event_bundle_sequence_id
-, event_data.event_date::DATE as event_date
-, event_data.event_dimensions::SUPER as event_dimensions
-, event_data.event_params::SUPER as event_params
-, event_data.event_previous_timestamp::BIGINT as event_previous_timestamp
-, event_data.event_server_timestamp_offset::BIGINT as event_server_timestamp_offset
-, event_data.event_value_in_usd::INT as event_value_in_usd
-, event_data.geo::SUPER as geo
-, event_data.ingest_timestamp::BIGINT as ingest_timestamp
-, event_data.items::SUPER as items
-, event_data.platform::VARCHAR as platform
-, event_data.privacy_info::SUPER as privacy_info
-, event_data.traffic_source::SUPER as traffic_source
-, event_data.user_first_touch_timestamp::BIGINT as user_first_touch_timestamp
-, event_data.user_id::VARCHAR as user_id
-, event_data.user_ltv::SUPER as user_ltv
-, event_data.user_properties::SUPER as user_properties
-, event_data.session_id::VARCHAR as session_id
+select 
+    approximate_arrival_timestamp,
+    timestamp 'epoch' + (event_data.event_timestamp::bigint/1000) * interval '1 second'  as event_timestamp,
+    event_data.event_id::varchar,
+    event_data.event_time_msec::bigint,
+    event_data.event_name::varchar,
+    event_data.event_value::double precision,
+    event_data.event_value_currency::varchar,
+    event_data.event_bundle_sequence_id::bigint,
+    event_data.ingest_time_msec::bigint,
+    event_data.device_mobile_brand_name::varchar,
+    event_data.device_mobile_model_name::varchar,
+    event_data.device_manufacturer::varchar,
+    event_data.device_carrier::varchar,
+    event_data.device_network_type::varchar,
+    event_data.device_operating_system::varchar,
+    event_data.device_operating_system_version::varchar,
+    event_data.device_vendor_id::varchar,
+    event_data.device_advertising_id::varchar,
+    event_data.device_system_language::varchar,
+    event_data.device_time_zone_offset_seconds::integer,
+    event_data.device_ua_browser::varchar,
+    event_data.device_ua_browser_version::varchar,
+    event_data.device_ua_os::varchar,
+    event_data.device_ua_os_version::varchar,
+    event_data.device_ua_device::varchar,
+    event_data.device_ua_device_category::varchar,
+    event_data.device_ua::super::varchar,
+    event_data.device_screen_width::integer,
+    event_data.device_screen_height::integer,
+    event_data.device_viewport_width::integer,
+    event_data.device_viewport_height::integer,
+    event_data.geo_continent::varchar,
+    event_data.geo_sub_continent::varchar,
+    event_data.geo_country::varchar,
+    event_data.geo_region::varchar,
+    event_data.geo_metro::varchar,
+    event_data.geo_city::varchar,
+    event_data.geo_locale::varchar,
+    event_data.traffic_source_source::varchar,
+    event_data.traffic_source_medium::varchar,
+    event_data.traffic_source_campaign::varchar,
+    event_data.traffic_source_content::varchar,
+    event_data.traffic_source_term::varchar,
+    event_data.traffic_source_campaign_id::varchar,
+    event_data.traffic_source_clid_platform::varchar,
+    event_data.traffic_source_clid::varchar,
+    event_data.traffic_source_channel_group::varchar,
+    event_data.traffic_source_category::varchar,
+    event_data.user_first_touch_time_msec::bigint,
+    event_data.app_package_id::varchar,
+    event_data.app_version::varchar,
+    event_data.app_title::varchar,
+    event_data.app_install_source::varchar,
+    event_data.platform::varchar,
+    event_data.project_id::varchar,
+    event_data.app_id::varchar,
+    event_data.screen_view_screen_name::varchar,
+    event_data.screen_view_screen_id::varchar,
+    event_data.screen_view_screen_unique_id::varchar,
+    event_data.screen_view_previous_screen_name::varchar,
+    event_data.screen_view_previous_screen_id::varchar,
+    event_data.screen_view_previous_screen_unique_id,
+    event_data.screen_view_previous_time_msec::bigint,
+    event_data.screen_view_engagement_time_msec::bigint,
+    event_data.screen_view_entrances::varchar,
+    event_data.page_view_page_referrer::varchar,
+    event_data.page_view_page_referrer_title::varchar,
+    event_data.page_view_previous_time_msec::bigint,
+    event_data.page_view_engagement_time_msec::bigint,
+    event_data.page_view_page_title::varchar,
+    event_data.page_view_page_url::varchar,
+    event_data.page_view_page_url_path::varchar,
+    event_data.page_view_page_url_query_parameters::super,
+    event_data.page_view_hostname::varchar,
+    event_data.page_view_latest_referrer::varchar,
+    event_data.page_view_latest_referrer_host::varchar,
+    event_data.page_view_entrances::varchar,
+    event_data.app_start_is_first_time::varchar,
+    event_data.upgrade_previous_app_version::varchar,
+    event_data.upgrade_previous_os_version::varchar,
+    event_data.search_key::varchar,
+    event_data.search_term::varchar,
+    event_data.outbound_link_classes::varchar,
+    event_data.outbound_link_domain::varchar,
+    event_data.outbound_link_id::varchar,
+    event_data.outbound_link_url::varchar,
+    event_data.outbound_link::varchar,
+    event_data.user_engagement_time_msec::bigint,
+    event_data.user_id::varchar,
+    event_data.user_pseudo_id::varchar,
+    event_data.session_id::varchar,
+    event_data.session_start_time_msec::bigint,
+    event_data.session_duration::varchar,
+    event_data.session_number::varchar,
+    event_data.scroll_engagement_time_msec::bigint,
+    event_data.sdk_error_code::varchar,
+    event_data.sdk_error_message::varchar,
+    event_data.sdk_version::varchar,
+    event_data.sdk_name::varchar,
+    event_data.app_exception_message::varchar,
+    event_data.app_exception_stack::varchar,
+    event_data.custom_parameters_json_str::varchar,
+    event_data.custom_parameters::super,
+    event_data.process_info::super
 from {{app_schema}}.ods_events_streaming_mv;
