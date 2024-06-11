@@ -365,8 +365,7 @@ export class StackManager {
     state: WorkflowState, stackDetails: PipelineStatusDetail[], retryStackNames: string[],
     lastAction: string): WorkflowState {
     if (state.Data?.Input.StackName &&
-      (retryStackNames.includes(state.Data.Input.StackName) || lastAction === 'Delete')
-    ) {
+      (retryStackNames.includes(state.Data.Input.StackName) || lastAction === 'Delete')) {
       const status = this.getStackStatusByName(state.Data?.Input.StackName, stackDetails);
       state.Data.Input.Action = this._getRetryAction(lastAction, status);
     } else {
@@ -461,7 +460,6 @@ export class StackManager {
   private getStackStatusByName(stackName: string, statusDetail: PipelineStatusDetail[]) {
     for (let detail of statusDetail) {
       if (detail.stackName === stackName) {
-        console.log('detail.stackStatus', this.pipeline.templateVersion, detail.stackTemplateVersion);
         if (detail.stackTemplateVersion !== this.pipeline.templateVersion) {
           return StackStatus.UPDATE_FAILED;
         }
