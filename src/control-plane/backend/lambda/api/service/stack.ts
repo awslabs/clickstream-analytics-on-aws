@@ -357,7 +357,7 @@ export class StackManager {
       shortStatus = 'ROLLBACK_COMPLETE';
     } else if (status?.endsWith('COMPLETE')) {
       shortStatus = 'COMPLETE';
-    } 
+    }
     return retryActionMap.get(`${lastAction}+${shortStatus}`) ?? '';
   }
 
