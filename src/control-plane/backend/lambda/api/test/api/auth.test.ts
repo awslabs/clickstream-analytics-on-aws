@@ -47,6 +47,13 @@ describe('OIDC Auth test', () => {
     process.env.WITH_VALIDATE_ROLE = 'false';
   });
 
+  it('status 200 when access healthcheck', async () => {
+    process.env.HEALTH_CHECK_PATH='/';
+    const res = await request(app)
+      .get('/');
+    expect(res.statusCode).toBe(200);
+  });
+
   it('status 401 when no auth token provided.', async () => {
     const res = await request(app)
       .get('/api/user');

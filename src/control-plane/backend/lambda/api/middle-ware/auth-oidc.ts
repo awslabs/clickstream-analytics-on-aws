@@ -20,9 +20,12 @@ import { getEmailFromRequestContext, isEmpty } from '../common/utils';
 
 // Implement access log middleware function
 export async function authOIDC(req: express.Request, res: express.Response, next: express.NextFunction) {
+  if (req.url === process.env.HEALTH_CHECK_PATH) {
+    return next();
+  }
   let operatorName = '';
   const WITH_AUTH_MIDDLEWARE = process.env.WITH_AUTH_MIDDLEWARE;
-  if (WITH_AUTH_MIDDLEWARE === 'true' && req.url !== process.env.HEALTH_CHECK_PATH) {
+  if (WITH_AUTH_MIDDLEWARE === 'true') {
     // ALB control plane get IdToken from header
     const authorization = req.get('authorization');
     if (authorization === undefined) {
