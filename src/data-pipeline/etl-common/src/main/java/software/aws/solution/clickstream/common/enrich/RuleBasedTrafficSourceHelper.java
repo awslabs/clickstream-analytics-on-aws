@@ -65,6 +65,8 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     public static final String REFERRAL = "Referral";
     public static final String ORGANIC = "Organic";
     public static final String INTERNAL = "Internal";
+    public static final String SEARCH = "Search";
+    public static final String SHOPPING = "Shopping";
 
     static {
         KNOWN_CLID_TO_MEDIUM_MAP = getKnownClidTypeToSourceMediumMap();
@@ -136,16 +138,6 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     public static Map<String, SourceMedium> getKnownClidTypeToSourceMediumMap() {
         Map<String, SourceMedium> clidTypeToSourceMediumMap = new HashMap<>();
         clidTypeToSourceMediumMap.put(GCLID, new SourceMedium(GOOGLE, CPC));
-        clidTypeToSourceMediumMap.put("dclid", new SourceMedium(GOOGLE, DISPLAY));
-        clidTypeToSourceMediumMap.put("fbclid", new SourceMedium(FACEBOOK, SOCIAL));
-        clidTypeToSourceMediumMap.put("msclid", new SourceMedium(MICROSOFT, CPC));
-        clidTypeToSourceMediumMap.put("twclid", new SourceMedium(TWITTER, CPC));
-        clidTypeToSourceMediumMap.put("pintclid", new SourceMedium(PINTEREST, CPC));
-        clidTypeToSourceMediumMap.put("linclid", new SourceMedium(LINKEDIN, CPC));
-        clidTypeToSourceMediumMap.put("ytclid", new SourceMedium(YOUTUBE, VIDEO));
-        clidTypeToSourceMediumMap.put("tikclid", new SourceMedium(TIKTOK, VIDEO));
-        clidTypeToSourceMediumMap.put("bingclid", new SourceMedium(BING, CPC));
-        clidTypeToSourceMediumMap.put("baiduclid", new SourceMedium(BAIDU, CPC));
         return clidTypeToSourceMediumMap;
     }
 
@@ -285,14 +277,18 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             trafficSourceUtm.setTerm(terms);
         }
 
+        if (trafficSourceUtm.getSource() != null
+                && (category == null || CategoryListEvaluator.UNASSIGNED.equals(category))) {
+            category = this.categoryListEvaluator.getCategoryBySource(trafficSourceUtm.getSource());
+            log.debug("category is null/UNASSIGNED, trying to get category from source: {} -> category: {}", trafficSourceUtm.getSource(), category);
+        }
+
+        String medium = getMediumByCategory(trafficSourceUtm, category);
+        trafficSourceUtm.setMedium(medium);
+
         String categoryForEval = category;
         if (CategoryListEvaluator.UNASSIGNED.equals(categoryForEval)) {
             categoryForEval = null;
-        }
-
-        if (trafficSourceUtm.getSource() != null && categoryForEval == null) {
-            category = this.categoryListEvaluator.getCategoryBySource(trafficSourceUtm.getSource());
-            log.debug("category is null/UNASSIGNED, trying to get category from source: {} -> category: {}", trafficSourceUtm.getSource(), category);
         }
 
         ChannelRuleEvaluatorInput evalInput = ChannelRuleEvaluatorInput.from(trafficSourceUtm, categoryForEval, theReferrer, theReferrerHost);
@@ -311,6 +307,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         return categoryTrafficSource;
 
     }
+
 
     @Override
     public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput,
@@ -392,31 +389,29 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             }
         }
 
-        if (categoryTrafficSource.getSource() != null && categoryTrafficSource.getMedium() == null) {
-            categoryTrafficSource.setMedium(getMediumBySourceAndCategory(categoryTrafficSource.getSource(), categoryTrafficSource.getCategory()));
-        }
-
         if (categoryTrafficSource.getMedium() == null) {
             categoryTrafficSource.setMedium(getMediumByReferrer(pageReferrer, latestReferrer, isFromInternal));
         }
     }
 
-    private String getMediumBySourceAndCategory(final String source, final String category) {
-        log.debug("getMediumBySourceAndCategory() enter source: {}, category: {}", source, category);
-        if (REFERRAL.equals(category)) {
-            return REFERRAL;
+    String getMediumByCategory(final TrafficSourceUtm trafficSourceUtm, final String category) {
+        String medium = trafficSourceUtm.getMedium();
+        String clidId = trafficSourceUtm.getClid();
+        if (isEmpty(medium) && category != null) {
+            if (!isEmpty(clidId)) {
+                medium = CPC;
+            } else if (category.equals(SEARCH)) {
+                medium = ORGANIC;
+            } else if ((category.equals(SOCIAL) || category.equals(VIDEO) || category.equals(SHOPPING) || category.equals(REFERRAL))) {
+                medium = REFERRAL;
+            }
+            log.debug("medium is null, trying to get medium from category: {} -> medium: {}", category, medium);
         }
-        if (category != null
-                && !category.equals(DIRECT)
-                && !category.equals(CategoryListEvaluator.UNASSIGNED)) {
-            return ORGANIC;
-        }
-        return null;
+        return medium;
     }
 
     String getMediumByReferrer(final String pageReferrer, final String latestReferrer, final boolean isFromInternal) {
         log.debug("getMediumByReferrer() enter pageReferrer: {}, latestReferrer: {}, isFromInternal: {}", pageReferrer, latestReferrer, isFromInternal);
-
         if (isAllEmpty(pageReferrer, latestReferrer)) {
             return NONE;
         }
