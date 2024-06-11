@@ -14,12 +14,10 @@
 
 package software.aws.solution.clickstream.plugin.enrich;
 
-import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.clickstream.common.enrich.UAEnrichHelper;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.common.model.ClickstreamUA;
 
-@Slf4j
 public class UAEnrichmentV2 implements ClickstreamEventEnrichment {
 
     private static final long serialVersionUID = 17054589439690001L;

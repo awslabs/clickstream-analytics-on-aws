@@ -14,7 +14,6 @@
 
 package software.aws.solution.clickstream.plugin.enrich;
 
-import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.clickstream.common.enrich.IPEnrichmentHelper;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.common.model.ClickstreamIPEnrichResult;
@@ -22,7 +21,6 @@ import software.aws.solution.clickstream.common.model.ClickstreamIPEnrichResult;
 import java.io.File;
 import java.io.IOException;
 
-@Slf4j
 public final class IPEnrichmentV2 implements ClickstreamEventEnrichment {
 
     private static final long serialVersionUID = 17054589439690001L;
