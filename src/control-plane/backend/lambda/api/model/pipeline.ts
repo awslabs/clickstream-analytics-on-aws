@@ -938,6 +938,7 @@ export class CPipeline {
   };
 
   public async generateWorkflow(): Promise<WorkflowTemplate> {
+    // TODO
     await this.resourcesCheck();
 
     return {
