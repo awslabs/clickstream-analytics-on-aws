@@ -458,7 +458,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     const createdDataset = await createDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
     logger.info(`data set id: ${createdDataset?.DataSetId}`);
 
-    if(dataSet.realtime === 'yes') {
+    if (dataSet.realtime === 'yes') {
       realtimeDatasetRefs.push({
         DataSetPlaceholder: dataSet.tableName,
         DataSetArn: createdDataset?.Arn!,
@@ -495,7 +495,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
 
   let realtimeDashboard = undefined;
-  if(realtimeDatasetRefs.length > 0) {
+  if (realtimeDatasetRefs.length > 0) {
     const realtimeSourceEntity = {
       SourceTemplate: {
         Arn: dashboardDef.realtimeTemplateArn,
@@ -524,7 +524,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 
   return {
     dashboard,
-    realtimeDashboard
+    realtimeDashboard,
   };
 
 };
@@ -543,7 +543,7 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
     // Delete Dashboard
     const dashboardId = buildDashBoardId(deleteDatabase, schema);
     const result = await deleteDashboardById(quickSight, accountId, dashboardId.id);
-    
+
     // Delete Realtime Dashboard
     const rtDashboardId = buildDashBoardId(deleteDatabase, schema, true);
     await deleteDashboardById(quickSight, accountId, rtDashboardId.id);
@@ -684,7 +684,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
       createdDataset = await createDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
     }
 
-    if(dataSet.realtime === 'yes') {
+    if (dataSet.realtime === 'yes') {
       datasetRefsRT.push({
         DataSetPlaceholder: dataSet.tableName,
         DataSetArn: createdDataset?.Arn!,
@@ -783,8 +783,8 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
 
   return {
     dashboard,
-    dashboardRT
-  }
+    dashboardRT,
+  };
 };
 
 const updateFolderMembership = async (quickSight: QuickSight, commonParams: ResourceCommonParams, folderId: string, dashboardId: string)

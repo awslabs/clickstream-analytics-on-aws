@@ -1400,7 +1400,7 @@
         },
         {
             "DataSetIdentifier": "Realtime_Event",
-            "Name": "Page title/Screen name",
+            "Name": "View count",
             "Expression": "distinct_countIf({user_pseudo_id},({event_name}='_page_view' OR {event_name}='_screen_view'))"
         }
     ],
@@ -1448,7 +1448,7 @@
                         "FilterId": "b51ec9e7-b1e0-41df-8f58-87b9724f71b1",
                         "Column": {
                             "DataSetIdentifier": "Realtime_Event",
-                            "ColumnName": "aggregation_dim"
+                            "ColumnName": "Page title/Screen name"
                         },
                         "Limit": 10,
                         "AggregationSortConfigurations": [

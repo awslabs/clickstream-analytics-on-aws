@@ -135,7 +135,10 @@ export class DataReportingQuickSightStack extends Stack {
         ],
       }],
 
-      definition: JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-realtime.json')).toString('utf-8')),
+      definition: Fn.conditionIf(useSpiceCondition.logicalId,
+        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-realtime.json')).toString('utf-8')),
+        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-realtime.json')).toString('utf-8')),
+      ),
     });
 
     const userSecret = Secret.fromSecretNameV2(this, 'Clickstream-Redshift-Secret', `${stackParams.redshiftParameterKeyParam.valueAsString}`);
