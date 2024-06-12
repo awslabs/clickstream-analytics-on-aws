@@ -1,31 +1,11 @@
 {
   "event_timestamp" : 1690249851000,
   "user_pseudo_id" : "9113946abd821d52",
-  "user_id" : null,
+  "user_id" : "9113946abd821d52",
   "user_properties" : {
-    "firstName" : {
+    "$x_test_user" : {
       "set_time_msec" : null,
-      "value" : "Yong Liu"
-    },
-    "lastName" : {
-      "set_time_msec" : null,
-      "value" : "Yong Liu"
-    },
-    "user_id" : {
-      "set_time_msec" : null,
-      "value" : null
-    },
-    "$lib_version" : {
-      "set_time_msec" : null,
-      "value" : "6.7.2"
-    },
-    "age" : {
-      "set_time_msec" : null,
-      "value" : 0
-    },
-    "username" : {
-      "set_time_msec" : null,
-      "value" : null
+      "value" : "Test Name"
     }
   },
   "first_touch_time_msec" : 1690249850031,
