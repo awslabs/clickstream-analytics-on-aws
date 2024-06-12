@@ -257,6 +257,7 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_user_v2/" + new Date().getTime();
         System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
+
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
 
         Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
