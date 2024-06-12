@@ -46,7 +46,7 @@ import static software.aws.solution.clickstream.flink.Utils.getCurrentTimeMillis
 import static software.aws.solution.clickstream.flink.Utils.getValueType;
 
 @Slf4j
-public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, JsonNode>, String> {
+public class TransformDataMapFunction implements MapFunction<Tuple2<String, String>, String> {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static final String APP_ID = "app_id";
     public static final String TIMESTAMP = "timestamp";
@@ -79,11 +79,11 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
     }
 
     @Override
-    public String map(final Tuple2<JsonNode, JsonNode> value) throws Exception {
+    public String map(final Tuple2<String, String> value) throws Exception {
         ObjectNode data = OBJECT_MAPPER.createObjectNode();
         try {
-            JsonNode ingestNode = value.f0;
-            JsonNode dataNode = value.f1;
+            JsonNode ingestNode = OBJECT_MAPPER.readTree(value.f0);
+            JsonNode dataNode = OBJECT_MAPPER.readTree(value.f1);
 
             ObjectNode auditInfo = OBJECT_MAPPER.createObjectNode();
             auditInfo.set("kda_process_timestamp", JsonNodeFactory.instance.numberNode(getCurrentTimeMillis()));

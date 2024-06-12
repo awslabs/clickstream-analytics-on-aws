@@ -12,7 +12,7 @@
  */
 
 import path from 'path';
-import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON, SolutionInfo } from '@aws/clickstream-base-lib';
+import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON, OUTPUT_STREAMING_INGESTION_APP_TRAFFIC_SOURCE_RULE_CONFIG_S3_PATH, SolutionInfo } from '@aws/clickstream-base-lib';
 import { Application, ApplicationCode, LogLevel, MetricsLevel, Runtime } from '@aws-cdk/aws-kinesisanalytics-flink-alpha';
 import {
   Arn,
@@ -119,8 +119,9 @@ export class StreamingIngestionStack extends Stack {
     // create managed flink application
     const applicationJarKey = applicationJar.substring(`s3://${dataBucket.bucketName}/`.length);
     const geoDBKey = builtInFiles[0].substring(`s3://${dataBucket.bucketName}/`.length);
-    const mappingConfgKey = `${pipeline.dataBucket.prefix}${projectId}/flink-config/app-id-stream-config.json`;
-    const appIdStreamConfigS3Path = `s3://${dataBucket.bucketName}/${mappingConfgKey}`;
+    const mappingConfigKey = `${pipeline.dataBucket.prefix}${projectId}/flink-config/app-id-stream-config.json`;
+    const appIdStreamConfigS3Path = `s3://${dataBucket.bucketName}/${mappingConfigKey}`;
+    const appRuleConfigPathS3Path = `s3://${dataBucket.bucketName}/clickstream/${projectId}/rules/`;
     this.flinkApp = new Application(this, 'ClickstreamStreamingIngestion', {
       code: ApplicationCode.fromBucket(dataBucket, applicationJarKey),
       propertyGroups: {
@@ -131,9 +132,11 @@ export class StreamingIngestionStack extends Stack {
           dataBucketName: dataBucket.bucketName,
           geoFileKey: geoDBKey,
           appIdStreamConfig: appIdStreamConfigS3Path,
+          appRuleConfigPath: appRuleConfigPathS3Path,
+          transformVersion: 'v2',
         },
       },
-      runtime: Runtime.FLINK_1_15,
+      runtime: Runtime.of('FLINK-1_18'),
       checkpointingEnabled: true, // default is true
       logLevel: LogLevel.ERROR, // default is INFO
       metricsLevel: MetricsLevel.TASK, // default is APPLICATION
@@ -147,7 +150,7 @@ export class StreamingIngestionStack extends Stack {
     sourceStream.grantRead(this.flinkApp);
     dataBucket.grantRead(this.flinkApp, applicationJarKey);
     dataBucket.grantRead(this.flinkApp, geoDBKey);
-    dataBucket.grantRead(this.flinkApp, mappingConfgKey);
+    dataBucket.grantRead(this.flinkApp, mappingConfigKey);
     this.flinkApp.addToRolePolicy(new PolicyStatement({
       actions: [
         'kinesis:PutRecord',
@@ -218,6 +221,11 @@ export class StreamingIngestionStack extends Stack {
     new CfnOutput(this, OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH, {
       description: 'S3 path of app IDs and kineisis data stream sinks config mapping',
       value: appIdStreamConfigS3Path,
+    });
+
+    new CfnOutput(this, OUTPUT_STREAMING_INGESTION_APP_TRAFFIC_SOURCE_RULE_CONFIG_S3_PATH, {
+      description: 'S3 folder of app traffic source configuration rule files',
+      value: appRuleConfigPathS3Path,
     });
 
     new CfnOutput(this, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, {

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, SolutionInfo } from '@aws/clickstream-base-lib';
+import { OUTPUT_STREAMING_INGESTION_APP_TRAFFIC_SOURCE_RULE_CONFIG_S3_PATH, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, SolutionInfo } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { REDSHIFT_MODE } from '../../src/common/model';
@@ -760,6 +760,8 @@ describe('managed Flink application for real-time data processing', () => {
                     ],
                   ],
                 },
+                appRuleConfigPath: Match.anyValue(),
+                transformVersion: 'v2',
               },
             },
           ],
@@ -824,6 +826,12 @@ describe('managed Flink application for real-time data processing', () => {
     template.hasOutput(OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, {
     });
   });
+
+  test('Has traffic source app config rule s3 path output', ()=>{
+    template.hasOutput(OUTPUT_STREAMING_INGESTION_APP_TRAFFIC_SOURCE_RULE_CONFIG_S3_PATH, {
+    });
+  });
+
 });
 
 describe('nested redshift stacks in streaming ingestion stack', () => {

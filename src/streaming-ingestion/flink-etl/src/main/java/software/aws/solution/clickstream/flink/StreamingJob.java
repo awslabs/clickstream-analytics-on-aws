@@ -16,7 +16,6 @@ package software.aws.solution.clickstream.flink;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.connector.sink2.Sink;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
@@ -132,8 +131,8 @@ public class StreamingJob {
         }
 
         log.info("Enabled appId list: {}", appIds);
-        SourceFunction<String> kinesisSource = this.streamProvider.createSource();
-        DataStream<String> inputStream = env.addSource(kinesisSource, "Kinesis source");
+        SourceFunction<String> kinesisSource = this.streamProvider.createSource(); // NOSONAR
+        DataStream<String> inputStream = env.addSource(kinesisSource, "Kinesis source"); // NOSONAR
         runWithFlink(inputStream);
         return true;
     }
@@ -141,22 +140,22 @@ public class StreamingJob {
     private void runWithFlink(final DataStream<String> inputStream) throws IOException {
 
         RouteProcessFunction processFunction = new RouteProcessFunction(appIds);
-        Map<String, OutputTag<JsonNode>> sideAppOutputTagMap = processFunction.getSideAppOutputTagMap();
-        SingleOutputStreamOperator<JsonNode> mainStream = inputStream.process(processFunction);
+        Map<String, OutputTag<String>> sideAppOutputTagMap = processFunction.getSideAppOutputTagMap();
+        SingleOutputStreamOperator<String> mainStream = inputStream.process(processFunction);
 
         String defaultAppId = appIds.get(0);
         transformAndSink(defaultAppId, mainStream, appSinkMap.get(defaultAppId));
 
-        for (Map.Entry<String, OutputTag<JsonNode>> entry : sideAppOutputTagMap.entrySet()) {
+        for (Map.Entry<String, OutputTag<String>> entry : sideAppOutputTagMap.entrySet()) {
             String appId = entry.getKey();
-            DataStream<JsonNode> sideAppStream = mainStream.getSideOutput(entry.getValue());
+            DataStream<String> sideAppStream = mainStream.getSideOutput(entry.getValue());
             Sink<String> outKinesisSink = appSinkMap.get(appId);
             transformAndSink(appId, sideAppStream, outKinesisSink);
         }
 
     }
 
-    private void transformAndSink(final String appId, final DataStream<JsonNode> inputStream,
+    private void transformAndSink(final String appId, final DataStream<String> inputStream,
                                   final Sink<String> outKinesisSink) throws IOException {
         if ("v2".equals(props.getTransformVersion())) {
             transformAndSinkV2(appId, inputStream, outKinesisSink);
@@ -165,7 +164,7 @@ public class StreamingJob {
         }
     }
 
-    private void transformAndSinkV1(final String appId, final DataStream<JsonNode> inputStream,
+    private void transformAndSinkV1(final String appId, final DataStream<String> inputStream,
                                   final Sink<String> outKinesisSink) {
         String projectId = props.getProjectId();
         String bucketName = props.getDataBucketName();
@@ -173,13 +172,13 @@ public class StreamingJob {
         String region = props.getRegion();
 
         log.info("transformAndSink appId: {}", appId);
-        DataStream<Tuple2<JsonNode, JsonNode>> explodedData = inputStream.flatMap(new ExplodeDataFlatMapFunction(appId)).name("ExplodeDataFlatMapFunction" + appId);
+        DataStream<Tuple2<String, String>> explodedData = inputStream.flatMap(new ExplodeDataFlatMapFunction(appId)).name("ExplodeDataFlatMapFunction" + appId);
         DataStream<String> transformedData = explodedData.map(new TransformDataMapFunction(appId, projectId, bucketName, geoFileKey, region))
                 .name("TransformDataMapFunction" + appId);
         transformedData.sinkTo(outKinesisSink).name(appId);
     }
 
-    private void transformAndSinkV2(final String appId, final DataStream<JsonNode> inputStream,
+    private void transformAndSinkV2(final String appId, final DataStream<String> inputStream,
                                   final Sink<String> outKinesisSink) throws IOException {
         String projectId = props.getProjectId();
         log.info("transformAndSinkV2 appId: {}", appId);

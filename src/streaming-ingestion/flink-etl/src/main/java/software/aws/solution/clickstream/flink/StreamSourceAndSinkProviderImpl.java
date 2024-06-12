@@ -20,10 +20,9 @@ import org.apache.flink.connector.aws.config.AWSConfigConstants;
 import org.apache.flink.connector.kinesis.sink.KinesisStreamsSink;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kinesis.FlinkKinesisConsumer;
+import org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants;
 
 import java.util.Properties;
-
-import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.STREAM_INITIAL_POSITION;
 
 @Slf4j
 public class StreamSourceAndSinkProviderImpl implements StreamSourceAndSinkProvider {
@@ -35,16 +34,15 @@ public class StreamSourceAndSinkProviderImpl implements StreamSourceAndSinkProvi
     }
 
     @Override
-    public SourceFunction<String> createSource() {
+    public SourceFunction<String> createSource() { // NOSONAR
         // Properties for Amazon Kinesis Data Streams Source, we need to specify from where we want to consume the data.
         // STREAM_INITIAL_POSITION: LATEST: consume messages that have arrived from the moment application has been deployed
         // STREAM_INITIAL_POSITION: TRIM_HORIZON: consume messages starting from first available in the Kinesis Stream
 
         Properties kinesisConsumerConfig = new Properties();
         kinesisConsumerConfig.put(AWSConfigConstants.AWS_REGION, props.getRegion());
-        kinesisConsumerConfig.put(STREAM_INITIAL_POSITION, "LATEST");
+        kinesisConsumerConfig.put(ConsumerConfigConstants.STREAM_INITIAL_POSITION, "LATEST");
         log.info("createKinesisSource InputStreamName: {}", props.getInputStreamName());
-
         return new FlinkKinesisConsumer<>(props.getInputStreamName(), new SimpleStringSchema(), kinesisConsumerConfig);
     }
 
@@ -53,14 +51,14 @@ public class StreamSourceAndSinkProviderImpl implements StreamSourceAndSinkProvi
         Properties sinkProperties = new Properties();
         // Required
         sinkProperties.put(AWSConfigConstants.AWS_REGION, props.getRegion());
-        String sinkStreamName = props.getSinkStreamNameByAppId(appId);
-        log.info("createSink appId: {}, sinkStreamName: {}", appId, sinkStreamName);
+        String sinkStreamArn = props.getSinkStreamArnByAppId(appId);
+        log.info("createSink appId: {}, sinkStreamArn: {}", appId, sinkStreamArn);
 
         return KinesisStreamsSink.<String>builder()
                 .setKinesisClientProperties(sinkProperties)
                 .setSerializationSchema(new SimpleStringSchema())
                 .setPartitionKeyGenerator(element -> String.valueOf(element.hashCode()))
-                .setStreamName(sinkStreamName)
+                .setStreamArn(sinkStreamArn)
                 .build();
     }
 }

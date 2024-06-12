@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class RouteProcessFunction extends ProcessFunction<String, JsonNode> {
+public class RouteProcessFunction extends ProcessFunction<String, String> {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final List<String> appIds;
     @Getter
-    private final Map<String, OutputTag<JsonNode>> sideAppOutputTagMap;
+    private final Map<String, OutputTag<String>> sideAppOutputTagMap;
 
     public RouteProcessFunction(final List<String> appIds) {
         this.appIds = appIds;
@@ -39,7 +39,7 @@ public class RouteProcessFunction extends ProcessFunction<String, JsonNode> {
         if (appIds.size() > 1) {
             for (int i = 1; i < appIds.size(); i++) {
                 String appId = appIds.get(i);
-                OutputTag<JsonNode> outputTag = new OutputTag<>("side-output-" + appId) {
+                OutputTag<String> outputTag = new OutputTag<>("side-output-" + appId) {
                 };
                 sideAppOutputTagMap.put(appId, outputTag);
             }
@@ -47,7 +47,7 @@ public class RouteProcessFunction extends ProcessFunction<String, JsonNode> {
     }
 
     @Override
-    public void processElement(final String value, final ProcessFunction<String, JsonNode>.Context ctx, final Collector<JsonNode> out) throws Exception {
+    public void processElement(final String value, final ProcessFunction<String, String>.Context ctx, final Collector<String> out) throws Exception {
         JsonNode jsonNode = null;
         try {
             jsonNode = OBJECT_MAPPER.readValue(value, JsonNode.class);
@@ -78,9 +78,9 @@ public class RouteProcessFunction extends ProcessFunction<String, JsonNode> {
         }
 
         if (appIds.get(0).equals(appId)) {
-            out.collect(jsonNode);
+            out.collect(jsonNode.toString());
         } else {
-            ctx.output(sideAppOutputTagMap.get(appId), jsonNode);
+            ctx.output(sideAppOutputTagMap.get(appId), jsonNode.toString());
         }
 
     }

@@ -167,10 +167,10 @@ public class ApplicationParameters {
         }
     }
 
-    public String getSinkStreamNameByAppId(final String appId) {
+    public String getSinkStreamArnByAppId(final String appId) {
         for (AppIdStream appIdSteamMap : appIdStreamList) {
             if (appIdSteamMap.getAppId().equals(appId)) {
-                return appIdSteamMap.getStreamArn().split("/")[1];
+                return appIdSteamMap.getStreamArn();
             }
         }
         return null;

@@ -15,20 +15,18 @@ package software.aws.solution.clickstream.function;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.util.Collector;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.ParseRowResult;
-import software.aws.solution.clickstream.common.exception.ExtractDataException;
+import software.aws.solution.clickstream.common.Util;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
-import software.aws.solution.clickstream.flink.ClickstreamException;
 import software.aws.solution.clickstream.plugin.enrich.ClickstreamEventEnrichment;
 
 import java.time.Instant;
 import java.util.List;
 
 @Slf4j
-public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<JsonNode, String> {
+public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<String, String> {
     private final String projectId;
     private final String appId;
     private final EventParser eventParser;
@@ -45,27 +43,25 @@ public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<JsonNode
     }
 
     @Override
-    public void flatMap(final JsonNode value, final Collector<String> out) {
+    public void flatMap(final String value, final Collector<String> out) {
         String delimiter = "/";
-        String fileName = "file://" + appId + delimiter + System.currentTimeMillis();
+        String fileName = "file://" + appId + delimiter + Instant.now().toString();
         try {
-            ParseRowResult result = this.eventParser.parseLineToDBRow(value.toString(), projectId, fileName);
+            ParseRowResult result = this.eventParser.parseLineToDBRow(value, projectId, fileName);
             List<ClickstreamEvent> eventList = result.getClickstreamEventList();
             for (ClickstreamEvent clickstreamEvent : eventList) {
-                clickstreamEvent.getProcessInfo().put("process_time", Instant.now().toString());
                 for (ClickstreamEventEnrichment enrichment : enrichments) {
                     enrichment.enrich(clickstreamEvent);
                 }
+                clickstreamEvent.getProcessInfo().put("process_time", Instant.now().toString());
                 out.collect(clickstreamEvent.toJson());
             }
-        } catch (ExtractDataException e) {
-            if (e.getMessage().contains("Not in GZIP format")) {
-                log.warn("Error '{}' in parse data: {}", e.getMessage(), value);
-            } else {
-                throw e;
-            }
         } catch (Exception e) {
-            throw new ClickstreamException(e);
+            if (e.getMessage().contains("Not in GZIP format")) {
+                log.warn("Error {} in parse data: '{}'", e.getMessage(), value);
+            } else {
+                log.error("Error in parse data: '{}', error: {}", value,  Util.getStackTrace(e), e);
+            }
         }
     }
 }

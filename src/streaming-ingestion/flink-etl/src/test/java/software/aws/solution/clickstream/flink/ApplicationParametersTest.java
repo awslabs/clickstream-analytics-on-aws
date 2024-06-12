@@ -98,9 +98,9 @@ class ApplicationParametersTest {
         Assertions.assertEquals("testStream", params.getInputStreamName());
         Assertions.assertEquals("project1", params.getProjectId());
 
-        Assertions.assertEquals("app1Sink", params.getSinkStreamNameByAppId("app1"));
-        Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
-        Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink", params.getSinkStreamArnByAppId("app1"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink", params.getSinkStreamArnByAppId("app2"));
+        Assertions.assertNull(params.getSinkStreamArnByAppId("app5"));
 
         params.getAppIdStreamList().forEach(appIdStreamMap -> {
 
@@ -135,9 +135,9 @@ class ApplicationParametersTest {
         Assertions.assertEquals("testStream", params.getInputStreamName());
         Assertions.assertEquals("project1", params.getProjectId());
 
-        Assertions.assertEquals("app1Sink", params.getSinkStreamNameByAppId("app1"));
-        Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
-        Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink", params.getSinkStreamArnByAppId("app1"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink", params.getSinkStreamArnByAppId("app2"));
+        Assertions.assertNull(params.getSinkStreamArnByAppId("app5"));
 
         params.getAppIdStreamList().forEach(appIdStreamMap -> {
             Assertions.assertTrue(appIdStreamMap.isEnabled());
@@ -165,9 +165,9 @@ class ApplicationParametersTest {
             Assertions.assertEquals("testStream", params.getInputStreamName());
             Assertions.assertEquals("project1", params.getProjectId());
 
-            Assertions.assertEquals("app1Sink", params.getSinkStreamNameByAppId("app1"));
-            Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
-            Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
+            Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink", params.getSinkStreamArnByAppId("app1"));
+            Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink", params.getSinkStreamArnByAppId("app2"));
+            Assertions.assertNull(params.getSinkStreamArnByAppId("app5"));
 
             Assertions.assertEquals("s3://test/project1/rules/", params.getAppRuleConfigPath());
             Assertions.assertEquals("v2", params.getTransformVersion());
@@ -187,9 +187,9 @@ class ApplicationParametersTest {
         Assertions.assertEquals("testStream", params.getInputStreamName());
         Assertions.assertEquals("project1", params.getProjectId());
 
-        Assertions.assertEquals("app1Sink", params.getSinkStreamNameByAppId("app1"));
-        Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
-        Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink", params.getSinkStreamArnByAppId("app1"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink", params.getSinkStreamArnByAppId("app2"));
+        Assertions.assertNull(params.getSinkStreamArnByAppId("app5"));
 
         params.getAppIdStreamList().forEach(appIdStreamMap -> {
             Assertions.assertTrue(appIdStreamMap.isEnabled());

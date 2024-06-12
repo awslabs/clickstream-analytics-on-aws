@@ -67,8 +67,9 @@ applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=log4j2.xml"]
 
 dependencies {
     api "com.amazonaws:aws-kinesisanalytics-runtime:$kdaRuntimeVersion"
-    api "org.apache.flink:flink-connector-kinesis:$flinkVersion"
-    api "org.apache.flink:flink-connector-aws-kinesis-streams:$flinkVersion"
+    api "org.apache.flink:flink-connector-base:$flinkVersion"
+    api "org.apache.flink:flink-connector-kinesis:$flinkKinesisVersion"
+    api "org.apache.flink:flink-connector-aws-kinesis-streams:$flinkKinesisVersion"
     api "org.apache.flink:flink-streaming-java:$flinkVersion"
     api "org.apache.flink:flink-clients:$flinkVersion"
     api "software.amazon.awssdk:bom:$awsSdkVersion"

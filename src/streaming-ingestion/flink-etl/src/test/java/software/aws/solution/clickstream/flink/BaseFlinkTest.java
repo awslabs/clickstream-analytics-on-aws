@@ -131,7 +131,7 @@ public class BaseFlinkTest {
 
         ObjectNode info = (ObjectNode)jsonNode.get("process_info");
         String inputFileName = info.get("input_file_name").asText();
-        info.put("input_file_name", inputFileName.replaceAll("file://(.*)/\\d+", "file://$1/1716538211207"));
+        info.put("input_file_name", inputFileName.replaceAll("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3,}Z", "2021-01-01T00:00:00.001Z"));
         String processTime = info.get("process_time").asText();
         // "process_time" : "2024-06-06T02:16:26.362709Z",
         info.put("process_time", processTime.replaceAll("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3,}Z", "2021-01-01T00:00:00.000Z"));
