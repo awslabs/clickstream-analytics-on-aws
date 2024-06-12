@@ -84,7 +84,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
         String expectedValue = "{\n" +
                 "  \"source\" : \"Google\",\n" +
-                "  \"medium\" : \"CPC\",\n" +
+                "  \"medium\" : \"(CPC)\",\n" +
                 "  \"campaign\" : \"shopping\",\n" +
                 "  \"content\" : \"content\",\n" +
                 "  \"term\" : null,\n" +
@@ -179,7 +179,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "https://google.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"Google\",\n" +
-                "  \"medium\" : \"Organic\",\n" +
+                "  \"medium\" : \"(Organic)\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : null,\n" +
@@ -201,7 +201,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 null, "https://video.google.com/search?q=flowers&q=football&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"Google Video\",\n" +
-                "  \"medium\" : \"Organic\",\n" +
+                "  \"medium\" : \"(Organic)\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,football\",\n" +
@@ -229,7 +229,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
         String expectedValue = "{\n" +
                 "  \"source\" : \"Google Video\",\n" +
-                "  \"medium\" : \"Organic\",\n" +
+                "  \"medium\" : \"(Organic)\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers2,football2\",\n" +
@@ -259,7 +259,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "https://search.imesh.com/search?q=flowers&si=foo&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"iMesh\",\n" +
-                "  \"medium\" : \"Organic\",\n" +
+                "  \"medium\" : \"(Organic)\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,foo\",\n" +
@@ -282,7 +282,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
                 "https://search.imesh.com/search?q=flowers&si=foo&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg", null, null);
         String expectedValue = "{\n" +
                 "  \"source\" : \"iMesh\",\n" +
-                "  \"medium\" : \"Organic\",\n" +
+                "  \"medium\" : \"(Organic)\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : \"flowers,foo\",\n" +
@@ -306,7 +306,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         boolean internalReferrer = false;
 
         String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
-        Assertions.assertEquals(REFERRAL, medium);
+        Assertions.assertEquals("(" + REFERRAL + ")", medium);
 
     }
 
@@ -320,7 +320,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         boolean internalReferrer = false;
 
         String medium = parser.getMediumByReferrer(pageReferrer, latestReferrer, internalReferrer);
-        Assertions.assertEquals(REFERRAL, medium);
+        Assertions.assertEquals("(" +REFERRAL+ ")", medium);
 
     }
 
@@ -395,7 +395,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
         String expectedValue = "{\n" +
                 "      \"source\" : \"Google\",\n" +
-                "      \"medium\" : \"Organic\",\n" +
+                "      \"medium\" : \"(Organic)\",\n" +
                 "      \"campaign\" : null,\n" +
                 "      \"content\" : null,\n" +
                 "      \"term\" : null,\n" +
@@ -467,7 +467,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
         String expectedValue = "{\n" +
                 "      \"source\" : \"Google\",\n" +
-                "      \"medium\" : \"Organic\",\n" +
+                "      \"medium\" : \"(Organic)\",\n" +
                 "      \"campaign\" : null,\n" +
                 "      \"content\" : null,\n" +
                 "      \"term\" : null,\n" +
@@ -519,7 +519,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
         String expectedValue = "{\n" +
                 "  \"source\" : \"Facebook\",\n" +
-                "  \"medium\" : \"Referral\",\n" +
+                "  \"medium\" : \"(Referral)\",\n" +
                 "  \"campaign\" : null,\n" +
                 "  \"content\" : null,\n" +
                 "  \"term\" : null,\n" +
@@ -541,32 +541,32 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         TrafficSourceUtm trafficSourceUtm1 = new TrafficSourceUtm();
 
         String medium = parser.getMediumByCategory(trafficSourceUtm1, SOCIAL);
-        Assertions.assertEquals(REFERRAL, medium);
+        Assertions.assertEquals("(" + REFERRAL + ")", medium);
 
         medium = parser.getMediumByCategory(trafficSourceUtm1, SOCIAL);
-        Assertions.assertEquals(REFERRAL, medium);
+        Assertions.assertEquals("(" + REFERRAL + ")", medium);
 
         medium = parser.getMediumByCategory(trafficSourceUtm1, VIDEO);
-        Assertions.assertEquals(REFERRAL, medium);
+        Assertions.assertEquals("(" + REFERRAL + ")", medium);
 
         medium = parser.getMediumByCategory(trafficSourceUtm1, SHOPPING);
-        Assertions.assertEquals(REFERRAL, medium);
+        Assertions.assertEquals("(" + REFERRAL + ")", medium);
 
         medium = parser.getMediumByCategory(trafficSourceUtm1, REFERRAL);
-        Assertions.assertEquals(REFERRAL, medium);
+        Assertions.assertEquals("(" + REFERRAL + ")", medium);
 
         medium = parser.getMediumByCategory(trafficSourceUtm1, SEARCH);
-        Assertions.assertEquals(ORGANIC, medium);
+        Assertions.assertEquals("(" + ORGANIC + ")", medium);
 
         // clid is not emtpy
         TrafficSourceUtm trafficSourceUtm2 = new TrafficSourceUtm();
         trafficSourceUtm2.setClid("clid");
 
         medium = parser.getMediumByCategory(trafficSourceUtm2, SOCIAL);
-        Assertions.assertEquals(CPC, medium);
+        Assertions.assertEquals("(" + CPC + ")", medium);
 
         medium = parser.getMediumByCategory(trafficSourceUtm2, SEARCH);
-        Assertions.assertEquals(CPC, medium);
+        Assertions.assertEquals("(" + CPC + ")", medium);
 
         // Medium is not empty
         TrafficSourceUtm trafficSourceUtm3 = new TrafficSourceUtm();
