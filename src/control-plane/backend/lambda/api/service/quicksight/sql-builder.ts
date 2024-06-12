@@ -190,7 +190,7 @@ export interface EventNonNestColProps {
 export const EVENT_USER_VIEW = 'clickstream_event_view_v3';
 export const USER_SEGMENT_TABLE = 'segment_user';
 
-export function buildFunnelTableView(sqlParameters: SQLParameters, requestAciton: string) : string {
+export function buildFunnelTableView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction) : string {
 
   let eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
   let groupCondition: GroupingCondition | undefined = undefined;
@@ -442,7 +442,7 @@ function _buildFunnelChartViewResultSql(sqlParameters: SQLParameters, prefix: st
   `;
 }
 
-export function buildFunnelView(sqlParameters: SQLParameters, requestAciton: string, isMultipleChart: boolean = false) : string {
+export function buildFunnelView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction, isMultipleChart: boolean = false) : string {
 
   const eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
 
@@ -476,7 +476,7 @@ export function buildFunnelView(sqlParameters: SQLParameters, requestAciton: str
   });
 }
 
-export function buildEventAnalysisView(sqlParameters: SQLParameters, requestAciton: string) : string {
+export function buildEventAnalysisView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction) : string {
 
   let resultSql = '';
   const eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
@@ -515,7 +515,7 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters, requestAcit
   });
 }
 
-export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters, requestAciton: string) : string {
+export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction) : string {
 
   let resultSql = '';
   const eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
@@ -555,7 +555,7 @@ export function isStartFromPathAnalysis(sqlParameters: SQLParameters, analyticsT
   ;
 }
 
-export function buildEventPathAnalysisView(sqlParameters: SQLParameters, requestAciton: string) : string {
+export function buildEventPathAnalysisView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction) : string {
 
   const eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
 
@@ -761,7 +761,7 @@ function _buildNodeFieldSqlForNodePathAnalysis(isStartFrom: boolean, sqlParamete
   }
 }
 
-export function buildNodePathAnalysisView(sqlParameters: SQLParameters, requestAciton: string) : string {
+export function buildNodePathAnalysisView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction) : string {
 
   let midTableSql = '';
   let dataTableSql = '';
@@ -1026,7 +1026,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters, requestA
   });
 }
 
-export function buildRetentionAnalysisView(sqlParameters: SQLParameters, requestAciton: string) : string {
+export function buildRetentionAnalysisView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction) : string {
 
   const dateListSql = _buildDateListSQL(sqlParameters);
   const { tableSql, resultSql } = _buildRetentionAnalysisSQLs(sqlParameters);
@@ -1118,7 +1118,7 @@ function _buildTableListColumnSql(sqlParameters: SQLParameters, groupCondition: 
   return sql;
 }
 
-function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters, requestAciton: string, applyToFirst: boolean,
+function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters, requestAciton: ExploreRequestAction, applyToFirst: boolean,
   groupCondition: GroupingCondition | undefined = undefined) : string {
 
   let sql = _buildCommonPartSql(ExploreAnalyticsType.FUNNEL, eventNames, sqlParameters, requestAciton);
@@ -1233,7 +1233,7 @@ function _buildJoinSqlForFunnelTableVisual(sqlParameters: SQLParameters, index:n
 
 }
 
-function _buildFunnelBaseSqlForTableVisual(eventNames: string[], sqlParameters: SQLParameters, requestAciton: string,
+function _buildFunnelBaseSqlForTableVisual(eventNames: string[], sqlParameters: SQLParameters, requestAciton: ExploreRequestAction,
   groupCondition: GroupingCondition | undefined = undefined) : string {
 
   let sql = _buildCommonPartSql(ExploreAnalyticsType.FUNNEL, eventNames, sqlParameters, requestAciton);
@@ -1284,7 +1284,7 @@ function _buildFunnelBaseSqlForTableVisual(eventNames: string[], sqlParameters: 
   return sql;
 };
 
-function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters, requestAciton: string) : string {
+function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters, requestAciton: ExploreRequestAction) : string {
 
   let sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, eventNames, sqlParameters, requestAciton);
   const buildResult = _buildEventCondition(sqlParameters, sql);
@@ -1399,7 +1399,7 @@ function _buildSqlForGrouping(groupCondition: GroupingCondition | undefined, ind
   };
 }
 
-function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters, requestAciton: string) : string {
+function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters, requestAciton: ExploreRequestAction) : string {
 
   let sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, eventNames, sqlParameters, requestAciton);
   const buildResult = _buildEventCondition(sqlParameters, sql);
@@ -1713,7 +1713,7 @@ export function buildColumnsSqlFromConditions(columns: ColumnAttribute[], prefix
 }
 
 export function _buildCommonPartSql(analyticsType: ExploreAnalyticsType, eventNames: string[],
-  sqlParameters: SQLParameters, requestAction: string) : string {
+  sqlParameters: SQLParameters, requestAction: ExploreRequestAction) : string {
 
   // build column sql from event condition
   const eventConditionProps = _getEventConditionProps(sqlParameters);
@@ -1807,19 +1807,13 @@ export function buildDateUnitsSql(timezone: string) {
   `;
 }
 
-function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames: string[],
-  sqlParameters: SQLParameters,
+export function _buildBaseEventDataReturnSql(sqlParameters: BaseSQLParameters,
+  userSegmentBaseSQl: string,
+  globalConditionSql: string,
+  eventDateSQL: string,
+  eventNameClause: string,
   eventColumnSql: string,
-  userColumnSql: string,
-) {
-
-  const eventDateSQL = buildEventDateSql(sqlParameters, 'event.');
-  const eventNameClause = _buildEventNameClause(eventNames, sqlParameters,
-    analyticsType === ExploreAnalyticsType.EVENT_PATH, analyticsType === ExploreAnalyticsType.NODE_PATH);
-  let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
-  globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
-
-  const userSegmentBaseSQl = buildSegmentBaseSql(sqlParameters);
+  userColumnSql: string) {
 
   if (userSegmentBaseSQl !== '') {
     return `
@@ -1829,7 +1823,7 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          event.user_pseudo_id,
+          event.merged_user_id as user_pseudo_id,
           event.user_id,
           ${eventColumnSql}
           ${userColumnSql}
@@ -1864,6 +1858,24 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
         ${globalConditionSql}
     ),
   `;
+}
+
+function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames: string[],
+  sqlParameters: SQLParameters,
+  eventColumnSql: string,
+  userColumnSql: string,
+) {
+
+  const eventDateSQL = buildEventDateSql(sqlParameters, 'event.');
+  const eventNameClause = _buildEventNameClause(eventNames, sqlParameters,
+    analyticsType === ExploreAnalyticsType.EVENT_PATH, analyticsType === ExploreAnalyticsType.NODE_PATH);
+  let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
+  globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
+
+  const userSegmentBaseSQl = buildSegmentBaseSql(sqlParameters);
+
+  return _buildBaseEventDataReturnSql(sqlParameters, userSegmentBaseSQl, globalConditionSql, eventDateSQL, eventNameClause,
+    eventColumnSql, userColumnSql);
 };
 
 export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
