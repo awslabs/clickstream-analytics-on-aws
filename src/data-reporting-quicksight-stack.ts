@@ -99,6 +99,15 @@ export class DataReportingQuickSightStack extends Stack {
       },
     );
 
+    const realtimeDashboardCondition = new CfnCondition(
+      this,
+      'realtimeDashboardCondition',
+      {
+        expression:
+          Fn.conditionEquals(stackParams.quickSightRealTimeDashboardParam.valueAsString, 'yes'),
+      },
+    );
+
     const templateId = `clickstream_template_${stackParams.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
     const template = new CfnTemplate(this, 'Clickstream-Template-Def', {
       templateId,
@@ -135,11 +144,12 @@ export class DataReportingQuickSightStack extends Stack {
         ],
       }],
 
-      definition: Fn.conditionIf(useSpiceCondition.logicalId,
+      definition: Fn.conditionIf(realtimeDashboardCondition.logicalId,
         JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-realtime.json')).toString('utf-8')),
         JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-realtime.json')).toString('utf-8')),
       ),
     });
+    realtimeTemplate.cfnOptions.condition = realtimeDashboardCondition;
 
     const userSecret = Secret.fromSecretNameV2(this, 'Clickstream-Redshift-Secret', `${stackParams.redshiftParameterKeyParam.valueAsString}`);
 
