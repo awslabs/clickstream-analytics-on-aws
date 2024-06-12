@@ -163,7 +163,8 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
 
         dashboards.push({
           appId: schemaName,
-          dashboardId: dashboard?.DashboardId,
+          dashboardId: dashboard?.dashboard.DashboardId,
+          realtimeDashboardId: dashboard?.realtimeDashboard?.DashboardId,
         });
       };
     } catch (err: any) {
@@ -287,8 +288,10 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
 
       dashboards.push({
         appId: schemaName,
-        dashboardId: dashboard?.DashboardId,
+        dashboardId: dashboard?.dashboard.DashboardId,
+        realtimeDashboardId: dashboard?.realtimeDashboard?.DashboardId,
       });
+
     };
 
     for (const schemaName of createSchemas) {
@@ -304,12 +307,13 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       logger.info('Creating schema', {
         schemaName: schemaName,
         dashboardDefProps: dashboardDefProps,
-        oldDashboardDefProps: dashboard?.DashboardId,
+        oldDashboardDefProps: dashboard,
       });
 
       dashboards.push({
         appId: schemaName,
-        dashboardId: dashboard?.DashboardId,
+        dashboardId: dashboard?.dashboard.DashboardId,
+        realtimeDashboardId: dashboard?.realtimeDashboard?.DashboardId,
       });
     };
 
@@ -495,7 +499,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
 
   let realtimeDashboard = undefined;
-  if (realtimeDatasetRefs.length > 0) {
+  if (realtimeDatasetRefs.length > 0 && dashboardDef.realtimeTemplateArn.length > 0) {
     const realtimeSourceEntity = {
       SourceTemplate: {
         Arn: dashboardDef.realtimeTemplateArn,
@@ -545,8 +549,10 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
     const result = await deleteDashboardById(quickSight, accountId, dashboardId.id);
 
     // Delete Realtime Dashboard
-    const rtDashboardId = buildDashBoardId(deleteDatabase, schema, true);
-    await deleteDashboardById(quickSight, accountId, rtDashboardId.id);
+    if(dashboardDef.realtimeTemplateId.length > 0) {
+      const rtDashboardId = buildDashBoardId(deleteDatabase, schema, true);
+      await deleteDashboardById(quickSight, accountId, rtDashboardId.id);
+    }
 
     //delete Analysis
     const analysisId = buildAnalysisId(deleteDatabase, schema);
@@ -704,7 +710,6 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
   }
 
   const latestVersion = await getLatestTemplateVersion(quickSight, commonParams.awsAccountId, dashboardDef.templateId);
-  const latestVersionRT = await getLatestTemplateVersion(quickSight, commonParams.awsAccountId, dashboardDef.realtimeTemplateId);
 
   logger.info('template info', {
     templateId: dashboardDef.templateId,
@@ -716,13 +721,6 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
     SourceTemplate: {
       Arn: dashboardDef.templateArn + `/version/${latestVersion}`,
       DataSetReferences: datasetRefs,
-    },
-  };
-
-  const sourceEntityRT = {
-    SourceTemplate: {
-      Arn: dashboardDef.realtimeTemplateArn + `/version/${latestVersionRT}`,
-      DataSetReferences: datasetRefsRT,
     },
   };
 
@@ -764,18 +762,27 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
 
   //real time dashboard
   let dashboardRT = undefined;
-  const dashboardIdRT = buildDashBoardId(commonParams.databaseName, commonParams.schema, true);
-  const dashboardExistRT = await existDashboard(quickSight, commonParams.awsAccountId, dashboardIdRT.id);
-  if (dashboardExistRT) {
-    dashboardRT = await updateDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef);
-    logger.info(`Dashboard ${dashboard?.DashboardId} update completed.`);
-  } else {
-    createdQuickSightResources.createdSchemas.push({
-      schema: commonParams.schema,
-      dashboardDefProps: dashboardDef,
-    });
-    dashboardRT = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef, true);
-    logger.info(`Dashboard ${dashboard?.DashboardId} create completed.`);
+  if(dashboardDef.realtimeTemplateId.length > 0) {
+    const latestVersionRT = await getLatestTemplateVersion(quickSight, commonParams.awsAccountId, dashboardDef.realtimeTemplateId);
+    const sourceEntityRT = {
+      SourceTemplate: {
+        Arn: dashboardDef.realtimeTemplateArn + `/version/${latestVersionRT}`,
+        DataSetReferences: datasetRefsRT,
+      },
+    };
+    const dashboardIdRT = buildDashBoardId(commonParams.databaseName, commonParams.schema, true);
+    const dashboardExistRT = await existDashboard(quickSight, commonParams.awsAccountId, dashboardIdRT.id);
+    if (dashboardExistRT) {
+      dashboardRT = await updateDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef);
+      logger.info(`Dashboard ${dashboard?.DashboardId} update completed.`);
+    } else {
+      createdQuickSightResources.createdSchemas.push({
+        schema: commonParams.schema,
+        dashboardDefProps: dashboardDef,
+      });
+      dashboardRT = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef, true);
+      logger.info(`Dashboard ${dashboard?.DashboardId} create completed.`);
+    }
   }
 
   const folderId = `clickstream_${commonParams.databaseName}_${commonParams.schema}`;

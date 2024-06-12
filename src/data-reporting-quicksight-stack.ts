@@ -178,13 +178,12 @@ export class DataReportingQuickSightStack extends Stack {
     });
     dataSource.node.addDependency(interfaceCheckCR);
     dataSource.node.addDependency(template);
-    dataSource.node.addDependency(realtimeTemplate);
 
     const cr = createQuicksightCustomResource(this, {
       templateArn: template.attrArn,
       templateId: template.templateId,
-      realtimeTemplateArn: realtimeTemplate.attrArn,
-      realtimeTemplateId: realtimeTemplate.templateId,
+      realtimeTemplateArn: Fn.conditionIf(realtimeDashboardCondition.logicalId, realtimeTemplate.attrArn, '').toString(),
+      realtimeTemplateId: Fn.conditionIf(realtimeDashboardCondition.logicalId, realtimeTemplate.templateId, '').toString(),
       dataSourceArn: dataSource.attrArn,
       databaseName: stackParams.redshiftDBParam.valueAsString,
       timezone: stackParams.quickSightTimezoneParam.valueAsString,
@@ -201,7 +200,6 @@ export class DataReportingQuickSightStack extends Stack {
     });
     cr.node.addDependency(vPCConnectionResource);
     cr.node.addDependency(template);
-    cr.node.addDependency(realtimeTemplate);
 
     this.templateOptions.metadata = {
       'AWS::CloudFormation::Interface': {

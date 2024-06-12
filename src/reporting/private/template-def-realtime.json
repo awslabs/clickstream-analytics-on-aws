@@ -825,8 +825,7 @@
                                                 "Column": {
                                                     "DataSetIdentifier": "Realtime_Event",
                                                     "ColumnName": "geo_country"
-                                                },
-                                                "HierarchyId": "4a8c6739-c42d-4ec1-9e2e-9d68368dd043"
+                                                }
                                             }
                                         }
                                     ],
@@ -881,22 +880,7 @@
                             }
                         },
                         "ColumnHierarchies": [
-                            {
-                                "PredefinedHierarchy": {
-                                    "HierarchyId": "4a8c6739-c42d-4ec1-9e2e-9d68368dd043",
-                                    "Columns": [
-                                        {
-                                            "DataSetIdentifier": "Realtime_Event",
-                                            "ColumnName": "geo_country"
-                                        },
-                                        {
-                                            "DataSetIdentifier": "Realtime_Event",
-                                            "ColumnName": "geo_city"
-                                        }
-                                    ],
-                                    "DrillDownFilters": []
-                                }
-                            }
+
                         ],
                         "Actions": []
                     }
@@ -1396,7 +1380,7 @@
         {
             "DataSetIdentifier": "Realtime_Event",
             "Name": "Page title/Screen name",
-            "Expression": "coalesce({traffic_source_source}, {traffic_source_medium}, '')"
+            "Expression": "coalesce({page_view_page_title}, {screen_view_screen_name}, '')"
         },
         {
             "DataSetIdentifier": "Realtime_Event",
@@ -1457,12 +1441,7 @@
                                     "DataSetIdentifier": "Realtime_Event",
                                     "ColumnName": "View count"
                                 },
-                                "SortDirection": "DESC",
-                                "AggregationFunction": {
-                                    "NumericalAggregationFunction": {
-                                        "SimpleNumericalAggregation": "SUM"
-                                    }
-                                }
+                                "SortDirection": "DESC"
                             }
                         ]
                     }
