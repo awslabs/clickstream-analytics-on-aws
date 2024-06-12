@@ -29,24 +29,11 @@ import java.util.Map;
 @Setter
 public class SensorsEvent {
     private final Map<String, Object> unknownProperties = new HashMap<>();
-
-    @JsonProperty("_track_id")
-    private String trackId;
-
     @JsonProperty("time")
     private long time;
 
-    @JsonProperty("type")
-    private String type;
-
-    @JsonProperty("crc")
-    private String crc;
-
     @JsonProperty("distinct_id")
     private String distinctId;
-
-    @JsonProperty("original_id")
-    private String originalId;
 
     @JsonProperty("anonymous_id")
     private String anonymousId;
@@ -57,20 +44,11 @@ public class SensorsEvent {
     @JsonProperty("event")
     private String event;
 
-    @JsonProperty("project")
-    private String project;
-
-    @JsonProperty("time_free")
-    private boolean timeFree;
-
     @JsonProperty("lib")
     private Lib lib;
 
     @JsonProperty("properties")
     private Properties properties;
-
-    @JsonProperty("_flush_time")
-    private long flushTime;
 
     @JsonProperty("items")
     private List<Item> items;

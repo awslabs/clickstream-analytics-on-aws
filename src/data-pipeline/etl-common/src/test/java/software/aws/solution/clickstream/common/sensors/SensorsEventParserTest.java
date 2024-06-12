@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.BaseTest;
-import software.aws.solution.clickstream.common.ClickstreamEventParser;
 import software.aws.solution.clickstream.common.ExtraParams;
 import software.aws.solution.clickstream.common.ParseDataResult;
 import software.aws.solution.clickstream.common.ParseRowResult;
@@ -31,10 +30,8 @@ import software.aws.solution.clickstream.common.model.ClickstreamUser;
 import software.aws.solution.clickstream.common.sensors.event.SensorsEvent;
 
 import java.io.IOException;
-import java.util.List;
 
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
-
 
 public class SensorsEventParserTest extends BaseTest {
     @BeforeAll
@@ -58,7 +55,7 @@ public class SensorsEventParserTest extends BaseTest {
 
     @Test
     void test_sensors_ingestDataToEvent() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_ingestDataToEvent
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest
 
         String lines = resourceFileContent("/sensors-data/track-signup-data.json");
 
@@ -91,7 +88,7 @@ public class SensorsEventParserTest extends BaseTest {
 
     @Test
     void test_sensors_parseLineToDBRow_web_event() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_parseLineToDBRow_event
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_gtm_parseLineToDBRow_event
 
         String lines = resourceFileContent("/sensors-data/web-sdk-data.json");
 
@@ -107,7 +104,7 @@ public class SensorsEventParserTest extends BaseTest {
 
     @Test
     void test_sensors_parseLineToDBRow_user() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_parseLineToDBRow_user
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_gtm_parseLineToDBRow_user
 
         String lines = resourceFileContent("/sensors-data/unzip-data2.json");
 
@@ -123,7 +120,7 @@ public class SensorsEventParserTest extends BaseTest {
 
     @Test
     void test_sensors_parseLineToDBRow_item() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_parseLineToDBRow_item
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_gtm_parseLineToDBRow_item
 
         String lines = resourceFileContent("/sensors-data/track-signup-data.json");
 
@@ -138,7 +135,7 @@ public class SensorsEventParserTest extends BaseTest {
 
     @Test
     void test_sensors_parseLineToDBRow_item_data() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_parseLineToDBRow_item
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_gtm_parseLineToDBRow_item
 
         String lines = resourceFileContent("/sensors-data/unzip-item-data.json");
 
