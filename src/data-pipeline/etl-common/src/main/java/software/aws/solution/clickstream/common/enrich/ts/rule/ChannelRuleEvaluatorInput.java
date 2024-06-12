@@ -57,7 +57,7 @@ public class ChannelRuleEvaluatorInput {
         evalInput.setTrafficSourceSource(trafficSource.getSource());
         evalInput.setTrafficSourceCampaign(trafficSource.getCampaign());
         evalInput.setTrafficSourceCampaignId(trafficSource.getCampaignId());
-        evalInput.setTrafficSourceMedium(trafficSource.getMedium());
+        evalInput.setTrafficSourceMedium(trafficSource.getMedium()==null? null:trafficSource.getMedium().replace("(", "").replace(")", ""));
         evalInput.setTrafficSourceContent(trafficSource.getContent());
         evalInput.setTrafficSourceTerm(trafficSource.getTerm());
         evalInput.setPageViewLatestReferrer(pageViewLatestReferrer);
