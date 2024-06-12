@@ -5,7 +5,7 @@
   "user_properties" : {
     "$x_test_user" : {
       "set_time_msec" : null,
-      "value" : "Yong Liu"
+      "value" : "Test Name"
     }
   },
   "first_touch_time_msec" : 1690249850031,
