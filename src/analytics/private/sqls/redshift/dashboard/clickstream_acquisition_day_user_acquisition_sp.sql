@@ -19,8 +19,11 @@ BEGIN
         MAX(session_duration) AS session_duration,
         SUM(user_engagement_time_msec) AS user_engagement_time_msec,
         CASE WHEN
-          SUM(CASE WHEN event_name = '_page_view' OR event_name = '_screen_view' THEN 1 ELSE 0 END) > 1 
-          OR MAX(session_duration) > 10000  THEN 1 ELSE 0 
+             SUM(CASE WHEN event_name = '_page_view' OR event_name = '_screen_view' THEN 1 ELSE 0 END) > 1 
+          OR MAX(session_duration) > 10000  
+          OR SUM(user_engagement_time_msec) > 10000000
+          THEN 1 
+          ELSE 0 
         END AS session_indicator,
         MAX(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS new_user_indicator
       FROM 
@@ -52,7 +55,7 @@ BEGIN
         WHERE 
             event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
         GROUP BY 
-            1, 2
+            1, 2, 3
     );
 
     -- first_traffic_source
