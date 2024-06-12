@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { AttributionModelType, ConditionCategory, ExploreAnalyticsOperators, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS, QuickSightChartType } from '@aws/clickstream-base-lib';
+import { AttributionModelType, ConditionCategory, ExploreAnalyticsOperators, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRequestAction, MetadataPlatform, MetadataValueType, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_ENDPOINT_ADDRESS, QuickSightChartType } from '@aws/clickstream-base-lib';
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
 import {
   CreateAnalysisCommand,
@@ -4002,7 +4002,7 @@ describe('reporting test', () => {
             },
           },
         ],
-      }, 'PUBLISH');
+      }, ExploreRequestAction.PUBLISH);
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -4198,7 +4198,7 @@ describe('reporting test', () => {
             },
           },
         ],
-      }, 'PUBLISH');
+      }, ExploreRequestAction.PUBLISH);
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
