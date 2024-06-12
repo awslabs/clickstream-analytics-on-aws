@@ -761,7 +761,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
   }
 
   //real time dashboard
-  let dashboardRT = undefined;
+  let realtimeDashboard = undefined;
   if(dashboardDef.realtimeTemplateId.length > 0) {
     const latestVersionRT = await getLatestTemplateVersion(quickSight, commonParams.awsAccountId, dashboardDef.realtimeTemplateId);
     const sourceEntityRT = {
@@ -773,14 +773,14 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
     const dashboardIdRT = buildDashBoardId(commonParams.databaseName, commonParams.schema, true);
     const dashboardExistRT = await existDashboard(quickSight, commonParams.awsAccountId, dashboardIdRT.id);
     if (dashboardExistRT) {
-      dashboardRT = await updateDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef);
+      realtimeDashboard = await updateDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef);
       logger.info(`Dashboard ${dashboard?.DashboardId} update completed.`);
     } else {
       createdQuickSightResources.createdSchemas.push({
         schema: commonParams.schema,
         dashboardDefProps: dashboardDef,
       });
-      dashboardRT = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef, true);
+      realtimeDashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef, true);
       logger.info(`Dashboard ${dashboard?.DashboardId} create completed.`);
     }
   }
@@ -790,7 +790,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
 
   return {
     dashboard,
-    dashboardRT,
+    realtimeDashboard,
   };
 };
 
