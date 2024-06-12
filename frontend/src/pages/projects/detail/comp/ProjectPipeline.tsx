@@ -175,6 +175,9 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   };
 
   const disableStreamEnableButton = () => {
+    if (!pipelineInfo.streaming || !pipelineInfo.streaming.appIdStreamList) {
+      return false;
+    }
     if (!selectedItems.length) {
       return false;
     }
