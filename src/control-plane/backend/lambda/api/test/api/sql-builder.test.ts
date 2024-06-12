@@ -12,7 +12,7 @@
  */
 
 import { afterEach } from 'node:test';
-import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
 import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, _buildCommonPartSql, daysBetweenDates, buildEventPropertyAnalysisView, ExploreAnalyticsType } from '../../service/quicksight/sql-builder';
 
@@ -54,9 +54,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -221,11 +222,12 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(
       `
-      with
+      -- clickstream-explorative-dashboard-FUNNEL
+    with
       base_data as (
         select
           event.event_id,
@@ -390,9 +392,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -549,9 +552,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -741,9 +745,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -960,9 +965,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -1247,9 +1253,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -1450,9 +1457,10 @@ describe('SQL Builder test', () => {
         lagSeconds: 3600,
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT_PATH
     with
     base_data as (
       select
@@ -1678,9 +1686,10 @@ describe('SQL Builder test', () => {
         nodeType: ExplorePathNodeType.EVENT,
         lagSeconds: 3600,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT_PATH
     with
       base_data as (
         select
@@ -1903,9 +1912,10 @@ describe('SQL Builder test', () => {
         nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -2097,9 +2107,10 @@ describe('SQL Builder test', () => {
         nodes: ['LoginActivity'],
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -2284,9 +2295,10 @@ describe('SQL Builder test', () => {
         mergeConsecutiveEvents: true,
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -2500,9 +2512,10 @@ describe('SQL Builder test', () => {
         nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
         includingOtherEvents: false,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -2698,9 +2711,10 @@ describe('SQL Builder test', () => {
         nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -2947,9 +2961,10 @@ describe('SQL Builder test', () => {
         mergeConsecutiveEvents: true,
         includingOtherEvents: true,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -3215,9 +3230,10 @@ describe('SQL Builder test', () => {
         nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
         includingOtherEvents: false,
       },
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-NODE_PATH
     with
       base_data as (
         select
@@ -3545,9 +3561,10 @@ describe('SQL Builder test', () => {
         },
       ],
 
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -3842,9 +3859,10 @@ describe('SQL Builder test', () => {
         },
       ],
 
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -4138,9 +4156,10 @@ describe('SQL Builder test', () => {
         },
       ],
 
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -4435,9 +4454,10 @@ describe('SQL Builder test', () => {
         },
       ],
 
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -4699,9 +4719,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -4990,9 +5011,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -5325,9 +5347,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -5613,9 +5636,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -5903,9 +5927,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -6164,9 +6189,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -6463,9 +6489,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -6881,9 +6908,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -7287,9 +7315,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-20'),
       timeEnd: new Date('2023-11-04'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -7718,9 +7747,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     const expectResult = `
+    -- clickstream-explorative-dashboard-NODE_PATH
     with
       base_data as (
         select
@@ -8010,9 +8040,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
     base_data as (
       select
@@ -8212,9 +8243,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -8414,9 +8446,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -8678,9 +8711,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -8942,9 +8976,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -9156,9 +9191,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -9242,9 +9278,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -9349,9 +9386,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -9440,9 +9478,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -9537,9 +9576,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -9635,9 +9675,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -9747,9 +9788,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -9834,9 +9876,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -9913,9 +9956,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -10015,9 +10059,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -10135,9 +10180,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -10287,9 +10333,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -10449,9 +10496,10 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      });
+      }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    --clickstream-explorative-analytics-EVENT
     with
     base_data as (
       select
@@ -10641,9 +10689,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -11032,9 +11081,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -11392,9 +11442,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -11624,9 +11675,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -11902,9 +11954,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -12201,9 +12254,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -12501,9 +12555,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -12798,9 +12853,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -12979,9 +13035,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -13253,9 +13310,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-NODE_PATH
     with
       base_data as (
         select
@@ -13643,9 +13701,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-24'),
       timeEnd: new Date('2023-10-30'),
       groupColumn: ExploreGroupColumn.MONTH,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -13905,11 +13964,12 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.includes('shopping.shopping.')).toEqual(true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -14240,9 +14300,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
     with
       base_data as (
         select
@@ -14465,9 +14526,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -14629,9 +14691,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-FUNNEL
     with
       base_data as (
         select
@@ -14841,9 +14904,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-FUNNEL
     with
       base_data as (
         select
@@ -15064,9 +15128,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    }, true);
+    }, ExploreRequestAction.PREVIEW, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-FUNNEL
     with
       base_data as (
         select
@@ -15291,9 +15356,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    }, true);
+    }, ExploreRequestAction.PREVIEW, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-FUNNEL
     with
       base_data as (
         select
@@ -15555,9 +15621,10 @@ describe('SQL Builder test', () => {
       lastN: 1,
       timeUnit: ExploreRelativeTimeUnit.WK,
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -15789,10 +15856,10 @@ describe('SQL Builder test', () => {
           },
         },
       ],
-
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -16069,9 +16136,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -16341,9 +16409,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -16580,9 +16649,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -16782,10 +16852,10 @@ describe('SQL Builder test', () => {
           },
         },
       ],
-
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -17066,10 +17136,10 @@ describe('SQL Builder test', () => {
           },
         },
       ],
-
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -17300,9 +17370,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -17516,9 +17587,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -17732,9 +17804,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -17947,9 +18020,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -18148,9 +18222,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -18360,9 +18435,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -18619,9 +18695,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -18886,9 +18963,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -19195,9 +19273,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -19517,9 +19596,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -19730,9 +19810,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -20065,9 +20146,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-24'),
       timeEnd: new Date('2023-10-30'),
       groupColumn: ExploreGroupColumn.MONTH,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -20402,9 +20484,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -20713,9 +20796,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -20938,9 +21022,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -21187,9 +21272,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, ExploreRequestAction.PUBLISH, true);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
     with
       base_data as (
         select
@@ -21485,9 +21571,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -21702,9 +21789,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, ExploreRequestAction.PUBLISH);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
     with
       base_data as (
         select
@@ -22074,9 +22162,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-24'),
       timeEnd: new Date('2023-10-30'),
       groupColumn: ExploreGroupColumn.MONTH,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -22499,9 +22588,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-24'),
       timeEnd: new Date('2023-10-30'),
       groupColumn: ExploreGroupColumn.MONTH,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     const expectResult = `
+    -- clickstream-explorative-analytics-RETENTION
     with
       base_data as (
         select
@@ -22782,9 +22872,10 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, ExploreRequestAction.PREVIEW);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
     with
       base_data as (
         select
@@ -23018,6 +23109,2045 @@ describe('SQL Builder test', () => {
       join_table
     `.trim().replace(/ /g, ''),
     );
+  });
+
+  test('segment condition - and - in', () => {
+
+    const sql = buildEventPropertyAnalysisView({
+      dbName: 'shop',
+      timezone: 'Asia/Shanghai',
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'in',
+            value: ['111111', '33333'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'in',
+            value: ['22222', '44444'],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+        conditionOperator: 'and',
+      },
+      groupCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'platform',
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER,
+            property: 'cagegory',
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+        applyTo: 'FIRST',
+      },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT_OUTER,
+              property: 'geo_country',
+              dataType: MetadataValueType.STRING,
+            },
+          },
+        },
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.AGGREGATION_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              dataType: MetadataValueType.INTEGER,
+            },
+            aggregationMethod: ExploreAggregationMethod.SUM,
+          },
+        },
+        {
+          eventName: 'add_to_cart',
+          computeMethod: ExploreComputeMethod.AGGREGATION_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              dataType: MetadataValueType.INTEGER,
+            },
+            aggregationMethod: ExploreAggregationMethod.MAX,
+          },
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.WEEK,
+    }, ExploreRequestAction.PREVIEW);
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-analytics-EVENT
+    with
+      user_segment_base as (
+        select
+          user_id
+        from
+          shop.shop.segment_user
+        where
+          segment_id in ('111111', '33333', '22222', '44444')
+        group by
+          user_id
+        having
+          (count(distinct segment_id) = 4)
+      ),
+      base_data as (
+        select
+          event.event_id,
+          event.event_name,
+          event.event_timestamp,
+          event.merged_user_id as user_pseudo_id,
+          event.user_id,
+          event.geo_country,
+          event.platform,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties.cagegory.value::varchar as u_cagegory,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          shop.shop.clickstream_event_view_v3 as event
+          join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
+        where
+          event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          geo_country as custom_attr_0,
+          event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0,
+          platform as platform_0,
+          u_cagegory as u_cagegory_0
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+      ),
+      table_1 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          e__session_duration as custom_attr_1,
+          event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1,
+          platform as platform_1,
+          u_cagegory as u_cagegory_1
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+      ),
+      table_2 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          e__session_duration as custom_attr_2,
+          event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2,
+          platform as platform_2,
+          u_cagegory as u_cagegory_2
+        from
+          base_data base
+        where
+          event_name = 'add_to_cart'
+      ),
+      table_3 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          user_pseudo_id as custom_attr_3,
+          event_name as event_name_3,
+          event_timestamp as event_timestamp_3,
+          event_id as event_id_3,
+          user_id as user_id_3,
+          user_pseudo_id as user_pseudo_id_3,
+          platform as platform_3,
+          u_cagegory as u_cagegory_3
+        from
+          base_data base
+        where
+          event_name = 'purchase'
+      ),
+      join_table as (
+        select
+          WEEK as event_date,
+          event_name,
+          platform,
+          u_cagegory,
+          count(distinct custom_attr_id) as "count/aggregation amount"
+        from
+          (
+            select
+              table_0.month,
+              table_0.week,
+              table_0.day,
+              table_0.hour,
+              1 || '_' || table_0.event_name_0 as event_name,
+              table_0.event_timestamp_0 as event_timestamp,
+              table_0.custom_attr_0 as custom_attr_id,
+              table_0.platform_0 as platform,
+              table_0.u_cagegory_0 as u_cagegory
+            from
+              table_0
+          ) as union_table_0
+        group by
+          WEEK,
+          event_name,
+          platform,
+          u_cagegory
+        union all
+        select
+          WEEK as event_date,
+          event_name,
+          platform,
+          u_cagegory,
+          SUM(custom_attr_id) as "count/aggregation amount"
+        from
+          (
+            select
+              table_1.month,
+              table_1.week,
+              table_1.day,
+              table_1.hour,
+              2 || '_' || table_1.event_name_1 as event_name,
+              table_1.event_timestamp_1 as event_timestamp,
+              table_1.custom_attr_1 as custom_attr_id,
+              table_1.platform_1 as platform,
+              table_1.u_cagegory_1 as u_cagegory
+            from
+              table_1
+          ) as union_table_1
+        group by
+          WEEK,
+          event_name,
+          platform,
+          u_cagegory
+        union all
+        select
+          WEEK as event_date,
+          event_name,
+          platform,
+          u_cagegory,
+          MAX(custom_attr_id) as "count/aggregation amount"
+        from
+          (
+            select
+              table_2.month,
+              table_2.week,
+              table_2.day,
+              table_2.hour,
+              3 || '_' || table_2.event_name_2 as event_name,
+              table_2.event_timestamp_2 as event_timestamp,
+              table_2.custom_attr_2 as custom_attr_id,
+              table_2.platform_2 as platform,
+              table_2.u_cagegory_2 as u_cagegory
+            from
+              table_2
+          ) as union_table_2
+        group by
+          WEEK,
+          event_name,
+          platform,
+          u_cagegory
+        union all
+        select
+          WEEK as event_date,
+          event_name,
+          platform,
+          u_cagegory,
+          count(distinct custom_attr_id) as "count/aggregation amount"
+        from
+          (
+            select
+              table_3.month,
+              table_3.week,
+              table_3.day,
+              table_3.hour,
+              4 || '_' || table_3.event_name_3 as event_name,
+              table_3.event_timestamp_3 as event_timestamp,
+              table_3.user_pseudo_id_3 as custom_attr_id,
+              table_3.platform_3 as platform,
+              table_3.u_cagegory_3 as u_cagegory
+            from
+              table_3
+          ) as union_table_3
+        group by
+          WEEK,
+          event_name,
+          platform,
+          u_cagegory
+      )
+    select
+      event_date::date,
+      event_name,
+      platform::varchar as platform,
+      u_cagegory::varchar as u_cagegory,
+      "count/aggregation amount"::double precision
+    from
+      join_table
+    `.trim().replace(/ /g, ''),
+    );
+  });
+
+  test('segment condition - or - in', () => {
+
+    const sql = buildFunnelView({
+      dbName: 'shop',
+      timezone: 'Asia/Shanghai',
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      groupCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'geo_country',
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+      },
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'in',
+            value: ['111111', '33333'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'in',
+            value: ['22222', '44444'],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+        conditionOperator: 'or',
+      },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'geo_country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526780],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'add_to_cart',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'geo_country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [200],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    }, ExploreRequestAction.PUBLISH, true);
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-FUNNEL
+    with
+      user_segment_base as (
+        select
+          user_id
+        from
+          shop.shop.segment_user
+        where
+          segment_id in ('111111', '33333', '22222', '44444')
+        group by
+          user_id
+      ),
+      base_data as (
+        select
+          event.event_id,
+          event.event_name,
+          event.event_timestamp,
+          event.merged_user_id as user_pseudo_id,
+          event.user_id,
+          event.platform,
+          event.geo_country,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          shop.shop.clickstream_event_view_v3 as event
+          join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
+        where
+          event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          '1_' || event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0,
+          COALESCE(geo_country::varchar, null) as geo_country_0
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and u__user_first_touch_timestamp > 1686532526770
+            and u__user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      table_1 as (
+        select
+          '2_' || event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1,
+          COALESCE(geo_country::varchar, null) as geo_country_1
+        from
+          base_data base
+        where
+          event_name = 'add_to_cart'
+      ),
+      table_2 as (
+        select
+          '3_' || event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2,
+          COALESCE(geo_country::varchar, null) as geo_country_2
+        from
+          base_data base
+        where
+          event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and u__user_first_touch_timestamp > 1686532526770
+            and e__session_duration > 200
+          )
+      ),
+      join_table as (
+        select
+          table_0.*,
+          table_1.event_id_1,
+          table_1.event_name_1,
+          table_1.user_pseudo_id_1,
+          table_1.event_timestamp_1,
+          table_1.geo_country_1,
+          table_2.event_id_2,
+          table_2.event_name_2,
+          table_2.user_pseudo_id_2,
+          table_2.event_timestamp_2,
+          table_2.geo_country_2
+        from
+          table_0
+          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_0.geo_country_0 = table_1.geo_country_1
+          and EXTRACT(
+            epoch
+            FROM
+              table_1.event_timestamp_1 - table_0.event_timestamp_0
+          ) > 0
+          and EXTRACT(
+            epoch
+            FROM
+              table_1.event_timestamp_1 - table_0.event_timestamp_0
+          ) <= cast(600 as bigint)
+          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_1.geo_country_1 = table_2.geo_country_2
+          and EXTRACT(
+            epoch
+            FROM
+              table_2.event_timestamp_2 - table_1.event_timestamp_1
+          ) > 0
+          and EXTRACT(
+            epoch
+            FROM
+              table_2.event_timestamp_2 - table_0.event_timestamp_0
+          ) <= cast(600 as bigint)
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          event_id_0,
+          event_id_1,
+          event_id_2,
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then event_id_0
+              when seq = 1 then event_id_1
+              when seq = 2 then event_id_2
+              else null
+            end
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then event_id_0
+              when seq = 1 then event_id_1
+              else null
+            end
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then event_id_0
+              else null
+            end
+          end as event_id,
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
+              else null
+            end
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              else null
+            end
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then event_name_0
+              else null
+            end
+          end as event_name,
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then geo_country_0
+              when seq = 1 then geo_country_1
+              when seq = 2 then geo_country_2
+              else null
+            end
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then geo_country_0
+              when seq = 1 then geo_country_1
+              else null
+            end
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then geo_country_0
+              else null
+            end
+          end as geo_country
+        from
+          join_table
+          join seq_table on 1 = 1
+      )
+    select
+      day::date as event_date,
+      event_name,
+      event_id,
+      geo_country
+    from
+      final_table
+    where
+      event_name is not null
+    `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+
+  test('segment condition - and - not_in', () => {
+
+    const sql = buildEventAnalysisView({
+      dbName: 'shop',
+      timezone: 'Asia/Shanghai',
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      groupCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'geo_country',
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+      },
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'platform',
+            operator: '=',
+            value: ['Android'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'not_in',
+            value: ['111111', '33333'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'not_in',
+            value: ['22222', '44444'],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+        conditionOperator: 'and',
+      },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'geo_country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526780],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'add_to_cart',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'geo_country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [200],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    }, ExploreRequestAction.PUBLISH);
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT
+    with
+      user_segment_base as (
+        select
+          user_id
+        from
+          shop.shop.segment_user
+        where
+          segment_id not in ('111111', '33333', '22222', '44444')
+        group by
+          user_id
+      ),
+      base_data as (
+        select
+          event.event_id,
+          event.event_name,
+          event.event_timestamp,
+          event.merged_user_id as user_pseudo_id,
+          event.user_id,
+          event.platform,
+          event.geo_country,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          shop.shop.clickstream_event_view_v3 as event
+          join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
+        where
+          event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+          and (platform = 'Android')
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0,
+          geo_country as geo_country_0
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and u__user_first_touch_timestamp > 1686532526770
+            and u__user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      table_1 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1,
+          geo_country as geo_country_1
+        from
+          base_data base
+        where
+          event_name = 'add_to_cart'
+      ),
+      table_2 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2,
+          geo_country as geo_country_2
+        from
+          base_data base
+        where
+          event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and u__user_first_touch_timestamp > 1686532526770
+            and e__session_duration > 200
+          )
+      ),
+      join_table as (
+        select
+          table_0.month,
+          table_0.week,
+          table_0.day,
+          table_0.hour,
+          1 || '_' || table_0.event_name_0 as event_name,
+          table_0.event_timestamp_0 as event_timestamp,
+          table_0.event_id_0 as x_id,
+          table_0.geo_country_0 as geo_country
+        from
+          table_0
+        union all
+        select
+          table_1.month,
+          table_1.week,
+          table_1.day,
+          table_1.hour,
+          2 || '_' || table_1.event_name_1 as event_name,
+          table_1.event_timestamp_1 as event_timestamp,
+          table_1.event_id_1 as x_id,
+          table_1.geo_country_1 as geo_country
+        from
+          table_1
+        union all
+        select
+          table_2.month,
+          table_2.week,
+          table_2.day,
+          table_2.hour,
+          3 || '_' || table_2.event_name_2 as event_name,
+          table_2.event_timestamp_2 as event_timestamp,
+          table_2.user_pseudo_id_2 as x_id,
+          table_2.geo_country_2 as geo_country
+        from
+          table_2
+      )
+    select
+      day::date as event_date,
+      event_name,
+      geo_country::varchar as geo_country,
+      x_id as "Count"
+    from
+      join_table
+    where
+      x_id is not null
+    group by
+      day,
+      event_name,
+      geo_country::varchar,
+      x_id
+    `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('segment condition - or - not_in', () => {
+
+    const sql = buildNodePathAnalysisView({
+      dbName: 'shop',
+      timezone: 'Asia/Shanghai',
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'platform',
+            operator: '=',
+            value: ['Android'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'not_in',
+            value: ['111111', '33333'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'not_in',
+            value: ['22222', '44444'],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+        conditionOperator: 'or',
+      },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'geo_country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526780],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'add_to_cart',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.EVENT_OUTER,
+                property: 'geo_country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [200],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+      ],
+      pathAnalysis: {
+        sessionType: ExplorePathSessionDef.SESSION,
+        nodeType: ExplorePathNodeType.SCREEN_NAME,
+        nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
+        includingOtherEvents: true,
+      },
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    }, ExploreRequestAction.PUBLISH);
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-NODE_PATH
+    with
+      user_segment_base as (
+        select
+          a.user_id
+        from
+          (
+            select
+              user_id
+            from
+              shop.shop.segment_user
+            group by
+              user_id
+          ) a
+          left join (
+            select
+              user_id
+            from
+              shop.shop.segment_user
+            where
+              segment_id in ('111111', '33333', '22222', '44444')
+            group by
+              user_id
+            having
+              (count(distinct segment_id) = 4)
+          ) b on a.user_id = b.user_id
+        where
+          b.user_id is not null
+        group by
+          1
+      ),
+      base_data as (
+        select
+          event.event_id,
+          event.event_name,
+          event.event_timestamp,
+          event.merged_user_id as user_pseudo_id,
+          event.user_id,
+          event.platform,
+          event.geo_country,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.session_id,
+          event.screen_view_screen_name,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          shop.shop.clickstream_event_view_v3 as event
+          join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
+        where
+          event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_name in ('_screen_view', '_page_view')
+          and (platform = 'Android')
+      ),
+      mid_table_1 as (
+        select
+          event_name,
+          day as event_date,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          session_id
+        from
+          base_data
+      ),
+      mid_table_2 as (
+        select
+          base_data.event_timestamp,
+          base_data.event_id,
+          max(screen_view_screen_name) as node
+        from
+          base_data
+        group by
+          1,
+          2
+      ),
+      mid_table as (
+        select
+          mid_table_1.*,
+          mid_table_2.node
+        from
+          mid_table_1
+          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+      ),
+      data as (
+        select
+          event_name,
+          event_date,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          session_id,
+          case
+            when node in (
+              'LoginActivity',
+              'MainActivity',
+              'ProductDetailActivity',
+              'ShoppingCartActivity'
+            ) then node
+            else 'other'
+          end as node,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          mid_table
+      ),
+      step_table_1 as (
+        select
+          user_pseudo_id,
+          session_id,
+          min(step_1) min_step
+        from
+          data
+        where
+          node = 'LoginActivity'
+        group by
+          user_pseudo_id,
+          session_id
+      ),
+      step_table_2 as (
+        select
+          data.*
+        from
+          data
+          join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
+          and data.session_id = step_table_1.session_id
+          and data.step_1 >= step_table_1.min_step
+      ),
+      data_final as (
+        select
+          event_name,
+          event_date,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          session_id,
+          node,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) + 1 as step_2
+        from
+          step_table_2
+      )
+    select
+      a.event_date event_date,
+      a.node || '_' || a.step_1 as source,
+      CASE
+        WHEN b.node is not null THEN b.node || '_' || a.step_2
+        ELSE 'lost_' || a.step_2
+      END as target,
+      a.user_pseudo_id as x_id
+    from
+      data_final a
+      left join data_final b on a.user_pseudo_id = b.user_pseudo_id
+      and a.session_id = b.session_id
+      and a.step_2 = b.step_1
+    where
+      a.step_2 <= 5
+    `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('segment condition - and - mix in & not_in', () => {
+
+    const sql = buildRetentionAnalysisView({
+      dbName: 'shop',
+      timezone: 'Asia/Shanghai',
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      groupCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'geo_country',
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'geo_city',
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+        applyTo: 'ALL',
+      },
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'platform',
+            operator: '=',
+            value: ['Android'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.EVENT_OUTER,
+            property: 'geo_country',
+            operator: '=',
+            value: ['China'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'in',
+            value: ['111111', '33333'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'not_in',
+            value: ['22222', '44444'],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+        conditionOperator: 'and',
+      },
+      pairEventAndConditions: [
+        {
+          startEvent: {
+            eventName: 'view_item',
+            sqlCondition: {
+              conditionOperator: 'and',
+              conditions: [
+                {
+                  category: ConditionCategory.EVENT_OUTER,
+                  property: 'platform',
+                  operator: '=',
+                  value: ['Android'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.EVENT_OUTER,
+                  property: 'geo_country',
+                  operator: '=',
+                  value: ['China'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.USER,
+                  property: '_user_first_touch_timestamp',
+                  operator: '>',
+                  value: [1686532526770],
+                  dataType: MetadataValueType.INTEGER,
+                },
+                {
+                  category: ConditionCategory.USER,
+                  property: '_user_first_touch_timestamp',
+                  operator: '>',
+                  value: [1686532526780],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+            },
+          },
+          backEvent: {
+            eventName: 'purchase',
+            sqlCondition: {
+              conditionOperator: 'and',
+              conditions: [
+                {
+                  category: ConditionCategory.EVENT_OUTER,
+                  property: 'platform',
+                  operator: '=',
+                  value: ['Android'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.EVENT_OUTER,
+                  property: 'geo_country',
+                  operator: '=',
+                  value: ['China'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.USER,
+                  property: '_user_first_touch_timestamp',
+                  operator: '>',
+                  value: [1686532526770],
+                  dataType: MetadataValueType.INTEGER,
+                },
+                {
+                  category: ConditionCategory.EVENT,
+                  property: '_session_duration',
+                  operator: '>',
+                  value: [200],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+            },
+          },
+        },
+        {
+          startEvent: {
+            eventName: 'view_item',
+            sqlCondition: {
+              conditionOperator: 'and',
+              conditions: [
+                {
+                  category: ConditionCategory.EVENT_OUTER,
+                  property: 'platform',
+                  operator: '=',
+                  value: ['Android'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.EVENT_OUTER,
+                  property: 'geo_country',
+                  operator: '=',
+                  value: ['China'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.USER,
+                  property: '_user_first_touch_timestamp',
+                  operator: '>',
+                  value: [1686532526770],
+                  dataType: MetadataValueType.INTEGER,
+                },
+                {
+                  category: ConditionCategory.USER,
+                  property: '_user_first_touch_timestamp',
+                  operator: '>',
+                  value: [1686532526780],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+            },
+          },
+          backEvent: {
+            eventName: 'add_to_cart',
+            sqlCondition: {
+              conditionOperator: 'and',
+              conditions: [
+                {
+                  category: ConditionCategory.EVENT_OUTER,
+                  property: 'platform',
+                  operator: '=',
+                  value: ['Android'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.EVENT_OUTER,
+                  property: 'geo_country',
+                  operator: '=',
+                  value: ['China'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.USER,
+                  property: '_user_first_touch_timestamp',
+                  operator: '>',
+                  value: [1686532526770],
+                  dataType: MetadataValueType.INTEGER,
+                },
+                {
+                  category: ConditionCategory.EVENT,
+                  property: '_session_duration',
+                  operator: '>',
+                  value: [200],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+            },
+          },
+        },
+
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-24'),
+      timeEnd: new Date('2023-10-30'),
+      groupColumn: ExploreGroupColumn.MONTH,
+    }, ExploreRequestAction.PREVIEW);
+
+    const expectResult = `
+    -- clickstream-explorative-analytics-RETENTION
+    with
+      user_segment_base as (
+        select
+          a.user_id
+        from
+          (
+            select
+              user_id
+            from
+              shop.shop.segment_user
+            where
+              segment_id not in ('22222', '44444')
+            group by
+              user_id
+          ) a
+          join (
+            select
+              user_id
+            from
+              shop.shop.segment_user
+            where
+              segment_id in ('111111', '33333')
+            group by
+              user_id
+            having
+              (count(distinct segment_id) = 2)
+          ) b on a.user_id = b.user_id
+        group by
+          1
+      ),
+      base_data as (
+        select
+          event.event_id,
+          event.event_name,
+          event.event_timestamp,
+          event.merged_user_id as user_pseudo_id,
+          event.user_id,
+          event.platform,
+          event.geo_country,
+          event.geo_city,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          shop.shop.clickstream_event_view_v3 as event
+          join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
+        where
+          event.event_timestamp >= (date '2023-10-24')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp <= (date '2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_name in ('view_item', 'purchase', 'add_to_cart')
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+          )
+      ),
+      date_list as (
+        select
+          '2023-10-24'::date as event_date
+        union all
+        select
+          '2023-10-25'::date as event_date
+        union all
+        select
+          '2023-10-26'::date as event_date
+        union all
+        select
+          '2023-10-27'::date as event_date
+        union all
+        select
+          '2023-10-28'::date as event_date
+        union all
+        select
+          '2023-10-29'::date as event_date
+        union all
+        select
+          '2023-10-30'::date as event_date
+      ),
+      first_date as (
+        select
+          min(event_date) as first_date
+        from
+          date_list
+      ),
+      first_table_0 as (
+        select
+          day::date as event_date,
+          event_name,
+          geo_country,
+          geo_city,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.day::date = first_date.first_date
+        where
+          event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and u__user_first_touch_timestamp > 1686532526770
+            and u__user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      second_table_0 as (
+        select
+          day::date as event_date,
+          event_name,
+          geo_country,
+          geo_city,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.day::date >= first_date.first_date
+        where
+          event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and u__user_first_touch_timestamp > 1686532526770
+            and e__session_duration > 200
+          )
+      ),
+      first_table_1 as (
+        select
+          day::date as event_date,
+          event_name,
+          geo_country,
+          geo_city,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.day::date = first_date.first_date
+        where
+          event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and u__user_first_touch_timestamp > 1686532526770
+            and u__user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      second_table_1 as (
+        select
+          day::date as event_date,
+          event_name,
+          geo_country,
+          geo_city,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.day::date >= first_date.first_date
+        where
+          event_name = 'add_to_cart'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and u__user_first_touch_timestamp > 1686532526770
+            and e__session_duration > 200
+          )
+      ),
+      result_table as (
+        select
+          first_table_0.geo_country,
+          first_table_0.geo_city,
+          first_table_0.event_name || '_' || 0 as grouping,
+          first_table_0.event_date as start_event_date,
+          first_table_0.user_pseudo_id as start_user_pseudo_id,
+          date_list.event_date as event_date,
+          second_table_0.user_pseudo_id as end_user_pseudo_id,
+          second_table_0.event_date as end_event_date
+        from
+          first_table_0
+          join date_list on 1 = 1
+          left join second_table_0 on date_list.event_date = second_table_0.event_date
+          and first_table_0.user_pseudo_id = second_table_0.user_pseudo_id
+          and first_table_0.geo_country = second_table_0.geo_country
+          and first_table_0.geo_city = second_table_0.geo_city
+        union all
+        select
+          first_table_1.geo_country,
+          first_table_1.geo_city,
+          first_table_1.event_name || '_' || 1 as grouping,
+          first_table_1.event_date as start_event_date,
+          first_table_1.user_pseudo_id as start_user_pseudo_id,
+          date_list.event_date as event_date,
+          second_table_1.user_pseudo_id as end_user_pseudo_id,
+          second_table_1.event_date as end_event_date
+        from
+          first_table_1
+          join date_list on 1 = 1
+          left join second_table_1 on date_list.event_date = second_table_1.event_date
+          and first_table_1.user_pseudo_id = second_table_1.user_pseudo_id
+          and first_table_1.geo_country = second_table_1.geo_country
+          and first_table_1.geo_city = second_table_1.geo_city
+      )
+    select
+      geo_country::varchar as geo_country,
+      geo_city::varchar as geo_city,
+      grouping,
+      DATE_TRUNC('month', start_event_date) as start_event_date,
+      DATE_TRUNC('month', event_date) as event_date,
+      (
+        count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)
+      )::decimal(20, 4) as retention
+    from
+      result_table
+    group by
+      geo_country::varchar,
+      geo_city::varchar,
+      grouping,
+      start_event_date,
+      event_date
+    order by
+      grouping,
+      event_date
+    `;
+    expect(sql.trim().replace(/ /g, '')).toEqual(expectResult.trim().replace(/ /g, ''));
+
+  });
+
+  test('segment condition - or - mix in & not_in', () => {
+
+    const sql = buildEventPathAnalysisView({
+      dbName: 'shop',
+      timezone: 'Asia/Shanghai',
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'in',
+            value: ['111111', '33333'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: 'segment_id',
+            operator: 'not_in',
+            value: ['22222', '44444'],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+        conditionOperator: 'or',
+      },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+        },
+        {
+          eventName: 'add_to_cart',
+        },
+        {
+          eventName: 'purchase',
+        },
+      ],
+      pathAnalysis: {
+        sessionType: ExplorePathSessionDef.SESSION,
+        nodeType: ExplorePathNodeType.EVENT,
+      },
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    }, ExploreRequestAction.PUBLISH);
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    -- clickstream-explorative-dashboard-EVENT_PATH
+    with
+      user_segment_base as (
+        select
+          t.user_id
+        from
+          (
+            select
+              a.user_id
+            from
+              (
+                select
+                  user_id
+                from
+                  shop.shop.segment_user
+                group by
+                  user_id
+              ) a
+              left join (
+                select
+                  user_id
+                from
+                  shop.shop.segment_user
+                where
+                  segment_id in ('22222', '44444')
+                group by
+                  user_id
+                having
+                  (count(distinct segment_id) = 2)
+              ) b on a.user_id = b.user_id
+            where
+              b.user_id is not null
+            group by
+              1
+            union all
+            select
+              user_id
+            from
+              shop.shop.segment_user
+            where
+              segment_id in ('111111', '33333')
+            group by
+              user_id
+          ) t
+        group by
+          1
+      ),
+      base_data as (
+        select
+          event.event_id,
+          event.event_name,
+          event.event_timestamp,
+          event.merged_user_id as user_pseudo_id,
+          event.user_id,
+          event.session_id,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp)
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            CONVERT_TIMEZONE ('Asia/Shanghai', event.event_timestamp),
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          shop.shop.clickstream_event_view_v3 as event
+          join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
+        where
+          event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+      ),
+      mid_table as (
+        select
+          CASE
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN event_name
+            ELSE 'other'
+          END as event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          day as event_date,
+          session_id
+        from
+          base_data
+      ),
+      data as (
+        select
+          *,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          mid_table
+      ),
+      step_table_1 as (
+        select
+          data.user_pseudo_id user_pseudo_id,
+          data.session_id session_id,
+          min(step_1) min_step
+        from
+          data
+        where
+          event_name = 'view_item'
+        group by
+          user_pseudo_id,
+          session_id
+      ),
+      step_table_2 as (
+        select
+          data.*
+        from
+          data
+          join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
+          and data.session_id = step_table_1.session_id
+          and data.step_1 >= step_table_1.min_step
+      ),
+      data_final as (
+        select
+          event_name,
+          event_date,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          session_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) + 1 as step_2
+        from
+          step_table_2
+      )
+    select
+      a.event_date,
+      a.event_name || '_' || a.step_1 as source,
+      CASE
+        WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
+        ELSE 'lost_' || a.step_2
+      END as target,
+      a.event_id as x_id
+    from
+      data_final a
+      left join data_final b on a.step_2 = b.step_1
+      and a.session_id = b.session_id
+      and a.user_pseudo_id = b.user_pseudo_id
+    where
+      a.step_2 <= 5
+    `.trim().replace(/ /g, ''),
+    );
+
   });
 
 });

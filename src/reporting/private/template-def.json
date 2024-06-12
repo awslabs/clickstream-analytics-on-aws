@@ -12139,7 +12139,8 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "Android",
-                                    "iOS"
+                                    "iOS",
+                                    "WeChatMP"
                                 ],
                                 "NullOption": "NON_NULLS_ONLY"
                             }
@@ -12178,7 +12179,8 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "Android",
-                                    "iOS"
+                                    "iOS",
+                                    "WeChatMP"
                                 ],
                                 "NullOption": "NON_NULLS_ONLY"
                             }
