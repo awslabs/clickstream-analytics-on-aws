@@ -247,10 +247,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         String utmMedium = null;
         if (KNOWN_CLID_TO_MEDIUM_MAP.containsKey(clidType)) {
             utmSource = KNOWN_CLID_TO_MEDIUM_MAP.get(clidType).getSource();
-            utmMedium = KNOWN_CLID_TO_MEDIUM_MAP.get(clidType).getMedium();
+            utmMedium = wrapInferMedium(KNOWN_CLID_TO_MEDIUM_MAP.get(clidType).getMedium());
         } else {
             utmSource = clidType;
-            utmMedium = CPC;
+            utmMedium = wrapInferMedium(CPC);
         }
         trafficSourceUtm.setSource(utmSource);
         if (trafficSourceUtm.getMedium() == null || trafficSourceUtm.getMedium().isEmpty()) {
@@ -397,13 +397,14 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     String getMediumByCategory(final TrafficSourceUtm trafficSourceUtm, final String category) {
         String medium = trafficSourceUtm.getMedium();
         String clidId = trafficSourceUtm.getClid();
+        log.debug("getMediumByCategory() enter category: {}, medium: {}, clidId: {}", category, medium, clidId);
         if (isEmpty(medium) && category != null) {
             if (!isEmpty(clidId)) {
-                medium = CPC;
+                medium = wrapInferMedium(CPC);
             } else if (category.equals(SEARCH)) {
-                medium = ORGANIC;
+                medium = wrapInferMedium(ORGANIC);
             } else if ((category.equals(SOCIAL) || category.equals(VIDEO) || category.equals(SHOPPING) || category.equals(REFERRAL))) {
-                medium = REFERRAL;
+                medium = wrapInferMedium(REFERRAL);
             }
             log.debug("medium is null, trying to get medium from category: {} -> medium: {}", category, medium);
         }
@@ -418,7 +419,11 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         if (isFromInternal) {
             return NONE;
         }
-        return REFERRAL;
+        return wrapInferMedium(REFERRAL);
+    }
+
+    static String wrapInferMedium(final String medium) {
+       return "(" +  medium + ")";
     }
 
     private static boolean isAllEmpty(final String pageReferrer, final String latestReferrer) {
