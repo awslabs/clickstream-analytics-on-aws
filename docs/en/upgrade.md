@@ -65,7 +65,7 @@ The solution automatically and asynchronously upgrades the views and materialize
 
 !!! danger "Important"
 
-    The data migration process is CPU-intensive. Before starting the migration, ensure that the load on your Redshift is low. It's also advisable to consider temporarily increasing the RPUs of Redshift Serverless or the cluster size when migrating large volumes of data.
+    The data migration process is CPU-intensive, and it will **incur additional cost**. Before starting the migration, ensure that the load on your Redshift is low. It's also advisable to consider temporarily increasing the RPUs of Redshift Serverless or the cluster size when migrating large volumes of data.
 
     In our benchmark, we migrated the events from the last **30 days**. Here are the details: <br>
     Average number of events per day: **10 million** <br>
