@@ -3027,10 +3027,16 @@
 <h3 id="_5">升级数据模型和预置仪表板</h3>
 <p>在升级项目的管道后，解决方案会自动异步升级仪表板所需的视图和物化视图。更新持续时间取决于 Redshift 集群的工作负载和现有数据量，可能需要几分钟到几小时。您可以在管道详情页面的<strong>数据处理和建模</strong>标签下的<strong>Redshift Schemas</strong>部分中跟踪进度。如果后期配置作业失败，您可以通过其链接访问工作流程的执行情况，然后使用保持不变的输入通过<strong>操作 - 重启</strong>或<strong>新执行</strong>来重新运行作业。</p>
 <h3 id="116">迁移现有数据(仅适用于从1.1.6之前的版本升级)</h3>
-<div class="admonition info">
+<div class="admonition danger">
 <p class="admonition-title">注意</p>
-<p>数据迁移过程是CPU密集型的。在开始迁移之前，请确保您的Redshift的负载较低。当迁移大量数据时，建议临时增加Redshift Serverless的RPU或集群大小。</p>
-<p>在我们的基准测试中，我们使用32个RPU的Redshift Serverless，在25分钟内迁移了1亿个事件。</p>
+<p>数据迁移过程是CPU密集型的，会<strong>产生额外的成本</strong>。在开始迁移之前，请确保您的Redshift的负载较低。当迁移大量数据时，建议临时增加Redshift Serverless的RPU或集群大小。</p>
+<p>在我们的基准测试中，我们迁移了过去 <strong>30天</strong> 的事件。以下是详细信息：<br>
+每天的平均事件数：<strong>1000万</strong> <br>
+30天的总事件数：<strong>3亿</strong> <br>
+Redshift RPU：<strong>32个RPU</strong> <br>
+总用时：<strong>4小时45分钟</strong> <br>
+总成本：<strong>$47.77</strong> <br></p>
+<p>请注意：<strong>总用时以及总成本会根据您迁移的事件数量的增加而相应增加</strong>。</p>
 </div>
 <ol>
 <li>
@@ -3047,14 +3053,14 @@
 <p>创建一个新的SQL编辑器，选中对应的project。</p>
 </li>
 <li>
-<p>根据需要自定义日期范围，并在编辑器中执行以下SQL，将过去180天或任意天数前到现在的事件迁移到新表中。</p>
+<p>根据需要自定义日期范围，并在编辑器中执行以下SQL，将过去 30 天或任意天数前到现在的事件迁移到新表中。</p>
 <div class="language-sql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">-- 请用您的实际应用程序ID替换 &lt;app-id&gt;</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1">-- 根据需要更新天数范围（如下例中的 180 天）</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">CALL</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_migrate_data_to_v2</span><span class="p">(</span><span class="mi">180</span><span class="p">);</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1">-- 根据需要更新天数范围（如下例中的 30 天）</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">CALL</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_migrate_data_to_v2</span><span class="p">(</span><span class="mi">30</span><span class="p">);</span>
 </span></code></pre></div>
 </li>
 <li>
-<p>等待SQL执行完成。执行时间取决于<code>events</code>表中的数据量。</p>
+<p>等待SQL执行完成。执行时间取决于<code>events</code>表中的数据量。在我们的测试中，当使用 32 个 RPU 迁移 3 亿个事件时此过程将花费 2 小时 5 分钟。</p>
 </li>
 <li>
 <p>执行以下SQL来检查存储过程执行日志，确保没有错误。如遇中断，超时，其他错误，可重新执行第 4 步继续执行数据迁移。</p>
@@ -3069,8 +3075,8 @@
 <li>
 <p>将原始事件表转化为<code>clickstream_event_base_view</code>表。</p>
 <div class="language-sql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">-- 请用您的实际应用程序ID替换 &lt;app-id&gt;</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1">-- 根据需要更新天数范围（如下例中的 180 天）</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">CALL</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">clickstream_event_base_view_sp</span><span class="p">(</span><span class="k">NULL</span><span class="p">,</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="o">*</span><span class="mi">180</span><span class="p">);</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1">-- 根据需要更新天数范围（如下例中的 30 天）</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">CALL</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">clickstream_event_base_view_sp</span><span class="p">(</span><span class="k">NULL</span><span class="p">,</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="o">*</span><span class="mi">30</span><span class="p">);</span>
 </span></code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">注意</p>
@@ -3086,9 +3092,11 @@
 <div class="language-sql highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">call</span><span class="w"> </span><span class="ss">&quot;&lt;schema&gt;&quot;</span><span class="p">.</span><span class="n">clickstream_event_base_view_sp</span><span class="p">(</span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="s1">&#39;epoch&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1715270400</span><span class="w">  </span><span class="o">*</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;1 second&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="s1">&#39;epoch&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1715443200</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;1 second&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
 </span></code></pre></div></p>
 </div>
+<p>根据我们上面所述的测试标准，这一过程大约需要 20 分钟。</p>
 </li>
 <li>
 <p>请遵循<a href="../faq/#_10">此指南</a>，使用迁移后的新数据来计算预设仪表板的指标。</p>
+<p>根据我们上面所述的测试标准，这一过程大约需要 2 小时 20 分钟。</p>
 </li>
 <li>
 <p>如果您没有其他应用程序使用旧表和视图，您可以运行以下SQL来清理旧视图和表，从而节省Redshift存储空间。</p>
