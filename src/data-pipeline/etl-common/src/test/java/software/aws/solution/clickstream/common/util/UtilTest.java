@@ -173,7 +173,27 @@ public class UtilTest extends BaseTest {
         assertEquals("www.example.com", result.getHostName());
         assertEquals("param1=value1&param2=value2", result.getQueryString());
         assertEquals("/abc/test", result.getPath());
+
         assertNull(Util.parseUrl(null));
+        assertNull(Util.parseUrl(""));
+        assertNotNull(Util.parseUrl("https://www.example.com/"));
+        assertNotNull(Util.parseUrl("https://www.example.com/?"));
     }
 
+    @Test
+    void  test_getUriParams2() {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.util.UtilTest.test_getUriParams2
+        String url = "https://www.example.com/abc/test?param1=value1&param2=value2";
+        Map<String, List<String>> params = Util.getUriParams(url);
+        assertEquals("value1", params.get("param1").get(0));
+
+        params = Util.getUriParams((String)null);
+        assertEquals(0, params.size());
+
+        params = Util.getUriParams("");
+        assertEquals(0, params.size());
+
+        params = Util.getUriParams("https://www.example.com/?abc=12|aa#!~*$(-)][");
+        assertEquals("12|aa#!~*$(-)][", params.get("abc").get(0));
+    }
 }

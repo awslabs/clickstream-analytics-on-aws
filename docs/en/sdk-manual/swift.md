@@ -556,23 +556,24 @@ Clickstream Swift SDK supports the following data types:
 
 In order to improve the efficiency of querying and analysis, we need to limit events as follows:
 
-| Name                                     | Suggestion                 | Hard limit           | Strategy                                                                           | Error code |
-|------------------------------------------|----------------------------|----------------------|------------------------------------------------------------------------------------|------------|
-| Event name invalid                       | --                         | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
-| Length of event name                     | under 25 characters        | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
-| Length of event attribute name           | under 25 characters        | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
-| Attribute name invalid                   | --                         | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
-| Length of event attribute value          | under 100 characters       | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
-| Event attribute per event                | under 50 attributes        | 500 event attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
-| User attribute number                    | under 25 attributes        | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
-| Length of User attribute name            | under 25 characters        | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
-| User attribute name invalid              | --                         | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
-| Length of User attribute value           | under 50 characters        | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
-| Item number in one event                 | under 50 items             | 100 items            | discard the item, print log and record error in event attribute                    | 4001       |
-| Length of item attribute value           | under 100 characters       | 256 characters       | discard the item, print log and record error in event attribute                    | 4002       |
-| Custom item attribute number in one item | under 10 custom attributes | 10 custom attributes | discard the item, print log and record error in event attribute                    | 4003       |
-| Length of item attribute name            | under 25 characters        | 50 characters        | discard the item, print log and record error in event attribute                    | 4004       |
-| Item attribute name invalid              | --                         | --                   | discard the item, print log and record error in event attribute                    | 4005       |
+| Name                                                                                   | Suggestion                 | Hard limit           | Strategy                                                                           | Error code |
+|----------------------------------------------------------------------------------------|----------------------------|----------------------|------------------------------------------------------------------------------------|------------|
+| Event name invalid                                                                     | --                         | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
+| Length of event name                                                                   | under 25 characters        | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
+| Length of event attribute name                                                         | under 25 characters        | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
+| Attribute name invalid                                                                 | --                         | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
+| Length of event attribute value                                                        | under 100 characters       | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
+| Event attribute per event                                                              | under 50 attributes        | 500 event attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
+| Event attribute value is infinite (When Double or Decimal isFinite attribute is false) | --                         | --                   | discard the attribute, print log and record error in event attribute               | 2005       |
+| User attribute number                                                                  | under 25 attributes        | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
+| Length of User attribute name                                                          | under 25 characters        | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
+| User attribute name invalid                                                            | --                         | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
+| Length of User attribute value                                                         | under 50 characters        | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
+| Item number in one event                                                               | under 50 items             | 100 items            | discard the item, print log and record error in event attribute                    | 4001       |
+| Length of item attribute value                                                         | under 100 characters       | 256 characters       | discard the item, print log and record error in event attribute                    | 4002       |
+| Custom item attribute number in one item                                               | under 10 custom attributes | 10 custom attributes | discard the item, print log and record error in event attribute                    | 4003       |
+| Length of item attribute name                                                          | under 25 characters        | 50 characters        | discard the item, print log and record error in event attribute                    | 4004       |
+| Item attribute name invalid                                                            | --                         | --                   | discard the item, print log and record error in event attribute                    | 4005       |
 
 !!! info "Important"
 

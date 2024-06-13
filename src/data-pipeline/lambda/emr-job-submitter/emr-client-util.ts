@@ -263,7 +263,7 @@ export class EMRServerlessUtil {
       sparkSubmitParameters.push('--conf', `${confKey}=${confVal}`);
     }
 
-    const appConfigs: Configuration[] = await this.getEmrApplicationConfig(config.emrServerlessApplicationId!);
+    const appConfigs: Configuration[] = await this.getEmrApplicationConfig(config.emrServerlessApplicationId);
     const startJobRunCommandInput: StartJobRunCommandInput = {
       applicationId: config.emrServerlessApplicationId,
       executionRoleArn: config.roleArn,
@@ -499,18 +499,30 @@ export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkCo
   let driverCore = 4;
   let driverMem = 14;
   let driverDisk = 20;
-  let executorCore = 4;
-  let executorMem = 14;
-  let executorDisk = 20;
-  let initialExecutors = 3;
   let inputRePartitions = 10;
 
+  let executorCore;
+  let executorMem;
+  let executorDisk;
+  let initialExecutors;
+
   if (objectsInfo.sizeTotal < 1 * size_1G) {
-    logger.info('use default settings');
+    driverCore = 2;
+    driverMem = 7;
+    executorCore = 4;
+    executorMem = 14;
+    executorDisk = 20;
+    initialExecutors = 2;
+  } else if (objectsInfo.sizeTotal < 5 * size_1G) {
+    executorCore = 4;
+    executorMem = 14;
+    executorDisk = 20;
+    initialExecutors = 3;
   } else if (objectsInfo.sizeTotal < 10 * size_1G) {
     executorCore = 8;
     executorMem = 50;
     executorDisk = 50;
+    initialExecutors = 3;
   } else if (objectsInfo.sizeTotal < 50 * size_1G) {
     driverCore = 8;
     driverMem = 50;

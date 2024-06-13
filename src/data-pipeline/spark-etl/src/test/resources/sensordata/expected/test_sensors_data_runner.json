@@ -2,22 +2,115 @@
   "app_id" : "shopping",
   "created_time" : "_CREATED_TIME_",
   "custom_parameters" : {
-    "distinct_id" : {
+    "$anonymous_id" : {
       "type" : "string",
       "value" : "18f6b3eb4d890f-0049f49f49f49f48-7e433c49-3686400-18f6b3eb4d92266"
     },
-    "properties" : {
-      "type" : "object",
-      "value" : "{\"$is_login_id\":false,\"$province\":null,\"$city\":null,\"$url\":\"https://d2qnp5r77e6a7o.cloudfront.net/product/b5daf920-8f69-4603-9ccb-1d7f2b77656e?feature=live_stream_prod_recommendation\",\"$screen_name\":null,\"$title\":\"Retail Demo Store\",\"$lib_method\":null,\"$is_first_day\":true,\"$os\":null,\"$os_version\":null,\"$lib\":\"js\",\"$manufacturer\":null,\"$model\":null,\"$brand\":null,\"$app_version\":null,\"$screen_width\":2560,\"$screen_height\":1440,\"$carrier\":null,\"$timezone_offset\":-480,\"$app_id\":null,\"$app_name\":null,\"$wifi\":false,\"$network_type\":null,\"$lib_plugin_version\":null,\"$device_id\":null,\"$x_test_user\":null,\"$product_id\":0,\"$product_name\":null,\"$product_classify\":null,\"$product_price\":0.0,\"$item_price\":0.0,\"$event_duration\":0,\"$referrer\":null,\"$referrer_title\":null,\"$resume_from_background\":false,\"$is_first_time\":false,\"$age\":0,\"$name\":null,\"$user_id\":null,\"$user_name\":null,\"$browser\":null,\"$browser_language\":null,\"$browser_version\":null,\"$element_type\":\"a\",\"$viewport_width\":1857,\"$page_x\":417,\"$page_y\":56,\"$element_path\":\"div#app > div > nav > div > a\",\"$viewport_height\":1242,\"$url_path\":\"/product/b5daf920-8f69-4603-9ccb-1d7f2b77656e\",\"$lib_version\":\"1.26.11\",\"$latest_search_keyword\":\"未取到值_直接打开\",\"$latest_traffic_source_type\":\"直接流量\",\"$element_class_name\":\"logo\",\"$latest_referrer\":\"\",\"$element_content\":\"\",\"$element_selector\":\"#app > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)\",\"$element_target_url\":\"/\"}"
-    },
-    "screen_resolution" : {
+    "$distinct_id" : {
       "type" : "string",
-      "value" : "2560x1440"
+      "value" : "18f6b3eb4d890f-0049f49f49f49f48-7e433c49-3686400-18f6b3eb4d92266"
+    },
+    "$element_class_name" : {
+      "type" : "string",
+      "value" : "logo"
+    },
+    "$element_content" : {
+      "type" : "string",
+      "value" : ""
+    },
+    "$element_path" : {
+      "type" : "string",
+      "value" : "div#app > div > nav > div > a"
+    },
+    "$element_selector" : {
+      "type" : "string",
+      "value" : "#app > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)"
+    },
+    "$element_target_url" : {
+      "type" : "string",
+      "value" : "/"
+    },
+    "$element_type" : {
+      "type" : "string",
+      "value" : "a"
+    },
+    "$identity_android_id" : {
+      "type" : "string"
+    },
+    "$identity_login_id" : {
+      "type" : "string"
+    },
+    "$is_first_day" : {
+      "type" : "boolean",
+      "value" : "true"
+    },
+    "$latest_referrer" : {
+      "type" : "string",
+      "value" : ""
+    },
+    "$latest_search_keyword" : {
+      "type" : "string",
+      "value" : "未取到值_直接打开"
+    },
+    "$latest_traffic_source_type" : {
+      "type" : "string",
+      "value" : "直接流量"
+    },
+    "$lib" : {
+      "type" : "string",
+      "value" : "js"
+    },
+    "$lib_method" : {
+      "type" : "string",
+      "value" : "code"
+    },
+    "$lib_version" : {
+      "type" : "string",
+      "value" : "1.26.11"
+    },
+    "$page_x" : {
+      "type" : "number",
+      "value" : "417"
+    },
+    "$page_y" : {
+      "type" : "number",
+      "value" : "56"
+    },
+    "$referrer_host" : null,
+    "$time" : {
+      "type" : "number",
+      "value" : "1715499272687"
+    },
+    "$url_path" : {
+      "type" : "string",
+      "value" : "/product/b5daf920-8f69-4603-9ccb-1d7f2b77656e"
+    },
+    "$viewport_height" : {
+      "type" : "number",
+      "value" : "1242"
+    },
+    "$viewport_width" : {
+      "type" : "number",
+      "value" : "1857"
+    },
+    "_flush_time" : {
+      "type" : "number",
+      "value" : "1715499272689"
+    },
+    "_track_id" : {
+      "type" : "number",
+      "value" : "112602689"
+    },
+    "type" : {
+      "type" : "string",
+      "value" : "track"
     }
   },
-  "custom_parameters_json_str" : "{\"distinct_id\":\"18f6b3eb4d890f-0049f49f49f49f48-7e433c49-3686400-18f6b3eb4d92266\",\"screen_resolution\":\"2560x1440\",\"properties\":{\"$is_login_id\":false,\"$province\":null,\"$city\":null,\"$url\":\"https://d2qnp5r77e6a7o.cloudfront.net/product/b5daf920-8f69-4603-9ccb-1d7f2b77656e?feature=live_stream_prod_recommendation\",\"$screen_name\":null,\"$title\":\"Retail Demo Store\",\"$lib_method\":null,\"$is_first_day\":true,\"$os\":null,\"$os_version\":null,\"$lib\":\"js\",\"$manufacturer\":null,\"$model\":null,\"$brand\":null,\"$app_version\":null,\"$screen_width\":2560,\"$screen_height\":1440,\"$carrier\":null,\"$timezone_offset\":-480,\"$app_id\":null,\"$app_name\":null,\"$wifi\":false,\"$network_type\":null,\"$lib_plugin_version\":null,\"$device_id\":null,\"$x_test_user\":null,\"$product_id\":0,\"$product_name\":null,\"$product_classify\":null,\"$product_price\":0.0,\"$item_price\":0.0,\"$event_duration\":0,\"$referrer\":null,\"$referrer_title\":null,\"$resume_from_background\":false,\"$is_first_time\":false,\"$age\":0,\"$name\":null,\"$user_id\":null,\"$user_name\":null,\"$browser\":null,\"$browser_language\":null,\"$browser_version\":null,\"$element_type\":\"a\",\"$viewport_width\":1857,\"$page_x\":417,\"$page_y\":56,\"$element_path\":\"div#app > div > nav > div > a\",\"$viewport_height\":1242,\"$url_path\":\"/product/b5daf920-8f69-4603-9ccb-1d7f2b77656e\",\"$lib_version\":\"1.26.11\",\"$latest_search_keyword\":\"未取到值_直接打开\",\"$latest_traffic_source_type\":\"直接流量\",\"$element_class_name\":\"logo\",\"$latest_referrer\":\"\",\"$element_content\":\"\",\"$element_selector\":\"#app > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)\",\"$element_target_url\":\"/\"}}",
+  "custom_parameters_json_str" : "{\"$time\":1715499272687,\"$element_type\":\"a\",\"type\":\"track\",\"$viewport_height\":1242,\"$url_path\":\"/product/b5daf920-8f69-4603-9ccb-1d7f2b77656e\",\"$latest_search_keyword\":\"未取到值_直接打开\",\"$anonymous_id\":\"18f6b3eb4d890f-0049f49f49f49f48-7e433c49-3686400-18f6b3eb4d92266\",\"$distinct_id\":\"18f6b3eb4d890f-0049f49f49f49f48-7e433c49-3686400-18f6b3eb4d92266\",\"$latest_referrer\":\"\",\"$element_content\":\"\",\"$element_target_url\":\"/\",\"$lib_method\":\"code\",\"$is_first_day\":true,\"$viewport_width\":1857,\"$page_x\":417,\"$identity_android_id\":null,\"$page_y\":56,\"$element_path\":\"div#app > div > nav > div > a\",\"$lib\":\"js\",\"_track_id\":112602689,\"$lib_version\":\"1.26.11\",\"_flush_time\":1715499272689,\"$latest_traffic_source_type\":\"直接流量\",\"$element_class_name\":\"logo\",\"$element_selector\":\"#app > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1)\",\"$identity_login_id\":null}",
+  "device_network_type" : "CELLULAR",
   "device_screen_height" : 1440,
   "device_screen_width" : 2560,
+  "device_time_zone_offset_seconds" : -480,
   "device_ua" : {
     "device" : "{\"family\":\"Mac\"}",
     "os" : "{\"family\":\"Mac OS X\",\"major\":\"10\",\"minor\":\"15\",\"patch\":\"7\",\"patchMinor\":null}",
@@ -30,7 +123,7 @@
   "device_ua_device_category" : "PC",
   "device_ua_os" : "Mac OS X",
   "device_ua_os_version" : "10.15.7",
-  "event_id" : "95652074a6de38887c28cdd21a6abf95-0-18f6b3eb4d890f-0049f49f49f49f48-7e433c49-3686400-18f6b3eb4d92266-x",
+  "event_id" : "95652074a6de38887c28cdd21a6abf95-0-18f6b3eb4d890f-0049f49f49f49f48-7e433c49-3686400-18f6b3eb4d92266",
   "event_name" : "$WebClick",
   "event_time_msec" : 1715499272000,
   "event_timestamp" : "2024-05-12T07:34:32.000Z",
@@ -39,6 +132,7 @@
   "geo_country" : "China",
   "ingest_time_msec" : 1715499272000,
   "page_view_page_referrer" : null,
+  "page_view_page_title" : "Retail Demo Store",
   "page_view_page_url" : "https://d2qnp5r77e6a7o.cloudfront.net/product/b5daf920-8f69-4603-9ccb-1d7f2b77656e?feature=live_stream_prod_recommendation",
   "platform" : "Web",
   "process_info" : {
@@ -49,6 +143,8 @@
     "rid" : "95652074a6de38887c28cdd21a6abf95"
   },
   "project_id" : "test_project_id_01",
+  "sdk_name" : "js",
+  "sdk_version" : "1.26.11",
   "session_start_time_msec" : 1715499272687,
   "traffic_source_campaign" : "Direct",
   "traffic_source_category" : "Direct",

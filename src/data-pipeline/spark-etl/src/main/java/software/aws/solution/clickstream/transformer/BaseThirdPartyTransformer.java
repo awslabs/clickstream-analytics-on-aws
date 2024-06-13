@@ -285,10 +285,4 @@ public abstract class BaseThirdPartyTransformer extends BaseTransformerV3 {
         log.info("getCleanedDataset() count: {}", dataset.count());
         return dataset;
     }
-
-    @Override
-    public Dataset<Row> postTransform(final Dataset<Row> dataset) {
-        return dataset.drop(Constant.UA, Constant.IP);
-    }
-
 }

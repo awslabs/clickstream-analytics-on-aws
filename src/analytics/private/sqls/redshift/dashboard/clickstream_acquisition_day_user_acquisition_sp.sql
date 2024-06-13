@@ -19,14 +19,17 @@ BEGIN
         MAX(session_duration) AS session_duration,
         SUM(user_engagement_time_msec) AS user_engagement_time_msec,
         CASE WHEN
-          SUM(CASE WHEN event_name = '_page_view' OR event_name = '_screen_view' THEN 1 ELSE 0 END) > 1 
-          OR MAX(session_duration) > 10000  THEN 1 ELSE 0 
+             SUM(CASE WHEN event_name = '_page_view' OR event_name = '_screen_view' THEN 1 ELSE 0 END) > 1 
+          OR MAX(session_duration) > 10000  
+          OR SUM(user_engagement_time_msec) > 10000000
+          THEN 1 
+          ELSE 0 
         END AS session_indicator,
         MAX(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS new_user_indicator
       FROM 
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE
-        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+        event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
       GROUP BY 1,2
     );
 
@@ -35,6 +38,7 @@ BEGIN
         SELECT 
             session_id,
             platform,
+            merged_user_id,
             MAX(first_traffic_source) AS first_traffic_source,
             MAX(first_traffic_medium) AS first_traffic_medium,
             MAX(first_traffic_campaign) AS first_traffic_campaign,
@@ -49,9 +53,9 @@ BEGIN
         FROM 
             {{database_name}}.{{schema}}.{{baseView}}
         WHERE 
-            DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = current_date
+            event_timestamp >= current_date::timestamp AT TIME ZONE timezone AND event_timestamp < (current_date + 1)::timestamp AT TIME ZONE timezone
         GROUP BY 
-            1, 2
+            1, 2, 3
     );
 
     -- first_traffic_source
@@ -85,7 +89,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -120,7 +124,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -155,7 +159,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -190,7 +194,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -226,7 +230,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -262,7 +266,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -298,7 +302,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -334,7 +338,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -369,7 +373,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -404,7 +408,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -440,7 +444,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -475,7 +479,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 
@@ -510,7 +514,7 @@ BEGIN
     FROM 
         event_traffic_tmp_tb_2 tmp2
     JOIN 
-        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
+        event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id and tmp2.merged_user_id = tmp1.user_id
     GROUP BY 
         1, 2, 3, 4, 5;
 

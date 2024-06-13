@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { getAWSSDKClientConfig, logger } from '@aws/clickstream-base-lib';
+import { fetchRemoteUrl, getAWSSDKClientConfig, logger } from '@aws/clickstream-base-lib';
 import {
   CloudFormationClient,
   CreateStackCommand,
@@ -135,9 +135,15 @@ export const createStack = async (event: SfnStackEvent) => {
 
 export const updateStack = async (event: SfnStackEvent) => {
   try {
+    const parameters = await usePreviousParameterValue(
+      event.Input.Region,
+      event.Input.StackName,
+      event.Input.TemplateURL,
+      event.Input.Parameters,
+    );
     const result = await doUpdate(event.Input.Region, {
       StackName: event.Input.StackName,
-      Parameters: event.Input.Parameters,
+      Parameters: parameters,
       DisableRollback: false,
       UsePreviousTemplate: true,
       Capabilities: [
@@ -166,10 +172,16 @@ export const updateStack = async (event: SfnStackEvent) => {
 
 export const upgradeStack = async (event: SfnStackEvent) => {
   try {
+    const parameters = await usePreviousParameterValue(
+      event.Input.Region,
+      event.Input.StackName,
+      event.Input.TemplateURL,
+      event.Input.Parameters,
+    );
     const result = await doUpdate(event.Input.Region, {
       StackName: event.Input.StackName,
       TemplateURL: event.Input.TemplateURL,
-      Parameters: event.Input.Parameters,
+      Parameters: parameters,
       DisableRollback: false,
       UsePreviousTemplate: false,
       Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
@@ -356,4 +368,42 @@ export const doUpdate = async (region: string, input: UpdateStackCommandInput): 
     }
     throw Error((err as Error).message);
   }
+};
+
+const fetchTemplateParameters = async (templateUrl: string): Promise<any> => {
+  let parameters;
+  try {
+    const response = await fetchRemoteUrl(templateUrl);
+    const jsonData = await response.json();
+    logger.debug('Received remote template', { jsonData });
+    parameters = jsonData.Parameters;
+    logger.info('fetched the template Parameters.', { parameters });
+  } catch (error) {
+    logger.warn(`failed to fetch the template from ${templateUrl}`, { error });
+  }
+  return parameters;
+};
+
+const usePreviousParameterValue = async (region: string, stackName: string, templateUrl: string, parameters: Parameter[]): Promise<Parameter[]> => {
+  const stack = await describe(region, stackName);
+  if (!stack) {
+    throw Error('Describe Stack failed.');
+  }
+  // Get the keys from Template Parameters
+  const templateParameters = await fetchTemplateParameters(templateUrl);
+  const templateParameterKeys = Object.keys(templateParameters);
+  // Find the ParameterKeys in stack.Parameters but not in parameters
+  const parameterKeys = parameters.map((p) => p.ParameterKey) ?? [];
+  const previousParameters = stack.Parameters?.filter(
+    (p) => p.ParameterKey && !parameterKeys.includes(p.ParameterKey) && templateParameterKeys.includes(p.ParameterKey),
+  );
+  const previousParameterList: Parameter[] = [];
+  for (const previousParameter of previousParameters ?? []) {
+    previousParameterList.push({
+      ParameterKey: previousParameter.ParameterKey,
+      UsePreviousValue: true,
+    });
+  }
+  // concat the previous parameters to the parameters
+  return parameters.concat(previousParameterList);
 };

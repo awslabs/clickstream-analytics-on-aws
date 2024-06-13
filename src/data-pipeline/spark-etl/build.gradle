@@ -47,6 +47,9 @@ dependencies {
     // For UA.
     implementation "com.github.ua-parser:uap-java:$uapJavaVersion"
 
+    // cache
+    implementation "com.github.ben-manes.caffeine:caffeine:$caffeineVersion"
+
     // lombok related.
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
@@ -103,7 +106,10 @@ jar {
         configurations
                 .runtimeClasspath
                 .collect {
-                    if (it.name.contains("maxmind-db") || it.name.contains("uap-java") || it.name.contains("etl-common")) {
+                    if (it.name.contains("maxmind-db")
+                            || it.name.contains("uap-java")
+                            || it.name.contains("etl-common")
+                            || it.name.contains("caffeine")) {
                         zipTree(it)
                     }
                 }
