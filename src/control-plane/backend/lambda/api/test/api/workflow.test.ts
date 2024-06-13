@@ -2407,7 +2407,11 @@ describe('Workflow test', () => {
                     StartAt: 'Ingestion',
                     States: {
                       Ingestion: replaceStackProps(
-                        IngestionStack,
+                        replaceStackInputProps(IngestionStack,
+                          {
+                            StackName: `${getStackPrefix()}-Ingestion-kafka-6666-6666`,
+                          },
+                        ),
                         {
                           Type: WorkflowStateType.PASS,
                           Next: 'KafkaConnector',
