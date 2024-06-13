@@ -80,36 +80,70 @@ public final class Util {
         try {
              uriObj = new URI(uri);
         } catch (URISyntaxException e) {
-            if (e.getMessage().contains("Illegal character")) {
-                String encodedUri = encodeUriQueryString(uri);
+            if (isHasIllegalChar(e)) {
+                String encodedUri = encodeUriString(uri);
                 try {
                     uriObj = new URI(encodedUri);
                 } catch (URISyntaxException ex) {
-                    log.warn("cannot parse encoded uri: " + encodedUri + ERROR_LOG + ex.getMessage());
+                    log.warn("getUriParams() cannot parse encoded uri: {}" + ERROR_LOG + "{}", encodedUri, ex.getMessage());
                     return new HashMap<>();
                 }
+            } else {
+                log.warn("getUriParams() cannot parse uri: {}" + ERROR_LOG + "{}", uri, e.getMessage());
+                return new HashMap<>();
             }
         }
 
-        if (uriObj == null) {
-            return new HashMap<>();
-        }
         return getUriParams(uriObj);
     }
 
-    public static String encodeUriQueryString(final String pageUrlInput) {
-        String pageUrl = pageUrlInput;
+    private static boolean isHasIllegalChar(final URISyntaxException e) {
+        return e.getMessage().contains("Illegal character") || e.getMessage().contains("Malformed escape pair");
+    }
 
-        if (pageUrl == null) {
-            return null; // NOSONAR
-        }
-        String[] uriParts = pageUrl.split("\\?");
+    public static String encodeUriString(final String pageUrlInput) {
+        String pageUrl = pageUrlInput;
+        log.debug("encodeUriString(): input pageUrl: {}", pageUrl);
+
+        String[] uriParts = pageUrl.split("\\?", 2);
+
+        String hostAndPath = uriParts[0];
+        hostAndPath = encodeHostAndPath(hostAndPath);
 
         if (uriParts.length == 1) {
-            return pageUrl;
+            return hostAndPath;
         }
+
         String queryString = uriParts[1];
-        queryString = queryString.replace("|", "%7C")
+        queryString = enchodeQueryString(queryString);
+
+        pageUrl = hostAndPath + "?" + queryString;
+        log.debug("encodeUriString(): return pageUrl: {}", pageUrl);
+        return pageUrl;
+    }
+
+    private static String enchodeQueryString(final String queryString) {
+        return replaceIllegalChar(queryString)
+                .replace("/", "%2F");
+    }
+
+    private static String encodeHostAndPath(final String schemaHostAndPath) {
+        String[] parts = schemaHostAndPath.split("://", 2);
+        String schema = parts[0];
+        String hostAndPath;
+        if (parts.length ==2) {
+            hostAndPath = parts[1];
+        } else {
+            schema = "https";
+            hostAndPath = parts[0];
+        }
+        hostAndPath = replaceIllegalChar(hostAndPath);
+
+        return String.join("://", schema, hostAndPath);
+    }
+
+    private static String replaceIllegalChar(final String hostAndPathInput) {
+         return hostAndPathInput.replace("|", "%7C")
                 .replace("<", "%3C")
                 .replace(">", "%3E")
                 .replace("#", "%23")
@@ -122,16 +156,15 @@ public final class Util {
                 .replace("]", "%5D")
                 .replace("`", "%60")
                 .replace(";", "%3B")
-                .replace("/", "%2F")
                 .replace("?", "%3F")
                 .replace(":", "%3A")
                 .replace("@", "%40")
                 .replace("$", "%24")
                 .replace("+", "%2B")
                 .replace(",", "%2C")
+                .replace("%", "%25")
+                .replace("-", "%2D")
                 .replace(" ", "%20");
-        pageUrl = uriParts[0] + "?" + queryString;
-        return pageUrl;
     }
 
     public static Map<String, List<String>> getUriParams(final URI uriObj) {
@@ -163,14 +196,30 @@ public final class Util {
 
         UrlParseResult result = new UrlParseResult();
         try {
-            URI uri = new URI(schemaUrl);
-            result.setHostName(uri.getHost());
-            result.setPath(uri.getPath());
-            result.setQueryString(deCodeUri(uri.getQuery()));
-            result.setQueryParameters(getUriParams(url));
+            result = extractFromUrl(schemaUrl);
         } catch (URISyntaxException e) {
-            log.warn("cannot parse url: " + schemaUrl + ERROR_LOG + e.getMessage());
+            log.warn("parseUrl(): cannot parse uri: {}" + ERROR_LOG + "{}", schemaUrl, e.getMessage());
+            if (isHasIllegalChar(e)) {
+                String encodedUri = encodeUriString(schemaUrl);
+                log.debug("parseUrl(): encoded uri: {}", encodedUri);
+                try {
+                    result = extractFromUrl(encodedUri);
+                } catch (URISyntaxException ex) {
+                    log.warn("parseUrl(): cannot parse encoded uri: {}" + ERROR_LOG + "{}", encodedUri, ex.getMessage());
+                }
+            }
         }
+        log.debug("parseUrl(): result host: {}",  result.getHostName());
+        return result;
+    }
+
+    private static UrlParseResult extractFromUrl(final String schemaUrl) throws URISyntaxException {
+        UrlParseResult result = new UrlParseResult();
+        URI uri = new URI(schemaUrl);
+        result.setHostName(uri.getHost());
+        result.setPath(uri.getPath());
+        result.setQueryString(deCodeUri(uri.getQuery()));
+        result.setQueryParameters(getUriParams(schemaUrl));
         return result;
     }
 
@@ -325,6 +374,10 @@ public final class Util {
         ByteArrayOutputStream output = readAllInputStream(inputStream);
         return output.toString(StandardCharsets.UTF_8.toString());
 
+    }
+
+    public static boolean isResourceFileExist(final String fileName) {
+        return Util.class.getClassLoader().getResource(fileName) != null;
     }
 
     public static ByteArrayOutputStream readAllInputStream(final InputStream inputStream) throws IOException {
