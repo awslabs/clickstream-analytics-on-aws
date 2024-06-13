@@ -12,6 +12,7 @@
  */
 
 import { logger } from '@aws/clickstream-base-lib';
+import { utc } from 'moment-timezone';
 import { RefreshViewOrSp } from './get-refresh-viewlist';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
@@ -25,6 +26,9 @@ export interface RefreshBasicViewEvent {
   timezoneWithAppId: {
     appId: string;
     timezone: string;
+  };
+  originalInput: {
+    refreshStartTime: string;
   };
 }
 
@@ -51,14 +55,18 @@ export const handler = async (event: RefreshBasicViewEvent) => {
 
   const sqlStatements: string[] = [];
   const timezoneWithAppId = event.timezoneWithAppId;
+  const originalInput = event.originalInput;
   const viewName = event.view.name;
-
-  const dataFreshnessInHour = process.env.DATA_REFRESHNESS_IN_HOUR!;
 
   try {
     let queryId : string | undefined;
     const type = event.view.type;
     if (type === 'custom-mv') {
+      let dataFreshnessInHour = process.env.DATA_REFRESHNESS_IN_HOUR!;
+      if (originalInput.refreshStartTime) {
+        dataFreshnessInHour = calculateHoursAgo(originalInput.refreshStartTime, timezoneWithAppId.timezone).toString();
+      }
+      logger.info('dataFreshnessInHour', { dataFreshnessInHour });
       sqlStatements.push(`CALL ${timezoneWithAppId.appId}.${viewName}(NULL, NULL, ${dataFreshnessInHour});`);
     } else {
       sqlStatements.push(`REFRESH MATERIALIZED VIEW ${timezoneWithAppId.appId}.${viewName};`);
@@ -80,3 +88,10 @@ export const handler = async (event: RefreshBasicViewEvent) => {
     throw err;
   }
 };
+
+function calculateHoursAgo(refreshStartTime : string, timezone : string) {
+  const timestampMoment = utc(parseInt(refreshStartTime)).tz(timezone);
+  const currentMoment = utc().tz(timezone);
+  const diffInHours = currentMoment.diff(timestampMoment, 'hours') + 1;
+  return diffInHours;
+}
