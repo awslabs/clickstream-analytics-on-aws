@@ -107,7 +107,7 @@ export function createQuicksightCustomResource(
 
   const eventViewColumnsRT = `
     *, 
-    CASE WHEN event_name = '_first_open' THEN COALESCE(e.user_id, e.user_pseudo_id) ELSE NULL END as new_user_indicator,
+    CASE WHEN event_name = '_first_open' THEN COALESCE(user_id, user_pseudo_id) ELSE NULL END as new_user_indicator,
     DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
     DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date
   `;
@@ -190,8 +190,8 @@ function _getDataSetDefs(
           ${eventViewColumns} 
         from {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME}
         where
-          event_timestamp >= event_timestamp >= (date <<$startDate01>>)::timestamp AT TIME ZONE '{{{timezone}}}' 
-          and event_timestamp <= (date <<$endDate01>> + interval '1 days' )::timestamp AT TIME ZONE '{{{timezone}}}' 
+          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
+          and event_timestamp <= (<<$endDate01>>::timestamp + interval '1 days') AT TIME ZONE '{{{timezone}}}' 
       `,
       columns: [
         ...clickstream_event_view_columns,
@@ -241,12 +241,13 @@ function _getDataSetDefs(
       useSpice: 'no',
       realtime: 'yes',
       customSql: `
+        -- clickstream-builtin-realtime-dashboard
         select 
           ${eventViewColumnsRT} 
         from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
         where 
-          event_timestamp >= event_timestamp >= (date <<$startDate01>>)::timestamp AT TIME ZONE '{{{timezone}}}' 
-          and event_timestamp <= (date <<$endDate01>> + interval '1 days' )::timestamp AT TIME ZONE '{{{timezone}}}' 
+          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
+          and event_timestamp <= (<<$endDate01>>::timestamp + interval '1 days') AT TIME ZONE '{{{timezone}}}' 
       `,
       columns: [
         ...clickstream_realtime_event_view_columns,
