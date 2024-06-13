@@ -107,6 +107,8 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
   };
 
   const updateProjectInfo = async (type: 'email' | 'env' | 'description') => {
+    newProject.id = project.id;
+    newProject.name = project.name;
     if (type === 'email') {
       if (!newProject.emails) {
         setEmailsEmptyError(true);
