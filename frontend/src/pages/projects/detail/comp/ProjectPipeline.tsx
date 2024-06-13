@@ -174,12 +174,12 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
     );
   };
 
-  const disableStreamEnableButton = () => {
+  const disableStreamEnableButton = (button: string) => {
     if (!pipelineInfo.streaming || !pipelineInfo.streaming.appIdStreamList) {
-      return false;
+      return button === 'disable';
     }
     if (!selectedItems.length) {
-      return false;
+      return button === 'disable';
     }
     return !pipelineInfo.streaming?.appIdStreamList?.includes(
       selectedItems[0].appId
@@ -406,12 +406,12 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                       {
                         text: defaultStr(t('button.streamEnable')),
                         id: 'stream-enable',
-                        disabled: !disableStreamEnableButton(),
+                        disabled: !disableStreamEnableButton('enable'),
                       },
                       {
                         text: defaultStr(t('button.streamDisable')),
                         id: 'stream-disable',
-                        disabled: disableStreamEnableButton(),
+                        disabled: disableStreamEnableButton('disable'),
                       },
                     ]}
                   >
