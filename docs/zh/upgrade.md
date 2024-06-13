@@ -125,11 +125,11 @@
         ```sql
         call "<schema>".clickstream_event_base_view_sp(TIMESTAMP 'epoch' + 1715270400  * INTERVAL '1 second', TIMESTAMP 'epoch' + 1715443200 * INTERVAL '1 second', 1);
         ```
-   根据我们上面所述的测试标准，这一过程大约需要 20 分钟.
+   根据我们上面所述的测试标准，这一过程大约需要 20 分钟。
 
 8. 请遵循[此指南][faq-recalculate-data]，使用迁移后的新数据来计算预设仪表板的指标。
    
-   根据我们上面所述的测试标准，这一过程大约需要 2 小时 20 分钟.
+    根据我们上面所述的测试标准，这一过程大约需要 2 小时 20 分钟。
 
 9. 如果您没有其他应用程序使用旧表和视图，您可以运行以下SQL来清理旧视图和表，从而节省Redshift存储空间。
 
