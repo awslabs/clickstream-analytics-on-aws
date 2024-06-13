@@ -1430,6 +1430,7 @@ test('Nested stack has CreateEMRServerlessApplicationCustomResource', () => {
     idleTimeoutMinutes: RefAnyValue,
     pipelineS3BucketName: RefAnyValue,
     pipelineS3Prefix: RefAnyValue,
+    solutionVersion: Match.anyValue(),
   });
 });
 
