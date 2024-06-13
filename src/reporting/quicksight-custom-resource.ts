@@ -247,7 +247,7 @@ function _getDataSetDefs(
         from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
         where 
           event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
-          and event_timestamp <= (<<$endDate01>>::timestamp + interval '1 days') AT TIME ZONE '{{{timezone}}}' 
+          and event_timestamp <= <<$endDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
       `,
       columns: [
         ...clickstream_realtime_event_view_columns,
