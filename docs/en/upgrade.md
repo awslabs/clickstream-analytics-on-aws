@@ -63,11 +63,18 @@ The solution automatically and asynchronously upgrades the views and materialize
 
 ### Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
 
-!!! info "Important"
+!!! danger "Important"
 
-    The data migration process is CPU-intensive. Before starting the migration, ensure that the load on your Redshift is low. It's also advisable to consider temporarily increasing the RPUs of Redshift Serverless or the cluster size when migrating large volumes of data.
+    The data migration process is CPU-intensive, and it will **incur additional cost**. Before starting the migration, ensure that the load on your Redshift is low. It's also advisable to consider temporarily increasing the RPUs of Redshift Serverless or the cluster size when migrating large volumes of data.
 
-    In our benchmark, we migrated 100 million events in 25 minutes using 32 RPUs of Redshift Serverless.
+    In our benchmark, we migrated the events from the last **30 days**. Here are the details: <br>
+    Average number of events per day: **10 million** <br>
+    Total events for 30 days: **300 million** <br>
+    Redshift RPU: **32 RPUs** <br>
+    Total duration: **4 hour 45 minutes** <br>
+    Total cost: **$47.77**
+    
+    **Please note that the total duration and cost will increase as the number of events you migrate increases.**
 
 1. Open [Redshift query editor v2][query-editor]. You can refer to the AWS document [Working with query editor v2][working-with-query-editor] to log in and query data using Redshift query editor v2.
 
@@ -78,15 +85,15 @@ The solution automatically and asynchronously upgrades the views and materialize
 
 3. Create a new SQL Editor, select your project's schema.
 
-4. Customize the date range as desired, and execute the following SQL in the editor to migrate events from the past 180 days, or any number of days up to the present, to the new tables.
+4. Customize the date range as desired, and execute the following SQL in the editor to migrate events from the past 30 days, or any number of days up to the present, to the new tables.
 
     ```sql
     -- please replace <app-id> with your actual app id
-    -- update the day range(180 days in below example) based on your needs
-    CALL "<app-id>".sp_migrate_data_to_v2(180);
+    -- update the day range(30 days in below example) based on your needs
+    CALL "<app-id>".sp_migrate_data_to_v2(30);
     ```
 
-5. Wait for the SQL to complete. The execution time depends on the volume of data in the `events` table.
+5. Wait for the SQL to complete. The execution time depends on the volume of data in the `events` table. In our test, migrating 300 million events using 32 RPUs will take approximately 2 hours and 5 minutes.
 
 6. Execute the following SQL to check the stored procedure execution log; ensure there are no errors. If there are any interruptions, timeouts, or other errors, you can re-execute step 4 to continue the data migration.
 
@@ -103,8 +110,8 @@ The solution automatically and asynchronously upgrades the views and materialize
 
     ```sql
     -- please replace <app-id> with your actual app id
-    -- update the day range(180 days in below example) based on your needs
-    CALL "<app-id>".clickstream_event_base_view_sp(NULL, NULL, 24*180);
+    -- update the day range(30 days in below example) based on your needs
+    CALL "<app-id>".clickstream_event_base_view_sp(NULL, NULL, 24*30);
     ```
 
     !!! info "Note"
@@ -122,8 +129,11 @@ The solution automatically and asynchronously upgrades the views and materialize
         ```sql
         call "<schema>".clickstream_event_base_view_sp(TIMESTAMP 'epoch' + 1715270400  * INTERVAL '1 second', TIMESTAMP 'epoch' + 1715443200 * INTERVAL '1 second', 1);
         ```
+   Based on our test parameters mentioned above, this process will take about 20 minutes.
 
 8. Follow [this guide][faq-recalculate-data] to calculate metrics for the new preset dashboard based on the migrated data.
+   
+    Based on our test parameters mentioned above, this process will take about 2 hours and 20 minutes.
 
 9. If you don't have other applications using the legacy tables and views, you could run the following SQL to clean up the legacy views and tables to save Redshift storage.
 
