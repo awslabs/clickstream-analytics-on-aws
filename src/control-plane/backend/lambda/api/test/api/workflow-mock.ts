@@ -1378,6 +1378,50 @@ export const DataModelingRedshiftStackCn = {
   Type: 'Stack',
 };
 
+export const DataModelingAthenaStack = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'ap-southeast-1',
+      Parameters: [
+        ...BASE_ATHENA_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-DataModelingAthena-6666-6666`,
+      Tags: Tags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const DataModelingAthenaStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...BASE_ATHENA_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-DataModelingAthena-6666-6666`,
+      Tags: Tags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
 export const ReportingStack = {
   Data: {
     Callback: {
@@ -1416,6 +1460,28 @@ export const ReportingStackCn = {
       StackName: `${getStackPrefix()}-Reporting-6666-6666`,
       Tags: InitTags,
       TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const StreamingStack = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'ap-southeast-1',
+      Parameters: [
+        ...STREAMING_BASE_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Streaming-6666-6666`,
+      Tags: Tags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/streaming-ingestion-stack.template.json',
     },
   },
   End: true,
@@ -1535,13 +1601,12 @@ export function replaceStackInputProps(stack: any, props: any) {
   return newStack;
 }
 
-export function replaceStackDataProps(stack: any, props: any) {
+export function replaceStackProps(stack: any, props: any) {
   const newStack = cloneDeep(stack);
-  newStack.Data = {
-    ...newStack.Data,
+  return {
+    ...newStack,
     ...props,
   };
-  return newStack;
 }
 
 export function replaceStackParameters(stack: any, parameters: Parameter[]) {

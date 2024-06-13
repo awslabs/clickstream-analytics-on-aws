@@ -25,7 +25,7 @@ const REQUEST_TIMEOUT = 10000;
 const REGION = process.env.AWS_REGION ?? 'us-east-1';
 
 export interface WorkFlowStack {
-  Name: string;
+  Name?: string;
   Type: string;
   Data: SfnStackEvent;
 }
