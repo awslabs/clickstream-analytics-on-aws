@@ -30,6 +30,8 @@ import java.util.Map;
 
 import static software.aws.solution.clickstream.common.Util.deCodeUri;
 import static software.aws.solution.clickstream.common.Util.decompress;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.CATEGORY_RULE_FILE;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.CHANNEL_RULE_FILE;
 
 @Slf4j
 public abstract class BaseEventParser implements EventParser {
@@ -112,8 +114,13 @@ public abstract class BaseEventParser implements EventParser {
     protected void setTrafficSourceBySourceParser(final ClickstreamEvent clickstreamEvent) {
         String appId = clickstreamEvent.getAppId();
         RuleConfig ruleConfig = getAppRuleConfig() !=null ? getAppRuleConfig().get(appId) : null;
+
         if (ruleConfig == null) {
-            log.warn("RuleConfig is not set for appId: " + appId);
+            log.warn("RuleConfig is not set for appId: {}", appId);
+            if (!Util.isResourceFileExist(CHANNEL_RULE_FILE) || !Util.isResourceFileExist(CATEGORY_RULE_FILE)) {
+                log.warn("RuleConfig is not set for appId: {} and default rule files are not available, ignore trafficSource enrich", appId);
+                return;
+            }
         }
 
         RuleBasedTrafficSourceHelper rsHelper = RuleBasedTrafficSourceHelper.getInstance(appId, ruleConfig);

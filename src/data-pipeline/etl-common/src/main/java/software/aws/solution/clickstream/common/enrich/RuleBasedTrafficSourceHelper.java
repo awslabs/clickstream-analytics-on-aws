@@ -68,6 +68,9 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     public static final String SEARCH = "Search";
     public static final String SHOPPING = "Shopping";
 
+    public static final String CHANNEL_RULE_FILE = "ts/traffic_source_channel_rule_v0.json";
+    public static final String CATEGORY_RULE_FILE = "ts/traffic_source_category_rule_v0.json";
+
     static {
         KNOWN_CLID_TO_MEDIUM_MAP = getKnownClidTypeToSourceMediumMap();
     }
@@ -80,8 +83,8 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     private final String appId;
 
     private RuleBasedTrafficSourceHelper(final String appId, final RuleConfig ruleConfig) {
-        String channelRuleFile = "ts/traffic_source_channel_rule_v0.json";
-        String categoryRuleFile = "ts/traffic_source_category_rule_v0.json";
+       String categoryRuleFile = CATEGORY_RULE_FILE;
+       String channelRuleFile = CHANNEL_RULE_FILE;
 
         String channelRuleJson = null;
         String categoryRuleJson = null;
