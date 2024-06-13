@@ -498,19 +498,6 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   const dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
 
-  let realtimeDashboard = undefined;
-  if (realtimeDatasetRefs.length > 0 && dashboardDef.realtimeTemplateArn.length > 0) {
-    const realtimeSourceEntity = {
-      SourceTemplate: {
-        Arn: dashboardDef.realtimeTemplateArn,
-        DataSetReferences: realtimeDatasetRefs,
-      },
-    };
-
-    realtimeDashboard = await createDashboard(quickSight, commonParams, realtimeSourceEntity, dashboardDef, true);
-    logger.info(`Realtime dashboard ${realtimeDashboard?.DashboardId} creation completed.`);
-  }
-
   try {
     await quickSight.createFolderMembership({
       AwsAccountId: commonParams.awsAccountId,
@@ -523,6 +510,34 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
       logger.warn('folder membership already exist. skip create operation.');
     } else {
       throw e;
+    }
+  }
+
+  let realtimeDashboard = undefined;
+  if (realtimeDatasetRefs.length > 0 && dashboardDef.realtimeTemplateArn.length > 0) {
+    const realtimeSourceEntity = {
+      SourceTemplate: {
+        Arn: dashboardDef.realtimeTemplateArn,
+        DataSetReferences: realtimeDatasetRefs,
+      },
+    };
+
+    realtimeDashboard = await createDashboard(quickSight, commonParams, realtimeSourceEntity, dashboardDef, true);
+    logger.info(`Realtime dashboard ${realtimeDashboard?.DashboardId} creation completed.`);
+
+    try {
+      await quickSight.createFolderMembership({
+        AwsAccountId: commonParams.awsAccountId,
+        FolderId: folderId,
+        MemberId: realtimeDashboard?.DashboardId!,
+        MemberType: MemberType.DASHBOARD,
+      });
+    } catch (e) {
+      if (e instanceof ResourceExistsException) {
+        logger.warn('folder membership already exist. skip create operation.');
+      } else {
+        throw e;
+      }
     }
   }
 
