@@ -135,6 +135,7 @@ export class CIngestionServerStack extends JSONObject {
       'EnableApplicationLoadBalancerAccessLog',
       'Protocol',
       'SinkType',
+      'DevMode',
     ];
     return allowedList;
   }
