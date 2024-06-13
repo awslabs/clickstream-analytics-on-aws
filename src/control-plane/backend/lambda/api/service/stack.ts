@@ -127,6 +127,9 @@ export class StackManager {
       retryStackNames.push(
         getStackName(this.pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR, this.pipeline.ingestionServer.sinkType),
       );
+      retryStackNames.push(
+        getStackName(this.pipeline.pipelineId, PipelineStackType.STREAMING, this.pipeline.ingestionServer.sinkType),
+      );
     }
     if (retryStackTypes.includes(PipelineStackType.DATA_PROCESSING)) {
       retryStackNames.push(
@@ -142,6 +145,9 @@ export class StackManager {
     if (retryStackTypes.includes(PipelineStackType.ATHENA) || retryStackTypes.includes(PipelineStackType.DATA_MODELING_REDSHIFT)) {
       retryStackNames.push(
         getStackName(this.pipeline.pipelineId, PipelineStackType.REPORTING, this.pipeline.ingestionServer.sinkType),
+      );
+      retryStackNames.push(
+        getStackName(this.pipeline.pipelineId, PipelineStackType.STREAMING, this.pipeline.ingestionServer.sinkType),
       );
     }
     return Array.from(new Set(retryStackNames));

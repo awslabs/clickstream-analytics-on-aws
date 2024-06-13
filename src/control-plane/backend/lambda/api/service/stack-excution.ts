@@ -411,7 +411,7 @@ export async function getReportingState(pipeline: IPipeline, resources: CPipelin
 }
 
 export async function getStreamingState(pipeline: IPipeline, resources: CPipelineResources): Promise<WorkflowState | undefined> {
-  if (isEmpty(pipeline.streaming)) {
+  if (!pipeline.streaming?.appIdStreamList) {
     return undefined;
   }
   const streamingTemplateURL = await getTemplateUrlFromResource(resources, PipelineStackType.STREAMING);

@@ -149,7 +149,6 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
       accountName: '',
     },
   },
-
   selectedRegion: null,
   selectedVPC: null,
   selectedSDK: null,

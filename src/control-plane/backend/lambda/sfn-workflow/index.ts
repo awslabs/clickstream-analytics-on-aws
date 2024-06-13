@@ -54,7 +54,9 @@ export const handler = async (event: any): Promise<any> => {
   try {
     const eventData = event.MapRun? event.Data: event;
     if (eventData.Type === 'Pass') {
-      await callback(eventData.Data as SfnStackEvent);
+      if (eventData.Data) {
+        await callback(eventData.Data as SfnStackEvent);
+      }
       return eventData;
     } else if (eventData.Type === 'Stack') {
       const stack = await handlerStack(eventData as WorkFlowStack);
@@ -81,6 +83,12 @@ export const handlerStack = async (stack: WorkFlowStack) => {
 };
 
 export const handlerBranch = async (eventData: any) => {
+  if (eventData.Branches.length === 0) {
+    return {
+      Type: 'Pass',
+      Data: {},
+    };
+  }
   if (eventData.Branches.length === 1) {
     const branch = eventData.Branches[0];
     if (Object.keys(branch.States).length === 1) {
@@ -137,7 +145,6 @@ export const callback = async (event: SfnStackEvent) => {
   );
   return event;
 };
-
 
 export const describe = async (region: string, stackName: string) => {
   try {
