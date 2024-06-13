@@ -57,33 +57,14 @@ export const handler = async (event: any): Promise<any> => {
       await callback(eventData.Data as SfnStackEvent);
       return eventData;
     } else if (eventData.Type === 'Stack') {
-      const stack = eventData as WorkFlowStack;
-      await stackParametersResolve(stack);
-      await stackTagsResolve(stack);
+      const stack = await handlerStack(eventData as WorkFlowStack);
       return stack;
     } else if (eventData.Type === 'Parallel') {
-      return {
-        Type: 'Parallel',
-        Data: eventData.Branches,
-      };
+      const branch = await handlerBranch(eventData);
+      return branch;
     }
-
-    const data = [];
-    let currentKey = eventData.StartAt;
-    let currentStep = eventData.States[currentKey];
-    while (true) {
-      currentStep.Name = currentKey;
-      data.push(currentStep);
-      if (currentStep.End) {
-        break;
-      }
-      currentKey = currentStep.Next;
-      currentStep = eventData.States[currentKey];
-    }
-    return {
-      Type: 'Serial',
-      Data: data,
-    };
+    const serial = await handlerSerial(eventData);
+    return serial;
   } catch (err) {
     logger.error('Stack workflow input failed.', {
       error: err,
@@ -91,6 +72,52 @@ export const handler = async (event: any): Promise<any> => {
     });
     throw new Error('Stack workflow input failed.');
   }
+};
+
+export const handlerStack = async (stack: WorkFlowStack) => {
+  await stackParametersResolve(stack);
+  await stackTagsResolve(stack);
+  return stack;
+};
+
+export const handlerBranch = async (eventData: any) => {
+  if (eventData.Branches.length === 1) {
+    const branch = eventData.Branches[0];
+    if (Object.keys(branch.States).length === 1) {
+      const currentStep = branch.States[branch.StartAt];
+      if (currentStep.Type === 'Stack') {
+        const stack = await handlerStack(currentStep as WorkFlowStack);
+        return stack;
+      }
+    }
+  }
+  return {
+    Type: 'Parallel',
+    Data: eventData.Branches,
+  };
+};
+
+export const handlerSerial = async (eventData: any) => {
+  const data = [];
+  let currentKey = eventData.StartAt;
+  let currentStep = eventData.States[currentKey];
+  if (Object.keys(eventData.States).length === 1 && currentStep.Type === 'Stack') {
+    const stack = await handlerStack(currentStep as WorkFlowStack);
+    return stack;
+  }
+  while (true) {
+    currentStep.Name = currentKey;
+    data.push(currentStep);
+    if (currentStep.End) {
+      break;
+    }
+    currentKey = currentStep.Next;
+    currentStep = eventData.States[currentKey];
+  }
+  return {
+    Type: 'Serial',
+    Data: data,
+  };
 };
 
 export const callback = async (event: SfnStackEvent) => {

@@ -637,7 +637,6 @@ export class ReportingService {
 
       const sql = buildEventPropertyAnalysisView(sqlParameters, query.action);
       logger.debug(`event analysis sql: ${sql}`);
-      console.log(sql);
 
       let groupingColName:string[] = [];
       if ( isValidGroupingCondition(query.groupCondition)) {

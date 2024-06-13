@@ -84,6 +84,9 @@ const SOLUTION_VPC_ENDPOINTS = [
 const CFN_RULE_PREFIX = 'ClickstreamRuleForCFN';
 const CFN_TOPIC_PREFIX = 'ClickstreamTopicForCFN';
 const listenStackQueueArn = process.env.LISTEN_STACK_QUEUE_ARN;
+const LEVEL1 = 'PipelineLevel1';
+const LEVEL2 = 'PipelineLevel2';
+const LEVEL3 = 'PipelineLevel3';
 
 export {
   clickStreamTableName,
@@ -123,4 +126,7 @@ export {
   CFN_RULE_PREFIX,
   CFN_TOPIC_PREFIX,
   listenStackQueueArn,
+  LEVEL1,
+  LEVEL2,
+  LEVEL3,
 };

@@ -86,7 +86,7 @@ import {
   stackDetailsWithOutputs,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
 } from './pipeline-mock';
-import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
+import { FULL_SOLUTION_VERSION, LEVEL1, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
 import { PipelineServerProtocol } from '../../common/types';
 import { getDefaultTags, getStackPrefix } from '../../common/utils';
@@ -4041,8 +4041,8 @@ describe('Pipeline test', () => {
     });
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const pipelineStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M.PipelineStacks.M;
-      const dataProcessingInput = pipelineStacks.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      const level1State = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M[LEVEL1].M;
+      const dataProcessingInput = level1State.Branches.L[2].M.States.M.DataProcessing.M.Data.M.Input;
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
@@ -4109,8 +4109,8 @@ describe('Pipeline test', () => {
     });
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const pipelineStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M.PipelineStacks.M;
-      const dataProcessingInput = pipelineStacks.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      const level1State = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M[LEVEL1].M;
+      const dataProcessingInput = level1State.Branches.L[2].M.States.M.DataProcessing.M.Data.M.Input;
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&

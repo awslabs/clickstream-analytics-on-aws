@@ -1463,6 +1463,14 @@ function readAndIterateFile(filePath: string): any[] {
   }
 }
 
+export function getTemplateUrlFromResource(resources: CPipelineResources, name: string) {
+  if (!resources.solution || !resources.templates || isEmpty(resources.templates.data[name])) {
+    return undefined;
+  }
+  const templateName = resources.templates.data[name] as string;
+  return getTemplateUrl(templateName, resources.solution);
+};
+
 function getTemplateUrl(templateName: string, solutionMetadata?: IDictionary, useTarget = false) {
   const solutionName = solutionMetadata?.data.name;
   // default/ or cn/ or 'null',''
