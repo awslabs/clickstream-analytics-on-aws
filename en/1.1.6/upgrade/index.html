@@ -3068,10 +3068,16 @@
 <h3 id="upgrade-the-data-schema-and-out-of-the-box-dashboards">Upgrade the Data Schema and Out-of-the-box Dashboards</h3>
 <p>The solution automatically and asynchronously upgrades the views and materialized views used by the dashboard after upgrading the pipeline of the project. The duration of the update depends on the workload of the Redshift cluster and the existing data volume, and can take minutes to hours. You can track the progress in the <strong>Redshift Schemas</strong> section in the <strong>Processing</strong> tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via <strong>Actions - Redrive</strong> or <strong>New execution</strong> with the input unchanged.</p>
 <h3 id="migrate-the-existing-data-only-applicable-when-upgrading-from-a-version-earlier-than-v116">Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)</h3>
-<div class="admonition info">
+<div class="admonition danger">
 <p class="admonition-title">Important</p>
-<p>The data migration process is CPU-intensive. Before starting the migration, ensure that the load on your Redshift is low. It's also advisable to consider temporarily increasing the RPUs of Redshift Serverless or the cluster size when migrating large volumes of data.</p>
-<p>In our benchmark, we migrated 100 million events in 25 minutes using 32 RPUs of Redshift Serverless.</p>
+<p>The data migration process is CPU-intensive, and it will <strong>incur additional cost</strong>. Before starting the migration, ensure that the load on your Redshift is low. It's also advisable to consider temporarily increasing the RPUs of Redshift Serverless or the cluster size when migrating large volumes of data.</p>
+<p>In our benchmark, we migrated the events from the last <strong>30 days</strong>. Here are the details: <br>
+Average number of events per day: <strong>10 million</strong> <br>
+Total events for 30 days: <strong>300 million</strong> <br>
+Redshift RPU: <strong>32 RPUs</strong> <br>
+Total duration: <strong>4 hour 45 minutes</strong> <br>
+Total cost: <strong>$47.77</strong></p>
+<p><strong>Please note that the total duration and cost will increase as the number of events you migrate increases.</strong></p>
 </div>
 <ol>
 <li>
@@ -3088,14 +3094,14 @@
 <p>Create a new SQL Editor, select your project's schema.</p>
 </li>
 <li>
-<p>Customize the date range as desired, and execute the following SQL in the editor to migrate events from the past 180 days, or any number of days up to the present, to the new tables.</p>
+<p>Customize the date range as desired, and execute the following SQL in the editor to migrate events from the past 30 days, or any number of days up to the present, to the new tables.</p>
 <div class="language-sql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">-- please replace &lt;app-id&gt; with your actual app id</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1">-- update the day range(180 days in below example) based on your needs</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">CALL</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_migrate_data_to_v2</span><span class="p">(</span><span class="mi">180</span><span class="p">);</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1">-- update the day range(30 days in below example) based on your needs</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">CALL</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">sp_migrate_data_to_v2</span><span class="p">(</span><span class="mi">30</span><span class="p">);</span>
 </span></code></pre></div>
 </li>
 <li>
-<p>Wait for the SQL to complete. The execution time depends on the volume of data in the <code>events</code> table.</p>
+<p>Wait for the SQL to complete. The execution time depends on the volume of data in the <code>events</code> table. In our test, migrating 300 million events using 32 RPUs will take approximately 2 hours and 5 minutes.</p>
 </li>
 <li>
 <p>Execute the following SQL to check the stored procedure execution log; ensure there are no errors. If there are any interruptions, timeouts, or other errors, you can re-execute step 4 to continue the data migration.</p>
@@ -3110,8 +3116,8 @@
 <li>
 <p>populate the event data to <code>clickstream_event_base_view</code> table.</p>
 <div class="language-sql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">-- please replace &lt;app-id&gt; with your actual app id</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1">-- update the day range(180 days in below example) based on your needs</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">CALL</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">clickstream_event_base_view_sp</span><span class="p">(</span><span class="k">NULL</span><span class="p">,</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="o">*</span><span class="mi">180</span><span class="p">);</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1">-- update the day range(30 days in below example) based on your needs</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">CALL</span><span class="w"> </span><span class="ss">&quot;&lt;app-id&gt;&quot;</span><span class="p">.</span><span class="n">clickstream_event_base_view_sp</span><span class="p">(</span><span class="k">NULL</span><span class="p">,</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="o">*</span><span class="mi">30</span><span class="p">);</span>
 </span></code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Note</p>
@@ -3127,9 +3133,11 @@ For example, to refresh data between 2024-05-10 00:00:00 and 2024-05-12 00:00:00
 <div class="language-sql highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">call</span><span class="w"> </span><span class="ss">&quot;&lt;schema&gt;&quot;</span><span class="p">.</span><span class="n">clickstream_event_base_view_sp</span><span class="p">(</span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="s1">&#39;epoch&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1715270400</span><span class="w">  </span><span class="o">*</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;1 second&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="s1">&#39;epoch&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1715443200</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;1 second&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
 </span></code></pre></div></p>
 </div>
+<p>Based on our test parameters mentioned above, this process will take about 20 minutes.</p>
 </li>
 <li>
 <p>Follow <a href="../faq/#how-do-i-recalculate-historical-events-for-out-of-the-box-dashboards">this guide</a> to calculate metrics for the new preset dashboard based on the migrated data.</p>
+<p>Based on our test parameters mentioned above, this process will take about 2 hours and 20 minutes.</p>
 </li>
 <li>
 <p>If you don't have other applications using the legacy tables and views, you could run the following SQL to clean up the legacy views and tables to save Redshift storage.</p>
