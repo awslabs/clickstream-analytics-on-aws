@@ -93,6 +93,33 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
     jest.useRealTimers();
   });
 
+  test('Executed Redshift refresh custom-mv command with RefreshStartTime bigger than current', async () => {
+    const exeuteId = 'Id-1';
+    refreshBasicViewEvent.view.type = 'custom-mv';
+    refreshBasicViewEvent.originalInput = {
+      refreshStartTime: '1715470905000',
+    };
+    jest
+      .useFakeTimers()
+      .setSystemTime(1715450905000);
+    const dataFreshnessInHour = 72;
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+    const resp = await handler(refreshBasicViewEvent);
+    expect(resp).toEqual({
+      detail: {
+        viewName: refreshBasicViewEvent.view.name,
+        queryId: exeuteId,
+      },
+      timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+      WorkgroupName: workGroupName,
+      Sql: `CALL ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name}(NULL, NULL, ${dataFreshnessInHour});`,
+      Database: expect.any(String),
+    });
+    jest.useRealTimers();
+  });
+
   test('Executed Redshift refresh custom-mv command without input refreshStartTime', async () => {
     const exeuteId = 'Id-1';
     refreshBasicViewEvent.view.type = 'custom-mv';
