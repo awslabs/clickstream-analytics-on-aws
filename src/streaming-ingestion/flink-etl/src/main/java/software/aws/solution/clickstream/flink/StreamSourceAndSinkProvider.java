@@ -17,6 +17,6 @@ import org.apache.flink.api.connector.sink2.Sink;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
 public interface StreamSourceAndSinkProvider {
-    SourceFunction<String> createSource();
+    SourceFunction<String> createSource(); // NOSONAR
     Sink<String> createSink(String appId);
 }
