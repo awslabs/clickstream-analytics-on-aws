@@ -148,7 +148,7 @@ export class ReportingService {
         timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
       };
-      const sql = buildFunnelView(sqlParameters, query.action, query.chartType === QuickSightChartType.BAR);
+      const sql = buildFunnelView(sqlParameters, query.action, query.chartType);
 
       logger.debug(`funnel sql: ${sql}`);
 
