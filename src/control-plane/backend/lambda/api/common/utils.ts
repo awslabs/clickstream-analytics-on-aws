@@ -1197,7 +1197,9 @@ function getUpdateTags(newPipeline: IPipeline, oldPipeline: IPipeline) {
     for (let tag of newPipeline.tags) {
       if (tag.key != BuiltInTagKeys.CLICKSTREAM_PROJECT &&
         tag.key != BuiltInTagKeys.AWS_SOLUTION &&
-        tag.key != BuiltInTagKeys.AWS_SOLUTION_VERSION) {
+        tag.key != BuiltInTagKeys.AWS_SOLUTION_VERSION &&
+        !tag.key.startsWith('#.')
+      ) {
         updateTags.push(tag);
       }
     }

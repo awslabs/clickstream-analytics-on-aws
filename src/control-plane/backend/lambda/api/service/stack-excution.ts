@@ -513,8 +513,8 @@ export async function updateReportingState(newPipeline: IPipeline, oldPipeline: 
 }
 
 export async function updateStreamingState(newPipeline: IPipeline, oldPipeline: IPipeline, resources: CPipelineResources, workflow: WorkflowState) {
-  const newStreamingEnabled = !isEmpty(newPipeline.streaming?.appIdStreamList);
-  const oldStreamingEnabled = !isEmpty(oldPipeline.streaming?.appIdStreamList);
+  const newStreamingEnabled = !!newPipeline.streaming?.appIdStreamList;
+  const oldStreamingEnabled = !!oldPipeline.streaming?.appIdStreamList;
   if (workflow.Branches?.length !== 1) {
     throw new Error('Workflow branches error.');
   }

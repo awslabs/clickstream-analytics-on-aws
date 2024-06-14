@@ -2898,6 +2898,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       stackDetails: defaultGenericsValue(data.stackDetails, []),
       executionDetail: data.executionDetail,
       workflow: data.workflow,
+      templateVersion: defaultStr(data.templateVersion),
       version: defaultStr(data.version),
       versionTag: defaultStr(data.versionTag),
       createAt: defaultGenericsValue(data.createAt, 0),
