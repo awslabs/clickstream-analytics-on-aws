@@ -33,7 +33,7 @@
                               "FieldId":"{{measureFieldId}}",
                               "Column":{
                                   "DataSetIdentifier":"{{dataSetIdentifier}}",
-                                  "ColumnName":"{{Count}}"
+                                  "ColumnName":"Count"
                               },
                               "AggregationFunction":{
                                   "SimpleNumericalAggregation": "SUM"
