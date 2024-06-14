@@ -1018,8 +1018,6 @@ export class CPipeline {
     if (!this.pipeline.streaming?.appIdStreamList) {
       throw new ClickStreamBadRequestError('Streaming not enabled.');
     }
-    // TODO: Redshift MV
-
     // Save pipeline status
     const appIdRealtimeList = this.pipeline.streaming?.appIdRealtimeList ?? [];
     if (enable && !appIdRealtimeList.includes(appId)) {
