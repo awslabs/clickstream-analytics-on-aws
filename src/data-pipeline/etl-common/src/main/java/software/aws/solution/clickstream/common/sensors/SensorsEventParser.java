@@ -264,7 +264,13 @@ public final class SensorsEventParser extends BaseEventParser {
         if (isDisableTrafficSourceEnrichment()) {
             log.info("Traffic source enrichment is disabled");
         } else {
-            setTrafficSourceBySourceParser(clickstreamEvent);
+            if (sensorsEvent.getProperties() != null) {
+                setTrafficSourceBySourceParser(sensorsEvent.getProperties().getUrl(),
+                        sensorsEvent.getProperties().getReferrer(),
+                        null,
+                        null,
+                        clickstreamEvent);
+            }
         }
 
         Map<String, String> processInfo = new HashMap<>();
