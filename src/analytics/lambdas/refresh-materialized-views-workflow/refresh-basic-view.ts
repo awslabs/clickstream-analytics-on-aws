@@ -12,7 +12,6 @@
  */
 
 import { logger } from '@aws/clickstream-base-lib';
-import { utc } from 'moment-timezone';
 import { RefreshViewOrSp } from './get-refresh-viewlist';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
@@ -64,7 +63,10 @@ export const handler = async (event: RefreshBasicViewEvent) => {
     if (type === 'custom-mv') {
       let dataFreshnessInHour = process.env.DATA_REFRESHNESS_IN_HOUR!;
       if (originalInput.refreshStartTime) {
-        dataFreshnessInHour = calculateHoursAgo(originalInput.refreshStartTime, timezoneWithAppId.timezone).toString();
+        let dataFreshnessInHourNumber = calculateHoursAgo(originalInput.refreshStartTime);
+        if (dataFreshnessInHourNumber > 0) {
+          dataFreshnessInHour = dataFreshnessInHourNumber.toString();
+        }
       }
       logger.info('dataFreshnessInHour', { dataFreshnessInHour });
       sqlStatements.push(`CALL ${timezoneWithAppId.appId}.${viewName}(NULL, NULL, ${dataFreshnessInHour});`);
@@ -89,9 +91,9 @@ export const handler = async (event: RefreshBasicViewEvent) => {
   }
 };
 
-function calculateHoursAgo(refreshStartTime : string, timezone : string) {
-  const timestampMoment = utc(parseInt(refreshStartTime)).tz(timezone);
-  const currentMoment = utc().tz(timezone);
-  const diffInHours = currentMoment.diff(timestampMoment, 'hours') + 1;
+function calculateHoursAgo(refreshStartTime: string) {
+  const currentDate = new Date();
+  const diffInMilliseconds = currentDate.getTime() - parseInt(refreshStartTime);
+  const diffInHours = Math.floor(diffInMilliseconds / (1000 * 60 * 60) ) + 1;
   return diffInHours;
 }
