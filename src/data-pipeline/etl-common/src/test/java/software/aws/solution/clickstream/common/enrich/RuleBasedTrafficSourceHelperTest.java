@@ -16,12 +16,10 @@ package software.aws.solution.clickstream.common.enrich;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.BaseTest;
-import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.Util;
 import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
 import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceUtm;
@@ -29,7 +27,6 @@ import software.aws.solution.clickstream.common.enrich.ts.rule.CategoryListEvalu
 
 import java.io.IOException;
 
-import static software.aws.solution.clickstream.common.Util.encodeUriQueryString;
 import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.CPC;
 import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.DIRECT;
 import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.ORGANIC;
@@ -492,7 +489,7 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
 
         String expectedValue = "{\n" +
-                "  \"source\" : \"feedYahoo{{1|||{[}]]][[<,,,,>M<$#@~^\\\\;`#~;/: , }AA_【中文测试 | 中文 测试 @test\",\n" +
+                "  \"source\" : \"feedYahoo{{1|||{[}]]][[<,,,,>M<$#@~^\\\\;`#~;/:+, }AA_【中文测试 | 中文 测试 @test\",\n" +
                 "  \"medium\" : \"referral\",\n" +
                 "  \"campaign\" : \"nmgYahoo\",\n" +
                 "  \"content\" : null,\n" +
@@ -506,6 +503,33 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
         String value = prettyJson(Util.objectToJsonString(cts));
         Assertions.assertEquals(prettyJson(expectedValue), value);
     }
+
+    @Test
+    void testParseCNChars2() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseCNChars2
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://www.example.com/travel/航空-786138/中 文 测 试/?utm_source=feedYahoo{{1|||{[}]]][[<,,,,>M<$#@~^\\;`#~;/:+, }AA_【中文测试 | 中文 测试 @test&utm_medium=referral&utm_campaign=nmgYahoo";
+        String pageReferrer = "https://hk.news.yahoo.com/借錢-中 文 测 试/{[}]]][[-test-070840890.html";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
+
+        String expectedValue = "{\n" +
+                "  \"source\" : \"feedYahoo{{1|||{[}]]][[<,,,,>M<$#@~^\\\\;`#~;/:+, }AA_【中文测试 | 中文 测试 @test\",\n" +
+                "  \"medium\" : \"referral\",\n" +
+                "  \"campaign\" : \"nmgYahoo\",\n" +
+                "  \"content\" : null,\n" +
+                "  \"term\" : null,\n" +
+                "  \"campaignId\" : null,\n" +
+                "  \"clidPlatform\" : null,\n" +
+                "  \"clid\" : null,\n" +
+                "  \"channelGroup\" : \"Referral\",\n" +
+                "  \"category\" : \"Unassigned\"\n" +
+                "}";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
 
     @Test
     void testParseFacebookReferral() throws IOException {
@@ -588,6 +612,109 @@ public class RuleBasedTrafficSourceHelperTest extends BaseTest {
 
         medium = parser.getMediumByCategory(trafficSourceUtm4, CategoryListEvaluator.UNASSIGNED);
         Assertions.assertNull(medium);
+    }
+
+    @Test
+    void testParseIllegalCharInPath1() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseIllegalCharInPath1
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://www.example.com/keyword/太古 食乜^$@()[- #]%好/";
+        String pageReferrer = "https://www.example.com/dining/太古-著數 推介-snoopy-669390/";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
+
+        String expectedValue = "{\n" +
+                "      \"source\" : \"Direct\",\n" +
+                "      \"medium\" : \"None\",\n" +
+                "      \"campaign\" : \"Direct\",\n" +
+                "      \"content\" : null,\n" +
+                "      \"term\" : null,\n" +
+                "      \"campaignId\" : null,\n" +
+                "      \"clidPlatform\" : null,\n" +
+                "      \"clid\" : null,\n" +
+                "      \"channelGroup\" : \"Internal\",\n" +
+                "      \"category\" : \"Direct\"\n" +
+                "    }";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+    @Test
+    void testParseIllegalCharInPath2() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseIllegalCharInPath2
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://www.example.com/keyword/太古%/";
+        String pageReferrer = "https://www.example.com/dining/%/";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
+
+        String expectedValue = "{\n" +
+                "      \"source\" : \"Direct\",\n" +
+                "      \"medium\" : \"None\",\n" +
+                "      \"campaign\" : \"Direct\",\n" +
+                "      \"content\" : null,\n" +
+                "      \"term\" : null,\n" +
+                "      \"campaignId\" : null,\n" +
+                "      \"clidPlatform\" : null,\n" +
+                "      \"clid\" : null,\n" +
+                "      \"channelGroup\" : \"Internal\",\n" +
+                "      \"category\" : \"Direct\"\n" +
+                "    }";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+    @Test
+    void testParseIllegalCharInPath3() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseIllegalCharInPath3
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "www.example.com/keyword/太古 /";
+        String pageReferrer = "www.example.com/dining/%/";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
+
+        String expectedValue = "{\n" +
+                "      \"source\" : \"Direct\",\n" +
+                "      \"medium\" : \"None\",\n" +
+                "      \"campaign\" : \"Direct\",\n" +
+                "      \"content\" : null,\n" +
+                "      \"term\" : null,\n" +
+                "      \"campaignId\" : null,\n" +
+                "      \"clidPlatform\" : null,\n" +
+                "      \"clid\" : null,\n" +
+                "      \"channelGroup\" : \"Internal\",\n" +
+                "      \"category\" : \"Direct\"\n" +
+                "    }";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
+    }
+
+    @Test
+    void testParseIllegalCharInPath4() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelperTest.testParseIllegalCharInPath4
+
+        RuleBasedTrafficSourceHelper parser = RuleBasedTrafficSourceHelper.getInstance("testApp", getRuleConfigV0());
+        String pageUrl = "https://www.example.com/mbti/istp测试istj测试-16型人格-mbti-cplt1-1697502/3?method=lazyload";
+        String pageReferrer = "https://www.example.com/mbti/isfp测试-isfp性格-16型人格-mbti-cplt1-1684248/";
+
+        CategoryTrafficSource cts = parser.parse(pageUrl, pageReferrer, null, null);
+
+        String expectedValue = "{\n" +
+                "      \"source\" : \"Direct\",\n" +
+                "      \"medium\" : \"None\",\n" +
+                "      \"campaign\" : \"Direct\",\n" +
+                "      \"content\" : null,\n" +
+                "      \"term\" : null,\n" +
+                "      \"campaignId\" : null,\n" +
+                "      \"clidPlatform\" : null,\n" +
+                "      \"clid\" : null,\n" +
+                "      \"channelGroup\" : \"Internal\",\n" +
+                "      \"category\" : \"Direct\"\n" +
+                "    }";
+        String value = prettyJson(Util.objectToJsonString(cts));
+        Assertions.assertEquals(prettyJson(expectedValue), value);
     }
 
 }
