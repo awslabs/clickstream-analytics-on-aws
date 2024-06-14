@@ -468,11 +468,11 @@ BEGIN
 			stage.created_time
 		);		
 
-	CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'Merge data into session table successfully.');
+	CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'Merge data into session table successfully. manifestFileName: ' || manifestFileName);
 
 	DROP TABLE session_stage;
 	DROP TABLE session_stage_1;
 EXCEPTION WHEN OTHERS THEN
-    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'error message:' || SQLERRM);	
+    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'manifestFileName: ' || manifestFileName || ', error message:' || SQLERRM);
 END;
 $$ LANGUAGE plpgsql;
