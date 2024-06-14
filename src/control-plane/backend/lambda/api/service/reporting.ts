@@ -247,7 +247,7 @@ export class ReportingService {
       'event_name',
     ];
 
-    if(props.query.chartType === QuickSightChartType.BAR) {
+    if (props.query.chartType === QuickSightChartType.BAR) {
       datasetColumns.push({
         Name: 'event_date',
         Type: 'DATETIME',
