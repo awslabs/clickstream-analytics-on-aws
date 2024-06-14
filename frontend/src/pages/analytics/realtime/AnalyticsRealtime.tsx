@@ -48,7 +48,7 @@ const AnalyticsRealtime: React.FC = () => {
         defaultStr(projectId),
         defaultStr(appId),
         window.location.origin,
-        checked,
+        checked
       );
       if (success && data.EmbedUrl) {
         setDashboardEmbedUrl(data.EmbedUrl);
@@ -140,7 +140,7 @@ const AnalyticsRealtime: React.FC = () => {
               }
             >
               <Container>
-              <ColumnLayout columns={2}>
+                <ColumnLayout columns={2}>
                   <div>
                     <Toggle
                       onChange={({ detail }) => setChecked(detail.checked)}
@@ -155,26 +155,26 @@ const AnalyticsRealtime: React.FC = () => {
                 <br />
                 {!checked ? (
                   <Alert
-                  statusIconAriaLabel="Info"
-                  action={
-                    <Button disabled iconAlign="right" iconName="external">
-                      {t('analytics:realtime.configProject')}
-                    </Button>
-                  }
-                >
-                  {t('analytics:realtime.disableMessage')}
-                </Alert>
+                    statusIconAriaLabel="Info"
+                    action={
+                      <Button disabled iconAlign="right" iconName="external">
+                        {t('analytics:realtime.configProject')}
+                      </Button>
+                    }
+                  >
+                    {t('analytics:realtime.disableMessage')}
+                  </Alert>
                 ) : (
                   <>
-                  {loadingData ? (
-                  <Loading isPage />
-                ) : (
-                  <ExploreEmbedFrame
-                    embedType="console"
-                    embedUrl={dashboardEmbedUrl}
-                    embedPage="analyze"
-                  />
-                )}
+                    {loadingData ? (
+                      <Loading isPage />
+                    ) : (
+                      <ExploreEmbedFrame
+                        embedType="console"
+                        embedUrl={dashboardEmbedUrl}
+                        embedPage="analyze"
+                      />
+                    )}
                   </>
                 )}
               </Container>
