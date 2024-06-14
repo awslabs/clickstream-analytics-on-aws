@@ -111,7 +111,8 @@ public abstract class BaseEventParser implements EventParser {
         return OBJECT_MAPPER;
     }
 
-    protected void setTrafficSourceBySourceParser(final ClickstreamEvent clickstreamEvent) {
+    protected void setTrafficSourceBySourceParser(final String url, final String pageReferrer, final String latestReferrer, final String latestReferrerHost,
+                                                  final ClickstreamEvent clickstreamEvent) {
         String appId = clickstreamEvent.getAppId();
         RuleConfig ruleConfig = getAppRuleConfig() !=null ? getAppRuleConfig().get(appId) : null;
 
@@ -125,10 +126,10 @@ public abstract class BaseEventParser implements EventParser {
 
         RuleBasedTrafficSourceHelper rsHelper = RuleBasedTrafficSourceHelper.getInstance(appId, ruleConfig);
 
-        CategoryTrafficSource ts = rsHelper.parse(clickstreamEvent.getPageViewPageUrl(),
-                clickstreamEvent.getPageViewPageReferrer(),
-                clickstreamEvent.getPageViewLatestReferrer(),
-                clickstreamEvent.getPageViewLatestReferrerHost());
+        CategoryTrafficSource ts = rsHelper.parse(url,
+                pageReferrer,
+                latestReferrer,
+                latestReferrerHost);
 
         clickstreamEvent.setTrafficSourceSource(ts.getSource());
         clickstreamEvent.setTrafficSourceMedium(ts.getMedium());

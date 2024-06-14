@@ -115,14 +115,14 @@ public final class Util {
         }
 
         String queryString = uriParts[1];
-        queryString = enchodeQueryString(queryString);
+        queryString = encodeQueryString(queryString);
 
         pageUrl = hostAndPath + "?" + queryString;
         log.debug("encodeUriString(): return pageUrl: {}", pageUrl);
         return pageUrl;
     }
 
-    private static String enchodeQueryString(final String queryString) {
+    private static String encodeQueryString(final String queryString) {
         return replaceIllegalChar(queryString)
                 .replace("/", "%2F");
     }
