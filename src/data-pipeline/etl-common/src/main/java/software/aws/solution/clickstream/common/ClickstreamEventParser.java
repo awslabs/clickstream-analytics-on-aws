@@ -44,6 +44,7 @@ import static software.aws.solution.clickstream.common.Util.ERROR_LOG;
 import static software.aws.solution.clickstream.common.Util.VALUE_LOG;
 import static software.aws.solution.clickstream.common.Util.convertCustomerUserPropMapToStringUserPropMap;
 import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringEventPropMap;
+import static software.aws.solution.clickstream.common.Util.deCodeUri;
 import static software.aws.solution.clickstream.common.Util.getStackTrace;
 import static software.aws.solution.clickstream.common.Util.getUriParams;
 import static software.aws.solution.clickstream.common.Util.parseUrl;
@@ -400,8 +401,8 @@ public final class ClickstreamEventParser extends BaseEventParser {
         if (ingestEvent.getAttributes() == null) {
             return;
         }
-        clickstreamEvent.setPageViewPageReferrer(ingestEvent.getAttributes().getPageReferrer());
-        clickstreamEvent.setPageViewPageReferrerTitle(ingestEvent.getAttributes().getPageReferrerTitle());
+        clickstreamEvent.setPageViewPageReferrer(deCodeUri(ingestEvent.getAttributes().getPageReferrer()));
+        clickstreamEvent.setPageViewPageReferrerTitle(deCodeUri(ingestEvent.getAttributes().getPageReferrerTitle()));
 
         if (EVENT_PAGE_VIEW.equals(ingestEvent.getEventName())) {
             clickstreamEvent.setPageViewEngagementTimeMsec(ingestEvent.getAttributes().getEngagementTimeMsec());
@@ -409,8 +410,8 @@ public final class ClickstreamEventParser extends BaseEventParser {
                 clickstreamEvent.setPageViewPreviousTimeMsec(ingestEvent.getAttributes().getPreviousTimestamp() + timeShiftInfo.getTimeDiff());
             }
         }
-        clickstreamEvent.setPageViewPageTitle(ingestEvent.getAttributes().getPageTitle());
-        clickstreamEvent.setPageViewPageUrl(ingestEvent.getAttributes().getPageUrl());
+        clickstreamEvent.setPageViewPageTitle(deCodeUri(ingestEvent.getAttributes().getPageTitle()));
+        clickstreamEvent.setPageViewPageUrl(deCodeUri(ingestEvent.getAttributes().getPageUrl()));
 
         setPageViewUrl(clickstreamEvent, ingestEvent.getAttributes().getPageUrl());
 
@@ -418,11 +419,11 @@ public final class ClickstreamEventParser extends BaseEventParser {
             clickstreamEvent.setPageViewHostname(ingestEvent.getHostName());
         }
 
-        clickstreamEvent.setPageViewLatestReferrer(ingestEvent.getAttributes().getLatestReferrer());
+        clickstreamEvent.setPageViewLatestReferrer(deCodeUri(ingestEvent.getAttributes().getLatestReferrer()));
         clickstreamEvent.setPageViewLatestReferrerHost(ingestEvent.getAttributes().getLatestReferrerHost());
-        if (clickstreamEvent.getPageViewLatestReferrer() != null
+        if (ingestEvent.getAttributes().getLatestReferrer() != null
                 && clickstreamEvent.getPageViewLatestReferrerHost() == null) {
-            UrlParseResult latestReferrerUrlParseResult = parseUrl(clickstreamEvent.getPageViewLatestReferrer());
+            UrlParseResult latestReferrerUrlParseResult = parseUrl(ingestEvent.getAttributes().getLatestReferrer());
             clickstreamEvent.setPageViewLatestReferrerHost(latestReferrerUrlParseResult.getHostName());
         }
         clickstreamEvent.setPageViewEntrances(ingestEvent.getAttributes().getEntrances());
@@ -518,8 +519,14 @@ public final class ClickstreamEventParser extends BaseEventParser {
         }
 
         // not set by client SDK
-        if (clientTsInfo.getSource() == null) {
-            setTrafficSourceBySourceParser(clickstreamEvent);
+        if (clientTsInfo.getSource() == null && ingestEvent.getAttributes() != null) {
+            setTrafficSourceBySourceParser(
+                    ingestEvent.getAttributes().getPageUrl(),
+                    ingestEvent.getAttributes().getPageReferrer(),
+                    ingestEvent.getAttributes().getLatestReferrer(),
+                    ingestEvent.getAttributes().getLatestReferrerHost(),
+                    clickstreamEvent
+            );
         }
     }
 

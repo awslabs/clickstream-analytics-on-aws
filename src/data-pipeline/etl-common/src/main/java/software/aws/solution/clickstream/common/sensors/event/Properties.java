@@ -21,7 +21,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -30,38 +29,20 @@ public class Properties {
 
     private final Map<String, Object> unknownProperties = new HashMap<>();
 
-    @JsonProperty("$is_login_id")
-    private boolean isLoginId;
-
-    @JsonProperty("$province")
-    private String province;
-
     @JsonProperty("$city")
     private String city;
 
     @JsonProperty("$url")
     private String url;
 
-    @JsonProperty("$screen_name")
-    private String screenName;
-
     @JsonProperty("$title")
     private String title;
-
-    @JsonProperty("$lib_method")
-    private String libMethod;
-
-    @JsonProperty("$is_first_day")
-    private boolean isFirstDay;
 
     @JsonProperty("$os")
     private String os;
 
     @JsonProperty("$os_version")
     private String osVersion;
-
-    @JsonProperty("$lib")
-    private String lib;
 
     @JsonProperty("$manufacturer")
     private String manufacturer;
@@ -71,9 +52,6 @@ public class Properties {
 
     @JsonProperty("$brand")
     private String brand;
-
-    @JsonProperty("$app_version")
-    private String appVersion;
 
     @JsonProperty("$screen_width")
     private int screenWidth;
@@ -87,9 +65,6 @@ public class Properties {
     @JsonProperty("$timezone_offset")
     private int timezoneOffset;
 
-    @JsonProperty("$app_id")
-    private String appId;
-
     @JsonProperty("$app_name")
     private String appName;
 
@@ -99,29 +74,8 @@ public class Properties {
     @JsonProperty("$network_type")
     private String networkType;
 
-    @JsonProperty("$lib_plugin_version")
-    private List<String> libPluginVersion;
-
     @JsonProperty("$device_id")
     private String deviceId;
-
-    @JsonProperty("$x_test_user")
-    private String xTestUser;
-
-    @JsonProperty("$product_id")
-    private int productId;
-
-    @JsonProperty("$product_name")
-    private String productName;
-
-    @JsonProperty("$product_classify")
-    private String productClassify;
-
-    @JsonProperty("$product_price")
-    private double productPrice;
-
-    @JsonProperty("$item_price")
-    private double itemPrice;
 
     @JsonProperty("$event_duration")
     private long eventDuration;
@@ -132,32 +86,15 @@ public class Properties {
     @JsonProperty("$referrer_title")
     private String referrerTitle;
 
-    @JsonProperty("$resume_from_background")
-    private boolean resumeFromBackground;
-
     @JsonProperty("$is_first_time")
     private boolean isFirstTime;
-
-    @JsonProperty("$age")
-    private int age;
-
-    @JsonProperty("$name")
-    private String name;
 
     @JsonProperty("$user_id")
     private String userId;
 
-    @JsonProperty("$user_name")
-    private String userName;
-
-    @JsonProperty("$browser")
-    private String browser;
-
     @JsonProperty("$browser_language")
     private String browserLanguage;
 
-    @JsonProperty("$browser_version")
-    private String browserVersion;
 
     @JsonAnySetter
     public void setUnknownProperty(final String name, final Object value) {

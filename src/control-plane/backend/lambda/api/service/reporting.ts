@@ -148,12 +148,12 @@ export class ReportingService {
         timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
       };
-      const sql = buildFunnelView(sqlParameters, query.chartType === QuickSightChartType.BAR);
+      const sql = buildFunnelView(sqlParameters, query.action, query.chartType === QuickSightChartType.BAR);
 
       logger.debug(`funnel sql: ${sql}`);
 
       const tableVisualViewName = viewName + '_tab';
-      const sqlTable = buildFunnelTableView(sqlParameters);
+      const sqlTable = buildFunnelTableView(sqlParameters, query.action);
 
       logger.debug(`funnel table chart sql: ${sqlTable}`);
 
@@ -501,7 +501,7 @@ export class ReportingService {
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
       };
 
-      const sql = buildEventAnalysisView(sqlParameters);
+      const sql = buildEventAnalysisView(sqlParameters, query.action);
       logger.debug(`event analysis sql: ${sql}`);
 
       const projectedColumns = ['event_date', 'event_name', 'Count'];
@@ -635,7 +635,7 @@ export class ReportingService {
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
       };
 
-      const sql = buildEventPropertyAnalysisView(sqlParameters);
+      const sql = buildEventPropertyAnalysisView(sqlParameters, query.action);
       logger.debug(`event analysis sql: ${sql}`);
       console.log(sql);
 
@@ -741,7 +741,7 @@ export class ReportingService {
         },
         groupCondition: query.groupCondition,
         globalEventCondition: query.globalEventCondition,
-      });
+      }, query.action);
     }
 
     return buildNodePathAnalysisView({
@@ -769,7 +769,7 @@ export class ReportingService {
       },
       groupCondition: query.groupCondition,
       globalEventCondition: query.globalEventCondition,
-    });
+    }, query.action);
   }
 
   async createPathAnalysisVisual(req: any, res: any, next: any) {
@@ -915,7 +915,7 @@ export class ReportingService {
         pairEventAndConditions: query.pairEventAndConditions,
         groupCondition: query.groupCondition,
         globalEventCondition: query.globalEventCondition,
-      });
+      }, query.action);
       logger.debug(`retention analysis sql: ${sql}`);
 
       const projectedColumns = [

@@ -47,6 +47,7 @@ import {
   InvalidParameterValueException,
   RefreshSchedule,
   RefreshFrequency,
+  PreconditionNotMetException,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -957,7 +958,7 @@ const deleteFolder = async (quickSight: QuickSight, awsAccountId: string, databa
         FolderId: getQuickSightFolderId(databaseName, schema),
       });
     } catch (err: any) {
-      if ((err as Error) instanceof ResourceNotFoundException) {
+      if ((err as Error) instanceof ResourceNotFoundException || (err as Error) instanceof PreconditionNotMetException) {
         logger.info('Folder not exist. skip delete operation.');
         return;
       }

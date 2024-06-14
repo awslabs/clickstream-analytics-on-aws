@@ -30,6 +30,8 @@ import java.util.Map;
 
 import static software.aws.solution.clickstream.common.Util.deCodeUri;
 import static software.aws.solution.clickstream.common.Util.decompress;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.CATEGORY_RULE_FILE;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.CHANNEL_RULE_FILE;
 
 @Slf4j
 public abstract class BaseEventParser implements EventParser {
@@ -110,19 +112,25 @@ public abstract class BaseEventParser implements EventParser {
         return OBJECT_MAPPER;
     }
 
-    protected void setTrafficSourceBySourceParser(final ClickstreamEvent clickstreamEvent) {
+    protected void setTrafficSourceBySourceParser(final String url, final String pageReferrer, final String latestReferrer, final String latestReferrerHost,
+                                                  final ClickstreamEvent clickstreamEvent) {
         String appId = clickstreamEvent.getAppId();
         RuleConfig ruleConfig = getAppRuleConfig() !=null ? getAppRuleConfig().get(appId) : null;
+
         if (ruleConfig == null) {
-            log.warn("RuleConfig is not set for appId: " + appId);
+            log.warn("RuleConfig is not set for appId: {}", appId);
+            if (!Util.isResourceFileExist(CHANNEL_RULE_FILE) || !Util.isResourceFileExist(CATEGORY_RULE_FILE)) {
+                log.warn("RuleConfig is not set for appId: {} and default rule files are not available, ignore trafficSource enrich", appId);
+                return;
+            }
         }
 
         RuleBasedTrafficSourceHelper rsHelper = RuleBasedTrafficSourceHelper.getInstance(appId, ruleConfig);
 
-        CategoryTrafficSource ts = rsHelper.parse(clickstreamEvent.getPageViewPageUrl(),
-                clickstreamEvent.getPageViewPageReferrer(),
-                clickstreamEvent.getPageViewLatestReferrer(),
-                clickstreamEvent.getPageViewLatestReferrerHost());
+        CategoryTrafficSource ts = rsHelper.parse(url,
+                pageReferrer,
+                latestReferrer,
+                latestReferrerHost);
 
         clickstreamEvent.setTrafficSourceSource(ts.getSource());
         clickstreamEvent.setTrafficSourceMedium(ts.getMedium());

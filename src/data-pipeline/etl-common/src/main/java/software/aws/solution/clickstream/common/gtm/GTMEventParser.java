@@ -206,7 +206,7 @@ public final class GTMEventParser extends BaseEventParser {
         if (isDisableTrafficSourceEnrichment()) {
             log.info("Traffic source enrichment is disabled");
         } else {
-            setTrafficSourceBySourceParser(clickstreamEvent);
+            setTrafficSourceBySourceParser(gtmEvent.getPageLocation(), gtmEvent.getPageReferrer(), null, null, clickstreamEvent);
         }
 
         Map<String, String> processInfo = new HashMap<>();

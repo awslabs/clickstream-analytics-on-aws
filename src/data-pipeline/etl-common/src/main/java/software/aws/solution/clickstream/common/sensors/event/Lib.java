@@ -27,9 +27,6 @@ import java.util.Map;
 public class Lib {
     private final Map<String, Object> unknownProperties = new HashMap<>();
 
-    @JsonProperty("$lib_method")
-    private String sdkLibMethod;
-
     @JsonProperty("$lib")
     private String sdkLib;
 
@@ -37,10 +34,7 @@ public class Lib {
     private String sdkLibVersion;
 
     @JsonProperty("$app_version")
-    private String sdkAppVersion;
-
-    @JsonProperty("$lib_detail")
-    private String sdkLibDetail;
+    private String appVersion;
 
     @JsonAnySetter
     public void setUnknownProperty(final String name, final Object value) {

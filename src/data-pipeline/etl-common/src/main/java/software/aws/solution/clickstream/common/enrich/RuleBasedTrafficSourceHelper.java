@@ -65,6 +65,11 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     public static final String REFERRAL = "Referral";
     public static final String ORGANIC = "Organic";
     public static final String INTERNAL = "Internal";
+    public static final String SEARCH = "Search";
+    public static final String SHOPPING = "Shopping";
+
+    public static final String CHANNEL_RULE_FILE = "ts/traffic_source_channel_rule_v0.json";
+    public static final String CATEGORY_RULE_FILE = "ts/traffic_source_category_rule_v0.json";
 
     static {
         KNOWN_CLID_TO_MEDIUM_MAP = getKnownClidTypeToSourceMediumMap();
@@ -78,8 +83,8 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     private final String appId;
 
     private RuleBasedTrafficSourceHelper(final String appId, final RuleConfig ruleConfig) {
-        String channelRuleFile = "ts/traffic_source_channel_rule_v0.json";
-        String categoryRuleFile = "ts/traffic_source_category_rule_v0.json";
+       String categoryRuleFile = CATEGORY_RULE_FILE;
+       String channelRuleFile = CHANNEL_RULE_FILE;
 
         String channelRuleJson = null;
         String categoryRuleJson = null;
@@ -136,16 +141,6 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     public static Map<String, SourceMedium> getKnownClidTypeToSourceMediumMap() {
         Map<String, SourceMedium> clidTypeToSourceMediumMap = new HashMap<>();
         clidTypeToSourceMediumMap.put(GCLID, new SourceMedium(GOOGLE, CPC));
-        clidTypeToSourceMediumMap.put("dclid", new SourceMedium(GOOGLE, DISPLAY));
-        clidTypeToSourceMediumMap.put("fbclid", new SourceMedium(FACEBOOK, SOCIAL));
-        clidTypeToSourceMediumMap.put("msclid", new SourceMedium(MICROSOFT, CPC));
-        clidTypeToSourceMediumMap.put("twclid", new SourceMedium(TWITTER, CPC));
-        clidTypeToSourceMediumMap.put("pintclid", new SourceMedium(PINTEREST, CPC));
-        clidTypeToSourceMediumMap.put("linclid", new SourceMedium(LINKEDIN, CPC));
-        clidTypeToSourceMediumMap.put("ytclid", new SourceMedium(YOUTUBE, VIDEO));
-        clidTypeToSourceMediumMap.put("tikclid", new SourceMedium(TIKTOK, VIDEO));
-        clidTypeToSourceMediumMap.put("bingclid", new SourceMedium(BING, CPC));
-        clidTypeToSourceMediumMap.put("baiduclid", new SourceMedium(BAIDU, CPC));
         return clidTypeToSourceMediumMap;
     }
 
@@ -255,10 +250,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         String utmMedium = null;
         if (KNOWN_CLID_TO_MEDIUM_MAP.containsKey(clidType)) {
             utmSource = KNOWN_CLID_TO_MEDIUM_MAP.get(clidType).getSource();
-            utmMedium = KNOWN_CLID_TO_MEDIUM_MAP.get(clidType).getMedium();
+            utmMedium = wrapInferMedium(KNOWN_CLID_TO_MEDIUM_MAP.get(clidType).getMedium());
         } else {
             utmSource = clidType;
-            utmMedium = CPC;
+            utmMedium = wrapInferMedium(CPC);
         }
         trafficSourceUtm.setSource(utmSource);
         if (trafficSourceUtm.getMedium() == null || trafficSourceUtm.getMedium().isEmpty()) {
@@ -285,14 +280,18 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             trafficSourceUtm.setTerm(terms);
         }
 
+        if (trafficSourceUtm.getSource() != null
+                && (category == null || CategoryListEvaluator.UNASSIGNED.equals(category))) {
+            category = this.categoryListEvaluator.getCategoryBySource(trafficSourceUtm.getSource());
+            log.debug("category is null/UNASSIGNED, trying to get category from source: {} -> category: {}", trafficSourceUtm.getSource(), category);
+        }
+
+        String medium = getMediumByCategory(trafficSourceUtm, category);
+        trafficSourceUtm.setMedium(medium);
+
         String categoryForEval = category;
         if (CategoryListEvaluator.UNASSIGNED.equals(categoryForEval)) {
             categoryForEval = null;
-        }
-
-        if (trafficSourceUtm.getSource() != null && categoryForEval == null) {
-            category = this.categoryListEvaluator.getCategoryBySource(trafficSourceUtm.getSource());
-            log.debug("category is null/UNASSIGNED, trying to get category from source: {} -> category: {}", trafficSourceUtm.getSource(), category);
         }
 
         ChannelRuleEvaluatorInput evalInput = ChannelRuleEvaluatorInput.from(trafficSourceUtm, categoryForEval, theReferrer, theReferrerHost);
@@ -311,6 +310,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         return categoryTrafficSource;
 
     }
+
 
     @Override
     public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput,
@@ -392,38 +392,41 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             }
         }
 
-        if (categoryTrafficSource.getSource() != null && categoryTrafficSource.getMedium() == null) {
-            categoryTrafficSource.setMedium(getMediumBySourceAndCategory(categoryTrafficSource.getSource(), categoryTrafficSource.getCategory()));
-        }
-
         if (categoryTrafficSource.getMedium() == null) {
             categoryTrafficSource.setMedium(getMediumByReferrer(pageReferrer, latestReferrer, isFromInternal));
         }
     }
 
-    private String getMediumBySourceAndCategory(final String source, final String category) {
-        log.debug("getMediumBySourceAndCategory() enter source: {}, category: {}", source, category);
-        if (REFERRAL.equals(category)) {
-            return REFERRAL;
+    String getMediumByCategory(final TrafficSourceUtm trafficSourceUtm, final String category) {
+        String medium = trafficSourceUtm.getMedium();
+        String clidId = trafficSourceUtm.getClid();
+        log.debug("getMediumByCategory() enter category: {}, medium: {}, clidId: {}", category, medium, clidId);
+        if (isEmpty(medium) && category != null) {
+            if (!isEmpty(clidId)) {
+                medium = wrapInferMedium(CPC);
+            } else if (category.equals(SEARCH)) {
+                medium = wrapInferMedium(ORGANIC);
+            } else if ((category.equals(SOCIAL) || category.equals(VIDEO) || category.equals(SHOPPING) || category.equals(REFERRAL))) {
+                medium = wrapInferMedium(REFERRAL);
+            }
+            log.debug("medium is null, trying to get medium from category: {} -> medium: {}", category, medium);
         }
-        if (category != null
-                && !category.equals(DIRECT)
-                && !category.equals(CategoryListEvaluator.UNASSIGNED)) {
-            return ORGANIC;
-        }
-        return null;
+        return medium;
     }
 
     String getMediumByReferrer(final String pageReferrer, final String latestReferrer, final boolean isFromInternal) {
         log.debug("getMediumByReferrer() enter pageReferrer: {}, latestReferrer: {}, isFromInternal: {}", pageReferrer, latestReferrer, isFromInternal);
-
         if (isAllEmpty(pageReferrer, latestReferrer)) {
             return NONE;
         }
         if (isFromInternal) {
             return NONE;
         }
-        return REFERRAL;
+        return wrapInferMedium(REFERRAL);
+    }
+
+    static String wrapInferMedium(final String medium) {
+       return "(" +  medium + ")";
     }
 
     private static boolean isAllEmpty(final String pageReferrer, final String latestReferrer) {

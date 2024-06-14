@@ -98,6 +98,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       payload: TaskInput.fromObject({
         'view.$': '$.view',
         'timezoneWithAppId.$': '$.timezoneWithAppId',
+        'originalInput.$': '$$.Execution.Input',
       }),
       outputPath: '$.Payload',
     });

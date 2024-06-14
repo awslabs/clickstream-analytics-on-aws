@@ -90,7 +90,7 @@ export class AttributionAnalysisService {
       ...query,
       schemaName: query.appId,
       dbName: dbName,
-    } as AttributionSQLParameters);
+    } as AttributionSQLParameters, query.action);
 
     logger.debug(`sql of single point model: ${sql}`);
 
@@ -108,7 +108,7 @@ export class AttributionAnalysisService {
       ...query,
       schemaName: query.appId,
       dbName: dbName,
-    } as AttributionSQLParameters);
+    } as AttributionSQLParameters, query.action);
     logger.debug(`sql of linear model: ${sql}`);
 
     return this.createModelVisual(sql, sheetId, query, pipeline);
@@ -124,7 +124,7 @@ export class AttributionAnalysisService {
       ...query,
       schemaName: query.appId,
       dbName: dbName,
-    } as AttributionSQLParameters);
+    } as AttributionSQLParameters, query.action);
     logger.debug(`sql of position based model: ${sql}`);
 
     return this.createModelVisual(sql, sheetId, query, pipeline);

@@ -13,6 +13,7 @@
 
 
 import { join } from 'path';
+import { SolutionInfo } from '@aws/clickstream-base-lib';
 import { Arn, ArnFormat, Aws, CfnResource, CustomResource, Duration, Fn, Stack } from 'aws-cdk-lib';
 
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
@@ -286,6 +287,7 @@ export function createEMRServerlessApplicationCustomResource(
       pipelineS3BucketName: props.pipelineS3Bucket.bucketName,
       pipelineS3Prefix: props.pipelineS3Prefix,
       architecture: props.architecture,
+      solutionVersion: SolutionInfo.SOLUTION_VERSION_DETAIL? SolutionInfo.SOLUTION_VERSION_DETAIL: 'build-' + new Date().getTime(),
     },
   });
   cr.node.addDependency(policy);

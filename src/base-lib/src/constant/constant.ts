@@ -493,3 +493,5 @@ export const DATA_SOURCE_OWNER_PERMISSION_ACTIONS = [
 export const DEFAULT_TIMEZONE = 'UTC';
 export const TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME = 'traffic_source_category_rule_v1.json';
 export const TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME = 'traffic_source_channel_rule_v1.json';
+
+export const EXPLORE_SEGMENT_DUMMY_PROPERTY = 'segment_id';
