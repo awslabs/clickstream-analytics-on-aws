@@ -26,7 +26,10 @@ const refreshBasicViewEvent: RefreshBasicViewEvent = {
   },
   timezoneWithAppId: {
     appId: 'app1',
-    timezone: 'America/Noronha',
+    timezone: 'UTC',
+  },
+  originalInput: {
+    refreshStartTime: '',
   },
 };
 
@@ -62,8 +65,86 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
     });
   });
 
+  test('Executed Redshift refresh custom-mv command', async () => {
+    const exeuteId = 'Id-1';
+    refreshBasicViewEvent.view.type = 'custom-mv';
+    refreshBasicViewEvent.originalInput = {
+      refreshStartTime: '1715470905000',
+    };
+    jest
+      .useFakeTimers()
+      .setSystemTime(1715490905000);
+    const dataFreshnessInHour = 6;
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+    const resp = await handler(refreshBasicViewEvent);
+    expect(resp).toEqual({
+      detail: {
+        viewName: refreshBasicViewEvent.view.name,
+        queryId: exeuteId,
+      },
+      timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+      WorkgroupName: workGroupName,
+      Sql: `CALL ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name}(NULL, NULL, ${dataFreshnessInHour});`,
+      Database: expect.any(String),
+    });
+    jest.useRealTimers();
+  });
+
+  test('Executed Redshift refresh custom-mv command with RefreshStartTime bigger than current', async () => {
+    const exeuteId = 'Id-1';
+    refreshBasicViewEvent.view.type = 'custom-mv';
+    refreshBasicViewEvent.originalInput = {
+      refreshStartTime: '1715470905000',
+    };
+    jest
+      .useFakeTimers()
+      .setSystemTime(1715450905000);
+    const dataFreshnessInHour = 72;
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+    const resp = await handler(refreshBasicViewEvent);
+    expect(resp).toEqual({
+      detail: {
+        viewName: refreshBasicViewEvent.view.name,
+        queryId: exeuteId,
+      },
+      timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+      WorkgroupName: workGroupName,
+      Sql: `CALL ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name}(NULL, NULL, ${dataFreshnessInHour});`,
+      Database: expect.any(String),
+    });
+    jest.useRealTimers();
+  });
+
+  test('Executed Redshift refresh custom-mv command without input refreshStartTime', async () => {
+    const exeuteId = 'Id-1';
+    refreshBasicViewEvent.view.type = 'custom-mv';
+    refreshBasicViewEvent.originalInput = {
+      refreshStartTime: '',
+    };
+    const dataFreshnessInHour = 72;
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+    const resp = await handler(refreshBasicViewEvent);
+    expect(resp).toEqual({
+      detail: {
+        viewName: refreshBasicViewEvent.view.name,
+        queryId: exeuteId,
+      },
+      timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+      WorkgroupName: workGroupName,
+      Sql: `CALL ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.view.name}(NULL, NULL, ${dataFreshnessInHour});`,
+      Database: expect.any(String),
+    });
+  });
+
   test('Execute command error in Redshift when doing refresh', async () => {
     redshiftDataMock.on(ExecuteStatementCommand).rejects();
+    refreshBasicViewEvent.view.type = 'basic';
     try {
       await handler(refreshBasicViewEvent);
       fail('The error in executing statement of Redshift data was caught');
@@ -79,7 +160,6 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
     redshiftDataMock.on(ExecuteStatementCommand)
       .rejectsOnce()
       .resolves({ Id: exeuteId });
-
     const resp = await handler(refreshBasicViewEvent);
     expect(resp).toEqual({
       detail: {
