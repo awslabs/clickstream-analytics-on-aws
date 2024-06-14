@@ -1,5 +1,5 @@
 CREATE OR REPLACE PROCEDURE {{schema}}.sp_merge_user_v2(manifestFileName varchar(65535), iam_role varchar(65535)) 
-AS 
+NONATOMIC AS 
 $$ 
 DECLARE
 	log_name varchar(50) := 'sp_merge_user_v2';
@@ -9,8 +9,12 @@ BEGIN
 	CREATE temp TABLE user_v2_stage_1 (like {{schema}}.user_v2);
 
   EXECUTE 'COPY user_v2_stage FROM ''' || manifestFileName || ''' IAM_ROLE ''' || iam_role || ''' STATUPDATE ON FORMAT AS PARQUET SERIALIZETOJSON MANIFEST ACCEPTINVCHARS'; 
-	
-	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Copy ods data into user v2 stage table successfully.');
+
+	ALTER TABLE user_v2_stage
+	DROP COLUMN created_time;
+
+	ALTER TABLE user_v2_stage
+	ADD COLUMN created_time timestamp DEFAULT getdate();
 
 	INSERT INTO user_v2_stage_1 (
 		SELECT
@@ -34,29 +38,53 @@ BEGIN
 			first_traffic_category,
 			first_app_install_source,
 			process_info,
-			CURRENT_TIMESTAMP as created_time
+			created_time
 		FROM (
 				select
 						*,
 						row_number() over (partition by user_pseudo_id order by event_timestamp desc) as row_num
-				FROM
-						user_v2_stage
+				FROM (
+						SELECT
+								a.*
+						FROM
+								user_v2_stage a
+						JOIN (
+								SELECT 
+										user_pseudo_id
+								FROM
+										user_v2_stage
+								GROUP BY
+										user_pseudo_id
+								HAVING
+										count(*) > 1
+						) b ON (
+								a.user_pseudo_id = b.user_pseudo_id
+						)
+				) 						
 		)
 		WHERE
 				row_num = 1
 	);
 
-	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Remove duplicates from user v2 stage table successfully.');
+	DELETE FROM user_v2_stage
+	WHERE (user_pseudo_id) IN (
+    SELECT user_pseudo_id
+    FROM user_v2_stage_1
+    GROUP BY user_pseudo_id
+	);
 
 	MERGE INTO {{schema}}.user_v2
 	USING user_v2_stage_1 AS stage ON ({{schema}}.user_v2.user_pseudo_id = stage.user_pseudo_id)
 	REMOVE DUPLICATES;
 
-	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Merge data into user v2 table successfully.');
+	MERGE INTO {{schema}}.user_v2
+	USING user_v2_stage AS stage ON ({{schema}}.user_v2.user_pseudo_id = stage.user_pseudo_id)
+	REMOVE DUPLICATES;	
 
+	CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'Merge data into user v2 table successfully. manifestFileName: ' || manifestFileName);
 	DROP TABLE user_v2_stage;
 	DROP TABLE user_v2_stage_1;
 EXCEPTION WHEN OTHERS THEN
-    CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'error', 'error message:' || SQLERRM);	
+    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'manifestFileName: ' || manifestFileName || ', error message:' || SQLERRM);
 END;
 $$ LANGUAGE plpgsql;
