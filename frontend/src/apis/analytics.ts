@@ -276,3 +276,16 @@ export const embedAnalyzesUrl = async (
   );
   return result;
 };
+
+export const embedRealtimeUrl = async (
+  projectId: string,
+  appId: string,
+  allowedDomain: string,
+  enable: boolean
+) => {
+  const result: any = await apiRequest(
+    'get',
+    `project/${projectId}/${appId}/realtime?enable=${enable}&allowedDomain=${allowedDomain}`
+  );
+  return result;
+};

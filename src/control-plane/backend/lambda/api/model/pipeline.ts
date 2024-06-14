@@ -220,6 +220,7 @@ export interface Reporting {
 
 export interface Streaming {
   readonly appIdStreamList: string[];
+  readonly appIdRealtimeList?: string[];
   readonly bucket?: S3Bucket;
 }
 
@@ -1011,5 +1012,31 @@ export class CPipeline {
     } catch (e) {
       return '';
     }
+  }
+
+  public async realtime(enable: boolean, appId: string): Promise<void> {
+    if (!this.pipeline.streaming?.appIdStreamList) {
+      throw new ClickStreamBadRequestError('Streaming not enabled.');
+    }
+    // TODO: Redshift MV
+
+    // Save pipeline status
+    const appIdRealtimeList = this.pipeline.streaming?.appIdRealtimeList ?? [];
+    if (enable && !appIdRealtimeList.includes(appId)) {
+      if (!this.pipeline.streaming.appIdStreamList.includes(appId)) {
+        throw new ClickStreamBadRequestError('AppId not found in stream list.');
+      }
+      appIdRealtimeList.push(appId);
+    }
+    if (!enable && appIdRealtimeList.includes(appId)) {
+      const index = appIdRealtimeList.indexOf(appId);
+      appIdRealtimeList.splice(index, 1);
+    }
+    this.pipeline.streaming = {
+      ...this.pipeline.streaming,
+      appIdRealtimeList,
+    };
+    this.pipeline.updateAt = Date.now();
+    await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 }

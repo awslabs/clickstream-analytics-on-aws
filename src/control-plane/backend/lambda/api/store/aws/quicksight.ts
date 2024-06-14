@@ -138,9 +138,12 @@ export const generateEmbedUrlForRegisteredUser = async (
   region: string,
   userArn: string,
   allowedDomain: string,
-  dashboardId?: string,
-  sheetId?: string,
-  visualId?: string,
+  props: {
+    dashboardId?: string;
+    sheetId?: string;
+    visualId?: string;
+    initialPath?: string;
+  },
 ) => {
   try {
     const quickSight = sdkClient.QuickSight({
@@ -152,25 +155,25 @@ export const generateEmbedUrlForRegisteredUser = async (
       AllowedDomains: [allowedDomain],
       ExperienceConfiguration: {},
     };
-    if (sheetId && visualId) {
+    if (props.sheetId && props.visualId) {
       commandInput = {
         ...commandInput,
         ExperienceConfiguration: {
           DashboardVisual: {
             InitialDashboardVisualId: {
-              DashboardId: dashboardId,
-              SheetId: sheetId,
-              VisualId: visualId,
+              DashboardId: props.dashboardId,
+              SheetId: props.sheetId,
+              VisualId: props.visualId,
             },
           },
         },
       };
-    } else if (dashboardId) {
+    } else if (props.dashboardId) {
       commandInput = {
         ...commandInput,
         ExperienceConfiguration: {
           Dashboard: {
-            InitialDashboardId: dashboardId,
+            InitialDashboardId: props.dashboardId,
           },
         },
       };
@@ -179,7 +182,7 @@ export const generateEmbedUrlForRegisteredUser = async (
         ...commandInput,
         ExperienceConfiguration: {
           QuickSightConsole: {
-            InitialPath: '/start/analyses',
+            InitialPath: props.initialPath ?? '/start/analyses',
           },
         },
       };

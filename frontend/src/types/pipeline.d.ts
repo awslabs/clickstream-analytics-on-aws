@@ -167,6 +167,7 @@ declare global {
     timezone?: IAppTimezone[];
     streaming?: {
       appIdStreamList: string[];
+      appIdRealtimeList?: string[];
     };
     statusType?: PipelineStatusType;
     stackDetails?: PipelineStatusDetail[];
