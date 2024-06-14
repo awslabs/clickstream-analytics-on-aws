@@ -418,7 +418,7 @@ function handleObjectType(conditionsProps: any, objK: any, k: any, objV: any) {
   return conditionsProps;
 }
 
-function createNegCondition(
+export function createNegCondition(
   scope: Construct,
   id: string,
   condition: CfnCondition,

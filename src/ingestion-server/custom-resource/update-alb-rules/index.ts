@@ -10,7 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
+import { aws_sdk_client_common_config, logger, sleep } from '@aws/clickstream-base-lib';
 import { ElasticLoadBalancingV2Client, DescribeRulesCommand, CreateRuleCommand, DeleteRuleCommand, ModifyListenerCommand, ModifyRuleCommand, Rule, RuleCondition, ActionTypeEnum, AuthenticateCognitoActionConditionalBehaviorEnum } from '@aws-sdk/client-elastic-load-balancing-v2';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, Context } from 'aws-lambda';
@@ -33,6 +33,7 @@ interface ResourcePropertiesType {
   clickStreamSDK: string;
   targetGroupArn: string;
   listenerArn: string;
+  enableAuthentication: string;
   authenticationSecretArn: string;
   endpointPath: string;
   domainName: string;
@@ -46,6 +47,7 @@ interface HandleClickStreamSDKInput {
   readonly protocol: string;
   readonly endpointPath: string;
   readonly domainName: string;
+  readonly enableAuthentication: string;
   readonly authenticationSecretArn: string;
   readonly targetGroupArn: string;
 }
@@ -55,9 +57,11 @@ interface HandleUpdateInput {
   readonly protocol: string;
   readonly endpointPath: string;
   readonly hostHeader: string;
+  readonly enableAuthentication: string;
   readonly authenticationSecretArn: string;
   readonly oldEndpointPath: string;
   readonly oldHostHeader: string;
+  readonly oldEnableAuthentication: string;
   readonly oldAuthenticationSecretArn: string;
 }
 
@@ -65,6 +69,7 @@ type ResourceEvent = CloudFormationCustomResourceEvent;
 
 export const handler = async (event: ResourceEvent, context: Context) => {
   try {
+    logger.info('=== event ===', { event });
     await _handler(event, context);
     logger.info('=== complete ===');
     return;
@@ -87,13 +92,14 @@ async function _handler(
   const clickStreamSDK = props.clickStreamSDK;
   const targetGroupArn = props.targetGroupArn;
   const listenerArn = props.listenerArn;
+  const enableAuthentication = props.enableAuthentication;
   const authenticationSecretArn = props.authenticationSecretArn;
   const endpointPath = props.endpointPath;
   const domainName = props.domainName;
   const protocol = props.protocol;
 
   if (requestType === 'Create') {
-    await handleCreate(listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
+    await handleCreate(listenerArn, protocol, endpointPath, domainName, enableAuthentication, authenticationSecretArn, targetGroupArn);
   }
 
   if (requestType === 'Update') {
@@ -101,20 +107,33 @@ async function _handler(
     const oldEndpointPath = oldProps.endpointPath;
     const oldDomainName = oldProps.domainName;
     const oldAuthenticationSecretArn = oldProps.authenticationSecretArn;
+    const oldEnableAuthentication = oldProps.enableAuthentication;
     await handleUpdate({
       listenerArn,
       protocol,
       endpointPath,
       hostHeader: domainName,
+      enableAuthentication,
       authenticationSecretArn,
       oldEndpointPath,
+      oldEnableAuthentication,
       oldHostHeader: oldDomainName,
       oldAuthenticationSecretArn,
     });
   }
 
   if (clickStreamSDK === 'Yes') {
-    await handleClickStreamSDK({ appIds, requestType, listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn });
+    await handleClickStreamSDK({
+      appIds,
+      requestType,
+      listenerArn,
+      protocol,
+      endpointPath,
+      domainName,
+      enableAuthentication,
+      authenticationSecretArn,
+      targetGroupArn,
+    });
   }
 
   // set default rules
@@ -137,13 +156,14 @@ async function handleCreate(
   protocol: string,
   endpointPath: string,
   domainName: string,
+  enableAuthentication: string,
   authenticationSecretArn: string,
   targetGroupArn: string,
 ) {
   // Create defalut forward rule and action
-  await createDefaultForwardRule(listenerArn, protocol, endpointPath, domainName, authenticationSecretArn, targetGroupArn);
+  await createDefaultForwardRule(listenerArn, protocol, endpointPath, domainName, enableAuthentication, authenticationSecretArn, targetGroupArn);
 
-  if (authenticationSecretArn && authenticationSecretArn.length > 0) {
+  if (enableAuthentication === 'Yes') {
     await createAuthLogindRule(authenticationSecretArn, listenerArn);
   }
 }
@@ -162,8 +182,22 @@ async function handleUpdate(
     );
   }
 
-  if (inputPros.authenticationSecretArn !== inputPros.oldAuthenticationSecretArn) {
-    await updateAuthenticationSecretArn(inputPros.listenerArn, inputPros.authenticationSecretArn);
+  // update authentication
+  if (
+    inputPros.enableAuthentication !== inputPros.oldEnableAuthentication ||
+    (inputPros.authenticationSecretArn !== inputPros.oldAuthenticationSecretArn && inputPros.enableAuthentication === 'Yes')
+  ) {
+    await sleep(20000);
+    if (inputPros.enableAuthentication === 'Yes' && inputPros.oldEnableAuthentication === 'No') {
+      // if enableAuthentication change from No to Yes, enable auth
+      await enableAuth(inputPros.listenerArn, inputPros.authenticationSecretArn);
+    } else if (inputPros.enableAuthentication === 'No' && inputPros.oldEnableAuthentication === 'Yes') {
+      // if enableAuthentication change from Yes to No, disable auth
+      await disableAuth(inputPros.listenerArn);
+    } else {
+      // enable auth and authentication secret arn changed
+      await updateAuthenticationSecretArn(inputPros.listenerArn, inputPros.authenticationSecretArn);
+    }
   }
 }
 
@@ -264,6 +298,73 @@ async function updateAuthenticationSecretArn(
   }
 }
 
+async function enableAuth(
+  listenerArn: string,
+  authenticationSecretArn: string,
+) {
+  await createAuthLogindRule(authenticationSecretArn, listenerArn);
+
+  await addAllExistingRulesAsAuthForwardRule(listenerArn, authenticationSecretArn);
+
+}
+
+// add all existing rule as auth forward rule
+async function addAllExistingRulesAsAuthForwardRule(
+  listenerArn: string,
+  authenticationSecretArn: string,
+) {
+  const existingAppIdRules = await getAllExistingAppIdRules(listenerArn);
+  const { issuer, userEndpoint, authorizationEndpoint, tokenEndpoint, appClientId, appClientSecret } = await getOidcInfo(authenticationSecretArn);
+  if (!existingAppIdRules) return;
+  for (const rule of existingAppIdRules) {
+    const authForwardActions = [
+      {
+        Type: ActionTypeEnum.AUTHENTICATE_OIDC,
+        Order: 1,
+        AuthenticateOidcConfig: {
+          ...createAuthenticateOidcConfig(issuer, userEndpoint, authorizationEndpoint, tokenEndpoint, appClientId, appClientSecret),
+          OnUnauthenticatedRequest: AuthenticateCognitoActionConditionalBehaviorEnum.DENY,
+        },
+      },
+      {
+        Type: ActionTypeEnum.FORWARD,
+        Order: 2,
+        TargetGroupArn: rule.Actions?.find(action => action.Type === ActionTypeEnum.FORWARD)?.TargetGroupArn,
+      },
+    ];
+    const modifyCommand = new ModifyRuleCommand({
+      RuleArn: rule.RuleArn,
+      Actions: authForwardActions,
+    });
+    await albClient.send(modifyCommand);
+  }
+}
+
+// disable authentication
+async function disableAuth(
+  listenerArn: string,
+) {
+  const rulesWithActionTypeIsAuthenticateOidc = await getRulesWithActionTypeIsAuthenticateOidc(listenerArn);
+  if (!rulesWithActionTypeIsAuthenticateOidc) return;
+  for (const rule of rulesWithActionTypeIsAuthenticateOidc) {
+    if (rule.Conditions?.some(condition => condition.Field === 'path-pattern' && condition.Values?.includes('/login'))) {
+      // delete auth login rule
+      const deleteRuleInput = {
+        RuleArn: rule.RuleArn,
+      };
+      const command = new DeleteRuleCommand(deleteRuleInput);
+      await albClient.send(command);
+    } else {
+      const forwardActions = rule.Actions?.filter(action => action.Type === ActionTypeEnum.FORWARD) || [];
+      const modifyCommand = new ModifyRuleCommand({
+        RuleArn: rule.RuleArn,
+        Actions: forwardActions,
+      });
+      await albClient.send(modifyCommand);
+    }
+  }
+}
+
 function createAuthenticateOidcConfig(
   issuer: string,
   userEndpoint: string,
@@ -311,6 +412,7 @@ async function handleClickStreamSDK(input: HandleClickStreamSDKInput) {
         input.protocol,
         input.endpointPath,
         input.domainName,
+        input.enableAuthentication,
         input.authenticationSecretArn,
         input.targetGroupArn,
       );
@@ -341,6 +443,7 @@ async function handleClickStreamSDK(input: HandleClickStreamSDKInput) {
         input.protocol,
         input.endpointPath,
         input.domainName,
+        input.enableAuthentication,
         input.authenticationSecretArn,
         input.targetGroupArn,
       );
@@ -423,12 +526,13 @@ async function createAppIdRules(
   protocol: string,
   endpointPath: string,
   domainName: string,
+  enableAuthentication: string,
   authenticationSecretArn: string,
   targetGroupArn: string,
 ) {
   const allExistingAppIdRules = await getAllExistingAppIdRules(listenerArn);
 
-  const forwardActions = await generateForwardActions(authenticationSecretArn, targetGroupArn);
+  const forwardActions = await generateForwardActions(enableAuthentication, authenticationSecretArn, targetGroupArn);
   const allPriorities = allExistingAppIdRules.map(rule => parseInt(rule.Priority!));
   const existingAppIds = getAllExistingAppIds(allExistingAppIdRules);
 
@@ -524,11 +628,12 @@ async function createDefaultForwardRule(
   protocol: string,
   endpointPath: string,
   domainName: string,
+  enableAuthentication: string,
   authenticationSecretArn: string,
   targetGroupArn: string) {
   const defaultForwardConditions = generateBaseForwardConditions(protocol, endpointPath, domainName);
 
-  const defaultForwardActions = await generateForwardActions(authenticationSecretArn, targetGroupArn);
+  const defaultForwardActions = await generateForwardActions(enableAuthentication, authenticationSecretArn, targetGroupArn);
 
   const createForwardRuleCommand = new CreateRuleCommand({
     ListenerArn: listenerArn,
@@ -539,6 +644,7 @@ async function createDefaultForwardRule(
   await albClient.send(createForwardRuleCommand);
 
   const pingPathRuleConditions = generateBaseForwardConditions(protocol, process.env.PING_PATH!, domainName);
+
   const createPingPathRuleCommand = new CreateRuleCommand({
     ListenerArn: listenerArn,
     Actions: defaultForwardActions,
@@ -549,11 +655,11 @@ async function createDefaultForwardRule(
 }
 
 async function generateForwardActions(
+  enableAuthentication: string,
   authenticationSecretArn: string,
   targetGroupArn: string) {
   const defaultForwardActions = [];
-  if (authenticationSecretArn && authenticationSecretArn.length > 0) {
-    // auth scenario
+  if (enableAuthentication === 'Yes') {
     // create auth forward rule
     const { issuer, userEndpoint, authorizationEndpoint, tokenEndpoint, appClientId, appClientSecret } = await getOidcInfo(authenticationSecretArn);
     // create auth forward rule

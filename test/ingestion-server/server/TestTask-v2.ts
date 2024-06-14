@@ -12,12 +12,9 @@
  */
 
 import {
-  CfnOutput,
   RemovalPolicy,
   Stack,
   StackProps,
-  Fn,
-  CfnCondition,
 } from 'aws-cdk-lib';
 import {
   FlowLogDestination,
@@ -29,7 +26,7 @@ import {
   SubnetType,
   Vpc,
 } from 'aws-cdk-lib/aws-ec2';
-import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import {
   BlockPublicAccess,
@@ -41,7 +38,9 @@ import { S3SinkConfig, KafkaSinkConfig, KinesisSinkConfig } from '../../../src/i
 import {
   IngestionServerV2,
   IngestionServerV2Props,
-  FleetV2Props,
+  FargateFleetProps,
+  Ec2FleetProps,
+  DefaultEc2FleetProps,
 } from '../../../src/ingestion-server/server-v2/ingestion-server-v2';
 
 
@@ -123,7 +122,7 @@ export function createMSKSecurityGroup(
   return mskSg;
 }
 
-export interface TestStackProps extends StackProps {
+export interface TestStackV2Props extends StackProps {
   serverMin: number;
   serverMax: number;
   scaleOnCpuUtilizationPercent: number;
@@ -162,11 +161,11 @@ export interface TestStackProps extends StackProps {
   publicSubnets?: string;
 }
 
-export class TestStack extends Stack {
+export class TestStackV2 extends Stack {
   constructor(
     scope: Construct,
     id: string,
-    props: TestStackProps = {
+    props: TestStackV2Props = {
       withMskConfig: false,
       withS3SinkConfig: false,
       withKinesisSinkConfig: false,
@@ -223,17 +222,26 @@ export class TestStack extends Stack {
       };
     }
 
-    const fleetProps: FleetV2Props = {
+    const fargateFleetProps: FargateFleetProps = {
       taskCpu: 256,
       taskMemory: 512,
       workerCpu: 128,
       workerMemory: 256,
       proxyCpu: 128,
       proxyMemory: 256,
-      isArm: false,
+      arch: Platform.LINUX_AMD64,
       proxyMaxConnections: 1024,
       workerThreads: 6,
       workerStreamAckEnable: true,
+      taskMin: props.serverMin || 1,
+      taskMax: props.serverMax || 1,
+      scaleOnCpuUtilizationPercent: props.scaleOnCpuUtilizationPercent || 50,
+    };
+
+    const ec2FleetProps: Ec2FleetProps = {
+      ...DefaultEc2FleetProps,
+      serverMin: props.serverMin || 1,
+      serverMax: props.serverMax || 1,
       taskMin: props.serverMin || 1,
       taskMax: props.serverMax || 1,
       scaleOnCpuUtilizationPercent: props.scaleOnCpuUtilizationPercent || 50,
@@ -244,64 +252,26 @@ export class TestStack extends Stack {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
-      publicSubnets: 'publicSubnet1,publicSubnet2',
-      privateSubnets: 'privateSubnet1,privateSubnet2',
-      isPrivateSubnetsCondition: new CfnCondition(this, 'IsPrivateSubnets', {
-        expression: Fn.conditionEquals('publicSubnet1,publicSubnet2', 'privateSubnet1,privateSubnet2'),
-      }),
-      fleetProps,
+      fargateFleetProps,
+      ec2FleetProps,
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,
-      domainName: props.domainName,
-      certificateArn: props.certificateArn,
       s3SinkConfig,
       kinesisSinkConfig,
       kafkaSinkConfig,
-      enableGlobalAccelerator: props.enableGlobalAccelerator,
       devMode: props.devMode,
       projectId: 'test-project',
-      appIds: 'appId',
-      clickStreamSDK: 'Yes',
       workerStopTimeout: props.workerStopTimeout,
-      protocol: props.protocol,
-      enableApplicationLoadBalancerAccessLog: props.enableApplicationLoadBalancerAccessLog,
-      logBucketName: props.logBucketName,
-      logPrefix: props.logPrefix,
-
-      notificationsTopicArn: 'arn:aws:sns:us-east-1:111111111111:fake-topic',
-
-      enableAuthentication: props.enableAuthentication,
-      authenticationSecretArn: props.authenticationSecretArn,
-
+      ecsInfraType: 'FARGATE',
+      albTargetGroupArn: 'arn:aws:elasticloadbalancing:us-east-1:111111111111:targetgroup/test/xxxx',
+      ecsSecurityGroupArn: 'arn:aws:ec2:us-east-1:111111111111:security-group/sg-xxxx',
+      loadBalancerFullName: 'test-load-balancer',
     };
 
-
-    const ingestionServer = new IngestionServerV2(
+    new IngestionServerV2(
       this,
       'IngestionServer',
       serverProps,
     );
-
-    const ingestionServerDNS = Fn.conditionIf(
-      ingestionServer.acceleratorEnableCondition.logicalId,
-      ingestionServer.acceleratorDNS,
-      ingestionServer.albDNS).toString();
-
-    new CfnOutput(this, 'ingestionServerDNS', {
-      value: ingestionServerDNS,
-      description: 'Server DNS',
-    });
-
-    let ingestionServerUrl;
-    if (props.protocol === ApplicationProtocol.HTTPS) {
-      ingestionServerUrl = `https://${props.domainName}${props.serverEndpointPath}`;
-    } else {
-      ingestionServerUrl = `http://${ingestionServerDNS}${props.serverEndpointPath}`;
-    }
-
-    new CfnOutput(this, 'ingestionServerUrl', {
-      value: ingestionServerUrl,
-      description: 'Server Url',
-    });
   }
 }

@@ -68,9 +68,9 @@ function createECSFargateClusterAndService(
     containerInsights: true,
   });
 
-  const ecsSetting = props.fleetProps;
+  const ecsSetting = props.fargateFleetProps;
 
-  const platform: Platform = ecsSetting.isArm ? Platform.LINUX_ARM64 : Platform.LINUX_AMD64;
+  const platform: Platform = ecsSetting.arch;
 
   const { proxyImage, workerImage } = createProxyAndWorkerECRImages(
     scope,

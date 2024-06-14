@@ -80,16 +80,15 @@ function createECSFargateService(
 
   const proxyContainer = taskDefinition.addContainer('proxy', {
     image: props.proxyImage,
-    memoryReservationMiB:
-      256,
-    cpu: 128,
+    memoryReservationMiB: props.fargateFleetProps.proxyMemory,
+    cpu: props.fargateFleetProps.proxyCpu,
     portMappings: [
       {
         containerPort: 8088,
       },
     ],
     environment: {
-      NGINX_WORKER_CONNECTIONS: `${props.fleetProps.proxyMaxConnections}`,
+      NGINX_WORKER_CONNECTIONS: `${props.fargateFleetProps.proxyMaxConnections}`,
       SERVER_ENDPOINT_PATH: props.serverEndpointPath,
       PING_ENDPOINT_PATH: INGESTION_SERVER_PING_PATH,
       SERVER_CORS_ORIGIN: props.serverCorsOrigin,
@@ -103,9 +102,8 @@ function createECSFargateService(
   taskDefinition.addContainer('worker', {
     image: props.workerImage,
     stopTimeout: Duration.seconds(props.workerStopTimeout),
-    memoryReservationMiB:
-      256,
-    cpu: 128,
+    memoryReservationMiB: props.fargateFleetProps.workerMemory,
+    cpu: props.fargateFleetProps.workerCpu,
     portMappings: getVectorPortMappings(),
     environment: getVectorEnvs(scope, props),
     logging: LogDriver.awsLogs({
@@ -118,16 +116,28 @@ function createECSFargateService(
     cluster: props.ecsCluster,
     taskDefinition: taskDefinition,
     securityGroups: [props.ecsSecurityGroup],
-    desiredCount: props.fleetProps.taskMin,
+    healthCheckGracePeriod: Duration.seconds(60),
+    desiredCount: props.fargateFleetProps.taskMin,
   });
 
   const scalableTarget = fargateService.autoScaleTaskCount({
-    minCapacity: props.fleetProps.taskMin,
-    maxCapacity: props.fleetProps.taskMax,
+    minCapacity: props.fargateFleetProps.taskMin,
+    maxCapacity: props.fargateFleetProps.taskMax,
   });
 
+  const loadBalancer: any[] = [
+    {
+      ContainerName: 'proxy',
+      ContainerPort: 8088,
+      TargetGroupArn: props.albTargetGroupArn,
+    },
+  ];
+
+  const cfnFargateService = fargateService.node.defaultChild as CfnResource;
+  cfnFargateService.addPropertyOverride('LoadBalancers', loadBalancer);
+
   scalableTarget.scaleOnCpuUtilization('CpuScaling', {
-    targetUtilizationPercent: props.fleetProps.scaleOnCpuUtilizationPercent || 50,
+    targetUtilizationPercent: props.fargateFleetProps.scaleOnCpuUtilizationPercent || 50,
     scaleInCooldown: Duration.seconds(45),
     scaleOutCooldown: Duration.seconds(1),
   });
@@ -156,11 +166,11 @@ function getVectorEnvs(scope: Construct, props: ECSFargateClusterProps) {
   let workerThreads = DefaultFleetProps.workerThreads;
   let streamAckEnable = DefaultFleetProps.workerStreamAckEnable;
 
-  if (props.fleetProps.workerThreads) {
-    workerThreads = props.fleetProps.workerThreads;
+  if (props.fargateFleetProps.workerThreads) {
+    workerThreads = props.fargateFleetProps.workerThreads;
   }
-  if (props.fleetProps?.workerStreamAckEnable) {
-    streamAckEnable = props.fleetProps.workerStreamAckEnable;
+  if (props.fargateFleetProps?.workerStreamAckEnable) {
+    streamAckEnable = props.fargateFleetProps.workerStreamAckEnable;
   }
 
   return {
