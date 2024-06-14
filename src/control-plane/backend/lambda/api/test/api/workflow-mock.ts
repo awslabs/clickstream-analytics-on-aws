@@ -11,9 +11,12 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE, SolutionInfo, SolutionVersion } from '@aws/clickstream-base-lib';
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { cloneDeep } from 'lodash';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { FULL_SOLUTION_VERSION, LEVEL1 } from '../../common/constants';
+import { BuiltInTagKeys } from '../../common/model-ln';
 import { getStackPrefix } from '../../common/utils';
 
 export function mergeParameters(base: Parameter[], attach: Parameter[]) {
@@ -1210,3 +1213,420 @@ export const BOUNDARY_ARN_PARAMETER = {
   ParameterKey: 'IamRoleBoundaryArn',
   ParameterValue: 'arn:aws:iam::555555555555:policy/test-boundary-policy',
 };
+
+export const InitTags = [
+  {
+    Key: BuiltInTagKeys.AWS_SOLUTION,
+    Value: SolutionInfo.SOLUTION_SHORT_NAME,
+  },
+  {
+    Key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
+    Value: FULL_SOLUTION_VERSION,
+  },
+  {
+    Key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
+    Value: MOCK_PROJECT_ID,
+  },
+  {
+    Key: 'customerKey1',
+    Value: 'tagValue1',
+  },
+  {
+    Key: 'customerKey2',
+    Value: 'tagValue2',
+  },
+];
+export const appRegistryApplicationTag = {
+  Key: `#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
+  Value: `#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
+};
+
+export const Tags = [
+  ...InitTags,
+  appRegistryApplicationTag,
+];
+
+export const IngestionStack = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'ap-southeast-1',
+      Parameters: [
+        ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const IngestionStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
+        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const DataProcessingStack = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'ap-southeast-1',
+      Parameters: [
+        ...DATA_PROCESSING_PLUGIN3_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-DataProcessing-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const DataProcessingStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...DATA_PROCESSING_PLUGIN3_PARAMETERS,
+        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-DataProcessing-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const DataModelingRedshiftStack = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'ap-southeast-1',
+      Parameters: [
+        ...MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-DataModelingRedshift-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const DataModelingRedshiftStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-DataModelingRedshift-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const DataModelingAthenaStack = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'ap-southeast-1',
+      Parameters: [
+        ...BASE_ATHENA_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-DataModelingAthena-6666-6666`,
+      Tags: Tags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const DataModelingAthenaStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...BASE_ATHENA_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-DataModelingAthena-6666-6666`,
+      Tags: Tags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const ReportingStack = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'ap-southeast-1',
+      Parameters: [
+        ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Reporting-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const ReportingStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
+        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Reporting-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const StreamingStack = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'ap-southeast-1',
+      Parameters: [
+        ...STREAMING_BASE_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Streaming-6666-6666`,
+      Tags: Tags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/streaming-ingestion-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const MetricsStack = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'ap-southeast-1',
+      Parameters: [
+        ...BASE_METRICS_PARAMETERS,
+        APPREGISTRY_APPLICATION_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Metrics-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const MetricsStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...BASE_METRICS_PARAMETERS,
+        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Metrics-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+export const ServiceCatalogAppRegistryStack = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'ap-southeast-1',
+      Parameters: [
+        {
+          ParameterKey: 'ProjectId',
+          ParameterValue: 'project_8888_8888',
+        },
+      ],
+      StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
+    },
+  },
+  Next: LEVEL1,
+  Type: 'Stack',
+};
+
+export const ServiceCatalogAppRegistryStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        {
+          ParameterKey: 'ProjectId',
+          ParameterValue: 'project_8888_8888',
+        },
+      ],
+      StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
+    },
+  },
+  Next: LEVEL1,
+  Type: 'Stack',
+};
+
+export function removeParametersFromStack(stack: any, parameters: Parameter[]) {
+  const newStack = cloneDeep(stack);
+  newStack.Data.Input.Parameters = removeParameters(newStack.Data.Input.Parameters, parameters);
+  return newStack;
+}
+
+export function mergeParametersFromStack(stack: any, parameters: Parameter[]) {
+  const newStack = cloneDeep(stack);
+  newStack.Data.Input.Parameters = mergeParameters(newStack.Data.Input.Parameters, parameters);
+  return newStack;
+}
+
+export function replaceStackInputProps(stack: any, props: any) {
+  const newStack = cloneDeep(stack);
+  newStack.Data.Input = {
+    ...newStack.Data.Input,
+    ...props,
+  };
+  return newStack;
+}
+
+export function replaceStackProps(stack: any, props: any) {
+  const newStack = cloneDeep(stack);
+  return {
+    ...newStack,
+    ...props,
+  };
+}
+
+export function replaceStackParameters(stack: any, parameters: Parameter[]) {
+  const newStack = cloneDeep(stack);
+  newStack.Data.Input.Parameters = parameters;
+  return newStack;
+}
+
+export function setTagsToStack(stack: any, tags: any[]) {
+  const newStack = cloneDeep(stack);
+  newStack.Data.Input.Tags = tags;
+  return newStack;
+}
+
+export function setTagsWithVersion(stack: any, version: SolutionVersion) {
+  const newStack = cloneDeep(stack);
+  for (const tag of newStack.Data.Input.Tags) {
+    if (tag.Key === BuiltInTagKeys.AWS_SOLUTION_VERSION) {
+      tag.Value = version.fullVersion;
+    }
+  }
+  return newStack;
+}

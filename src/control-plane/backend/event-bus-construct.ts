@@ -27,7 +27,6 @@ import { CFN_RULE_PREFIX, CFN_TOPIC_PREFIX } from './lambda/api/common/constants
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { createDLQueue } from '../../common/sqs';
-import { getShortIdOfStack } from '../../common/stack';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface BackendEventBusProps {
@@ -55,7 +54,6 @@ export class BackendEventBus extends Construct {
 
   private createSQSForListenStackStatusChange = () => {
     const queue = new Queue(this, 'ListenStackStatusQueue', {
-      queueName: `ClickstreamListenStackStatusChange-${getShortIdOfStack(Stack.of(this))}`,
       visibilityTimeout: Duration.seconds(60),
       encryption: QueueEncryption.SQS_MANAGED,
       enforceSSL: true,
@@ -104,7 +102,6 @@ export class BackendEventBus extends Construct {
     const listenStateStatusFn = this.listenStateFn(props);
 
     const ruleState = new Rule(this, 'ListenStateStatusChange', {
-      ruleName: `ClickstreamListenStateStatusChange-${getShortIdOfStack(Stack.of(this))}`,
       description: 'Rule for listen SFN state machine status change',
       eventPattern: {
         source: ['aws.states'],
