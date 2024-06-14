@@ -83,7 +83,7 @@ import {
   isEmpty,
 } from '../common/utils';
 import { StackManager } from '../service/stack';
-import { generateWorkflow, getReportingState, getStreamingState } from '../service/stack-excution';
+import { generateWorkflow } from '../service/stack-excution';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
@@ -345,7 +345,6 @@ export class CPipeline {
     // create rule to listen CFN stack
     await this._createRules();
     this.pipeline.lastAction = 'Create';
-    this.pipeline.statusType = PipelineStatusType.CREATING;
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this._setExecution(executionName);
@@ -417,10 +416,6 @@ export class CPipeline {
     this._setExecution(executionName);
     // update parameters
     await this._mergeUpdateParameters(oldPipeline);
-    // enable reporting
-    await this._enableReporting(oldPipeline);
-    // enable streaming
-    await this._enableStreaming(oldPipeline);
     // update tags
     this.pipeline.tags = getUpdateTags(this.pipeline, oldPipeline);
     if (this._editStackTags(oldPipeline)) {
@@ -437,30 +432,6 @@ export class CPipeline {
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
-  private async _enableReporting(oldPipeline: IPipeline) {
-    if (oldPipeline.reporting?.quickSight?.accountName === this.pipeline.reporting?.quickSight?.accountName) {
-      return;
-    }
-    if (this.pipeline.reporting?.quickSight?.accountName) {
-      const reportingState = await getReportingState(this.pipeline, this.resources!);
-      if (!reportingState) {
-        return;
-      }
-      this.stackManager.patchStateAfterRedshiftWorkflow(reportingState, PipelineStackType.REPORTING);
-    }
-  }
-
-  private async _enableStreaming(oldPipeline: IPipeline) {
-    if (!isEmpty(oldPipeline.streaming) || isEmpty(this.pipeline.streaming)) {
-      return;
-    }
-    const streamingState = await getStreamingState(this.pipeline, this.resources!);
-    if (!streamingState) {
-      return;
-    }
-    this.stackManager.patchStateAfterRedshiftWorkflow(streamingState, PipelineStackType.STREAMING);
-  }
-
   private async _mergeUpdateParameters(oldPipeline: IPipeline): Promise<void> {
     // generate parameters according to current control plane version
     await this.resourcesCheck();
@@ -475,6 +446,7 @@ export class CPipeline {
 
     this._overwriteParameters(editedParameters);
 
+    await this.stackManager.updateStreamAndReport(oldPipeline, this.resources!);
   }
 
   private _overwriteParameters(editedParameters: EditedPath[]): void {

@@ -12,8 +12,8 @@
  */
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
-import { cloneDeep } from 'lodash';
-import { AFTER_REDSHIFT_STACKS, awsRegion, stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
+import { getStateCallback, updateReportingState, updateStreamingState, workflowToLevel } from './stack-excution';
+import { awsRegion, stackWorkflowStateMachineArn } from '../common/constants';
 import { PipelineStackType, PipelineStatusDetail } from '../common/model-ln';
 import {
   WorkflowParallelBranch,
@@ -22,7 +22,7 @@ import {
   WorkflowTemplate,
 } from '../common/types';
 import { getPipelineLastActionFromStacksStatus, getStackName, getStackTags } from '../common/utils';
-import { IPipeline } from '../model/pipeline';
+import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { startExecution } from '../store/aws/sfn';
 
 
@@ -161,10 +161,14 @@ export class StackManager {
 
     for (let param of editedParameters) {
       this.execWorkflow.Workflow = this.updateStackParameter(
-        this.execWorkflow.Workflow, param.stackName, param.parameterKey, param.parameterValue, 'Update');
+        this.execWorkflow.Workflow, param.stackName, param.parameterKey, param.parameterValue, 'Update',
+      );
       this.workflow.Workflow = this.updateStackParameter(
-        this.workflow.Workflow, param.stackName, param.parameterKey, param.parameterValue, 'Create');
+        this.workflow.Workflow, param.stackName, param.parameterKey, param.parameterValue, 'Create',
+      );
     }
+    this.execWorkflow.Workflow = workflowToLevel(this.execWorkflow.Workflow);
+    this.workflow.Workflow = workflowToLevel(this.workflow.Workflow);
   }
 
   public updateWorkflowAction(editStacks: string[]): void {
@@ -175,73 +179,16 @@ export class StackManager {
     this.execWorkflow.Workflow = this.getUpdateWorkflow(this.execWorkflow.Workflow, stackDetails, editStacks);
   }
 
-  public patchStateAfterRedshiftWorkflow(state: WorkflowState, type: PipelineStackType): void {
-    this._patchStateAfterRedshiftWorkflow(this.execWorkflow?.Workflow as WorkflowState, state, type);
-    this._patchStateAfterRedshiftWorkflow(this.workflow?.Workflow as WorkflowState, state, type);
-  }
-
-  public _patchStateAfterRedshiftWorkflow(workflow: WorkflowState, state: WorkflowState, type: PipelineStackType): void {
-    const dataProcessingBranch = this._findBranch(workflow, PipelineStackType.DATA_PROCESSING);
-    if (!dataProcessingBranch || !(PipelineStackType.DATA_MODELING_REDSHIFT in dataProcessingBranch.States)) {
-      throw new Error('Data Processing state or redshift state not found.');
+  public async updateStreamAndReport(oldPipeline: IPipeline, resources: CPipelineResources) {
+    if (!this.execWorkflow || !this.workflow) {
+      throw new Error('Pipeline workflow is empty.');
     }
-    if (AFTER_REDSHIFT_STACKS in dataProcessingBranch.States) {
-      dataProcessingBranch.States[AFTER_REDSHIFT_STACKS].Branches?.push({
-        StartAt: type,
-        States: {
-          [type]: state,
-        },
-      });
-      if (PipelineStackType.REPORTING in dataProcessingBranch.States) {
-        delete dataProcessingBranch.States[PipelineStackType.REPORTING];
-      }
-    } else {
-      const parallelAfterRedshift: WorkflowState = {
-        Type: WorkflowStateType.PARALLEL,
-        End: true,
-        Branches: [{
-          StartAt: type,
-          States: {
-            [type]: state,
-          },
-        }],
-      };
-      if (PipelineStackType.REPORTING in dataProcessingBranch.States) {
-        if (type === PipelineStackType.REPORTING) {
-          delete dataProcessingBranch.States[PipelineStackType.REPORTING];
-        } else {
-          const oldReporting = cloneDeep(dataProcessingBranch.States[PipelineStackType.REPORTING]);
-          parallelAfterRedshift.Branches?.push(
-            {
-              StartAt: PipelineStackType.REPORTING,
-              States: {
-                [PipelineStackType.REPORTING]: oldReporting,
-              },
-            },
-          );
-          delete dataProcessingBranch.States[PipelineStackType.REPORTING];
-        }
-      }
-
-      dataProcessingBranch.States[AFTER_REDSHIFT_STACKS] = parallelAfterRedshift;
-      dataProcessingBranch.States[PipelineStackType.DATA_MODELING_REDSHIFT].Next = AFTER_REDSHIFT_STACKS;
-      delete dataProcessingBranch.States[PipelineStackType.DATA_MODELING_REDSHIFT].End;
-    }
-  }
-
-  private _findBranch(state: WorkflowState, startAt: string): WorkflowParallelBranch | undefined {
-    if (state.Type === WorkflowStateType.PARALLEL) {
-      const targetBranch = state.Branches?.find((b) => b.StartAt === startAt);
-      if (targetBranch) {
-        return targetBranch;
-      }
-      for (let branch of state.Branches as WorkflowParallelBranch[]) {
-        for (let key of Object.keys(branch.States)) {
-          return this._findBranch(branch.States[key], startAt);
-        }
-      }
-    }
-    return undefined;
+    // enable reporting
+    await updateReportingState(this.pipeline, oldPipeline, resources, this.execWorkflow.Workflow);
+    await updateReportingState(this.pipeline, oldPipeline, resources, this.workflow.Workflow);
+    // enable streaming
+    await updateStreamingState(this.pipeline, oldPipeline, resources, this.execWorkflow.Workflow);
+    await updateStreamingState(this.pipeline, oldPipeline, resources, this.workflow.Workflow);
   }
 
   public async execute(workflow: WorkflowTemplate | undefined, executionName: string): Promise<string> {
@@ -270,10 +217,7 @@ export class StackManager {
       this._getParallelDeleteWorkflow(state);
     } else if (state.Type === WorkflowStateType.STACK) {
       state.Data!.Input.Action = 'Delete';
-      state.Data!.Callback = {
-        BucketName: stackWorkflowS3Bucket ?? '',
-        BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
-      };
+      state.Data!.Callback = getStateCallback(this.pipeline);
     }
     return state;
   }
@@ -313,10 +257,7 @@ export class StackManager {
       if (!origin && oldStackNames.includes(state.Data.Input.StackName)) {
         state.Data.Input.Action = 'Upgrade';
       }
-      state.Data.Callback = {
-        BucketName: stackWorkflowS3Bucket ?? '',
-        BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
-      };
+      state.Data.Callback = getStateCallback(this.pipeline);
     }
     return state;
   }
@@ -377,10 +318,7 @@ export class StackManager {
     } else {
       state.Type = WorkflowStateType.PASS;
     }
-    state.Data!.Callback = {
-      BucketName: stackWorkflowS3Bucket ?? '',
-      BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
-    };
+    state.Data!.Callback = getStateCallback(this.pipeline);
     return state;
   }
 
@@ -400,10 +338,7 @@ export class StackManager {
         }
       }
     } else if (state.Type === WorkflowStateType.STACK || state.Type === WorkflowStateType.PASS) {
-      state.Data!.Callback = {
-        BucketName: stackWorkflowS3Bucket ?? '',
-        BucketPrefix: `clickstream/workflow/${executionName}`,
-      };
+      state.Data!.Callback = getStateCallback(this.pipeline, `clickstream/workflow/${executionName}`);
     }
     return state;
   }
@@ -434,10 +369,7 @@ export class StackManager {
         state.Type = WorkflowStateType.PASS;
       }
     }
-    state.Data!.Callback = {
-      BucketName: stackWorkflowS3Bucket ?? '',
-      BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
-    };
+    state.Data!.Callback = getStateCallback(this.pipeline);
   }
 
   public updateWorkflowTags(): void {

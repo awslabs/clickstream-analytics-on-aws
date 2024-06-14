@@ -120,7 +120,7 @@ import { getStackPrefix } from '../../common/utils';
 import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
-import { generateWorkflow } from '../../service/stack-excution';
+import { generateWorkflow, workflowToLevel } from '../../service/stack-excution';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
@@ -188,7 +188,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -223,23 +223,23 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -267,7 +267,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -302,23 +302,23 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -346,7 +346,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -385,23 +385,23 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -471,23 +471,23 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -511,7 +511,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -546,23 +546,23 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -586,7 +586,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -648,23 +648,23 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
 
@@ -762,23 +762,23 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
 
@@ -803,7 +803,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -838,23 +838,23 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -924,23 +924,23 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -964,7 +964,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -1014,23 +1014,23 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -1055,7 +1055,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -1105,7 +1105,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [
@@ -1127,18 +1127,18 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -1163,7 +1163,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -1240,7 +1240,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [
@@ -1262,18 +1262,18 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -1298,7 +1298,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -1375,7 +1375,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [
@@ -1413,18 +1413,18 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -1449,7 +1449,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -1499,7 +1499,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [
@@ -1521,18 +1521,18 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -1556,7 +1556,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -1606,7 +1606,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [
@@ -1644,18 +1644,18 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -1679,7 +1679,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -1729,7 +1729,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [
@@ -1767,7 +1767,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [
@@ -1795,13 +1795,13 @@ describe('Workflow test', () => {
                   },
                 ],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -1825,7 +1825,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -1875,7 +1875,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [
@@ -1913,18 +1913,18 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -1949,7 +1949,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -1999,7 +1999,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [
@@ -2021,7 +2021,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [
@@ -2049,13 +2049,13 @@ describe('Workflow test', () => {
                   },
                 ],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -2087,7 +2087,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -2137,7 +2137,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [
@@ -2159,7 +2159,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [
@@ -2203,13 +2203,13 @@ describe('Workflow test', () => {
                   },
                 ],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
@@ -2235,7 +2235,7 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -2312,7 +2312,7 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [
@@ -2356,18 +2356,18 @@ describe('Workflow test', () => {
                   },
                 ],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
 
@@ -3813,7 +3813,7 @@ describe('Workflow test', () => {
           },
         },
       ],
-      Type: 'Parallel',
+      Type: WorkflowStateType.PARALLEL,
     });
 
     workflowTemplate = {
@@ -3996,7 +3996,7 @@ describe('Workflow test', () => {
           },
         },
       ],
-      Type: 'Parallel',
+      Type: WorkflowStateType.PARALLEL,
     });
 
     workflowTemplate = {
@@ -4225,7 +4225,7 @@ describe('Workflow test', () => {
           },
         },
       ],
-      Type: 'Parallel',
+      Type: WorkflowStateType.PARALLEL,
     });
 
   });
@@ -4462,6 +4462,168 @@ describe('Workflow test', () => {
       `${getStackPrefix()}-Reporting-6666-6666`,
     ]);
   });
+  it('Workflow to level', async () => {
+    const workflow: WorkflowTemplate = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: IngestionStack as WorkflowState,
+                      KafkaConnector: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [],
+                            StackName: `${getStackPrefix()}-KafkaConnector-6666-6666`,
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: WorkflowStateType.STACK,
+                      },
+                    },
+                  },
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataModelingAthena: {
+                        ...DataModelingAthenaStack,
+                        Next: 'DataModelingRedshift',
+                        End: undefined,
+                      } as WorkflowState,
+                      DataModelingRedshift: {
+                        ...DataModelingRedshiftStack,
+                        Next: 'ReportingStack',
+                        End: undefined,
+                      } as WorkflowState,
+                      DataProcessing: {
+                        ...DataProcessingStack,
+                        Next: 'DataModelingAthena',
+                        End: undefined,
+                      } as WorkflowState,
+                      Reporting: ReportingStack as WorkflowState,
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: MetricsStack as WorkflowState,
+                    },
+                  },
+                ],
+                End: true,
+                Type: WorkflowStateType.PARALLEL,
+              },
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
+            },
+          },
+        ],
+        End: true,
+        Type: WorkflowStateType.PARALLEL,
+      },
+    };
+    const workflowLevel: WorkflowTemplate = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
+              [LEVEL1]: {
+                Branches: [
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: MetricsStack as WorkflowState,
+                    },
+                  },
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: IngestionStack as WorkflowState,
+                      KafkaConnector: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [],
+                            StackName: `${getStackPrefix()}-KafkaConnector-6666-6666`,
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: WorkflowStateType.STACK,
+                      },
+                    },
+                  },
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: DataProcessingStack as WorkflowState,
+                    },
+                  },
+                ],
+                Next: LEVEL2,
+                Type: WorkflowStateType.PARALLEL,
+              },
+              [LEVEL2]: {
+                Branches: [
+                  {
+                    StartAt: 'DataModelingAthena',
+                    States: {
+                      DataModelingAthena: DataModelingAthenaStack as WorkflowState,
+                    },
+                  },
+                  {
+                    StartAt: 'DataModelingRedshift',
+                    States: {
+                      DataModelingRedshift: DataModelingRedshiftStack as WorkflowState,
+                    },
+                  },
+                ],
+                Next: LEVEL3,
+                Type: WorkflowStateType.PARALLEL,
+              },
+              [LEVEL3]: {
+                Branches: [
+                  {
+                    StartAt: 'Reporting',
+                    States: {
+                      Reporting: ReportingStack as WorkflowState,
+                    },
+                  },
+                ],
+                End: true,
+                Type: WorkflowStateType.PARALLEL,
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: WorkflowStateType.PARALLEL,
+      },
+    };
+    expect(workflowToLevel(workflow.Workflow)).toEqual(workflowLevel.Workflow);
+  });
 
   afterAll((done) => {
     server.close();
@@ -4510,7 +4672,7 @@ describe('Workflow test with boundary', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
               [LEVEL1]: {
                 Branches: [
                   {
@@ -4547,23 +4709,23 @@ describe('Workflow test with boundary', () => {
                   },
                 ],
                 Next: LEVEL2,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL2]: {
                 Branches: [],
                 Next: LEVEL3,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
               [LEVEL3]: {
                 Branches: [],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
           },
         ],
         End: true,
-        Type: 'Parallel',
+        Type: WorkflowStateType.PARALLEL,
       },
     };
     expect(wf).toEqual(expected);
