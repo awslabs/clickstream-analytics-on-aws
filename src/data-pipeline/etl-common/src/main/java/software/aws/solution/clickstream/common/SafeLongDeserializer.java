@@ -16,9 +16,11 @@ package software.aws.solution.clickstream.common;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 
+@Slf4j
 public class SafeLongDeserializer extends JsonDeserializer<Long> {
     @Override
     public Long deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
@@ -26,6 +28,7 @@ public class SafeLongDeserializer extends JsonDeserializer<Long> {
         try {
             return Long.parseLong(value);
         } catch (NumberFormatException e) {
+            log.error("Failed to parse long value: {}", value, e);
             return null;
         }
     }

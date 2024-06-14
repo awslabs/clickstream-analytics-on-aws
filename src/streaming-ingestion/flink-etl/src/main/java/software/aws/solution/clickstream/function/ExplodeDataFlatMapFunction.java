@@ -42,7 +42,7 @@ public class ExplodeDataFlatMapFunction implements FlatMapFunction<String, Tuple
             try {
                 dataNode = OBJECT_MAPPER.readTree(dataText);
             } catch (Exception e) {
-                log.warn("decodeData json error, dataText: {}, error: {}", dataText, e.getMessage());
+                log.error("decodeData json error, dataText: {}, error: {}", dataText, e.getMessage());
                 return null;
             }
         } else {
@@ -51,7 +51,7 @@ public class ExplodeDataFlatMapFunction implements FlatMapFunction<String, Tuple
                 StringBuilder output = gzipBytesToString(decodedBytes);
                 return OBJECT_MAPPER.readValue(output.toString(), JsonNode.class);
             } catch (Exception e) {
-                log.warn("decodeData gzip error, dataText: {}, error {}", dataText, e.getMessage());
+                log.error("decodeData gzip error, dataText: {}, error {}", dataText, e.getMessage());
                 return null;
             }
         }
