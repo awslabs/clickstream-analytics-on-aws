@@ -104,11 +104,11 @@ BEGIN
 	)
 	REMOVE DUPLICATES;	
 
-	CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'Merge data into item v2 table successfully.');
+	CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'Merge data into item v2 table successfully. manifestFileName: ' || manifestFileName);
 
 	DROP TABLE item_v2_stage;
 	DROP TABLE item_v2_stage_1;
 EXCEPTION WHEN OTHERS THEN
-    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'error message:' || SQLERRM);	
+    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'manifestFileName: ' || manifestFileName || ', error message:' || SQLERRM);
 END;
 $$ LANGUAGE plpgsql;

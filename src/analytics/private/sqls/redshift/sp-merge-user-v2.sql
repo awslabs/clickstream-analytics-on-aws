@@ -81,10 +81,10 @@ BEGIN
 	USING user_v2_stage AS stage ON ({{schema}}.user_v2.user_pseudo_id = stage.user_pseudo_id)
 	REMOVE DUPLICATES;	
 
-	CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'Merge data into user v2 table successfully.');
+	CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'Merge data into user v2 table successfully. manifestFileName: ' || manifestFileName);
 	DROP TABLE user_v2_stage;
 	DROP TABLE user_v2_stage_1;
 EXCEPTION WHEN OTHERS THEN
-    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'error message:' || SQLERRM);	
+    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'manifestFileName: ' || manifestFileName || ', error message:' || SQLERRM);
 END;
 $$ LANGUAGE plpgsql;
