@@ -338,6 +338,7 @@ React Native SDK version dependencies
 
 | React Native SDK Version | Android SDK Version | Swift SDK Version |
 |--------------------------|---------------------|-------------------|
+| 0.2.1                    | 0.13.0              | 0.12.3            |
 | 0.1.0 ~ 0.2.0            | 0.12.0              | 0.11.0            |
 
 ## Sample project
