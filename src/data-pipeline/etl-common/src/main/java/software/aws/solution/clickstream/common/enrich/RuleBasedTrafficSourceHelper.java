@@ -78,7 +78,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     private final CategoryListEvaluator categoryListEvaluator;
     private final ChannelListEvaluator channelListEvaluator;
 
-    private static final Cache<CategoryTrafficSource> CACHED_CATEGORY_TRAFFIC_SOURCE = new Cache<>();
+    private final Cache<CategoryTrafficSource> categoryTrafficSourceCache = new Cache<>();
     @Getter
     private final String appId;
 
@@ -180,9 +180,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
     public CategoryTrafficSource parse(final String pageUrl, final String pageReferrer, final String latestReferrer, final String latestReferrerHost) {
         log.debug("parser() enter pageUrl: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", pageUrl, pageReferrer, latestReferrer, latestReferrerHost);
 
-        String cachedKey = String.join("|", pageUrl, pageReferrer, latestReferrer);
-        if (CACHED_CATEGORY_TRAFFIC_SOURCE.containsKey(cachedKey)) {
-            return CACHED_CATEGORY_TRAFFIC_SOURCE.get(cachedKey);
+        String cachedKey = getCachedKey(pageUrl, pageReferrer, latestReferrer);
+
+        if (categoryTrafficSourceCache.containsKey(cachedKey)) {
+            return categoryTrafficSourceCache.get(cachedKey);
         }
         TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
         String pageHostName = null;
@@ -191,7 +192,7 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
             pageHostName = parseUrl(pageUrl).getHostName();
         }
         CategoryTrafficSource result = parse(trafficSourceUtm, pageHostName, pageReferrer, latestReferrer, latestReferrerHost);
-        CACHED_CATEGORY_TRAFFIC_SOURCE.put(cachedKey, result);
+        categoryTrafficSourceCache.put(cachedKey, result);
         return result;
     }
 
@@ -321,9 +322,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         log.debug("parse() enter trafficSourceUtmInput: {}, pageHostName: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}",
                 trafficSourceUtmInput, pageHostName, pageReferrer, latestReferrer, latestReferrerHost);
 
-        String catchKey = String.join("|", trafficSourceUtmInput.hashCode() + "", pageReferrer, latestReferrer);
-        if (CACHED_CATEGORY_TRAFFIC_SOURCE.containsKey(catchKey)) {
-            return CACHED_CATEGORY_TRAFFIC_SOURCE.get(catchKey);
+        String cachedKey = getCachedKey(trafficSourceUtmInput, pageReferrer, latestReferrer);
+
+        if (categoryTrafficSourceCache.containsKey(cachedKey)) {
+            return categoryTrafficSourceCache.get(cachedKey);
         }
         TrafficSourceUtm trafficSourceUtm = normEmptyInTrafficSourceUtm(trafficSourceUtmInput);
 
@@ -356,9 +358,30 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
         handleUnassignedSource(categoryTrafficSource, pageReferrer, latestReferrer, isInternalReferrer, isInternalLatestReferrer);
 
-        CACHED_CATEGORY_TRAFFIC_SOURCE.put(catchKey, categoryTrafficSource);
+        categoryTrafficSourceCache.put(cachedKey, categoryTrafficSource);
 
         return categoryTrafficSource;
+    }
+
+    private static String getCachedKey(final TrafficSourceUtm trafficSourceUtmInput, final String pageReferrer, final String latestReferrer) {
+        return String.join("|",
+                trafficSourceUtmInput.getSource() == null ? "1" : "1:" + trafficSourceUtmInput.getSource(),
+                trafficSourceUtmInput.getMedium() == null ? "2" : "2:" + trafficSourceUtmInput.getMedium(),
+                trafficSourceUtmInput.getClid() == null ? "3" : "3:" + trafficSourceUtmInput.getClid(),
+                trafficSourceUtmInput.getContent() == null ? "4" : "4:" + trafficSourceUtmInput.getContent(),
+                trafficSourceUtmInput.getTerm() == null ? "5" : "5:" + trafficSourceUtmInput.getTerm(),
+                trafficSourceUtmInput.getCampaignId() == null ? "6" : "6:" + trafficSourceUtmInput.getCampaignId(),
+                trafficSourceUtmInput.getCampaign() == null ? "7" : "7:" + trafficSourceUtmInput.getCampaign(),
+                trafficSourceUtmInput.getClidPlatform() == null ? "8" : "8:" + trafficSourceUtmInput.getClidPlatform(),
+                pageReferrer == null ? "9" : "9:" + pageReferrer,
+                latestReferrer == null ? "10" : "10:" + latestReferrer);
+    }
+
+    private static String getCachedKey(final String pageUrl, final String pageReferrer, final String latestReferrer) {
+      return String.join("|",
+                pageUrl == null ? "1" : "1:" + pageUrl,
+                pageReferrer == null ? "2" : "2:" + pageReferrer,
+                latestReferrer == null ? "3" : "3:" + latestReferrer);
     }
 
     private void handleUnassignedSource(final CategoryTrafficSource categoryTrafficSource, final String pageReferrer,
