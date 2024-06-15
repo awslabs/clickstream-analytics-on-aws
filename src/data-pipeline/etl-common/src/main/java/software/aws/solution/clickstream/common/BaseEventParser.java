@@ -151,6 +151,10 @@ public abstract class BaseEventParser implements EventParser {
         clickstreamEvent.setPageViewPageUrl(deCodeUri(url));
         UrlParseResult urlParseResult = Util.parseUrl(url);
 
+        if (urlParseResult == null) {
+            return;
+        }
+
         if (urlParseResult.getPath() != null) {
             clickstreamEvent.setPageViewPageUrlPath(urlParseResult.getPath());
         }
