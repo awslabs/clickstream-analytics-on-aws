@@ -33,7 +33,7 @@ public final class ChannelListEvaluator {
     public static final String UNASSIGNED = "Unassigned";
     @Getter
     private List<ChannelRule> channelRules;
-    private static final Cache<String> CHANNEL_CACHED = new Cache<>();
+    private final Cache<String> channelCached = new Cache<>();
 
     private ChannelListEvaluator() {
 
@@ -68,8 +68,8 @@ public final class ChannelListEvaluator {
         log.debug("Evaluating channel rule for: {}", channelRuleEvaluatorInput.toString());
 
         String cachedKey = channelRuleEvaluatorInput.hashCode() + "";
-        if (CHANNEL_CACHED.containsKey(cachedKey)) {
-            return CHANNEL_CACHED.get(cachedKey);
+        if (channelCached.containsKey(cachedKey)) {
+            return channelCached.get(cachedKey);
         }
 
         String channel = UNASSIGNED;
@@ -81,7 +81,7 @@ public final class ChannelListEvaluator {
                 break;
             }
         }
-        CHANNEL_CACHED.put(cachedKey, channel);
+        channelCached.put(cachedKey, channel);
         return channel;
     }
 }
