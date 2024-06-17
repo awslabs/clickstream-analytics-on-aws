@@ -182,7 +182,6 @@ export type MustacheFunnelAnalysisType = MustacheBaseType & {
   dateDimFieldId?: string;
   dimFieldId: string;
   measureFieldId: string;
-  countColName: string;
   dateGranularity?: string;
   hierarchyId?: string;
 }
@@ -234,10 +233,6 @@ export type MustacheRelativeDateFilterGroupType = {
 }
 
 export const funnelVisualColumns: InputColumn[] = [
-  {
-    Name: 'event_date',
-    Type: 'DATETIME',
-  },
   {
     Name: 'event_name',
     Type: 'STRING',
@@ -583,12 +578,12 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
 }
 
 export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType, groupColumn: string, groupCondition: GroupingCondition | undefined, countColName: string) : Visual {
+  quickSightChartType: QuickSightChartType, groupColumn: string, groupCondition: GroupingCondition | undefined) : Visual {
 
   if (quickSightChartType === QuickSightChartType.FUNNEL) {
-    return _getFunnelChartVisualDef(visualId, viewName, titleProps, countColName);
+    return _getFunnelChartVisualDef(visualId, viewName, titleProps);
   } else if (quickSightChartType === QuickSightChartType.BAR) {
-    return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn, groupCondition, countColName);
+    return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn, groupCondition);
   } else {
     const errorMessage = `Funnel analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
@@ -596,7 +591,7 @@ export function getFunnelVisualDef(visualId: string, viewName: string, titleProp
   }
 }
 
-function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, countColName: string) : Visual {
+function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/funnel-funnel-chart.json')).toString('utf-8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
@@ -604,7 +599,6 @@ function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps
     dataSetIdentifier: viewName,
     dimFieldId: uuidv4(),
     measureFieldId: uuidv4(),
-    countColName,
     title: titleProps.title,
     subTitle: titleProps.subTitle,
   };
@@ -613,7 +607,7 @@ function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps
 }
 
 function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  groupColumn: string, groupCondition: GroupingCondition | undefined, countColName: string) : Visual {
+  groupColumn: string, groupCondition: GroupingCondition | undefined) : Visual {
 
   const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
@@ -626,7 +620,6 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
     measureFieldId: uuidv4(),
     dateGranularity: groupColumn,
     hierarchyId: uuidv4(),
-    countColName,
     title: titleProps.title,
     subTitle: titleProps.subTitle,
     smalMultiplesFieldId: props.smalMultiplesFieldId,

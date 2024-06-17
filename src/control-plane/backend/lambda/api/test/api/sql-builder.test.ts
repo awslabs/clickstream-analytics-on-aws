@@ -12,7 +12,7 @@
  */
 
 import { afterEach } from 'node:test';
-import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType, QuickSightChartType } from '@aws/clickstream-base-lib';
 import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
 import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, _buildCommonPartSql, daysBetweenDates, buildEventPropertyAnalysisView, ExploreAnalyticsType } from '../../service/quicksight/sql-builder';
 
@@ -960,7 +960,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, QuickSightChartType.FUNNEL);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -1210,13 +1210,14 @@ describe('SQL Builder test', () => {
           join seq_table on 1 = 1
       )
     select
-      day::date as event_date,
       event_name,
-      user_pseudo_id
+      count(distinct user_pseudo_id) as "Count"
     from
       final_table
     where
       event_name is not null
+      group by 
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -4990,7 +4991,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, QuickSightChartType.FUNNEL);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -5186,13 +5187,14 @@ describe('SQL Builder test', () => {
           join seq_table on 1 = 1
       )
     select
-      day::date as event_date,
       event_name,
-      user_pseudo_id
+      count(distinct user_pseudo_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by 
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -8414,7 +8416,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, QuickSightChartType.BAR);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -8530,7 +8532,7 @@ describe('SQL Builder test', () => {
             FROM
               table_2.event_timestamp_2 - table_1.event_timestamp_1
           ) > 0
-          andCONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_2.event_timestamp_2)::DATE
+          and CONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_2.event_timestamp_2)::DATE
       ),
       seq_table as (
         select
@@ -8615,12 +8617,16 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      event_id,
-      e__session_id
+      e__session_id,
+      count(distinct event_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_date,
+      event_name,
+      e__session_id
     `.trim().replace(/ /g, ''),
     );
 
@@ -8678,7 +8684,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, QuickSightChartType.BAR);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -8794,7 +8800,7 @@ describe('SQL Builder test', () => {
             FROM
               table_2.event_timestamp_2 - table_1.event_timestamp_1
           ) > 0
-          andCONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_2.event_timestamp_2)::DATE
+          and CONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_2.event_timestamp_2)::DATE
       ),
       seq_table as (
         select
@@ -8879,12 +8885,16 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      user_pseudo_id,
-      geo_country
+      geo_country,
+      count(distinct user_pseudo_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_date,
+      event_name,
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
@@ -8942,7 +8952,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, QuickSightChartType.BAR);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -9118,12 +9128,16 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      user_pseudo_id,
-      geo_country
+      geo_country,
+      count(distinct user_pseudo_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_date,
+      event_name,
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
@@ -10641,7 +10655,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, QuickSightChartType.BAR);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -10866,12 +10880,16 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      event_id,
-      geo_country
+      geo_country,
+      count(distinct event_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_date,
+      event_name,
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
@@ -11032,7 +11050,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, QuickSightChartType.BAR);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -11261,12 +11279,16 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      event_id,
-      geo_country
+      geo_country,
+      count(distinct event_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_date,
+      event_name,
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
@@ -13905,7 +13927,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    });
+    }, QuickSightChartType.FUNNEL);
 
     expect(sql.includes('shopping.shopping.')).toEqual(true);
 
@@ -14095,13 +14117,14 @@ describe('SQL Builder test', () => {
           join seq_table on 1 = 1
       )
     select
-      day::date as event_date,
       event_name,
-      user_pseudo_id
+      count(distinct user_pseudo_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by 
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -14629,7 +14652,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, QuickSightChartType.FUNNEL);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -14803,13 +14826,14 @@ describe('SQL Builder test', () => {
           join seq_table on 1 = 1
       )
     select
-      day::date as event_date,
       event_name,
-      user_pseudo_id
+      count(distinct user_pseudo_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -14841,7 +14865,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    });
+    }, QuickSightChartType.FUNNEL);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -15015,13 +15039,14 @@ describe('SQL Builder test', () => {
           join seq_table on 1 = 1
       )
     select
-      day::date as event_date,
       event_name,
-      event_id
+      count(distinct event_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -15064,7 +15089,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    }, true);
+    }, QuickSightChartType.BAR);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -15243,12 +15268,16 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      user_pseudo_id,
-      geo_country
+      geo_country,
+      count(distinct user_pseudo_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_date,
+      event_name,
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
@@ -15291,7 +15320,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.WEEK,
-    }, true);
+    }, QuickSightChartType.BAR);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -15495,12 +15524,16 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      user_pseudo_id,
-      geo_country
+      geo_country,
+      count(distinct user_pseudo_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_date,
+      event_name,
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
@@ -20938,7 +20971,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, QuickSightChartType.BAR);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -21117,13 +21150,18 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      event_id,
       e__session_id,
-      geo_country
+      geo_country,
+      count(distinct event_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_date,
+      event_name,
+      e__session_id,
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
@@ -21187,7 +21225,7 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
-    }, true);
+    }, QuickSightChartType.BAR);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -21416,13 +21454,18 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      event_id,
       e__session_id,
-      geo_country
+      geo_country,
+      count(distinct event_id) as "Count"
     from
       final_table
     where
       event_name is not null
+    group by
+      event_date,
+      event_name,
+      e__session_id,
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
