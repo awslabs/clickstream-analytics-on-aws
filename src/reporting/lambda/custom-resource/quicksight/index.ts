@@ -524,21 +524,20 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 
     realtimeDashboard = await createDashboard(quickSight, commonParams, realtimeSourceEntity, dashboardDef, true);
     logger.info(`Realtime dashboard ${realtimeDashboard?.DashboardId} creation completed.`);
-
-    try {
-      await quickSight.createFolderMembership({
-        AwsAccountId: commonParams.awsAccountId,
-        FolderId: folderId,
-        MemberId: realtimeDashboard?.DashboardId!,
-        MemberType: MemberType.DASHBOARD,
-      });
-    } catch (e) {
-      if (e instanceof ResourceExistsException) {
-        logger.warn('folder membership already exist. skip create operation.');
-      } else {
-        throw e;
-      }
-    }
+    // try {
+    //   await quickSight.createFolderMembership({
+    //     AwsAccountId: commonParams.awsAccountId,
+    //     FolderId: folderId,
+    //     MemberId: realtimeDashboard?.DashboardId!,
+    //     MemberType: MemberType.DASHBOARD,
+    //   });
+    // } catch (e) {
+    //   if (e instanceof ResourceExistsException) {
+    //     logger.warn('folder membership already exist. skip create operation.');
+    //   } else {
+    //     throw e;
+    //   }
+    // }
   }
 
   return {
@@ -564,7 +563,7 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
     const result = await deleteDashboardById(quickSight, accountId, dashboardId.id);
 
     // Delete Realtime Dashboard
-    if(dashboardDef.realtimeTemplateId.length > 0) {
+    if (dashboardDef.realtimeTemplateId.length > 0) {
       const rtDashboardId = buildDashBoardId(deleteDatabase, schema, true);
       await deleteDashboardById(quickSight, accountId, rtDashboardId.id);
     }
@@ -777,7 +776,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
 
   //real time dashboard
   let realtimeDashboard = undefined;
-  if(dashboardDef.realtimeTemplateId.length > 0) {
+  if (dashboardDef.realtimeTemplateId.length > 0) {
     const latestVersionRT = await getLatestTemplateVersion(quickSight, commonParams.awsAccountId, dashboardDef.realtimeTemplateId);
     const sourceEntityRT = {
       SourceTemplate: {

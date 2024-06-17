@@ -103,6 +103,8 @@ describe('QuickSight Lambda function', () => {
       analysisName: 'Clickstream Analysis',
       dashboardName: 'Clickstream Dashboard',
       templateArn: 'test-template-arn',
+      realtimeTemplateArn: '',
+      realtimeTemplateId: '',
       databaseName: 'test-database-name',
       dataSourceArn: 'test-datasource',
       dataSets: [
@@ -296,6 +298,8 @@ describe('QuickSight Lambda function', () => {
       analysisName: 'Clickstream Analysis',
       dashboardName: 'Clickstream Dashboard',
       templateArn: 'test-template-arn',
+      realtimeTemplateArn: '',
+      realtimeTemplateId: '',
       databaseName: 'test-database-name',
       dataSourceArn: 'test-datasource',
       dataSets: [
@@ -663,6 +667,8 @@ describe('QuickSight Lambda function', () => {
       analysisName: 'Clickstream Analysis',
       dashboardName: 'Clickstream Dashboard',
       templateArn: 'test-template-arn',
+      realtimeTemplateArn: '',
+      realtimeTemplateId: '',
       databaseName: 'test-database-name',
       dataSourceArn: 'test-datasource',
       dataSets: [
@@ -956,6 +962,8 @@ describe('QuickSight Lambda function', () => {
       analysisName: 'Clickstream Analysis',
       dashboardName: 'Clickstream Dashboard',
       templateArn: 'test-template-arn',
+      realtimeTemplateArn: '',
+      realtimeTemplateId: '',
       databaseName: 'test-database-name',
       dataSourceArn: 'test-datasource',
       dataSets: [
@@ -1172,6 +1180,8 @@ describe('QuickSight Lambda function', () => {
       analysisName: 'Clickstream Analysis',
       dashboardName: 'Clickstream Dashboard',
       templateArn: 'test-template-arn',
+      realtimeTemplateArn: '',
+      realtimeTemplateId: '',
       databaseName: 'test-database-name',
       dataSourceArn: 'test-datasource',
       dataSets: [
@@ -1317,6 +1327,8 @@ describe('QuickSight Lambda function', () => {
       analysisName: 'Clickstream Analysis',
       dashboardName: 'Clickstream Dashboard',
       templateArn: 'test-template-arn',
+      realtimeTemplateArn: '',
+      realtimeTemplateId: '',
       databaseName: 'changed-database',
       dataSourceArn: 'test-datasource',
       dataSets: [
@@ -1511,6 +1523,8 @@ describe('QuickSight Lambda function', () => {
       analysisName: 'Clickstream Analysis',
       dashboardName: 'Clickstream Dashboard',
       templateArn: 'test-template-arn',
+      realtimeTemplateArn: '',
+      realtimeTemplateId: '',
       databaseName: 'test-database-name',
       dataSourceArn: 'test-datasource',
       dataSets: [
@@ -1707,6 +1721,8 @@ describe('QuickSight Lambda function', () => {
       analysisName: 'Clickstream Analysis',
       dashboardName: 'Clickstream Dashboard',
       templateArn: 'test-template-arn',
+      realtimeTemplateArn: '',
+      realtimeTemplateId: '',
       databaseName: 'test-database-name',
       dataSourceArn: 'test-datasource',
       dataSets: [
