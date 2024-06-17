@@ -35,6 +35,11 @@ public class ApplicationParameters {
     private static final String PROJECT_ID = "projectId";
     private static final String GEO_FILE_KEY = "geoFileKey";
     private static final String INPUT_STREAM_ARN = "inputStreamArn";
+    private static final String TRANSFORM_VERSION = "transformVersion";
+    private static final String APP_RULE_CONFIG_PATH = "appRuleConfigPath";
+    private static final String ENABLE_UA_ENRICH = "enableUaEnrich";
+    private static final String ENABLE_IP_ENRICH = "enableIpEnrich";
+    private static final String ENABLE_TRAFFIC_SOURCE_ENRICH = "enableTrafficSourceEnrich";
 
     private String dataBucketName;
     private String region;
@@ -43,8 +48,14 @@ public class ApplicationParameters {
     private String inputStreamName;
     private String projectId;
     private String appIdStreamConfig;
+    private String transformVersion;
+    private String appRuleConfigPath;
     private List<AppIdStream> appIdStreamList;
     private int parallelism = 0;
+
+    private boolean uaEnrich;
+    private boolean ipEnrich;
+    private boolean trafficSourceEnrich;
 
      static ApplicationParameters fromProperties(final Properties props) {
         ApplicationParameters parameters = new ApplicationParameters();
@@ -53,15 +64,36 @@ public class ApplicationParameters {
         String region = inputStreamArn.split(":")[3];
         String bucket = props.getProperty(DATA_BUCKET_NAME);
         String projectId = props.getProperty(PROJECT_ID);
+        String transformVersion = props.getProperty(TRANSFORM_VERSION);
+
+        boolean enableUaEnrich = Boolean.parseBoolean(props.getProperty(ENABLE_UA_ENRICH, "true"));
+        parameters.setUaEnrich(enableUaEnrich);
+
+        boolean enableIpEnrich = Boolean.parseBoolean(props.getProperty(ENABLE_IP_ENRICH, "true"));
+        parameters.setIpEnrich(enableIpEnrich);
+
+        boolean enableTrafficSourceEnrich =  Boolean.parseBoolean(props.getProperty(ENABLE_TRAFFIC_SOURCE_ENRICH, "true"));
+        parameters.setTrafficSourceEnrich(enableTrafficSourceEnrich);
+
         parameters.setDataBucketName(bucket);
         parameters.setGeoFileKey(props.getProperty(GEO_FILE_KEY));
         parameters.setInputStreamArn(inputStreamArn);
         parameters.setProjectId(projectId);
+        if (transformVersion == null || transformVersion.isEmpty()) {
+            transformVersion = "v1";
+        }
+        parameters.setTransformVersion(transformVersion);
 
-        String defaultConfigS3Path = "s3://" + bucket + "/clickstream/" + projectId + "/config/flink/appIdStreamConfig.json";
+         String s3Schema = "s3://";
+         String defaultConfigS3Path = s3Schema + bucket + "/clickstream/" + projectId + "/config/flink/appIdStreamConfig.json";
         String appIdStreamConfig = props.getProperty(APP_ID_STREAM_CONFIG, defaultConfigS3Path);
         log.info("AppIdStreamConfig: {}", appIdStreamConfig);
         parameters.setAppIdStreamConfig(appIdStreamConfig);
+
+        String defaultAppRuleConfigPath = s3Schema + bucket + "/clickstream/" + projectId + "/rules/";
+        String appRuleConfigPath = props.getProperty(APP_RULE_CONFIG_PATH, defaultAppRuleConfigPath);
+        log.info("appRuleConfigPath: {}", appRuleConfigPath);
+        parameters.setAppRuleConfigPath(appRuleConfigPath);
 
         parameters.setRegion(region);
         parameters.setAppIdStreamList(getConfig(parameters.getAppIdStreamConfig(), region));
@@ -98,6 +130,25 @@ public class ApplicationParameters {
         parameters.setInputStreamArn(args[2]);
         parameters.setProjectId(args[3]);
         parameters.setAppIdStreamConfig(args[4]);
+        if (args.length > 5) {
+            parameters.setTransformVersion(args[5]);
+        }
+        if (args.length > 6) {
+            parameters.setAppRuleConfigPath(args[6]);
+        }
+        if (args.length > 7) {
+            String enrichFlag = args[7].toLowerCase();
+            if (enrichFlag.contains("ua")) {
+                parameters.setUaEnrich(true);
+            }
+
+            if (enrichFlag.contains("ip")) {
+                parameters.setIpEnrich(true);
+            }
+            if (enrichFlag.contains("ts") || enrichFlag.contains("traffic")) {
+                parameters.setTrafficSourceEnrich(true);
+            }
+        }
 
         parameters.setRegion(args[2].split(":")[3]);
         parameters.setAppIdStreamList(getConfig(parameters.getAppIdStreamConfig(), parameters.getRegion()));
@@ -116,10 +167,10 @@ public class ApplicationParameters {
         }
     }
 
-    public String getSinkStreamNameByAppId(final String appId) {
+    public String getSinkStreamArnByAppId(final String appId) {
         for (AppIdStream appIdSteamMap : appIdStreamList) {
             if (appIdSteamMap.getAppId().equals(appId)) {
-                return appIdSteamMap.getStreamArn().split("/")[1];
+                return appIdSteamMap.getStreamArn();
             }
         }
         return null;

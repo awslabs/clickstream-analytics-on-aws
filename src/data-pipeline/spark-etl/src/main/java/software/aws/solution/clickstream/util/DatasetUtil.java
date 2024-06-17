@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import static org.apache.spark.sql.functions.col;
@@ -330,7 +331,8 @@ public final class DatasetUtil {
 
     private static void overWriteDataset(final String path, final Dataset<Row> dataset) {
         Date now = new Date();
-        DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
+        DateFormat dateFormatYMD = getDateFormatYMD();
+
         String yyyyMMdd = dateFormatYMD.format(now);
         Dataset<Row> dataset1 = dataset.withColumn(UPDATE_DATE, lit(yyyyMMdd).cast(DataTypes.StringType));
 
@@ -347,7 +349,8 @@ public final class DatasetUtil {
 
         log.info("saveIncrementalDataset path=" + path + ", count:" + newItemsDataset.count());
         Date now = new Date();
-        DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
+        DateFormat dateFormatYMD = getDateFormatYMD();
+
         String yyyyMMdd = dateFormatYMD.format(now);
         Dataset<Row> newItemsDatasetSave = newItemsDataset.withColumn(UPDATE_DATE, lit(yyyyMMdd).cast(DataTypes.StringType));
         SCHEMA_MAP.put(path, newItemsDatasetSave.schema());
@@ -373,7 +376,8 @@ public final class DatasetUtil {
         StructField eventTimestampField = schemaRead.apply(EVENT_TIMESTAMP);
         boolean isEventTimestampTypeLong = eventTimestampField.dataType() == DataTypes.LongType;
 
-        DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
+        DateFormat dateFormatYMD = getDateFormatYMD();
+
         String nDaysBefore = dateFormatYMD.format(nDaysBeforeDate);
         String pathInfo = "readDatasetFromPath path=" + path;
         log.info(pathInfo + ", nDaysBefore=" + nDaysBefore + ", fromNDays=" + fromNDays + ", isEventTimestampTypeLong=" + isEventTimestampTypeLong);
@@ -434,7 +438,8 @@ public final class DatasetUtil {
     public static boolean isNeedMergedDataset(final SparkSession sparkSession) {
         boolean mergedToday = false;
         Date now = new Date();
-        DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
+        DateFormat dateFormatYMD = getDateFormatYMD();
+
         String yyyyMMdd = dateFormatYMD.format(now);
 
         String statePath = getPathForTable(TABLE_NAME_ETL_MERGE_STATE);
@@ -474,6 +479,12 @@ public final class DatasetUtil {
             log.info("Datasets merged today, detail: " + mergedState.first().json());
         }
         return !mergedToday && !isFirstRun;
+    }
+
+    private static DateFormat getDateFormatYMD() {
+        DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
+        dateFormatYMD.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormatYMD;
     }
 
     public static class TableInfo {

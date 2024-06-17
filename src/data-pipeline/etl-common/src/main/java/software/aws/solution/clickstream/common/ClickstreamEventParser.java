@@ -13,30 +13,47 @@
 
 package software.aws.solution.clickstream.common;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.*;
-import software.aws.solution.clickstream.common.enrich.*;
+import lombok.extern.slf4j.Slf4j;
+import software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper;
+import software.aws.solution.clickstream.common.enrich.UrlParseResult;
 import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
 import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceUtm;
-import software.aws.solution.clickstream.common.ingest.*;
-import software.aws.solution.clickstream.common.model.*;
+import software.aws.solution.clickstream.common.ingest.Event;
+import software.aws.solution.clickstream.common.ingest.Item;
+import software.aws.solution.clickstream.common.ingest.User;
+import software.aws.solution.clickstream.common.model.ClickstreamEvent;
+import software.aws.solution.clickstream.common.model.ClickstreamEventPropValue;
+import software.aws.solution.clickstream.common.model.ClickstreamItem;
+import software.aws.solution.clickstream.common.model.ClickstreamUser;
+import software.aws.solution.clickstream.common.model.ClickstreamUserPropValue;
+import software.aws.solution.clickstream.common.model.TimeShiftInfo;
 
-import java.sql.*;
-import java.time.*;
-import java.util.*;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static software.aws.solution.clickstream.common.Util.*;
+import static software.aws.solution.clickstream.common.Util.ERROR_LOG;
+import static software.aws.solution.clickstream.common.Util.VALUE_LOG;
+import static software.aws.solution.clickstream.common.Util.convertCustomerUserPropMapToStringUserPropMap;
+import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringEventPropMap;
+import static software.aws.solution.clickstream.common.Util.deCodeUri;
+import static software.aws.solution.clickstream.common.Util.getStackTrace;
+import static software.aws.solution.clickstream.common.Util.getUriParams;
+import static software.aws.solution.clickstream.common.Util.parseUrl;
 import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.GCLID;
 
 
 @Slf4j
 public final class ClickstreamEventParser extends BaseEventParser {
-    private static ClickstreamEventParser instance;
-    public static final String ENABLE_EVENT_TIME_SHIFT_PROP =  "enable.event.time.shift";
+    public static final String ENABLE_EVENT_TIME_SHIFT_PROP = "enable.event.time.shift";
     public static final String EVENT_PROFILE_SET = "_profile_set";
     public static final String EVENT_PAGE_VIEW = "_page_view";
     public static final String EVENT_SCREEN_VIEW = "_screen_view";
@@ -47,7 +64,8 @@ public final class ClickstreamEventParser extends BaseEventParser {
     public static final String EVENT_SESSION_START = "_session_start";
     public static final String EVENT_USER_ENGAGEMENT = "_user_engagement";
     public static final String EVENT_SCROLL = "_scroll";
-
+    private static final long serialVersionUID = 1L;
+    private static ClickstreamEventParser instance;
     private TransformConfig transformConfig;
 
     private ClickstreamEventParser(final TransformConfig transformConfig) {
@@ -63,8 +81,9 @@ public final class ClickstreamEventParser extends BaseEventParser {
         if (instance == null) {
             instance = new ClickstreamEventParser(transformConfig);
         }
-         return instance;
+        return instance;
     }
+
     Event ingestDataToEvent(final String data) throws JsonProcessingException {
         return getObjectMapper().readValue(data, Event.class);
     }
@@ -278,14 +297,18 @@ public final class ClickstreamEventParser extends BaseEventParser {
             log.error(getStackTrace(e));
         }
 
-        try {
-            Map<String, ClickstreamEventPropValue> customPropertiesFromAttributes = convertStringObjectMapToStringEventPropMap(ingestEvent.getAttributes().getCustomProperties());
-            customProperties.putAll(customPropertiesFromAttributes);
-        } catch (JsonProcessingException e) {
-            log.error("cannot convert Event.Attributes.customPropertiesFromAttributes to Map<String, ClickstreamEventPropValue>, "
-                    + ERROR_LOG + e.getMessage()
-                    + VALUE_LOG + ingestEvent.getAttributes().getCustomProperties());
-            log.error(getStackTrace(e));
+        if (ingestEvent.getAttributes() != null) {
+            try {
+
+                Map<String, ClickstreamEventPropValue> customPropertiesFromAttributes = convertStringObjectMapToStringEventPropMap(ingestEvent.getAttributes().getCustomProperties());
+                customProperties.putAll(customPropertiesFromAttributes);
+
+            } catch (JsonProcessingException e) {
+                log.error("cannot convert Event.Attributes.customPropertiesFromAttributes to Map<String, ClickstreamEventPropValue>, "
+                        + ERROR_LOG + e.getMessage()
+                        + VALUE_LOG + ingestEvent.getAttributes().getCustomProperties());
+                log.error(getStackTrace(e));
+            }
         }
 
         clickstreamEvent.setCustomParameters(customProperties);
@@ -301,7 +324,9 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setDeviceVendorId(ingestEvent.getDeviceId());
         clickstreamEvent.setDeviceAdvertisingId(ingestEvent.getDeviceUniqueId());
         clickstreamEvent.setDeviceSystemLanguage(ingestEvent.getSystemLanguage());
-        clickstreamEvent.setDeviceTimeZoneOffsetSeconds((int) (ingestEvent.getZoneOffset() / 1000));
+        if (ingestEvent.getZoneOffset() != null) {
+            clickstreamEvent.setDeviceTimeZoneOffsetSeconds((int) (ingestEvent.getZoneOffset() / 1000));
+        }
         clickstreamEvent.setDeviceScreenWidth(ingestEvent.getScreenWidth());
         clickstreamEvent.setDeviceScreenHeight(ingestEvent.getScreenHeight());
         clickstreamEvent.setDeviceViewportWidth(ingestEvent.getViewportWidth());
@@ -440,6 +465,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
         uaMap.put("string", extraParams.getUa());
         clickstreamEvent.setDeviceUa(uaMap);
     }
+
     private void setTrafficSource(final Event ingestEvent, final ClickstreamEvent clickstreamEvent) {
         IngestTrafficSourceWrap clientTsInfo = getIngestTrafficSourceInfo(ingestEvent);
 
@@ -505,44 +531,49 @@ public final class ClickstreamEventParser extends BaseEventParser {
     }
 
     private IngestTrafficSourceWrap getIngestTrafficSourceInfo(final Event ingestEvent) {
-        IngestTrafficSourceWrap ingestTrafficSourceInfo =  new IngestTrafficSourceWrap();
+        IngestTrafficSourceWrap ingestTrafficSourceInfo = new IngestTrafficSourceWrap();
+
+        if (ingestEvent.getAttributes() == null) {
+            return ingestTrafficSourceInfo;
+        }
+
         String source = ingestEvent.getAttributes().getTrafficSourceSource() != null
-                ? ingestEvent.getAttributes().getTrafficSourceSource(): ingestEvent.getAttributes().getUtmSource();
+                ? ingestEvent.getAttributes().getTrafficSourceSource() : ingestEvent.getAttributes().getUtmSource();
         ingestTrafficSourceInfo.setSource(source);
 
         String medium = ingestEvent.getAttributes().getTrafficSourceMedium() != null
-                ? ingestEvent.getAttributes().getTrafficSourceMedium(): ingestEvent.getAttributes().getUtmMedium();
+                ? ingestEvent.getAttributes().getTrafficSourceMedium() : ingestEvent.getAttributes().getUtmMedium();
         ingestTrafficSourceInfo.setMedium(medium);
 
 
         String campaign = ingestEvent.getAttributes().getTrafficSourceCampaign() != null
-                ? ingestEvent.getAttributes().getTrafficSourceCampaign(): ingestEvent.getAttributes().getUtmCampaign();
+                ? ingestEvent.getAttributes().getTrafficSourceCampaign() : ingestEvent.getAttributes().getUtmCampaign();
         ingestTrafficSourceInfo.setCampaign(campaign);
 
 
         String content = ingestEvent.getAttributes().getTrafficSourceContent() != null
-                ? ingestEvent.getAttributes().getTrafficSourceContent(): ingestEvent.getAttributes().getUtmContent();
+                ? ingestEvent.getAttributes().getTrafficSourceContent() : ingestEvent.getAttributes().getUtmContent();
         ingestTrafficSourceInfo.setContent(content);
 
         String term = ingestEvent.getAttributes().getTrafficSourceTerm() != null
-                ? ingestEvent.getAttributes().getTrafficSourceTerm(): ingestEvent.getAttributes().getUtmTerm();
+                ? ingestEvent.getAttributes().getTrafficSourceTerm() : ingestEvent.getAttributes().getUtmTerm();
         ingestTrafficSourceInfo.setTerm(term);
 
         String campaignId = ingestEvent.getAttributes().getTrafficSourceCampaignId() != null
-                ? ingestEvent.getAttributes().getTrafficSourceCampaignId(): ingestEvent.getAttributes().getUtmId();
+                ? ingestEvent.getAttributes().getTrafficSourceCampaignId() : ingestEvent.getAttributes().getUtmId();
         ingestTrafficSourceInfo.setCampaignId(campaignId);
 
         String clidPlatform = ingestEvent.getAttributes().getTrafficSourceClidPlatform() != null
-                ? ingestEvent.getAttributes().getTrafficSourceClidPlatform(): ingestEvent.getAttributes().getUtmSourcePlatform();
+                ? ingestEvent.getAttributes().getTrafficSourceClidPlatform() : ingestEvent.getAttributes().getUtmSourcePlatform();
         ingestTrafficSourceInfo.setClidPlatform(clidPlatform);
 
         String gclid = null;
         if (ingestEvent.getAttributes().getGclid() != null) {
-           gclid = buildTrafficSourceClidJson(GCLID, ingestEvent.getAttributes().getGclid());
+            gclid = buildTrafficSourceClidJson(GCLID, ingestEvent.getAttributes().getGclid());
 
         }
         String clid = ingestEvent.getAttributes().getTrafficSourceClid() != null
-                ? ingestEvent.getAttributes().getTrafficSourceClid(): gclid;
+                ? ingestEvent.getAttributes().getTrafficSourceClid() : gclid;
         ingestTrafficSourceInfo.setClid(clid);
 
         String channel = ingestEvent.getAttributes().getTrafficSourceChannelGroup();
@@ -554,26 +585,11 @@ public final class ClickstreamEventParser extends BaseEventParser {
         return ingestTrafficSourceInfo;
     }
 
-
-    @Getter
-    @Setter
-    public static class IngestTrafficSourceWrap {
-        String source;
-        String medium;
-        String campaign;
-        String content;
-        String term;
-        String campaignId;
-        String clidPlatform;
-        String clid;
-        String channel;
-        String category;
-    }
-
     @Override
     public TransformConfig getTransformConfig() {
         return this.transformConfig;
     }
+
     public void setTransformConfig(final TransformConfig transformConfig) {
         this.transformConfig = transformConfig;
     }
@@ -640,7 +656,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
             timeShiftInfo.setAdjusted(true);
             timeShiftInfo.setTimeDiff(timeShiftInfo.getIngestTimestamp() - timeShiftInfo.getOriginEventTimestamp());
             timeShiftInfo.setReason(String.join("|",
-                    timeShiftInfo.getReason() == null ? "": timeShiftInfo.getReason(),
+                    timeShiftInfo.getReason() == null ? "" : timeShiftInfo.getReason(),
                     "eventTimestamp is in the future, set to ingestTimestamp"));
         }
 
@@ -667,7 +683,6 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setProcessInfo(processInfo);
     }
 
-
     private String buildTrafficSourceClidJson(final String type, final String value) {
         return "{\"type\":\"" + type + "\",\"value\":\"" + value + "\"}";
     }
@@ -687,6 +702,21 @@ public final class ClickstreamEventParser extends BaseEventParser {
         if (clickstreamEvent.getEventValue() != null) {
             clickstreamEvent.setEventValueCurrency(ingestEvent.getEventValueCurrency() == null ? "USD" : ingestEvent.getEventValueCurrency());
         }
+    }
+
+    @Getter
+    @Setter
+    public static class IngestTrafficSourceWrap {
+        String source;
+        String medium;
+        String campaign;
+        String content;
+        String term;
+        String campaignId;
+        String clidPlatform;
+        String clid;
+        String channel;
+        String category;
     }
 
 }

@@ -35,6 +35,7 @@ import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSo
 
 @Slf4j
 public abstract class BaseEventParser implements EventParser {
+    private static final long serialVersionUID = 1L;
     public static final String UPLOAD_TIMESTAMP = "upload_timestamp";
     public static final int ADJUST_THRESHOLD = 600_000; // 10 minutes
     public static final String INPUT_FILE_NAME = "input_file_name";

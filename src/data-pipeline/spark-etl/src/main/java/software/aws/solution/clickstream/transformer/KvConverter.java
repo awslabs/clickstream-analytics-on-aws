@@ -52,6 +52,7 @@ public class KvConverter {
             try {
                 return getGenericRows(value, excludeAttributes);
             } catch (Exception e) {
+                log.error("Error when convertJsonStringToKeyValue, errorMessage: {}", e.getMessage(), e);
                 return null;
             }
         };

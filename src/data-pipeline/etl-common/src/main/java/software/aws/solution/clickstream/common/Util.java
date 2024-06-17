@@ -367,12 +367,14 @@ public final class Util {
     }
 
     public static String readResourceFile(final String fileName) throws IOException {
-        InputStream inputStream = getResourceAsStream(fileName);
-        if (inputStream == null) {
-            throw new IllegalArgumentException("File not found! " + fileName);
+        try (InputStream inputStream = getResourceAsStream(fileName)) {
+            if (inputStream == null) {
+                throw new IllegalArgumentException("File not found! " + fileName);
+            }
+            ByteArrayOutputStream output = readAllInputStream(inputStream);
+
+            return output.toString(StandardCharsets.UTF_8);
         }
-        ByteArrayOutputStream output = readAllInputStream(inputStream);
-        return output.toString(StandardCharsets.UTF_8.toString());
 
     }
 
@@ -392,9 +394,10 @@ public final class Util {
 
 
     public static String readTextFile(final String fileName) throws IOException {
-        FileInputStream inputStream = new FileInputStream(fileName);
-        ByteArrayOutputStream output = readAllInputStream(inputStream);
-        return output.toString(StandardCharsets.UTF_8.toString());
+        try (FileInputStream inputStream = new FileInputStream(fileName)) {
+            ByteArrayOutputStream output = readAllInputStream(inputStream);
+            return output.toString(StandardCharsets.UTF_8);
+        }
     }
 
     public static InputStream getResourceAsStream(final String fileName) {

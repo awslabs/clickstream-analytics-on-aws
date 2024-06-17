@@ -195,7 +195,9 @@ jobs:
           gradle-version: 7.6
       - name: Build & Test streaming ingestion flink application
         run: |-
-          cd ./src/streaming-ingestion/flink-etl
+          cd ./src/data-pipeline/etl-common
+          gradle clean install
+          cd ../../streaming-ingestion/flink-etl
           gradle clean build
           gradle jacocoAggregatedReport
       - name: Publish Test Report

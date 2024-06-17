@@ -14,12 +14,10 @@
 package software.aws.solution.clickstream.common;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-
 import java.time.Duration;
 
 public class Cache<T> {
     private final com.github.benmanes.caffeine.cache.Cache<String, T> dataCached;
-
     public Cache() {
         this(Integer.MAX_VALUE/8); //255M
     }

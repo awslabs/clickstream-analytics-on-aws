@@ -16,9 +16,11 @@ package software.aws.solution.clickstream.common;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 
+@Slf4j
 public class SafeDoubleDeserializer extends JsonDeserializer<Double> {
     @Override
     public Double deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
@@ -26,6 +28,7 @@ public class SafeDoubleDeserializer extends JsonDeserializer<Double> {
         try {
             return Double.parseDouble(value);
         } catch (NumberFormatException e) {
+            log.error("Failed to parse double value: {}", value, e);
             return null;
         }
     }

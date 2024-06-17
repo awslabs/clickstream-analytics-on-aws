@@ -67,8 +67,9 @@ applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=log4j2.xml"]
 
 dependencies {
     api "com.amazonaws:aws-kinesisanalytics-runtime:$kdaRuntimeVersion"
-    api "org.apache.flink:flink-connector-kinesis:$flinkVersion"
-    api "org.apache.flink:flink-connector-aws-kinesis-streams:$flinkVersion"
+    api "org.apache.flink:flink-connector-base:$flinkVersion"
+    api "org.apache.flink:flink-connector-kinesis:$flinkKinesisVersion"
+    api "org.apache.flink:flink-connector-aws-kinesis-streams:$flinkKinesisVersion"
     api "org.apache.flink:flink-streaming-java:$flinkVersion"
     api "org.apache.flink:flink-clients:$flinkVersion"
     api "software.amazon.awssdk:bom:$awsSdkVersion"
@@ -95,6 +96,10 @@ dependencies {
     // For UA.
     implementation "com.github.ua-parser:uap-java:$uapJavaVersion"
 
+    // Cache
+    implementation  "com.github.ben-manes.caffeine:caffeine:$caffeineVersion"
+
+
     // lombok related.
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
@@ -104,6 +109,9 @@ dependencies {
     // test related
     testImplementation("org.assertj:assertj-core:$assertJVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+
+    // /tmp/etl-common/lib/etl-common-1.2.0.jar
+    implementation files("/tmp/etl-common/lib/etl-common-${projectVersion}.jar")
 }
 
 test {
@@ -113,9 +121,9 @@ test {
         exceptionFormat = 'full'
         events = ['passed', 'skipped', 'failed', 'standardOut', 'standardError']
     }
-    minHeapSize = "128m" // initial heap size
-    maxHeapSize = "1024m" // maximum heap size
-    jvmArgs '-XX:MaxPermSize=1024m' // mem argument for the test JVM
+    minHeapSize = "512m" // initial heap size
+    maxHeapSize = "4096m" // maximum heap size
+    jvmArgs '-XX:MaxPermSize=4096m' // mem argument for the test JVM
 }
 
 application {

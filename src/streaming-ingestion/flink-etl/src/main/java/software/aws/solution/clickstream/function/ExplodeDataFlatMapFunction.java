@@ -29,7 +29,7 @@ import java.util.Iterator;
 import static software.aws.solution.clickstream.flink.Utils.gzipBytesToString;
 
 @Slf4j
-public class ExplodeDataFlatMapFunction implements FlatMapFunction<JsonNode, Tuple2<JsonNode, JsonNode>> {
+public class ExplodeDataFlatMapFunction implements FlatMapFunction<String, Tuple2<String, String>> {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final String appId;
 
@@ -42,7 +42,7 @@ public class ExplodeDataFlatMapFunction implements FlatMapFunction<JsonNode, Tup
             try {
                 dataNode = OBJECT_MAPPER.readTree(dataText);
             } catch (Exception e) {
-                log.warn("decodeData json error, dataText: {}, error: {}", dataText, e.getMessage());
+                log.error("decodeData json error, dataText: {}, error: {}", dataText, e.getMessage());
                 return null;
             }
         } else {
@@ -51,7 +51,7 @@ public class ExplodeDataFlatMapFunction implements FlatMapFunction<JsonNode, Tup
                 StringBuilder output = gzipBytesToString(decodedBytes);
                 return OBJECT_MAPPER.readValue(output.toString(), JsonNode.class);
             } catch (Exception e) {
-                log.warn("decodeData gzip error, dataText: {}, error {}", dataText, e.getMessage());
+                log.error("decodeData gzip error, dataText: {}, error {}", dataText, e.getMessage());
                 return null;
             }
         }
@@ -59,9 +59,10 @@ public class ExplodeDataFlatMapFunction implements FlatMapFunction<JsonNode, Tup
     }
 
     @Override
-    public void flatMap(final JsonNode value, final Collector<Tuple2<JsonNode, JsonNode>> out) {
+    public void flatMap(final String value, final Collector<Tuple2<String, String>> out) {
         try {
-            JsonNode jsonNode = value;
+            JsonNode jsonNode = OBJECT_MAPPER.readTree(value);
+
             String dataText = jsonNode.get("data").asText();
             JsonNode dataNode = decodeData(dataText);
 
@@ -87,12 +88,13 @@ public class ExplodeDataFlatMapFunction implements FlatMapFunction<JsonNode, Tup
             if (dataNode.isArray()) {
                 Iterator<JsonNode> iterator = dataNode.elements();
                 while (iterator.hasNext()) {
-                    out.collect(new Tuple2<>(ingestNode, iterator.next()));
+                    out.collect(new Tuple2<>(ingestNode.toString(), iterator.next().toString()));
                 }
             } else {
-                out.collect(new Tuple2<>(ingestNode, dataNode));
+                out.collect(new Tuple2<>(ingestNode.toString(), dataNode.toString()));
             }
         } catch (Exception e) {
+            log.warn("Error in explode data: {}", value, e);
             throw new ClickstreamException(e);
         }
     }
