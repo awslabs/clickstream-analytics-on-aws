@@ -148,7 +148,7 @@ export class ReportingService {
         timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
       };
-      const sql = buildFunnelView(sqlParameters, query.chartType === QuickSightChartType.BAR);
+      const sql = buildFunnelView(sqlParameters, query.chartType);
 
       logger.debug(`funnel sql: ${sql}`);
 
@@ -245,24 +245,21 @@ export class ReportingService {
     const datasetColumns = [...funnelVisualColumns];
     const visualProjectedColumns = [
       'event_name',
-      'event_date',
     ];
 
-    let countColName = 'event_id';
-    if (props.query.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+    if (props.query.chartType === QuickSightChartType.BAR) {
       datasetColumns.push({
-        Name: 'event_id',
-        Type: 'STRING',
+        Name: 'event_date',
+        Type: 'DATETIME',
       });
-      visualProjectedColumns.push('event_id');
-    } else {
-      datasetColumns.push({
-        Name: 'user_pseudo_id',
-        Type: 'STRING',
-      });
-      visualProjectedColumns.push('user_pseudo_id');
-      countColName = 'user_pseudo_id';
+      visualProjectedColumns.push('event_date');
     }
+
+    datasetColumns.push({
+      Name: 'Count',
+      Type: 'INTEGER',
+    });
+    visualProjectedColumns.push('Count');
 
     const groupCondition = props.query.groupCondition as GroupingCondition;
     const params = this.buildDataSetParamForVisual(ExploreAnalyticsType.FUNNEL, props.query.chartType, groupCondition);
@@ -348,7 +345,7 @@ export class ReportingService {
       const visualId = uuidv4();
       const visualDef = getFunnelVisualDef(
         visualId, props.viewName, titleProps, quickSightChartType, props.query.groupColumn,
-        groupCondition, countColName);
+        groupCondition);
 
       const visualProps = {
         sheetId: props.sheetId,
