@@ -375,10 +375,10 @@ export const isStreamingVisible = (
   update?: boolean,
   pipelineInfo?: IExtPipeline
 ) => {
-  if (!pipelineInfo?.templateVersion) {
-    return false;
-  }
   if (update) {
+    if (!pipelineInfo?.templateVersion) {
+      return false;
+    }
     const templateVersion = SolutionVersion.Of(pipelineInfo?.templateVersion);
     return templateVersion.greaterThanOrEqualTo(SolutionVersion.V_1_2_0);
   }
