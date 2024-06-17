@@ -1971,10 +1971,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'INTEGER',
                     },
                     {
-                      Name: 'device_ua_string',
-                      Type: 'STRING',
-                    },
-                    {
                       Name: 'geo_continent',
                       Type: 'STRING',
                     },
@@ -2231,58 +2227,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'session_duration',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'session_number',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'session_start_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'session_source',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_medium',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_campaign',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_content',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_term',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_campaign_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_clid_platform',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_clid',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_channel_group',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_source_category',
-                      Type: 'STRING',
-                    },
-                    {
                       Name: 'event_timestamp_local',
                       Type: 'DATETIME',
                     },
@@ -2364,7 +2308,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                     'device_screen_height',
                     'device_viewport_width',
                     'device_viewport_height',
-                    'device_ua_string',
                     'geo_continent',
                     'geo_sub_continent',
                     'geo_country',
@@ -2429,19 +2372,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                     'app_exception_message',
                     'app_exception_stack',
                     'custom_parameters_json_str',
-                    'session_duration',
-                    'session_number',
-                    'session_start_time_msec',
-                    'session_source',
-                    'session_medium',
-                    'session_campaign',
-                    'session_content',
-                    'session_term',
-                    'session_campaign_id',
-                    'session_clid_platform',
-                    'session_clid',
-                    'session_channel_group',
-                    'session_source_category',
                     'event_timestamp_local',
                     'event_date',
                     'new_user_indicator',
@@ -4274,10 +4204,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'INTEGER',
                     },
                     {
-                      Name: 'device_ua_string',
-                      Type: 'STRING',
-                    },
-                    {
                       Name: 'geo_continent',
                       Type: 'STRING',
                     },
@@ -4534,58 +4460,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'session_duration',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'session_number',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'session_start_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'session_source',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_medium',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_campaign',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_content',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_term',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_campaign_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_clid_platform',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_clid',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_channel_group',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'session_source_category',
-                      Type: 'STRING',
-                    },
-                    {
                       Name: 'event_timestamp_local',
                       Type: 'DATETIME',
                     },
@@ -4667,7 +4541,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                     'device_screen_height',
                     'device_viewport_width',
                     'device_viewport_height',
-                    'device_ua_string',
                     'geo_continent',
                     'geo_sub_continent',
                     'geo_country',
@@ -4732,19 +4605,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                     'app_exception_message',
                     'app_exception_stack',
                     'custom_parameters_json_str',
-                    'session_duration',
-                    'session_number',
-                    'session_start_time_msec',
-                    'session_source',
-                    'session_medium',
-                    'session_campaign',
-                    'session_content',
-                    'session_term',
-                    'session_campaign_id',
-                    'session_clid_platform',
-                    'session_clid',
-                    'session_channel_group',
-                    'session_source_category',
                     'event_timestamp_local',
                     'event_date',
                     'new_user_indicator',

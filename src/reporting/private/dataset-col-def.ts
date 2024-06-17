@@ -926,5 +926,5 @@ export const clickstream_realtime_event_view_columns: InputColumn[] = [
   {
     Name: 'custom_parameters_json_str',
     Type: 'STRING',
-  }
+  },
 ];
