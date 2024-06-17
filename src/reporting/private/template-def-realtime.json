@@ -130,10 +130,6 @@
                 "DataType": "INTEGER"
                 },
                 {
-                "Name": "device_ua_string",
-                "DataType": "STRING"
-                },
-                {
                 "Name": "geo_continent",
                 "DataType": "STRING"
                 },
@@ -390,66 +386,6 @@
                 },
                 {
                 "Name": "custom_parameters_json_str",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "session_duration",
-                "DataType": "INTEGER"
-                },
-                {
-                "Name": "session_number",
-                "DataType": "INTEGER"
-                },
-                {
-                "Name": "session_start_time_msec",
-                "DataType": "INTEGER"
-                },
-                {
-                "Name": "session_source",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "session_medium",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "session_campaign",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "session_content",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "session_term",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "session_campaign_id",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "session_clid_platform",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "session_clid",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "session_channel_group",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "session_source_category",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "user_id",
-                "DataType": "STRING"
-                },
-                {
-                "Name": "user_properties_json_str",
                 "DataType": "STRING"
                 },
                 {

@@ -82,7 +82,7 @@ export const CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER = 'Retention_View';
 export const CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER = 'Last_Refresh_Date';
 export const CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME = 'refresh_mv_sp_status';
 
-export const CLICKSTREAM_REALTIME_EVENT_VIEW_NAME = 'event_v2';
+export const CLICKSTREAM_REALTIME_EVENT_VIEW_NAME = 'ods_events_streaming_view';
 export const CLICKSTREAM_REALTIME_EVENT_VIEW_PLACEHOLDER = 'Realtime_Event';
 
 export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [

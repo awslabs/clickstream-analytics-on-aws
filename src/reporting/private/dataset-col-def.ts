@@ -571,7 +571,6 @@ export const clickstream_realtime_event_view_columns: InputColumn[] = [
     Name: 'session_id',
     Type: 'STRING',
   },
-
   {
     Name: 'event_value',
     Type: 'DECIMAL',
@@ -671,10 +670,6 @@ export const clickstream_realtime_event_view_columns: InputColumn[] = [
   {
     Name: 'device_viewport_height',
     Type: 'INTEGER',
-  },
-  {
-    Name: 'device_ua_string',
-    Type: 'STRING',
   },
   {
     Name: 'geo_continent',
@@ -931,57 +926,5 @@ export const clickstream_realtime_event_view_columns: InputColumn[] = [
   {
     Name: 'custom_parameters_json_str',
     Type: 'STRING',
-  },
-  {
-    Name: 'session_duration',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'session_number',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'session_start_time_msec',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'session_source',
-    Type: 'STRING',
-  },
-  {
-    Name: 'session_medium',
-    Type: 'STRING',
-  },
-  {
-    Name: 'session_campaign',
-    Type: 'STRING',
-  },
-  {
-    Name: 'session_content',
-    Type: 'STRING',
-  },
-  {
-    Name: 'session_term',
-    Type: 'STRING',
-  },
-  {
-    Name: 'session_campaign_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'session_clid_platform',
-    Type: 'STRING',
-  },
-  {
-    Name: 'session_clid',
-    Type: 'STRING',
-  },
-  {
-    Name: 'session_channel_group',
-    Type: 'STRING',
-  },
-  {
-    Name: 'session_source_category',
-    Type: 'STRING',
-  },
+  }
 ];
