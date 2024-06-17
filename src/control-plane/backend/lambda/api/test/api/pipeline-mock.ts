@@ -15,13 +15,15 @@ import { OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATA_API_ROLE_ARN, OUTPUT_REPORTIN
 import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION } from './ddb-mock';
-import { BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS } from './workflow-mock';
+import { APPREGISTRY_APPLICATION_ARN_PARAMETER, BASE_KAFKACONNECTOR_BATCH_PARAMETERS, BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS, DataModelingRedshiftStack, DataProcessingStack, IngestionStack, MetricsStack, ReportingStack, ServiceCatalogAppRegistryStack, StreamingStack, Tags, replaceStackInputProps, replaceStackProps } from './workflow-mock';
+import { LEVEL1, LEVEL2, LEVEL3 } from '../../common/constants';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusType } from '../../common/model-ln';
 import {
   DataCollectionSDK,
   KinesisStreamMode,
   PipelineServerProtocol,
   PipelineSinkType,
+  WorkflowState,
   WorkflowStateType,
 } from '../../common/types';
 import { getStackPrefix } from '../../common/utils';
@@ -1023,6 +1025,24 @@ export const BASE_STATUS = {
       stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
+    {
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-Streaming-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
+      stackName: `${getStackPrefix()}-Streaming-${MOCK_PIPELINE_ID}`,
+      stackType: PipelineStackType.STREAMING,
+      stackStatus: StackStatus.CREATE_COMPLETE,
+      stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
+      outputs: [],
+    },
+    {
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-ServiceCatalogAppRegistry-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
+      stackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-${MOCK_PIPELINE_ID}`,
+      stackType: PipelineStackType.APP_REGISTRY,
+      stackStatus: StackStatus.CREATE_COMPLETE,
+      stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
+      outputs: [],
+    },
   ],
   executionDetail: {
     name: MOCK_EXECUTION_ID,
@@ -1360,127 +1380,96 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
   workflow: {
     Version: '2022-03-15',
     Workflow: {
-      Type: WorkflowStateType.PARALLEL,
-      End: true,
       Branches: [
         {
+          StartAt: 'ServiceCatalogAppRegistry',
           States: {
-            KafkaConnector: {
-              Type: WorkflowStateType.STACK,
-              Data: {
-                Input: {
-                  Region: 'ap-southeast-1',
-                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/kafka-s3-sink-stack.template.json`,
-                  Action: 'Create',
-                  Parameters: [],
-                  StackName: `${getStackPrefix()}-KafkaConnector-${MOCK_PIPELINE_ID}`,
+            ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
+            [LEVEL1]: {
+              Branches: [
+                {
+                  StartAt: 'Metrics',
+                  States: {
+                    Metrics: MetricsStack as WorkflowState,
+                  },
                 },
-                Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
-                  BucketName: 'EXAMPLE_BUCKET',
+                {
+                  StartAt: 'Ingestion',
+                  States: {
+                    Ingestion: replaceStackProps(IngestionStack,
+                      {
+                        Next: 'KafkaConnector',
+                        End: undefined,
+                      },
+                    ),
+                    KafkaConnector: {
+                      Data: {
+                        Callback: {
+                          BucketName: 'TEST_EXAMPLE_BUCKET',
+                          BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                        },
+                        Input: {
+                          Action: 'Create',
+                          Region: 'ap-southeast-1',
+                          Parameters: [
+                            ...BASE_KAFKACONNECTOR_BATCH_PARAMETERS,
+                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                          ],
+                          StackName: `${getStackPrefix()}-KafkaConnector-6666-6666`,
+                          Tags: Tags,
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
+                        },
+                      },
+                      End: true,
+                      Type: WorkflowStateType.STACK,
+                    },
+                  },
                 },
-              },
+                {
+                  StartAt: 'DataProcessing',
+                  States: {
+                    DataProcessing: DataProcessingStack as WorkflowState,
+                  },
+                },
+              ],
+              Next: LEVEL2,
+              Type: WorkflowStateType.PARALLEL,
+            },
+            [LEVEL2]: {
+              Branches: [
+                {
+                  StartAt: 'DataModelingRedshift',
+                  States: {
+                    DataModelingRedshift: DataModelingRedshiftStack as WorkflowState,
+                  },
+                },
+              ],
+              Next: LEVEL3,
+              Type: WorkflowStateType.PARALLEL,
+            },
+            [LEVEL3]: {
+              Branches: [
+                {
+                  StartAt: 'Streaming',
+                  States: {
+                    Streaming: StreamingStack as WorkflowState,
+                  },
+                },
+                {
+                  StartAt: 'Reporting',
+                  States: {
+                    Reporting: ReportingStack as WorkflowState,
+                  },
+                },
+              ],
               End: true,
-            },
-            Ingestion: {
-              Type: WorkflowStateType.STACK,
-              Data: {
-                Input: {
-                  Region: 'ap-southeast-1',
-                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/ingestion-server-kafka-stack.template.json`,
-                  Action: 'Create',
-                  Parameters: [],
-                  StackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
-                },
-                Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
-                  BucketName: 'EXAMPLE_BUCKET',
-                },
-              },
-              Next: 'KafkaConnector',
-            },
-          },
-          StartAt: 'Ingestion',
-        },
-        {
-          States: {
-            DataProcessing: {
-              Type: WorkflowStateType.STACK,
-              Data: {
-                Input: {
-                  Region: 'ap-southeast-1',
-                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-pipeline-stack.template.json`,
-                  Action: 'Create',
-                  Parameters: [],
-                  StackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
-                },
-                Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
-                  BucketName: 'EXAMPLE_BUCKET',
-                },
-              },
-              Next: 'DataModelingRedshift',
-            },
-            Reporting: {
-              Type: WorkflowStateType.STACK,
-              Data: {
-                Input: {
-                  Region: 'ap-southeast-1',
-                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-reporting-quicksight-stack.template.json`,
-                  Action: 'Create',
-                  Parameters: [],
-                  StackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
-                },
-                Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
-                  BucketName: 'EXAMPLE_BUCKET',
-                },
-              },
-              End: true,
-            },
-            DataModelingRedshift: {
-              Type: WorkflowStateType.STACK,
-              Data: {
-                Input: {
-                  Region: 'ap-southeast-1',
-                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-analytics-redshift-stack.template.json`,
-                  Action: 'Create',
-                  Parameters: [],
-                  StackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
-                },
-                Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
-                  BucketName: 'EXAMPLE_BUCKET',
-                },
-              },
-              Next: 'Reporting',
-            },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          StartAt: 'Metrics',
-          States: {
-            Metrics: {
-              Data: {
-                Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
-                },
-                Input: {
-                  Action: 'Create',
-                  Region: 'ap-southeast-1',
-                  Parameters: BASE_METRICS_PARAMETERS,
-                  StackName: `${getStackPrefix()}-Metrics-6666-6666`,
-                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/metrics-stack.template.json`,
-                },
-              },
-              End: true,
-              Type: WorkflowStateType.STACK,
+              Type: WorkflowStateType.PARALLEL,
             },
           },
         },
       ],
+      End: true,
+      Type: WorkflowStateType.PARALLEL,
     },
   },
 };
@@ -1709,132 +1698,101 @@ const BASE_RETRY_PIPELINE: IPipeline = {
   workflow: {
     Version: '2022-03-15',
     Workflow: {
-      Type: WorkflowStateType.PARALLEL,
-      End: true,
       Branches: [
         {
+          StartAt: 'ServiceCatalogAppRegistry',
           States: {
-            KafkaConnector: {
-              Type: WorkflowStateType.STACK,
-              Data: {
-                Input: {
-                  Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
-                  Action: 'Create',
-                  Parameters: [],
-                  StackName: `${getStackPrefix()}-KafkaConnector-${MOCK_PIPELINE_ID}`,
+            ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
+            [LEVEL1]: {
+              Branches: [
+                {
+                  StartAt: 'Metrics',
+                  States: {
+                    Metrics: MetricsStack as WorkflowState,
+                  },
                 },
-                Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
-                  BucketName: 'EXAMPLE_BUCKET',
-                },
-              },
-              End: true,
-            },
-            Ingestion: {
-              Type: WorkflowStateType.STACK,
-              Data: {
-                Input: {
-                  Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
-                  Action: 'Create',
-                  Parameters: [],
-                  StackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
-                },
-                Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
-                  BucketName: 'EXAMPLE_BUCKET',
-                },
-              },
-              Next: 'KafkaConnector',
-            },
-          },
-          StartAt: 'Ingestion',
-        },
-        {
-          States: {
-            DataProcessing: {
-              Type: WorkflowStateType.STACK,
-              Data: {
-                Input: {
-                  Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
-                  Action: 'Create',
-                  Parameters: [],
-                  StackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
-                },
-                Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
-                  BucketName: 'EXAMPLE_BUCKET',
-                },
-              },
-              Next: 'DataModelingRedshift',
-            },
-            Reporting: {
-              Type: WorkflowStateType.STACK,
-              Data: {
-                Input: {
-                  Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
-                  Action: 'Create',
-                  Parameters: [],
-                  StackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
-                },
-                Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
-                  BucketName: 'EXAMPLE_BUCKET',
-                },
-              },
-              End: true,
-            },
-            DataModelingRedshift: {
-              Type: WorkflowStateType.STACK,
-              Data: {
-                Input: {
-                  Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
-                  Action: 'Create',
-                  Parameters: [
-                    {
-                      ParameterKey: 'DataProcessingCronOrRateExpression',
-                      ParameterValue: 'rate(16 minutes)',
+                {
+                  StartAt: 'Ingestion',
+                  States: {
+                    Ingestion: replaceStackProps(
+                      replaceStackInputProps(IngestionStack,
+                        {
+                          StackName: `${getStackPrefix()}-Ingestion-kafka-6666-6666`,
+                        },
+                      ),
+                      {
+                        Next: 'KafkaConnector',
+                        End: undefined,
+                      },
+                    ),
+                    KafkaConnector: {
+                      Data: {
+                        Callback: {
+                          BucketName: 'TEST_EXAMPLE_BUCKET',
+                          BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                        },
+                        Input: {
+                          Action: 'Create',
+                          Region: 'ap-southeast-1',
+                          Parameters: [
+                            ...BASE_KAFKACONNECTOR_BATCH_PARAMETERS,
+                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                          ],
+                          StackName: `${getStackPrefix()}-KafkaConnector-6666-6666`,
+                          Tags: Tags,
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
+                        },
+                      },
+                      End: true,
+                      Type: WorkflowStateType.STACK,
                     },
-                  ],
-                  StackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+                  },
                 },
-                Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
-                  BucketName: 'EXAMPLE_BUCKET',
+                {
+                  StartAt: 'DataProcessing',
+                  States: {
+                    DataProcessing: DataProcessingStack as WorkflowState,
+                  },
                 },
-              },
-              Next: 'Reporting',
+              ],
+              Next: LEVEL2,
+              Type: WorkflowStateType.PARALLEL,
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          StartAt: 'Metrics',
-          States: {
-            Metrics: {
-              Data: {
-                Callback: {
-                  BucketName: 'EXAMPLE_BUCKET',
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+            [LEVEL2]: {
+              Branches: [
+                {
+                  StartAt: 'DataModelingRedshift',
+                  States: {
+                    DataModelingRedshift: DataModelingRedshiftStack as WorkflowState,
+                  },
                 },
-                Input: {
-                  Action: 'Create',
-                  Region: 'ap-southeast-1',
-                  Parameters: BASE_METRICS_PARAMETERS,
-                  StackName: `${getStackPrefix()}-Metrics-6666-6666`,
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+              ],
+              Next: LEVEL3,
+              Type: WorkflowStateType.PARALLEL,
+            },
+            [LEVEL3]: {
+              Branches: [
+                {
+                  StartAt: 'Streaming',
+                  States: {
+                    Streaming: StreamingStack as WorkflowState,
+                  },
                 },
-              },
+                {
+                  StartAt: 'Reporting',
+                  States: {
+                    Reporting: ReportingStack as WorkflowState,
+                  },
+                },
+              ],
               End: true,
-              Type: WorkflowStateType.STACK,
+              Type: WorkflowStateType.PARALLEL,
             },
           },
         },
       ],
+      End: true,
+      Type: WorkflowStateType.PARALLEL,
     },
   },
 };
@@ -1857,6 +1815,8 @@ export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
       stackStatus: undefined,
     },
     BASE_STATUS.stackDetails[5],
+    BASE_STATUS.stackDetails[6],
+    BASE_STATUS.stackDetails[7],
   ],
   executionDetail: {
     name: MOCK_EXECUTION_ID,
@@ -1878,6 +1838,8 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED: IPipeline = {
     BASE_STATUS.stackDetails[3],
     BASE_STATUS.stackDetails[4],
     BASE_STATUS.stackDetails[5],
+    BASE_STATUS.stackDetails[6],
+    BASE_STATUS.stackDetails[7],
   ],
   executionDetail: {
     name: MOCK_EXECUTION_ID,
@@ -1899,6 +1861,8 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_EMPTY: IPipeline = {
     BASE_STATUS.stackDetails[3],
     BASE_STATUS.stackDetails[4],
     BASE_STATUS.stackDetails[5],
+    BASE_STATUS.stackDetails[6],
+    BASE_STATUS.stackDetails[7],
   ],
   executionDetail: {
     name: MOCK_EXECUTION_ID,
@@ -1920,6 +1884,8 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE: IPipeline = {
     },
     BASE_STATUS.stackDetails[4],
     BASE_STATUS.stackDetails[5],
+    BASE_STATUS.stackDetails[6],
+    BASE_STATUS.stackDetails[7],
   ],
   executionDetail: {
     name: MOCK_EXECUTION_ID,
@@ -1941,6 +1907,8 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_FAILED: IPipeline = {
       stackTemplateVersion: '1.0.0',
     },
     BASE_STATUS.stackDetails[5],
+    BASE_STATUS.stackDetails[6],
+    BASE_STATUS.stackDetails[7],
   ],
   executionDetail: {
     name: MOCK_EXECUTION_ID,

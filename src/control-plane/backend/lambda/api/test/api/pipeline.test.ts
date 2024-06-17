@@ -86,7 +86,7 @@ import {
   stackDetailsWithOutputs,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
 } from './pipeline-mock';
-import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
+import { FULL_SOLUTION_VERSION, LEVEL1, LEVEL2, LEVEL3, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
 import { PipelineServerProtocol } from '../../common/types';
 import { getDefaultTags, getStackPrefix } from '../../common/utils';
@@ -2927,18 +2927,16 @@ describe('Pipeline test', () => {
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const branches = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M.Branches;
-      const dataProcessingBranch = branches.L[1].M.States.M;
-      const reportingState = dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[0].M.States.M.Reporting;
-      const redshiftState = dataProcessingBranch.DataModelingRedshift;
+      const level2State = branches.L[0].M.States.M[LEVEL2];
+      const level3State = branches.L[0].M.States.M[LEVEL3];
+      const reportingState = level3State.M.Branches.L[0].M.States.M.Reporting;
+      const redshiftState = level2State.M.Branches.L[0].M.States.M.DataModelingRedshift;
       expect(
         reportingState.M.End.BOOL === true &&
         reportingState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
         reportingState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000' &&
         redshiftState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
-        redshiftState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000' &&
-        dataProcessingBranch.AfterRedshiftStacks.M.End.BOOL === true &&
-        dataProcessingBranch.Reporting === undefined &&
-        dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[0].M.States.M.Reporting.M.End.BOOL === true,
+        redshiftState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000',
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -3005,12 +3003,13 @@ describe('Pipeline test', () => {
     });
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
-      const updateWorkflow = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M;
-      const dataProcessingBranch = updateWorkflow.Branches.L[1].M.States.M;
+      const branches = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const level3State = branches.L[0].M.States.M[LEVEL3];
+      const reportingState = level3State.M.Branches.L[0].M.States.M.Reporting;
+      const streamingState = level3State.M.Branches.L[1].M.States.M.Streaming;
       expect(
-        dataProcessingBranch.AfterRedshiftStacks.M.End.BOOL === true &&
-        dataProcessingBranch.Reporting === undefined &&
-        dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[0].M.States.M.Streaming.M.End.BOOL === true,
+        reportingState.M.End.BOOL === true &&
+        streamingState.M.End.BOOL === true,
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -3081,13 +3080,13 @@ describe('Pipeline test', () => {
     });
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
-      const updateWorkflow = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M;
-      const dataProcessingBranch = updateWorkflow.Branches.L[1].M.States.M;
+      const branches = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const level3State = branches.L[0].M.States.M[LEVEL3];
+      const reportingState = level3State.M.Branches.L[0].M.States.M.Reporting;
+      const streamingState = level3State.M.Branches.L[1].M.States.M.Streaming;
       expect(
-        dataProcessingBranch.AfterRedshiftStacks.M.End.BOOL === true &&
-        dataProcessingBranch.Reporting === undefined &&
-        dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[0].M.States.M.Streaming.M.End.BOOL === true &&
-        dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[1].M.States.M.Reporting.M.End.BOOL === true,
+        reportingState.M.End.BOOL === true &&
+        streamingState.M.End.BOOL === true,
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -3429,9 +3428,13 @@ describe('Pipeline test', () => {
     });
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
-      const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
-      const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
+      const branches = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const level1State = branches.L[0].M.States.M[LEVEL1];
+      const level3State = branches.L[0].M.States.M[LEVEL3];
+      const dataProcessingState = level1State.M.Branches.L[2].M.States.M.DataProcessing;
+      const dataProcessingInput = dataProcessingState.M.Data.M.Input;
+      const reportingState = level3State.M.Branches.L[0].M.States.M.Reporting;
+      const reportInput = reportingState.M.Data.M.Input;
       expect(
         dataProcessingInput.M.Tags.L[5].M.Key.S === 'customerKey3' &&
         reportInput.M.Tags.L[5].M.Key.S === 'customerKey3',
@@ -3506,7 +3509,10 @@ describe('Pipeline test', () => {
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
+      const branches = expressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const level3State = branches.L[0].M.States.M[LEVEL3];
+      const reportingState = level3State.M.Branches.L[0].M.States.M.Reporting;
+      const reportInput = reportingState.M.Data.M.Input;
       expect(
         expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
         expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
@@ -3591,14 +3597,16 @@ describe('Pipeline test', () => {
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const afterRedshiftStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.AfterRedshiftStacks.M;
-      const reportInput = afterRedshiftStacks.Branches.L[0].M.States.M.Reporting.M.Data.M.Input;
+      const branches = expressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const level3State = branches.L[0].M.States.M[LEVEL3];
+      const reportingState = level3State.M.Branches.L[0].M.States.M.Reporting;
+      const reportInput = reportingState.M.Data.M.Input;
+
       expect(
         expressionAttributeValues[':templateVersion'].S === SolutionVersion.V_1_1_4.fullVersion &&
         expressionAttributeValues[':tags'].L[0].M.value.S === SolutionVersion.V_1_1_4.fullVersion &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'GCRUser' &&
-        reportInput.M.Parameters.L[1].M.ParameterValue.S === 'default' &&
-        reportInput.M.Parameters.L[2].M.ParameterValue.S === 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/GCRUser',
+        reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/GCRUser',
       ).toBeTruthy();
     });
     process.env.AWS_REGION = 'cn-north-1';
@@ -3683,8 +3691,14 @@ describe('Pipeline test', () => {
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
-      const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
+      const branches = expressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const level1State = branches.L[0].M.States.M[LEVEL1];
+      const level3State = branches.L[0].M.States.M[LEVEL3];
+      const dataProcessingState = level1State.M.Branches.L[2].M.States.M.DataProcessing;
+      const dataProcessingInput = dataProcessingState.M.Data.M.Input;
+      const reportingState = level3State.M.Branches.L[0].M.States.M.Reporting;
+      const reportInput = reportingState.M.Data.M.Input;
+
       expect(
         expressionAttributeValues[':timezone'].L.length === 0 &&
         expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
@@ -3765,7 +3779,11 @@ describe('Pipeline test', () => {
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      const branches = expressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const level1State = branches.L[0].M.States.M[LEVEL1];
+      const dataProcessingState = level1State.M.Branches.L[2].M.States.M.DataProcessing;
+      const dataProcessingInput = dataProcessingState.M.Data.M.Input;
+
       expect(
         expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
         expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
@@ -3839,7 +3857,10 @@ describe('Pipeline test', () => {
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      const branches = expressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const level1State = branches.L[0].M.States.M[LEVEL1];
+      const dataProcessingState = level1State.M.Branches.L[2].M.States.M.DataProcessing;
+      const dataProcessingInput = dataProcessingState.M.Data.M.Input;
       expect(
         expressionAttributeValues[':timezone'].L.length === 1 &&
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
@@ -4041,8 +4062,8 @@ describe('Pipeline test', () => {
     });
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const pipelineStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M.PipelineStacks.M;
-      const dataProcessingInput = pipelineStacks.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      const level1State = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M[LEVEL1].M;
+      const dataProcessingInput = level1State.Branches.L[2].M.States.M.DataProcessing.M.Data.M.Input;
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
@@ -4109,8 +4130,8 @@ describe('Pipeline test', () => {
     });
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const pipelineStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M.PipelineStacks.M;
-      const dataProcessingInput = pipelineStacks.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      const level1State = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M[LEVEL1].M;
+      const dataProcessingInput = level1State.Branches.L[2].M.States.M.DataProcessing.M.Data.M.Input;
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&

@@ -46,8 +46,6 @@
     "src/**/*.ts",
     "test/**/*.ts",
     "src",
-    "test",
-    "src",
     "test"
   ],
   "exclude": [
