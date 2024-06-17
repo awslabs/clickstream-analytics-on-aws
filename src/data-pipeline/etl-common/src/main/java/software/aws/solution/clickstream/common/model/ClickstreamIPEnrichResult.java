@@ -21,7 +21,7 @@ import java.io.Serializable;
 @Getter
 @AllArgsConstructor
 public class ClickstreamIPEnrichResult implements Serializable {
-    private String city;
-    private String continent;
-    private String country;
+    private String city; // NOSONAR
+    private String continent; // NOSONAR
+    private String country; // NOSONAR
 }
