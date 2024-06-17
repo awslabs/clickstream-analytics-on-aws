@@ -62,7 +62,7 @@ public class StreamingJobTest extends BaseFlinkTest {
         };
 
         env.setRestartStrategy(RestartStrategies.noRestart());
-        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props);
+        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props, null);
         steamingJob.executeStreamJob();
         env.execute("test");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -96,7 +96,7 @@ public class StreamingJobTest extends BaseFlinkTest {
         };
 
         env.setRestartStrategy(RestartStrategies.noRestart());
-        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props);
+        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props, null);
         steamingJob.executeStreamJob();
         env.execute("test");
 
@@ -125,7 +125,7 @@ public class StreamingJobTest extends BaseFlinkTest {
         };
 
         env.setRestartStrategy(RestartStrategies.noRestart());
-        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props);
+        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props, null);
         steamingJob.executeStreamJob();
         env.execute("test");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -159,7 +159,7 @@ public class StreamingJobTest extends BaseFlinkTest {
         };
 
         env.setRestartStrategy(RestartStrategies.noRestart());
-        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props);
+        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props, null);
         steamingJob.executeStreamJob();
         env.execute("test");
 
@@ -195,7 +195,7 @@ public class StreamingJobTest extends BaseFlinkTest {
         };
 
         env.setRestartStrategy(RestartStrategies.noRestart());
-        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props);
+        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props, null);
         boolean b = steamingJob.executeStreamJob();
         Assertions.assertFalse(b);
 
@@ -227,7 +227,7 @@ public class StreamingJobTest extends BaseFlinkTest {
         };
 
         env.setRestartStrategy(RestartStrategies.noRestart());
-        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props);
+        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props, null);
         boolean b = steamingJob.executeStreamJob();
         Assertions.assertFalse(b);
     }
@@ -257,7 +257,7 @@ public class StreamingJobTest extends BaseFlinkTest {
         };
 
         env.setRestartStrategy(RestartStrategies.noRestart());
-        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props);
+        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props, null);
         boolean b = steamingJob.executeStreamJob();
         Assertions.assertFalse(b);
     }

@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import software.aws.solution.clickstream.plugin.transformer.KvTransformer;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -98,6 +99,26 @@ public class UtilsTest {
         Assertions.assertEquals("test1", new String(result, StandardCharsets.UTF_8));
         Mockito.verify(s3ClientMock, Mockito.times(1)).getObject(bucket, key);
     }
+
+    @Test
+    void testDownloadS3File() throws IOException {
+        String bucket = "testBucket";
+        String key = "testKey/t.txt";
+        String awsRegion = "us-east-1";
+
+        AmazonS3 s3ClientMock = Mockito.mock(AmazonS3.class);
+        S3Object s3ObjectMock = Mockito.mock(S3Object.class);
+        Mockito.when(s3ClientMock.getObject(bucket, key)).thenReturn(s3ObjectMock);
+        Mockito.when(s3ObjectMock.getObjectContent()).thenReturn(new S3ObjectInputStream(new ByteArrayInputStream("test1".getBytes(StandardCharsets.UTF_8)), null));
+
+        Utils utils = Utils.getInstance();
+        utils.setS3Client(s3ClientMock);
+
+        File file = Utils.getInstance().dowloadS3File(bucket, key, awsRegion, "/tmp/testDownloadS3File_" + System.currentTimeMillis() + ".txt");
+        Assertions.assertTrue(file.isFile() && file.exists());
+    }
+
+
 
     @Test
     void testGetStackError() {

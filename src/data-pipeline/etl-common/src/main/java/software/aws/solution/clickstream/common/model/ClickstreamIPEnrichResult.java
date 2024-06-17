@@ -11,15 +11,17 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.common;
+package software.aws.solution.clickstream.common.model;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.io.Serializable;
 
-public interface EventParser extends Serializable {
-    ParseRowResult parseLineToDBRow(String ingestLine, String projectId, String fileName)  throws JsonProcessingException;
-    JsonNode getData(String ingestDataField) throws JsonProcessingException;
-    ParseDataResult parseData(String dataString, ExtraParams extraParams, int index)  throws JsonProcessingException;
+@Getter
+@AllArgsConstructor
+public class ClickstreamIPEnrichResult implements Serializable {
+    private String city;
+    private String continent;
+    private String country;
 }

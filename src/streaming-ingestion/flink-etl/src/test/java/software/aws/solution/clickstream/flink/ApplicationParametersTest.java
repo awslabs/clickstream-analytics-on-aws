@@ -63,6 +63,28 @@ class ApplicationParametersTest {
         return props;
     }
 
+
+    private static Properties getPropertiesV3() {
+        String configText = "{\"appIdStreamList\":[" +
+                "{\"appId\":\"app1\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink\"}" +
+                ",{\"appId\":\"app2\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
+                ",{\"appId\":\"app3\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
+                "]}";
+        Properties props = new Properties();
+        props.setProperty("inputStreamArn", "arn:aws:kinesis:us-east-1:123456789012:stream/testStream");
+        props.setProperty("dataBucketName", "testBucket");
+        props.setProperty("projectId", "project1");
+        props.setProperty("geoFileKey", "testKey/t.txt");
+        props.setProperty("appIdStreamConfig", configText);
+        props.setProperty("transformVersion", "v2");
+        props.setProperty("appRuleConfigPath", "s3://test/project1/rules/");
+        props.setProperty("enableUaEnrich", "true");
+        props.setProperty("enableIpEnrich", "true");
+        props.setProperty("enableTrafficSourceEnrich", "false");
+
+        return props;
+    }
+
     @Test
     void testCreateApplicationParametersFromProps() throws IOException {
         // ./gradlew  test --tests  software.aws.solution.clickstream.flink.ApplicationParametersTest.testCreateApplicationParametersFromProps
@@ -76,9 +98,9 @@ class ApplicationParametersTest {
         Assertions.assertEquals("testStream", params.getInputStreamName());
         Assertions.assertEquals("project1", params.getProjectId());
 
-        Assertions.assertEquals("app1Sink", params.getSinkStreamNameByAppId("app1"));
-        Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
-        Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink", params.getSinkStreamArnByAppId("app1"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink", params.getSinkStreamArnByAppId("app2"));
+        Assertions.assertNull(params.getSinkStreamArnByAppId("app5"));
 
         params.getAppIdStreamList().forEach(appIdStreamMap -> {
 
@@ -94,6 +116,9 @@ class ApplicationParametersTest {
                 Assertions.assertFalse(appIdStreamMap.isEnabled());
             }
         });
+
+        Assertions.assertEquals("s3://testBucket/clickstream/project1/rules/", params.getAppRuleConfigPath());
+        Assertions.assertEquals("v1", params.getTransformVersion());
     }
 
 
@@ -110,18 +135,21 @@ class ApplicationParametersTest {
         Assertions.assertEquals("testStream", params.getInputStreamName());
         Assertions.assertEquals("project1", params.getProjectId());
 
-        Assertions.assertEquals("app1Sink", params.getSinkStreamNameByAppId("app1"));
-        Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
-        Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink", params.getSinkStreamArnByAppId("app1"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink", params.getSinkStreamArnByAppId("app2"));
+        Assertions.assertNull(params.getSinkStreamArnByAppId("app5"));
 
         params.getAppIdStreamList().forEach(appIdStreamMap -> {
             Assertions.assertTrue(appIdStreamMap.isEnabled());
         });
+
+        Assertions.assertEquals("s3://testBucket/clickstream/project1/rules/", params.getAppRuleConfigPath());
+        Assertions.assertEquals("v1", params.getTransformVersion());
     }
 
     @Test
     void testCreateApplicationParametersFromRuntime() throws IOException {
-        Properties props = getProperties();
+        Properties props = getPropertiesV3();
         Map<String, Properties> appProperties = new HashMap<>();
         appProperties.put(ENVIRONMENT_PROPERTIES, props);
 
@@ -137,9 +165,40 @@ class ApplicationParametersTest {
             Assertions.assertEquals("testStream", params.getInputStreamName());
             Assertions.assertEquals("project1", params.getProjectId());
 
-            Assertions.assertEquals("app1Sink", params.getSinkStreamNameByAppId("app1"));
-            Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
-            Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
+            Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink", params.getSinkStreamArnByAppId("app1"));
+            Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink", params.getSinkStreamArnByAppId("app2"));
+            Assertions.assertNull(params.getSinkStreamArnByAppId("app5"));
+
+            Assertions.assertEquals("s3://test/project1/rules/", params.getAppRuleConfigPath());
+            Assertions.assertEquals("v2", params.getTransformVersion());
         }
+    }
+
+    @Test
+    void testCreateApplicationParametersFromPropsV3() throws IOException {
+        //  ./gradlew  test --tests  software.aws.solution.clickstream.flink.ApplicationParametersTest.testCreateApplicationParametersFromPropsV3
+        Properties propsV3 = getPropertiesV3();
+        ApplicationParameters params = ApplicationParameters.fromProperties(propsV3);
+
+        Assertions.assertEquals("us-east-1", params.getRegion());
+        Assertions.assertEquals("testBucket", params.getDataBucketName());
+        Assertions.assertEquals("testKey/t.txt", params.getGeoFileKey());
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/testStream", params.getInputStreamArn());
+        Assertions.assertEquals("testStream", params.getInputStreamName());
+        Assertions.assertEquals("project1", params.getProjectId());
+
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink", params.getSinkStreamArnByAppId("app1"));
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink", params.getSinkStreamArnByAppId("app2"));
+        Assertions.assertNull(params.getSinkStreamArnByAppId("app5"));
+
+        params.getAppIdStreamList().forEach(appIdStreamMap -> {
+            Assertions.assertTrue(appIdStreamMap.isEnabled());
+        });
+
+        Assertions.assertEquals("s3://test/project1/rules/", params.getAppRuleConfigPath());
+        Assertions.assertEquals("v2", params.getTransformVersion());
+        Assertions.assertTrue(params.isIpEnrich());
+        Assertions.assertTrue(params.isUaEnrich());
+        Assertions.assertFalse(params.isTrafficSourceEnrich());
     }
 }

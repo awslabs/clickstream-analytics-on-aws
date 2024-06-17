@@ -17,10 +17,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @ToString
-public class CategoryTrafficSource  {
+public class CategoryTrafficSource implements Serializable {
     private String source; // NOSONAR
     private String medium;  // NOSONAR
     private String campaign; // NOSONAR

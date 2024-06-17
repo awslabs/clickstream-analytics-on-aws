@@ -49,6 +49,7 @@ public class UserPropertiesConverter {
             try {
                 return getUserPropertiesGenericRows(value);
             } catch (Exception e) {
+                log.error("Error when convertJsonStringToKeyValue, errorMessage: {}", e.getMessage(), e);
                 return null;
             }
         };
@@ -59,6 +60,7 @@ public class UserPropertiesConverter {
             try {
                 return getUserLtvGenericRow(value);
             } catch (Exception e) {
+                log.error("Error when convertUserLtv, errorMessage: {}", e.getMessage(), e);
                 return null;
             }
         };

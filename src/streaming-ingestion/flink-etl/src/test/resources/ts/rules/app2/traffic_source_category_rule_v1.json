@@ -1,0 +1,98 @@
+[
+    {
+        "url": "www.google.com",
+        "source": "Google",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.bing.com",
+        "source": "Bing",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.yahoo.com",
+        "source": "Yahoo",
+        "category": "Search",
+        "params": [
+            "p"
+        ]
+    },
+    {
+        "url": "www.ask.com",
+        "source": "Ask",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.aol.com",
+        "source": "AOL",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.lycos.com",
+        "source": "Lycos",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.altavista.com",
+        "source": "AltaVista",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.excite.com",
+        "source": "Excite",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.hotbot.com",
+        "source": "HotBot",
+        "category": "Search",
+        "params": [
+            "query"
+        ]
+    },
+    {
+        "url": "www.webcrawler.com",
+        "source": "WebCrawler",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.dogpile.com",
+        "source": "Dogpile",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.mamma.com",
+        "source": "Mamma",
+        "category": "Search",
+        "params": [
+            "query"
+        ]
+    }
+]

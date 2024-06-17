@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.flink.transformer;
+package software.aws.solution.clickstream.flink.plugin;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;

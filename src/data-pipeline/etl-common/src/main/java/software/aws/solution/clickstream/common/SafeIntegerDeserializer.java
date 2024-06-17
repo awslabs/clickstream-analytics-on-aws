@@ -16,9 +16,11 @@ package software.aws.solution.clickstream.common;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 
+@Slf4j
 public class SafeIntegerDeserializer extends JsonDeserializer<Integer> {
     @Override
     public Integer deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
@@ -26,6 +28,7 @@ public class SafeIntegerDeserializer extends JsonDeserializer<Integer> {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
+            log.error("Failed to parse int value: {}", value, e);
             return null;
         }
     }

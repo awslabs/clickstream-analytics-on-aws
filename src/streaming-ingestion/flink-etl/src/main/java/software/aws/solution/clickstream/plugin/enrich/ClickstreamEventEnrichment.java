@@ -11,15 +11,13 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.common;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.JsonNode;
+package software.aws.solution.clickstream.plugin.enrich;
+
+import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 
 import java.io.Serializable;
 
-public interface EventParser extends Serializable {
-    ParseRowResult parseLineToDBRow(String ingestLine, String projectId, String fileName)  throws JsonProcessingException;
-    JsonNode getData(String ingestDataField) throws JsonProcessingException;
-    ParseDataResult parseData(String dataString, ExtraParams extraParams, int index)  throws JsonProcessingException;
+public interface ClickstreamEventEnrichment extends Serializable {
+    void enrich(ClickstreamEvent event);
 }

@@ -16,11 +16,12 @@ package software.aws.solution.clickstream.common.model;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.*;
 
 @Getter
 @Setter
-public class ClickstreamUA {
+public class ClickstreamUA implements Serializable {
     @JsonProperty("device_ua_browser")
     private String uaBrowser;
     @JsonProperty("device_ua_browser_version")
@@ -34,5 +35,5 @@ public class ClickstreamUA {
     @JsonProperty("device_ua_device_category")
     private String uaDeviceCategory;
     @JsonProperty("device_ua")
-    private Map<String, Object> uaMap;
+    private Map<String, Object> uaMap; // NOSONAR
 }

@@ -53,6 +53,7 @@ import static software.aws.solution.clickstream.common.enrich.UAEnrichHelper.UA_
 
 @Slf4j
 public final class SensorsEventParser extends BaseEventParser {
+    private static final long serialVersionUID = 1L;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
     private static final String GZIP_DATA_LIST = "data_list=";

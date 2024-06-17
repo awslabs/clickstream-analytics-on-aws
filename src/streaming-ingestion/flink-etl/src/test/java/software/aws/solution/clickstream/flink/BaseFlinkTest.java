@@ -14,6 +14,7 @@
 
 package software.aws.solution.clickstream.flink;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import software.aws.solution.clickstream.flink.mock.MockKinesisSink;
 
@@ -42,6 +44,7 @@ import java.util.zip.GZIPInputStream;
 
 import static org.mockito.Mockito.mock;
 
+@Slf4j
 public class BaseFlinkTest {
     public static final String TMP_GEO_LITE_2_CITY_MMDB = "/tmp/GeoLite2-City.mmdb";
     @ClassRule
@@ -66,7 +69,8 @@ public class BaseFlinkTest {
 
     public static String downloadFile(String urlStr) {
         File dbFile = new File(TMP_GEO_LITE_2_CITY_MMDB);
-        if (dbFile.isFile()) {
+        if (dbFile.exists()) {
+            log.info("File already exists: {}", dbFile.getAbsolutePath());
             return dbFile.getAbsolutePath();
         }
         try (
@@ -112,6 +116,26 @@ public class BaseFlinkTest {
         ObjectMapper om = new ObjectMapper();
         String jsonStr = IOUtils.resourceToString(fileName, StandardCharsets.UTF_8).trim();
         JsonNode jsonNode = om.readTree(jsonStr);
+        return om.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+    }
+
+    public String prettyJson(String jsonStr) throws IOException {
+        ObjectMapper om = new ObjectMapper();
+        JsonNode jsonNode = om.readTree(jsonStr);
+        return om.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+    }
+
+    public String removeDynamicFields(String jsonStr) throws IOException {
+        ObjectMapper om = new ObjectMapper();
+        JsonNode jsonNode = om.readTree(jsonStr);
+
+        ObjectNode info = (ObjectNode)jsonNode.get("process_info");
+        String inputFileName = info.get("input_file_name").asText();
+        info.put("input_file_name", inputFileName.replaceAll("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3,}Z", "2021-01-01T00:00:00.001Z"));
+        String processTime = info.get("process_time").asText();
+        // "process_time" : "2024-06-06T02:16:26.362709Z",
+        info.put("process_time", processTime.replaceAll("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3,}Z", "2021-01-01T00:00:00.000Z"));
+
         return om.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
     }
 }
