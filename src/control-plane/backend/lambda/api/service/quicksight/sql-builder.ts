@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, EXPLORE_SEGMENT_DUMMY_PROPERTY, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, EXPLORE_SEGMENT_DUMMY_PROPERTY, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType, QuickSightChartType } from '@aws/clickstream-base-lib';
 import { format } from 'sql-formatter';
 import { formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks, isValidGroupingCondition } from './reporting-utils';
 import { logger } from '../../common/powertools';
@@ -406,7 +406,7 @@ function _buildFunnelChartIdList(count: number, prefix: string) : string {
 }
 
 function _buildFunnelChartViewResultSql(sqlParameters: SQLParameters, prefix: string,
-  appendGroupingCol: boolean, applyToFirst: boolean, colNameWithAlias: ColNameWithAlias | undefined) : string {
+  appendGroupingCol: boolean, applyToFirst: boolean, colNameWithAlias: ColNameWithAlias | undefined, chartType: QuickSightChartType) : string {
 
   const count = sqlParameters.eventAndConditions!.length;
   const seqTable = `,
@@ -437,12 +437,18 @@ function _buildFunnelChartViewResultSql(sqlParameters: SQLParameters, prefix: st
   return `
     ${seqTable}
     ${resultColSql}
-    select day::date as event_date, event_name, ${prefix} ${appendGroupingCol ? ',' + groupCols.join(',') : ''} 
-    from final_table where event_name is not null
+    select 
+      ${chartType === QuickSightChartType.FUNNEL ? '' : 'day::date as event_date,'}
+      event_name
+      ${appendGroupingCol ? ',' + groupCols.join(',') : ''} 
+      ,count(distinct ${prefix}) as "Count"
+    from final_table 
+    where event_name is not null
+    group by ${chartType === QuickSightChartType.FUNNEL ? 'event_name' : 'event_date,event_name'} ${appendGroupingCol ? ',' + groupCols.join(',') : ''}
   `;
 }
 
-export function buildFunnelView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction, isMultipleChart: boolean = false) : string {
+export function buildFunnelView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction, chartType: QuickSightChartType) : string {
 
   const eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
 
@@ -455,7 +461,7 @@ export function buildFunnelView(sqlParameters: SQLParameters, requestAciton: Exp
   let appendGroupingCol = false;
   let colNameWithAlias: ColNameWithAlias | undefined = undefined;
 
-  if (isMultipleChart && isValidGroupingCondition(sqlParameters.groupCondition)) {
+  if (chartType === QuickSightChartType.BAR && isValidGroupingCondition(sqlParameters.groupCondition)) {
     colNameWithAlias = buildColNameWithPrefix(sqlParameters.groupCondition);
     groupCondition = sqlParameters.groupCondition;
     appendGroupingCol = true;
@@ -464,7 +470,7 @@ export function buildFunnelView(sqlParameters: SQLParameters, requestAciton: Exp
   const applyToFirst = isValidGroupingCondition(sqlParameters.groupCondition) && (sqlParameters.groupCondition?.applyTo === 'FIRST');
 
   let baseSQL = _buildFunnelBaseSql(eventNames, sqlParameters, requestAciton, applyToFirst, groupCondition);
-  const resultSql = _buildFunnelChartViewResultSql(sqlParameters, prefix, appendGroupingCol, applyToFirst, colNameWithAlias);
+  const resultSql = _buildFunnelChartViewResultSql(sqlParameters, prefix, appendGroupingCol, applyToFirst, colNameWithAlias, chartType);
 
   let sql = `
    ${baseSQL}
