@@ -1839,7 +1839,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               tableName: 'Realtime_Event',
               useSpice: 'no',
               realtime: 'yes',
-              customSql: "\n        -- clickstream-builtin-realtime-dashboard\n        select \n          \n    *, \n    CASE WHEN event_name = '_first_open' THEN COALESCE(user_id, user_pseudo_id) ELSE NULL END as new_user_indicator,\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n        from {{schema}}.event_v2\n        where \n          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n          and event_timestamp <= <<$endDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n      ",
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard\n        select \n          \n    *, \n    CASE WHEN event_name = '_first_open' THEN COALESCE(user_id, user_pseudo_id) ELSE NULL END as new_user_indicator,\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n        from {{schema}}.ods_events_streaming_view\n        where \n          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n          and event_timestamp <= <<$endDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n      ",
               columns:
                   [
                     {
@@ -4072,7 +4072,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               tableName: 'Realtime_Event',
               useSpice: 'no',
               realtime: 'yes',
-              customSql: "\n        -- clickstream-builtin-realtime-dashboard\n        select \n          \n    *, \n    CASE WHEN event_name = '_first_open' THEN COALESCE(user_id, user_pseudo_id) ELSE NULL END as new_user_indicator,\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n        from {{schema}}.event_v2\n        where \n          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n          and event_timestamp <= <<$endDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n      ",
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard\n        select \n          \n    *, \n    CASE WHEN event_name = '_first_open' THEN COALESCE(user_id, user_pseudo_id) ELSE NULL END as new_user_indicator,\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n        from {{schema}}.ods_events_streaming_view\n        where \n          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n          and event_timestamp <= <<$endDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n      ",
               columns:
                   [
                     {
