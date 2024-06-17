@@ -94,7 +94,7 @@ describe('DataReportingQuickSightStack parameter test', () => {
   test('Should has Parameter QuickSightRealTimeDashboardParam', () => {
     template.hasParameter('QuickSightRealTimeDashboardParam', {
       Type: 'String',
-      Default: 'no',
+      Default: 'yes',
       AllowedValues: ['no', 'yes'],
     });
   });

@@ -105,7 +105,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     description: 'enable realtime dashboard or not.',
     type: 'String',
     allowedValues: allowedValues,
-    default: allowedValues[0],
+    default: allowedValues[1],
   });
   labels[quickSightRealTimeDashboardParam.logicalId] = {
     default: 'Enable Realtime Dashboard',
