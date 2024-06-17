@@ -496,7 +496,7 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters, requestAcit
     const colNameWithAlias = buildColNameWithPrefix(sqlParameters.groupCondition);
     for (const colName of colNameWithAlias.colNames) {
       groupColSQL += `${colName}::varchar as ${colName},`;
-      groupCol += `${colName}::varchar,`;
+      groupCol += `${colName},`;
     }
   }
 
@@ -505,11 +505,11 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters, requestAcit
         day::date as event_date, 
         event_name, 
         ${groupColSQL}
-        x_id as "Count"
+        count(distinct x_id) as "Count"
       from join_table 
       where x_id is not null
       group by
-      day, event_name, ${groupCol} x_id
+      day, event_name ${groupCol === '' ? '' : ',' + groupCol.substring(0, groupCol.length - 1)}
   `);
 
   let sql = `
@@ -623,12 +623,13 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters, request
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
+      count(distinct ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' }) as x_id
     from data_final a left join data_final b 
       on a.step_2 = b.step_1 
       and a.session_id = b.session_id
       and a.user_pseudo_id = b.user_pseudo_id
     where a.step_2 <= ${sqlParameters.maxStep ?? 5}
+    group by 1,2,3
     `;
 
   } else {
@@ -728,12 +729,13 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters, request
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
+      count(distinct ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' }) as x_id
     from data_final a left join data_final b 
       on a.step_2 = b.step_1 
       and a.group_id = b.group_id 
       and a.user_pseudo_id = b.user_pseudo_id
     where a.step_2 <= ${sqlParameters.maxStep ?? 5}
+    group by 1,2,3
     `;
   }
 
@@ -877,12 +879,13 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters, requestA
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
+      count(distinct ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' }) as x_id
     from data_final a left join data_final b 
       on a.user_pseudo_id = b.user_pseudo_id 
       and a.session_id = b.session_id
       and a.step_2 = b.step_1
     where a.step_2 <= ${sqlParameters.maxStep ?? 5}
+    group by 1,2,3
     `;
 
   } else {
@@ -1012,12 +1015,13 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters, requestA
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
+      count(distinct ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' }) as x_id
     from data_final a left join data_final b 
       on a.user_pseudo_id = b.user_pseudo_id 
       and a.group_id = b.group_id
       and a.step_2 = b.step_1
     where a.step_2 <= ${sqlParameters.maxStep ?? 5}
+    group by 1,2,3
     `;
   }
 

@@ -40,13 +40,15 @@
                   ],
                   "Weight": [
                       {
-                        "CategoricalMeasureField":{
+                        "NumericalMeasureField":{
                             "FieldId":"{{weightFieldId}}",
                             "Column":{
                                 "DataSetIdentifier":"{{dataSetIdentifier}}",
                                 "ColumnName":"x_id"
                             },
-                            "AggregationFunction":"DISTINCT_COUNT"
+                            "AggregationFunction":{
+                                "SimpleNumericalAggregation": "SUM"
+                            }
                         }
                     }
                   ]

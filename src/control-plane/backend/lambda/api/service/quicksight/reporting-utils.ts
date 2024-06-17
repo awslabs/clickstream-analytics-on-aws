@@ -250,7 +250,7 @@ export const eventVisualColumns: InputColumn[] = [
   },
   {
     Name: 'Count',
-    Type: 'STRING',
+    Type: 'INTEGER',
   },
 ];
 
@@ -269,7 +269,7 @@ export const pathAnalysisVisualColumns: InputColumn[] = [
   },
   {
     Name: 'x_id',
-    Type: 'STRING',
+    Type: 'INTEGER',
   },
 ];
 
