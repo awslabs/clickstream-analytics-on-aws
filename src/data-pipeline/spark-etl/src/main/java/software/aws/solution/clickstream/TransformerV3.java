@@ -261,11 +261,6 @@ public class TransformerV3 extends BaseTransformerV3 {
         Dataset<Row> userDataset = convertedDataset.select(expr("dataOut.user.*"))
                 .select(toColumnArray(ModelV2.getUserFields()));
 
-        if (userDataset.count() == 0) {
-            log.info("extractUser return empty dataset");
-            return userDataset;
-        }
-
         userDataset = userDataset.withColumn(USER_FIRST_EVENT_NAME, col(Constant.EVENT_NAME))
                 .withColumn(USER_LATEST_EVENT_NAME, col(Constant.EVENT_NAME))
                 .drop(Constant.EVENT_NAME);
@@ -278,6 +273,11 @@ public class TransformerV3 extends BaseTransformerV3 {
         DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserAggDataset, tableName, TABLE_VERSION_SUFFIX_V3);
         log.info("tableName: {}", tableName);
         log.info("pathInfo - incremental: " + pathInfo.getIncremental() + ", full: " + pathInfo.getFull());
+
+        if (userDataset.count() == 0) {
+            log.info("extractUser return empty dataset");
+            return userDataset;
+        }
 
         // save new (append)
         String path = saveIncrementalDatasetToPath(pathInfo.getIncremental(), newUserAggDataset);
