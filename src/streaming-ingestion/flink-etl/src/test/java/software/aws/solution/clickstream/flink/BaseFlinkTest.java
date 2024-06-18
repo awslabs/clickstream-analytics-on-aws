@@ -24,8 +24,6 @@ import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.ObjectNode;
@@ -42,8 +40,6 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
-import static org.mockito.Mockito.mock;
-
 @Slf4j
 public class BaseFlinkTest {
     public static final String TMP_GEO_LITE_2_CITY_MMDB = "/tmp/GeoLite2-City.mmdb";
@@ -58,13 +54,13 @@ public class BaseFlinkTest {
 
     @BeforeAll
     public static void setUPAll() {
-        System.out.println("BeforeAll downloadResources");
+        log.info("BeforeAll downloadResources");
         if (!needDownloadFile()) {
             return;
         }
-        System.out.println("download GeoLite2-City.mmdb.gz...");
+        log.info("download GeoLite2-City.mmdb.gz...");
         String dbFile = downloadFile("https://cdn.jsdelivr.net/npm/geolite2-city@1.0.0/GeoLite2-City.mmdb.gz");
-        System.out.println("download completed, " + dbFile);
+        log.info("download completed, {}", dbFile);
     }
 
     public static String downloadFile(String urlStr) {
@@ -102,14 +98,23 @@ public class BaseFlinkTest {
     public void init() {
         Configurator.setRootLevel(Level.WARN);
         Configurator.setLevel("software.aws.solution.clickstream", Level.DEBUG);
-        System.out.println("BeforeEach init");
+        log.info("BeforeEach init");
         env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(2);
+        env.setMaxParallelism(2);
     }
 
     @AfterEach
     public void clear() {
         MockKinesisSink.appValues.clear();
-        System.out.println("AfterEach clear");
+        log.info("AfterEach clear");
+        if (env != null) {
+            try {
+                env.close();
+            } catch (Exception e) {
+              log.error("Failed to close env", e);
+            }
+        }
     }
 
     public String resourceFileAsString(final String fileName) throws IOException {
