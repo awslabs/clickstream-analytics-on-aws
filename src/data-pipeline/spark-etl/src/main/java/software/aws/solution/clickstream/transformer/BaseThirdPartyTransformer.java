@@ -217,11 +217,6 @@ public abstract class BaseThirdPartyTransformer extends BaseTransformerV3 {
         Dataset<Row> userDataset = convertedDataset.select(expr("dataOut.user.*"))
                 .select(toColumnArray(ModelV2.getUserFields()));
 
-        if (userDataset.count() == 0) {
-            log.info("extractUser return empty dataset");
-            return userDataset;
-        }
-
         // agg new
         Dataset<Row> newUserAggDataset = aggUserDataset(userDataset, "newUserAggDataset");
         log.info("newUserAggDataset count: {}", newUserAggDataset.count());
@@ -230,6 +225,11 @@ public abstract class BaseThirdPartyTransformer extends BaseTransformerV3 {
         DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserAggDataset, tableName, TABLE_VERSION_SUFFIX_V3);
         log.info("tableName: {}", tableName);
         log.info("pathInfo - incremental: " + pathInfo.getIncremental() + ", full: " + pathInfo.getFull());
+
+        if (userDataset.count() == 0) {
+            log.info("extractUser return empty dataset");
+            return userDataset;
+        }
 
         // save new (append)
         String path = saveIncrementalDatasetToPath(pathInfo.getIncremental(), newUserAggDataset);

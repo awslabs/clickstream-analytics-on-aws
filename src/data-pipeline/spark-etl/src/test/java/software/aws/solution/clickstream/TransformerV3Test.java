@@ -316,4 +316,37 @@ class TransformerV3Test extends BaseSparkTest {
         String expectedJson1 = this.resourceFileAsString("/event_v2/expected/test_extract_session_from_event2.json");
         Assertions.assertEquals(expectedJson1, replaceDynData(sessionDataset.first().prettyJson()));
     }
+
+
+    @Test
+    public void should_transform_can_merge_state_table_when_dataset_is_empty_v2() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV3Test.should_transform_can_merge_state_table_when_dataset_is_empty_v2
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty("force.merge", "true");
+
+        String testWarehouseDir = "/tmp/warehouse/should_transform_can_merge_state_table_when_dataset_is_empty_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
+
+        Dataset<Row> emptyDataset = dataset.filter(col("appId").equalTo("empty"));
+        // make sure input dataset is empty
+        Assertions.assertEquals(0, emptyDataset.count());
+
+
+        // create folders for full and incremental table
+        String tableDirFull = testWarehouseDir + "/" + getUserPropsTableName("clickstream") + FULL_SUFFIX  + TABLE_VERSION_SUFFIX_V3;
+        emptyDataset.write().mode(SaveMode.Overwrite).json(tableDirFull);
+        String tableDirIncr = testWarehouseDir + "/" + getUserPropsTableName("clickstream") + INCREMENTAL_SUFFIX  + TABLE_VERSION_SUFFIX_V3;
+        emptyDataset.write().mode(SaveMode.Overwrite).json(tableDirIncr);
+
+
+        Map<TableName, Dataset<Row>> transformedDatasets = transformer.transform(emptyDataset);
+        Dataset<Row> datasetEvent = transformedDatasets.get(TableName.EVENT_V2);
+
+        transformer.postTransform(datasetEvent);  // should no error
+    }
+
 }
