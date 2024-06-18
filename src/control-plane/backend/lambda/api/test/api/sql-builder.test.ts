@@ -1377,15 +1377,14 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
       x_id is not null
     group by
       day,
-      event_name,
-      x_id
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -1608,7 +1607,7 @@ describe('SQL Builder test', () => {
       WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
       ELSE 'lost_' || a.step_2
     END as target,
-    a.user_pseudo_id as x_id
+    count(distinct a.user_pseudo_id) as x_id
   from
     data_final a
     left join data_final b on a.step_2 = b.step_1
@@ -1616,6 +1615,10 @@ describe('SQL Builder test', () => {
     and a.user_pseudo_id = b.user_pseudo_id
   where
     a.step_2 <= 5
+  group by
+  1,
+  2,
+  3
     `.trim().replace(/ /g, ''),
     );
 
@@ -1878,7 +1881,7 @@ describe('SQL Builder test', () => {
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.step_2 = b.step_1
@@ -1886,6 +1889,10 @@ describe('SQL Builder test', () => {
       and a.user_pseudo_id = b.user_pseudo_id
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -2074,7 +2081,7 @@ describe('SQL Builder test', () => {
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.user_pseudo_id = b.user_pseudo_id
@@ -2082,6 +2089,10 @@ describe('SQL Builder test', () => {
       and a.step_2 = b.step_1
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
   });
@@ -2261,7 +2272,7 @@ describe('SQL Builder test', () => {
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.user_pseudo_id = b.user_pseudo_id
@@ -2269,6 +2280,10 @@ describe('SQL Builder test', () => {
       and a.step_2 = b.step_1
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
   });
@@ -2479,7 +2494,7 @@ describe('SQL Builder test', () => {
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.user_pseudo_id = b.user_pseudo_id
@@ -2487,6 +2502,10 @@ describe('SQL Builder test', () => {
       and a.step_2 = b.step_1
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
   });
@@ -2681,7 +2700,7 @@ describe('SQL Builder test', () => {
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.user_pseudo_id = b.user_pseudo_id
@@ -2689,6 +2708,10 @@ describe('SQL Builder test', () => {
       and a.step_2 = b.step_1
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
   });
@@ -2930,7 +2953,7 @@ describe('SQL Builder test', () => {
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.user_pseudo_id = b.user_pseudo_id
@@ -2938,6 +2961,10 @@ describe('SQL Builder test', () => {
       and a.step_2 = b.step_1
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
   });
@@ -3200,7 +3227,7 @@ describe('SQL Builder test', () => {
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.user_pseudo_id = b.user_pseudo_id
@@ -3208,6 +3235,10 @@ describe('SQL Builder test', () => {
       and a.step_2 = b.step_1
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
   });
@@ -3456,7 +3487,7 @@ describe('SQL Builder test', () => {
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.user_pseudo_id = b.user_pseudo_id
@@ -3464,6 +3495,10 @@ describe('SQL Builder test', () => {
       and a.step_2 = b.step_1
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
   });
@@ -5783,15 +5818,14 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
       x_id is not null
     group by
       day,
-      event_name,
-      x_id
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -6087,7 +6121,7 @@ describe('SQL Builder test', () => {
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.step_2 = b.step_1
@@ -6095,6 +6129,10 @@ describe('SQL Builder test', () => {
       and a.user_pseudo_id = b.user_pseudo_id
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -6345,7 +6383,7 @@ describe('SQL Builder test', () => {
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.step_2 = b.step_1
@@ -6353,6 +6391,10 @@ describe('SQL Builder test', () => {
       and a.user_pseudo_id = b.user_pseudo_id
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -6709,7 +6751,7 @@ describe('SQL Builder test', () => {
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.step_2 = b.step_1
@@ -6717,6 +6759,10 @@ describe('SQL Builder test', () => {
       and a.user_pseudo_id = b.user_pseudo_id
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -7148,7 +7194,7 @@ describe('SQL Builder test', () => {
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.step_2 = b.step_1
@@ -7156,6 +7202,10 @@ describe('SQL Builder test', () => {
       and a.user_pseudo_id = b.user_pseudo_id
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -7602,7 +7652,7 @@ describe('SQL Builder test', () => {
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.step_2 = b.step_1
@@ -7610,6 +7660,10 @@ describe('SQL Builder test', () => {
       and a.user_pseudo_id = b.user_pseudo_id
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -7977,7 +8031,7 @@ describe('SQL Builder test', () => {
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.user_pseudo_id = b.user_pseudo_id
@@ -7985,6 +8039,10 @@ describe('SQL Builder test', () => {
       and a.step_2 = b.step_1
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `;
     expect(sql.trim().replace(/ /g, '')).toEqual(expectResult.trim().replace(/ /g, ''));
 
@@ -8178,7 +8236,7 @@ describe('SQL Builder test', () => {
     day::date as event_date,
     event_name,
     e__session_id::varchar as e__session_id,
-    x_id as "Count"
+    count(distinct x_id) as "Count"
   from
     join_table
   where
@@ -8186,8 +8244,7 @@ describe('SQL Builder test', () => {
   group by
     day,
     event_name,
-    e__session_id::varchar,
-    x_id
+    e__session_id
     `.trim().replace(/ /g, ''),
     );
 
@@ -8381,7 +8438,7 @@ describe('SQL Builder test', () => {
       day::date as event_date,
       event_name,
       geo_country::varchar as geo_country,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
@@ -8389,8 +8446,7 @@ describe('SQL Builder test', () => {
     group by
       day,
       event_name,
-      geo_country::varchar,
-      x_id
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
@@ -12729,7 +12785,7 @@ describe('SQL Builder test', () => {
       day::date as event_date,
       event_name,
       geo_country::varchar as geo_country,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
@@ -12737,8 +12793,7 @@ describe('SQL Builder test', () => {
     group by
       day,
       event_name,
-      geo_country::varchar,
-      x_id
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
@@ -13014,7 +13069,7 @@ describe('SQL Builder test', () => {
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.event_id as x_id
+      count(distinct a.event_id) as x_id
     from
       data_final a
       left join data_final b on a.step_2 = b.step_1
@@ -13022,6 +13077,10 @@ describe('SQL Builder test', () => {
       and a.user_pseudo_id = b.user_pseudo_id
     where
       a.step_2 <= 5
+    group by
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -13186,7 +13245,7 @@ describe('SQL Builder test', () => {
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.event_id as x_id
+      count(distinct a.event_id) as x_id
     from
       data_final a
       left join data_final b on a.step_2 = b.step_1
@@ -13194,6 +13253,10 @@ describe('SQL Builder test', () => {
       and a.user_pseudo_id = b.user_pseudo_id
     where
       a.step_2 <= 5
+    group by
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -13503,7 +13566,7 @@ describe('SQL Builder test', () => {
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.user_pseudo_id = b.user_pseudo_id
@@ -13511,6 +13574,10 @@ describe('SQL Builder test', () => {
       and a.step_2 = b.step_1
     where
       a.step_2 <= 5
+    group by
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -14501,7 +14568,7 @@ describe('SQL Builder test', () => {
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.event_id as x_id
+      count(distinct a.event_id) as x_id
     from
       data_final a
       left join data_final b on a.step_2 = b.step_1
@@ -14509,6 +14576,10 @@ describe('SQL Builder test', () => {
       and a.user_pseudo_id = b.user_pseudo_id
     where
       a.step_2 <= 5
+    group by
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -14674,15 +14745,14 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
       x_id is not null
     group by
       day,
-      event_name,
-      x_id
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -15780,15 +15850,14 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
       x_id is not null
     group by
       day,
-      event_name,
-      x_id
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -16324,15 +16393,14 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
       x_id is not null
     group by
       day,
-      event_name,
-      x_id
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -16587,15 +16655,14 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
       x_id is not null
     group by
       day,
-      event_name,
-      x_id
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -16790,15 +16857,14 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
       x_id is not null
     group by
       day,
-      event_name,
-      x_id
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -19741,15 +19807,14 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
       x_id is not null
     group by
       day,
-      event_name,
-      x_id
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -19958,15 +20023,14 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
       x_id is not null
     group by
       day,
-      event_name,
-      x_id
+      event_name
     `.trim().replace(/ /g, ''),
     );
 
@@ -21758,7 +21822,7 @@ describe('SQL Builder test', () => {
       event_name,
       e__session_id::varchar as e__session_id,
       geo_city::varchar as geo_city,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
@@ -21766,9 +21830,8 @@ describe('SQL Builder test', () => {
     group by
       day,
       event_name,
-      e__session_id::varchar,
-      geo_city::varchar,
-      x_id
+      e__session_id,
+      geo_city
     `.trim().replace(/ /g, ''),
     );
 
@@ -21976,7 +22039,7 @@ describe('SQL Builder test', () => {
       event_name,
       e__session_id::varchar as e__session_id,
       geo_city::varchar as geo_city,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
@@ -21984,9 +22047,8 @@ describe('SQL Builder test', () => {
     group by
       day,
       event_name,
-      e__session_id::varchar,
-      geo_city::varchar,
-      x_id
+      e__session_id,
+      geo_city
     `.trim().replace(/ /g, ''),
     );
 
@@ -24154,7 +24216,7 @@ describe('SQL Builder test', () => {
       day::date as event_date,
       event_name,
       geo_country::varchar as geo_country,
-      x_id as "Count"
+      count(distinct x_id) as "Count"
     from
       join_table
     where
@@ -24162,8 +24224,7 @@ describe('SQL Builder test', () => {
     group by
       day,
       event_name,
-      geo_country::varchar,
-      x_id
+      geo_country
     `.trim().replace(/ /g, ''),
     );
 
@@ -24492,7 +24553,7 @@ describe('SQL Builder test', () => {
         WHEN b.node is not null THEN b.node || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.user_pseudo_id as x_id
+      count(distinct a.user_pseudo_id) as x_id
     from
       data_final a
       left join data_final b on a.user_pseudo_id = b.user_pseudo_id
@@ -24500,6 +24561,10 @@ describe('SQL Builder test', () => {
       and a.step_2 = b.step_1
     where
       a.step_2 <= 5
+    group by 
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 
@@ -25184,7 +25249,7 @@ describe('SQL Builder test', () => {
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
         ELSE 'lost_' || a.step_2
       END as target,
-      a.event_id as x_id
+      count(distinct a.event_id) as x_id
     from
       data_final a
       left join data_final b on a.step_2 = b.step_1
@@ -25192,6 +25257,10 @@ describe('SQL Builder test', () => {
       and a.user_pseudo_id = b.user_pseudo_id
     where
       a.step_2 <= 5
+    group by
+    1,
+    2,
+    3
     `.trim().replace(/ /g, ''),
     );
 

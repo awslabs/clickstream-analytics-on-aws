@@ -38,13 +38,15 @@
                   ],
                   "Values": [
                       {
-                          "CategoricalMeasureField": {
+                          "NumericalMeasureField": {
                               "FieldId": "{{catMeasureFieldId}}",
                               "Column": {
                                   "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "Count"
                               },
-                              "AggregationFunction": "DISTINCT_COUNT"
+                              "AggregationFunction":{
+                                  "SimpleNumericalAggregation": "SUM"
+                              }
                           }
                       }
                   ]
