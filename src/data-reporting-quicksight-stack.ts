@@ -144,10 +144,7 @@ export class DataReportingQuickSightStack extends Stack {
         ],
       }],
 
-      definition: Fn.conditionIf(realtimeDashboardCondition.logicalId,
-        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-realtime.json')).toString('utf-8')),
-        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-realtime.json')).toString('utf-8')),
-      ),
+      definition: transformKeysToLowercase(JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-realtime.json')).toString('utf-8'))),
     });
     realtimeTemplate.cfnOptions.condition = realtimeDashboardCondition;
 
@@ -243,6 +240,20 @@ export class DataReportingQuickSightStack extends Stack {
       iamRoleBoundaryArnParam,
     } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
     Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
+  }
+}
+
+function transformKeysToLowercase(obj: string): any {
+  if (Array.isArray(obj)) {
+    return obj.map(transformKeysToLowercase);
+  } else if (obj !== null && typeof obj === 'object') {
+    return Object.keys(obj).reduce((acc, key) => {
+      const lowerKey = key.charAt(0).toLowerCase() + key.slice(1);
+      acc[lowerKey] = transformKeysToLowercase(obj[key]);
+      return acc;
+    }, {} as Record<string, any>);
+  } else {
+    return obj;
   }
 }
 
