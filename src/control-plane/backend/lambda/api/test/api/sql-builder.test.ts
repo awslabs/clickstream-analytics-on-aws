@@ -89,7 +89,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -258,7 +258,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -427,7 +427,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -587,7 +587,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -782,7 +782,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -1002,7 +1002,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in (
             '_first_open',
             '_scroll',
@@ -1289,7 +1289,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -1495,7 +1495,7 @@ describe('SQL Builder test', () => {
         shop.shop.clickstream_event_view_v3 as event
       where
         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-        and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+        and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
         and event.event_name not in (
           '_session_start',
           '_session_stop',
@@ -1727,7 +1727,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       mid_table as (
@@ -1957,7 +1957,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
@@ -2156,7 +2156,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
@@ -2348,7 +2348,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
@@ -2569,7 +2569,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
@@ -2771,7 +2771,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
@@ -3025,7 +3025,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
@@ -3298,7 +3298,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
@@ -3635,7 +3635,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2024-02-15')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date'2024-03-01' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date'2024-03-01' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -3932,7 +3932,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2024-02-15')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date'2024-03-01' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date'2024-03-01' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -4230,7 +4230,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2024-02-15')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date'2024-03-01' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date'2024-03-01' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -4528,7 +4528,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event 
         where
           event.event_timestamp >= (date '2023-06-19')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          andevent.event_timestamp <= (date '2023-06-22' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2023-06-22' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -4798,7 +4798,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -5086,7 +5086,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -5423,7 +5423,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -5712,7 +5712,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -6003,7 +6003,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -6268,7 +6268,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -6572,7 +6572,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -6996,7 +6996,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -7406,7 +7406,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-20')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date'2023-11-04' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date'2023-11-04' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -7843,7 +7843,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', '_page_view')
           and (
             platform = 'Android'
@@ -8137,7 +8137,7 @@ describe('SQL Builder test', () => {
         shop.shop.clickstream_event_view_v3 as event
       where
         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-        and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+        and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
     table_0 as (
@@ -8339,7 +8339,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -8541,7 +8541,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -8810,7 +8810,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -9079,7 +9079,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -9296,7 +9296,7 @@ describe('SQL Builder test', () => {
         shop.shop.clickstream_event_view_v3 as event
       where
         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-        and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+        and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
     `;
@@ -9384,7 +9384,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             u__user_first_touch_timestamp > 1686532526770
@@ -9494,7 +9494,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
     `.trim().replace(/ /g, ''),
@@ -9585,7 +9585,7 @@ describe('SQL Builder test', () => {
         shop.shop.clickstream_event_view_v3 as event
       where
         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-        and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+        and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
     `;
@@ -9684,7 +9684,7 @@ describe('SQL Builder test', () => {
         shop.shop.clickstream_event_view_v3 as event
       where
         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-        and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+        and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
       `;
@@ -9783,7 +9783,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
     `;
@@ -9898,7 +9898,7 @@ describe('SQL Builder test', () => {
         shop.shop.clickstream_event_view_v3 as event
       where
         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-        and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+        and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
     `;
@@ -9982,7 +9982,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
     `;
@@ -10062,7 +10062,7 @@ describe('SQL Builder test', () => {
         shop.shop.clickstream_event_view_v3 as event
       where
         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-        and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+        and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
     `;
@@ -10168,7 +10168,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -10290,7 +10290,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -10444,7 +10444,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -10608,7 +10608,7 @@ describe('SQL Builder test', () => {
         shop.shop.clickstream_event_view_v3 as event
       where
         event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-        and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+        and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
         and (
           platform = 'Android'
@@ -10798,7 +10798,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -11194,7 +11194,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase')
           and (
             platform = 'Android'
@@ -11559,7 +11559,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -11790,7 +11790,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase')
           and (
             u__user_first_touch_timestamp > 1686532526770
@@ -12072,7 +12072,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -12372,7 +12372,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -12672,7 +12672,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -12970,7 +12970,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -13152,7 +13152,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       mid_table as (
@@ -13436,7 +13436,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', '_page_view')
           and (
             platform = 'Android'
@@ -13829,7 +13829,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-24')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase', 'add_to_cart')
           and (
             platform = 'Android'
@@ -14093,7 +14093,7 @@ describe('SQL Builder test', () => {
           shopping.shopping.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'UTC'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'UTC'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'UTC'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -14430,7 +14430,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -14656,7 +14656,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -14819,7 +14819,7 @@ describe('SQL Builder test', () => {
           shop.blog.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_first_open', '_scroll', '_user_engagement')
       ),
       table_0 as (
@@ -15033,7 +15033,7 @@ describe('SQL Builder test', () => {
           shop.blog.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_first_open', '_scroll', '_user_engagement')
       ),
       table_0 as (
@@ -15259,7 +15259,7 @@ describe('SQL Builder test', () => {
           shop.blog.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_first_open', '_scroll', '_user_engagement')
       ),
       table_0 as (
@@ -15491,7 +15491,7 @@ describe('SQL Builder test', () => {
           shop.blog.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_first_open', '_scroll', '_user_engagement')
       ),
       table_0 as (
@@ -16277,7 +16277,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             (
@@ -16549,7 +16549,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase')
           and (
             (
@@ -16788,7 +16788,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase')
           and (geo_country = 'China''')
       ),
@@ -16989,7 +16989,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-06-19')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          andevent.event_timestamp <= (date '2023-06-22' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2023-06-22' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (platform = 'Android''')
       ),
@@ -17274,7 +17274,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-06-19')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          andevent.event_timestamp <= (date '2023-06-22' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2023-06-22' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform like '%\\\\%%'
@@ -17505,7 +17505,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase')
       ),
       table_0 as (
@@ -17722,7 +17722,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase')
       ),
       table_0 as (
@@ -17939,7 +17939,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase')
       ),
       table_0 as (
@@ -18156,7 +18156,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase')
       ),
       table_0 as (
@@ -18357,7 +18357,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase')
       ),
       table_0 as (
@@ -18571,7 +18571,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -18831,7 +18831,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -19100,7 +19100,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -19412,7 +19412,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -19735,7 +19735,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', 'purchase')
           and (
             geo_country = 'China'''
@@ -19948,7 +19948,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', 'purchase')
           and (
             geo_country = 'China'''
@@ -20282,7 +20282,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date'2023-10-24')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date'2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date'2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase', 'add_to_cart')
           and (
             platform = 'Android'
@@ -20621,7 +20621,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -20933,7 +20933,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -21157,7 +21157,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -21412,7 +21412,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -21716,7 +21716,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -21933,7 +21933,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -22307,7 +22307,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-24')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase', 'add_to_cart')
           and (
             platform = 'Android'
@@ -22733,7 +22733,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-24')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase', 'add_to_cart')
           and (
             platform = 'Android'
@@ -23016,7 +23016,7 @@ describe('SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -23358,7 +23358,7 @@ describe('SQL Builder test', () => {
           join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -23731,7 +23731,7 @@ describe('SQL Builder test', () => {
           join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -24108,7 +24108,7 @@ describe('SQL Builder test', () => {
           join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (platform = 'Android')
       ),
@@ -24428,7 +24428,7 @@ describe('SQL Builder test', () => {
           join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('_screen_view', '_page_view')
           and (platform = 'Android')
       ),
@@ -24854,7 +24854,7 @@ describe('SQL Builder test', () => {
           join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
         where
           event.event_timestamp >= (date '2023-10-24')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2023-10-30' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'purchase', 'add_to_cart')
           and (
             platform = 'Android'
@@ -25156,7 +25156,7 @@ describe('SQL Builder test', () => {
           join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       mid_table as (
