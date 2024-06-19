@@ -53,12 +53,13 @@ export function createMetricsWidget(scope: Construct, props: {
     evaluationPeriods: 1,
     treatMissingData: TreatMissingData.IGNORE,
     metric: new Metric({
-      metricName: 'FailedJobs',
-      namespace: emrServerlessNamespace,
+      metricName: DataPipelineCustomMetricsName.JOB_FAILED,
+      namespace: dataPipelineNamespace,
       period: Duration.seconds(3600),
-      statistic: 'Sum',
+      statistic: 'Maximum',
       dimensionsMap: {
         ApplicationId: props.emrApplicationId,
+        service: MetricsService.EMR_SERVERLESS,
       },
     }),
     alarmDescription: `Has failed jobs, projectId: ${props.projectId}`,

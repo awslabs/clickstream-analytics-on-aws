@@ -109,6 +109,8 @@ export enum DataPipelineCustomMetricsName {
   FILTERED_BY_APP_IDS='Data count filtered by appIds',
   FILTERED_BY_DATA_FRESHNESS_AND_FUTURE = 'Data count filtered by freshness and future time',
   FILTERED_BY_BOT = 'Data count filtered by bot',
+  JOB_FAILED='Data Processing job failed',
+  JOB_SUCCESS='Data Processing job success',
 };
 
 

@@ -35,9 +35,6 @@ const sqsClient = new SQSClient({
 });
 
 const jobMetrics = new Metrics({ namespace: MetricsNamespace.DATAPIPELINE, serviceName: MetricsService.EMR_SERVERLESS });
-jobMetrics.addDimensions({
-  ApplicationId: emrApplicationId,
-});
 
 export const handler = async (event: EventBridgeEvent<string, { jobRunId: string; applicationId: string; state: string }>) => {
   logger.info('Triggered from  event', { event });
@@ -81,13 +78,20 @@ export const handler = async (event: EventBridgeEvent<string, { jobRunId: string
     }
   }
 
+  jobMetrics.addDimensions({
+    ApplicationId: emrApplicationId,
+  });
+
   if (jobState == 'SUCCESS') {
-    await sendMetrics(event);
+    await sendJobSuccessMetrics(event);
   }
 
   if (jobState == 'FAILED') {
     const jobSubmitInfo = await readS3ObjectAsJson(pipelineS3BucketName, jobStartStateFile);
-    await putFailedJobInfoToDLQueue(JSON.stringify(jobSubmitInfo));
+    await sendJobFailedMetrics();
+    if (jobSubmitInfo) {
+      await putFailedJobInfoToDLQueue(JSON.stringify(jobSubmitInfo));
+    }
   }
 };
 
@@ -98,7 +102,13 @@ async function putFailedJobInfoToDLQueue(jobSubmitInfoMessage: string) {
   }));
 }
 
-async function sendMetrics(event: any) {
+async function sendJobFailedMetrics() {
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.JOB_FAILED, MetricUnits.Count, 1);
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.JOB_SUCCESS, MetricUnits.Count, 0);
+  jobMetrics.publishStoredMetrics();
+}
+
+async function sendJobSuccessMetrics(event: any) {
 
   const jobRunInfo = await emrClient.send(new GetJobRunCommand({
     jobRunId: event.detail.jobRunId!,
@@ -239,6 +249,10 @@ async function sendMetrics(event: any) {
   jobMetrics.addMetric(DataPipelineCustomMetricsName.FILTERED_BY_DATA_FRESHNESS_AND_FUTURE,
     MetricUnits.Count, metrics.filteredByDataFreshnessAndFuture);
   jobMetrics.addMetric(DataPipelineCustomMetricsName.FILTERED_BY_BOT, MetricUnits.Count, metrics.filteredByBot);
+
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.JOB_FAILED, MetricUnits.Count, 0);
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.JOB_SUCCESS, MetricUnits.Count, 1);
+
   jobMetrics.publishStoredMetrics();
 
   logger.info('droppedTables', { droppedTables });

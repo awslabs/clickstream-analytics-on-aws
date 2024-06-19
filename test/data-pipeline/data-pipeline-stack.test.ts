@@ -14,6 +14,7 @@
 import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_EVENT_V2, TABLE_NAME_INGESTION, TABLE_NAME_ITEM_V2, TABLE_NAME_SESSION, TABLE_NAME_USER_V2, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
+import { DataPipelineCustomMetricsName, MetricsNamespace } from '../../src/common/model';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { WIDGETS_ORDER } from '../../src/metrics/settings';
 import { validateSubnetsRule } from '../rules';
@@ -1643,17 +1644,22 @@ test ('Should has alarm: data Processing Job Failed', ()=> {
           ],
         },
       },
+      {
+        Name: 'service',
+        Value: 'EMR-Serverless',
+      },
     ],
-    MetricName: 'FailedJobs',
-    Namespace: 'AWS/EMRServerless',
+    MetricName: DataPipelineCustomMetricsName.JOB_FAILED,
+    Namespace: MetricsNamespace.DATAPIPELINE,
     Period: {
       'Fn::GetAtt': [
         Match.anyValue(),
         'intervalSeconds',
       ],
     },
-    Statistic: 'Sum',
+    Statistic: 'Maximum',
     Threshold: 1,
+    TreatMissingData: 'ignore',
   });
 });
 

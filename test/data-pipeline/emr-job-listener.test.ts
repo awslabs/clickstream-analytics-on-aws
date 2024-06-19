@@ -224,9 +224,11 @@ test('lambda should record SUCCESS job state', async () => {
       [DataPipelineCustomMetricsName.FILTERED_BY_APP_IDS, 'Count', 126],
       [DataPipelineCustomMetricsName.FILTERED_BY_DATA_FRESHNESS_AND_FUTURE, 'Count', 12],
       [DataPipelineCustomMetricsName.FILTERED_BY_BOT, 'Count', 16],
+      [DataPipelineCustomMetricsName.JOB_FAILED, 'Count', 0],
+      [DataPipelineCustomMetricsName.JOB_SUCCESS, 'Count', 1],
     ],
   );
-  expect(publishStoredMetricsMock).toBeCalledTimes(1);
+  expect(publishStoredMetricsMock).toHaveBeenCalledTimes(1);
 
 });
 
@@ -250,7 +252,7 @@ test('lambda should not record job from other emr application', async () => {
   await handler(event);
   expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 0);
 
-  expect(addMetricMock).toBeCalledTimes(0);
+  expect(addMetricMock).toHaveBeenCalledTimes(0);
 
 });
 
@@ -273,7 +275,7 @@ test('lambda should not record PENDING job', async () => {
   };
   await handler(event);
   expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 0);
-  expect(addMetricMock).toBeCalledTimes(0);
+  expect(addMetricMock).toHaveBeenCalledTimes(0);
 
 });
 
@@ -314,8 +316,13 @@ test('lambda should send FAILDE job info to dead letter queue', async () => {
     MessageBody: jobInfoMsg,
   } as any);
 
-  expect(addMetricMock).toBeCalledTimes(0);
-
+  expect(addMetricMock.mock.calls).toEqual(
+    [
+      [DataPipelineCustomMetricsName.JOB_FAILED, 'Count', 1],
+      [DataPipelineCustomMetricsName.JOB_SUCCESS, 'Count', 0],
+    ],
+  );
+  expect(publishStoredMetricsMock).toHaveBeenCalledTimes(1);
 
 });
 
