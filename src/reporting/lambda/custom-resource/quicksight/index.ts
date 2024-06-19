@@ -780,7 +780,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
         schema: commonParams.schema,
         dashboardDefProps: dashboardDef,
       });
-      realtimeDashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef, true);
+      realtimeDashboard = await createDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef, true);
       logger.info(`Dashboard ${dashboard?.DashboardId} create completed.`);
     }
   }
