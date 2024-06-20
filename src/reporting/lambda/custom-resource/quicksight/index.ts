@@ -773,7 +773,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
     const dashboardIdRT = buildDashBoardId(commonParams.databaseName, commonParams.schema, true);
     const dashboardExistRT = await existDashboard(quickSight, commonParams.awsAccountId, dashboardIdRT.id);
     if (dashboardExistRT) {
-      realtimeDashboard = await updateDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef);
+      realtimeDashboard = await updateDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef, true);
       logger.info(`Dashboard ${realtimeDashboard?.DashboardId} update completed.`);
     } else {
       createdQuickSightResources.createdSchemas.push({
@@ -989,7 +989,7 @@ const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
     const dashboard = await quickSight.createDashboard({
       AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,
-      Name: `${props.dashboardName} - ${realtime ? 'rt- ':''}${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
+      Name: `${props.dashboardName} - ${realtime ? 'rt - ':''}${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
       Permissions: getDashboardPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
       SourceEntity: sourceEntity,
     });
@@ -1392,17 +1392,17 @@ const publishNewVersionDashboard = async(quickSight: QuickSight, dashboardId: st
 };
 
 const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
-  sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
+  sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps, realtime: boolean = false)
 : Promise<UpdateDashboardCommandOutput|undefined> => {
   try {
-    const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema);
+    const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema, realtime);
     const dashboardId = identifier.id;
 
     logger.info('start to update dashboard', { sourceEntity });
     const dashboard = await quickSight.updateDashboard({
       AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,
-      Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
+      Name: `${props.dashboardName} - ${realtime ? 'rt - ':''}${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
 
       SourceEntity: sourceEntity,
 
