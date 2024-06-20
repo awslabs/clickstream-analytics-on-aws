@@ -5786,8 +5786,23 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(UpdateDashboardCommand).callsFakeOnce(input => {
+      console.log(input);
+      if ( input.SourceEntity.SourceTemplate.Arn !== 'test-template-arn/version/1'
+        || input.Name !== 'Clickstream Dashboard - test1 - test-database-name'
+      ) {
+        fail('Template not set correctly');
+      }
+      return {
+        DashboardId: 'dashboard_0',
+        Status: 200,
+      };
+    });
+
     quickSightClientMock.on(CreateDashboardCommand).callsFakeOnce(input => {
-      if ( input.SourceEntity.SourceTemplate.Arn !== 'realtime-test-template-arn/version/1') {
+      if ( input.SourceEntity.SourceTemplate.Arn !== 'realtime-test-template-arn/version/1'
+        || input.Name !== 'Clickstream Dashboard - rt - test1 - test-database-name '
+      ) {
         fail('Template not set correctly');
       }
       return {
