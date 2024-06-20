@@ -350,6 +350,7 @@ export interface IngestionServerSinkBatchProps {
 export interface ReportingDashboardOutput {
   readonly appId: string;
   readonly dashboardId: string;
+  readonly realtimeDashboardId: string;
 }
 
 export interface IngestionServerSizeProps {

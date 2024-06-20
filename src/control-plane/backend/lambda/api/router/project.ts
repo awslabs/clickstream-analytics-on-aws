@@ -69,6 +69,13 @@ router_project.get(
     return projectServ.getAnalyzes(req, res, next);
   });
 
+
+router_project.get(
+  '/:projectId/:appId/realtime',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return projectServ.getRealtime(req, res, next);
+  });
+
 router_project.get(
   '',
   validate([

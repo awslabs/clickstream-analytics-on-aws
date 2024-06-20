@@ -1215,7 +1215,9 @@ export class ReportingService {
           props.dashboardCreateParameters.region,
           props.principals.exploreUserArn,
           props.dashboardCreateParameters.allowedDomain,
-          dashboardId,
+          {
+            dashboardId,
+          },
         );
         dashboardEmbedUrl = embedUrl.EmbedUrl!;
       }

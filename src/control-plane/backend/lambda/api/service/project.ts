@@ -37,7 +37,7 @@ export class ProjectServ {
     return pipelines[0];
   }
 
-  private getPresetAppDashboard(pipeline: IPipeline, appId: string) {
+  private getPresetAppDashboard(pipeline: IPipeline, appId: string, realtime: boolean = false) {
     const stackDashboards = getReportingDashboardsUrl(
       pipeline.stackDetails ?? pipeline.status?.stackDetails, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX);
     if (stackDashboards.length === 0) {
@@ -45,6 +45,20 @@ export class ProjectServ {
     }
     const appDashboard = stackDashboards.find((item: any) => item.appId === appId);
     if (appDashboard) {
+      if (realtime) {
+        const presetDashboard: IDashboard = {
+          id: appDashboard.realtimeDashboardId,
+          name: 'Realtime Dashboard',
+          description: 'Realtime user lifecycle analysis dashboard created by solution.',
+          projectId: pipeline.projectId,
+          appId: appId,
+          region: pipeline.region,
+          sheets: [],
+          createAt: pipeline.createAt,
+          updateAt: pipeline.updateAt,
+        };
+        return presetDashboard;
+      }
       const presetDashboard: IDashboard = {
         id: appDashboard.dashboardId,
         name: DEFAULT_DASHBOARD_NAME,
@@ -147,7 +161,9 @@ export class ProjectServ {
         pipeline.region,
         principals.publishUserArn,
         allowedDomain,
-        dashboardId,
+        {
+          dashboardId: dashboardId,
+        },
       );
       if (embed?.EmbedUrl) {
         dashboard.embedUrl = embed.EmbedUrl;
@@ -216,8 +232,48 @@ export class ProjectServ {
         pipeline.region,
         principals.publishUserArn,
         allowedDomain,
+        {},
       );
       return res.json(new ApiSuccess(embed));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public async getRealtime(req: any, res: any, next: any) {
+    try {
+      const { projectId, appId } = req.params;
+      const { allowedDomain, enable } = req.query;
+      const pipeline = await this.getPipelineByProjectId(projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+      }
+      if (!pipeline.reporting?.quickSight?.accountName) {
+        return res.status(400).json(new ApiFail('The latest pipeline not enable reporting.'));
+      }
+      const pipe = new CPipeline(pipeline);
+      if (enable === 'false') {
+        await pipe.realtime(false, appId);
+        return res.json(new ApiSuccess({
+          EmbedUrl: '',
+        }));
+      } else if (enable === 'true') {
+        await pipe.realtime(true, appId);
+        const principals = await getClickstreamUserArn(
+          SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
+          pipeline.reporting?.quickSight?.user ?? '',
+        );
+        const presetRealtimeDashboard = this.getPresetAppDashboard(pipeline, appId, true);
+        const embed = await generateEmbedUrlForRegisteredUser(
+          pipeline.region,
+          principals.publishUserArn,
+          allowedDomain,
+          {
+            initialPath: `/dashboards/${presetRealtimeDashboard?.id}`,
+          },
+        );
+        return res.json(new ApiSuccess(embed));
+      }
     } catch (error) {
       next(error);
     }
