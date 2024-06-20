@@ -38,9 +38,7 @@ import { S3SinkConfig, KafkaSinkConfig, KinesisSinkConfig } from '../../../src/i
 import {
   IngestionServerV2,
   IngestionServerV2Props,
-  FargateFleetProps,
-  Ec2FleetProps,
-  DefaultEc2FleetProps,
+  FleetProps,
 } from '../../../src/ingestion-server/server-v2/ingestion-server-v2';
 
 
@@ -222,9 +220,7 @@ export class TestStackV2 extends Stack {
       };
     }
 
-    const fargateFleetProps: FargateFleetProps = {
-      taskCpu: 256,
-      taskMemory: 512,
+    const fleetProps: FleetProps = {
       workerCpu: 128,
       workerMemory: 256,
       proxyCpu: 128,
@@ -238,22 +234,12 @@ export class TestStackV2 extends Stack {
       scaleOnCpuUtilizationPercent: props.scaleOnCpuUtilizationPercent || 50,
     };
 
-    const ec2FleetProps: Ec2FleetProps = {
-      ...DefaultEc2FleetProps,
-      serverMin: props.serverMin || 1,
-      serverMax: props.serverMax || 1,
-      taskMin: props.serverMin || 1,
-      taskMax: props.serverMax || 1,
-      scaleOnCpuUtilizationPercent: props.scaleOnCpuUtilizationPercent || 50,
-    };
-
     const serverProps: IngestionServerV2Props = {
       vpc,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
-      fargateFleetProps,
-      ec2FleetProps,
+      fleetProps,
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,
       s3SinkConfig,

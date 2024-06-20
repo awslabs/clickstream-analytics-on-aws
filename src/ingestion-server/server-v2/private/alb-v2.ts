@@ -145,7 +145,7 @@ function createApplicationLoadBalancer(
     },
     {
       Key: 'access_logs.s3.bucket',
-      Value: props.albLogBucket.s3BucketName,
+      Value: props.albLogBucket.bucketName,
     },
     {
       Key: 'access_logs.s3.prefix',

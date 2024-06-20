@@ -82,7 +82,7 @@ function createECSClusterAndService(
     containerInsights: true,
   });
 
-  const ecsAsgSetting = props.ec2FleetProps;
+  const ecsAsgSetting = props.fleetProps;
   const arch = ecsAsgSetting.arch;
 
   const ecsConfig = {
@@ -99,8 +99,8 @@ function createECSClusterAndService(
     associatePublicIpAddress: props.vpcSubnets.subnetType == SubnetType.PUBLIC,
     instanceType: ecsConfig.instanceType,
     machineImage: ecsConfig.machineImage,
-    maxCapacity: ecsAsgSetting.serverMax,
-    minCapacity: ecsAsgSetting.serverMin,
+    maxCapacity: ecsAsgSetting.taskMax,
+    minCapacity: ecsAsgSetting.taskMin,
     healthCheck: HealthCheck.ec2({
       grace: Duration.seconds(60),
     }),
@@ -157,7 +157,6 @@ function createECSClusterAndService(
     proxyImage,
     workerImage,
     capacityProvider,
-    autoScalingGroup,
   });
 
   Aspects.of(scope).add(new AddDefaultCapacityProviderStrategyAspect(capacityProvider));

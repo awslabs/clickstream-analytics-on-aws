@@ -50,8 +50,7 @@ import {
 import {
   IngestionServerV2,
   IngestionServerV2Props,
-  Ec2FleetProps,
-  FargateFleetProps,
+  FleetProps,
 } from './ingestion-server/server-v2/ingestion-server-v2';
 import {
   createCommonResources,
@@ -64,7 +63,7 @@ export interface NetworkProps {
 };
 
 export interface S3BucketProps {
-  readonly s3BucketName: string;
+  readonly bucketName: string;
   readonly prefix: string;
 }
 
@@ -149,62 +148,48 @@ export class IngestionServerV2NestedStack extends NestedStack {
       mskSecurityGroupId: props.kafkaBufferProps?.mskSecurityGroupId,
       mskClusterName: props.kafkaBufferProps?.mskClusterName,
       kinesisDataStreamArn: props.kinesisBufferProps?.kinesisDataStreamArn,
-      s3BucketName: props.s3BufferProps?.s3Bucket.s3BucketName,
+      s3BucketName: props.s3BufferProps?.s3Bucket.bucketName,
       s3Prefix: props.s3BufferProps?.s3Bucket.prefix,
       batchMaxBytes: props.s3BufferProps?.batchMaxBytes,
       batchTimeout: props.s3BufferProps?.batchTimeout,
     });
 
-    const ec2FleetCommonProps = {
-      workerCpu: 1792,
-      proxyCpu: 256,
-      instanceType: new InstanceType('c6i.large'),
-      arch: Platform.LINUX_AMD64,
-      warmPoolSize: 0,
-      proxyReservedMemory: 900,
-      workerReservedMemory: 900,
-      proxyMaxConnections: 1024,
-      workerThreads: 6,
-      workerStreamAckEnable: true,
-    };
-
-    const ec2FleetProps: Ec2FleetProps = {
-      ...ec2FleetCommonProps,
-      serverMin: props.serverCapability.serverMin,
-      serverMax: props.serverCapability.serverMax,
-      warmPoolSize: props.serverCapability.warmPoolSize,
-      taskMin: props.serverCapability.serverMin,
-      taskMax: props.serverCapability.serverMax,
-      scaleOnCpuUtilizationPercent: props.serverCapability.scaleOnCpuUtilizationPercent,
-    };
-
-    const fargateFleetCommonProps = {
-      taskCpu: 256,
-      taskMemory: 512,
-      workerCpu: 128,
-      workerMemory: 256,
-      proxyCpu: 128,
-      proxyMemory: 256,
+    let fleetProps: FleetProps;
+    const commonFleetProps = {
       arch: Platform.LINUX_AMD64,
       proxyMaxConnections: 1024,
       workerThreads: 6,
       workerStreamAckEnable: true,
-    };
-
-    const fargateFleetProps: FargateFleetProps = {
-      ...fargateFleetCommonProps,
       taskMin: props.serverCapability.serverMin,
       taskMax: props.serverCapability.serverMax,
       scaleOnCpuUtilizationPercent: props.serverCapability.scaleOnCpuUtilizationPercent,
     };
+    if (props.ecsInfraType === 'FARGATE') {
+      fleetProps = {
+        ...commonFleetProps,
+        workerCpu: 128,
+        workerMemory: 256,
+        proxyCpu: 128,
+        proxyMemory: 256,
+      };
+    } else {
+      fleetProps = {
+        ...commonFleetProps,
+        workerCpu: 1792,
+        proxyCpu: 256,
+        instanceType: new InstanceType('c6i.large'),
+        proxyMemory: 900,
+        workerMemory: 900,
+        warmPoolSize: props.serverCapability.warmPoolSize,
+      };
+    }
 
     const serverProps: IngestionServerV2Props = {
       vpc,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
-      ec2FleetProps,
-      fargateFleetProps,
+      fleetProps,
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,
       s3SinkConfig,
@@ -305,7 +290,7 @@ export class IngestionServerStackV2 extends Stack {
     const domainName = domainNameParam.valueAsString;
     const enableApplicationLoadBalancerAccessLog = enableApplicationLoadBalancerAccessLogParam.valueAsString;
     const logBucket = {
-      s3BucketName: logS3BucketParam.valueAsString,
+      bucketName: logS3BucketParam.valueAsString,
       prefix: logS3PrefixParam.valueAsString,
     };
     const serverCapability = {
@@ -376,7 +361,7 @@ export class IngestionServerStackV2 extends Stack {
       ...nestStackCommonProps,
       s3BufferProps: {
         s3Bucket: {
-          s3BucketName: s3Params.s3DataBucketParam.valueAsString,
+          bucketName: s3Params.s3DataBucketParam.valueAsString,
           prefix: s3Params.s3DataPrefixParam.valueAsString,
         },
         batchMaxBytes: s3Params.s3BatchMaxBytesParam.valueAsNumber,

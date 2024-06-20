@@ -30,14 +30,30 @@ const secretsManagerClient = new SecretsManagerClient({
 interface ResourcePropertiesType {
   ServiceToken: string;
   appIds: string;
-  clickStreamSDK: string;
+  clickStreamSDK: FeatureFlag;
   targetGroupArn: string;
   listenerArn: string;
-  enableAuthentication: string;
+  enableAuthentication: FeatureFlag;
   authenticationSecretArn: string;
   endpointPath: string;
   domainName: string;
   protocol: string;
+}
+
+interface CreateAppIdRulesInput {
+  listenerArn: string;
+  appIdArray: Array<string>;
+  protocol: string;
+  endpointPath: string;
+  domainName: string;
+  enableAuthentication: string;
+  authenticationSecretArn: string;
+  targetGroupArn: string;
+}
+
+export enum FeatureFlag {
+  ENABLED = 'Yes',
+  DISABLED = 'No',
 }
 
 interface HandleClickStreamSDKInput {
@@ -47,7 +63,7 @@ interface HandleClickStreamSDKInput {
   readonly protocol: string;
   readonly endpointPath: string;
   readonly domainName: string;
-  readonly enableAuthentication: string;
+  readonly enableAuthentication: FeatureFlag;
   readonly authenticationSecretArn: string;
   readonly targetGroupArn: string;
 }
@@ -55,14 +71,15 @@ interface HandleClickStreamSDKInput {
 interface HandleUpdateInput {
   readonly listenerArn: string;
   readonly protocol: string;
+  readonly newUpdateProps: UpdatePropType;
+  readonly oldUpdateProps: UpdatePropType;
+}
+
+interface UpdatePropType {
   readonly endpointPath: string;
   readonly hostHeader: string;
-  readonly enableAuthentication: string;
+  readonly enableAuthentication: FeatureFlag;
   readonly authenticationSecretArn: string;
-  readonly oldEndpointPath: string;
-  readonly oldHostHeader: string;
-  readonly oldEnableAuthentication: string;
-  readonly oldAuthenticationSecretArn: string;
 }
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -89,10 +106,10 @@ async function _handler(
   logger.info('functionName: ' + context.functionName);
 
   const appIds = props.appIds;
-  const clickStreamSDK = props.clickStreamSDK;
+  const clickStreamSDK: FeatureFlag = props.clickStreamSDK;
   const targetGroupArn = props.targetGroupArn;
   const listenerArn = props.listenerArn;
-  const enableAuthentication = props.enableAuthentication;
+  const enableAuthentication: FeatureFlag = props.enableAuthentication;
   const authenticationSecretArn = props.authenticationSecretArn;
   const endpointPath = props.endpointPath;
   const domainName = props.domainName;
@@ -107,22 +124,28 @@ async function _handler(
     const oldEndpointPath = oldProps.endpointPath;
     const oldDomainName = oldProps.domainName;
     const oldAuthenticationSecretArn = oldProps.authenticationSecretArn;
-    const oldEnableAuthentication = oldProps.enableAuthentication;
-    await handleUpdate({
-      listenerArn,
-      protocol,
+    const oldEnableAuthentication: FeatureFlag = oldProps.enableAuthentication;
+    const newUpdateProps : UpdatePropType = {
       endpointPath,
       hostHeader: domainName,
       enableAuthentication,
       authenticationSecretArn,
-      oldEndpointPath,
-      oldEnableAuthentication,
-      oldHostHeader: oldDomainName,
-      oldAuthenticationSecretArn,
+    };
+    const oldUpdateProps : UpdatePropType = {
+      endpointPath: oldEndpointPath,
+      hostHeader: oldDomainName,
+      enableAuthentication: oldEnableAuthentication,
+      authenticationSecretArn: oldAuthenticationSecretArn,
+    };
+    await handleUpdate({
+      listenerArn,
+      protocol,
+      newUpdateProps,
+      oldUpdateProps,
     });
   }
 
-  if (clickStreamSDK === 'Yes') {
+  if (clickStreamSDK === FeatureFlag.ENABLED) {
     await handleClickStreamSDK({
       appIds,
       requestType,
@@ -156,14 +179,14 @@ async function handleCreate(
   protocol: string,
   endpointPath: string,
   domainName: string,
-  enableAuthentication: string,
+  enableAuthentication: FeatureFlag,
   authenticationSecretArn: string,
   targetGroupArn: string,
 ) {
   // Create defalut forward rule and action
   await createDefaultForwardRule(listenerArn, protocol, endpointPath, domainName, enableAuthentication, authenticationSecretArn, targetGroupArn);
 
-  if (enableAuthentication === 'Yes') {
+  if (enableAuthentication === FeatureFlag.ENABLED) {
     await createAuthLogindRule(authenticationSecretArn, listenerArn);
   }
 }
@@ -171,32 +194,43 @@ async function handleCreate(
 async function handleUpdate(
   inputPros: HandleUpdateInput,
 ) {
-  if (inputPros.endpointPath !== inputPros.oldEndpointPath || inputPros.hostHeader !== inputPros.oldHostHeader) {
+  if (
+    inputPros.newUpdateProps.endpointPath !== inputPros.oldUpdateProps.endpointPath ||
+    inputPros.newUpdateProps.hostHeader !== inputPros.oldUpdateProps.hostHeader
+  ) {
     await updateEndpointPathAndHostHeader(
       inputPros.listenerArn,
-      inputPros.endpointPath,
-      inputPros.hostHeader,
-      inputPros.oldEndpointPath,
-      inputPros.oldHostHeader,
+      inputPros.newUpdateProps.endpointPath,
+      inputPros.newUpdateProps.hostHeader,
+      inputPros.oldUpdateProps.endpointPath,
+      inputPros.oldUpdateProps.hostHeader,
       inputPros.protocol,
     );
   }
 
   // update authentication
   if (
-    inputPros.enableAuthentication !== inputPros.oldEnableAuthentication ||
-    (inputPros.authenticationSecretArn !== inputPros.oldAuthenticationSecretArn && inputPros.enableAuthentication === 'Yes')
+    inputPros.newUpdateProps.enableAuthentication !== inputPros.oldUpdateProps.enableAuthentication ||
+    (
+      inputPros.newUpdateProps.authenticationSecretArn !== inputPros.oldUpdateProps.authenticationSecretArn &&
+      inputPros.newUpdateProps.enableAuthentication === FeatureFlag.ENABLED
+    )
   ) {
-    await sleep(20000);
-    if (inputPros.enableAuthentication === 'Yes' && inputPros.oldEnableAuthentication === 'No') {
+    if (
+      inputPros.newUpdateProps.enableAuthentication === FeatureFlag.ENABLED &&
+      inputPros.oldUpdateProps.enableAuthentication === FeatureFlag.DISABLED
+    ) {
       // if enableAuthentication change from No to Yes, enable auth
-      await enableAuth(inputPros.listenerArn, inputPros.authenticationSecretArn);
-    } else if (inputPros.enableAuthentication === 'No' && inputPros.oldEnableAuthentication === 'Yes') {
+      await enableAuth(inputPros.listenerArn, inputPros.newUpdateProps.authenticationSecretArn);
+    } else if (
+      inputPros.newUpdateProps.enableAuthentication === FeatureFlag.DISABLED &&
+      inputPros.oldUpdateProps.enableAuthentication === FeatureFlag.ENABLED
+    ) {
       // if enableAuthentication change from Yes to No, disable auth
       await disableAuth(inputPros.listenerArn);
     } else {
       // enable auth and authentication secret arn changed
-      await updateAuthenticationSecretArn(inputPros.listenerArn, inputPros.authenticationSecretArn);
+      await updateAuthenticationSecretArn(inputPros.listenerArn, inputPros.newUpdateProps.authenticationSecretArn);
     }
   }
 }
@@ -406,16 +440,17 @@ async function handleClickStreamSDK(input: HandleClickStreamSDKInput) {
 
   if (input.requestType === 'Create' || input.requestType === 'Update') {
     if (appIdArray.length > 0) {
-      await createAppIdRules(
-        input.listenerArn,
+      const createAppIdRulesInput: CreateAppIdRulesInput = {
+        listenerArn: input.listenerArn,
         appIdArray,
-        input.protocol,
-        input.endpointPath,
-        input.domainName,
-        input.enableAuthentication,
-        input.authenticationSecretArn,
-        input.targetGroupArn,
-      );
+        protocol: input.protocol,
+        endpointPath: input.endpointPath,
+        domainName: input.domainName,
+        enableAuthentication: input.enableAuthentication,
+        authenticationSecretArn: input.authenticationSecretArn,
+        targetGroupArn: input.targetGroupArn,
+      };
+      await createAppIdRules(createAppIdRulesInput);
     }
   }
 
@@ -520,35 +555,29 @@ async function getDeleteAppIdRules(appIdArray: Array<string>, listenerArn: strin
   return shouldDeleteRules;
 }
 
-async function createAppIdRules(
-  listenerArn: string,
-  appIdArray: Array<string>,
-  protocol: string,
-  endpointPath: string,
-  domainName: string,
-  enableAuthentication: string,
-  authenticationSecretArn: string,
-  targetGroupArn: string,
-) {
-  const allExistingAppIdRules = await getAllExistingAppIdRules(listenerArn);
 
-  const forwardActions = await generateForwardActions(enableAuthentication, authenticationSecretArn, targetGroupArn);
+async function createAppIdRules(
+  input: CreateAppIdRulesInput,
+) {
+  const allExistingAppIdRules = await getAllExistingAppIdRules(input.listenerArn);
+
+  const forwardActions = await generateForwardActions(input.enableAuthentication, input.authenticationSecretArn, input.targetGroupArn);
   const allPriorities = allExistingAppIdRules.map(rule => parseInt(rule.Priority!));
   const existingAppIds = getAllExistingAppIds(allExistingAppIdRules);
 
-  for (const appId of appIdArray) {
+  for (const appId of input.appIdArray) {
     if (existingAppIds.includes(appId)) {
       continue; // skip to the next iteration of the loop
     }
     const appIdConditions = generateAppIdCondition(appId);
 
     let priority = createPriority(allPriorities);
-    const baseForwardConditions = generateBaseForwardConditions(protocol, endpointPath, domainName);
+    const baseForwardConditions = generateBaseForwardConditions(input.protocol, input.endpointPath, input.domainName);
     //@ts-ignore
     baseForwardConditions.push(...appIdConditions);
     // Create a rule just contains mustConditions
     const createRuleCommand = new CreateRuleCommand({
-      ListenerArn: listenerArn,
+      ListenerArn: input.listenerArn,
       Actions: forwardActions,
       Conditions: baseForwardConditions,
       Priority: priority,
@@ -556,11 +585,11 @@ async function createAppIdRules(
     await albClient.send(createRuleCommand);
 
     priority = createPriority(allPriorities);
-    const pingPathRuleConditions = generateBaseForwardConditions(protocol, process.env.PING_PATH!, domainName);
+    const pingPathRuleConditions = generateBaseForwardConditions(input.protocol, process.env.PING_PATH!, input.domainName);
     //@ts-ignore
     pingPathRuleConditions.push(...appIdConditions);
     const createPingPathRuleCommand = new CreateRuleCommand({
-      ListenerArn: listenerArn,
+      ListenerArn: input.listenerArn,
       Actions: forwardActions,
       Conditions: pingPathRuleConditions,
       Priority: priority,
@@ -628,7 +657,7 @@ async function createDefaultForwardRule(
   protocol: string,
   endpointPath: string,
   domainName: string,
-  enableAuthentication: string,
+  enableAuthentication: FeatureFlag,
   authenticationSecretArn: string,
   targetGroupArn: string) {
   const defaultForwardConditions = generateBaseForwardConditions(protocol, endpointPath, domainName);
@@ -659,7 +688,7 @@ async function generateForwardActions(
   authenticationSecretArn: string,
   targetGroupArn: string) {
   const defaultForwardActions = [];
-  if (enableAuthentication === 'Yes') {
+  if (enableAuthentication === FeatureFlag.ENABLED) {
     // create auth forward rule
     const { issuer, userEndpoint, authorizationEndpoint, tokenEndpoint, appClientId, appClientSecret } = await getOidcInfo(authenticationSecretArn);
     // create auth forward rule
@@ -777,15 +806,35 @@ async function getOidcInfo(authenticationSecretArn: string) {
   const secretParams = {
     SecretId: authenticationSecretArn,
   };
-  const data = await secretsManagerClient.send(new GetSecretValueCommand(secretParams));
-  const secretValue = JSON.parse(data.SecretString!);
-  const issuer = secretValue.issuer;
-  const userEndpoint = secretValue.userEndpoint;
-  const authorizationEndpoint = secretValue.authorizationEndpoint;
-  const tokenEndpoint = secretValue.tokenEndpoint;
-  const appClientId = secretValue.appClientId;
-  const appClientSecret = secretValue.appClientSecret;
-  return { issuer, userEndpoint, authorizationEndpoint, tokenEndpoint, appClientId, appClientSecret };
+  const MAX_RETRIES = 5;
+  let attempts = 0;
+
+  while (attempts < MAX_RETRIES) {
+    try {
+      const data = await secretsManagerClient.send(new GetSecretValueCommand(secretParams));
+      const secretValue = JSON.parse(data.SecretString!);
+
+      const issuer = secretValue.issuer;
+      const userEndpoint = secretValue.userEndpoint;
+      const authorizationEndpoint = secretValue.authorizationEndpoint;
+      const tokenEndpoint = secretValue.tokenEndpoint;
+      const appClientId = secretValue.appClientId;
+      const appClientSecret = secretValue.appClientSecret;
+      return { issuer, userEndpoint, authorizationEndpoint, tokenEndpoint, appClientId, appClientSecret };
+    } catch (err: any) {
+      if (err.name === 'AccessDeniedException') {
+        attempts++;
+        logger.info(`No permission, retrying... Attempt ${attempts}/${MAX_RETRIES}`);
+        await sleep(2000 * attempts);        
+      } else {
+        // If the error is not a "AccessDeniedException" error, rethrow it
+        logger.error('Error retrieving secret: ', err);
+        throw err;
+      }
+    }
+  }
+  // If all retries fail, throw an error or handle it as needed
+  throw new Error('Failed to retrieve secret after maximum retries.');
 }
 
 function createPriority(allPriorities: Array<number>) {

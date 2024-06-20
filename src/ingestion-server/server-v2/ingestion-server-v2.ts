@@ -31,64 +31,20 @@ import { createMetricsWidgetForServerV2 } from '../server/private/metircs-server
 
 export const RESOURCE_ID_PREFIX = 'clickstream-ingestion-service-';
 
-export const DefaultFargateFleetProps = {
-  taskCpu: 256,
-  taskMemory: 512,
-  workerCpu: 128,
-  workerMemory: 256,
-  proxyCpu: 128,
-  proxyMemory: 256,
-  arch: Platform.LINUX_AMD64,
-  proxyMaxConnections: 1024,
-  workerThreads: 6,
-  workerStreamAckEnable: true,
-};
-
-export interface FargateFleetProps {
+export interface FleetProps {
   readonly workerCpu: number;
   readonly workerMemory: number;
   readonly proxyCpu: number;
   readonly proxyMemory: number;
-  readonly taskCpu: number;
-  readonly taskMemory: number;
-  readonly arch: Platform;
-  readonly proxyMaxConnections: number;
   readonly workerThreads: number;
   readonly workerStreamAckEnable: boolean;
+  readonly arch: Platform;
+  readonly proxyMaxConnections: number;
   readonly taskMin: number;
   readonly taskMax: number;
   readonly scaleOnCpuUtilizationPercent: number;
-}
-
-export const DefaultEc2FleetProps = {
-  workerCpu: 1792,
-  proxyCpu: 256,
-  instanceType: new InstanceType('c6i.large'),
-  arch: Platform.LINUX_AMD64,
-  warmPoolSize: 0,
-  proxyReservedMemory: 900,
-  workerReservedMemory: 900,
-  proxyMaxConnections: 1024,
-  workerThreads: 6,
-  workerStreamAckEnable: true,
-};
-
-export interface Ec2FleetProps {
-  readonly serverMin: number;
-  readonly serverMax: number;
-  readonly taskMin: number;
-  readonly taskMax: number;
-  readonly scaleOnCpuUtilizationPercent: number;
-  readonly instanceType: InstanceType;
-  readonly arch: Platform;
-  readonly warmPoolSize: number;
-  readonly proxyReservedMemory: number;
-  readonly proxyCpu: number;
-  readonly proxyMaxConnections: number;
-  readonly workerReservedMemory: number;
-  readonly workerCpu: number;
-  readonly workerThreads: number;
-  readonly workerStreamAckEnable: boolean;
+  readonly instanceType?: InstanceType;
+  readonly warmPoolSize?: number;
 }
 
 export interface MskS3SinkConnectorSetting {
@@ -100,8 +56,7 @@ export interface MskS3SinkConnectorSetting {
 export interface IngestionServerV2Props {
   readonly vpc: IVpc;
   readonly vpcSubnets: SubnetSelection;
-  readonly fargateFleetProps: FargateFleetProps;
-  readonly ec2FleetProps: Ec2FleetProps;
+  readonly fleetProps: FleetProps;
   readonly serverEndpointPath: string;
   readonly serverCorsOrigin: string;
   readonly kafkaSinkConfig?: KafkaSinkConfig;
@@ -172,7 +127,7 @@ export class IngestionServerV2 extends Construct {
       });
     }
 
-    deleteECSCluster(
+    createDeleteECSClusterHook(
       this,
       ecsCluster.ecsCluster.clusterArn,
       ecsCluster.ecsCluster.clusterName,
@@ -181,7 +136,7 @@ export class IngestionServerV2 extends Construct {
   }
 }
 
-function deleteECSCluster(scope: Construct, ecsClusterArn: string, ecsClusterName: string, ecsServiceName: string) {
+function createDeleteECSClusterHook(scope: Construct, ecsClusterArn: string, ecsClusterName: string, ecsServiceName: string) {
   deleteECSClusterCustomResource(scope, {
     ecsClusterArn,
     ecsClusterName,
