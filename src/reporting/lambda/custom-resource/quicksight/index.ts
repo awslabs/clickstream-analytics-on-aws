@@ -514,7 +514,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   }
 
   let realtimeDashboard = undefined;
-  if (realtimeDatasetRefs.length > 0 && dashboardDef.realtimeTemplateArn.length > 0) {
+  if (dashboardDef.realtimeTemplateId.length > 0) {
     const realtimeSourceEntity = {
       SourceTemplate: {
         Arn: dashboardDef.realtimeTemplateArn,
@@ -774,14 +774,14 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
     const dashboardExistRT = await existDashboard(quickSight, commonParams.awsAccountId, dashboardIdRT.id);
     if (dashboardExistRT) {
       realtimeDashboard = await updateDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef);
-      logger.info(`Dashboard ${dashboard?.DashboardId} update completed.`);
+      logger.info(`Dashboard ${realtimeDashboard?.DashboardId} update completed.`);
     } else {
       createdQuickSightResources.createdSchemas.push({
         schema: commonParams.schema,
         dashboardDefProps: dashboardDef,
       });
       realtimeDashboard = await createDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef, true);
-      logger.info(`Dashboard ${dashboard?.DashboardId} create completed.`);
+      logger.info(`Dashboard ${realtimeDashboard?.DashboardId} create completed.`);
     }
   }
 
