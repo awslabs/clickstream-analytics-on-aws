@@ -163,7 +163,8 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
 
         dashboards.push({
           appId: schemaName,
-          dashboardId: dashboard?.DashboardId,
+          dashboardId: dashboard?.dashboard.DashboardId,
+          realtimeDashboardId: dashboard?.realtimeDashboard?.DashboardId,
         });
       };
     } catch (err: any) {
@@ -287,8 +288,10 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
 
       dashboards.push({
         appId: schemaName,
-        dashboardId: dashboard?.DashboardId,
+        dashboardId: dashboard?.dashboard.DashboardId,
+        realtimeDashboardId: dashboard?.realtimeDashboard?.DashboardId,
       });
+
     };
 
     for (const schemaName of createSchemas) {
@@ -304,12 +307,13 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       logger.info('Creating schema', {
         schemaName: schemaName,
         dashboardDefProps: dashboardDefProps,
-        oldDashboardDefProps: dashboard?.DashboardId,
+        oldDashboardDefProps: dashboard,
       });
 
       dashboards.push({
         appId: schemaName,
-        dashboardId: dashboard?.DashboardId,
+        dashboardId: dashboard?.dashboard.DashboardId,
+        realtimeDashboardId: dashboard?.realtimeDashboard?.DashboardId,
       });
     };
 
@@ -443,9 +447,10 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   dashboardDef: QuickSightDashboardDefProps,
   useSpice: string,
 )
-: Promise<CreateDashboardCommandOutput|undefined> => {
+: Promise<any|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
+  const realtimeDatasetRefs: DataSetReference[] = [];
   const dataSets = dashboardDef.dataSets;
   const dataSetsSpice = dashboardDef.dataSetsSpice;
 
@@ -457,10 +462,17 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     const createdDataset = await createDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
     logger.info(`data set id: ${createdDataset?.DataSetId}`);
 
-    datasetRefs.push({
-      DataSetPlaceholder: dataSet.tableName,
-      DataSetArn: createdDataset?.Arn!,
-    });
+    if (dataSet.realtime === 'yes') {
+      realtimeDatasetRefs.push({
+        DataSetPlaceholder: dataSet.tableName,
+        DataSetArn: createdDataset?.Arn!,
+      });
+    } else {
+      datasetRefs.push({
+        DataSetPlaceholder: dataSet.tableName,
+        DataSetArn: createdDataset?.Arn!,
+      });
+    }
   }
 
   const sourceEntity = {
@@ -501,7 +513,23 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     }
   }
 
-  return dashboard;
+  let realtimeDashboard = undefined;
+  if (dashboardDef.realtimeTemplateId.length > 0) {
+    const realtimeSourceEntity = {
+      SourceTemplate: {
+        Arn: dashboardDef.realtimeTemplateArn,
+        DataSetReferences: realtimeDatasetRefs,
+      },
+    };
+
+    realtimeDashboard = await createDashboard(quickSight, commonParams, realtimeSourceEntity, dashboardDef, true);
+    logger.info(`Realtime dashboard ${realtimeDashboard?.DashboardId} creation completed.`);
+  }
+
+  return {
+    dashboard,
+    realtimeDashboard,
+  };
 
 };
 
@@ -519,6 +547,12 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
     // Delete Dashboard
     const dashboardId = buildDashBoardId(deleteDatabase, schema);
     const result = await deleteDashboardById(quickSight, accountId, dashboardId.id);
+
+    // Delete Realtime Dashboard
+    if (dashboardDef.realtimeTemplateId.length > 0) {
+      const rtDashboardId = buildDashBoardId(deleteDatabase, schema, true);
+      await deleteDashboardById(quickSight, accountId, rtDashboardId.id);
+    }
 
     //delete Analysis
     const analysisId = buildAnalysisId(deleteDatabase, schema);
@@ -609,9 +643,10 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
   createdQuickSightResources: CreatedQuickSightResources,
   useSpice: string,
 )
-: Promise<UpdateDashboardCommandOutput|undefined> => {
+: Promise<any|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
+  const datasetRefsRT: DataSetReference[] = [];
   const dataSets = dashboardDef.dataSets;
   const oldDataSets = oldDashboardDef.dataSets;
   const dataSetsSpice = dashboardDef.dataSetsSpice;
@@ -654,10 +689,18 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
       });
       createdDataset = await createDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
     }
-    datasetRefs.push({
-      DataSetPlaceholder: dataSet.tableName,
-      DataSetArn: createdDataset?.Arn!,
-    });
+
+    if (dataSet.realtime === 'yes') {
+      datasetRefsRT.push({
+        DataSetPlaceholder: dataSet.tableName,
+        DataSetArn: createdDataset?.Arn!,
+      });
+    } else {
+      datasetRefs.push({
+        DataSetPlaceholder: dataSet.tableName,
+        DataSetArn: createdDataset?.Arn!,
+      });
+    }
   }
 
   //remove unused datasets
@@ -717,10 +760,38 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
     }
   }
 
+  //real time dashboard
+  let realtimeDashboard = undefined;
+  if (dashboardDef.realtimeTemplateId.length > 0) {
+    const latestVersionRT = await getLatestTemplateVersion(quickSight, commonParams.awsAccountId, dashboardDef.realtimeTemplateId);
+    const sourceEntityRT = {
+      SourceTemplate: {
+        Arn: dashboardDef.realtimeTemplateArn + `/version/${latestVersionRT}`,
+        DataSetReferences: datasetRefsRT,
+      },
+    };
+    const dashboardIdRT = buildDashBoardId(commonParams.databaseName, commonParams.schema, true);
+    const dashboardExistRT = await existDashboard(quickSight, commonParams.awsAccountId, dashboardIdRT.id);
+    if (dashboardExistRT) {
+      realtimeDashboard = await updateDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef, true);
+      logger.info(`Dashboard ${realtimeDashboard?.DashboardId} update completed.`);
+    } else {
+      createdQuickSightResources.createdSchemas.push({
+        schema: commonParams.schema,
+        dashboardDefProps: dashboardDef,
+      });
+      realtimeDashboard = await createDashboard(quickSight, commonParams, sourceEntityRT, dashboardDef, true);
+      logger.info(`Dashboard ${realtimeDashboard?.DashboardId} create completed.`);
+    }
+  }
+
   const folderId = `clickstream_${commonParams.databaseName}_${commonParams.schema}`;
   await updateFolderMembership(quickSight, commonParams, folderId, dashboard?.DashboardId!);
 
-  return dashboard;
+  return {
+    dashboard,
+    realtimeDashboard,
+  };
 };
 
 const updateFolderMembership = async (quickSight: QuickSight, commonParams: ResourceCommonParams, folderId: string, dashboardId: string)
@@ -788,7 +859,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
   props: DataSetProps)
 : Promise<CreateDataSetCommandOutput|undefined> => {
   try {
-    const identifier = buildDataSetId(commonParams.databaseName, commonParams.schema, props.tableName);
+    const identifier = buildDataSetId(commonParams.databaseName, commonParams.schema, props.tableName, props.realtime === 'yes');
     const datasetId = identifier.id;
 
     const timezone = commonParams.timezoneDict[commonParams.schema] ?? 'UTC';
@@ -865,7 +936,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     const datasetParams: CreateDataSetCommandInput = {
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
-      Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
+      Name: `${identifier.tableNameIdentifier}-${props.realtime === 'yes' ? 'rt-':''}${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
       Permissions: getDataSetPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
       DatasetParameters: datasetParameters,
       ImportMode: props.useSpice === 'yes' ? DataSetImportMode.SPICE : DataSetImportMode.DIRECT_QUERY,
@@ -906,10 +977,10 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
 };
 
 const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
-  sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
+  sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps, realtime: boolean = false)
 : Promise<CreateDashboardCommandOutput|undefined> => {
   try {
-    const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema);
+    const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema, realtime);
     const dashboardId = identifier.id;
 
     logger.info(`start to create dashboard ${dashboardId}`);
@@ -918,7 +989,7 @@ const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
     const dashboard = await quickSight.createDashboard({
       AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,
-      Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
+      Name: `${props.dashboardName} - ${realtime ? 'rt - ':''}${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
       Permissions: getDashboardPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
       SourceEntity: sourceEntity,
     });
@@ -1048,7 +1119,7 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
 : Promise<DeleteDataSetCommandOutput|undefined> => {
 
   let result = undefined;
-  const identifier = buildDataSetId(databaseName, schema, props.tableName);
+  const identifier = buildDataSetId(databaseName, schema, props.tableName, props.realtime === 'yes');
   const datasetId = identifier.id;
   try {
 
@@ -1173,7 +1244,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
 : Promise<UpdateDataSetCommandOutput|undefined> => {
 
   try {
-    const identifier = buildDataSetId(commonParams.databaseName, commonParams.schema, props.tableName);
+    const identifier = buildDataSetId(commonParams.databaseName, commonParams.schema, props.tableName, props.realtime === 'yes');
     const datasetId = identifier.id;
 
     const timezone = commonParams.timezoneDict[commonParams.schema] ?? 'UTC';
@@ -1321,17 +1392,17 @@ const publishNewVersionDashboard = async(quickSight: QuickSight, dashboardId: st
 };
 
 const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
-  sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
+  sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps, realtime: boolean = false)
 : Promise<UpdateDashboardCommandOutput|undefined> => {
   try {
-    const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema);
+    const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema, realtime);
     const dashboardId = identifier.id;
 
     logger.info('start to update dashboard', { sourceEntity });
     const dashboard = await quickSight.updateDashboard({
       AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,
-      Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
+      Name: `${props.dashboardName} - ${realtime ? 'rt - ':''}${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
 
       SourceEntity: sourceEntity,
 
@@ -1373,12 +1444,12 @@ const grantDataSourcePermission = async (quickSight: QuickSight, dataSourceArn: 
   });
 };
 
-const buildDashBoardId = function (databaseName: string, schema: string): Identifier {
+const buildDashBoardId = function (databaseName: string, schema: string, realtime: boolean = false): Identifier {
   const schemaIdentifier = truncateString(schema, 40);
   const databaseIdentifier = truncateString(databaseName, 40);
   const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}`).digest('hex').substring(0, 8);
   return {
-    id: `clickstream_dashboard_${databaseIdentifier}_${schemaIdentifier}_${suffix}`,
+    id: `clickstream_dashboard_${realtime ? 'rt_' : ''}${databaseIdentifier}_${schemaIdentifier}_${suffix}`,
     idSuffix: suffix,
     databaseIdentifier,
     schemaIdentifier,
@@ -1397,13 +1468,13 @@ const buildAnalysisId = function (databaseName: string, schema: string): Identif
   };
 };
 
-const buildDataSetId = function (databaseName: string, schema: string, tableName: string): Identifier {
+const buildDataSetId = function (databaseName: string, schema: string, tableName: string, realtime: boolean = false): Identifier {
   const tableNameIdentifier = truncateString(tableName.replace(/clickstream_/g, ''), 40);
   const schemaIdentifier = truncateString(schema, 15);
   const databaseIdentifier = truncateString(databaseName, 15);
   const suffix = crypto.createHash('sha256').update(`${databaseName}${schema}${tableName}`).digest('hex').substring(0, 8);
   return {
-    id: `clickstream_dataset_${databaseIdentifier}_${schemaIdentifier}_${tableNameIdentifier}_${suffix}`,
+    id: `clickstream_dataset_${realtime ? 'rt_' : ''}${databaseIdentifier}_${schemaIdentifier}_${tableNameIdentifier}_${suffix}`,
     idSuffix: suffix,
     databaseIdentifier,
     schemaIdentifier,

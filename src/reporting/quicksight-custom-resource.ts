@@ -55,6 +55,8 @@ import {
   CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,
   CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER,
   CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME,
+  CLICKSTREAM_REALTIME_EVENT_VIEW_PLACEHOLDER,
+  CLICKSTREAM_REALTIME_EVENT_VIEW_NAME,
 } from '@aws/clickstream-base-lib';
 import { RefreshInterval, TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -64,6 +66,7 @@ import { Construct } from 'constructs';
 import { DataSetProps, QuickSightDashboardDefProps, QuicksightCustomResourceProps } from './private/dashboard';
 import {
   clickstream_event_view_columns,
+  clickstream_realtime_event_view_columns,
 } from './private/dataset-col-def';
 import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
 
@@ -93,8 +96,18 @@ export function createQuicksightCustomResource(
   const eventViewProjectedColumns: string[] = [];
   clickstream_event_view_columns.forEach( item => eventViewProjectedColumns.push(item.Name!));
 
+  const realtimeEventViewProjectedColumns: string[] = [];
+  clickstream_realtime_event_view_columns.forEach( item => realtimeEventViewProjectedColumns.push(item.Name!));
+
   const eventViewColumns = `
+    *,
+    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
+    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date
+  `;
+
+  const eventViewColumnsRT = `
     *, 
+    CASE WHEN event_name = '_first_open' THEN COALESCE(user_id, user_pseudo_id) ELSE NULL END as new_user_indicator,
     DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
     DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date
   `;
@@ -104,10 +117,12 @@ export function createQuicksightCustomResource(
     dashboardName: 'Clickstream Dashboard',
     templateArn: props.templateArn,
     templateId: props.templateId,
+    realtimeTemplateId: props.realtimeTemplateId,
+    realtimeTemplateArn: props.realtimeTemplateArn,
     dataSourceArn: props.dataSourceArn,
     databaseName: databaseName,
-    dataSets: _getDataSetDefs('no', eventViewColumns, eventViewProjectedColumns, tenYearsAgo, futureDate),
-    dataSetsSpice: _getDataSetDefs('yes', eventViewColumns, eventViewProjectedColumns, tenYearsAgo, futureDate),
+    dataSets: _getDataSetDefs('no', eventViewColumns, eventViewColumnsRT, eventViewProjectedColumns, realtimeEventViewProjectedColumns, tenYearsAgo, futureDate),
+    dataSetsSpice: _getDataSetDefs('yes', eventViewColumns, eventViewColumnsRT, eventViewProjectedColumns, realtimeEventViewProjectedColumns, tenYearsAgo, futureDate),
   };
 
   const cr = new CustomResource(scope, 'QuicksightCustomResource', {
@@ -156,7 +171,9 @@ function createQuicksightLambda(
 function _getDataSetDefs(
   useSpice: string,
   eventViewColumns: string,
+  eventViewColumnsRT: string,
   eventViewProjectedColumns: string[],
+  realtimeEventViewProjectedColumns: string[],
   tenYearsAgo: Date,
   futureDate: Date,
 ): DataSetProps[] {
@@ -172,8 +189,9 @@ function _getDataSetDefs(
         select 
           ${eventViewColumns} 
         from {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME}
-        where DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) >= <<$startDate01>>
-        and DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))
+        where
+          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
+          and event_timestamp <= (<<$endDate01>>::timestamp + interval '1 days') AT TIME ZONE '{{{timezone}}}' 
       `,
       columns: [
         ...clickstream_event_view_columns,
@@ -213,6 +231,66 @@ function _getDataSetDefs(
         },
       ],
       projectedColumns: [...eventViewProjectedColumns, 'event_timestamp_local', 'event_date'],
+    },
+  );
+
+  //Realtime data set
+  dataSetProps.push(
+    {
+      tableName: CLICKSTREAM_REALTIME_EVENT_VIEW_PLACEHOLDER,
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard
+        select 
+          ${eventViewColumnsRT} 
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where 
+          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
+          and event_timestamp <= <<$endDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
+      `,
+      columns: [
+        ...clickstream_realtime_event_view_columns,
+        {
+          Name: 'event_timestamp_local',
+          Type: 'DATETIME',
+        },
+        {
+          Name: 'event_date',
+          Type: 'DATETIME',
+        },
+        {
+          Name: 'new_user_indicator',
+          Type: 'STRING',
+        },
+      ],
+      dateTimeDatasetParameter: [
+        {
+          name: 'startDate01',
+          timeGranularity: TimeGranularity.DAY,
+          defaultValue: tenYearsAgo,
+        },
+        {
+          name: 'endDate01',
+          timeGranularity: TimeGranularity.DAY,
+          defaultValue: futureDate,
+        },
+      ],
+      tagColumnOperations: [
+        {
+          columnName: 'geo_country',
+          columnGeographicRoles: ['COUNTRY'],
+        },
+        {
+          columnName: 'geo_city',
+          columnGeographicRoles: ['CITY'],
+        },
+        {
+          columnName: 'geo_region',
+          columnGeographicRoles: ['STATE'],
+        },
+      ],
+      projectedColumns: [...realtimeEventViewProjectedColumns, 'event_timestamp_local', 'event_date', 'new_user_indicator'],
     },
   );
 

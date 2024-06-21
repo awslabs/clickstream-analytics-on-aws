@@ -2053,13 +2053,13 @@ export function buildEventDateSql(sqlParameters: BaseSQLParameters, prefix: stri
   let eventDateSQL = '';
   if (timeWindowInSeconds) {
     if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
-      eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= (date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)})::timestamp AT TIME ZONE '${sqlParameters.timezone}' - interval '${timeWindowInSeconds} seconds' and ${prefix}event_timestamp <= (date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)} + interval '1 days' )::timestamp AT TIME ZONE '${sqlParameters.timezone}'`);
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= (date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)})::timestamp AT TIME ZONE '${sqlParameters.timezone}' - interval '${timeWindowInSeconds} seconds' and ${prefix}event_timestamp < (date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)} + interval '1 days' )::timestamp AT TIME ZONE '${sqlParameters.timezone}'`);
     } else {
       eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= ${_getStartDateForRelativeDateRange(sqlParameters.timezone, sqlParameters.lastN, sqlParameters.timeUnit, timeWindowInSeconds)} and ${prefix}event_timestamp <= CURRENT_TIMESTAMP `);
     }
   } else {
     if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
-      eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= (date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)})::timestamp AT TIME ZONE '${sqlParameters.timezone}' and ${prefix}event_timestamp <= (date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)} + interval '1 days' )::timestamp AT TIME ZONE '${sqlParameters.timezone}' `);
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= (date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)})::timestamp AT TIME ZONE '${sqlParameters.timezone}' and ${prefix}event_timestamp < (date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)} + interval '1 days' )::timestamp AT TIME ZONE '${sqlParameters.timezone}' `);
     } else {
       if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
         eventDateSQL = eventDateSQL.concat(`${prefix}event_timestamp >= DATE_TRUNC('week', CURRENT_TIMESTAMP AT TIME ZONE '${sqlParameters.timezone}' - interval '${sqlParameters.lastN! - 1} weeks') and ${prefix}event_timestamp <= CURRENT_TIMESTAMP`);

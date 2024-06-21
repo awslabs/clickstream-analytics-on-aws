@@ -55,6 +55,12 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
 
   const analyticsNavItems: IAnalyticsItemType[] = [
     {
+      text: t('nav.analytics.realtime'),
+      icon: <ExtendIcon icon="angle-right-double" />,
+      href: `/analytics/${projectId}/app/${appId}/realtime`,
+      value: 'realtime',
+    },
+    {
       text: t('nav.analytics.dashboards'),
       icon: <ExtendIcon icon="BsKanban" />,
       href: `/analytics/${projectId}/app/${appId}/dashboards`,

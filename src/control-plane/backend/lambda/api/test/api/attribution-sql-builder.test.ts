@@ -234,7 +234,7 @@ describe('Attribution SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -991,7 +991,7 @@ describe('Attribution SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
          event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       target_data as (
@@ -1403,7 +1403,7 @@ describe('Attribution SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai' - interval '2592000 seconds'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -1851,7 +1851,7 @@ describe('Attribution SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
          event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -5026,7 +5026,7 @@ describe('Attribution SQL Builder test', () => {
           shop.shop.clickstream_event_view_v3 as event
         where
          event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'''
@@ -5984,7 +5984,7 @@ describe('Attribution SQL Builder test', () => {
           join user_segment_base on event.user_pseudo_id = user_segment_base.user_id
         where
           event.event_timestamp >= (date '2023-10-01')::timestamp AT TIME ZONE 'Asia/Shanghai'
-          and event.event_timestamp <= (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
+          and event.event_timestamp < (date '2025-10-10' + interval '1 days')::timestamp AT TIME ZONE 'Asia/Shanghai'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (platform = 'Android')
       ),

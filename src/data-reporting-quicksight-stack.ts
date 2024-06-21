@@ -99,6 +99,15 @@ export class DataReportingQuickSightStack extends Stack {
       },
     );
 
+    const realtimeDashboardCondition = new CfnCondition(
+      this,
+      'realtimeDashboardCondition',
+      {
+        expression:
+          Fn.conditionEquals(stackParams.quickSightRealTimeDashboardParam.valueAsString, 'yes'),
+      },
+    );
+
     const templateId = `clickstream_template_${stackParams.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
     const template = new CfnTemplate(this, 'Clickstream-Template-Def', {
       templateId,
@@ -119,6 +128,25 @@ export class DataReportingQuickSightStack extends Stack {
         JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json')).toString('utf-8')),
       ),
     });
+
+    const realtimeTemplateId = `clickstream_template_rt_${stackParams.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
+    const realtimeTemplate = new CfnTemplate(this, 'Clickstream-Template-Def-Realtime', {
+      templateId: realtimeTemplateId,
+      awsAccountId: Aws.ACCOUNT_ID,
+      permissions: [{
+        principal: stackParams.quickSightOwnerPrincipalParam.valueAsString,
+        actions: [
+          'quicksight:UpdateTemplatePermissions',
+          'quicksight:DescribeTemplatePermissions',
+          'quicksight:DescribeTemplate',
+          'quicksight:DeleteTemplate',
+          'quicksight:UpdateTemplate',
+        ],
+      }],
+
+      definition: transformKeysToLowercase(JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def-realtime.json')).toString('utf-8'))),
+    });
+    realtimeTemplate.cfnOptions.condition = realtimeDashboardCondition;
 
     const userSecret = Secret.fromSecretNameV2(this, 'Clickstream-Redshift-Secret', `${stackParams.redshiftParameterKeyParam.valueAsString}`);
 
@@ -151,6 +179,8 @@ export class DataReportingQuickSightStack extends Stack {
     const cr = createQuicksightCustomResource(this, {
       templateArn: template.attrArn,
       templateId: template.templateId,
+      realtimeTemplateArn: Fn.conditionIf(realtimeDashboardCondition.logicalId, realtimeTemplate.attrArn, '').toString(),
+      realtimeTemplateId: Fn.conditionIf(realtimeDashboardCondition.logicalId, realtimeTemplate.templateId, '').toString(),
       dataSourceArn: dataSource.attrArn,
       databaseName: stackParams.redshiftDBParam.valueAsString,
       timezone: stackParams.quickSightTimezoneParam.valueAsString,
@@ -210,6 +240,20 @@ export class DataReportingQuickSightStack extends Stack {
       iamRoleBoundaryArnParam,
     } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
     Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
+  }
+}
+
+function transformKeysToLowercase(obj: string): any {
+  if (Array.isArray(obj)) {
+    return obj.map(transformKeysToLowercase);
+  } else if (obj !== null && typeof obj === 'object') {
+    return Object.keys(obj).reduce((acc, key) => {
+      const lowerKey = key.charAt(0).toLowerCase() + key.slice(1);
+      acc[lowerKey] = transformKeysToLowercase(obj[key]);
+      return acc;
+    }, {} as Record<string, any>);
+  } else {
+    return obj;
   }
 }
 

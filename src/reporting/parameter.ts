@@ -101,6 +101,16 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Enable QuickSight SPICE Import Mode',
   };
 
+  const quickSightRealTimeDashboardParam = new CfnParameter(scope, 'QuickSightRealTimeDashboardParam', {
+    description: 'enable realtime dashboard or not.',
+    type: 'String',
+    allowedValues: allowedValues,
+    default: allowedValues[1],
+  });
+  labels[quickSightRealTimeDashboardParam.logicalId] = {
+    default: 'Enable Realtime Dashboard',
+  };
+
   const redshiftDefaultDBParam = new CfnParameter(scope, 'RedshiftDefaultDBParam', {
     description: 'Redshift Default database name.',
     type: 'String',
@@ -173,6 +183,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       quickSightOwnerPrincipalParam.logicalId,
       quickSightTimezoneParam.logicalId,
       quickSightUseSpiceParam.logicalId,
+      quickSightRealTimeDashboardParam.logicalId,
     ],
   });
 
@@ -197,6 +208,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     quickSightOwnerPrincipalParam,
     quickSightTimezoneParam,
     quickSightUseSpiceParam,
+    quickSightRealTimeDashboardParam,
     redshiftEndpointParam,
     redshiftDefaultDBParam,
     redshiftDBParam,

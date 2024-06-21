@@ -82,6 +82,9 @@ export const CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER = 'Retention_View';
 export const CLICKSTREAM_LAST_REFRESH_DATE_VIEW_PLACEHOLDER = 'Last_Refresh_Date';
 export const CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME = 'refresh_mv_sp_status';
 
+export const CLICKSTREAM_REALTIME_EVENT_VIEW_NAME = 'ods_events_streaming_view';
+export const CLICKSTREAM_REALTIME_EVENT_VIEW_PLACEHOLDER = 'Realtime_Event';
+
 export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [
   'clickstream_lifecycle_daily_view_v1',
   'clickstream_lifecycle_weekly_view_v1',
@@ -96,8 +99,6 @@ export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [
   'clickstream_event_attr_view_v1',
   'clickstream_session_view_v1',
   'clickstream_event_view_v1',
-  'user_m_view',
-  'item_m_view',
 ];
 
 export const CLICKSTREAM_DEPRECATED_VIEW_LIST = [

@@ -18,81 +18,83 @@ import {
   ColumnLayout,
   Container,
   ContentLayout,
-  DateRangePicker,
-  DateRangePickerProps,
   Header,
   Link,
   Popover,
   SpaceBetween,
   Toggle,
 } from '@cloudscape-design/components';
+import { embedRealtimeUrl, getPipelineDetailByProjectId } from 'apis/analytics';
+import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
-import i18n from 'i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
+import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 
 const AnalyticsRealtime: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
-
   const [checked, setChecked] = React.useState(false);
+  const [loadingData, setLoadingData] = useState(false);
+  const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
 
-  const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>({
-      type: 'relative',
-      amount: 30,
-      unit: 'minute',
-    });
-
-  const relativeOptions: ReadonlyArray<DateRangePickerProps.RelativeOption> = [
-    {
-      key: 'previous-10-minute',
-      amount: 10,
-      unit: 'minute',
-      type: 'relative',
-    },
-    {
-      key: 'previous-30-minute',
-      amount: 30,
-      unit: 'minute',
-      type: 'relative',
-    },
-    {
-      key: 'previous-1-hour',
-      amount: 1,
-      unit: 'hour',
-      type: 'relative',
-    },
-  ];
-
-  const isValidRange = (
-    range: DateRangePickerProps.Value | null
-  ): DateRangePickerProps.ValidationResult => {
-    if (range?.type === 'absolute') {
-      const [startDateWithoutTime] = range.startDate.split('T');
-      const [endDateWithoutTime] = range.endDate.split('T');
-      if (!startDateWithoutTime || !endDateWithoutTime) {
-        return {
-          valid: false,
-          errorMessage: t('analytics:valid.dateRangeIncomplete'),
-        };
+  const getRealtime = async () => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<any> = await embedRealtimeUrl(
+        defaultStr(projectId),
+        defaultStr(appId),
+        window.location.origin,
+        checked
+      );
+      if (success && data.EmbedUrl) {
+        setDashboardEmbedUrl(data.EmbedUrl);
       }
-      if (
-        new Date(range.startDate).getTime() -
-          new Date(range.endDate).getTime() >
-        0
-      ) {
-        return {
-          valid: false,
-          errorMessage: t('analytics:valid.dateRangeInvalid'),
-        };
-      }
+    } catch (error) {
+      setChecked(!checked);
+      setDashboardEmbedUrl('');
+      setLoadingData(false);
     }
-    return { valid: true };
+    setLoadingData(false);
   };
+
+  const loadPipeline = async () => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(defaultStr(projectId));
+      if (success && data.analysisStudioEnabled) {
+        if (appId && data.streaming?.appIdRealtimeList?.includes(appId)) {
+          setChecked(true);
+          await Promise.all([getRealtime()]);
+        } else {
+          setChecked(false);
+        }
+      }
+      setLoadingData(false);
+    } catch (error) {
+      setLoadingData(false);
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (projectId && appId) {
+      loadPipeline();
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    if (!checked) {
+      setDashboardEmbedUrl('');
+    }
+    if (projectId && appId) {
+      getRealtime();
+    }
+  }, [checked]);
 
   const breadcrumbItems = [
     {
@@ -149,64 +151,32 @@ const AnalyticsRealtime: React.FC = () => {
                         : t('analytics:labels.realtimeStopped')}
                     </Toggle>
                   </div>
-                  <div>
-                    <DateRangePicker
-                      onChange={({ detail }) => {
-                        setDateRangeValue(
-                          detail.value as DateRangePickerProps.Value
-                        );
-                      }}
-                      value={dateRangeValue ?? null}
-                      relativeOptions={relativeOptions}
-                      isValidRange={isValidRange}
-                      i18nStrings={{
-                        relativeModeTitle: defaultStr(
-                          t('analytics:dateRange.relativeModeTitle')
-                        ),
-                        absoluteModeTitle: defaultStr(
-                          t('analytics:dateRange.absoluteModeTitle')
-                        ),
-                        relativeRangeSelectionHeading: defaultStr(
-                          t('analytics:dateRange.relativeRangeSelectionHeading')
-                        ),
-                        cancelButtonLabel: defaultStr(
-                          t('analytics:dateRange.cancelButtonLabel')
-                        ),
-                        applyButtonLabel: defaultStr(
-                          t('analytics:dateRange.applyButtonLabel')
-                        ),
-                        clearButtonLabel: defaultStr(
-                          t('analytics:dateRange.clearButtonLabel')
-                        ),
-                        customRelativeRangeOptionLabel: defaultStr(
-                          t(
-                            'analytics:dateRange.customRelativeRangeOptionLabel'
-                          )
-                        ),
-                        formatRelativeRange: (
-                          value: DateRangePickerProps.RelativeValue
-                        ) => {
-                          return `${t(
-                            'analytics:dateRange.formatRelativeRangeLabel'
-                          )} ${value.amount} ${i18n.t(
-                            `analytics:dateRange.${value.unit}`
-                          )}`;
-                        },
-                      }}
-                    />
-                  </div>
                 </ColumnLayout>
                 <br />
-                <Alert
-                  statusIconAriaLabel="Info"
-                  action={
-                    <Button disabled iconAlign="right" iconName="external">
-                      {t('analytics:realtime.configProject')}
-                    </Button>
-                  }
-                >
-                  {t('analytics:realtime.disableMessage')}
-                </Alert>
+                {!checked ? (
+                  <Alert
+                    statusIconAriaLabel="Info"
+                    action={
+                      <Button disabled iconAlign="right" iconName="external">
+                        {t('analytics:realtime.configProject')}
+                      </Button>
+                    }
+                  >
+                    {t('analytics:realtime.disableMessage')}
+                  </Alert>
+                ) : (
+                  <>
+                    {loadingData ? (
+                      <Loading isPage />
+                    ) : (
+                      <ExploreEmbedFrame
+                        embedType="console"
+                        embedUrl={dashboardEmbedUrl}
+                        embedPage="analyze"
+                      />
+                    )}
+                  </>
+                )}
               </Container>
             </ContentLayout>
           }
