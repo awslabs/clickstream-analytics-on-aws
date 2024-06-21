@@ -1839,7 +1839,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               tableName: 'Realtime_Event',
               useSpice: 'no',
               realtime: 'yes',
-              customSql: "\n        -- clickstream-builtin-realtime-dashboard\n        select \n          \n    *, \n    CASE WHEN event_name = '_first_open' THEN COALESCE(user_id, user_pseudo_id) ELSE NULL END as new_user_indicator,\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n        from {{schema}}.ods_events_streaming_view\n        where \n          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n          and event_timestamp <= <<$endDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n      ",
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard\n        select \n          \n    event_timestamp,\n    event_id,\n    event_name,\n    user_pseudo_id,\n    user_id,\n    platform,\n    geo_country,\n    geo_city,\n    traffic_source_source,\n    screen_view_screen_name,\n    page_view_page_title,\n    CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as new_user_indicator,\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n        from {{schema}}.ods_events_streaming_view\n      ",
               columns:
                   [
                     {
@@ -1849,10 +1849,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                     {
                       Name: 'event_id',
                       Type: 'STRING',
-                    },
-                    {
-                      Name: 'event_time_msec',
-                      Type: 'INTEGER',
                     },
                     {
                       Name: 'event_name',
@@ -1867,115 +1863,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'session_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'event_value',
-                      Type: 'DECIMAL',
-                    },
-                    {
-                      Name: 'event_value_currency',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'event_bundle_sequence_id',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'ingest_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'device_mobile_brand_name',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_mobile_model_name',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_manufacturer',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_carrier',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_network_type',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_operating_system',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_operating_system_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_vendor_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_advertising_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_system_language',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_time_zone_offset_seconds',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'device_ua_os',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_ua_os_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_ua_browser',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_ua_browser_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_ua_device',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_ua_device_category',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_screen_width',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'device_screen_height',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'device_viewport_width',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'device_viewport_height',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'geo_continent',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'geo_sub_continent',
+                      Name: 'platform',
                       Type: 'STRING',
                     },
                     {
@@ -1983,19 +1871,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'geo_region',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'geo_metro',
-                      Type: 'STRING',
-                    },
-                    {
                       Name: 'geo_city',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'geo_locale',
                       Type: 'STRING',
                     },
                     {
@@ -2003,227 +1879,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'traffic_source_medium',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_campaign',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_content',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_term',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_campaign_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_clid_platform',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_clid',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_channel_group',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_category',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'user_first_touch_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'app_package_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_title',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_install_source',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'project_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'platform',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_id',
-                      Type: 'STRING',
-                    },
-                    {
                       Name: 'screen_view_screen_name',
                       Type: 'STRING',
                     },
                     {
-                      Name: 'screen_view_screen_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'screen_view_screen_unique_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'screen_view_previous_screen_name',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'screen_view_previous_screen_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'screen_view_previous_screen_unique_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'screen_view_previous_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'screen_view_engagement_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'screen_view_entrances',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_page_referrer',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_page_referrer_title',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_previous_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'page_view_engagement_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
                       Name: 'page_view_page_title',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_page_url',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_page_url_path',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_hostname',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_latest_referrer',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_latest_referrer_host',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_entrances',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_start_is_first_time',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'upgrade_previous_app_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'upgrade_previous_os_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'search_key',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'search_term',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'outbound_link_classes',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'outbound_link_domain',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'outbound_link_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'outbound_link_url',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'outbound_link',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'user_engagement_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'scroll_engagement_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'sdk_error_code',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'sdk_error_message',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'sdk_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'sdk_name',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_exception_message',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_exception_stack',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'custom_parameters_json_str',
                       Type: 'STRING',
                     },
                     {
@@ -2240,16 +1900,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                     },
                   ],
               dateTimeDatasetParameter:
-                  [
-                    {
-                      name: 'startDate01',
-                      timeGranularity: 'DAY',
-                    },
-                    {
-                      name: 'endDate01',
-                      timeGranularity: 'DAY',
-                    },
-                  ],
+                  [],
               tagColumnOperations:
                   [
                     {
@@ -2266,112 +1917,20 @@ describe('DataReportingQuickSightStack resource test', () => {
                             'CITY',
                           ],
                     },
-                    {
-                      columnName: 'geo_region',
-                      columnGeographicRoles:
-                          [
-                            'STATE',
-                          ],
-                    },
                   ],
               projectedColumns:
                   [
                     'event_timestamp',
                     'event_id',
-                    'event_time_msec',
                     'event_name',
                     'user_pseudo_id',
                     'user_id',
-                    'session_id',
-                    'event_value',
-                    'event_value_currency',
-                    'event_bundle_sequence_id',
-                    'ingest_time_msec',
-                    'device_mobile_brand_name',
-                    'device_mobile_model_name',
-                    'device_manufacturer',
-                    'device_carrier',
-                    'device_network_type',
-                    'device_operating_system',
-                    'device_operating_system_version',
-                    'device_vendor_id',
-                    'device_advertising_id',
-                    'device_system_language',
-                    'device_time_zone_offset_seconds',
-                    'device_ua_os',
-                    'device_ua_os_version',
-                    'device_ua_browser',
-                    'device_ua_browser_version',
-                    'device_ua_device',
-                    'device_ua_device_category',
-                    'device_screen_width',
-                    'device_screen_height',
-                    'device_viewport_width',
-                    'device_viewport_height',
-                    'geo_continent',
-                    'geo_sub_continent',
-                    'geo_country',
-                    'geo_region',
-                    'geo_metro',
-                    'geo_city',
-                    'geo_locale',
-                    'traffic_source_source',
-                    'traffic_source_medium',
-                    'traffic_source_campaign',
-                    'traffic_source_content',
-                    'traffic_source_term',
-                    'traffic_source_campaign_id',
-                    'traffic_source_clid_platform',
-                    'traffic_source_clid',
-                    'traffic_source_channel_group',
-                    'traffic_source_category',
-                    'user_first_touch_time_msec',
-                    'app_package_id',
-                    'app_version',
-                    'app_title',
-                    'app_install_source',
-                    'project_id',
                     'platform',
-                    'app_id',
+                    'geo_country',
+                    'geo_city',
+                    'traffic_source_source',
                     'screen_view_screen_name',
-                    'screen_view_screen_id',
-                    'screen_view_screen_unique_id',
-                    'screen_view_previous_screen_name',
-                    'screen_view_previous_screen_id',
-                    'screen_view_previous_screen_unique_id',
-                    'screen_view_previous_time_msec',
-                    'screen_view_engagement_time_msec',
-                    'screen_view_entrances',
-                    'page_view_page_referrer',
-                    'page_view_page_referrer_title',
-                    'page_view_previous_time_msec',
-                    'page_view_engagement_time_msec',
                     'page_view_page_title',
-                    'page_view_page_url',
-                    'page_view_page_url_path',
-                    'page_view_hostname',
-                    'page_view_latest_referrer',
-                    'page_view_latest_referrer_host',
-                    'page_view_entrances',
-                    'app_start_is_first_time',
-                    'upgrade_previous_app_version',
-                    'upgrade_previous_os_version',
-                    'search_key',
-                    'search_term',
-                    'outbound_link_classes',
-                    'outbound_link_domain',
-                    'outbound_link_id',
-                    'outbound_link_url',
-                    'outbound_link',
-                    'user_engagement_time_msec',
-                    'scroll_engagement_time_msec',
-                    'sdk_error_code',
-                    'sdk_error_message',
-                    'sdk_version',
-                    'sdk_name',
-                    'app_exception_message',
-                    'app_exception_stack',
-                    'custom_parameters_json_str',
                     'event_timestamp_local',
                     'event_date',
                     'new_user_indicator',
@@ -4072,7 +3631,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               tableName: 'Realtime_Event',
               useSpice: 'no',
               realtime: 'yes',
-              customSql: "\n        -- clickstream-builtin-realtime-dashboard\n        select \n          \n    *, \n    CASE WHEN event_name = '_first_open' THEN COALESCE(user_id, user_pseudo_id) ELSE NULL END as new_user_indicator,\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n        from {{schema}}.ods_events_streaming_view\n        where \n          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n          and event_timestamp <= <<$endDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' \n      ",
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard\n        select \n          \n    event_timestamp,\n    event_id,\n    event_name,\n    user_pseudo_id,\n    user_id,\n    platform,\n    geo_country,\n    geo_city,\n    traffic_source_source,\n    screen_view_screen_name,\n    page_view_page_title,\n    CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as new_user_indicator,\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n        from {{schema}}.ods_events_streaming_view\n      ",
               columns:
                   [
                     {
@@ -4082,10 +3641,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                     {
                       Name: 'event_id',
                       Type: 'STRING',
-                    },
-                    {
-                      Name: 'event_time_msec',
-                      Type: 'INTEGER',
                     },
                     {
                       Name: 'event_name',
@@ -4100,115 +3655,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'session_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'event_value',
-                      Type: 'DECIMAL',
-                    },
-                    {
-                      Name: 'event_value_currency',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'event_bundle_sequence_id',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'ingest_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'device_mobile_brand_name',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_mobile_model_name',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_manufacturer',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_carrier',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_network_type',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_operating_system',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_operating_system_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_vendor_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_advertising_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_system_language',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_time_zone_offset_seconds',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'device_ua_os',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_ua_os_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_ua_browser',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_ua_browser_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_ua_device',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_ua_device_category',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'device_screen_width',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'device_screen_height',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'device_viewport_width',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'device_viewport_height',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'geo_continent',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'geo_sub_continent',
+                      Name: 'platform',
                       Type: 'STRING',
                     },
                     {
@@ -4216,19 +3663,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'geo_region',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'geo_metro',
-                      Type: 'STRING',
-                    },
-                    {
                       Name: 'geo_city',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'geo_locale',
                       Type: 'STRING',
                     },
                     {
@@ -4236,227 +3671,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'traffic_source_medium',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_campaign',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_content',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_term',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_campaign_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_clid_platform',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_clid',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_channel_group',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'traffic_source_category',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'user_first_touch_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'app_package_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_title',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_install_source',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'project_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'platform',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_id',
-                      Type: 'STRING',
-                    },
-                    {
                       Name: 'screen_view_screen_name',
                       Type: 'STRING',
                     },
                     {
-                      Name: 'screen_view_screen_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'screen_view_screen_unique_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'screen_view_previous_screen_name',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'screen_view_previous_screen_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'screen_view_previous_screen_unique_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'screen_view_previous_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'screen_view_engagement_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'screen_view_entrances',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_page_referrer',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_page_referrer_title',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_previous_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'page_view_engagement_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
                       Name: 'page_view_page_title',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_page_url',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_page_url_path',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_hostname',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_latest_referrer',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_latest_referrer_host',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'page_view_entrances',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_start_is_first_time',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'upgrade_previous_app_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'upgrade_previous_os_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'search_key',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'search_term',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'outbound_link_classes',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'outbound_link_domain',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'outbound_link_id',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'outbound_link_url',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'outbound_link',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'user_engagement_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'scroll_engagement_time_msec',
-                      Type: 'INTEGER',
-                    },
-                    {
-                      Name: 'sdk_error_code',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'sdk_error_message',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'sdk_version',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'sdk_name',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_exception_message',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'app_exception_stack',
-                      Type: 'STRING',
-                    },
-                    {
-                      Name: 'custom_parameters_json_str',
                       Type: 'STRING',
                     },
                     {
@@ -4473,16 +3692,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                     },
                   ],
               dateTimeDatasetParameter:
-                  [
-                    {
-                      name: 'startDate01',
-                      timeGranularity: 'DAY',
-                    },
-                    {
-                      name: 'endDate01',
-                      timeGranularity: 'DAY',
-                    },
-                  ],
+                  [],
               tagColumnOperations:
                   [
                     {
@@ -4499,112 +3709,20 @@ describe('DataReportingQuickSightStack resource test', () => {
                             'CITY',
                           ],
                     },
-                    {
-                      columnName: 'geo_region',
-                      columnGeographicRoles:
-                          [
-                            'STATE',
-                          ],
-                    },
                   ],
               projectedColumns:
                   [
                     'event_timestamp',
                     'event_id',
-                    'event_time_msec',
                     'event_name',
                     'user_pseudo_id',
                     'user_id',
-                    'session_id',
-                    'event_value',
-                    'event_value_currency',
-                    'event_bundle_sequence_id',
-                    'ingest_time_msec',
-                    'device_mobile_brand_name',
-                    'device_mobile_model_name',
-                    'device_manufacturer',
-                    'device_carrier',
-                    'device_network_type',
-                    'device_operating_system',
-                    'device_operating_system_version',
-                    'device_vendor_id',
-                    'device_advertising_id',
-                    'device_system_language',
-                    'device_time_zone_offset_seconds',
-                    'device_ua_os',
-                    'device_ua_os_version',
-                    'device_ua_browser',
-                    'device_ua_browser_version',
-                    'device_ua_device',
-                    'device_ua_device_category',
-                    'device_screen_width',
-                    'device_screen_height',
-                    'device_viewport_width',
-                    'device_viewport_height',
-                    'geo_continent',
-                    'geo_sub_continent',
-                    'geo_country',
-                    'geo_region',
-                    'geo_metro',
-                    'geo_city',
-                    'geo_locale',
-                    'traffic_source_source',
-                    'traffic_source_medium',
-                    'traffic_source_campaign',
-                    'traffic_source_content',
-                    'traffic_source_term',
-                    'traffic_source_campaign_id',
-                    'traffic_source_clid_platform',
-                    'traffic_source_clid',
-                    'traffic_source_channel_group',
-                    'traffic_source_category',
-                    'user_first_touch_time_msec',
-                    'app_package_id',
-                    'app_version',
-                    'app_title',
-                    'app_install_source',
-                    'project_id',
                     'platform',
-                    'app_id',
+                    'geo_country',
+                    'geo_city',
+                    'traffic_source_source',
                     'screen_view_screen_name',
-                    'screen_view_screen_id',
-                    'screen_view_screen_unique_id',
-                    'screen_view_previous_screen_name',
-                    'screen_view_previous_screen_id',
-                    'screen_view_previous_screen_unique_id',
-                    'screen_view_previous_time_msec',
-                    'screen_view_engagement_time_msec',
-                    'screen_view_entrances',
-                    'page_view_page_referrer',
-                    'page_view_page_referrer_title',
-                    'page_view_previous_time_msec',
-                    'page_view_engagement_time_msec',
                     'page_view_page_title',
-                    'page_view_page_url',
-                    'page_view_page_url_path',
-                    'page_view_hostname',
-                    'page_view_latest_referrer',
-                    'page_view_latest_referrer_host',
-                    'page_view_entrances',
-                    'app_start_is_first_time',
-                    'upgrade_previous_app_version',
-                    'upgrade_previous_os_version',
-                    'search_key',
-                    'search_term',
-                    'outbound_link_classes',
-                    'outbound_link_domain',
-                    'outbound_link_id',
-                    'outbound_link_url',
-                    'outbound_link',
-                    'user_engagement_time_msec',
-                    'scroll_engagement_time_msec',
-                    'sdk_error_code',
-                    'sdk_error_message',
-                    'sdk_version',
-                    'sdk_name',
-                    'app_exception_message',
-                    'app_exception_stack',
-                    'custom_parameters_json_str',
                     'event_timestamp_local',
                     'event_date',
                     'new_user_indicator',

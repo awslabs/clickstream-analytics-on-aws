@@ -106,8 +106,18 @@ export function createQuicksightCustomResource(
   `;
 
   const eventViewColumnsRT = `
-    *, 
-    CASE WHEN event_name = '_first_open' THEN COALESCE(user_id, user_pseudo_id) ELSE NULL END as new_user_indicator,
+    event_timestamp,
+    event_id,
+    event_name,
+    user_pseudo_id,
+    user_id,
+    platform,
+    geo_country,
+    geo_city,
+    traffic_source_source,
+    screen_view_screen_name,
+    page_view_page_title,
+    CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as new_user_indicator,
     DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
     DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date
   `;
@@ -245,9 +255,6 @@ function _getDataSetDefs(
         select 
           ${eventViewColumnsRT} 
         from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
-        where 
-          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
-          and event_timestamp <= <<$endDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
       `,
       columns: [
         ...clickstream_realtime_event_view_columns,
@@ -265,16 +272,6 @@ function _getDataSetDefs(
         },
       ],
       dateTimeDatasetParameter: [
-        {
-          name: 'startDate01',
-          timeGranularity: TimeGranularity.DAY,
-          defaultValue: tenYearsAgo,
-        },
-        {
-          name: 'endDate01',
-          timeGranularity: TimeGranularity.DAY,
-          defaultValue: futureDate,
-        },
       ],
       tagColumnOperations: [
         {
@@ -284,10 +281,6 @@ function _getDataSetDefs(
         {
           columnName: 'geo_city',
           columnGeographicRoles: ['CITY'],
-        },
-        {
-          columnName: 'geo_region',
-          columnGeographicRoles: ['STATE'],
         },
       ],
       projectedColumns: [...realtimeEventViewProjectedColumns, 'event_timestamp_local', 'event_date', 'new_user_indicator'],
