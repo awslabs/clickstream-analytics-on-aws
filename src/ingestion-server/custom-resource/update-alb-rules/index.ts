@@ -825,7 +825,7 @@ async function getOidcInfo(authenticationSecretArn: string) {
       if (err.name === 'AccessDeniedException') {
         attempts++;
         logger.info(`No permission, retrying... Attempt ${attempts}/${MAX_RETRIES}`);
-        await sleep(2000 * attempts);        
+        await sleep(2000 * attempts);
       } else {
         // If the error is not a "AccessDeniedException" error, rethrow it
         logger.error('Error retrieving secret: ', err);
