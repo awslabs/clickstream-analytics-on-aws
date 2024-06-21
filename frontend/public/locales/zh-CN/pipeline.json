@@ -316,7 +316,7 @@
     "streamingTitle": "实时分析配置",
     "streamingDesc": "启用此管道的实时分析",
     "enableStreaming": "启用实时分析",
-    "enableStreamingDesc": "启用实时分析将为该管道创建实时数据处理资源（即Lambda）。请注意，需要支付额外费用。",
+    "enableStreamingDesc": "启用实时分析将为该管道创建实时数据处理资源（即Flink应用）。请注意，需要支付额外费用。",
     "streamingDataRangeTitle": "实时数据范围",
     "streamingDataRangeDesc": "实时数据范围是保留实时数据的时间段，超过数据范围的数据将从实时数据表中删除，不会显示在仪表板中。"
   },
