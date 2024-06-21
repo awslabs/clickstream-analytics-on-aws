@@ -106,7 +106,17 @@ export function createQuicksightCustomResource(
   `;
 
   const eventViewColumnsRT = `
-    *, 
+    event_timestamp,
+    event_id,
+    event_name,
+    user_pseudo_id,
+    user_id,
+    platform,
+    geo_country,
+    geo_city,
+    traffic_source_source,
+    screen_view_screen_name,
+    page_view_page_title,
     CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as new_user_indicator,
     DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
     DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date
