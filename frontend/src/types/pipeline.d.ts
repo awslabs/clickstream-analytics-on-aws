@@ -267,8 +267,14 @@ declare global {
     executionArn?: string;
   }
 
+  interface RealtimeSchemasStatus {
+    readonly appId: string;
+    readonly realtimeEnable: boolean;
+  }
+
   interface IPipelineExtend {
     createApplicationSchemasStatus: CreateApplicationSchemasStatus[];
+    realtimeSchemasStatus: RealtimeSchemasStatus[];
   }
 
   interface IAlarm {

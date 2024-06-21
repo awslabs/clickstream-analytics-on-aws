@@ -101,7 +101,7 @@ const AnalyticsRealtime: React.FC = () => {
     if (!checked) {
       setDashboardEmbedUrl('');
     }
-    if (projectId && appId) {
+    if (projectId && appId && enableStreamModule) {
       getRealtime();
     }
   }, [checked]);
@@ -174,9 +174,10 @@ const AnalyticsRealtime: React.FC = () => {
                         statusIconAriaLabel="Info"
                         action={
                           <Button
-                            disabled
+                            href={`/project/detail/${projectId}`}
                             iconAlign="right"
                             iconName="external"
+                            target="_blank"
                           >
                             {t('analytics:realtime.configProject')}
                           </Button>

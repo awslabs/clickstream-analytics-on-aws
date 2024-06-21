@@ -400,6 +400,7 @@
     "bufferSize": "Buffer size",
     "bufferInterval": "Buffer interval",
     "analyticSchemaStatus": "Redshift Schemas",
+    "realtimeSchemaStatus": "Realtime Schemas",
     "streamingApplication": "Streaming Application (Flink)"
   },
   "list": {

@@ -415,3 +415,8 @@ export interface CreateApplicationSchemasStatus {
   status?: ExecutionStatus;
   executionArn?: string;
 }
+
+export interface RealtimeSchemasStatus {
+  readonly appId: string;
+  readonly realtimeEnable: boolean;
+}

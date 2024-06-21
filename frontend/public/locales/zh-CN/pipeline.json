@@ -400,6 +400,7 @@
     "bufferSize": "缓冲区大小",
     "bufferInterval": "缓冲间隔",
     "analyticSchemaStatus": "Redshift Schemas",
+    "realtimeSchemaStatus": "Realtime Schemas",
     "streamingApplication": "流式应用程序 (Flink)"
   },
   "list": {

@@ -128,8 +128,10 @@ export class PipelineServ {
       const apps = await store.listApplication(latestPipeline.projectId, 'asc');
       const appIds = apps.map(a => a.appId);
       const createApplicationSchemasStatus = await pipeline.getCreateApplicationSchemasStatus(appIds);
+      const realtimeSchemasStatus = await pipeline.getRealtimeSchemasStatus(appIds, latestPipeline);
       return res.json(new ApiSuccess({
         createApplicationSchemasStatus,
+        realtimeSchemasStatus,
       }));
     } catch (error) {
       next(error);

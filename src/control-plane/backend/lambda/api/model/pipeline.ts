@@ -68,6 +68,7 @@ import {
   PipelineServerProtocol,
   PipelineSinkType,
   PipelineStatus,
+  RealtimeSchemasStatus,
   RedshiftInfo,
   StackUpdateParameter,
   WorkflowTemplate,
@@ -989,6 +990,17 @@ export class CPipeline {
       }
     }
     return schemasStatus;
+  };
+
+  public async getRealtimeSchemasStatus(appIds: string[], pipeline: IPipeline) {
+    const realtimeStatus: RealtimeSchemasStatus[] = [];
+    for (let appId of appIds) {
+      realtimeStatus.push({
+        appId: appId,
+        realtimeEnable: pipeline.streaming?.appIdStreamList?.includes(appId) ?? false,
+      });
+    }
+    return realtimeStatus;
   };
 
   private _getAppIdFromInputStr(input?: string): string {

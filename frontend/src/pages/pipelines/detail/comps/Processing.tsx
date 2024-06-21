@@ -511,6 +511,31 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
                       )}
                   </div>
                 </div>
+
+                <div>
+                  <Box variant="awsui-key-label">
+                    {t('pipeline:detail.realtimeSchemaStatus')}
+                  </Box>
+                  <div>
+                    {displayPipelineExtend &&
+                      pipelineExtend?.realtimeSchemasStatus.map((element) => {
+                        return (
+                          <div key={element.appId}>
+                            {element.appId}:
+                            {element.realtimeEnable ? (
+                              <StatusIndicator type="success">
+                                {t('enabled')}
+                              </StatusIndicator>
+                            ) : (
+                              <StatusIndicator type="stopped">
+                                {t('disabled')}
+                              </StatusIndicator>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
               </>
             )}
           </SpaceBetween>
