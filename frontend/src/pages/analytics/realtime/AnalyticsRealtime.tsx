@@ -39,6 +39,7 @@ const AnalyticsRealtime: React.FC = () => {
   const { projectId, appId } = useParams();
   const [checked, setChecked] = React.useState(false);
   const [loadingData, setLoadingData] = useState(false);
+  const [enableStreamModule, setEnableStreamModule] = useState(false);
   const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
 
   const getRealtime = async () => {
@@ -67,10 +68,19 @@ const AnalyticsRealtime: React.FC = () => {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(defaultStr(projectId));
       if (success && data.analysisStudioEnabled) {
-        if (appId && data.streaming?.appIdRealtimeList?.includes(appId)) {
-          setChecked(true);
-          await Promise.all([getRealtime()]);
+        if (
+          appId &&
+          data.streaming?.appIdStreamList &&
+          data.streaming?.appIdStreamList?.includes(appId)
+        ) {
+          setEnableStreamModule(true);
+          if (appId && data.streaming?.appIdRealtimeList?.includes(appId)) {
+            setChecked(true);
+          } else {
+            setChecked(false);
+          }
         } else {
+          setEnableStreamModule(false);
           setChecked(false);
         }
       }
@@ -140,40 +150,54 @@ const AnalyticsRealtime: React.FC = () => {
               }
             >
               <Container>
-                <ColumnLayout columns={2}>
-                  <div>
-                    <Toggle
-                      onChange={({ detail }) => setChecked(detail.checked)}
-                      checked={checked}
-                    >
-                      {checked
-                        ? t('analytics:labels.realtimeStarted')
-                        : t('analytics:labels.realtimeStopped')}
-                    </Toggle>
-                  </div>
-                </ColumnLayout>
-                <br />
-                {!checked ? (
-                  <Alert
-                    statusIconAriaLabel="Info"
-                    action={
-                      <Button disabled iconAlign="right" iconName="external">
-                        {t('analytics:realtime.configProject')}
-                      </Button>
-                    }
-                  >
-                    {t('analytics:realtime.disableMessage')}
-                  </Alert>
+                {loadingData ? (
+                  <Loading isPage />
                 ) : (
                   <>
-                    {loadingData ? (
-                      <Loading isPage />
+                    {enableStreamModule ? (
+                      <ColumnLayout columns={2}>
+                        <div>
+                          <Toggle
+                            onChange={({ detail }) =>
+                              setChecked(detail.checked)
+                            }
+                            checked={checked}
+                          >
+                            {checked
+                              ? t('analytics:labels.realtimeStarted')
+                              : t('analytics:labels.realtimeStopped')}
+                          </Toggle>
+                        </div>
+                      </ColumnLayout>
                     ) : (
-                      <ExploreEmbedFrame
-                        embedType="console"
-                        embedUrl={dashboardEmbedUrl}
-                        embedPage="analyze"
-                      />
+                      <Alert
+                        statusIconAriaLabel="Info"
+                        action={
+                          <Button
+                            disabled
+                            iconAlign="right"
+                            iconName="external"
+                          >
+                            {t('analytics:realtime.configProject')}
+                          </Button>
+                        }
+                      >
+                        {t('analytics:realtime.disableMessage')}
+                      </Alert>
+                    )}
+                    <br />
+                    {!checked ? null : (
+                      <>
+                        {loadingData ? (
+                          <Loading isPage />
+                        ) : (
+                          <ExploreEmbedFrame
+                            embedType="console"
+                            embedUrl={dashboardEmbedUrl}
+                            embedPage="analyze"
+                          />
+                        )}
+                      </>
                     )}
                   </>
                 )}

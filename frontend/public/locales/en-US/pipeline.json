@@ -399,7 +399,8 @@
     "tags": "Tags",
     "bufferSize": "Buffer size",
     "bufferInterval": "Buffer interval",
-    "analyticSchemaStatus": "Redshift Schemas"
+    "analyticSchemaStatus": "Redshift Schemas",
+    "streamingApplication": "Streaming Application (Flink)"
   },
   "list": {
     "id": "Pipeline ID",

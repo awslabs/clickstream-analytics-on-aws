@@ -176,6 +176,7 @@ declare global {
     workflow?: WorkflowTemplate;
     dashboards?: IDashboard[];
     metricsDashboardName?: string;
+    streamApplication?: string;
     templateInfo?: {
       isLatest: boolean;
       pipelineVersion: string;
