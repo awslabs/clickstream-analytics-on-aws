@@ -2222,6 +2222,20 @@ describe('Pipeline test', () => {
             status: 'ABORTED',
           },
         ],
+        realtimeSchemasStatus: [
+          {
+            appId: 'Application01',
+            realtimeEnable: false,
+          },
+          {
+            appId: 'Application02',
+            realtimeEnable: false,
+          },
+          {
+            appId: 'Application03',
+            realtimeEnable: false,
+          },
+        ],
       },
       message: '',
       success: true,
