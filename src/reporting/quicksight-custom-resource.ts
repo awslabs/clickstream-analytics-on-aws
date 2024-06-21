@@ -245,9 +245,6 @@ function _getDataSetDefs(
         select 
           ${eventViewColumnsRT} 
         from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
-        where 
-          event_timestamp >= <<$startDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
-          and event_timestamp <= <<$endDate01>>::timestamp AT TIME ZONE '{{{timezone}}}' 
       `,
       columns: [
         ...clickstream_realtime_event_view_columns,
@@ -265,16 +262,6 @@ function _getDataSetDefs(
         },
       ],
       dateTimeDatasetParameter: [
-        {
-          name: 'startDate01',
-          timeGranularity: TimeGranularity.DAY,
-          defaultValue: tenYearsAgo,
-        },
-        {
-          name: 'endDate01',
-          timeGranularity: TimeGranularity.DAY,
-          defaultValue: futureDate,
-        },
       ],
       tagColumnOperations: [
         {
@@ -284,10 +271,6 @@ function _getDataSetDefs(
         {
           columnName: 'geo_city',
           columnGeographicRoles: ['CITY'],
-        },
-        {
-          columnName: 'geo_region',
-          columnGeographicRoles: ['STATE'],
         },
       ],
       projectedColumns: [...realtimeEventViewProjectedColumns, 'event_timestamp_local', 'event_date', 'new_user_indicator'],
