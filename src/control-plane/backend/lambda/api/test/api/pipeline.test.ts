@@ -1414,6 +1414,7 @@ describe('Pipeline test', () => {
         },
         metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
         analysisStudioEnabled: false,
+        streamApplication: '',
       },
     });
   });
@@ -1646,6 +1647,7 @@ describe('Pipeline test', () => {
         },
         metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
         analysisStudioEnabled: false,
+        streamApplication: '',
       },
     });
   });
@@ -1828,6 +1830,7 @@ describe('Pipeline test', () => {
         templateVersion: FULL_SOLUTION_VERSION,
         metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
         analysisStudioEnabled: true,
+        streamApplication: '',
       },
     });
   });
@@ -1970,6 +1973,7 @@ describe('Pipeline test', () => {
         },
         templateVersion: 'v1.1.0',
         analysisStudioEnabled: true,
+        streamApplication: '',
       },
     });
   });
@@ -2055,6 +2059,7 @@ describe('Pipeline test', () => {
           solutionVersion: FULL_SOLUTION_VERSION,
         },
         analysisStudioEnabled: false,
+        streamApplication: '',
       },
     });
   });
