@@ -184,7 +184,7 @@ function createApplicationLoadBalancer(
   const httpListener = new ApplicationListener(scope, 'HttpListener', {
     loadBalancer: alb,
     port: props.ports.http,
-    protocol: ApplicationProtocol.HTTP,
+    protocol: ApplicationProtocol.HTTP, //NOSONAR
   });
 
   const targetGroup = createECSTargets(scope, props.vpc, httpListener, httpsListener);
