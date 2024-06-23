@@ -351,6 +351,16 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             </div>
           </>
         )}
+        <div>
+          <Box variant="awsui-key-label">
+            {t('pipeline:detail.streamingApplication')}
+          </Box>
+          <div>
+            {pipelineInfo?.streaming?.appIdStreamList
+              ? pipelineInfo.streamApplication
+              : t('no')}
+          </div>
+        </div>
       </SpaceBetween>
     </ColumnLayout>
   );

@@ -16,6 +16,7 @@ import {
   OUTPUT_INGESTION_SERVER_URL_SUFFIX,
   OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME,
   OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+  OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
 } from '@aws/clickstream-base-lib';
 import { v4 as uuidv4 } from 'uuid';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
@@ -107,6 +108,8 @@ export class PipelineServ {
           PipelineStackType.METRICS, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME),
         templateInfo,
         analysisStudioEnabled: pipelineAnalysisStudioEnabled(latestPipeline),
+        streamApplication: getStackOutputFromPipelineStatus(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.STREAMING, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN),
       }));
     } catch (error) {
       next(error);
@@ -125,8 +128,10 @@ export class PipelineServ {
       const apps = await store.listApplication(latestPipeline.projectId, 'asc');
       const appIds = apps.map(a => a.appId);
       const createApplicationSchemasStatus = await pipeline.getCreateApplicationSchemasStatus(appIds);
+      const realtimeSchemasStatus = await pipeline.getRealtimeSchemasStatus(appIds, latestPipeline);
       return res.json(new ApiSuccess({
         createApplicationSchemasStatus,
+        realtimeSchemasStatus,
       }));
     } catch (error) {
       next(error);

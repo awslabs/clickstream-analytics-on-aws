@@ -176,6 +176,7 @@ declare global {
     workflow?: WorkflowTemplate;
     dashboards?: IDashboard[];
     metricsDashboardName?: string;
+    streamApplication?: string;
     templateInfo?: {
       isLatest: boolean;
       pipelineVersion: string;
@@ -266,8 +267,14 @@ declare global {
     executionArn?: string;
   }
 
+  interface RealtimeSchemasStatus {
+    readonly appId: string;
+    readonly realtimeEnable: boolean;
+  }
+
   interface IPipelineExtend {
     createApplicationSchemasStatus: CreateApplicationSchemasStatus[];
+    realtimeSchemasStatus: RealtimeSchemasStatus[];
   }
 
   interface IAlarm {
