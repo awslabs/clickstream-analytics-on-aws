@@ -57,6 +57,10 @@ import {
   CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME,
   CLICKSTREAM_REALTIME_EVENT_VIEW_PLACEHOLDER,
   CLICKSTREAM_REALTIME_EVENT_VIEW_NAME,
+  CLICKSTREAM_REALTIME_EVENT_USER_VIEW_PLACEHOLDER,
+  CLICKSTREAM_REALTIME_EVENT_TRAFFIC_VIEW_PLACEHOLDER,
+  CLICKSTREAM_REALTIME_EVENT_PAGESCREEN_VIEW_PLACEHOLDER,
+  CLICKSTREAM_REALTIME_EVENT_NAME_VIEW_PLACEHOLDER,
 } from '@aws/clickstream-base-lib';
 import { RefreshInterval, TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -287,7 +291,7 @@ function _getDataSetDefs(
       projectedColumns: [...realtimeEventViewProjectedColumns, 'event_timestamp_local', 'event_date', 'new_user_indicator'],
     },
     {
-      tableName: 'Realtime_Event_User',
+      tableName: CLICKSTREAM_REALTIME_EVENT_USER_VIEW_PLACEHOLDER,
       useSpice: 'no',
       realtime: 'yes',
       customSql: `
@@ -317,7 +321,7 @@ function _getDataSetDefs(
       projectedColumns: ['event_timestamp_local', 'user_count', 'new_user_indicator'],
     },
     {
-      tableName: 'Realtime_Event_Traffic',
+      tableName: CLICKSTREAM_REALTIME_EVENT_TRAFFIC_VIEW_PLACEHOLDER,
       useSpice: 'no',
       realtime: 'yes',
       customSql: `
@@ -347,7 +351,7 @@ function _getDataSetDefs(
       projectedColumns: ['event_timestamp_local', 'user_count', 'traffic_source_source'],
     },
     {
-      tableName: 'Realtime_Event_Page_Screen',
+      tableName: CLICKSTREAM_REALTIME_EVENT_PAGESCREEN_VIEW_PLACEHOLDER,
       useSpice: 'no',
       realtime: 'yes',
       customSql: `
@@ -377,7 +381,7 @@ function _getDataSetDefs(
       projectedColumns: ['event_timestamp_local', 'View count', 'Page title/Screen name'],
     },
     {
-      tableName: 'Realtime_Event_Name',
+      tableName: CLICKSTREAM_REALTIME_EVENT_NAME_VIEW_PLACEHOLDER,
       useSpice: 'no',
       realtime: 'yes',
       customSql: `
