@@ -405,10 +405,10 @@ function _getDataSetDefs(
         },
       ],
       projectedColumns: ['event_timestamp_local', 'user_count', 'event_name'],
-    }
+    },
   ];
   dataSetProps.push(
-    ...realtimeDatasets
+    ...realtimeDatasets,
   );
 
   dataSetProps.push(
