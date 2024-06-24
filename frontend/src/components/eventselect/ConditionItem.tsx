@@ -198,7 +198,9 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     ANALYTICS_OPERATORS.not_in,
   ];
 
-  const getOperatorOptions = (valueType: MetadataValueType | ExtendedMetadataValueType) => {
+  const getOperatorOptions = (
+    valueType: MetadataValueType | ExtendedMetadataValueType
+  ) => {
     switch (valueType) {
       case MetadataValueType.STRING:
         return CONDITION_STRING_OPERATORS;
