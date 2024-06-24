@@ -614,7 +614,7 @@ const getAutoRefreshExpiration = (
   }
 
   const expiration = segment?.refreshSchedule.expireAfter;
-  return getDateTimeWithTimezoneString(expiration, timezone);
+  return expiration ? getDateTimeWithTimezoneString(expiration, timezone) : '-';
 };
 
 const getCreatedByInfo = (

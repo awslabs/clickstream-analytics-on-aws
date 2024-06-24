@@ -24,6 +24,7 @@ import {
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
   ExploreTimeScopeType,
+  ExtendedMetadataValueType,
   MetadataSource,
   MetadataValueType,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
@@ -1370,4 +1371,35 @@ export const convertCronExpByTimeRange = (
   }
 
   return '';
+};
+
+export const convertSegmentListToFilterOptions = (
+  segmentGroupList: SelectProps.Option[] | undefined,
+  categoryName: string,
+  itemName: string
+): CategoryItemType[] | undefined => {
+  if (segmentGroupList === undefined) {
+    return undefined;
+  }
+
+  return [
+    {
+      categoryId: ConditionCategoryFrontend.USER_OUTER,
+      categoryName: categoryName,
+      categoryType: 'attribute',
+      itemList: [
+        {
+          category: ConditionCategoryFrontend.USER_OUTER,
+          description: categoryName,
+          label: itemName,
+          name: itemName,
+          valueType: ExtendedMetadataValueType.USER_SEGMENT,
+          values: segmentGroupList.map((segment) => ({
+            value: segment.value ?? '',
+            displayValue: segment.label ?? '',
+          })),
+        },
+      ],
+    },
+  ];
 };

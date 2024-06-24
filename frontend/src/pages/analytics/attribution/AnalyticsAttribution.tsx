@@ -50,7 +50,7 @@ import { analyticsEventSelectReducer } from 'components/eventselect/reducer/anal
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
-import { StateActionType, HelpPanelType } from 'context/reducer';
+import { HelpPanelType, StateActionType } from 'context/reducer';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -71,9 +71,9 @@ import {
   getLngFromLocalStorage,
   getTargetComputeMethod,
   getTouchPointsAndConditions,
+  validateFilterConditions,
   validEventAnalyticsItem,
   validMultipleEventAnalyticsItems,
-  validateFilterConditions,
 } from '../analytics-utils';
 import ExploreDateRangePicker, {
   DEFAULT_MONTH_RANGE,
@@ -90,6 +90,7 @@ interface AnalyticsAttributionProps {
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
+  segmentParameters?: CategoryItemType[];
   loadingEvents: boolean;
 }
 
@@ -106,6 +107,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
+    segmentParameters,
     loadingEvents,
   } = props;
   const { appId } = useParams();
@@ -246,6 +248,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
     setSelectedAttributionModel(firstTouchOption);
     setSelectedWindowType(customWindowType);
@@ -461,6 +464,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
   }, [presetParameters]);
 

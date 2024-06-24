@@ -14,6 +14,7 @@
 import {
   ExploreAnalyticsNumericOperators,
   ExploreAnalyticsOperators,
+  ExtendedMetadataValueType,
   MetadataSource,
   MetadataValueType,
 } from '../constant';
@@ -118,7 +119,7 @@ export interface EventWithParameter {
 export interface ParameterCondition {
   parameterType: MetadataSource;
   parameterName: string;
-  dataType: MetadataValueType;
+  dataType: MetadataValueType | ExtendedMetadataValueType;
   conditionOperator: ExploreAnalyticsOperators;
   inputValue: string[];
 }

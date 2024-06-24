@@ -430,6 +430,8 @@ export class UserSegmentsSql {
           return parseFloat(value);
         case MetadataValueType.BOOLEAN:
           return value;
+        default:
+          return `'${value}'`;
       }
     });
 

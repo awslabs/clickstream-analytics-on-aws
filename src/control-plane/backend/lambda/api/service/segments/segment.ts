@@ -161,7 +161,7 @@ export class SegmentServ {
       }
 
       // Clean up EventBridge rule
-      if (segment.eventBridgeRuleArn !== '') {
+      if (!!segment.eventBridgeRuleArn) {
         await this.deleteEventBridgeRule(segment.projectId, segmentId);
       }
 

@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { convertCronExpByTimeRange, convertUISegmentObjectToAPIObject } from 'pages/analytics/analytics-utils';
+import {
+  convertCronExpByTimeRange,
+  convertSegmentListToFilterOptions,
+  convertUISegmentObjectToAPIObject,
+} from 'pages/analytics/analytics-utils';
 import { mockAPIData, mockUIData } from '../components/segments/data/mock_data';
 
 describe('analytics utils tests', () => {
@@ -44,5 +48,45 @@ describe('analytics utils tests', () => {
       value: 'Custom',
     };
     expect(convertCronExpByTimeRange(customTimeUnit, '5', '10')).toEqual('');
-  })
+  });
+
+  it ('should convert segmentList to filter options', () => {
+    const segmentList = [
+      {
+        label: 'segment-1',
+        value: 'segment-1-uuid',
+      },
+      {
+        label: 'segment-2',
+        value: 'segment-2-uuid',
+      },
+    ];
+
+    expect(convertSegmentListToFilterOptions(segmentList, 'User segments', 'Segment')).toEqual([
+      {
+        categoryId: 'user_outer',
+        categoryName: 'User segments',
+        categoryType: 'attribute',
+        itemList: [
+          {
+            category: 'user_outer',
+            description: 'User segments',
+            label: 'Segment',
+            name: 'Segment',
+            valueType: 'UserSegment',
+            values: [
+              {
+                displayValue: 'segment-1',
+                value: 'segment-1-uuid',
+              },
+              {
+                displayValue: 'segment-2',
+                value: 'segment-2-uuid',
+              },
+            ],
+          },
+        ],
+      }
+    ]);
+  });
 });

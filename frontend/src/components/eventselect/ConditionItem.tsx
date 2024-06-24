@@ -13,6 +13,7 @@
 
 import {
   ExploreAnalyticsOperators,
+  ExtendedMetadataValueType,
   MetadataValueType,
 } from '@aws/clickstream-base-lib';
 import {
@@ -192,8 +193,12 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     ANALYTICS_OPERATORS.true,
     ANALYTICS_OPERATORS.false,
   ];
+  const CONDITION_USER_SEGMENTS_OPERATORS: SelectProps.Options = [
+    ANALYTICS_OPERATORS.in,
+    ANALYTICS_OPERATORS.not_in,
+  ];
 
-  const getOperatorOptions = (valueType: MetadataValueType) => {
+  const getOperatorOptions = (valueType: MetadataValueType | ExtendedMetadataValueType) => {
     switch (valueType) {
       case MetadataValueType.STRING:
         return CONDITION_STRING_OPERATORS;
@@ -201,6 +206,8 @@ const ConditionItem: React.FC<ConditionItemProps> = (
         return CONDITION_NUMBER_OPERATORS;
       case MetadataValueType.BOOLEAN:
         return CONDITION_BOOLEAN_OPERATORS;
+      case ExtendedMetadataValueType.USER_SEGMENT:
+        return CONDITION_USER_SEGMENTS_OPERATORS;
       default:
         return [];
     }
