@@ -27,6 +27,7 @@ export interface UpdateAlbRulesCustomResourceProps {
   clickStreamSDK: string;
   targetGroupArn: string;
   listenerArn: string;
+  enableAuthentication: string;
   authenticationSecretArn?: string;
   endpointPath: string;
   domainName?: string;
@@ -53,6 +54,7 @@ export function updateAlbRulesCustomResource(
       clickStreamSDK: props.clickStreamSDK,
       targetGroupArn: props.targetGroupArn,
       listenerArn: props.listenerArn,
+      enableAuthentication: props.enableAuthentication,
       authenticationSecretArn: props.authenticationSecretArn,
       endpointPath: props.endpointPath,
       domainName: props.domainName,

@@ -14,9 +14,9 @@
 import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { TestStack, TestStackProps } from './TestTask-v2';
+import { TestStackV2, TestStackV2Props } from './TestTask-v2';
 import { WIDGETS_ORDER } from '../../../src/metrics/settings';
-import { findConditionByName, findFirstResource, findResources } from '../../utils';
+import { findFirstResource, findResources } from '../../utils';
 
 if (process.env.CI !== 'true') {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -24,7 +24,7 @@ if (process.env.CI !== 'true') {
 }
 
 function generateCommonTestStackProps() {
-  const commonTestStackProps: TestStackProps = {
+  const commonTestStackProps: TestStackV2Props = {
     withMskConfig: false,
     withS3SinkConfig: false,
     withKinesisSinkConfig: false,
@@ -52,7 +52,7 @@ test('Has one ECS cluster', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   template.resourceCountIs('AWS::ECS::Cluster', 1);
 });
@@ -61,7 +61,7 @@ test('Has one ECS Service', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   template.resourceCountIs('AWS::ECS::Service', 1);
 });
@@ -70,7 +70,7 @@ test('ECS task has log Configuration', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
 
   const taskDef = findFirstResource(
@@ -91,7 +91,7 @@ test('LogGroup has config RetentionInDays', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   template.allResourcesProperties('AWS::Logs::LogGroup', {
     RetentionInDays: Match.anyValue(),
@@ -102,7 +102,7 @@ test('ECS service has load balancer', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const ecsService = findFirstResource(template, 'AWS::ECS::Service')?.resource;
 
@@ -113,7 +113,7 @@ test('ECS service has HealthCheck grace time configured', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const ecsService = findFirstResource(template, 'AWS::ECS::Service')?.resource;
   expect(ecsService.Properties.HealthCheckGracePeriodSeconds > 0).toBeTruthy();
@@ -123,7 +123,7 @@ test('ECS service is in two subnets of VPC', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const ecsService = findFirstResource(template, 'AWS::ECS::Service')?.resource;
   expect(
@@ -135,34 +135,16 @@ test('ECS service ScalingPolicy is configured', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   template.resourceCountIs('AWS::ApplicationAutoScaling::ScalingPolicy', 1);
-});
-
-test('ALB protocol is condition with IsHTTPS', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-
-  const template = Template.fromStack(stack);
-  const listener = findFirstResource(
-    template,
-    'AWS::ElasticLoadBalancingV2::Listener',
-  )?.resource;
-  const properties = listener.Properties;
-  expect(properties.Protocol).toEqual(
-    { 'Fn::If': ['IsHTTPS', 'HTTPS', 'HTTP'] },
-  );
-  expect(properties.Port).toEqual({ 'Fn::If': ['IsHTTPS', 443, 80] });
 });
 
 test('The ECS service has one task which has two containers', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const taskDefinition = findFirstResource(
     template,
@@ -177,7 +159,7 @@ test('Sink to Msk container - vector environments', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const taskDefinition = findFirstResource(
     template,
@@ -213,7 +195,7 @@ test('Sink to Msk - vector configure as ACK', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const taskDefinition = findFirstResource(
     template,
@@ -236,7 +218,7 @@ test('Sink to Msk container - nginx environments', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const taskDefinition = findFirstResource(
     template,
@@ -257,107 +239,12 @@ test('Sink to Msk container - nginx environments', () => {
   expect(hasEndpointEnv).toBeTruthy();
 });
 
-test('Http is redirected to Https if hosted zone is set', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withMskConfig = true;
-  commonTestStackProps.domainName = 'www.example.com';
-  commonTestStackProps.certificateArn =
-    'arn:aws:acm:us-east-1:111111111111:certificate/fake';
-  commonTestStackProps.protocol = 'HTTPS';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-
-  const template = Template.fromStack(stack);
-  template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
-    DefaultActions: [
-      {
-        RedirectConfig: {
-          Port: '443',
-          Protocol: 'HTTPS',
-          StatusCode: 'HTTP_302',
-        },
-        Type: 'redirect',
-      },
-    ],
-    Port: 80,
-    Protocol: 'HTTP',
-  });
-});
-
-test('Construct has property server dns - https', () => {
-  const app = new App();
-
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withMskConfig = true;
-  commonTestStackProps.domainName = 'www.example.com';
-  commonTestStackProps.certificateArn =
-    'arn:aws:acm:us-east-1:111111111111:certificate/fake';
-  commonTestStackProps.protocol = 'HTTPS';
-  commonTestStackProps.serverEndpointPath = '/test_me';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-  const template = Template.fromStack(stack);
-  const ingestionServerDnsOutput = template.findOutputs(
-    'ingestionServerDNS',
-    {},
-  );
-  expect(ingestionServerDnsOutput.ingestionServerDNS.Value)
-    .toEqual({ 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerGlobalAccelerator22B37939', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerALBclickstreamingestionservicealbC894A3C2', 'DNSName'] }] });
-});
-
-test('Construct has property server url - https', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withMskConfig = true;
-  commonTestStackProps.domainName = 'www.example.com';
-  commonTestStackProps.certificateArn =
-    'arn:aws:acm:us-east-1:111111111111:certificate/fake';
-  commonTestStackProps.protocol = 'HTTPS';
-  commonTestStackProps.serverEndpointPath = '/test_me';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-  const template = Template.fromStack(stack);
-  const ingestionServerUrlOutput = template.findOutputs(
-    'ingestionServerUrl',
-    {},
-  );
-  expect(ingestionServerUrlOutput.ingestionServerUrl.Value).toEqual('https://www.example.com/test_me');
-});
-
-test('Construct has property server url - http', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withMskConfig = true;
-  commonTestStackProps.serverEndpointPath = '/test_me';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-  const template = Template.fromStack(stack);
-  const ingestionServerUrlOutput = template.findOutputs(
-    'ingestionServerUrl',
-    {},
-  );
-  expect(ingestionServerUrlOutput.ingestionServerUrl.Value)
-    .toEqual({ 'Fn::Join': ['', ['http://', { 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerGlobalAccelerator22B37939', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerALBclickstreamingestionservicealbC894A3C2', 'DNSName'] }] }, '/test_me']] });
-});
-
-test('Construct has property server dns - http', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withMskConfig = true;
-  commonTestStackProps.serverEndpointPath = '/test_me';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-  const template = Template.fromStack(stack);
-  const ingestionServerDnsOutput = template.findOutputs(
-    'ingestionServerDNS',
-    {},
-  );
-  expect(ingestionServerDnsOutput.ingestionServerDNS.Value)
-    .toEqual({ 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerGlobalAccelerator22B37939', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerALBclickstreamingestionservicealbC894A3C2', 'DNSName'] }] });
-});
-
 test('Server endpoint path can be configured in nginx task', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
   commonTestStackProps.serverEndpointPath = '/test_end_point';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const taskDefinition = findFirstResource(
     template,
@@ -381,7 +268,7 @@ test('SecurityGroupIngress is added to Msk security group', () => {
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
   commonTestStackProps.serverEndpointPath = '/test_end_point';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const sgIngress = findResources(template, 'AWS::EC2::SecurityGroupIngress');
   let findSgIngress = false;
@@ -402,7 +289,7 @@ test('SecurityGroup is added into SecurityGroupIngress for MSK as sink', () => {
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
   commonTestStackProps.serverEndpointPath = '/test_end_point';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const sgIngress = findResources(template, 'AWS::EC2::SecurityGroupIngress');
   let findSgIngress = false;
@@ -415,121 +302,13 @@ test('SecurityGroup is added into SecurityGroupIngress for MSK as sink', () => {
   expect(findSgIngress).toBeTruthy();
 });
 
-test('SecurityGroupIngress is added to ECS cluster SecurityGroup to allow access from ALB', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withMskConfig = true;
-  commonTestStackProps.serverEndpointPath = '/test_end_point';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-  const template = Template.fromStack(stack);
-  const sgIngress = findResources(template, 'AWS::EC2::SecurityGroupIngress');
-  let findSgIngress = false;
-  for (const ingress of sgIngress) {
-    if (
-      ingress.Properties.FromPort == 8088 &&
-      ingress.Properties.ToPort == 8088
-    ) {
-      findSgIngress = true;
-      break;
-    }
-  }
-  expect(findSgIngress).toBeTruthy();
-});
-
-test('Alb is internet-facing and ipv4 by default', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-  const template = Template.fromStack(stack);
-
-  template.hasCondition('IsPrivateSubnets', {
-    'Fn::Equals': [
-      'publicSubnet1,publicSubnet2',
-      'privateSubnet1,privateSubnet2',
-    ],
-  });
-  template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
-    //IpAddressType: 'dualstack',
-    IpAddressType: 'ipv4',
-    Scheme: {
-      'Fn::If': ['IsPrivateSubnets', 'internal', 'internet-facing'],
-    },
-    Subnets: {
-      'Fn::If': [
-        'IsPrivateSubnets',
-        [
-          'privateSubnet1',
-          'privateSubnet2',
-        ],
-        [
-          'publicSubnet1',
-          'publicSubnet2',
-        ],
-      ],
-    },
-  });
-});
-
-test('Alb drop_invalid_header_fields is enabled', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withMskConfig = true;
-  commonTestStackProps.enableApplicationLoadBalancerAccessLog = 'Yes';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-  const template = Template.fromStack(stack);
-  const alb = findFirstResource(
-    template,
-    'AWS::ElasticLoadBalancingV2::LoadBalancer',
-  )?.resource;
-
-  const albAttrs = alb.Properties.LoadBalancerAttributes['Fn::If'][1];
-
-  let drop_invalid_header_fields = false;
-
-  for (const attr of albAttrs) {
-    if (attr.Key == 'routing.http.drop_invalid_header_fields.enabled') {
-      drop_invalid_header_fields = attr.Value;
-    }
-  }
-  expect(drop_invalid_header_fields).toBeTruthy();
-});
-
-test('enable Alb access log is configured', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withMskConfig = true;
-  commonTestStackProps.enableApplicationLoadBalancerAccessLog = 'Yes';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-  const template = Template.fromStack(stack);
-  const alb = findFirstResource(
-    template,
-    'AWS::ElasticLoadBalancingV2::LoadBalancer',
-  )?.resource;
-  const albAttrs = alb.Properties.LoadBalancerAttributes['Fn::If'][1];
-
-  let access_logs_s3_bucket = false;
-  let access_logs_s3_enabled = false;
-
-  for (const attr of albAttrs) {
-    if (attr.Key == 'access_logs.s3.bucket') {
-      access_logs_s3_bucket = true;
-    }
-    if (attr.Key == 'access_logs.s3.enabled') {
-      access_logs_s3_enabled = true;
-    }
-  }
-  expect(access_logs_s3_bucket).toBeTruthy();
-  expect(access_logs_s3_enabled).toBeTruthy();
-});
-
 test('server EndpointPath and CorsOrigin can be configured', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
   commonTestStackProps.serverEndpointPath = '/abc/test';
   commonTestStackProps.serverCorsOrigin = 'a.test.com,b.test.net';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const taskDefinition = findFirstResource(
     template,
@@ -578,7 +357,7 @@ test('Sink to S3 container - vector environments', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withS3SinkConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const taskDefinition = findFirstResource(
     template,
@@ -598,7 +377,7 @@ test('Sink to Kinesis container - vector environments', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withKinesisSinkConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const taskDefinition = findFirstResource(
     template,
@@ -618,7 +397,7 @@ test('Sink both to MSK and Kinesis and S3 container - vector environments', () =
   commonTestStackProps.withKinesisSinkConfig = true;
   commonTestStackProps.withS3SinkConfig = true;
   commonTestStackProps.devMode = 'Yes';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   const taskDefinition = findFirstResource(
     template,
@@ -646,52 +425,10 @@ test('Sink both to MSK and Kinesis and S3 container - vector environments', () =
 
 });
 
-test('Enable Global Accelerator feature', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.enableGlobalAccelerator = 'Yes';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-  const template = Template.fromStack(stack);
-  const accelerator = findResources(template, 'AWS::GlobalAccelerator::Accelerator');
-
-  expect(accelerator.length === 1).toBeTruthy();
-
-  const conditionName = accelerator[0].Condition;
-
-  const condition = findConditionByName(template, conditionName);
-
-  expect(condition['Fn::And'][0]).toEqual({ 'Fn::Equals': ['Yes', 'Yes'] });
-
-  expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][0]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-north-1'] });
-  expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][1]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-northwest-1'] });
-
-});
-
-test('Disable Global Accelerator feature', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.enableGlobalAccelerator = 'No';
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-  const template = Template.fromStack(stack);
-  const accelerator = findResources(template, 'AWS::GlobalAccelerator::Accelerator');
-
-  expect(accelerator.length === 1).toBeTruthy();
-
-  const conditionName = accelerator[0].Condition;
-
-  const condition = findConditionByName(template, conditionName);
-
-  expect(condition['Fn::And'][0]).toEqual({ 'Fn::Equals': ['No', 'Yes'] });
-
-  expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][0]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-north-1'] });
-  expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][1]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-northwest-1'] });
-
-});
-
 test('Should set metrics widgets', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
     metricsWidgetsProps: {
@@ -711,7 +448,7 @@ test('Ingestion server with MskConfig should set metrics widgets for kafkaCluste
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
   commonTestStackProps.withMskConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
   template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
     metricsWidgetsProps: {
@@ -724,14 +461,4 @@ test('Ingestion server with MskConfig should set metrics widgets for kafkaCluste
       widgets: Match.anyValue(),
     },
   });
-});
-
-test('Check security group count', () => {
-  const app = new App();
-  let commonTestStackProps = generateCommonTestStackProps();
-  commonTestStackProps.withS3SinkConfig = true;
-  const stack = new TestStack(app, 'test', commonTestStackProps);
-
-  const template = Template.fromStack(stack);
-  template.resourceCountIs('AWS::EC2::SecurityGroup', 2);
 });

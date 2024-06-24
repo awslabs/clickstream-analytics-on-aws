@@ -25,7 +25,7 @@ import {
 import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
-import { SINK_TYPE_MODE } from '../../common/model';
+import { SINK_TYPE_MODE, ECS_INFRA_TYPE_MODE } from '../../common/model';
 import { Parameters, SubnetParameterType } from '../../common/parameters';
 
 export function createStackParameters(scope: Construct, props: {deliverToKinesis: boolean; deliverToKafka: boolean; deliverToS3: boolean}) {
@@ -36,6 +36,19 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     default: '330',
     minValue: 60,
   });
+
+  const notificationsTopicArnParam = new CfnParameter(
+    scope,
+    'NotificationsTopicArn',
+    {
+      description: 'AutoScaling group notifications SNS topic arn (optional)',
+      type: 'String',
+      default: '',
+      allowedPattern: '(arn:(aws|aws-cn):sns:.*?:[0-9]+:.*)?',
+      constraintDescription:
+        'NotificationsTopicArn must match pattern (arn:(aws|aws-cn):sns:.*?:[0-9]+:.*)?',
+    },
+  );
 
   const commonParameters = createCommonParameters(scope);
 
@@ -137,7 +150,6 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       enableApplicationLoadBalancerAccessLogParam: commonParameters.enableApplicationLoadBalancerAccessLogParam,
       logS3BucketParam: commonParameters.logS3BucketParam,
       logS3PrefixParam: commonParameters.logS3PrefixParam,
-      notificationsTopicArnParam: commonParameters.notificationsTopicArnParam,
       serverMinParam: commonParameters.serverMinParam,
       serverMaxParam: commonParameters.serverMaxParam,
       warmPoolSizeParam: commonParameters.warmPoolSizeParam,
@@ -160,7 +172,6 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     enableApplicationLoadBalancerAccessLogParam: commonParameters.enableApplicationLoadBalancerAccessLogParam,
     logS3BucketParam: commonParameters.logS3BucketParam,
     logS3PrefixParam: commonParameters.logS3PrefixParam,
-    notificationsTopicArnParam: commonParameters.notificationsTopicArnParam,
     serverMinParam: commonParameters.serverMinParam,
     serverMaxParam: commonParameters.serverMaxParam,
     warmPoolSizeParam: commonParameters.warmPoolSizeParam,
@@ -193,7 +204,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       enableApplicationLoadBalancerAccessLogParam: commonParameters.enableApplicationLoadBalancerAccessLogParam,
       logS3BucketParam: commonParameters.logS3BucketParam,
       logS3PrefixParam: commonParameters.logS3PrefixParam,
-      notificationsTopicArnParam: commonParameters.notificationsTopicArnParam,
+      notificationsTopicArnParam: notificationsTopicArnParam,
       serverMinParam: commonParameters.serverMinParam,
       serverMaxParam: commonParameters.serverMaxParam,
       warmPoolSizeParam: commonParameters.warmPoolSizeParam,
@@ -219,6 +230,13 @@ export function createV2StackParameters(scope: Construct) {
     type: 'String',
     allowedValues: [SINK_TYPE_MODE.SINK_TYPE_S3, SINK_TYPE_MODE.SINK_TYPE_KDS, SINK_TYPE_MODE.SINK_TYPE_MSK],
     default: SINK_TYPE_MODE.SINK_TYPE_S3,
+  });
+
+  const ecsInfraTypeParam = new CfnParameter(scope, 'EcsInfraType', {
+    description: 'Infrastructure type of ECS cluster',
+    type: 'String',
+    allowedValues: [ECS_INFRA_TYPE_MODE.EC2, ECS_INFRA_TYPE_MODE.FARGATE],
+    default: ECS_INFRA_TYPE_MODE.EC2,
   });
 
   const workerStopTimeoutParam = new CfnParameter(scope, 'WorkerStopTimeout', {
@@ -320,7 +338,6 @@ export function createV2StackParameters(scope: Construct) {
       enableApplicationLoadBalancerAccessLogParam: commonParameters.enableApplicationLoadBalancerAccessLogParam,
       logS3BucketParam: commonParameters.logS3BucketParam,
       logS3PrefixParam: commonParameters.logS3PrefixParam,
-      notificationsTopicArnParam: commonParameters.notificationsTopicArnParam,
       serverMinParam: commonParameters.serverMinParam,
       serverMaxParam: commonParameters.serverMaxParam,
       warmPoolSizeParam: commonParameters.warmPoolSizeParam,
@@ -343,7 +360,6 @@ export function createV2StackParameters(scope: Construct) {
     enableApplicationLoadBalancerAccessLogParam: commonParameters.enableApplicationLoadBalancerAccessLogParam,
     logS3BucketParam: commonParameters.logS3BucketParam,
     logS3PrefixParam: commonParameters.logS3PrefixParam,
-    notificationsTopicArnParam: commonParameters.notificationsTopicArnParam,
     serverMinParam: commonParameters.serverMinParam,
     serverMaxParam: commonParameters.serverMaxParam,
     warmPoolSizeParam: commonParameters.warmPoolSizeParam,
@@ -376,7 +392,6 @@ export function createV2StackParameters(scope: Construct) {
       enableApplicationLoadBalancerAccessLogParam: commonParameters.enableApplicationLoadBalancerAccessLogParam,
       logS3BucketParam: commonParameters.logS3BucketParam,
       logS3PrefixParam: commonParameters.logS3PrefixParam,
-      notificationsTopicArnParam: commonParameters.notificationsTopicArnParam,
       serverMinParam: commonParameters.serverMinParam,
       serverMaxParam: commonParameters.serverMaxParam,
       warmPoolSizeParam: commonParameters.warmPoolSizeParam,
@@ -391,6 +406,7 @@ export function createV2StackParameters(scope: Construct) {
       clickStreamSDKParam: commonParameters.clickStreamSDKParam,
       workerStopTimeoutParam,
       sinkTypeParam,
+      ecsInfraTypeParam,
       enableAuthenticationParam: commonParameters.enableAuthenticationParam,
       authenticationSecretArnParam: commonParameters.authenticationSecretArnParam,
     },
@@ -501,19 +517,6 @@ function createCommonParameters(scope: Construct) {
       type: 'String',
       allowedValues: ['Yes', 'No'],
       default: 'Yes',
-    },
-  );
-
-  const notificationsTopicArnParam = new CfnParameter(
-    scope,
-    'NotificationsTopicArn',
-    {
-      description: 'AutoScaling group notifications SNS topic arn (optional)',
-      type: 'String',
-      default: '',
-      allowedPattern: '(arn:(aws|aws-cn):sns:.*?:[0-9]+:.*)?',
-      constraintDescription:
-        'NotificationsTopicArn must match pattern (arn:(aws|aws-cn):sns:.*?:[0-9]+:.*)?',
     },
   );
 
@@ -647,7 +650,6 @@ function createCommonParameters(scope: Construct) {
     appIdsParam,
     warmPoolSizeParam,
     clickStreamSDKParam,
-    notificationsTopicArnParam,
     serverMinParam,
     serverMaxParam,
     scaleOnCpuUtilizationPercentParam,
@@ -671,7 +673,6 @@ function createCommonParameterGroups(props:
   enableApplicationLoadBalancerAccessLogParam: CfnParameter;
   logS3BucketParam: CfnParameter;
   logS3PrefixParam: CfnParameter;
-  notificationsTopicArnParam: CfnParameter;
   serverMinParam: CfnParameter;
   serverMaxParam: CfnParameter;
   warmPoolSizeParam: CfnParameter;
@@ -714,7 +715,6 @@ function createCommonParameterGroups(props:
         props.serverMinParam.logicalId,
         props.scaleOnCpuUtilizationPercentParam.logicalId,
         props.warmPoolSizeParam.logicalId,
-        props.notificationsTopicArnParam.logicalId,
       ],
     },
     {
@@ -741,7 +741,6 @@ function createCommonParameterLabels(props:
   enableApplicationLoadBalancerAccessLogParam: CfnParameter;
   logS3BucketParam: CfnParameter;
   logS3PrefixParam: CfnParameter;
-  notificationsTopicArnParam: CfnParameter;
   serverMinParam: CfnParameter;
   serverMaxParam: CfnParameter;
   warmPoolSizeParam: CfnParameter;
@@ -804,10 +803,6 @@ function createCommonParameterLabels(props:
 
     [props.logS3PrefixParam.logicalId]: {
       default: 'S3 object prefix to save log',
-    },
-
-    [props.notificationsTopicArnParam.logicalId]: {
-      default: 'AutoScaling group notifications SNS topic arn',
     },
 
     [props.serverMinParam.logicalId]: {
