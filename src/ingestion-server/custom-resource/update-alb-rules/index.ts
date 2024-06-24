@@ -124,13 +124,18 @@ async function _handler(
     const oldEndpointPath = oldProps.endpointPath;
     const oldDomainName = oldProps.domainName;
     const oldAuthenticationSecretArn = oldProps.authenticationSecretArn;
-    const oldEnableAuthentication: FeatureFlag = oldProps.enableAuthentication;
+    let oldEnableAuthentication: FeatureFlag = oldProps.enableAuthentication;
     const newUpdateProps : UpdatePropType = {
       endpointPath,
       hostHeader: domainName,
       enableAuthentication,
       authenticationSecretArn,
     };
+
+    if (!oldEnableAuthentication) {
+      oldEnableAuthentication = oldAuthenticationSecretArn ? FeatureFlag.ENABLED : FeatureFlag.DISABLED;
+    }
+
     const oldUpdateProps : UpdatePropType = {
       endpointPath: oldEndpointPath,
       hostHeader: oldDomainName,
