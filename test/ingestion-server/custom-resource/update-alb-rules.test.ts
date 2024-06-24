@@ -1381,6 +1381,79 @@ test('Update Listener for ClickStream SDK, with HTTPS and auth, have existing ap
   });
 });
 
+test('Test version compatible from v1 to v2 ', async () => {
+  const event: CloudFormationCustomResourceEvent = {
+    ...basicEvent,
+    RequestType: 'Update',
+    ResourceProperties: {
+      ...basicEvent.ResourceProperties,
+      appIds: 'notepad1,notepad2',
+      clickStreamSDK: 'Yes',
+      authenticationSecretArn: '',
+      enableAuthentication: 'No',
+      protocol: 'HTTP',
+    },
+    OldResourceProperties: {
+      protocol: 'HTTP',
+      appIds: 'app1',
+      clickStreamSDK: 'Yes',
+    },
+  };
+
+  albClientMock.on(DescribeRulesCommand).resolves({
+    Rules: [
+      {
+        RuleArn: 'RuleArn4',
+        Priority: '5',
+        Conditions: [
+          {
+            Field: 'query-string',
+            QueryStringConfig: {
+              Values: [
+                {
+                  Key: 'appId', Value: 'notepad1',
+                },
+              ],
+            },
+          },
+          {
+            Field: 'path-pattern',
+            Values: ['/collectold'],
+          },
+        ],
+      },
+      {
+        RuleArn: 'RuleArn5',
+        Priority: '6',
+        Conditions: [
+          {
+            Field: 'query-string',
+            QueryStringConfig: {
+              Values: [
+                {
+                  Key: 'appId', Value: 'notepad2',
+                },
+              ],
+            },
+          },
+          {
+            Field: 'path-pattern',
+            Values: ['/collectold'],
+          },
+        ],
+      },
+    ],
+  });
+
+  await handler(event, c);
+
+  expect(albClientMock).toHaveReceivedNthCommandWith(2, DescribeRulesCommand, {
+    ListenerArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:listener/app/abc/026af704b2ff1dcc',
+  });
+
+  expect(albClientMock).toHaveReceivedCommandTimes(DescribeRulesCommand, 5);
+});
+
 test('Update Listener for ClickStream SDK, with HTTP, have existing appId rules, add appIds change domain, endpoint path and auth secret arn', async () => {
   const event: CloudFormationCustomResourceEvent = {
     ...basicEvent,
