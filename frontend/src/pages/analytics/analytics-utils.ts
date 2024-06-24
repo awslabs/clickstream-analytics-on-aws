@@ -987,15 +987,31 @@ export const getGlobalEventCondition = (
   const conditions: ICondition[] = [];
   segmentationOptionData.data.forEach((condition) => {
     if (validConditionItemType(condition)) {
+      let dataType = defaultStr(
+        condition.conditionOption?.valueType,
+        MetadataValueType.STRING
+      );
+      if (
+        Object.values(ExtendedMetadataValueType).includes(
+          dataType as ExtendedMetadataValueType
+        )
+      ) {
+        switch (dataType) {
+          case ExtendedMetadataValueType.USER_SEGMENT:
+            dataType = MetadataValueType.STRING;
+            break;
+          default:
+            dataType = MetadataValueType.STRING;
+            break;
+        }
+      }
+
       const conditionObj: ICondition = {
         category: categoryMapping(condition.conditionOption?.category),
         property: defaultStr(condition.conditionOption?.name, ''),
         operator: defaultStr(condition.conditionOperator?.value, ''),
         value: condition.conditionValue,
-        dataType: defaultStr(
-          condition.conditionOption?.valueType,
-          MetadataValueType.STRING
-        ),
+        dataType,
       };
       conditions.push(conditionObj);
     }
@@ -1392,7 +1408,7 @@ export const convertSegmentListToFilterOptions = (
           category: ConditionCategoryFrontend.USER_OUTER,
           description: categoryName,
           label: itemName,
-          name: itemName,
+          name: 'segment_id',
           valueType: ExtendedMetadataValueType.USER_SEGMENT,
           values: segmentGroupList.map((segment) => ({
             value: segment.value ?? '',
