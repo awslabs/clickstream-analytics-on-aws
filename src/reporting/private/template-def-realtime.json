@@ -66,6 +66,90 @@
             ]
         },
         "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_User",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "event_timestamp_local",
+                        "DataType": "DATETIME"
+                    },
+                    {
+                        "Name": "user_count",
+                        "DataType": "INTEGER"
+                    },
+
+                    {
+                        "Name": "new_user_indicator",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_Traffic",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "event_timestamp_local",
+                        "DataType": "DATETIME"
+                    },
+                    {
+                        "Name": "user_count",
+                        "DataType": "INTEGER"
+                    },
+
+                    {
+                        "Name": "traffic_source_source",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_Name",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "event_timestamp_local",
+                        "DataType": "DATETIME"
+                    },
+                    {
+                        "Name": "user_count",
+                        "DataType": "INTEGER"
+                    },
+
+                    {
+                        "Name": "event_name",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_Page_Screen",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "event_timestamp_local",
+                        "DataType": "DATETIME"
+                    },
+                    {
+                        "Name": "View count",
+                        "DataType": "INTEGER"
+                    },
+
+                    {
+                        "Name": "Page title/Screen name",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
         }
     ],
     "Sheets": [
@@ -294,7 +378,7 @@
                                                 "DateDimensionField": {
                                                     "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.0.1715857356710",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
+                                                        "DataSetIdentifier": "Realtime_Event_User",
                                                         "ColumnName": "event_timestamp_local"
                                                     },
                                                     "DateGranularity": "MINUTE",
@@ -310,13 +394,15 @@
                                         ],
                                         "Values": [
                                             {
-                                                "CategoricalMeasureField": {
+                                                "NumericalMeasureField": {
                                                     "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715857362639",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "user_pseudo_id"
+                                                        "DataSetIdentifier": "Realtime_Event_User",
+                                                        "ColumnName": "user_count"
                                                     },
-                                                    "AggregationFunction": "DISTINCT_COUNT"
+                                                    "AggregationFunction": {
+                                                        "SimpleNumericalAggregation": "SUM"
+                                                    }
                                                 }
                                             }
                                         ],
@@ -325,7 +411,7 @@
                                                 "CategoricalDimensionField": {
                                                     "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.new_user_indicator.2.1715857385989",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
+                                                        "DataSetIdentifier": "Realtime_Event_User",
                                                         "ColumnName": "new_user_indicator"
                                                     }
                                                 }
@@ -512,7 +598,7 @@
                                                 "DateDimensionField": {
                                                     "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1716899533887",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
+                                                        "DataSetIdentifier": "Realtime_Event_Name",
                                                         "ColumnName": "event_timestamp_local"
                                                     },
                                                     "DateGranularity": "MINUTE",
@@ -528,13 +614,15 @@
                                         ],
                                         "Values": [
                                             {
-                                                "CategoricalMeasureField": {
+                                                "NumericalMeasureField": {
                                                     "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868483622",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "user_pseudo_id"
+                                                        "DataSetIdentifier": "Realtime_Event_Name",
+                                                        "ColumnName": "user_count"
                                                     },
-                                                    "AggregationFunction": "COUNT"
+                                                    "AggregationFunction": {
+                                                        "SimpleNumericalAggregation": "SUM"
+                                                    }
                                                 }
                                             }
                                         ],
@@ -543,7 +631,7 @@
                                                 "CategoricalDimensionField": {
                                                     "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.event_name.0.1715868468558",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
+                                                        "DataSetIdentifier": "Realtime_Event_Name",
                                                         "ColumnName": "event_name"
                                                     }
                                                 }
@@ -643,7 +731,7 @@
                                                 "DateDimensionField": {
                                                     "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1717558027378",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
+                                                        "DataSetIdentifier": "Realtime_Event_Traffic",
                                                         "ColumnName": "event_timestamp_local"
                                                     },
                                                     "DateGranularity": "MINUTE",
@@ -659,13 +747,15 @@
                                         ],
                                         "Values": [
                                             {
-                                                "CategoricalMeasureField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
+                                                "NumericalMeasureField": {
+                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_count.1.1715868773486",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "user_pseudo_id"
+                                                        "DataSetIdentifier": "Realtime_Event_Traffic",
+                                                        "ColumnName": "user_count"
                                                     },
-                                                    "AggregationFunction": "DISTINCT_COUNT"
+                                                    "AggregationFunction": {
+                                                        "SimpleNumericalAggregation": "SUM"
+                                                    }
                                                 }
                                             }
                                         ],
@@ -674,7 +764,7 @@
                                                 "CategoricalDimensionField": {
                                                     "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.traffic_source_source.1.1716899723929",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
+                                                        "DataSetIdentifier": "Realtime_Event_Traffic",
                                                         "ColumnName": "traffic_source_source"
                                                     }
                                                 }
@@ -719,7 +809,7 @@
                                         "TooltipFields": [
                                             {
                                                 "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
+                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_count.1.1715868773486",
                                                     "Visibility": "VISIBLE"
                                                 }
                                             },
@@ -770,7 +860,7 @@
                                                 "DateDimensionField": {
                                                     "FieldId": "LogicalTable1.event_timestamp_local.2.1718939702088",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
+                                                        "DataSetIdentifier": "Realtime_Event_Page_Screen",
                                                         "ColumnName": "event_timestamp_local"
                                                     },
                                                     "DateGranularity": "MINUTE",
@@ -783,8 +873,11 @@
                                                 "NumericalMeasureField": {
                                                     "FieldId": "LogicalTable1.view_count.1.1717558189271",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
+                                                        "DataSetIdentifier": "Realtime_Event_Page_Screen",
                                                         "ColumnName": "View count"
+                                                    },
+                                                    "AggregationFunction": {
+                                                        "SimpleNumericalAggregation": "SUM"
                                                     }
                                                 }
                                             }
@@ -794,7 +887,7 @@
                                                 "CategoricalDimensionField": {
                                                     "FieldId": "LogicalTable1.aggregation_dim.2.1717558195224",
                                                     "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
+                                                        "DataSetIdentifier": "Realtime_Event_Page_Screen",
                                                         "ColumnName": "Page title/Screen name"
                                                     }
                                                 }
@@ -877,13 +970,28 @@
                             "FreeFormLayout": {
                                 "Elements": [
                                     {
-                                        "ElementId": "ee4e4717-119c-4d3f-bbaf-27ceecb02e05",
+                                        "ElementId": "8cdbaa3a-2225-4b93-9461-b3b75efba133",
                                         "ElementType": "VISUAL",
-                                        "XAxisLocation": "0px",
+                                        "XAxisLocation": "1056px",
                                         "YAxisLocation": "384px",
-                                        "Width": "1056px",
+                                        "Width": "544px",
                                         "Height": "512px",
                                         "Visibility": "VISIBLE"
+                                    },
+                                    {
+                                        "ElementId": "94c6b175-89ed-4527-9c1f-d6450713d546",
+                                        "ElementType": "VISUAL",
+                                        "XAxisLocation": "592px",
+                                        "YAxisLocation": "0px",
+                                        "Width": "480px",
+                                        "Height": "384px",
+                                        "Visibility": "VISIBLE",
+                                        "BorderStyle": {
+                                            "Visibility": "HIDDEN"
+                                        },
+                                        "BackgroundStyle": {
+                                            "Visibility": "HIDDEN"
+                                        }
                                     },
                                     {
                                         "ElementId": "f63c274a-ba58-4d28-8dd2-5382a58ad652",
@@ -903,6 +1011,15 @@
                                             "Visibility": "HIDDEN",
                                             "Color": "#2A5D78"
                                         }
+                                    },
+                                    {
+                                        "ElementId": "ee4e4717-119c-4d3f-bbaf-27ceecb02e05",
+                                        "ElementType": "VISUAL",
+                                        "XAxisLocation": "0px",
+                                        "YAxisLocation": "384px",
+                                        "Width": "1056px",
+                                        "Height": "512px",
+                                        "Visibility": "VISIBLE"
                                     },
                                     {
                                         "ElementId": "7288a77f-b354-4af2-8fe4-2dbc1853769c",
@@ -935,30 +1052,6 @@
                                         }
                                     },
                                     {
-                                        "ElementId": "94c6b175-89ed-4527-9c1f-d6450713d546",
-                                        "ElementType": "VISUAL",
-                                        "XAxisLocation": "592px",
-                                        "YAxisLocation": "0px",
-                                        "Width": "480px",
-                                        "Height": "384px",
-                                        "Visibility": "VISIBLE",
-                                        "BorderStyle": {
-                                            "Visibility": "HIDDEN"
-                                        },
-                                        "BackgroundStyle": {
-                                            "Visibility": "HIDDEN"
-                                        }
-                                    },
-                                    {
-                                        "ElementId": "8cdbaa3a-2225-4b93-9461-b3b75efba133",
-                                        "ElementType": "VISUAL",
-                                        "XAxisLocation": "1056px",
-                                        "YAxisLocation": "384px",
-                                        "Width": "544px",
-                                        "Height": "512px",
-                                        "Visibility": "VISIBLE"
-                                    },
-                                    {
                                         "ElementId": "696a5cf9-2520-4cf6-83f4-cd40e4692cfa",
                                         "ElementType": "VISUAL",
                                         "XAxisLocation": "800px",
@@ -981,16 +1074,6 @@
             }
         ],
         "CalculatedFields": [
-            {
-                "DataSetIdentifier": "Realtime_Event",
-                "Name": "Page title/Screen name",
-                "Expression": "coalesce({page_view_page_title}, {screen_view_screen_name}, '')"
-            },
-            {
-                "DataSetIdentifier": "Realtime_Event",
-                "Name": "View count",
-                "Expression": "distinct_countIf({user_pseudo_id},({event_name}='_page_view' OR {event_name}='_screen_view'))"
-            }
         ],
         "ParameterDeclarations": [],
         "FilterGroups": [
@@ -1001,19 +1084,21 @@
                         "TopBottomFilter": {
                             "FilterId": "8d44139c-732d-4f85-b996-9d7d16a775af",
                             "Column": {
-                                "DataSetIdentifier": "Realtime_Event",
+                                "DataSetIdentifier": "Realtime_Event_Name",
                                 "ColumnName": "event_name"
                             },
                             "Limit": 10,
                             "AggregationSortConfigurations": [
                                 {
                                     "Column": {
-                                        "DataSetIdentifier": "Realtime_Event",
-                                        "ColumnName": "event_id"
+                                        "DataSetIdentifier": "Realtime_Event_Name",
+                                        "ColumnName": "user_count"
                                     },
                                     "SortDirection": "DESC",
                                     "AggregationFunction": {
-                                        "CategoricalAggregationFunction": "COUNT"
+                                        "NumericalAggregationFunction": {
+                                            "SimpleNumericalAggregation": "SUM"
+                                        }
                                     }
                                 }
                             ]
@@ -1043,14 +1128,14 @@
                         "TopBottomFilter": {
                             "FilterId": "b1039e04-0be3-46c0-bbf6-0421493946ce",
                             "Column": {
-                                "DataSetIdentifier": "Realtime_Event",
+                                "DataSetIdentifier": "Realtime_Event_Page_Screen",
                                 "ColumnName": "Page title/Screen name"
                             },
                             "Limit": 10,
                             "AggregationSortConfigurations": [
                                 {
                                     "Column": {
-                                        "DataSetIdentifier": "Realtime_Event",
+                                        "DataSetIdentifier": "Realtime_Event_Page_Screen",
                                         "ColumnName": "View count"
                                     },
                                     "SortDirection": "DESC"
@@ -1068,40 +1153,6 @@
                                 "VisualIds": [
                                     "696a5cf9-2520-4cf6-83f4-cd40e4692cfa"
                                 ]
-                            }
-                        ]
-                    }
-                },
-                "Status": "ENABLED",
-                "CrossDataset": "SINGLE_DATASET"
-            },
-            {
-                "FilterGroupId": "3cfc234b-d3d2-4d5d-a154-2d8cb0a24b76",
-                "Filters": [
-                    {
-                        "TimeRangeFilter": {
-                            "FilterId": "af7535ec-0abd-4807-902a-59876da4c8e4",
-                            "Column": {
-                                "DataSetIdentifier": "Realtime_Event",
-                                "ColumnName": "event_timestamp_local"
-                            },
-                            "IncludeMinimum": true,
-                            "RangeMinimumValue": {
-                                "RollingDate": {
-                                    "Expression": "addDateTime(-1, 'HH', truncDate('HH', now()))"
-                                }
-                            },
-                            "NullOption": "NON_NULLS_ONLY",
-                            "TimeGranularity": "SECOND"
-                        }
-                    }
-                ],
-                "ScopeConfiguration": {
-                    "SelectedSheets": {
-                        "SheetVisualScopingConfigurations": [
-                            {
-                                "SheetId": "f7454608-49ab-46bb-97a6-1d48e70889cc",
-                                "Scope": "ALL_VISUALS"
                             }
                         ]
                     }

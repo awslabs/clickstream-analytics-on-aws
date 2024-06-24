@@ -245,16 +245,17 @@ function _getDataSetDefs(
   );
 
   //Realtime data set
-  dataSetProps.push(
+  const realtimeDatasets: DataSetProps[] = [
     {
       tableName: CLICKSTREAM_REALTIME_EVENT_VIEW_PLACEHOLDER,
       useSpice: 'no',
       realtime: 'yes',
       customSql: `
-        -- clickstream-builtin-realtime-dashboard
+        -- clickstream-builtin-realtime-dashboard-${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
         select 
           ${eventViewColumnsRT} 
         from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
       `,
       columns: [
         ...clickstream_realtime_event_view_columns,
@@ -285,6 +286,129 @@ function _getDataSetDefs(
       ],
       projectedColumns: [...realtimeEventViewProjectedColumns, 'event_timestamp_local', 'event_date', 'new_user_indicator'],
     },
+    {
+      tableName: 'Realtime_Event_User',
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_User
+        select 
+          DATE_TRUNC('minute', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
+          CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as new_user_indicator,
+          COUNT(distinct user_pseudo_id) as user_count
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1,2
+      `,
+      columns: [
+        {
+          Name: 'event_timestamp_local',
+          Type: 'DATETIME',
+        },
+        {
+          Name: 'user_count',
+          Type: 'INTEGER',
+        },
+        {
+          Name: 'new_user_indicator',
+          Type: 'STRING',
+        },
+      ],
+      projectedColumns: ['event_timestamp_local', 'user_count', 'new_user_indicator'],
+    },
+    {
+      tableName: 'Realtime_Event_Traffic',
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Traffic
+        select 
+          DATE_TRUNC('minute', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
+          traffic_source_source,
+          COUNT(distinct user_pseudo_id) as user_count
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1,2
+      `,
+      columns: [
+        {
+          Name: 'event_timestamp_local',
+          Type: 'DATETIME',
+        },
+        {
+          Name: 'user_count',
+          Type: 'INTEGER',
+        },
+        {
+          Name: 'traffic_source_source',
+          Type: 'STRING',
+        },
+      ],
+      projectedColumns: ['event_timestamp_local', 'user_count', 'traffic_source_source'],
+    },
+    {
+      tableName: 'Realtime_Event_Page_Screen',
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Page_Screen
+        select 
+          DATE_TRUNC('minute', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
+          coalesce(page_view_page_title, screen_view_screen_name, '') as "Page title/Screen name",
+          SUM(CASE WHEN event_name = '_screen_view' or event_name = '_page_view' THEN 1 ELSE 0 END) as "View count"
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1,2
+      `,
+      columns: [
+        {
+          Name: 'event_timestamp_local',
+          Type: 'DATETIME',
+        },
+        {
+          Name: 'View count',
+          Type: 'INTEGER',
+        },
+        {
+          Name: 'Page title/Screen name',
+          Type: 'STRING',
+        },
+      ],
+      projectedColumns: ['event_timestamp_local', 'View count', 'Page title/Screen name'],
+    },
+    {
+      tableName: 'Realtime_Event_Name',
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Name
+        select 
+          DATE_TRUNC('minute', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
+          event_name,
+          COUNT(distinct user_pseudo_id) as user_count
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1,2
+      `,
+      columns: [
+        {
+          Name: 'event_timestamp_local',
+          Type: 'DATETIME',
+        },
+        {
+          Name: 'user_count',
+          Type: 'INTEGER',
+        },
+        {
+          Name: 'event_name',
+          Type: 'STRING',
+        },
+      ],
+      projectedColumns: ['event_timestamp_local', 'user_count', 'event_name'],
+    }
+  ];
+  dataSetProps.push(
+    ...realtimeDatasets
   );
 
   dataSetProps.push(
