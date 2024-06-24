@@ -1,6 +1,6 @@
 CREATE MATERIALIZED VIEW {{app_schema}}.ods_events_streaming_mv 
-SORTKEY(approximate_arrival_timestamp)
 BACKUP YES
+SORTKEY(approximate_arrival_timestamp)
 AUTO REFRESH YES 
 AS
 SELECT approximate_arrival_timestamp,

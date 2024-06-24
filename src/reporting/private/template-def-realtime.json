@@ -1138,7 +1138,12 @@
                                         "DataSetIdentifier": "Realtime_Event_Page_Screen",
                                         "ColumnName": "View count"
                                     },
-                                    "SortDirection": "DESC"
+                                    "SortDirection": "DESC",
+                                    "AggregationFunction": {
+                                        "NumericalAggregationFunction": {
+                                            "SimpleNumericalAggregation": "SUM"
+                                        }
+                                    }
                                 }
                             ]
                         }
