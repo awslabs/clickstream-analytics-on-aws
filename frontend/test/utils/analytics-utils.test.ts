@@ -72,7 +72,7 @@ describe('analytics utils tests', () => {
             category: 'user_outer',
             description: 'User segments',
             label: 'Segment',
-            name: 'Segment',
+            name: 'segment_id',
             valueType: 'UserSegment',
             values: [
               {

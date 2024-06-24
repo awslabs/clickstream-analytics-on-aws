@@ -141,7 +141,9 @@ const UserSegmentDetails: React.FC = () => {
   const renderSegmentTrendChart = () => {
     const getTimeLabel = (time: number) =>
       getDateTimeWithTimezoneString(time, timezone);
-    const jobs = segmentJobs.filter((job) => job.jobStatus === 'Completed');
+    const jobs = segmentJobs
+      .filter((job) => job.jobStatus === 'Completed')
+      .reverse();
 
     return (
       <MixedLineBarChart
