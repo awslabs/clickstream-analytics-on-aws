@@ -104,5 +104,4 @@ select
     event_data.custom_parameters_json_str::varchar,
     event_data.custom_parameters::super,
     event_data.process_info::super
-from {{app_schema}}.ods_events_streaming_mv
-;
+from {{app_schema}}.ods_events_streaming_mv;
