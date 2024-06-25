@@ -85,6 +85,30 @@ class ApplicationParametersTest {
         return props;
     }
 
+    private static Properties getPropertiesV4(String allowEvents) {
+        String configText = "{\"appIdStreamList\":[" +
+                "{\"appId\":\"app1\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink\"}" +
+                ",{\"appId\":\"app2\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
+                ",{\"appId\":\"app3\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
+                "]}";
+        Properties props = new Properties();
+        props.setProperty("inputStreamArn", "arn:aws:kinesis:us-east-1:123456789012:stream/testStream");
+        props.setProperty("dataBucketName", "testBucket");
+        props.setProperty("projectId", "project1");
+        props.setProperty("geoFileKey", "testKey/t.txt");
+        props.setProperty("appIdStreamConfig", configText);
+        props.setProperty("transformVersion", "v2");
+        props.setProperty("appRuleConfigPath", "s3://test/project1/rules/");
+        props.setProperty("enableUaEnrich", "true");
+        props.setProperty("enableIpEnrich", "true");
+        props.setProperty("enableTrafficSourceEnrich", "false");
+        props.setProperty("withCustomParameters", "false");
+        props.setProperty("allowRetentionHours", "24");
+        props.setProperty("allowEventList", allowEvents);
+
+        return props;
+    }
+
     @Test
     void testCreateApplicationParametersFromProps() throws IOException {
         // ./gradlew  test --tests  software.aws.solution.clickstream.flink.ApplicationParametersTest.testCreateApplicationParametersFromProps
@@ -200,5 +224,33 @@ class ApplicationParametersTest {
         Assertions.assertTrue(params.isIpEnrich());
         Assertions.assertTrue(params.isUaEnrich());
         Assertions.assertFalse(params.isTrafficSourceEnrich());
+        Assertions.assertNull(params.getAllowEventList());
+        Assertions.assertTrue(params.isWithCustomParameters());
+        Assertions.assertEquals(0, params.getAllowRetentionHours());
+    }
+
+    @Test
+    void testCreateApplicationParametersFromPropsV4() throws IOException {
+        //  ./gradlew  test --tests  software.aws.solution.clickstream.flink.ApplicationParametersTest.testCreateApplicationParametersFromPropsV4
+        Properties propsV4 = getPropertiesV4("ALL");
+        ApplicationParameters params = ApplicationParameters.fromProperties(propsV4);
+
+        Assertions.assertNull(params.getAllowEventList());
+
+        propsV4 = getPropertiesV4("");
+        params = ApplicationParameters.fromProperties(propsV4);
+        Assertions.assertNull(params.getAllowEventList());
+    }
+
+    @Test
+    void testCreateApplicationParametersFromPropsV5() throws IOException {
+        //  ./gradlew  test --tests  software.aws.solution.clickstream.flink.ApplicationParametersTest.testCreateApplicationParametersFromPropsV5
+        Properties propsV4 = getPropertiesV4("ALL,CLICK,VIEW");
+        ApplicationParameters params = ApplicationParameters.fromProperties(propsV4);
+
+        Assertions.assertEquals(3, params.getAllowEventList().size());
+
+        Assertions.assertEquals(24, params.getAllowRetentionHours());
+        Assertions.assertFalse(params.isWithCustomParameters());
     }
 }

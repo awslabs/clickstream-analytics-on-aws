@@ -22,7 +22,6 @@ import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.util.OutputTag;
-import software.aws.solution.clickstream.common.ClickstreamEventParser;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.TransformConfig;
@@ -89,7 +88,12 @@ public class StreamingJob {
         TransformConfig transformConfig = new TransformConfig();
         transformConfig.setTrafficSourceEnrichmentDisabled(!props.isTrafficSourceEnrich());
         transformConfig.setAppRuleConfig(getAppRuleConfig(props));
-        return ClickstreamEventParser.getInstance(transformConfig);
+        transformConfig.setAllowEvents(props.getAllowEventList());
+        long allowEventTimeMaxLatencyMilisec = Math.round(props.getAllowRetentionHours() * 3600 * 1000);
+        // at least 1 seconds
+        transformConfig.setAllowEventTimeMaxLatencyMilisec(allowEventTimeMaxLatencyMilisec >= 1000 ? allowEventTimeMaxLatencyMilisec : 0);
+        String transformName = props.getTransformerName();
+        return EventParserFactory.newEventParser(transformConfig, transformName);
     }
 
     private static Map<String, RuleConfig> getAppRuleConfig(final ApplicationParameters props) throws IOException {
@@ -182,8 +186,9 @@ public class StreamingJob {
                                   final Sink<String> outKinesisSink) throws IOException {
         String projectId = props.getProjectId();
         log.info("transformAndSinkV2 appId: {}", appId);
+        boolean withCustomParameters = props.isWithCustomParameters();
         DataStream<String> transformedData = inputStream.flatMap(
-                new TransformEventFlatMapFunctionV2(projectId, appId, eventParser, getEnrichments())).name("TransformEventFlatMapFunctionV2-" + appId);
+                new TransformEventFlatMapFunctionV2(projectId, appId, eventParser, getEnrichments(), withCustomParameters)).name("TransformEventFlatMapFunctionV2-" + appId);
         transformedData.sinkTo(outKinesisSink).name(appId);
     }
 

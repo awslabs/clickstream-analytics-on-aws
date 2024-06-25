@@ -17,7 +17,7 @@ import {
   S3_BUCKET_ARN_PATTERN,
   SUBNETS_PATTERN,
 } from '@aws/clickstream-base-lib';
-import { CfnParameter } from 'aws-cdk-lib';
+import { CfnParameter, Fn } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { REDSHIFT_MODE } from '../common/model';
 import { Parameters, SubnetParameterType } from '../common/parameters';
@@ -68,6 +68,15 @@ export interface StreamingIngestionStackProps {
     dataBucket: {
       arn: string;
       prefix: string;
+    };
+    eventProcessing : {
+      transformerName: string;
+      retentionHours: number;
+      allowEvents: string;
+      enableUaEnrich: string;
+      enableIpEnrich: string;
+      enableTrafficSourceEnrich: string;
+      withCustomParameters: string;
     };
   };
 }
@@ -167,6 +176,55 @@ export function createStackParameters(scope: Construct): {
     default: 'clickstream/',
   });
 
+
+  const transformerNameParam = new CfnParameter(scope, 'TransformerName', {
+    description: 'The name of the transformer',
+    type: 'String',
+    default: 'clickstream',
+    allowedValues: ['clickstream', 'gtm', 'sensors'],
+  });
+
+  const retentionHoursParam = new CfnParameter(scope, 'RetentionHours', {
+    description: 'The retention hours of events in the event table',
+    type: 'Number',
+    default: 1.0,
+    minValue: 0.01,
+  });
+
+  const allowEventsParam = new CfnParameter(scope, 'AllowEvents', {
+    description: 'The events that are allowed to be ingested, default is all events, use comma to separate multiple events',
+    type: 'CommaDelimitedList',
+    default: 'ALL',
+  });
+
+  const enableUaEnrichParam = new CfnParameter(scope, 'EnableUaEnrich', {
+    description: 'Enable User Agent enrichment',
+    type: 'String',
+    default: 'true',
+    allowedValues: ['true', 'false'],
+  });
+
+  const enableIpEnrichParam = new CfnParameter(scope, 'EnableIpEnrich', {
+    description: 'Enable IP enrichment',
+    type: 'String',
+    default: 'true',
+    allowedValues: ['true', 'false'],
+  });
+
+  const enableTrafficSourceEnrichParam = new CfnParameter(scope, 'EnableTrafficSourceEnrich', {
+    description: 'Enable Traffic Source enrichment',
+    type: 'String',
+    default: 'true',
+    allowedValues: ['true', 'false'],
+  });
+
+  const withCustomParametersParam = new CfnParameter(scope, 'WithCustomParameters', {
+    description: 'Enable custom parameters',
+    type: 'String',
+    default: 'false',
+    allowedValues: ['true', 'false'],
+  });
+
   // Set pipeline parameters
   const pipelineParamsGroup = [];
   pipelineParamsGroup.push({
@@ -177,6 +235,13 @@ export function createStackParameters(scope: Construct): {
       subnetIdsParam.logicalId,
       pipelineS3BucketArnParam.logicalId,
       pipelineS3PrefixParam.logicalId,
+      transformerNameParam.logicalId,
+      retentionHoursParam.logicalId,
+      allowEventsParam.logicalId,
+      enableUaEnrichParam.logicalId,
+      enableIpEnrichParam.logicalId,
+      enableTrafficSourceEnrichParam.logicalId,
+      withCustomParametersParam.logicalId,
     ],
   });
 
@@ -198,6 +263,27 @@ export function createStackParameters(scope: Construct): {
     },
     [pipelineS3PrefixParam.logicalId]: {
       default: 'The prefix of S3 bucket for streaming ingestion stores temporary files',
+    },
+    [transformerNameParam.logicalId]: {
+      default: 'The name of the transformer',
+    },
+    [retentionHoursParam.logicalId]: {
+      default: 'The retention hours of events in the event table',
+    },
+    [allowEventsParam.logicalId]: {
+      default: 'The events that are allowed to be ingested',
+    },
+    [enableUaEnrichParam.logicalId]: {
+      default: 'Enable User Agent enrichment',
+    },
+    [enableIpEnrichParam.logicalId]: {
+      default: 'Enable IP enrichment',
+    },
+    [enableTrafficSourceEnrichParam.logicalId]: {
+      default: 'Enable Traffic Source enrichment',
+    },
+    [withCustomParametersParam.logicalId]: {
+      default: 'Enable custom parameters',
     },
   };
 
@@ -387,6 +473,15 @@ export function createStackParameters(scope: Construct): {
         dataBucket: {
           arn: pipelineS3BucketArnParam.valueAsString,
           prefix: pipelineS3PrefixParam.valueAsString,
+        },
+        eventProcessing: {
+          transformerName: transformerNameParam.valueAsString,
+          retentionHours: retentionHoursParam.valueAsNumber,
+          allowEvents: Fn.join(',', allowEventsParam.valueAsList), // convert to string
+          enableUaEnrich: enableUaEnrichParam.valueAsString,
+          enableIpEnrich: enableIpEnrichParam.valueAsString,
+          enableTrafficSourceEnrich: enableTrafficSourceEnrichParam.valueAsString,
+          withCustomParameters: withCustomParametersParam.valueAsString,
         },
       },
     },

@@ -40,6 +40,10 @@ public class ApplicationParameters {
     private static final String ENABLE_UA_ENRICH = "enableUaEnrich";
     private static final String ENABLE_IP_ENRICH = "enableIpEnrich";
     private static final String ENABLE_TRAFFIC_SOURCE_ENRICH = "enableTrafficSourceEnrich";
+    private static final String WITH_CUSTOM_PARAMETERS = "withCustomParameters";
+    private static final String ALLOW_RETENTION_HOURS = "allowRetentionHours";
+    private static final String ALLOW_EVENT_LIST = "allowEventList";
+    private static final String TRANSFORMER_NAME = "transformerName";
 
     private String dataBucketName;
     private String region;
@@ -52,10 +56,14 @@ public class ApplicationParameters {
     private String appRuleConfigPath;
     private List<AppIdStream> appIdStreamList;
     private int parallelism = 0;
+    private boolean isWithCustomParameters;
+    private double allowRetentionHours;
+    private List<String> allowEventList;
 
     private boolean uaEnrich;
     private boolean ipEnrich;
     private boolean trafficSourceEnrich;
+    private String transformerName;
 
      static ApplicationParameters fromProperties(final Properties props) {
         ApplicationParameters parameters = new ApplicationParameters();
@@ -98,6 +106,26 @@ public class ApplicationParameters {
         parameters.setRegion(region);
         parameters.setAppIdStreamList(getConfig(parameters.getAppIdStreamConfig(), region));
         parameters.setInputStreamName(inputStreamArn.split("/")[1]);
+
+         boolean withCustomParameters = Boolean.parseBoolean(props.getProperty(WITH_CUSTOM_PARAMETERS, "true"));
+         parameters.setWithCustomParameters(withCustomParameters);
+         log.info("With custom parameters: {}", withCustomParameters);
+
+         String allowEventListStr = props.getProperty(ALLOW_EVENT_LIST);
+         if (allowEventListStr != null
+                 && !allowEventListStr.isEmpty() && !allowEventListStr.equals("ALL")) {
+             parameters.setAllowEventList(List.of(allowEventListStr.split(",")));
+             log.info("Allow event list: {}", String.join(",", parameters.getAllowEventList()));
+         }
+
+         double allowRetentionHours = Double.parseDouble(props.getProperty(ALLOW_RETENTION_HOURS, "0"));
+         parameters.setAllowRetentionHours(allowRetentionHours);
+         log.info("allow retention hours: {}", allowRetentionHours);
+
+         String transformerName = props.getProperty(TRANSFORMER_NAME, "clickstream");
+         parameters.setTransformerName(transformerName);
+         log.info("transformerName: {}", transformerName);
+
         return parameters;
     }
 
@@ -130,6 +158,11 @@ public class ApplicationParameters {
         parameters.setInputStreamArn(args[2]);
         parameters.setProjectId(args[3]);
         parameters.setAppIdStreamConfig(args[4]);
+        parameters.setTransformerName("clickstream");
+        parameters.setWithCustomParameters(true);
+        parameters.setAllowRetentionHours(0);
+        parameters.setAllowEventList(null);
+
         if (args.length > 5) {
             parameters.setTransformVersion(args[5]);
         }
@@ -148,6 +181,22 @@ public class ApplicationParameters {
             if (enrichFlag.contains("ts") || enrichFlag.contains("traffic")) {
                 parameters.setTrafficSourceEnrich(true);
             }
+        }
+
+        if (args.length > 8) { // WithCustomParameters
+            parameters.setWithCustomParameters(Boolean.parseBoolean(args[8]));
+        }
+
+        if (args.length > 9) { // allowRetentionHours
+            parameters.setAllowRetentionHours(Double.parseDouble(args[9]));
+        }
+
+        if (args.length > 10) { // AllowEventList
+            parameters.setAllowEventList(List.of(args[10].split(",")));
+        }
+
+        if (args.length > 11) { // transformerName
+            parameters.setTransformerName(args[11]);
         }
 
         parameters.setRegion(args[2].split(":")[3]);

@@ -24,12 +24,14 @@ import software.aws.solution.clickstream.BaseTest;
 import software.aws.solution.clickstream.common.ExtraParams;
 import software.aws.solution.clickstream.common.ParseDataResult;
 import software.aws.solution.clickstream.common.ParseRowResult;
+import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.common.ingest.ClickstreamIngestRow;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.common.model.ClickstreamUser;
 import software.aws.solution.clickstream.common.sensors.event.SensorsEvent;
 
 import java.io.IOException;
+import java.util.List;
 
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 
@@ -61,7 +63,7 @@ public class SensorsEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance(null, true);
         ClickstreamIngestRow row = sensorsEventParser.ingestLineToRow(firstLine);
         SensorsEvent event = sensorsEventParser.ingestDataToEvent(row.getData());
         String expectedJson = this.resourceFileAsString("/sensors-data/expected/test_sensors_data_ingestDataToEvent.json");
@@ -78,7 +80,7 @@ public class SensorsEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance(null, true);
         ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
 
         ClickstreamEvent csEvent = rowResult.getClickstreamEventList().get(0);
@@ -94,7 +96,7 @@ public class SensorsEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance(null, true);
         ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
 
         ClickstreamEvent csEvent = rowResult.getClickstreamEventList().get(0);
@@ -110,7 +112,7 @@ public class SensorsEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance(null, true);
         ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
 
         ClickstreamUser csUser = rowResult.getClickstreamUserList().get(0);
@@ -126,7 +128,7 @@ public class SensorsEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance(null, true);
         ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
 
         Assertions.assertEquals(0, rowResult.getClickstreamItemList().size(), "test_sensors_parseLineToDBRow_item");
@@ -141,7 +143,7 @@ public class SensorsEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance(null, true);
         ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
 
         Assertions.assertEquals(1, rowResult.getClickstreamItemList().size(), "test_sensors_parseLineToDBRow_item");
@@ -155,7 +157,7 @@ public class SensorsEventParserTest extends BaseTest {
 
         String lines = resourceFileContent("/sensors-data/web-non-gzip-data.json");
         String firstLine = lines.split("\n")[0];
-        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance(null, true);
         ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "web-non-gzip-data.json");
         Assertions.assertEquals(1, rowResult.getClickstreamEventList().size(), "test_sensors_parseLineToDBRow_non_zip_data");
     }
@@ -170,7 +172,7 @@ public class SensorsEventParserTest extends BaseTest {
         int userCount = 0;
         int itemCount = 0;
         for (String line : lines.split("\n")) {
-            SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+            SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance(null, true);
             ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(line, "test_project_id", "/sensors-web-data-empty.json");
             eventCount += rowResult.getClickstreamEventList().size();
             userCount += rowResult.getClickstreamUserList().size();
@@ -187,7 +189,7 @@ public class SensorsEventParserTest extends BaseTest {
     void test_parse_empty_data() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_parse_empty_data
 
-        SensorsEventParser eventParser = SensorsEventParser.getInstance();
+        SensorsEventParser eventParser = SensorsEventParser.getInstance(null, true);
         ExtraParams extraParams = ExtraParams.builder().build();
         ParseDataResult r = eventParser.parseData("", extraParams, 0);
         Assertions.assertEquals(0, r.getClickstreamEventList().size());
@@ -212,7 +214,7 @@ public class SensorsEventParserTest extends BaseTest {
         String lines = resourceFileContent("/sensors-data/sensors-web-ua.json");
         String[] lineList = lines.split("\n");
 
-        SensorsEventParser eventParser = SensorsEventParser.getInstance();
+        SensorsEventParser eventParser = SensorsEventParser.getInstance(null, true);
         ExtraParams extraParams = ExtraParams.builder().build();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -224,6 +226,44 @@ public class SensorsEventParserTest extends BaseTest {
             JsonNode ua = dataNode.get("properties").get("user_agent");
             Assertions.assertNull(ua);
         }
+    }
+
+
+    @Test
+    void test_sensors_ingestDataToEvent_allow_event() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_sensors_ingestDataToEvent_allow_event
+
+        String lines = resourceFileContent("/sensors-data/track-signup-data.json");
+
+        String firstLine = lines.split("\n")[0];
+
+        TransformConfig config = new TransformConfig();
+        config.setAllowEvents(List.of("ViewProduct"));
+
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance(config, true);
+        ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "web-non-gzip-data.json");
+        Assertions.assertEquals(1,  rowResult.getClickstreamEventList().size());
+        Assertions.assertEquals("ViewProduct",  rowResult.getClickstreamEventList().get(0).getEventName());
+    }
+
+
+    @Test
+    void test_sensors_ingestDataToEvent_allow_event2() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.sensors.SensorsEventParserTest.test_sensors_ingestDataToEvent_allow_event2
+
+        String lines = resourceFileContent("/sensors-data/track-signup-data.json");
+
+        String firstLine = lines.split("\n")[0];
+
+        TransformConfig config = new TransformConfig();
+        config.setAllowEvents(List.of("ViewProduct1"));
+
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance(config, true);
+        ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "web-non-gzip-data.json");
+        Assertions.assertEquals(0,  rowResult.getClickstreamEventList().size());
+        Assertions.assertEquals(0,  rowResult.getClickstreamUserList().size());
+        Assertions.assertEquals(0,  rowResult.getClickstreamItemList().size());
+
     }
 
 }
