@@ -263,7 +263,6 @@ function _getDataSetDefs(
           ${eventViewColumnsRT} 
         from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
         where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
-        and event_timestamp >= current_timestamp - interval '1 hour'
       `,
       columns: [
         ...clickstream_realtime_event_view_columns,
