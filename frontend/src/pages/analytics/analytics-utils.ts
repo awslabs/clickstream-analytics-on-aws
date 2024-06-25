@@ -996,13 +996,9 @@ export const getGlobalEventCondition = (
           dataType as ExtendedMetadataValueType
         )
       ) {
-        switch (dataType) {
-          case ExtendedMetadataValueType.USER_SEGMENT:
-            dataType = MetadataValueType.STRING;
-            break;
-          default:
-            dataType = MetadataValueType.STRING;
-            break;
+        // Convert specific value type to general type in favor of backend sql
+        if (dataType === ExtendedMetadataValueType.USER_SEGMENT) {
+          dataType = MetadataValueType.STRING;
         }
       }
 
