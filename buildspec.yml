@@ -79,7 +79,6 @@ phases:
 
   post_build:
     commands:
-      - aws s3 cp s3://solutions-build-assets/changelog-spec.yml buildspec.yml || true
       - |-
         set -euxo pipefail
         __dir="${CODEBUILD_SRC_DIR}/deployment"
