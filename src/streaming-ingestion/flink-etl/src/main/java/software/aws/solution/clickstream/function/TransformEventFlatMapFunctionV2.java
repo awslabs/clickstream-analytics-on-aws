@@ -31,15 +31,19 @@ public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<String, 
     private final String appId;
     private final EventParser eventParser;
     private final List<ClickstreamEventEnrichment> enrichments;
+    private final boolean withCustomParameters;
 
     public TransformEventFlatMapFunctionV2(final String projectId,
                                            final String appId,
                                            final EventParser eventParser,
-                                           final List<ClickstreamEventEnrichment> enrichments) {
+                                           final List<ClickstreamEventEnrichment> enrichments,
+                                           final boolean withCustomParameters
+    ) {
         this.projectId = projectId;
         this.appId = appId;
         this.eventParser = eventParser;
         this.enrichments = enrichments;
+        this.withCustomParameters = withCustomParameters;
     }
 
     @Override
@@ -54,6 +58,9 @@ public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<String, 
                     enrichment.enrich(clickstreamEvent);
                 }
                 clickstreamEvent.getProcessInfo().put("process_time", Instant.now().toString());
+                if (!withCustomParameters) {
+                    clickstreamEvent.setCustomParameters(null);
+                }
                 out.collect(clickstreamEvent.toJson());
             }
         } catch (Exception e) {

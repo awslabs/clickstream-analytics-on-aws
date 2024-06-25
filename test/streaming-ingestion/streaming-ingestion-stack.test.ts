@@ -188,6 +188,62 @@ describe('common parameter test of StreamingIngestionStack', () => {
       Type: 'String',
     });
   });
+
+  test('Should has Parameter TransformerName', () => {
+    template.hasParameter('TransformerName', {
+      Type: 'String',
+      Default: 'clickstream',
+      AllowedValues: ['clickstream', 'gtm', 'sensors'],
+    });
+  });
+
+  test('Should has Parameter RetentionHours', () => {
+    template.hasParameter('RetentionHours', {
+      Type: 'Number',
+      Default: 0.5,
+      MinValue: 0.1,
+    });
+  });
+
+  test('Should has Parameter AllowEvents', () => {
+    template.hasParameter('AllowEvents', {
+      Type: 'CommaDelimitedList',
+      Default: 'ALL',
+    });
+  });
+
+  test('Should has Parameter EnableUaEnrich', () => {
+    template.hasParameter('EnableUaEnrich', {
+      Type: 'String',
+      Default: 'true',
+      AllowedValues: ['true', 'false'],
+    });
+  });
+
+  test('Should has Parameter EnableIpEnrich', () => {
+    template.hasParameter('EnableIpEnrich', {
+      Type: 'String',
+      Default: 'true',
+      AllowedValues: ['true', 'false'],
+    });
+  });
+
+  test('Should has Parameter EnableTrafficSourceEnrich', () => {
+    template.hasParameter('EnableTrafficSourceEnrich', {
+      Type: 'String',
+      Default: 'true',
+      AllowedValues: ['true', 'false'],
+    });
+  });
+
+  test('Should has Parameter WithCustomParameters', () => {
+    template.hasParameter('WithCustomParameters', {
+      Type: 'String',
+      Default: 'false',
+      AllowedValues: ['true', 'false'],
+    });
+  });
+
 });
 
 describe('have custom resource to provisioning sink kinesis', () => {
@@ -762,6 +818,13 @@ describe('managed Flink application for real-time data processing', () => {
                 },
                 appRuleConfigPath: Match.anyValue(),
                 transformVersion: 'v2',
+                transformerName: Match.anyValue(),
+                allowEventList: Match.anyValue(),
+                allowRetentionHours: Match.anyValue(),
+                enableUaEnrich: Match.anyValue(),
+                enableIpEnrich: Match.anyValue(),
+                enableTrafficSourceEnrich: Match.anyValue(),
+                withCustomParameters: Match.anyValue(),
               },
             },
           ],

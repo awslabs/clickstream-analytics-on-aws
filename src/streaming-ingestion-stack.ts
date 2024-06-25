@@ -65,6 +65,7 @@ export class StreamingIngestionStack extends Stack {
     const projectId = p.params.projectId;
     const appIds = p.params.appIds;
     const pipeline = p.params.pipeline;
+    const eventProcessing = pipeline.eventProcessing;
     const sourceStream = Stream.fromStreamArn(this, 'SourceStream', pipeline.source.kinesisArn!);
     const dataBucket = Bucket.fromBucketArn(this, 'DataBucket', pipeline.dataBucket.arn);
 
@@ -134,6 +135,13 @@ export class StreamingIngestionStack extends Stack {
           appIdStreamConfig: appIdStreamConfigS3Path,
           appRuleConfigPath: appRuleConfigPathS3Path,
           transformVersion: 'v2',
+          transformerName: eventProcessing.transformerName,
+          enableUaEnrich: eventProcessing.enableUaEnrich,
+          enableIpEnrich: eventProcessing.enableIpEnrich,
+          enableTrafficSourceEnrich: eventProcessing.enableTrafficSourceEnrich,
+          withCustomParameters: eventProcessing.withCustomParameters,
+          allowEventList: eventProcessing.allowEvents,
+          allowRetentionHours: eventProcessing.retentionHours + '',
         },
       },
       runtime: Runtime.of('FLINK-1_18'),

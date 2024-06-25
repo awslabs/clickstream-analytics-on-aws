@@ -101,7 +101,6 @@ export interface IngestionServerNestStackProps extends StackProps {
   readonly s3Prefix?: string;
   readonly batchTimeout?: number;
   readonly batchMaxBytes?: number;
-
 }
 
 export class IngestionServerNestedStack extends NestedStack {
