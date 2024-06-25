@@ -105,5 +105,4 @@ select
     event_data.custom_parameters::super,
     event_data.process_info::super
 from {{app_schema}}.ods_events_streaming_mv
-where  approximate_arrival_timestamp <= event_timestamp + INTERVAL '5 minute'
 ;
