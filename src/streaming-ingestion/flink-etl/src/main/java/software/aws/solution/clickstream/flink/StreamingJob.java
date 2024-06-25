@@ -20,7 +20,12 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.table.api.Schema;
+import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
 import software.aws.solution.clickstream.common.ClickstreamEventParser;
 import software.aws.solution.clickstream.common.EventParser;
@@ -50,6 +55,7 @@ public class StreamingJob {
     private final HashMap<String, Sink<String>> appSinkMap = new HashMap<>();
     private final ArrayList<String> appIds = new ArrayList<>();
     private final StreamExecutionEnvironment env;
+    private final StreamTableEnvironment tableEnv;
     private final EventParser eventParser;
 
     public StreamingJob(final StreamExecutionEnvironment env,
@@ -60,6 +66,7 @@ public class StreamingJob {
         this.props = props;
         this.env = env;
         this.eventParser = eventParser;
+        this.tableEnv = StreamTableEnvironment.create(this.env);
 
         log.info("Application properties: {}", this.props);
 
@@ -182,9 +189,30 @@ public class StreamingJob {
                                   final Sink<String> outKinesisSink) throws IOException {
         String projectId = props.getProjectId();
         log.info("transformAndSinkV2 appId: {}", appId);
-        DataStream<String> transformedData = inputStream.flatMap(
-                new TransformEventFlatMapFunctionV2(projectId, appId, eventParser, getEnrichments())).name("TransformEventFlatMapFunctionV2-" + appId);
+
+        TransformEventFlatMapFunctionV2 transformEventProcessFunction = new TransformEventFlatMapFunctionV2(projectId, appId, eventParser, getEnrichments());
+        SingleOutputStreamOperator<String> transformedData = inputStream.process(transformEventProcessFunction).name("TransformEventFunction-" + appId);
+
+        aggStreamTable(appId, transformedData.getSideOutput(transformEventProcessFunction.getTableRowOutputTag()));
+
         transformedData.sinkTo(outKinesisSink).name(appId);
+    }
+
+    void aggStreamTable(final String appId, final DataStream<Row> inputStream) {
+        Table table = tableEnv.fromDataStream(inputStream, Schema.newBuilder()
+                .columnByExpression("proc_time", "PROCTIME()")
+                .build());
+        log.info("{} Table schema: {}", appId, table.getResolvedSchema());
+        String viewName = "clickstream_" + appId;
+        tableEnv.createTemporaryView(viewName, table);
+        String sql = "SELECT window_start, window_end, COUNT(distinct userPseudoId) as user_count, COUNT(event_id) as event_count\n" +
+                "      FROM TABLE(\n" +
+                "        TUMBLE(TABLE " + viewName + ", DESCRIPTOR(proc_time), INTERVAL '10' MINUTES))\n" +
+                "      GROUP BY window_start, window_end\n" +
+                "    )\n";
+
+        Table agg10MinutesEventAndUserTable = tableEnv.sqlQuery(sql);
+        agg10MinutesEventAndUserTable.execute().print();
     }
 
     private List<ClickstreamEventEnrichment> getEnrichments() throws IOException {

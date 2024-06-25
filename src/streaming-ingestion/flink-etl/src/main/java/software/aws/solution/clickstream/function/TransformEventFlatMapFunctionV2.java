@@ -13,9 +13,14 @@
 
 package software.aws.solution.clickstream.function;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
+import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
+import org.apache.flink.util.OutputTag;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.ParseRowResult;
 import software.aws.solution.clickstream.common.Util;
@@ -26,12 +31,13 @@ import java.time.Instant;
 import java.util.List;
 
 @Slf4j
-public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<String, String> {
+public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, String> {
     private final String projectId;
     private final String appId;
     private final EventParser eventParser;
     private final List<ClickstreamEventEnrichment> enrichments;
-
+    @Getter
+    private final OutputTag<Row> tableRowOutputTag;
     public TransformEventFlatMapFunctionV2(final String projectId,
                                            final String appId,
                                            final EventParser eventParser,
@@ -40,10 +46,12 @@ public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<String, 
         this.appId = appId;
         this.eventParser = eventParser;
         this.enrichments = enrichments;
+        this.tableRowOutputTag = new OutputTag<>("table-row-" + appId) {
+        };
     }
 
     @Override
-    public void flatMap(final String value, final Collector<String> out) {
+    public void processElement(final String value, final ProcessFunction<String, String>.Context ctx, final Collector<String> out) {
         String delimiter = "/";
         String fileName = "file://" + appId + delimiter + Instant.now().toString();
         try {
@@ -55,6 +63,22 @@ public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<String, 
                 }
                 clickstreamEvent.getProcessInfo().put("process_time", Instant.now().toString());
                 out.collect(clickstreamEvent.toJson());
+
+                ctx.output(tableRowOutputTag, Row.of(
+                        clickstreamEvent.getEventTimestamp(),
+                        clickstreamEvent.getEventId(),
+                        clickstreamEvent.getEventName(),
+                        clickstreamEvent.getUserPseudoId(),
+                        clickstreamEvent.getUserId(),
+                        clickstreamEvent.getPlatform(),
+                        clickstreamEvent.getAppId(),
+                        clickstreamEvent.getDeviceUaDevice(),
+                        clickstreamEvent.getDeviceUaOs(),
+                        clickstreamEvent.getPageViewPageTitle(),
+                        clickstreamEvent.getPageViewPageUrl(),
+                        clickstreamEvent.getTrafficSourceSource(),
+                        clickstreamEvent.getTrafficSourceMedium()
+                ));
             }
         } catch (Exception e) {
             if (e.getMessage().contains("Not in GZIP format")) {
