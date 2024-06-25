@@ -20,17 +20,19 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.FormatDescriptor;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
 import software.aws.solution.clickstream.common.ClickstreamEventParser;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.TransformConfig;
+import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.function.ExplodeDataFlatMapFunction;
 import software.aws.solution.clickstream.function.RouteProcessFunction;
 import software.aws.solution.clickstream.function.TransformDataMapFunction;
@@ -193,26 +195,48 @@ public class StreamingJob {
         TransformEventFlatMapFunctionV2 transformEventProcessFunction = new TransformEventFlatMapFunctionV2(projectId, appId, eventParser, getEnrichments());
         SingleOutputStreamOperator<String> transformedData = inputStream.process(transformEventProcessFunction).name("TransformEventFunction-" + appId);
 
-        aggStreamTable(appId, transformedData.getSideOutput(transformEventProcessFunction.getTableRowOutputTag()));
-
         transformedData.sinkTo(outKinesisSink).name(appId);
+        aggStreamTable(appId, transformedData.getSideOutput(transformEventProcessFunction.getTableRowOutputTag()));
     }
 
-    void aggStreamTable(final String appId, final DataStream<Row> inputStream) {
+    void aggStreamTable(final String appId, final DataStream<ClickstreamEvent> inputStream) {
         Table table = tableEnv.fromDataStream(inputStream, Schema.newBuilder()
                 .columnByExpression("proc_time", "PROCTIME()")
                 .build());
+
         log.info("{} Table schema: {}", appId, table.getResolvedSchema());
         String viewName = "clickstream_" + appId;
         tableEnv.createTemporaryView(viewName, table);
-        String sql = "SELECT window_start, window_end, COUNT(distinct userPseudoId) as user_count, COUNT(event_id) as event_count\n" +
-                "      FROM TABLE(\n" +
-                "        TUMBLE(TABLE " + viewName + ", DESCRIPTOR(proc_time), INTERVAL '10' MINUTES))\n" +
-                "      GROUP BY window_start, window_end\n" +
-                "    )\n";
+        int windowSizeMinutes1 = 10;
+        int windowSizeMinutes2 = 60;
+        String sql = "SELECT window_start, window_end, COUNT(distinct userPseudoId) as user_count, COUNT(eventId) as event_count\n"
+                + "FROM TABLE(\n"
+                + "   CUMULATE(TABLE " + viewName + ", DESCRIPTOR(proc_time), INTERVAL '"  + windowSizeMinutes1 + "' Minutes,  INTERVAL '"  + windowSizeMinutes2 + "' Minutes))\n"
+                + "GROUP BY window_start, window_end\n";
 
+        log.info("SQL: {}", sql);
         Table agg10MinutesEventAndUserTable = tableEnv.sqlQuery(sql);
-        agg10MinutesEventAndUserTable.execute().print();
+
+        agg10MinutesEventAndUserTable.printSchema();
+
+        final Schema schema = Schema.newBuilder()
+                .column("window_start", DataTypes.TIMESTAMP(3))
+                .column("window_end", DataTypes.TIMESTAMP(3))
+                .column("user_count", DataTypes.BIGINT())
+                .column("event_count", DataTypes.BIGINT())
+                .build();
+
+        String sinkTable = "agg_10_minutes_event_user_" + appId;
+        String s3Path = "s3://cs-test-data-us-east-2/clickstream/stream_demo2/flink/aggReports/" + sinkTable + ".json";
+
+        tableEnv.createTemporaryTable(sinkTable, TableDescriptor.forConnector("filesystem")
+                .schema(schema)
+                .option("path", s3Path)
+                .format(FormatDescriptor.forFormat("json")
+                        .build())
+                .build());
+
+        agg10MinutesEventAndUserTable.insertInto(sinkTable).execute();
     }
 
     private List<ClickstreamEventEnrichment> getEnrichments() throws IOException {

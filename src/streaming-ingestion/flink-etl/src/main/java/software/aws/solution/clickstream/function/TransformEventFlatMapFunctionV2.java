@@ -15,10 +15,7 @@ package software.aws.solution.clickstream.function;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
-import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import software.aws.solution.clickstream.common.EventParser;
@@ -37,7 +34,7 @@ public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, Str
     private final EventParser eventParser;
     private final List<ClickstreamEventEnrichment> enrichments;
     @Getter
-    private final OutputTag<Row> tableRowOutputTag;
+    private final OutputTag<ClickstreamEvent> tableRowOutputTag;
     public TransformEventFlatMapFunctionV2(final String projectId,
                                            final String appId,
                                            final EventParser eventParser,
@@ -64,21 +61,7 @@ public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, Str
                 clickstreamEvent.getProcessInfo().put("process_time", Instant.now().toString());
                 out.collect(clickstreamEvent.toJson());
 
-                ctx.output(tableRowOutputTag, Row.of(
-                        clickstreamEvent.getEventTimestamp(),
-                        clickstreamEvent.getEventId(),
-                        clickstreamEvent.getEventName(),
-                        clickstreamEvent.getUserPseudoId(),
-                        clickstreamEvent.getUserId(),
-                        clickstreamEvent.getPlatform(),
-                        clickstreamEvent.getAppId(),
-                        clickstreamEvent.getDeviceUaDevice(),
-                        clickstreamEvent.getDeviceUaOs(),
-                        clickstreamEvent.getPageViewPageTitle(),
-                        clickstreamEvent.getPageViewPageUrl(),
-                        clickstreamEvent.getTrafficSourceSource(),
-                        clickstreamEvent.getTrafficSourceMedium()
-                ));
+                ctx.output(tableRowOutputTag, clickstreamEvent);
             }
         } catch (Exception e) {
             if (e.getMessage().contains("Not in GZIP format")) {
