@@ -1407,8 +1407,8 @@ export const convertSegmentListToFilterOptions = (
           name: 'segment_id',
           valueType: ExtendedMetadataValueType.USER_SEGMENT,
           values: segmentGroupList.map((segment) => ({
-            value: segment.value ?? '',
-            displayValue: segment.label ?? '',
+            value: defaultStr(segment.value),
+            displayValue: defaultStr(segment.label),
           })),
         },
       ],
