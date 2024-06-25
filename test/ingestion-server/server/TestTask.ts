@@ -208,11 +208,13 @@ export class TestStack extends Stack {
     let authenticationConfig = {
       authenticationSecretArn: '',
     };
+    let enableAuthentication = 'No';
 
     if (props.withAuthentication) {
       authenticationConfig = {
         authenticationSecretArn: props.authenticationSecretArn || 'arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx',
       };
+      enableAuthentication = 'Yes';
     }
 
     let enableGlobalAccelerator = 'No';
@@ -297,6 +299,7 @@ export class TestStack extends Stack {
       ...mskSink,
       ...accessLogConfig,
       ...authenticationConfig,
+      enableAuthentication,
       s3SinkConfig,
       kinesisSinkConfig,
       enableGlobalAccelerator,

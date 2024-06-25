@@ -200,8 +200,8 @@ describe('common parameter test of StreamingIngestionStack', () => {
   test('Should has Parameter RetentionHours', () => {
     template.hasParameter('RetentionHours', {
       Type: 'Number',
-      Default: 0.5,
-      MinValue: 0.1,
+      Default: 1.0,
+      MinValue: 0.01,
     });
   });
 

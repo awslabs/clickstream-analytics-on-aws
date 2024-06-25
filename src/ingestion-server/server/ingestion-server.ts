@@ -19,6 +19,7 @@ import {
   Port,
   InstanceType,
 } from 'aws-cdk-lib/aws-ec2';
+import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import {
   ApplicationProtocol, IpAddressType,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -50,7 +51,7 @@ export const DefaultFleetProps = {
   workerCpu: 1792,
   proxyCpu: 256,
   instanceType: new InstanceType('c6i.large'),
-  isArm: false,
+  arch: Platform.LINUX_AMD64,
   warmPoolSize: 0,
   proxyReservedMemory: 900,
   workerReservedMemory: 900,
@@ -85,7 +86,7 @@ export interface FleetProps {
   readonly taskMax: number;
   readonly scaleOnCpuUtilizationPercent?: number;
   readonly instanceType?: InstanceType;
-  readonly isArm?: boolean;
+  readonly arch: Platform;
   readonly warmPoolSize?: number;
   readonly proxyReservedMemory?: number;
   readonly proxyCpu?: number;
@@ -120,6 +121,7 @@ export interface IngestionServerProps {
   readonly notificationsTopic?: ITopic;
   readonly loadBalancerLogProps?: LogProps;
   readonly loadBalancerIpAddressType?: IpAddressType;
+  readonly enableAuthentication: string;
   readonly enableGlobalAccelerator: string;
   readonly devMode: string;
   readonly authenticationSecretArn?: string;
@@ -136,6 +138,7 @@ interface UpdateAlbRulesInput {
   readonly listenerArn: string;
   readonly serverEndpointPath: string;
   readonly protocol: ApplicationProtocol;
+  readonly enableAuthentication: string;
   readonly domainName?: string;
   readonly authenticationSecretArn?: string;
 }
@@ -234,6 +237,7 @@ export class IngestionServer extends Construct {
     const serverEndpointPath = props.serverEndpointPath;
     const protocol: ApplicationProtocol = props.protocol;
     const domainName = props.domainName;
+    const enableAuthentication = props.enableAuthentication;
     const authenticationSecretArn = props.authenticationSecretArn;
 
     updateAlbRules(this, {
@@ -243,6 +247,7 @@ export class IngestionServer extends Construct {
       listenerArn,
       serverEndpointPath,
       protocol,
+      enableAuthentication,
       domainName,
       authenticationSecretArn,
     });
@@ -283,6 +288,7 @@ function updateAlbRules(
   const targetGroupArn = updateAlbRulesInput.targetGroupArn;
   const listenerArn = updateAlbRulesInput.listenerArn;
   const authenticationSecretArn = updateAlbRulesInput.authenticationSecretArn;
+  const enableAuthentication = updateAlbRulesInput.enableAuthentication;
   const endpointPath = updateAlbRulesInput.serverEndpointPath;
   const domainName = updateAlbRulesInput.domainName;
   const protocol = updateAlbRulesInput.protocol;
@@ -292,6 +298,7 @@ function updateAlbRules(
     clickStreamSDK,
     targetGroupArn,
     listenerArn,
+    enableAuthentication,
     authenticationSecretArn,
     endpointPath,
     domainName,

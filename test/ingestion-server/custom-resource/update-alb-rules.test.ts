@@ -68,6 +68,7 @@ test('Create listener rules for third party SDK with auth', async () => {
       appIds: '',
       clickStreamSDK: 'No',
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111111:secret:test-secret',
+      enableAuthentication: 'Yes',
       protocol: 'HTTPS',
     },
   };
@@ -212,6 +213,7 @@ test('Create listener rules for ClickStream SDK with auth, AppIds size is 0', as
       appIds: '',
       clickStreamSDK: 'Yes',
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111111:secret:test-secret',
+      enableAuthentication: 'Yes',
       protocol: 'HTTPS',
     },
   };
@@ -357,6 +359,7 @@ test('Create listener rules for ClickStream SDK with auth, AppIds size is NOT 0'
       appIds: 'notepad1,notepad2',
       clickStreamSDK: 'Yes',
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111111:secret:test-secret',
+      enableAuthentication: 'Yes',
       protocol: 'HTTPS',
     },
   };
@@ -716,10 +719,12 @@ test('Update listener rules for third party SDK with auth, change domain, endpoi
       appIds: '',
       clickStreamSDK: 'No',
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111111:secret:test-secret',
+      enableAuthentication: 'Yes',
       protocol: 'HTTPS',
     },
     OldResourceProperties: {
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111112:secret:test-secret',
+      enableAuthentication: 'Yes',
       endpointPath: '/collectold',
       domainName: 'exampleold.com',
     },
@@ -829,10 +834,12 @@ test('Update Listener for ClickStream SDK, with HTTPS and auth, add appIds, and 
       appIds: 'app1,app2',
       clickStreamSDK: 'Yes',
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111112:secret:test-secret',
+      enableAuthentication: 'Yes',
       protocol: 'HTTPS',
     },
     OldResourceProperties: {
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111111:secret:test-secret',
+      enableAuthentication: 'Yes',
       endpointPath: '/collectold',
       domainName: 'exampleold.com',
     },
@@ -959,10 +966,12 @@ test('Update Listener for ClickStream SDK, with HTTPS and auth, without appIds, 
       appIds: '',
       clickStreamSDK: 'Yes',
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111112:secret:test-secret',
+      enableAuthentication: 'Yes',
       protocol: 'HTTPS',
     },
     OldResourceProperties: {
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111111:secret:test-secret',
+      enableAuthentication: 'Yes',
       endpointPath: '/collectold',
       domainName: 'exampleold.com',
     },
@@ -1193,10 +1202,12 @@ test('Update Listener for ClickStream SDK, with HTTPS and auth, have existing ap
       appIds: 'nodePad2,nodePad3',
       clickStreamSDK: 'Yes',
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111112:secret:test-secret',
+      enableAuthentication: 'Yes',
       protocol: 'HTTPS',
     },
     OldResourceProperties: {
       authenticationSecretArn: 'arn:aws:secretsmanager:us-east-1:11111111111:secret:test-secret',
+      enableAuthentication: 'Yes',
       endpointPath: '/collectold',
       domainName: 'exampleold.com',
     },
@@ -1370,6 +1381,79 @@ test('Update Listener for ClickStream SDK, with HTTPS and auth, have existing ap
   });
 });
 
+test('Test version compatible from v1 to v2 ', async () => {
+  const event: CloudFormationCustomResourceEvent = {
+    ...basicEvent,
+    RequestType: 'Update',
+    ResourceProperties: {
+      ...basicEvent.ResourceProperties,
+      appIds: 'notepad1,notepad2',
+      clickStreamSDK: 'Yes',
+      authenticationSecretArn: '',
+      enableAuthentication: 'No',
+      protocol: 'HTTP',
+    },
+    OldResourceProperties: {
+      protocol: 'HTTP',
+      appIds: 'app1',
+      clickStreamSDK: 'Yes',
+    },
+  };
+
+  albClientMock.on(DescribeRulesCommand).resolves({
+    Rules: [
+      {
+        RuleArn: 'RuleArn4',
+        Priority: '5',
+        Conditions: [
+          {
+            Field: 'query-string',
+            QueryStringConfig: {
+              Values: [
+                {
+                  Key: 'appId', Value: 'notepad1',
+                },
+              ],
+            },
+          },
+          {
+            Field: 'path-pattern',
+            Values: ['/collectold'],
+          },
+        ],
+      },
+      {
+        RuleArn: 'RuleArn5',
+        Priority: '6',
+        Conditions: [
+          {
+            Field: 'query-string',
+            QueryStringConfig: {
+              Values: [
+                {
+                  Key: 'appId', Value: 'notepad2',
+                },
+              ],
+            },
+          },
+          {
+            Field: 'path-pattern',
+            Values: ['/collectold'],
+          },
+        ],
+      },
+    ],
+  });
+
+  await handler(event, c);
+
+  expect(albClientMock).toHaveReceivedNthCommandWith(2, DescribeRulesCommand, {
+    ListenerArn: 'arn:aws:elasticloadbalancing:us-east-1:11111111111:listener/app/abc/026af704b2ff1dcc',
+  });
+
+  expect(albClientMock).toHaveReceivedCommandTimes(DescribeRulesCommand, 5);
+});
+
 test('Update Listener for ClickStream SDK, with HTTP, have existing appId rules, add appIds change domain, endpoint path and auth secret arn', async () => {
   const event: CloudFormationCustomResourceEvent = {
     ...basicEvent,
@@ -1379,12 +1463,14 @@ test('Update Listener for ClickStream SDK, with HTTP, have existing appId rules,
       appIds: 'notepad1,notepad2,nodePad3',
       clickStreamSDK: 'Yes',
       authenticationSecretArn: '',
+      enableAuthentication: 'No',
       protocol: 'HTTP',
     },
     OldResourceProperties: {
       endpointPath: '/collectold',
       domainName: 'exampleold.com',
       authenticationSecretArn: '',
+      enableAuthentication: 'No',
     },
   };
 

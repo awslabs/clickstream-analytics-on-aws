@@ -78,7 +78,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
     }
 
     public static ClickstreamEventParser getInstance(final TransformConfig transformConfig) {
-        return getInstance(null, false);
+        return getInstance(transformConfig, false);
     }
 
     public static ClickstreamEventParser getInstance(final TransformConfig transformConfig, final boolean forceNew) {

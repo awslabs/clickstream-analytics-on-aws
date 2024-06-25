@@ -28,6 +28,7 @@ import {
   SecurityGroup,
   SubnetType,
 } from 'aws-cdk-lib/aws-ec2';
+import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
@@ -84,7 +85,7 @@ export interface IngestionServerNestStackProps extends StackProps {
   readonly clickStreamSDK: string;
 
   // authentication parameters
-  readonly enableAuthentication?: string;
+  readonly enableAuthentication: string;
   readonly authenticationSecretArn?: string;
 
   // Kafka parameters
@@ -159,7 +160,7 @@ export class IngestionServerNestedStack extends NestedStack {
       workerCpu: 1792,
       proxyCpu: 256,
       instanceType: new InstanceType('c6i.large'),
-      isArm: false,
+      arch: Platform.LINUX_AMD64,
       warmPoolSize: 0,
       proxyReservedMemory: 900,
       workerReservedMemory: 900,
@@ -199,6 +200,7 @@ export class IngestionServerNestedStack extends NestedStack {
       kinesisSinkConfig,
       enableGlobalAccelerator: props.enableGlobalAccelerator,
       devMode: props.devMode,
+      enableAuthentication: props.enableAuthentication,
       authenticationSecretArn,
       projectId: props.projectId,
       appIds: props.appIds,
@@ -391,6 +393,7 @@ export class IngestionServerStack extends Stack {
       certificateArn: certificateArnParam.valueAsString,
       protocol: protocolParam.valueAsString,
       enableGlobalAccelerator: enableGlobalAcceleratorParam.valueAsString,
+      enableAuthentication: enableAuthenticationParam.valueAsString,
       devMode: devModeParam.valueAsString,
       projectId: projectIdParam.valueAsString,
       clickStreamSDK: clickStreamSDKParam.valueAsString,
