@@ -14,7 +14,7 @@ This solution deploys the Amazon CloudFormation template in your AWS account and
 3. The web UI console uses [Amazon DynamoDB][ddb] to store persistent data.
 4. [AWS Step Functions][step-functions], [AWS CloudFormation][cloudformation], AWS Lambda, and [Amazon EventBridge][eventbridge] are used for orchestrating the lifecycle management of data pipelines.
 5. The data pipeline is provisioned in the region specified by the system operator. It consists of Application Load Balancer (ALB),
-[Amazon ECS][ecs], [Amazon Managed Streaming for Kafka (Amazon MSK)][msk], [Amazon Kinesis][kinesis] Data Streams, Amazon S3, [Amazon EMR][emr] Serverless, [Amazon Redshift][redshift], and [Amazon QuickSight][quicksight].
+[Amazon ECS][ecs], [Amazon Managed Streaming for Kafka (Amazon MSK)][msk], [Amazon Kinesis][kinesis] Data Streams, Amazon S3, [Amazon EMR][emr] Serverless, [Amazon Managed Service for Apache Flink][flink], [Amazon Redshift][redshift], and [Amazon QuickSight][quicksight].
 
 ## Data Pipeline
 
@@ -23,7 +23,8 @@ The key functionality of this solution is to build a data pipeline to collect, p
 - ingestion module 
 - data processing module 
 - data modeling module 
-- reporting module 
+- reporting module
+- streaming module
 
 The following introduces the architecture diagram for each module.
 
@@ -124,13 +125,27 @@ Suppose you create a data pipeline in the solution, enable data modeling in Amaz
 1. VPC connection in Amazon QuickSight is used for securely connecting your Redshift within VPC.
 2. The data source, data sets, template, analysis, and dashboard are created in Amazon QuickSight for out-of-the-box analysis and visualization.
 
+### Streaming module (since 1.2.0)
+
+<figure markdown>
+   ![streaming](./images/architecture/09-streaming.png){ loading=lazy }
+   <figcaption>Figure 8: Streaming module architecture</figcaption>
+</figure>
+
+Suppose you enable the streaming feature for the data pipeline with KDS as an ingestion sink. The solution deploys an Amazon Managed Service for Apache Flink application for near real-time processing of the events then sinks the transformed and enriched events to other Kinesis data streams. The solution leverages [Amazon Redshift Streaming Ingestion][redshift-streaming-ingestion] to ingest the events into Redshift.
+
+1. The Flink application consumes the events in KDS managed by the ingestion module.
+2. Flink application transforms and enriches the events, then sinks the events to other Kinesis data streams for the applications.
+3. Redshift continuously ingests the events into materialized views from the KDS of step 2.
+4. Real-time metrics are viewed in QuickSight.
+
 ## Analytics Studio
 
 Analytics Studio is a unified web interface for business analysts or data analysts to view and create dashboards, query and explore clickstream data, and manage metadata.
 
 <figure markdown>
    ![analytics-studio](./images/architecture/08-analytics-studio.png){ loading=lazy }
-   <figcaption>Figure 8: Analytics studio architecture</figcaption>
+   <figcaption>Figure 9: Analytics studio architecture</figcaption>
 </figure>
 
 1. When analysts access Analytics Studio, requests are sent to [Amazon CloudFront][cloudfront], which distributes the web application.
@@ -160,3 +175,5 @@ Analytics Studio is a unified web interface for business analysts or data analys
 [elb]: https://aws.amazon.com/elasticloadbalancing/
 [athena]: https://aws.amazon.com/athena/
 [glue]: https://aws.amazon.com/glue/
+[flink]: https://aws.amazon.com/managed-service-apache-flink/
+[redshift-streaming-ingestion]: https://aws.amazon.com/redshift/redshift-streaming-ingestion/

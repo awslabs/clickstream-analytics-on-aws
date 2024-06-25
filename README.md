@@ -17,7 +17,7 @@ With this solution, you can quickly configure and deploy a data pipeline that fi
 3. The web UI console uses Amazon DynamoDB to store persistent data.
 4. AWS Step Functions, AWS CloudFormation, AWS Lambda, and Amazon EventBridge are used for orchestrating the lifecycle management of data pipelines.
 5. The data pipeline is provisioned in the Region specified by the system operator. It consists of Application Load Balancer (ALB),
-Amazon ECS, Amazon Managed Streaming for Kafka (Amazon MSK), Amazon Kinesis Data Streams, Amazon S3, Amazon EMR Serverless, Amazon Redshift, and Amazon QuickSight.
+Amazon ECS, Amazon Managed Streaming for Kafka (Amazon MSK), Amazon Kinesis Data Streams, Amazon S3, Amazon EMR Serverless, Amazon Managed Service for Apache Flink, Amazon Redshift, and Amazon QuickSight.
 
 For more information, refer to [the doc][doc-arch].
 

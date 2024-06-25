@@ -23,6 +23,7 @@
 - 数据处理模块 
 - 数据建模模块 
 - 报表模块 
+- 流处理模块
 
 下面介绍每个模块的架构图。
 
@@ -123,13 +124,27 @@
 1. Amazon QuickSight 中的 VPC 连接用于在 VPC 内安全地连接 Redshift。
 2. 数据源、数据集、模板、分析和控制面板均在 Amazon QuickSight 中创建，用于开箱即用的分析和可视化。
 
+### 流处理模块 (始于 1.2.0)
+
+<figure markdown>
+   ![streaming](./images/architecture/09-streaming.png){ loading=lazy }
+   <figcaption>图 8:  流处理模块架构</figcaption>
+</figure>
+
+假设您为数据管道启用了流式功能，使用 KDS 作为摄取数据宿。该解决方案部署了一个Amazon Managed Service for Apache Flink 应用程序，用于近实时处理事件，然后将转换和富化后的事件输出到每个应用专用的 Kinesis 数据流。该解决方案利用[Amazon Redshift 流式摄取][redshift-streaming-ingestion]将事件摄取到 Redshift 中。
+
+1. Flink 应用程序消费由摄取模块管理的KDS中的事件。
+2. Flink 应用程序转换和丰富事件，然后将事件输出到其他 Kinesis 数据流供应用程序使用。
+3. Redshift 从步骤2的 KDS 持续摄取事件到物化视图中。
+4. 在 QuickSight 中查看实时指标。
+
 ## 分析工作坊
 
 分析工作坊（Analytics Studio）是供业务分析师或数据分析师查看和创建仪表板、查询和探索点击流数据以及管理元数据的统一网页界面。
 
 <figure markdown>
    ![analytics-studio](./images/architecture/08-analytics-studio.png){ loading=lazy }
-   <figcaption>图 8: 分析工作坊架构</figcaption>
+   <figcaption>图 9: 分析工作坊架构</figcaption>
 </figure>
 
 1. 当分析师访问分析工作坊时，请求会发送到 [Amazon CloudFront][step-functions]，由其分发网络应用程序。
