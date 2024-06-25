@@ -18,9 +18,13 @@
 
     * 最大容量：摄取服务器将扩展到的最大容量。
 
-    * 热池：热池使您能够减少具有异常长引导时间的应用程序的延迟。有关更多信息，请参阅[Amazon EC2 Auto Scaling 的热池](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html)。
+    * 暖池：暖池使您能够减少具有异常长引导时间的应用程序的延迟。有关更多信息，请参阅[Amazon EC2 Auto Scaling 的暖池](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html)。
 
 * **启用 HTTPS**：用户可以选择 Ingestion 端点的 HTTPS/HTTP 协议。
+
+    !!! warning "重要提示"
+
+        如果您在启用和禁用 HTTPS 之间进行切换，会导致服务中断。 
 
     * 启用 HTTPS：如果用户选择启用 HTTPS，则摄取服务器将提供 HTTPS 端点。
 
@@ -32,11 +36,7 @@
 
         !!! warning "重要提示"
 
-            使用 HTTP 协议是不安全的，因为数据将在没有任何加密的情况下发送，数据在传输过程中存在泄漏或篡改的高风险。请确认风险后再进行操作。
-
-    !!! warning "重要提示"
-
-        如果您在启用和禁用 HTTPS 之间进行切换，会导致服务中断。            
+            使用 HTTP 协议是不安全的，因为数据将在没有任何加密的情况下发送，数据在传输过程中存在泄漏或篡改的高风险。请确认风险后再进行操作。           
 
 * **跨源资源共享 (CORS)**: 您可以启用 CORS 来限制来自特定域的数据摄取 API 的请求。请注意，你需要输入一个完整的互联网地址，例如 https://www.example.com、http://localhost:8080。如果您有多个域用于此设置，请使用逗号分隔域。
 
@@ -50,7 +50,7 @@
 
     * AWS 全球加速器：用户可以选择创建加速器来获取充当全局固定入口点的静态 IP 地址，以提高摄取服务器的可用性和性能。 
 
-      **注意**：额外的费用适用。
+        **注意**：启用会产生额外的费用。
 
     * 鉴权：用户可以使用 OIDC 提供程序对发送到您的摄取服务器的请求进行身份验证。如果您计划启用 OIDC，请在 OIDC 提供程序中创建一个 OIDC 客户端，然后在 AWS Secret Manager 中创建一个包含以下信息的密钥：
 
@@ -77,7 +77,7 @@
             "appClientSecret":"xxx"
           }
         ```
-      **注意**：在 OIDC 提供程序中，您需要将 `https://<ingestion server endpoint>/oauth2/idpresponse` 添加到“允许回调 URL”。
+        **注意**：在 OIDC 提供程序中，您需要将 `https://<ingestion server endpoint>/oauth2/idpresponse` 添加到“允许回调 URL”。
 
         **注意**：如果您需要在不手动输入凭据（用户名/密码）的情况下直接获取身份验证令牌，您可以参考[ALB无头身份验证客户端代码][alb-headless-authentication-client]来设置您的客户端以自动获取身份验证令牌。
 
