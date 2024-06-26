@@ -23,7 +23,7 @@ import {
 } from '@aws/clickstream-base-lib';
 import { NextFunction, Request, Response, Router } from 'express';
 import { body, param, query, ValidationChain, validationResult } from 'express-validator';
-import { isValidEmpty, validate } from '../common/request-valid';
+import { isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { SegmentServ } from '../service/segments/segment';
 
 export const router_segment: Router = Router();
@@ -33,7 +33,7 @@ const segmentServ = new SegmentServ();
 router_segment.post(
   '',
   validate([
-    body().custom(isValidEmpty),
+    body().custom(isValidEmpty).custom(isXSSRequest),
     ...commonValidationsForSegment(),
   ]),
   async (req: Request, res: Response, next: NextFunction) => {
@@ -68,7 +68,7 @@ router_segment.get(
 router_segment.patch(
   '/:segmentId',
   validate([
-    body().custom(isValidEmpty),
+    body().custom(isValidEmpty).custom(isXSSRequest),
     body('id').notEmpty(),
     body('type').notEmpty(),
     body('segmentId').notEmpty(),
