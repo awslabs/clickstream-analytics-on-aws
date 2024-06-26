@@ -189,6 +189,7 @@ export interface EventNonNestColProps {
 
 export const EVENT_USER_VIEW = 'clickstream_event_view_v3';
 export const USER_SEGMENT_TABLE = 'segment_user';
+export const USER_TABLE = 'user_v2';
 
 export function buildFunnelTableView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction) : string {
 
@@ -1936,9 +1937,8 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
               a.user_id
             from (
               select 
-                user_id 
-              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-              group by user_id
+                user_pseudo_id as user_id 
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} 
             ) a
             left join (
               select 
@@ -1955,10 +1955,15 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
         userSegmentBaseSQl = `
           with user_segment_base as (
             select 
-              user_id 
-            from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-            where segment_id not in ('${segmentsNotIn.join('\',\'')}')
-            group by user_id
+              a.user_pseudo_id as user_id
+            from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} a
+            left join 
+            ( select user_id from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+               where segment_id in ('${segmentsNotIn.join('\',\'')}')
+            ) b
+            on a.user_pseudo_id = b.user_id
+            where b.user_id is null
+            group by 1
           ),
         `;
       }
@@ -1974,9 +1979,8 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
                 a.user_id
               from (
                 select 
-                  user_id 
-                from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-                group by user_id
+                  user_pseudo_id as user_id 
+                from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} 
               ) a
               left join (
                 select 
@@ -2002,14 +2006,19 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
       } else {
         userSegmentBaseSQl = `
           with user_segment_base as (
-            select
+            select 
               a.user_id
-            from (
+            from
+            (
               select 
-                user_id 
-              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-              where segment_id not in ('${segmentsNotIn.join('\',\'')}')
-              group by user_id
+                t1.user_pseudo_id as user_id
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} t1
+              left join 
+              ( select user_id from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+               where segment_id in ('${segmentsNotIn.join('\',\'')}')
+              ) t2
+              on t1.user_pseudo_id = t2.user_id
+              where t2.user_id is null
             ) a
             join 
             (

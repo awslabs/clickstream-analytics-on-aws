@@ -5443,11 +5443,9 @@ describe('Attribution SQL Builder test', () => {
             from
               (
                 select
-                  user_id
+                  user_pseudo_id as user_id
                 from
-                  shop.shop.segment_user
-                group by
-                  user_id
+                  shop.shop.user_v2
               ) a
               left join (
                 select
@@ -5924,13 +5922,19 @@ describe('Attribution SQL Builder test', () => {
         from
           (
             select
-              user_id
+              t1.user_pseudo_id as user_id
             from
-              shop.shop.segment_user
+              shop.shop.user_v2 t1
+              left join (
+                select
+                  user_id
+                from
+                  shop.shop.segment_user
+                where
+                  segment_id in ('22222', '44444')
+              ) t2 on t1.user_pseudo_id = t2.user_id
             where
-              segment_id not in ('22222', '44444')
-            group by
-              user_id
+              t2.user_id is null
           ) a
           join (
             select
