@@ -28,6 +28,7 @@ import {
   ContentLayout,
   Header,
   MixedLineBarChart,
+  SpaceBetween,
   Spinner,
   StatusIndicator,
 } from '@cloudscape-design/components';
@@ -272,66 +273,80 @@ const UserSegmentDetails: React.FC = () => {
                         variant="h2"
                         description={defaultStr(segment?.description)}
                         actions={
-                          <ButtonDropdown
-                            items={[
-                              {
-                                text: defaultStr(t('button.edit')),
-                                id: 'edit',
-                              },
-                              {
-                                text: defaultStr(t('button.duplicate')),
-                                id: 'duplicate',
-                              },
-                              {
-                                text: defaultStr(t('button.delete')),
-                                id: 'delete',
-                              },
-                              {
-                                text: defaultStr(t('button.refreshSegment')),
-                                id: 'refresh',
-                              },
-                            ]}
-                            onItemClick={async (e) => {
-                              const hrefPath = `/analytics/${projectId}/app/${appId}/segments/${segmentId}/`;
+                          <SpaceBetween direction="horizontal" size="s">
+                            <Button
+                              iconName="refresh"
+                              onClick={() => {
+                                getSegmentJobHistory();
+                                getSegmentSampleData();
+                              }}
+                            />
+                            <ButtonDropdown
+                              items={[
+                                {
+                                  text: defaultStr(t('button.edit')),
+                                  id: 'edit',
+                                },
+                                {
+                                  text: defaultStr(t('button.duplicate')),
+                                  id: 'duplicate',
+                                },
+                                {
+                                  text: defaultStr(t('button.delete')),
+                                  id: 'delete',
+                                },
+                                {
+                                  text: defaultStr(t('button.refreshSegment')),
+                                  id: 'refresh',
+                                },
+                              ]}
+                              onItemClick={async (e) => {
+                                const hrefPath = `/analytics/${projectId}/app/${appId}/segments/${segmentId}/`;
 
-                              switch (e.detail.id) {
-                                case 'delete':
-                                  try {
-                                    setIsLoading(true);
-                                    await deleteSegment({
-                                      segmentId,
-                                      appId,
-                                    });
-                                    window.location.href = `/analytics/${projectId}/app/${appId}/segments`;
-                                  } catch (error) {
-                                    console.error('Failed to delete segment.');
-                                  }
-                                  break;
-                                case 'duplicate':
-                                  window.location.href = hrefPath + 'duplicate';
-                                  break;
-                                case 'edit':
-                                  window.location.href = hrefPath + 'edit';
-                                  break;
-                                case 'refresh':
-                                  try {
-                                    setIsJobsLoading(true);
-                                    await refreshSegment({
-                                      segmentId,
-                                      appId,
-                                    });
-                                    await getSegmentJobHistory();
-                                  } catch (error) {
-                                    console.error('Failed to refresh segment.');
-                                  }
-                                  break;
-                                default:
-                                  break;
-                              }
-                            }}
-                          >
-                            {t('button.actions')}
-                          </ButtonDropdown>
+                                switch (e.detail.id) {
+                                  case 'delete':
+                                    try {
+                                      setIsLoading(true);
+                                      await deleteSegment({
+                                        segmentId,
+                                        appId,
+                                      });
+                                      window.location.href = `/analytics/${projectId}/app/${appId}/segments`;
+                                    } catch (error) {
+                                      console.error(
+                                        'Failed to delete segment.'
+                                      );
+                                    }
+                                    break;
+                                  case 'duplicate':
+                                    window.location.href =
+                                      hrefPath + 'duplicate';
+                                    break;
+                                  case 'edit':
+                                    window.location.href = hrefPath + 'edit';
+                                    break;
+                                  case 'refresh':
+                                    try {
+                                      setIsJobsLoading(true);
+                                      await refreshSegment({
+                                        segmentId,
+                                        appId,
+                                      });
+                                      await getSegmentJobHistory();
+                                    } catch (error) {
+                                      console.error(
+                                        'Failed to refresh segment.'
+                                      );
+                                    }
+                                    break;
+                                  default:
+                                    break;
+                                }
+                              }}
+                            >
+                              {t('button.actions')}
+                            </ButtonDropdown>
+                          </SpaceBetween>
                         }
                       >
                         {defaultStr(segment?.name)}
