@@ -57,6 +57,13 @@ import {
   CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME,
   CLICKSTREAM_REALTIME_EVENT_VIEW_PLACEHOLDER,
   CLICKSTREAM_REALTIME_EVENT_VIEW_NAME,
+  CLICKSTREAM_REALTIME_EVENT_USER_VIEW_PLACEHOLDER,
+  CLICKSTREAM_REALTIME_EVENT_TRAFFIC_VIEW_PLACEHOLDER,
+  CLICKSTREAM_REALTIME_EVENT_PAGESCREEN_VIEW_PLACEHOLDER,
+  CLICKSTREAM_REALTIME_EVENT_NAME_VIEW_PLACEHOLDER,
+  CLICKSTREAM_REALTIME_EVENT_PLATFORM_VIEW_PLACEHOLDER,
+  CLICKSTREAM_REALTIME_EVENT_CITY_VIEW_PLACEHOLDER,
+  CLICKSTREAM_REALTIME_EVENT_COUNTRY_VIEW_PLACEHOLDER,
 } from '@aws/clickstream-base-lib';
 import { RefreshInterval, TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -117,9 +124,9 @@ export function createQuicksightCustomResource(
     traffic_source_source,
     screen_view_screen_name,
     page_view_page_title,
-    CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as new_user_indicator,
-    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
-    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date
+    CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as "User indicator",
+    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS "Local time",
+    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS "Event date"
   `;
 
   const dashboardDefProps: QuickSightDashboardDefProps = {
@@ -245,29 +252,30 @@ function _getDataSetDefs(
   );
 
   //Realtime data set
-  dataSetProps.push(
+  const realtimeDatasets: DataSetProps[] = [
     {
       tableName: CLICKSTREAM_REALTIME_EVENT_VIEW_PLACEHOLDER,
       useSpice: 'no',
       realtime: 'yes',
       customSql: `
-        -- clickstream-builtin-realtime-dashboard
+        -- clickstream-builtin-realtime-dashboard-${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
         select 
           ${eventViewColumnsRT} 
         from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
       `,
       columns: [
         ...clickstream_realtime_event_view_columns,
         {
-          Name: 'event_timestamp_local',
+          Name: 'Local time',
           Type: 'DATETIME',
         },
         {
-          Name: 'event_date',
+          Name: 'Event date',
           Type: 'DATETIME',
         },
         {
-          Name: 'new_user_indicator',
+          Name: 'User indicator',
           Type: 'STRING',
         },
       ],
@@ -283,8 +291,217 @@ function _getDataSetDefs(
           columnGeographicRoles: ['CITY'],
         },
       ],
-      projectedColumns: [...realtimeEventViewProjectedColumns, 'event_timestamp_local', 'event_date', 'new_user_indicator'],
+      projectedColumns: [...realtimeEventViewProjectedColumns, 'Local time', 'Event date', 'User indicator'],
     },
+    {
+      tableName: CLICKSTREAM_REALTIME_EVENT_USER_VIEW_PLACEHOLDER,
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_User
+        select 
+          DATE_TRUNC('minute', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS "Local time",
+          CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as "User indicator",
+          COUNT(distinct user_pseudo_id) as "User count"
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1,2
+      `,
+      columns: [
+        {
+          Name: 'Local time',
+          Type: 'DATETIME',
+        },
+        {
+          Name: 'User count',
+          Type: 'INTEGER',
+        },
+        {
+          Name: 'User indicator',
+          Type: 'STRING',
+        },
+      ],
+      projectedColumns: ['Local time', 'User count', 'User indicator'],
+    },
+    {
+      tableName: CLICKSTREAM_REALTIME_EVENT_TRAFFIC_VIEW_PLACEHOLDER,
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Traffic
+        select 
+          traffic_source_source as "Traffic source",
+          COUNT(distinct user_pseudo_id) as "User count"
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1
+      `,
+      columns: [
+        {
+          Name: 'User count',
+          Type: 'INTEGER',
+        },
+        {
+          Name: 'Traffic source',
+          Type: 'STRING',
+        },
+      ],
+      projectedColumns: ['User count', 'Traffic source'],
+    },
+    {
+      tableName: CLICKSTREAM_REALTIME_EVENT_PAGESCREEN_VIEW_PLACEHOLDER,
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Page_Screen
+        select 
+          coalesce(page_view_page_title, screen_view_screen_name, '') as "Page title/Screen name",
+          SUM(CASE WHEN event_name = '_screen_view' or event_name = '_page_view' THEN 1 ELSE 0 END) as "View count"
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1
+        order by 2 desc
+        limit 10
+      `,
+      columns: [
+        {
+          Name: 'View count',
+          Type: 'INTEGER',
+        },
+        {
+          Name: 'Page title/Screen name',
+          Type: 'STRING',
+        },
+      ],
+      projectedColumns: ['View count', 'Page title/Screen name'],
+    },
+    {
+      tableName: CLICKSTREAM_REALTIME_EVENT_NAME_VIEW_PLACEHOLDER,
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Name
+        select 
+          event_name as "Event name",
+          COUNT(distinct user_pseudo_id) as "User count",
+          COUNT(distinct event_id) as event_count
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1
+        order by 3 desc
+        limit 10
+      `,
+      columns: [
+        {
+          Name: 'User count',
+          Type: 'INTEGER',
+        },
+        {
+          Name: 'Event name',
+          Type: 'STRING',
+        },
+      ],
+      projectedColumns: ['User count', 'Event name'],
+    },
+    {
+      tableName: CLICKSTREAM_REALTIME_EVENT_PLATFORM_VIEW_PLACEHOLDER,
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Platform
+        select 
+          platform,
+          COUNT(distinct user_pseudo_id) as "User count"
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1
+      `,
+      columns: [
+        {
+          Name: 'platform',
+          Type: 'STRING',
+        },
+        {
+          Name: 'User count',
+          Type: 'INTEGER',
+        },
+      ],
+      projectedColumns: ['platform', 'User count'],
+    },
+    {
+      tableName: CLICKSTREAM_REALTIME_EVENT_CITY_VIEW_PLACEHOLDER,
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_City
+        select 
+          geo_country,
+          geo_city,
+          COUNT(distinct user_pseudo_id) as "User count"
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1,2
+      `,
+      columns: [
+        {
+          Name: 'geo_country',
+          Type: 'STRING',
+        },
+        {
+          Name: 'geo_city',
+          Type: 'STRING',
+        },
+        {
+          Name: 'User count',
+          Type: 'INTEGER',
+        },
+      ],
+      tagColumnOperations: [
+        {
+          columnName: 'geo_country',
+          columnGeographicRoles: ['COUNTRY'],
+        },
+        {
+          columnName: 'geo_city',
+          columnGeographicRoles: ['CITY'],
+        },
+      ],
+      projectedColumns: ['geo_country', 'geo_city', 'User count'],
+    },
+    {
+      tableName: CLICKSTREAM_REALTIME_EVENT_COUNTRY_VIEW_PLACEHOLDER,
+      useSpice: 'no',
+      realtime: 'yes',
+      customSql: `
+        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Country
+        select 
+          geo_country,
+          COUNT(distinct user_pseudo_id) as "User count"
+        from {{schema}}.${CLICKSTREAM_REALTIME_EVENT_VIEW_NAME}
+        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'
+        group by 1
+      `,
+      columns: [
+        {
+          Name: 'geo_country',
+          Type: 'STRING',
+        },
+        {
+          Name: 'User count',
+          Type: 'INTEGER',
+        },
+      ],
+      tagColumnOperations: [
+        {
+          columnName: 'geo_country',
+          columnGeographicRoles: ['COUNTRY'],
+        },
+      ],
+      projectedColumns: ['geo_country', 'User count'],
+    },
+  ];
+  dataSetProps.push(
+    ...realtimeDatasets,
   );
 
   dataSetProps.push(

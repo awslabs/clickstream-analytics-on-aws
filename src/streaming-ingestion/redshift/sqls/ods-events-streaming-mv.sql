@@ -1,5 +1,8 @@
 CREATE MATERIALIZED VIEW {{app_schema}}.ods_events_streaming_mv 
-AUTO REFRESH YES AS
+BACKUP YES
+SORTKEY(approximate_arrival_timestamp)
+AUTO REFRESH YES 
+AS
 SELECT approximate_arrival_timestamp,
 partition_key,
 shard_id,
