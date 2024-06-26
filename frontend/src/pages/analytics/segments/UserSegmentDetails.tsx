@@ -141,7 +141,9 @@ const UserSegmentDetails: React.FC = () => {
   const renderSegmentTrendChart = () => {
     const getTimeLabel = (time: number) =>
       getDateTimeWithTimezoneString(time, timezone);
-    const jobs = segmentJobs.filter((job) => job.jobStatus === 'Completed');
+    const jobs = segmentJobs
+      .filter((job) => job.jobStatus === 'Completed')
+      .reverse();
 
     return (
       <MixedLineBarChart
@@ -614,7 +616,11 @@ const getAutoRefreshExpiration = (
   }
 
   const expiration = segment?.refreshSchedule.expireAfter;
-  return getDateTimeWithTimezoneString(expiration, timezone);
+  return ternary(
+    expiration,
+    getDateTimeWithTimezoneString(expiration, timezone),
+    '-'
+  );
 };
 
 const getCreatedByInfo = (

@@ -48,7 +48,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SEGMENT_AUTO_REFRESH_OPTIONS } from 'ts/const';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, ternary } from 'ts/utils';
 import SegmentItem from './group/SegmentItem';
 
 interface SegmentEditorProps {
@@ -87,7 +87,12 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
 
   useEffect(() => {
     const cron = segmentObject.refreshSchedule.cron;
-    if (cron === 'Manual' || cron === 'Custom') {
+    if (
+      cron === 'Manual' ||
+      cron === 'Custom' ||
+      !autoRefreshDay ||
+      !autoRefreshTime
+    ) {
       return;
     }
 
@@ -186,7 +191,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
         <SpaceBetween direction="horizontal" size="xs">
           <Button
             onClick={() => {
-              navigate(-1);
+              navigate(`/analytics/${projectId}/app/${appId}/segments`);
             }}
           >
             {t('button.cancel')}
@@ -407,7 +412,11 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                   updateSegmentObject('expireDate', e.detail.value);
                   updateSegmentObject('refreshSchedule', {
                     ...segmentObject.refreshSchedule,
-                    expireAfter: new Date(e.detail.value).getTime(),
+                    expireAfter: ternary(
+                      e.detail.value,
+                      new Date(e.detail.value).getTime(),
+                      0
+                    ),
                   });
                 }}
                 placeholder="YYYY/MM/DD"

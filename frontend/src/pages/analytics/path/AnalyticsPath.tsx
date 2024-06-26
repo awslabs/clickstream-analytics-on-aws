@@ -54,7 +54,7 @@ import { analyticsEventSelectReducer } from 'components/eventselect/reducer/anal
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
-import { StateActionType, HelpPanelType } from 'context/reducer';
+import { HelpPanelType, StateActionType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -79,9 +79,9 @@ import {
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
   pathNodesConvertToCategoryItemType,
+  validateFilterConditions,
   validEventAnalyticsItem,
   validMultipleEventAnalyticsItems,
-  validateFilterConditions,
 } from '../analytics-utils';
 import ExploreDateRangePicker, {
   DEFAULT_WEEK_RANGE,
@@ -99,6 +99,7 @@ interface AnalyticsPathProps {
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
+  segmentParameters?: CategoryItemType[];
   nodes: {
     pageTitles: IMetadataAttributeValue[];
     pageUrls: IMetadataAttributeValue[];
@@ -121,6 +122,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
+    segmentParameters,
     nodes,
     loadingEvents,
   } = props;
@@ -270,6 +272,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
     setDateRangeValue(DEFAULT_WEEK_RANGE);
     setTimeGranularity({
@@ -499,6 +502,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
     setStartNodeOption(null);
     switch (event.detail.selectedOption?.value) {
@@ -540,6 +544,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
   }, [presetParameters]);
 

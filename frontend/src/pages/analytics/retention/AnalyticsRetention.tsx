@@ -49,19 +49,19 @@ import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegm
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
-import { StateActionType, HelpPanelType } from 'context/reducer';
+import { HelpPanelType, StateActionType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
-  generateStr,
   alertMsg,
   defaultStr,
+  generateStr,
+  getAbsoluteStartEndRange,
   getEventParameters,
   getUserInfoFromLocalStorage,
   isAnalystAuthorRole,
-  getAbsoluteStartEndRange,
 } from 'ts/utils';
 import {
   getDashboardCreateParameters,
@@ -70,10 +70,10 @@ import {
   getLngFromLocalStorage,
   getPairEventAndConditions,
   parametersConvertToCategoryItemType,
+  validateFilterConditions,
   validMultipleRetentionAnalyticsItem,
   validRetentionAnalyticsItem,
   validRetentionJoinColumnDatatype,
-  validateFilterConditions,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDatePicker from '../comps/ExploreDatePicker';
@@ -90,6 +90,7 @@ interface AnalyticsRetentionProps {
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
   groupParameters: CategoryItemType[];
+  segmentParameters?: CategoryItemType[];
   loadingEvents: boolean;
 }
 
@@ -107,6 +108,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     categoryEvents,
     presetParameters,
     groupParameters,
+    segmentParameters,
     loadingEvents,
   } = props;
   const { appId } = useParams();
@@ -172,6 +174,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
     setStartDate(getAbsoluteStartEndRange().startDate);
     setRevisitDate(getAbsoluteStartEndRange().endDate);
@@ -363,6 +366,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
   }, [presetParameters]);
 

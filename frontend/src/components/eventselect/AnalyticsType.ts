@@ -17,6 +17,7 @@ import {
   ConditionCategoryFrontend,
   MetadataValueType,
   MetadataPlatform,
+  ExtendedMetadataValueType,
 } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
@@ -42,7 +43,7 @@ export interface IAnalyticsItem extends SelectProps.Option {
   modifyTime?: string;
   metadataSource?: MetadataSource;
   category?: ConditionCategoryFrontend;
-  valueType?: MetadataValueType;
+  valueType?: MetadataValueType | ExtendedMetadataValueType;
   platform?: MetadataPlatform[];
   values?: IMetadataAttributeValue[];
   groupName?: string;

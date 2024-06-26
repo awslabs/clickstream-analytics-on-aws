@@ -23,10 +23,10 @@ import {
   SpaceBetween,
 } from '@cloudscape-design/components';
 import {
-  getPipelineDetailByProjectId,
-  warmup,
   clean,
   getPathNodes,
+  getPipelineDetailByProjectId,
+  warmup,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
@@ -34,11 +34,12 @@ import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import { useUserEventParameter } from 'context/AnalyticsEventsContext';
 import { DispatchContext, StateContext } from 'context/StateContext';
-import { StateActionType, HelpPanelType } from 'context/reducer';
+import { HelpPanelType, StateActionType } from 'context/reducer';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
+import { convertSegmentListToFilterOptions } from '../analytics-utils';
 import AnalyticsAttribution from '../attribution/AnalyticsAttribution';
 import AnalyticsCustomHeader from '../comps/AnalyticsCustomHeader';
 import AnalyticsCustomHeaderBg from '../comps/AnalyticsCustomHeaderBg';
@@ -114,6 +115,11 @@ const AnalyticsExplore: React.FC = () => {
     ExploreRenderCondition.Loading
   );
   const { data, loading } = useUserEventParameter();
+  const segmentParameters = convertSegmentListToFilterOptions(
+    data.segmentGroupList,
+    defaultStr(t('analytics:segment.title')),
+    defaultStr(t('analytics:category.segment'))
+  );
 
   const [pathNodes, setPathNodes] = useState<{
     pageTitles: IMetadataAttributeValue[];
@@ -317,6 +323,7 @@ const AnalyticsExplore: React.FC = () => {
                     categoryEvents={data?.categoryEvents}
                     presetParameters={data.presetParameters}
                     groupParameters={data.groupParameters}
+                    segmentParameters={segmentParameters}
                   />
                 )}
               {pipeline && renderCondition === ExploreRenderCondition.Event && (
@@ -331,6 +338,7 @@ const AnalyticsExplore: React.FC = () => {
                   categoryEvents={data?.categoryEvents}
                   presetParameters={data.presetParameters}
                   groupParameters={data.groupParameters}
+                  segmentParameters={segmentParameters}
                 />
               )}
               {pipeline && renderCondition === ExploreRenderCondition.Path && (
@@ -344,6 +352,7 @@ const AnalyticsExplore: React.FC = () => {
                   metadataUserAttributes={data?.metaDataUserAttributes}
                   categoryEvents={data?.categoryEvents}
                   presetParameters={data.presetParameters}
+                  segmentParameters={segmentParameters}
                   nodes={pathNodes}
                 />
               )}
@@ -360,6 +369,7 @@ const AnalyticsExplore: React.FC = () => {
                     categoryEvents={data?.categoryEvents}
                     presetParameters={data.presetParameters}
                     groupParameters={data.groupParameters}
+                    segmentParameters={segmentParameters}
                   />
                 )}
               {pipeline &&
@@ -374,6 +384,7 @@ const AnalyticsExplore: React.FC = () => {
                     metadataUserAttributes={data?.metaDataUserAttributes}
                     categoryEvents={data?.categoryEvents}
                     presetParameters={data.presetParameters}
+                    segmentParameters={segmentParameters}
                   />
                 )}
             </ContentLayout>

@@ -465,7 +465,10 @@ const handleSetSegmentData = (
   state: IEventSegmentationObj,
   action: SetSegmentData
 ) => {
-  return { ...action.segmentData };
+  return {
+    ...state,
+    subItemList: action.segmentData.subItemList,
+  };
 };
 
 const handleValidateSegmentObject = (state: IEventSegmentationObj) => {

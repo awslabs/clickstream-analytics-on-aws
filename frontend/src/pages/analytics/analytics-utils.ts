@@ -24,6 +24,7 @@ import {
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
   ExploreTimeScopeType,
+  ExtendedMetadataValueType,
   MetadataSource,
   MetadataValueType,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
@@ -986,15 +987,27 @@ export const getGlobalEventCondition = (
   const conditions: ICondition[] = [];
   segmentationOptionData.data.forEach((condition) => {
     if (validConditionItemType(condition)) {
+      let dataType = defaultStr(
+        condition.conditionOption?.valueType,
+        MetadataValueType.STRING
+      );
+      if (
+        Object.values(ExtendedMetadataValueType).includes(
+          dataType as ExtendedMetadataValueType
+        )
+      ) {
+        // Convert specific value type to general type in favor of backend sql
+        if (dataType === ExtendedMetadataValueType.USER_SEGMENT) {
+          dataType = MetadataValueType.STRING;
+        }
+      }
+
       const conditionObj: ICondition = {
         category: categoryMapping(condition.conditionOption?.category),
         property: defaultStr(condition.conditionOption?.name, ''),
         operator: defaultStr(condition.conditionOperator?.value, ''),
         value: condition.conditionValue,
-        dataType: defaultStr(
-          condition.conditionOption?.valueType,
-          MetadataValueType.STRING
-        ),
+        dataType,
       };
       conditions.push(conditionObj);
     }
@@ -1370,4 +1383,35 @@ export const convertCronExpByTimeRange = (
   }
 
   return '';
+};
+
+export const convertSegmentListToFilterOptions = (
+  segmentGroupList: SelectProps.Option[] | undefined,
+  categoryName: string,
+  itemName: string
+): CategoryItemType[] | undefined => {
+  if (segmentGroupList === undefined) {
+    return undefined;
+  }
+
+  return [
+    {
+      categoryId: ConditionCategoryFrontend.USER_OUTER,
+      categoryName: categoryName,
+      categoryType: 'attribute',
+      itemList: [
+        {
+          category: ConditionCategoryFrontend.USER_OUTER,
+          description: categoryName,
+          label: itemName,
+          name: 'segment_id',
+          valueType: ExtendedMetadataValueType.USER_SEGMENT,
+          values: segmentGroupList.map((segment) => ({
+            value: defaultStr(segment.value),
+            displayValue: defaultStr(segment.label),
+          })),
+        },
+      ],
+    },
+  ];
 };
