@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -25,4 +26,6 @@ public class TransformConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     private Map<String, RuleConfig> appRuleConfig; // NOSONAR
     private boolean trafficSourceEnrichmentDisabled; // NOSONAR
+    private List<String> allowEvents; // NOSONAR
+    private long allowEventTimeMaxLatencyMilisec; // NOSONAR
 }

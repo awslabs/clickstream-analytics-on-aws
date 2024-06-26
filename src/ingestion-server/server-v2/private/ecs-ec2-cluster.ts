@@ -29,14 +29,15 @@ import {
   AmiHardwareType,
   CfnClusterCapacityProviderAssociations,
 } from 'aws-cdk-lib/aws-ecs';
+import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct, IConstruct } from 'constructs';
-import { createProxyAndWorkerECRImages } from './ecr';
+import { ECSEc2Service } from './ecs-ec2-service';
+import { createProxyAndWorkerECRImages } from '../../server/private/ecr';
 
-import { createECSService } from './ecs-service';
-import { addPoliciesToAsgRole } from './iam';
-import { IngestionServerProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
+import { addPoliciesToAsgRole } from '../../server/private/iam';
+import { IngestionServerV2Props, RESOURCE_ID_PREFIX } from '../ingestion-server-v2';
 
-export interface ECSClusterProps extends IngestionServerProps {
+export interface ECSClusterProps extends IngestionServerV2Props {
   ecsSecurityGroup: ISecurityGroup;
 }
 
@@ -50,7 +51,27 @@ export interface EcsClusterResult extends EcsServiceResult {
   autoScalingGroup: AutoScalingGroup;
 }
 
-export function createECSClusterAndService(
+export class ECSEc2Cluster extends Construct {
+  public readonly ecsCluster: Cluster;
+  public readonly ecsService: Ec2Service;
+  public readonly httpContainerName: string;
+  public readonly ecsInfraRole: IRole;
+  public readonly autoScalingGroup: AutoScalingGroup;
+
+  constructor(scope: Construct, id: string, props: ECSClusterProps) {
+    super(scope, id);
+
+    const { ecsService, httpContainerName, autoScalingGroup, ecsCluster } = createECSClusterAndService(this, props);
+
+    this.ecsCluster = ecsCluster;
+    this.ecsService = ecsService;
+    this.httpContainerName = httpContainerName;
+    this.autoScalingGroup = autoScalingGroup;
+    this.ecsInfraRole = autoScalingGroup.role;
+  }
+}
+
+function createECSClusterAndService(
   scope: Construct,
   props: ECSClusterProps,
 ): EcsClusterResult {
@@ -72,25 +93,19 @@ export function createECSClusterAndService(
     platform: arch,
   };
 
-  let notifications = {};
-
-  if (props.notificationsTopic) {
-    notifications = { notifications: [{ topic: props.notificationsTopic }] };
-  }
-
   const autoScalingGroup = new AutoScalingGroup(scope, `${RESOURCE_ID_PREFIX}ecs-asg`, {
     vpc,
     vpcSubnets: props.vpcSubnets,
     associatePublicIpAddress: props.vpcSubnets.subnetType == SubnetType.PUBLIC,
     instanceType: ecsConfig.instanceType,
     machineImage: ecsConfig.machineImage,
-    maxCapacity: ecsAsgSetting.serverMax,
-    minCapacity: ecsAsgSetting.serverMin,
+    maxCapacity: ecsAsgSetting.taskMax,
+    minCapacity: ecsAsgSetting.taskMin,
     healthCheck: HealthCheck.ec2({
       grace: Duration.seconds(60),
     }),
     securityGroup: props.ecsSecurityGroup,
-    ...notifications,
+    // ...notifications,
     blockDevices: [
       {
         deviceName: '/dev/xvda',
@@ -99,6 +114,7 @@ export function createECSClusterAndService(
     ],
     requireImdsv2: true,
   });
+
 
   if (Token.isUnresolved(ecsAsgSetting.warmPoolSize)) {
     // warmPoolSize is passed by CfnParameter
@@ -134,16 +150,23 @@ export function createECSClusterAndService(
     scope,
     ecsConfig.platform,
   );
-  const ecsServiceInfo = createECSService(scope, {
+
+  const ec2Service = new ECSEc2Service(scope, `${RESOURCE_ID_PREFIX}ecs-service`, {
     ...props,
     ecsCluster,
     proxyImage,
     workerImage,
     capacityProvider,
-    autoScalingGroup,
   });
+
   Aspects.of(scope).add(new AddDefaultCapacityProviderStrategyAspect(capacityProvider));
-  return { ...ecsServiceInfo, autoScalingGroup, ecsCluster };
+  return {
+    ecsService: ec2Service.ecsService,
+    httpContainerName: ec2Service.httpContainerName,
+    taskDefinition: ec2Service.taskDefinition,
+    autoScalingGroup,
+    ecsCluster,
+  };
 }
 
 

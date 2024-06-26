@@ -84,6 +84,13 @@ export const CLICKSTREAM_LAST_REFRESH_DATE_VIEW_NAME = 'refresh_mv_sp_status';
 
 export const CLICKSTREAM_REALTIME_EVENT_VIEW_NAME = 'ods_events_streaming_view';
 export const CLICKSTREAM_REALTIME_EVENT_VIEW_PLACEHOLDER = 'Realtime_Event';
+export const CLICKSTREAM_REALTIME_EVENT_USER_VIEW_PLACEHOLDER = 'Realtime_Event_User';
+export const CLICKSTREAM_REALTIME_EVENT_TRAFFIC_VIEW_PLACEHOLDER = 'Realtime_Event_Traffic';
+export const CLICKSTREAM_REALTIME_EVENT_NAME_VIEW_PLACEHOLDER = 'Realtime_Event_Name';
+export const CLICKSTREAM_REALTIME_EVENT_PAGESCREEN_VIEW_PLACEHOLDER = 'Realtime_Event_Page_Screen';
+export const CLICKSTREAM_REALTIME_EVENT_COUNTRY_VIEW_PLACEHOLDER = 'Realtime_Event_Country';
+export const CLICKSTREAM_REALTIME_EVENT_CITY_VIEW_PLACEHOLDER = 'Realtime_Event_City';
+export const CLICKSTREAM_REALTIME_EVENT_PLATFORM_VIEW_PLACEHOLDER = 'Realtime_Event_Platform';
 
 export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [
   'clickstream_lifecycle_daily_view_v1',

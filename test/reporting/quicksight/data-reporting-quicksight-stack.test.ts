@@ -1839,7 +1839,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               tableName: 'Realtime_Event',
               useSpice: 'no',
               realtime: 'yes',
-              customSql: "\n        -- clickstream-builtin-realtime-dashboard\n        select \n          \n    event_timestamp,\n    event_id,\n    event_name,\n    user_pseudo_id,\n    user_id,\n    platform,\n    geo_country,\n    geo_city,\n    traffic_source_source,\n    screen_view_screen_name,\n    page_view_page_title,\n    CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as new_user_indicator,\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n        from {{schema}}.ods_events_streaming_view\n      ",
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-ods_events_streaming_view\n        select \n          \n    event_timestamp,\n    event_id,\n    event_name,\n    user_pseudo_id,\n    user_id,\n    platform,\n    geo_country,\n    geo_city,\n    traffic_source_source,\n    screen_view_screen_name,\n    page_view_page_title,\n    CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as \"User indicator\",\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS \"Local time\",\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS \"Event date\"\n   \n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n      ",
               columns:
                   [
                     {
@@ -1887,15 +1887,15 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'event_timestamp_local',
+                      Name: 'Local time',
                       Type: 'DATETIME',
                     },
                     {
-                      Name: 'event_date',
+                      Name: 'Event date',
                       Type: 'DATETIME',
                     },
                     {
-                      Name: 'new_user_indicator',
+                      Name: 'User indicator',
                       Type: 'STRING',
                     },
                   ],
@@ -1931,9 +1931,200 @@ describe('DataReportingQuickSightStack resource test', () => {
                     'traffic_source_source',
                     'screen_view_screen_name',
                     'page_view_page_title',
-                    'event_timestamp_local',
-                    'event_date',
-                    'new_user_indicator',
+                    'Local time',
+                    'Event date',
+                    'User indicator',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_User',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_User\n        select \n          DATE_TRUNC('minute', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS \"Local time\",\n          CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as \"User indicator\",\n          COUNT(distinct user_pseudo_id) as \"User count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1,2\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'Local time',
+                      Type: 'DATETIME',
+                    },
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                    {
+                      Name: 'User indicator',
+                      Type: 'STRING',
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'Local time',
+                    'User count',
+                    'User indicator',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_Traffic',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Traffic\n        select \n          traffic_source_source as \"Traffic source\",\n          COUNT(distinct user_pseudo_id) as \"User count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                    {
+                      Name: 'Traffic source',
+                      Type: 'STRING',
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'User count',
+                    'Traffic source',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_Page_Screen',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Page_Screen\n        select \n          coalesce(page_view_page_title, screen_view_screen_name, '') as \"Page title/Screen name\",\n          SUM(CASE WHEN event_name = '_screen_view' or event_name = '_page_view' THEN 1 ELSE 0 END) as \"View count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1\n        order by 2 desc\n        limit 10\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'View count',
+                      Type: 'INTEGER',
+                    },
+                    {
+                      Name: 'Page title/Screen name',
+                      Type: 'STRING',
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'View count',
+                    'Page title/Screen name',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_Name',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Name\n        select \n          event_name as \"Event name\",\n          COUNT(distinct user_pseudo_id) as \"User count\",\n          COUNT(distinct event_id) as event_count\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1\n        order by 3 desc\n        limit 10\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                    {
+                      Name: 'Event name',
+                      Type: 'STRING',
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'User count',
+                    'Event name',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_Platform',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Platform\n        select \n          platform,\n          COUNT(distinct user_pseudo_id) as \"User count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'platform',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'platform',
+                    'User count',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_City',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_City\n        select \n          geo_country,\n          geo_city,\n          COUNT(distinct user_pseudo_id) as \"User count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1,2\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'geo_country',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'geo_city',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                  ],
+              tagColumnOperations:
+                  [
+                    {
+                      columnName: 'geo_country',
+                      columnGeographicRoles:
+                          [
+                            'COUNTRY',
+                          ],
+                    },
+                    {
+                      columnName: 'geo_city',
+                      columnGeographicRoles:
+                          [
+                            'CITY',
+                          ],
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'geo_country',
+                    'geo_city',
+                    'User count',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_Country',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Country\n        select \n          geo_country,\n          COUNT(distinct user_pseudo_id) as \"User count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'geo_country',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                  ],
+              tagColumnOperations:
+                  [
+                    {
+                      columnName: 'geo_country',
+                      columnGeographicRoles:
+                          [
+                            'COUNTRY',
+                          ],
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'geo_country',
+                    'User count',
                   ],
             },
             {
@@ -3631,7 +3822,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               tableName: 'Realtime_Event',
               useSpice: 'no',
               realtime: 'yes',
-              customSql: "\n        -- clickstream-builtin-realtime-dashboard\n        select \n          \n    event_timestamp,\n    event_id,\n    event_name,\n    user_pseudo_id,\n    user_id,\n    platform,\n    geo_country,\n    geo_city,\n    traffic_source_source,\n    screen_view_screen_name,\n    page_view_page_title,\n    CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as new_user_indicator,\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n        from {{schema}}.ods_events_streaming_view\n      ",
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-ods_events_streaming_view\n        select \n          \n    event_timestamp,\n    event_id,\n    event_name,\n    user_pseudo_id,\n    user_id,\n    platform,\n    geo_country,\n    geo_city,\n    traffic_source_source,\n    screen_view_screen_name,\n    page_view_page_title,\n    CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as \"User indicator\",\n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS \"Local time\",\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS \"Event date\"\n   \n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n      ",
               columns:
                   [
                     {
@@ -3679,15 +3870,15 @@ describe('DataReportingQuickSightStack resource test', () => {
                       Type: 'STRING',
                     },
                     {
-                      Name: 'event_timestamp_local',
+                      Name: 'Local time',
                       Type: 'DATETIME',
                     },
                     {
-                      Name: 'event_date',
+                      Name: 'Event date',
                       Type: 'DATETIME',
                     },
                     {
-                      Name: 'new_user_indicator',
+                      Name: 'User indicator',
                       Type: 'STRING',
                     },
                   ],
@@ -3723,9 +3914,200 @@ describe('DataReportingQuickSightStack resource test', () => {
                     'traffic_source_source',
                     'screen_view_screen_name',
                     'page_view_page_title',
-                    'event_timestamp_local',
-                    'event_date',
-                    'new_user_indicator',
+                    'Local time',
+                    'Event date',
+                    'User indicator',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_User',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_User\n        select \n          DATE_TRUNC('minute', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS \"Local time\",\n          CASE WHEN event_name = '_first_open' THEN 'New' ELSE 'Returning' END as \"User indicator\",\n          COUNT(distinct user_pseudo_id) as \"User count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1,2\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'Local time',
+                      Type: 'DATETIME',
+                    },
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                    {
+                      Name: 'User indicator',
+                      Type: 'STRING',
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'Local time',
+                    'User count',
+                    'User indicator',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_Traffic',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Traffic\n        select \n          traffic_source_source as \"Traffic source\",\n          COUNT(distinct user_pseudo_id) as \"User count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                    {
+                      Name: 'Traffic source',
+                      Type: 'STRING',
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'User count',
+                    'Traffic source',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_Page_Screen',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Page_Screen\n        select \n          coalesce(page_view_page_title, screen_view_screen_name, '') as \"Page title/Screen name\",\n          SUM(CASE WHEN event_name = '_screen_view' or event_name = '_page_view' THEN 1 ELSE 0 END) as \"View count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1\n        order by 2 desc\n        limit 10\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'View count',
+                      Type: 'INTEGER',
+                    },
+                    {
+                      Name: 'Page title/Screen name',
+                      Type: 'STRING',
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'View count',
+                    'Page title/Screen name',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_Name',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Name\n        select \n          event_name as \"Event name\",\n          COUNT(distinct user_pseudo_id) as \"User count\",\n          COUNT(distinct event_id) as event_count\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1\n        order by 3 desc\n        limit 10\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                    {
+                      Name: 'Event name',
+                      Type: 'STRING',
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'User count',
+                    'Event name',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_Platform',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Platform\n        select \n          platform,\n          COUNT(distinct user_pseudo_id) as \"User count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'platform',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'platform',
+                    'User count',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_City',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_City\n        select \n          geo_country,\n          geo_city,\n          COUNT(distinct user_pseudo_id) as \"User count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1,2\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'geo_country',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'geo_city',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                  ],
+              tagColumnOperations:
+                  [
+                    {
+                      columnName: 'geo_country',
+                      columnGeographicRoles:
+                          [
+                            'COUNTRY',
+                          ],
+                    },
+                    {
+                      columnName: 'geo_city',
+                      columnGeographicRoles:
+                          [
+                            'CITY',
+                          ],
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'geo_country',
+                    'geo_city',
+                    'User count',
+                  ],
+            },
+            {
+              tableName: 'Realtime_Event_Country',
+              useSpice: 'no',
+              realtime: 'yes',
+              customSql: "\n        -- clickstream-builtin-realtime-dashboard-Realtime_Event_Country\n        select \n          geo_country,\n          COUNT(distinct user_pseudo_id) as \"User count\"\n        from {{schema}}.ods_events_streaming_view\n        where approximate_arrival_timestamp >= current_timestamp - interval '1 hour'\n        group by 1\n      ",
+              columns:
+                  [
+                    {
+                      Name: 'geo_country',
+                      Type: 'STRING',
+                    },
+                    {
+                      Name: 'User count',
+                      Type: 'INTEGER',
+                    },
+                  ],
+              tagColumnOperations:
+                  [
+                    {
+                      columnName: 'geo_country',
+                      columnGeographicRoles:
+                          [
+                            'COUNTRY',
+                          ],
+                    },
+                  ],
+              projectedColumns:
+                  [
+                    'geo_country',
+                    'User count',
                   ],
             },
             {

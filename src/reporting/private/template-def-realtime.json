@@ -14,7 +14,7 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "event_name",
+                "Name": "Event name",
                 "DataType": "STRING"
                 },
                 {
@@ -36,7 +36,7 @@
                 "GeographicRole": "CITY"
                 },
                 {
-                "Name": "traffic_source_source",
+                "Name": "Traffic source",
                 "DataType": "STRING"
                 },
                 {
@@ -52,1080 +52,1005 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "event_timestamp_local",
+                "Name": "Local time",
                 "DataType": "DATETIME"
                 },
                 {
-                "Name": "event_date",
+                "Name": "Event date",
                 "DataType": "DATETIME"
                 },
                 {
-                "Name": "new_user_indicator",
+                "Name": "User indicator",
                 "DataType": "STRING"
                 }
             ]
         },
         "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_User",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "Local time",
+                        "DataType": "DATETIME"
+                    },
+                    {
+                        "Name": "User count",
+                        "DataType": "INTEGER"
+                    },
+
+                    {
+                        "Name": "User indicator",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_Traffic",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "User count",
+                        "DataType": "INTEGER"
+                    },
+
+                    {
+                        "Name": "Traffic source",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_Name",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "User count",
+                        "DataType": "INTEGER"
+                    },
+
+                    {
+                        "Name": "Event name",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_Page_Screen",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "View count",
+                        "DataType": "INTEGER"
+                    },
+
+                    {
+                        "Name": "Page title/Screen name",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_Platform",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "User count",
+                        "DataType": "INTEGER"
+                    },
+
+                    {
+                        "Name": "platform",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_Country",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "User count",
+                        "DataType": "INTEGER"
+                    },
+
+                    {
+                        "Name": "geo_country",
+                        "DataType": "STRING",
+                        "GeographicRole": "COUNTRY"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Realtime_Event_City",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "User count",
+                        "DataType": "INTEGER"
+                    },
+                    {
+                        "Name": "geo_country",
+                        "DataType": "STRING",
+                        "GeographicRole": "COUNTRY"
+                    },
+                    {
+                        "Name": "geo_city",
+                        "DataType": "STRING",
+                        "GeographicRole": "CITY"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
         }
     ],
     "Sheets": [
-            {
-                "SheetId": "f7454608-49ab-46bb-97a6-1d48e70889cc",
-                "Name": "Realtime",
-                "Visuals": [
-                    {
-                        "PivotTableVisual": {
-                            "VisualId": "8cdbaa3a-2225-4b93-9461-b3b75efba133",
-                            "Title": {
-                                "Visibility": "HIDDEN"
-                            },
-                            "Subtitle": {
-                                "Visibility": "HIDDEN"
-                            },
-                            "ChartConfiguration": {
-                                "FieldWells": {
-                                    "PivotTableAggregatedFieldWells": {
-                                        "Rows": [
-                                            {
-                                                "CategoricalDimensionField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "geo_country"
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                "CategoricalDimensionField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_city.2.1717558096880",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "geo_city"
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        "Columns": [],
-                                        "Values": [
-                                            {
-                                                "CategoricalMeasureField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868143523",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "user_pseudo_id"
-                                                    },
-                                                    "AggregationFunction": "DISTINCT_COUNT"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                "SortConfiguration": {
-                                    "FieldSortOptions": []
-                                },
-                                "TableOptions": {
-                                    "ColumnHeaderStyle": {},
-                                    "CellStyle": {},
-                                    "RowFieldNamesStyle": {},
-                                    "RowAlternateColorOptions": {
-                                        "Status": "DISABLED",
-                                        "UsePrimaryBackgroundColor": "ENABLED"
-                                    },
-                                    "RowsLayout": "TABULAR"
-                                },
-                                "TotalOptions": {
-                                    "RowSubtotalOptions": {
-                                        "TotalsVisibility": "VISIBLE",
-                                        "CustomLabel": "<<$aws:subtotalDimension>> Subtotal",
-                                        "TotalCellStyle": {},
-                                        "ValueCellStyle": {},
-                                        "MetricHeaderCellStyle": {},
-                                        "StyleTargets": [
-                                            {
-                                                "CellType": "VALUE"
-                                            },
-                                            {
-                                                "CellType": "TOTAL"
-                                            },
-                                            {
-                                                "CellType": "METRIC_HEADER"
-                                            }
-                                        ]
-                                    },
-                                    "RowTotalOptions": {
-                                        "TotalsVisibility": "VISIBLE"
-                                    }
-                                },
-                                "FieldOptions": {
-                                    "SelectedFieldOptions": [
+        {
+            "SheetId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_64cf36bd-099d-4b80-9c40-4dd171cf4627",
+            "Name": "Realtime",
+            "Visuals": [
+                {
+                    "PivotTableVisual": {
+                        "VisualId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_da51c06e-0921-4667-964d-a51939ed6354",
+                        "Title": {
+                            "Visibility": "HIDDEN"
+                        },
+                        "Subtitle": {
+                            "Visibility": "HIDDEN"
+                        },
+                        "ChartConfiguration": {
+                            "FieldWells": {
+                                "PivotTableAggregatedFieldWells": {
+                                    "Rows": [
                                         {
-                                            "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
-                                            "CustomLabel": "Country",
-                                            "Visibility": "VISIBLE"
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_City",
+                                                    "ColumnName": "geo_country"
+                                                }
+                                            }
                                         },
                                         {
-                                            "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_city.2.1717558096880",
-                                            "CustomLabel": "City",
-                                            "Visibility": "VISIBLE"
-                                        },
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_city.2.1717558096880",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_City",
+                                                    "ColumnName": "geo_city"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Columns": [],
+                                    "Values": [
                                         {
-                                            "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868143523",
-                                            "CustomLabel": "Active users",
-                                            "Visibility": "VISIBLE"
+                                            "NumericalMeasureField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868143523",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_City",
+                                                    "ColumnName": "User count"
+                                                },
+                                                "AggregationFunction": {
+                                                    "SimpleNumericalAggregation": "SUM"
+                                                }
+                                            }
                                         }
                                     ]
                                 }
                             },
-                            "Actions": []
-                        }
-                    },
-                    {
-                        "PieChartVisual": {
-                            "VisualId": "94c6b175-89ed-4527-9c1f-d6450713d546",
-                            "Title": {
-                                "Visibility": "VISIBLE",
-                                "FormatText": {
-                                    "RichText": "<visual-title>\n  <inline font-size=\"20px\">Platform</inline>\n</visual-title>"
-                                }
+                            "SortConfiguration": {
+                                "FieldSortOptions": []
                             },
-                            "Subtitle": {
-                                "Visibility": "HIDDEN"
-                            },
-                            "ChartConfiguration": {
-                                "FieldWells": {
-                                    "PieChartAggregatedFieldWells": {
-                                        "Category": [
-                                            {
-                                                "CategoricalDimensionField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.platform.1.1717557799344",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "platform"
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        "Values": [
-                                            {
-                                                "CategoricalMeasureField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "user_pseudo_id"
-                                                    },
-                                                    "AggregationFunction": "DISTINCT_COUNT"
-                                                }
-                                            }
-                                        ]
-                                    }
+                            "TableOptions": {
+                                "ColumnHeaderStyle": {},
+                                "CellStyle": {},
+                                "RowFieldNamesStyle": {},
+                                "RowAlternateColorOptions": {
+                                    "Status": "DISABLED",
+                                    "UsePrimaryBackgroundColor": "ENABLED"
                                 },
-                                "SortConfiguration": {
-                                    "CategorySort": [
+                                "RowsLayout": "TABULAR"
+                            },
+                            "TotalOptions": {
+                                "RowSubtotalOptions": {
+                                    "TotalsVisibility": "VISIBLE",
+                                    "CustomLabel": "<<$aws:subtotalDimension>> Subtotal",
+                                    "TotalCellStyle": {},
+                                    "ValueCellStyle": {},
+                                    "MetricHeaderCellStyle": {},
+                                    "StyleTargets": [
                                         {
-                                            "FieldSort": {
-                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
-                                                "Direction": "DESC"
-                                            }
-                                        }
-                                    ],
-                                    "CategoryItemsLimit": {
-                                        "OtherCategories": "INCLUDE"
-                                    },
-                                    "SmallMultiplesLimitConfiguration": {
-                                        "OtherCategories": "INCLUDE"
-                                    }
-                                },
-                                "DonutOptions": {
-                                    "ArcOptions": {
-                                        "ArcThickness": "MEDIUM"
-                                    }
-                                },
-                                "Legend": {
-                                    "Width": "35px"
-                                },
-                                "DataLabels": {
-                                    "Visibility": "VISIBLE",
-                                    "Overlap": "DISABLE_OVERLAP"
-                                },
-                                "Tooltip": {
-                                    "TooltipVisibility": "VISIBLE",
-                                    "SelectedTooltipType": "DETAILED",
-                                    "FieldBasedTooltip": {
-                                        "AggregationVisibility": "HIDDEN",
-                                        "TooltipTitleType": "PRIMARY_VALUE",
-                                        "TooltipFields": [
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            },
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.platform.1.1717557799344",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            "Actions": [],
-                            "ColumnHierarchies": []
-                        }
-                    },
-                    {
-                        "BarChartVisual": {
-                            "VisualId": "f63c274a-ba58-4d28-8dd2-5382a58ad652",
-                            "Title": {
-                                "Visibility": "VISIBLE",
-                                "FormatText": {
-                                    "RichText": "<visual-title>\n  <inline font-size=\"20px\">Active users in realtime</inline>\n</visual-title>"
-                                }
-                            },
-                            "Subtitle": {
-                                "Visibility": "HIDDEN"
-                            },
-                            "ChartConfiguration": {
-                                "FieldWells": {
-                                    "BarChartAggregatedFieldWells": {
-                                        "Category": [
-                                            {
-                                                "DateDimensionField": {
-                                                    "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.0.1715857356710",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "event_timestamp_local"
-                                                    },
-                                                    "DateGranularity": "MINUTE",
-                                                    "HierarchyId": "d9f904bb-8494-4d13-ae78-93dadeef8b4c",
-                                                    "FormatConfiguration": {
-                                                        "DateTimeFormat": "h:mma",
-                                                        "NullValueFormatConfiguration": {
-                                                            "NullString": "null"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        "Values": [
-                                            {
-                                                "CategoricalMeasureField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715857362639",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "user_pseudo_id"
-                                                    },
-                                                    "AggregationFunction": "DISTINCT_COUNT"
-                                                }
-                                            }
-                                        ],
-                                        "Colors": [
-                                            {
-                                                "CategoricalDimensionField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.new_user_indicator.2.1715857385989",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "new_user_indicator"
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                "SortConfiguration": {
-                                    "CategorySort": [
+                                            "CellType": "VALUE"
+                                        },
                                         {
-                                            "FieldSort": {
-                                                "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.0.1715857356710",
-                                                "Direction": "ASC"
-                                            }
-                                        }
-                                    ],
-                                    "CategoryItemsLimit": {
-                                        "OtherCategories": "INCLUDE"
-                                    },
-                                    "ColorItemsLimit": {
-                                        "OtherCategories": "INCLUDE"
-                                    },
-                                    "SmallMultiplesLimitConfiguration": {
-                                        "OtherCategories": "INCLUDE"
-                                    }
-                                },
-                                "Orientation": "VERTICAL",
-                                "BarsArrangement": "STACKED",
-                                "CategoryAxis": {
-                                    "TickLabelOptions": {
-                                        "RotationAngle": 0.0
-                                    }
-                                },
-                                "Legend": {
-                                    "Title": {
-                                        "Visibility": "HIDDEN"
-                                    },
-                                    "Position": "TOP"
-                                },
-                                "DataLabels": {
-                                    "Visibility": "HIDDEN",
-                                    "Overlap": "DISABLE_OVERLAP"
-                                },
-                                "Tooltip": {
-                                    "TooltipVisibility": "VISIBLE",
-                                    "SelectedTooltipType": "DETAILED",
-                                    "FieldBasedTooltip": {
-                                        "AggregationVisibility": "HIDDEN",
-                                        "TooltipTitleType": "PRIMARY_VALUE",
-                                        "TooltipFields": [
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.0.1715857356710",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            },
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715857362639",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            },
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.new_user_indicator.2.1715857385989",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            "Actions": [],
-                            "ColumnHierarchies": [
-                                {
-                                    "DateTimeHierarchy": {
-                                        "HierarchyId": "d9f904bb-8494-4d13-ae78-93dadeef8b4c",
-                                        "DrillDownFilters": []
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "FilledMapVisual": {
-                            "VisualId": "ee4e4717-119c-4d3f-bbaf-27ceecb02e05",
-                            "Title": {
-                                "Visibility": "HIDDEN",
-                                "FormatText": {
-                                    "RichText": "<visual-title>Active user by geo</visual-title>"
-                                }
-                            },
-                            "Subtitle": {
-                                "Visibility": "HIDDEN"
-                            },
-                            "ChartConfiguration": {
-                                "FieldWells": {
-                                    "FilledMapAggregatedFieldWells": {
-                                        "Geospatial": [
-                                            {
-                                                "CategoricalDimensionField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "geo_country"
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        "Values": [
-                                            {
-                                                "CategoricalMeasureField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868143523",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "user_pseudo_id"
-                                                    },
-                                                    "AggregationFunction": "DISTINCT_COUNT"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                "SortConfiguration": {},
-                                "Legend": {
-                                    "Width": "48px"
-                                },
-                                "Tooltip": {
-                                    "TooltipVisibility": "VISIBLE",
-                                    "SelectedTooltipType": "DETAILED",
-                                    "FieldBasedTooltip": {
-                                        "AggregationVisibility": "HIDDEN",
-                                        "TooltipTitleType": "PRIMARY_VALUE",
-                                        "TooltipFields": [
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868143523",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            },
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                "WindowOptions": {
-                                    "Bounds": {
-                                        "North": 76.43210383098352,
-                                        "South": -81.04001842947066,
-                                        "West": -250.32286336773205,
-                                        "East": 257.68609015810927
-                                    },
-                                    "MapZoomMode": "MANUAL"
-                                },
-                                "MapStyleOptions": {
-                                    "BaseMapStyle": "DARK_GRAY"
-                                }
-                            },
-                            "ColumnHierarchies": [],
-                            "Actions": []
-                        }
-                    },
-                    {
-                        "LineChartVisual": {
-                            "VisualId": "7288a77f-b354-4af2-8fe4-2dbc1853769c",
-                            "Title": {
-                                "Visibility": "VISIBLE",
-                                "FormatText": {
-                                    "RichText": "<visual-title>\n  <inline font-size=\"20px\">Top 10 events</inline>\n</visual-title>"
-                                }
-                            },
-                            "Subtitle": {
-                                "Visibility": "VISIBLE"
-                            },
-                            "ChartConfiguration": {
-                                "FieldWells": {
-                                    "LineChartAggregatedFieldWells": {
-                                        "Category": [
-                                            {
-                                                "DateDimensionField": {
-                                                    "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1716899533887",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "event_timestamp_local"
-                                                    },
-                                                    "DateGranularity": "MINUTE",
-                                                    "HierarchyId": "4e1f9a3d-f7c2-441f-b520-77cb850572a0",
-                                                    "FormatConfiguration": {
-                                                        "DateTimeFormat": "h:mma",
-                                                        "NullValueFormatConfiguration": {
-                                                            "NullString": "null"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        "Values": [
-                                            {
-                                                "CategoricalMeasureField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868483622",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "user_pseudo_id"
-                                                    },
-                                                    "AggregationFunction": "COUNT"
-                                                }
-                                            }
-                                        ],
-                                        "Colors": [
-                                            {
-                                                "CategoricalDimensionField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.event_name.0.1715868468558",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "event_name"
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                "SortConfiguration": {
-                                    "CategorySort": [
+                                            "CellType": "TOTAL"
+                                        },
                                         {
-                                            "FieldSort": {
-                                                "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1716899533887",
-                                                "Direction": "DESC"
-                                            }
+                                            "CellType": "METRIC_HEADER"
                                         }
-                                    ],
-                                    "CategoryItemsLimitConfiguration": {
-                                        "OtherCategories": "INCLUDE"
+                                    ]
+                                },
+                                "RowTotalOptions": {
+                                    "TotalsVisibility": "HIDDEN",
+                                    "ScrollStatus": "SCROLLED"
+                                }
+                            },
+                            "FieldOptions": {
+                                "SelectedFieldOptions": [
+                                    {
+                                        "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
+                                        "CustomLabel": "Country",
+                                        "Visibility": "VISIBLE"
                                     },
-                                    "ColorItemsLimitConfiguration": {
-                                        "OtherCategories": "INCLUDE"
+                                    {
+                                        "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_city.2.1717558096880",
+                                        "CustomLabel": "City",
+                                        "Visibility": "VISIBLE"
                                     },
-                                    "SmallMultiplesLimitConfiguration": {
-                                        "OtherCategories": "INCLUDE"
+                                    {
+                                        "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868143523",
+                                        "CustomLabel": "Active users",
+                                        "Visibility": "VISIBLE"
                                     }
-                                },
-                                "Type": "LINE",
-                                "XAxisDisplayOptions": {
-                                    "TickLabelOptions": {
-                                        "RotationAngle": 0.0
-                                    }
-                                },
-                                "Legend": {
-                                    "Width": "56px"
-                                },
-                                "DataLabels": {
-                                    "Visibility": "HIDDEN",
-                                    "Overlap": "DISABLE_OVERLAP"
-                                },
-                                "Tooltip": {
-                                    "TooltipVisibility": "VISIBLE",
-                                    "SelectedTooltipType": "DETAILED",
-                                    "FieldBasedTooltip": {
-                                        "AggregationVisibility": "HIDDEN",
-                                        "TooltipTitleType": "PRIMARY_VALUE",
-                                        "TooltipFields": [
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.event_name.0.1715868468558",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            },
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868483622",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            },
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1716899533887",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            "Actions": [],
-                            "ColumnHierarchies": [
-                                {
-                                    "DateTimeHierarchy": {
-                                        "HierarchyId": "4e1f9a3d-f7c2-441f-b520-77cb850572a0",
-                                        "DrillDownFilters": []
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "BarChartVisual": {
-                            "VisualId": "ed99c850-34b8-4498-8110-339f2c95b709",
-                            "Title": {
-                                "Visibility": "VISIBLE",
-                                "FormatText": {
-                                    "RichText": "<visual-title>\n  <inline font-size=\"20px\">Traffic source</inline>\n</visual-title>"
-                                }
-                            },
-                            "Subtitle": {
-                                "Visibility": "HIDDEN"
-                            },
-                            "ChartConfiguration": {
-                                "FieldWells": {
-                                    "BarChartAggregatedFieldWells": {
-                                        "Category": [
-                                            {
-                                                "DateDimensionField": {
-                                                    "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1717558027378",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "event_timestamp_local"
-                                                    },
-                                                    "DateGranularity": "MINUTE",
-                                                    "HierarchyId": "2795f55d-dff2-43d0-bfe3-222360122a55",
-                                                    "FormatConfiguration": {
-                                                        "DateTimeFormat": "h:mma",
-                                                        "NullValueFormatConfiguration": {
-                                                            "NullString": "null"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        "Values": [
-                                            {
-                                                "CategoricalMeasureField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "user_pseudo_id"
-                                                    },
-                                                    "AggregationFunction": "DISTINCT_COUNT"
-                                                }
-                                            }
-                                        ],
-                                        "Colors": [
-                                            {
-                                                "CategoricalDimensionField": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.traffic_source_source.1.1716899723929",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "traffic_source_source"
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                "SortConfiguration": {
-                                    "CategorySort": [
-                                        {
-                                            "FieldSort": {
-                                                "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1717558027378",
-                                                "Direction": "DESC"
-                                            }
-                                        }
-                                    ],
-                                    "CategoryItemsLimit": {
-                                        "OtherCategories": "INCLUDE"
-                                    },
-                                    "ColorItemsLimit": {
-                                        "OtherCategories": "INCLUDE"
-                                    },
-                                    "SmallMultiplesLimitConfiguration": {
-                                        "OtherCategories": "INCLUDE"
-                                    }
-                                },
-                                "Orientation": "HORIZONTAL",
-                                "BarsArrangement": "STACKED",
-                                "Legend": {
-                                    "Width": "35px"
-                                },
-                                "DataLabels": {
-                                    "Visibility": "HIDDEN",
-                                    "Overlap": "DISABLE_OVERLAP"
-                                },
-                                "Tooltip": {
-                                    "TooltipVisibility": "VISIBLE",
-                                    "SelectedTooltipType": "DETAILED",
-                                    "FieldBasedTooltip": {
-                                        "AggregationVisibility": "HIDDEN",
-                                        "TooltipTitleType": "PRIMARY_VALUE",
-                                        "TooltipFields": [
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            },
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.traffic_source_source.1.1716899723929",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            },
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.2.1717558027378",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            "Actions": [],
-                            "ColumnHierarchies": [
-                                {
-                                    "DateTimeHierarchy": {
-                                        "HierarchyId": "2795f55d-dff2-43d0-bfe3-222360122a55",
-                                        "DrillDownFilters": []
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "LineChartVisual": {
-                            "VisualId": "696a5cf9-2520-4cf6-83f4-cd40e4692cfa",
-                            "Title": {
-                                "Visibility": "VISIBLE",
-                                "FormatText": {
-                                    "RichText": "<visual-title>\n  <inline font-size=\"20px\">Top 10 pages and screens</inline>\n</visual-title>"
-                                }
-                            },
-                            "Subtitle": {
-                                "Visibility": "VISIBLE"
-                            },
-                            "ChartConfiguration": {
-                                "FieldWells": {
-                                    "LineChartAggregatedFieldWells": {
-                                        "Category": [
-                                            {
-                                                "DateDimensionField": {
-                                                    "FieldId": "LogicalTable1.event_timestamp_local.2.1718939702088",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "event_timestamp_local"
-                                                    },
-                                                    "DateGranularity": "MINUTE",
-                                                    "HierarchyId": "LogicalTable1.event_timestamp_local.2.1718939702088"
-                                                }
-                                            }
-                                        ],
-                                        "Values": [
-                                            {
-                                                "NumericalMeasureField": {
-                                                    "FieldId": "LogicalTable1.view_count.1.1717558189271",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "View count"
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        "Colors": [
-                                            {
-                                                "CategoricalDimensionField": {
-                                                    "FieldId": "LogicalTable1.aggregation_dim.2.1717558195224",
-                                                    "Column": {
-                                                        "DataSetIdentifier": "Realtime_Event",
-                                                        "ColumnName": "Page title/Screen name"
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                "SortConfiguration": {
-                                    "CategorySort": [
-                                        {
-                                            "FieldSort": {
-                                                "FieldId": "LogicalTable1.event_timestamp_local.2.1718939702088",
-                                                "Direction": "DESC"
-                                            }
-                                        }
-                                    ],
-                                    "CategoryItemsLimitConfiguration": {
-                                        "OtherCategories": "INCLUDE"
-                                    },
-                                    "ColorItemsLimitConfiguration": {
-                                        "OtherCategories": "INCLUDE"
-                                    },
-                                    "SmallMultiplesLimitConfiguration": {
-                                        "OtherCategories": "INCLUDE"
-                                    }
-                                },
-                                "Type": "LINE",
-                                "XAxisDisplayOptions": {
-                                    "TickLabelOptions": {
-                                        "RotationAngle": 0.0
-                                    }
-                                },
-                                "DataLabels": {
-                                    "Visibility": "HIDDEN",
-                                    "Overlap": "DISABLE_OVERLAP"
-                                },
-                                "Tooltip": {
-                                    "TooltipVisibility": "VISIBLE",
-                                    "SelectedTooltipType": "DETAILED",
-                                    "FieldBasedTooltip": {
-                                        "AggregationVisibility": "HIDDEN",
-                                        "TooltipTitleType": "PRIMARY_VALUE",
-                                        "TooltipFields": [
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "LogicalTable1.view_count.1.1717558189271",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            },
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "LogicalTable1.aggregation_dim.2.1717558195224",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            },
-                                            {
-                                                "FieldTooltipItem": {
-                                                    "FieldId": "LogicalTable1.event_timestamp_local.2.1718939702088",
-                                                    "Visibility": "VISIBLE"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            },
-                            "Actions": [],
-                            "ColumnHierarchies": [
-                                {
-                                    "DateTimeHierarchy": {
-                                        "HierarchyId": "LogicalTable1.event_timestamp_local.2.1718939702088"
-                                    }
-                                }
-                            ]
-                        }
+                                ]
+                            }
+                        },
+                        "Actions": []
                     }
-                ],
-                "Layouts": [
-                    {
-                        "Configuration": {
-                            "FreeFormLayout": {
-                                "Elements": [
-                                    {
-                                        "ElementId": "ee4e4717-119c-4d3f-bbaf-27ceecb02e05",
-                                        "ElementType": "VISUAL",
-                                        "XAxisLocation": "0px",
-                                        "YAxisLocation": "384px",
-                                        "Width": "1056px",
-                                        "Height": "512px",
-                                        "Visibility": "VISIBLE"
-                                    },
-                                    {
-                                        "ElementId": "f63c274a-ba58-4d28-8dd2-5382a58ad652",
-                                        "ElementType": "VISUAL",
-                                        "XAxisLocation": "16px",
-                                        "YAxisLocation": "0px",
-                                        "Width": "560px",
-                                        "Height": "384px",
-                                        "Visibility": "VISIBLE",
-                                        "BorderStyle": {
-                                            "Visibility": "VISIBLE"
-                                        },
-                                        "SelectedBorderStyle": {
-                                            "Visibility": "HIDDEN"
-                                        },
-                                        "BackgroundStyle": {
-                                            "Visibility": "HIDDEN",
-                                            "Color": "#2A5D78"
+                },
+                {
+                    "PieChartVisual": {
+                        "VisualId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_0da56dba-e8d0-4b27-9f2a-2f75a8fa0993",
+                        "Title": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-title>\n  <inline font-size=\"20px\">Platform</inline>\n</visual-title>"
+                            }
+                        },
+                        "Subtitle": {
+                            "Visibility": "HIDDEN"
+                        },
+                        "ChartConfiguration": {
+                            "FieldWells": {
+                                "PieChartAggregatedFieldWells": {
+                                    "Category": [
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.platform.1.1717557799344",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_Platform",
+                                                    "ColumnName": "platform"
+                                                }
+                                            }
                                         }
-                                    },
-                                    {
-                                        "ElementId": "7288a77f-b354-4af2-8fe4-2dbc1853769c",
-                                        "ElementType": "VISUAL",
-                                        "XAxisLocation": "0px",
-                                        "YAxisLocation": "896px",
-                                        "Width": "800px",
-                                        "Height": "512px",
-                                        "Visibility": "VISIBLE",
-                                        "BorderStyle": {
-                                            "Visibility": "VISIBLE"
-                                        },
-                                        "BackgroundStyle": {
-                                            "Visibility": "HIDDEN"
+                                    ],
+                                    "Values": [
+                                        {
+                                            "NumericalMeasureField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_Platform",
+                                                    "ColumnName": "User count"
+                                                },
+                                                "AggregationFunction": {
+                                                    "SimpleNumericalAggregation": "SUM"
+                                                }
+                                            }
                                         }
-                                    },
+                                    ]
+                                }
+                            },
+                            "SortConfiguration": {
+                                "CategorySort": [
                                     {
-                                        "ElementId": "ed99c850-34b8-4498-8110-339f2c95b709",
-                                        "ElementType": "VISUAL",
-                                        "XAxisLocation": "1056px",
-                                        "YAxisLocation": "0px",
-                                        "Width": "544px",
-                                        "Height": "384px",
-                                        "Visibility": "VISIBLE",
-                                        "BorderStyle": {
-                                            "Visibility": "HIDDEN"
-                                        },
-                                        "BackgroundStyle": {
-                                            "Visibility": "HIDDEN"
+                                        "FieldSort": {
+                                            "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
+                                            "Direction": "DESC"
                                         }
-                                    },
-                                    {
-                                        "ElementId": "94c6b175-89ed-4527-9c1f-d6450713d546",
-                                        "ElementType": "VISUAL",
-                                        "XAxisLocation": "592px",
-                                        "YAxisLocation": "0px",
-                                        "Width": "480px",
-                                        "Height": "384px",
-                                        "Visibility": "VISIBLE",
-                                        "BorderStyle": {
-                                            "Visibility": "HIDDEN"
-                                        },
-                                        "BackgroundStyle": {
-                                            "Visibility": "HIDDEN"
-                                        }
-                                    },
-                                    {
-                                        "ElementId": "8cdbaa3a-2225-4b93-9461-b3b75efba133",
-                                        "ElementType": "VISUAL",
-                                        "XAxisLocation": "1056px",
-                                        "YAxisLocation": "384px",
-                                        "Width": "544px",
-                                        "Height": "512px",
-                                        "Visibility": "VISIBLE"
-                                    },
-                                    {
-                                        "ElementId": "696a5cf9-2520-4cf6-83f4-cd40e4692cfa",
-                                        "ElementType": "VISUAL",
-                                        "XAxisLocation": "800px",
-                                        "YAxisLocation": "896px",
-                                        "Width": "800px",
-                                        "Height": "512px",
-                                        "Visibility": "VISIBLE"
                                     }
                                 ],
-                                "CanvasSizeOptions": {
-                                    "ScreenCanvasSizeOptions": {
-                                        "OptimizedViewPortWidth": "1600px"
+                                "CategoryItemsLimit": {
+                                    "OtherCategories": "INCLUDE"
+                                },
+                                "SmallMultiplesLimitConfiguration": {
+                                    "OtherCategories": "INCLUDE"
+                                }
+                            },
+                            "DonutOptions": {
+                                "ArcOptions": {
+                                    "ArcThickness": "MEDIUM"
+                                }
+                            },
+                            "Legend": {
+                                "Width": "77px"
+                            },
+                            "DataLabels": {
+                                "Visibility": "VISIBLE",
+                                "Overlap": "DISABLE_OVERLAP"
+                            },
+                            "Tooltip": {
+                                "TooltipVisibility": "VISIBLE",
+                                "SelectedTooltipType": "DETAILED",
+                                "FieldBasedTooltip": {
+                                    "AggregationVisibility": "HIDDEN",
+                                    "TooltipTitleType": "PRIMARY_VALUE",
+                                    "TooltipFields": [
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868773486",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        },
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.platform.1.1717557799344",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Actions": [],
+                        "ColumnHierarchies": []
+                    }
+                },
+                {
+                    "BarChartVisual": {
+                        "VisualId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_4edc2497-77b8-4b58-b470-85527a933cef",
+                        "Title": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-title>\n  <inline font-size=\"20px\">Active users in realtime</inline>\n</visual-title>"
+                            }
+                        },
+                        "Subtitle": {
+                            "Visibility": "HIDDEN"
+                        },
+                        "ChartConfiguration": {
+                            "FieldWells": {
+                                "BarChartAggregatedFieldWells": {
+                                    "Category": [
+                                        {
+                                            "DateDimensionField": {
+                                                "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.0.1715857356710",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_User",
+                                                    "ColumnName": "Local time"
+                                                },
+                                                "DateGranularity": "MINUTE",
+                                                "HierarchyId": "77e83648-7e08-4026-b5ef-76b8d58678a9",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "h:mma",
+                                                    "NullValueFormatConfiguration": {
+                                                        "NullString": "null"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Values": [
+                                        {
+                                            "NumericalMeasureField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715857362639",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_User",
+                                                    "ColumnName": "User count"
+                                                },
+                                                "AggregationFunction": {
+                                                    "SimpleNumericalAggregation": "SUM"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Colors": [
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.new_user_indicator.2.1715857385989",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_User",
+                                                    "ColumnName": "User indicator"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "SortConfiguration": {
+                                "CategorySort": [
+                                    {
+                                        "FieldSort": {
+                                            "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.0.1715857356710",
+                                            "Direction": "ASC"
+                                        }
                                     }
+                                ],
+                                "CategoryItemsLimit": {
+                                    "ItemsLimit": 100,
+                                    "OtherCategories": "INCLUDE"
+                                },
+                                "ColorItemsLimit": {
+                                    "OtherCategories": "INCLUDE"
+                                },
+                                "SmallMultiplesLimitConfiguration": {
+                                    "OtherCategories": "INCLUDE"
+                                }
+                            },
+                            "Orientation": "VERTICAL",
+                            "BarsArrangement": "STACKED",
+                            "CategoryAxis": {
+                                "TickLabelOptions": {
+                                    "RotationAngle": 0.0
+                                }
+                            },
+                            "Legend": {
+                                "Title": {
+                                    "Visibility": "HIDDEN"
+                                },
+                                "Position": "TOP"
+                            },
+                            "DataLabels": {
+                                "Visibility": "HIDDEN",
+                                "Overlap": "DISABLE_OVERLAP"
+                            },
+                            "Tooltip": {
+                                "TooltipVisibility": "VISIBLE",
+                                "SelectedTooltipType": "DETAILED",
+                                "FieldBasedTooltip": {
+                                    "AggregationVisibility": "HIDDEN",
+                                    "TooltipTitleType": "PRIMARY_VALUE",
+                                    "TooltipFields": [
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "087d2ef6-b2e1-4b7d-ab37-6e314e26ce23.0.1715857356710",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        },
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715857362639",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        },
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.new_user_indicator.2.1715857385989",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        }
+                                    ]
                                 }
                             }
-                        }
+                        },
+                        "Actions": [],
+                        "ColumnHierarchies": [
+                            {
+                                "DateTimeHierarchy": {
+                                    "HierarchyId": "77e83648-7e08-4026-b5ef-76b8d58678a9",
+                                    "DrillDownFilters": []
+                                }
+                            }
+                        ]
                     }
-                ],
-                "ContentType": "INTERACTIVE"
-            }
-        ],
-        "CalculatedFields": [
-            {
-                "DataSetIdentifier": "Realtime_Event",
-                "Name": "Page title/Screen name",
-                "Expression": "coalesce({page_view_page_title}, {screen_view_screen_name}, '')"
-            },
-            {
-                "DataSetIdentifier": "Realtime_Event",
-                "Name": "View count",
-                "Expression": "distinct_countIf({user_pseudo_id},({event_name}='_page_view' OR {event_name}='_screen_view'))"
-            }
-        ],
-        "ParameterDeclarations": [],
-        "FilterGroups": [
-            {
-                "FilterGroupId": "9715524d-2b51-4fb8-9d0b-42d67dd5f6de",
-                "Filters": [
-                    {
-                        "TopBottomFilter": {
-                            "FilterId": "8d44139c-732d-4f85-b996-9d7d16a775af",
-                            "Column": {
-                                "DataSetIdentifier": "Realtime_Event",
-                                "ColumnName": "event_name"
+                },
+                {
+                    "FilledMapVisual": {
+                        "VisualId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_98a02d00-513f-42bc-8cf7-321dd1c519ce",
+                        "Title": {
+                            "Visibility": "HIDDEN",
+                            "FormatText": {
+                                "RichText": "<visual-title>Active user by geo</visual-title>"
+                            }
+                        },
+                        "Subtitle": {
+                            "Visibility": "HIDDEN"
+                        },
+                        "ChartConfiguration": {
+                            "FieldWells": {
+                                "FilledMapAggregatedFieldWells": {
+                                    "Geospatial": [
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_Country",
+                                                    "ColumnName": "geo_country"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Values": [
+                                        {
+                                            "NumericalMeasureField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868143523",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_Country",
+                                                    "ColumnName": "User count"
+                                                },
+                                                "AggregationFunction": {
+                                                    "SimpleNumericalAggregation": "SUM"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
                             },
-                            "Limit": 10,
-                            "AggregationSortConfigurations": [
-                                {
-                                    "Column": {
-                                        "DataSetIdentifier": "Realtime_Event",
-                                        "ColumnName": "event_id"
-                                    },
-                                    "SortDirection": "DESC",
-                                    "AggregationFunction": {
-                                        "CategoricalAggregationFunction": "COUNT"
+                            "SortConfiguration": {},
+                            "Legend": {
+                                "Width": "48px"
+                            },
+                            "Tooltip": {
+                                "TooltipVisibility": "VISIBLE",
+                                "SelectedTooltipType": "DETAILED",
+                                "FieldBasedTooltip": {
+                                    "AggregationVisibility": "HIDDEN",
+                                    "TooltipTitleType": "PRIMARY_VALUE",
+                                    "TooltipFields": [
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868143523",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        },
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.geo_country.1.1715868432002",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "WindowOptions": {
+                                "Bounds": {
+                                    "North": -7.449540173052412,
+                                    "South": -68.69003832069683,
+                                    "West": 32.30066134384134,
+                                    "East": 202.886595164852
+                                },
+                                "MapZoomMode": "MANUAL"
+                            },
+                            "MapStyleOptions": {
+                                "BaseMapStyle": "DARK_GRAY"
+                            }
+                        },
+                        "ColumnHierarchies": [],
+                        "Actions": []
+                    }
+                },
+                {
+                    "BarChartVisual": {
+                        "VisualId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_1efd2920-4cbe-4f96-ae18-79905241fbb9",
+                        "Title": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-title>\n  <inline font-size=\"20px\">Top 10 events</inline>\n</visual-title>"
+                            }
+                        },
+                        "Subtitle": {
+                            "Visibility": "VISIBLE"
+                        },
+                        "ChartConfiguration": {
+                            "FieldWells": {
+                                "BarChartAggregatedFieldWells": {
+                                    "Category": [
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.event_name.0.1715868468558",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_Name",
+                                                    "ColumnName": "Event name"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Values": [
+                                        {
+                                            "NumericalMeasureField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868483622",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_Name",
+                                                    "ColumnName": "User count"
+                                                },
+                                                "AggregationFunction": {
+                                                    "SimpleNumericalAggregation": "SUM"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Colors": []
+                                }
+                            },
+                            "SortConfiguration": {
+                                "CategorySort": [
+                                    {
+                                        "FieldSort": {
+                                            "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868483622",
+                                            "Direction": "DESC"
+                                        }
                                     }
+                                ],
+                                "CategoryItemsLimit": {
+                                    "OtherCategories": "INCLUDE"
+                                },
+                                "ColorItemsLimit": {
+                                    "OtherCategories": "INCLUDE"
+                                },
+                                "SmallMultiplesLimitConfiguration": {
+                                    "OtherCategories": "INCLUDE"
                                 }
-                            ]
-                        }
-                    }
-                ],
-                "ScopeConfiguration": {
-                    "SelectedSheets": {
-                        "SheetVisualScopingConfigurations": [
-                            {
-                                "SheetId": "f7454608-49ab-46bb-97a6-1d48e70889cc",
-                                "Scope": "SELECTED_VISUALS",
-                                "VisualIds": [
-                                    "7288a77f-b354-4af2-8fe4-2dbc1853769c"
-                                ]
+                            },
+                            "Orientation": "HORIZONTAL",
+                            "BarsArrangement": "CLUSTERED",
+                            "Legend": {
+                                "Width": "56px"
+                            },
+                            "DataLabels": {
+                                "Visibility": "HIDDEN",
+                                "Overlap": "DISABLE_OVERLAP"
+                            },
+                            "Tooltip": {
+                                "TooltipVisibility": "VISIBLE",
+                                "SelectedTooltipType": "DETAILED",
+                                "FieldBasedTooltip": {
+                                    "AggregationVisibility": "HIDDEN",
+                                    "TooltipTitleType": "PRIMARY_VALUE",
+                                    "TooltipFields": [
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.event_name.0.1715868468558",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        },
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_pseudo_id.1.1715868483622",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        }
+                                    ]
+                                }
                             }
-                        ]
+                        },
+                        "Actions": [],
+                        "ColumnHierarchies": []
                     }
                 },
-                "Status": "ENABLED",
-                "CrossDataset": "SINGLE_DATASET"
-            },
-            {
-                "FilterGroupId": "a3483e65-dc6d-4af9-ba05-694e07fe6ba0",
-                "Filters": [
-                    {
-                        "TopBottomFilter": {
-                            "FilterId": "b1039e04-0be3-46c0-bbf6-0421493946ce",
-                            "Column": {
-                                "DataSetIdentifier": "Realtime_Event",
-                                "ColumnName": "Page title/Screen name"
+                {
+                    "BarChartVisual": {
+                        "VisualId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_7b6f5a11-7f96-4cef-a058-5c2ed1d5abf6",
+                        "Title": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-title>\n  <inline font-size=\"20px\">Traffic source</inline>\n</visual-title>"
+                            }
+                        },
+                        "Subtitle": {
+                            "Visibility": "HIDDEN"
+                        },
+                        "ChartConfiguration": {
+                            "FieldWells": {
+                                "BarChartAggregatedFieldWells": {
+                                    "Category": [
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.traffic_source_source.1.1716899723929",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_Traffic",
+                                                    "ColumnName": "Traffic source"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Values": [
+                                        {
+                                            "NumericalMeasureField": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_count.1.1715868773486",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_Traffic",
+                                                    "ColumnName": "User count"
+                                                },
+                                                "AggregationFunction": {
+                                                    "SimpleNumericalAggregation": "SUM"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Colors": []
+                                }
                             },
-                            "Limit": 10,
-                            "AggregationSortConfigurations": [
+                            "SortConfiguration": {
+                                "CategorySort": [
+                                    {
+                                        "FieldSort": {
+                                            "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_count.1.1715868773486",
+                                            "Direction": "DESC"
+                                        }
+                                    }
+                                ],
+                                "CategoryItemsLimit": {
+                                    "OtherCategories": "INCLUDE"
+                                },
+                                "ColorItemsLimit": {
+                                    "OtherCategories": "INCLUDE"
+                                },
+                                "SmallMultiplesLimitConfiguration": {
+                                    "OtherCategories": "INCLUDE"
+                                }
+                            },
+                            "Orientation": "HORIZONTAL",
+                            "BarsArrangement": "CLUSTERED",
+                            "Legend": {
+                                "Width": "35px"
+                            },
+                            "DataLabels": {
+                                "Visibility": "HIDDEN",
+                                "Overlap": "DISABLE_OVERLAP"
+                            },
+                            "Tooltip": {
+                                "TooltipVisibility": "VISIBLE",
+                                "SelectedTooltipType": "DETAILED",
+                                "FieldBasedTooltip": {
+                                    "AggregationVisibility": "HIDDEN",
+                                    "TooltipTitleType": "PRIMARY_VALUE",
+                                    "TooltipFields": [
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.user_count.1.1715868773486",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        },
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "70642ea0-21e6-4fa6-b237-094fa86b5e46.traffic_source_source.1.1716899723929",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Actions": [],
+                        "ColumnHierarchies": []
+                    }
+                },
+                {
+                    "BarChartVisual": {
+                        "VisualId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_c432b9a8-b3fb-4ed1-87be-669693ae830a",
+                        "Title": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-title>\n  <inline font-size=\"20px\">Top 10 pages and screens</inline>\n</visual-title>"
+                            }
+                        },
+                        "Subtitle": {
+                            "Visibility": "VISIBLE"
+                        },
+                        "ChartConfiguration": {
+                            "FieldWells": {
+                                "BarChartAggregatedFieldWells": {
+                                    "Category": [
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.aggregation_dim.2.1717558195224",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_Page_Screen",
+                                                    "ColumnName": "Page title/Screen name"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Values": [
+                                        {
+                                            "NumericalMeasureField": {
+                                                "FieldId": "LogicalTable1.view_count.1.1717558189271",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Realtime_Event_Page_Screen",
+                                                    "ColumnName": "View count"
+                                                },
+                                                "AggregationFunction": {
+                                                    "SimpleNumericalAggregation": "SUM"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Colors": []
+                                }
+                            },
+                            "SortConfiguration": {
+                                "CategorySort": [
+                                    {
+                                        "FieldSort": {
+                                            "FieldId": "LogicalTable1.view_count.1.1717558189271",
+                                            "Direction": "DESC"
+                                        }
+                                    }
+                                ],
+                                "CategoryItemsLimit": {
+                                    "OtherCategories": "INCLUDE"
+                                },
+                                "ColorItemsLimit": {
+                                    "OtherCategories": "INCLUDE"
+                                },
+                                "SmallMultiplesLimitConfiguration": {
+                                    "OtherCategories": "INCLUDE"
+                                }
+                            },
+                            "Orientation": "HORIZONTAL",
+                            "BarsArrangement": "CLUSTERED",
+                            "DataLabels": {
+                                "Visibility": "HIDDEN",
+                                "Overlap": "DISABLE_OVERLAP"
+                            },
+                            "Tooltip": {
+                                "TooltipVisibility": "VISIBLE",
+                                "SelectedTooltipType": "DETAILED",
+                                "FieldBasedTooltip": {
+                                    "AggregationVisibility": "HIDDEN",
+                                    "TooltipTitleType": "PRIMARY_VALUE",
+                                    "TooltipFields": [
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "LogicalTable1.view_count.1.1717558189271",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        },
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "LogicalTable1.aggregation_dim.2.1717558195224",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "Actions": [],
+                        "ColumnHierarchies": []
+                    }
+                }
+            ],
+            "Layouts": [
+                {
+                    "Configuration": {
+                        "FreeFormLayout": {
+                            "Elements": [
                                 {
-                                    "Column": {
-                                        "DataSetIdentifier": "Realtime_Event",
-                                        "ColumnName": "View count"
+                                    "ElementId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_da51c06e-0921-4667-964d-a51939ed6354",
+                                    "ElementType": "VISUAL",
+                                    "XAxisLocation": "1072px",
+                                    "YAxisLocation": "768px",
+                                    "Width": "528px",
+                                    "Height": "512px",
+                                    "Visibility": "VISIBLE"
+                                },
+                                {
+                                    "ElementId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_0da56dba-e8d0-4b27-9f2a-2f75a8fa0993",
+                                    "ElementType": "VISUAL",
+                                    "XAxisLocation": "0px",
+                                    "YAxisLocation": "384px",
+                                    "Width": "720px",
+                                    "Height": "384px",
+                                    "Visibility": "VISIBLE",
+                                    "BorderStyle": {
+                                        "Visibility": "HIDDEN"
                                     },
-                                    "SortDirection": "DESC"
+                                    "BackgroundStyle": {
+                                        "Visibility": "VISIBLE"
+                                    }
+                                },
+                                {
+                                    "ElementId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_4edc2497-77b8-4b58-b470-85527a933cef",
+                                    "ElementType": "VISUAL",
+                                    "XAxisLocation": "0px",
+                                    "YAxisLocation": "0px",
+                                    "Width": "1596px",
+                                    "Height": "384px",
+                                    "Visibility": "VISIBLE",
+                                    "BorderStyle": {
+                                        "Visibility": "VISIBLE"
+                                    },
+                                    "SelectedBorderStyle": {
+                                        "Visibility": "HIDDEN"
+                                    },
+                                    "BackgroundStyle": {
+                                        "Visibility": "VISIBLE",
+                                        "Color": "#FFFFFF"
+                                    }
+                                },
+                                {
+                                    "ElementId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_98a02d00-513f-42bc-8cf7-321dd1c519ce",
+                                    "ElementType": "VISUAL",
+                                    "XAxisLocation": "0px",
+                                    "YAxisLocation": "768px",
+                                    "Width": "1072px",
+                                    "Height": "512px",
+                                    "Visibility": "VISIBLE"
+                                },
+                                {
+                                    "ElementId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_1efd2920-4cbe-4f96-ae18-79905241fbb9",
+                                    "ElementType": "VISUAL",
+                                    "XAxisLocation": "0px",
+                                    "YAxisLocation": "1280px",
+                                    "Width": "800px",
+                                    "Height": "512px",
+                                    "Visibility": "VISIBLE",
+                                    "BorderStyle": {
+                                        "Visibility": "VISIBLE"
+                                    },
+                                    "BackgroundStyle": {
+                                        "Visibility": "VISIBLE"
+                                    }
+                                },
+                                {
+                                    "ElementId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_7b6f5a11-7f96-4cef-a058-5c2ed1d5abf6",
+                                    "ElementType": "VISUAL",
+                                    "XAxisLocation": "720px",
+                                    "YAxisLocation": "384px",
+                                    "Width": "880px",
+                                    "Height": "384px",
+                                    "Visibility": "VISIBLE",
+                                    "BorderStyle": {
+                                        "Visibility": "HIDDEN"
+                                    },
+                                    "BackgroundStyle": {
+                                        "Visibility": "VISIBLE"
+                                    }
+                                },
+                                {
+                                    "ElementId": "71f91329-d473-47ca-a7b2-3c8bd0aaa4f0_c432b9a8-b3fb-4ed1-87be-669693ae830a",
+                                    "ElementType": "VISUAL",
+                                    "XAxisLocation": "800px",
+                                    "YAxisLocation": "1280px",
+                                    "Width": "800px",
+                                    "Height": "512px",
+                                    "Visibility": "VISIBLE"
                                 }
-                            ]
-                        }
-                    }
-                ],
-                "ScopeConfiguration": {
-                    "SelectedSheets": {
-                        "SheetVisualScopingConfigurations": [
-                            {
-                                "SheetId": "f7454608-49ab-46bb-97a6-1d48e70889cc",
-                                "Scope": "SELECTED_VISUALS",
-                                "VisualIds": [
-                                    "696a5cf9-2520-4cf6-83f4-cd40e4692cfa"
-                                ]
-                            }
-                        ]
-                    }
-                },
-                "Status": "ENABLED",
-                "CrossDataset": "SINGLE_DATASET"
-            },
-            {
-                "FilterGroupId": "3cfc234b-d3d2-4d5d-a154-2d8cb0a24b76",
-                "Filters": [
-                    {
-                        "TimeRangeFilter": {
-                            "FilterId": "af7535ec-0abd-4807-902a-59876da4c8e4",
-                            "Column": {
-                                "DataSetIdentifier": "Realtime_Event",
-                                "ColumnName": "event_timestamp_local"
-                            },
-                            "IncludeMinimum": true,
-                            "RangeMinimumValue": {
-                                "RollingDate": {
-                                    "Expression": "addDateTime(-1, 'HH', truncDate('HH', now()))"
+                            ],
+                            "CanvasSizeOptions": {
+                                "ScreenCanvasSizeOptions": {
+                                    "OptimizedViewPortWidth": "1600px"
                                 }
-                            },
-                            "NullOption": "NON_NULLS_ONLY",
-                            "TimeGranularity": "SECOND"
-                        }
-                    }
-                ],
-                "ScopeConfiguration": {
-                    "SelectedSheets": {
-                        "SheetVisualScopingConfigurations": [
-                            {
-                                "SheetId": "f7454608-49ab-46bb-97a6-1d48e70889cc",
-                                "Scope": "ALL_VISUALS"
-                            }
-                        ]
-                    }
-                },
-                "Status": "ENABLED",
-                "CrossDataset": "SINGLE_DATASET"
-            }
-        ],
-        "AnalysisDefaults": {
-            "DefaultNewSheetConfiguration": {
-                "InteractiveLayoutConfiguration": {
-                    "Grid": {
-                        "CanvasSizeOptions": {
-                            "ScreenCanvasSizeOptions": {
-                                "ResizeOption": "FIXED",
-                                "OptimizedViewPortWidth": "1600px"
                             }
                         }
                     }
-                },
-                "SheetContentType": "INTERACTIVE"
-            }
-        },
-        "Options": {
-            "WeekStart": "MONDAY"
+                }
+            ],
+            "ContentType": "INTERACTIVE"
         }
+    ],
+    "CalculatedFields": [],
+    "ParameterDeclarations": [],
+    "FilterGroups": [],
+    "AnalysisDefaults": {
+        "DefaultNewSheetConfiguration": {
+            "InteractiveLayoutConfiguration": {
+                "Grid": {
+                    "CanvasSizeOptions": {
+                        "ScreenCanvasSizeOptions": {
+                            "ResizeOption": "FIXED",
+                            "OptimizedViewPortWidth": "1600px"
+                        }
+                    }
+                }
+            },
+            "SheetContentType": "INTERACTIVE"
+        }
+    },
+    "Options": {
+        "WeekStart": "MONDAY"
+    }
 }

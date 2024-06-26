@@ -15,7 +15,7 @@ import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { IngestionServerStackV2 } from '../../../src/ingestion-server-v2-stack';
 import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { validateSubnetsRule } from '../../rules';
-import { findResourceByCondition, getParameter, getParameterNamesFromParameterObject } from '../../utils';
+import { findResourceByCondition, getParameter, getParameterNamesFromParameterObject, findResources, findFirstResource, findConditionByName } from '../../utils';
 
 if (process.env.CI !== 'true') {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -28,260 +28,209 @@ const v2Stack = new IngestionServerStackV2(app, 'test-v2-stack', {});
 
 const v2Template = Template.fromStack(v2Stack);
 
-const templates = [v2Template];
-
 test('Has Parameter VpcId', () => {
-  templates.forEach((template) =>
-    template.hasParameter('VpcId', {
-      Type: 'AWS::EC2::VPC::Id',
-    }),
-  );
+  v2Template.hasParameter('VpcId', {
+    Type: 'AWS::EC2::VPC::Id',
+  });
 });
 
 test('Has Parameter PublicSubnetIds', () => {
-  templates.forEach((template) =>
-    template.hasParameter('PublicSubnetIds', {
-      Type: 'String',
-    }),
-  );
+  v2Template.hasParameter('PublicSubnetIds', {
+    Type: 'String',
+  });
 });
 
 test('PublicSubnetIds pattern', () => {
-  templates.forEach((template) => {
-    const param = getParameter(template, 'PublicSubnetIds');
-    const pattern = param.AllowedPattern;
-    const regex = new RegExp(`${pattern}`);
-    const validValues = [
-      'subnet-a1234,subnet-b1234',
-      'subnet-fffff1,subnet-fffff2,subnet-fffff3',
-    ];
+  const param = getParameter(v2Template, 'PublicSubnetIds');
+  const pattern = param.AllowedPattern;
+  const regex = new RegExp(`${pattern}`);
+  const validValues = [
+    'subnet-a1234,subnet-b1234',
+    'subnet-fffff1,subnet-fffff2,subnet-fffff3',
+  ];
 
-    for (const v of validValues) {
-      expect(v).toMatch(regex);
-    }
+  for (const v of validValues) {
+    expect(v).toMatch(regex);
+  }
 
-    const invalidValues = [
-      'subnet-a1234',
-      'net-a1234,net-b1234',
-      'subnet-g1234,subnet-g1234',
-      'subnet-a1234, subnet-b1234',
-    ];
-    for (const v of invalidValues) {
-      expect(v).not.toMatch(regex);
-    }
-  });
+  const invalidValues = [
+    'subnet-a1234',
+    'net-a1234,net-b1234',
+    'subnet-g1234,subnet-g1234',
+    'subnet-a1234, subnet-b1234',
+  ];
+  for (const v of invalidValues) {
+    expect(v).not.toMatch(regex);
+  }
 });
 
 test('Has Rule to validate subnets in VPC', () => {
-  templates.forEach((template) => {
-    validateSubnetsRule(template);
-  });
+  validateSubnetsRule(v2Template);
 });
 
 test('Has Parameter PrivateSubnetIds', () => {
-  templates.forEach((template) => {
-    template.hasParameter('PrivateSubnetIds', {
-      Type: 'String',
-    });
+  v2Template.hasParameter('PrivateSubnetIds', {
+    Type: 'String',
   });
 });
 
 test('PrivateSubnetIds pattern', () => {
-  templates.forEach((template) => {
-    const param = getParameter(template, 'PrivateSubnetIds');
-    const pattern = param.AllowedPattern;
-    const regex = new RegExp(`${pattern}`);
-    const validValues = [
-      'subnet-a1234,subnet-b1234',
-      'subnet-fffff1,subnet-fffff2,subnet-fffff3',
-    ];
+  const param = getParameter(v2Template, 'PrivateSubnetIds');
+  const pattern = param.AllowedPattern;
+  const regex = new RegExp(`${pattern}`);
+  const validValues = [
+    'subnet-a1234,subnet-b1234',
+    'subnet-fffff1,subnet-fffff2,subnet-fffff3',
+  ];
 
-    for (const v of validValues) {
-      expect(v).toMatch(regex);
-    }
+  for (const v of validValues) {
+    expect(v).toMatch(regex);
+  }
 
-    const invalidValues = [
-      'subnet-a1234',
-      'net-a1234,net-b1234',
-      'subnet-g1234,subnet-g1234',
-      'subnet-a1234, subnet-b1234',
-    ];
-    for (const v of invalidValues) {
-      expect(v).not.toMatch(regex);
-    }
-  });
+  const invalidValues = [
+    'subnet-a1234',
+    'net-a1234,net-b1234',
+    'subnet-g1234,subnet-g1234',
+    'subnet-a1234, subnet-b1234',
+  ];
+  for (const v of invalidValues) {
+    expect(v).not.toMatch(regex);
+  }
 });
 
 test('Has Parameter DomainName', () => {
-  templates.forEach((template) => {
-    template.hasParameter('DomainName', {
-      Type: 'String',
-    });
+  v2Template.hasParameter('DomainName', {
+    Type: 'String',
   });
 });
 
 test('Has Parameter ACMCertificateArn', () => {
-  templates.forEach((template) => {
-    template.hasParameter('ACMCertificateArn', {
-      Type: 'String',
-    });
+  v2Template.hasParameter('ACMCertificateArn', {
+    Type: 'String',
   });
 });
 
 test('domainName pattern', () => {
-  templates.forEach((template) => {
-    const param = getParameter(template, 'DomainName');
-    const pattern = param.AllowedPattern;
-    const regex = new RegExp(`${pattern}`);
-    const validValues = [
-      'abc.com',
-      'test.abc.com',
-      'example.services',
-      'test.example.graphics',
-      '123.test.clickstream.management',
-      '123.test.abc.com',
-      'a123#~&%.test-2.a_bc.com',
-    ];
+  const param = getParameter(v2Template, 'DomainName');
+  const pattern = param.AllowedPattern;
+  const regex = new RegExp(`${pattern}`);
+  const validValues = [
+    'abc.com',
+    'test.abc.com',
+    'example.services',
+    'test.example.graphics',
+    '123.test.clickstream.management',
+    '123.test.abc.com',
+    'a123#~&%.test-2.a_bc.com',
+  ];
 
-    for (const v of validValues) {
-      expect(v).toMatch(regex);
-    }
+  for (const v of validValues) {
+    expect(v).toMatch(regex);
+  }
 
-    const invalidValues = ['a', 'abc.example_test', 'abc.c', 'abc^.com'];
-    for (const v of invalidValues) {
-      expect(v).not.toMatch(regex);
-    }
-  });
+  const invalidValues = ['a', 'abc.example_test', 'abc.c', 'abc^.com'];
+  for (const v of invalidValues) {
+    expect(v).not.toMatch(regex);
+  }
 });
 
 test('Has Parameter ServerEndpointPath', () => {
-  templates.forEach((template) => {
-    template.hasParameter('ServerEndpointPath', {
-      Type: 'String',
-      Default: '/collect',
-    });
+  v2Template.hasParameter('ServerEndpointPath', {
+    Type: 'String',
+    Default: '/collect',
   });
 });
 
 test('ServerEndpointPath pattern', () => {
-  templates.forEach((template) => {
-    const param = getParameter(template, 'ServerEndpointPath');
-    const pattern = param.AllowedPattern;
-    const regex = new RegExp(`${pattern}`);
-    const validValues = ['/a', '/a_b', '/a1', '/123', '/a/ab#', '/a/ab&'];
+  const param = getParameter(v2Template, 'ServerEndpointPath');
+  const pattern = param.AllowedPattern;
+  const regex = new RegExp(`${pattern}`);
+  const validValues = ['/a', '/a_b', '/a1', '/123', '/a/ab#', '/a/ab&'];
 
-    for (const v of validValues) {
-      expect(v).toMatch(regex);
-    }
+  for (const v of validValues) {
+    expect(v).toMatch(regex);
+  }
 
-    const invalidValues = ['a/b', '*', 'a', 'collect'];
-    for (const v of invalidValues) {
-      expect(v).not.toMatch(regex);
-    }
-  });
+  const invalidValues = ['a/b', '*', 'a', 'collect'];
+  for (const v of invalidValues) {
+    expect(v).not.toMatch(regex);
+  }
 });
 
 test('Has Parameter serverCorsOrigin', () => {
-  templates.forEach((template) => {
-    template.hasParameter('ServerCorsOrigin', {
-      Type: 'String',
-      Default: '',
-    });
+  v2Template.hasParameter('ServerCorsOrigin', {
+    Type: 'String',
+    Default: '',
   });
 });
 
 test('ServerCorsOrigin pattern', () => {
-  templates.forEach((template) => {
-    const param = getParameter(template, 'ServerCorsOrigin');
-    const pattern = param.AllowedPattern;
-    const regex = new RegExp(`${pattern}`);
-    const validValues = [
-      '.*',
-      'http://.*\\.test\\.com',
-      'http://abc\\.test\\.com',
-      'http://abc1\\.test\\.com|http://abc2\\.test\\.com|http://abc3\\.test\\.com',
-      'http://abc1\\.test\\.com|http://abc2\\.test\\.com',
-    ];
+  const param = getParameter(v2Template, 'ServerCorsOrigin');
+  const pattern = param.AllowedPattern;
+  const regex = new RegExp(`${pattern}`);
+  const validValues = [
+    '.*',
+    'http://.*\\.test\\.com',
+    'http://abc\\.test\\.com',
+    'http://abc1\\.test\\.com|http://abc2\\.test\\.com|http://abc3\\.test\\.com',
+    'http://abc1\\.test\\.com|http://abc2\\.test\\.com',
+  ];
 
-    for (const v of validValues) {
-      expect(v).toMatch(regex);
-    }
+  for (const v of validValues) {
+    expect(v).toMatch(regex);
+  }
 
-    const invalidValues = ['http://a', 'http://abc1.test.com; http://abc2.test.com'];
-    for (const v of invalidValues) {
-      expect(v).not.toMatch(regex);
-    }
-  });
+  const invalidValues = ['http://a', 'http://abc1.test.com; http://abc2.test.com'];
+  for (const v of invalidValues) {
+    expect(v).not.toMatch(regex);
+  }
 });
 
 test('Has Parameter Protocol', () => {
-  templates.forEach((template) => {
-    template.hasParameter('Protocol', {
-      Type: 'String',
-      Default: 'HTTP',
-    });
+  v2Template.hasParameter('Protocol', {
+    Type: 'String',
+    Default: 'HTTP',
   });
 });
 
 test('Has Parameter EnableApplicationLoadBalancerAccessLog', () => {
-  templates.forEach((template) => {
-    template.hasParameter('EnableApplicationLoadBalancerAccessLog', {
-      Type: 'String',
-      Default: 'No',
-    });
+  v2Template.hasParameter('EnableApplicationLoadBalancerAccessLog', {
+    Type: 'String',
+    Default: 'No',
   });
 });
 
 test('Has Parameter EnableGlobalAccelerator', () => {
-  templates.forEach((template) => {
-    template.hasParameter('EnableGlobalAccelerator', {
-      Type: 'String',
-      Default: 'No',
-    });
+  v2Template.hasParameter('EnableGlobalAccelerator', {
+    Type: 'String',
+    Default: 'No',
   });
 });
 
 test('Has Parameter EnableAuthentication', () => {
-  templates.forEach((template) => {
-    template.hasParameter('EnableAuthentication', {
-      Type: 'String',
-      Default: 'No',
-    });
+  v2Template.hasParameter('EnableAuthentication', {
+    Type: 'String',
+    Default: 'No',
   });
 });
 
 test('Has Parameter AuthenticationSecretArn', () => {
-  templates.forEach((template) => {
-    template.hasParameter('AuthenticationSecretArn', {
-      Type: 'String',
-    });
+  v2Template.hasParameter('AuthenticationSecretArn', {
+    Type: 'String',
   });
 });
 
 test('Has Parameter LogS3Bucket', () => {
-  templates.forEach((template) => {
-    template.hasParameter('LogS3Bucket', {
-      Type: 'String',
-      Default: '',
-    });
+  v2Template.hasParameter('LogS3Bucket', {
+    Type: 'String',
+    Default: '',
   });
 });
 
 test('Has Parameter LogS3Prefix', () => {
-  templates.forEach((template) => {
-    template.hasParameter('LogS3Prefix', {
-      Type: 'String',
-      Default: 'ingestion-server-log/',
-    });
-  });
-});
-
-test('Has Parameter NotificationsTopicArn', () => {
-  templates.forEach((template) => {
-    template.hasParameter('NotificationsTopicArn', {
-      Type: 'String',
-      Default: '',
-    });
+  v2Template.hasParameter('LogS3Prefix', {
+    Type: 'String',
+    Default: 'ingestion-server-log/',
   });
 });
 
@@ -374,38 +323,30 @@ test('Has Parameter MskClusterName', () => {
 });
 
 test('Has Parameter ServerMin', () => {
-  templates.forEach((template) => {
-    template.hasParameter('ServerMin', {
-      Type: 'Number',
-      Default: '2',
-    });
+  v2Template.hasParameter('ServerMin', {
+    Type: 'Number',
+    Default: '2',
   });
 });
 
 test('Has Parameter ServerMax', () => {
-  templates.forEach((template) => {
-    template.hasParameter('ServerMax', {
-      Type: 'Number',
-      Default: '2',
-    });
+  v2Template.hasParameter('ServerMax', {
+    Type: 'Number',
+    Default: '2',
   });
 });
 
 test('Has Parameter WarmPoolSize', () => {
-  templates.forEach((template) => {
-    template.hasParameter('WarmPoolSize', {
-      Type: 'Number',
-      Default: '0',
-    });
+  v2Template.hasParameter('WarmPoolSize', {
+    Type: 'Number',
+    Default: '0',
   });
 });
 
 test('Has Parameter ScaleOnCpuUtilizationPercent', () => {
-  templates.forEach((template) => {
-    template.hasParameter('ScaleOnCpuUtilizationPercent', {
-      Type: 'Number',
-      Default: '50',
-    });
+  v2Template.hasParameter('ScaleOnCpuUtilizationPercent', {
+    Type: 'Number',
+    Default: '50',
   });
 });
 
@@ -496,17 +437,15 @@ test('Has Parameter S3BatchTimeout', () => {
 });
 
 test('Has ParameterGroups', () => {
-  templates.forEach((template) => {
-    const cfnInterface =
-      template.toJSON().Metadata['AWS::CloudFormation::Interface'];
-    expect(cfnInterface.ParameterGroups).toBeDefined();
-  });
+  const cfnInterface =
+  v2Template.toJSON().Metadata['AWS::CloudFormation::Interface'];
+  expect(cfnInterface.ParameterGroups).toBeDefined();
 });
 
 test('Check parameters for Kafka nested stack - has all parameters', () => {
   const nestStack = findResourceByCondition(
     v2Template,
-    'IngestionServerM11Condition',
+    'IngestionServerFM11Condition',
   );
   expect(nestStack).toBeDefined();
 
@@ -523,21 +462,8 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     'ServerMax',
     'ScaleOnCpuUtilizationPercent',
     'MskClusterName',
-    'VpcId',
     'IamRoleBoundaryArn',
-    'EnableAuthentication',
-    'PublicSubnetIds',
-    'LogS3Bucket',
-    'LogS3Prefix',
-    'EnableApplicationLoadBalancerAccessLog',
-    'ACMCertificateArn',
     'ProjectId',
-    'AuthenticationSecretArn',
-    'AppIds',
-    'ClickStreamSDK',
-    'DomainName',
-    'Protocol',
-    'EnableGlobalAccelerator',
   ];
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
@@ -551,13 +477,13 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     expect(templateParams.includes(ep)).toBeTruthy();
   }
 
-  expect(templateParams.length).toEqual(exceptedParams.length);
+  expect(templateParams.length).toEqual(exceptedParams.length + 3);
 });
 
 test('Check parameters for Kafka nested stack - has minimum parameters', () => {
   const nestStack = findResourceByCondition(
     v2Template,
-    'IngestionServerM00Condition',
+    'IngestionServerFM00Condition',
   );
   expect(nestStack).toBeDefined();
 
@@ -572,21 +498,8 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
     'PrivateSubnetIds',
     'ServerMax',
     'ScaleOnCpuUtilizationPercent',
-    'VpcId',
     'IamRoleBoundaryArn',
-    'EnableAuthentication',
-    'PublicSubnetIds',
-    'LogS3Bucket',
-    'LogS3Prefix',
-    'EnableApplicationLoadBalancerAccessLog',
-    'ACMCertificateArn',
     'ProjectId',
-    'AuthenticationSecretArn',
-    'AppIds',
-    'ClickStreamSDK',
-    'DomainName',
-    'Protocol',
-    'EnableGlobalAccelerator',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -600,13 +513,13 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
   for (const ep of exceptedParams) {
     expect(templateParams.includes(ep)).toBeTruthy();
   }
-  expect(templateParams.length).toEqual(exceptedParams.length);
+  expect(templateParams.length).toEqual(exceptedParams.length + 3);
 });
 
 test('Check parameters for Kinesis nested stack - has all parameters', () => {
   const nestStack = findResourceByCondition(
     v2Template,
-    'IngestionServerK1Condition',
+    'IngestionServerFK1Condition',
   );
   expect(nestStack).toBeDefined();
 
@@ -619,21 +532,8 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
     'PrivateSubnetIds',
     'ServerMax',
     'ScaleOnCpuUtilizationPercent',
-    'VpcId',
     'IamRoleBoundaryArn',
-    'EnableAuthentication',
-    'PublicSubnetIds',
-    'LogS3Bucket',
-    'LogS3Prefix',
-    'EnableApplicationLoadBalancerAccessLog',
-    'ACMCertificateArn',
     'ProjectId',
-    'AuthenticationSecretArn',
-    'AppIds',
-    'ClickStreamSDK',
-    'DomainName',
-    'Protocol',
-    'EnableGlobalAccelerator',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -647,13 +547,13 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
   for (const ep of exceptedParams) {
     expect(templateParams.includes(ep)).toBeTruthy();
   }
-  expect(templateParams.length).toEqual(exceptedParams.length + 1);
+  expect(templateParams.length).toEqual(exceptedParams.length + 4);
 });
 
 test('Check parameters for Kinesis nested stack - has minimum parameters', () => {
   const nestStack = findResourceByCondition(
     v2Template,
-    'IngestionServerK2Condition',
+    'IngestionServerFK2Condition',
   );
   expect(nestStack).toBeDefined();
 
@@ -666,21 +566,8 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
     'PrivateSubnetIds',
     'ServerMax',
     'ScaleOnCpuUtilizationPercent',
-    'VpcId',
     'IamRoleBoundaryArn',
-    'EnableAuthentication',
-    'PublicSubnetIds',
-    'LogS3Bucket',
-    'LogS3Prefix',
-    'EnableApplicationLoadBalancerAccessLog',
-    'ACMCertificateArn',
     'ProjectId',
-    'AuthenticationSecretArn',
-    'AppIds',
-    'ClickStreamSDK',
-    'DomainName',
-    'Protocol',
-    'EnableGlobalAccelerator',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -694,13 +581,13 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
   for (const ep of exceptedParams) {
     expect(templateParams.includes(ep)).toBeTruthy();
   }
-  expect(templateParams.length).toEqual(exceptedParams.length + 1);
+  expect(templateParams.length).toEqual(exceptedParams.length + 4);
 });
 
 test('Check parameters for S3 nested stack - has all parameters', () => {
   const nestStack = findResourceByCondition(
     v2Template,
-    'IngestionServerCCondition',
+    'IngestionServerFCCondition',
   );
   expect(nestStack).toBeDefined();
   const exceptedParams = [
@@ -712,21 +599,8 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
     'PrivateSubnetIds',
     'ServerMax',
     'ScaleOnCpuUtilizationPercent',
-    'VpcId',
     'IamRoleBoundaryArn',
-    'EnableAuthentication',
-    'PublicSubnetIds',
-    'LogS3Bucket',
-    'LogS3Prefix',
-    'EnableApplicationLoadBalancerAccessLog',
-    'ACMCertificateArn',
     'ProjectId',
-    'AuthenticationSecretArn',
-    'AppIds',
-    'ClickStreamSDK',
-    'DomainName',
-    'Protocol',
-    'EnableGlobalAccelerator',
     'S3DataBucket',
     'S3DataPrefix',
     'S3BatchMaxBytes',
@@ -743,165 +617,159 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
   for (const ep of exceptedParams) {
     expect(templateParams.includes(ep)).toBeTruthy();
   }
-  expect(templateParams.length).toEqual(exceptedParams.length);
+  expect(templateParams.length).toEqual(exceptedParams.length + 3);
 });
 
 test('Conditions are created as expected', () => {
   const expectedConditions = [
-    'IngestionServerM11Condition',
-    'IngestionServerM10Condition',
-    'IngestionServerM01Condition',
-    'IngestionServerM00Condition',
-    'IngestionServerK1Condition',
-    'IngestionServerK2Condition',
-    'IngestionServerCCondition',
+    'IngestionServerFM11Condition',
+    'IngestionServerFM10Condition',
+    'IngestionServerFM01Condition',
+    'IngestionServerFM00Condition',
+    'IngestionServerFK1Condition',
+    'IngestionServerFK2Condition',
+    'IngestionServerFCCondition',
   ];
 
   const conditions: string[] = [];
 
-  templates.forEach((template) => {
-    const conditionObj = template.toJSON().Conditions;
-    const tempConditions = Object.keys(conditionObj)
-      .filter((ck) => ck.startsWith('IngestionServer'))
-      .map((ck) => ck);
+  const conditionObj = v2Template.toJSON().Conditions;
+  const tempConditions = Object.keys(conditionObj)
+    .filter((ck) => ck.startsWith('IngestionServer'))
+    .map((ck) => ck);
 
-    conditions.push(...tempConditions);
-  });
+  conditions.push(...tempConditions);
   for (const ec of expectedConditions) {
     expect(conditions.includes(ec)).toBeTruthy();
   }
 });
 
 test('Rule logS3BucketAndEnableLogRule', () => {
-  templates.forEach((template) => {
-    const assert =
-      template.toJSON().Rules.logS3BucketAndEnableLogRule.Assertions[0].Assert;
+  const assert =
+  v2Template.toJSON().Rules.logS3BucketAndEnableLogRule.Assertions[0].Assert;
 
-    let assertStr = JSON.stringify(assert).replace(/Fn::Or/g, 'or');
-    assertStr = assertStr.replace(/Fn::And/g, 'and');
-    assertStr = assertStr.replace(/Fn::Equals/g, 'eq');
-    assertStr = assertStr.replace(/Fn::Not/g, 'not');
+  let assertStr = JSON.stringify(assert).replace(/Fn::Or/g, 'or');
+  assertStr = assertStr.replace(/Fn::And/g, 'and');
+  assertStr = assertStr.replace(/Fn::Equals/g, 'eq');
+  assertStr = assertStr.replace(/Fn::Not/g, 'not');
 
-    const expectedAssert = {
-      or: [
-        {
-          and: [
-            {
-              eq: [
-                {
-                  Ref: 'EnableApplicationLoadBalancerAccessLog',
-                },
-                'Yes',
-              ],
-            },
+  const expectedAssert = {
+    or: [
+      {
+        and: [
+          {
+            eq: [
+              {
+                Ref: 'EnableApplicationLoadBalancerAccessLog',
+              },
+              'Yes',
+            ],
+          },
 
-            {
-              not: [
-                {
-                  eq: [
-                    {
-                      Ref: 'LogS3Bucket',
-                    },
-                    '',
-                  ],
-                },
-              ],
-            },
+          {
+            not: [
+              {
+                eq: [
+                  {
+                    Ref: 'LogS3Bucket',
+                  },
+                  '',
+                ],
+              },
+            ],
+          },
 
-            {
-              not: [
-                {
-                  eq: [
-                    {
-                      Ref: 'LogS3Prefix',
-                    },
-                    '',
-                  ],
-                },
-              ],
-            },
-          ],
-        },
+          {
+            not: [
+              {
+                eq: [
+                  {
+                    Ref: 'LogS3Prefix',
+                  },
+                  '',
+                ],
+              },
+            ],
+          },
+        ],
+      },
 
-        {
-          eq: [
-            {
-              Ref: 'EnableApplicationLoadBalancerAccessLog',
-            },
-            'No',
-          ],
-        },
-      ],
-    };
+      {
+        eq: [
+          {
+            Ref: 'EnableApplicationLoadBalancerAccessLog',
+          },
+          'No',
+        ],
+      },
+    ],
+  };
 
-    expect(JSON.parse(assertStr)).toEqual(expectedAssert);
-  });
+  expect(JSON.parse(assertStr)).toEqual(expectedAssert);
 });
 
 test('Rule enableAuthenticationRule', () => {
-  templates.forEach((template) => {
-    const assert =
-      template.toJSON().Rules.enableAuthenticationRule.Assertions[0].Assert;
+  const assert =
+  v2Template.toJSON().Rules.enableAuthenticationRule.Assertions[0].Assert;
 
-    let assertStr = JSON.stringify(assert).replace(/Fn::Or/g, 'or');
-    assertStr = assertStr.replace(/Fn::And/g, 'and');
-    assertStr = assertStr.replace(/Fn::Equals/g, 'eq');
-    assertStr = assertStr.replace(/Fn::Not/g, 'not');
+  let assertStr = JSON.stringify(assert).replace(/Fn::Or/g, 'or');
+  assertStr = assertStr.replace(/Fn::And/g, 'and');
+  assertStr = assertStr.replace(/Fn::Equals/g, 'eq');
+  assertStr = assertStr.replace(/Fn::Not/g, 'not');
 
-    const expectedAssert = {
-      or: [
-        {
-          and: [
-            {
-              eq: [
-                {
-                  Ref: 'EnableAuthentication',
-                },
-                'Yes',
-              ],
-            },
+  const expectedAssert = {
+    or: [
+      {
+        and: [
+          {
+            eq: [
+              {
+                Ref: 'EnableAuthentication',
+              },
+              'Yes',
+            ],
+          },
 
-            {
-              not: [
-                {
-                  eq: [
-                    {
-                      Ref: 'AuthenticationSecretArn',
-                    },
-                    '',
-                  ],
-                },
-              ],
-            },
+          {
+            not: [
+              {
+                eq: [
+                  {
+                    Ref: 'AuthenticationSecretArn',
+                  },
+                  '',
+                ],
+              },
+            ],
+          },
 
-            {
-              not: [
-                {
-                  eq: [
-                    {
-                      Ref: 'Protocol',
-                    },
-                    'HTTP',
-                  ],
-                },
-              ],
-            },
-          ],
-        },
+          {
+            not: [
+              {
+                eq: [
+                  {
+                    Ref: 'Protocol',
+                  },
+                  'HTTP',
+                ],
+              },
+            ],
+          },
+        ],
+      },
 
-        {
-          eq: [
-            {
-              Ref: 'EnableAuthentication',
-            },
-            'No',
-          ],
-        },
-      ],
-    };
+      {
+        eq: [
+          {
+            Ref: 'EnableAuthentication',
+          },
+          'No',
+        ],
+      },
+    ],
+  };
 
-    expect(JSON.parse(assertStr)).toEqual(expectedAssert);
-  });
+  expect(JSON.parse(assertStr)).toEqual(expectedAssert);
 });
 
 test('Rule sinkToKinesisRule', () => {
@@ -1144,46 +1012,42 @@ test('S3DataPrefix pattern', () => {
 });
 
 test('check ACMCertificateArn pattern', () => {
-  templates.forEach((template) => {
-    const param = getParameter(template, 'ACMCertificateArn');
-    const pattern = param.AllowedPattern;
-    const regex = new RegExp(`${pattern}`);
-    const validValues = [
-      '',
-      'arn:aws:acm:us-east-1:111111111111:certificate/fake',
-      'arn:aws-cn:acm:cn-northwest-1:111111111111:certificate/fake',
-      'arn:aws-us-gov:acm:us-gov-west-1:111111111111:certificate/fake',
-    ];
-    for (const v of validValues) {
-      expect(v).toMatch(regex);
-    }
-    const invalidValues = ['abc', 'arn:aws-cx:acm:us-east-1:111111111111:certificate/fake', 'arn:aws:acme:us-east-1:111111111111:certificate/fake'];
-    for (const v of invalidValues) {
-      expect(v).not.toMatch(regex);
-    }
-  });
+  const param = getParameter(v2Template, 'ACMCertificateArn');
+  const pattern = param.AllowedPattern;
+  const regex = new RegExp(`${pattern}`);
+  const validValues = [
+    '',
+    'arn:aws:acm:us-east-1:111111111111:certificate/fake',
+    'arn:aws-cn:acm:cn-northwest-1:111111111111:certificate/fake',
+    'arn:aws-us-gov:acm:us-gov-west-1:111111111111:certificate/fake',
+  ];
+  for (const v of validValues) {
+    expect(v).toMatch(regex);
+  }
+  const invalidValues = ['abc', 'arn:aws-cx:acm:us-east-1:111111111111:certificate/fake', 'arn:aws:acme:us-east-1:111111111111:certificate/fake'];
+  for (const v of invalidValues) {
+    expect(v).not.toMatch(regex);
+  }
 });
 
 test('check AuthenticationSecretArn pattern', () => {
-  templates.forEach((template) => {
-    const param = getParameter(template, 'AuthenticationSecretArn');
-    const pattern = param.AllowedPattern;
-    const regex = new RegExp(`${pattern}`);
-    const validValues = [
-      '',
-      'arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx',
-      'arn:aws-cn:secretsmanager:cn-northwest-1:111111111111:secret:fake-xxxxxx',
-      'arn:aws-us-gov:secretsmanager:us-gov-west-1:111111111111:secret:fake-xxxxxx',
-      'arn:aws:secretsmanager:us-east-1:111111111111:secret:prefix/fake-xxxxxx',
-    ];
-    for (const v of validValues) {
-      expect(v).toMatch(regex);
-    }
-    const invalidValues = ['abc', 'arn:aws-cx:secretsmanager:us-east-1:111111111111:secret:fake', 'arn:aws:secretsmanager:us-east-1:111111111111:certificate/fake-xxxxxx'];
-    for (const v of invalidValues) {
-      expect(v).not.toMatch(regex);
-    }
-  });
+  const param = getParameter(v2Template, 'AuthenticationSecretArn');
+  const pattern = param.AllowedPattern;
+  const regex = new RegExp(`${pattern}`);
+  const validValues = [
+    '',
+    'arn:aws:secretsmanager:us-east-1:111111111111:secret:fake-xxxxxx',
+    'arn:aws-cn:secretsmanager:cn-northwest-1:111111111111:secret:fake-xxxxxx',
+    'arn:aws-us-gov:secretsmanager:us-gov-west-1:111111111111:secret:fake-xxxxxx',
+    'arn:aws:secretsmanager:us-east-1:111111111111:secret:prefix/fake-xxxxxx',
+  ];
+  for (const v of validValues) {
+    expect(v).toMatch(regex);
+  }
+  const invalidValues = ['abc', 'arn:aws-cx:secretsmanager:us-east-1:111111111111:secret:fake', 'arn:aws:secretsmanager:us-east-1:111111111111:certificate/fake-xxxxxx'];
+  for (const v of invalidValues) {
+    expect(v).not.toMatch(regex);
+  }
 });
 
 
@@ -1271,4 +1135,126 @@ test('Should has AppRegistryAssociation', () => {
     },
     ResourceType: 'CFN_STACK',
   });
+});
+
+test('SecurityGroupIngress is added to ECS cluster SecurityGroup to allow access from ALB', () => {
+  const sgIngress = findResources(v2Template, 'AWS::EC2::SecurityGroupIngress');
+  let findSgIngress = false;
+  for (const ingress of sgIngress) {
+    if (
+      ingress.Properties.FromPort == 8088 &&
+      ingress.Properties.ToPort == 8088
+    ) {
+      findSgIngress = true;
+      break;
+    }
+  }
+  expect(findSgIngress).toBeTruthy();
+});
+
+test('Alb is internet-facing and ipv4 by default', () => {
+  v2Template.hasCondition('IngestionCommonResourcesCreateApplicationLoadBalancerIsPrivateSubnets376AE3D6', {
+    'Fn::Equals': [
+      {
+        Ref: 'PublicSubnetIds',
+      },
+      {
+        Ref: 'PrivateSubnetIds',
+      },
+    ],
+  });
+  v2Template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
+    IpAddressType: 'ipv4',
+    Scheme: {
+      'Fn::If': ['IngestionCommonResourcesCreateApplicationLoadBalancerIsPrivateSubnets376AE3D6', 'internal', 'internet-facing'],
+    },
+    Subnets: {
+      'Fn::If': [
+        'IngestionCommonResourcesCreateApplicationLoadBalancerIsPrivateSubnets376AE3D6',
+        {
+          'Fn::Split': [
+            ',',
+            {
+              Ref: 'PrivateSubnetIds',
+            },
+          ],
+        },
+        {
+          'Fn::Split': [
+            ',',
+            {
+              Ref: 'PublicSubnetIds',
+            },
+          ],
+        },
+      ],
+    },
+  });
+});
+
+test('Alb drop_invalid_header_fields is enabled', () => {
+  const alb = findFirstResource(
+    v2Template,
+    'AWS::ElasticLoadBalancingV2::LoadBalancer',
+  )?.resource;
+
+  const albAttrs = alb.Properties.LoadBalancerAttributes['Fn::If'][1];
+
+  let drop_invalid_header_fields = false;
+
+  for (const attr of albAttrs) {
+    if (attr.Key == 'routing.http.drop_invalid_header_fields.enabled') {
+      drop_invalid_header_fields = attr.Value;
+    }
+  }
+  expect(drop_invalid_header_fields).toBeTruthy();
+});
+
+test('enable Alb access log is configured', () => {
+  const alb = findFirstResource(
+    v2Template,
+    'AWS::ElasticLoadBalancingV2::LoadBalancer',
+  )?.resource;
+  const albAttrs = alb.Properties.LoadBalancerAttributes['Fn::If'][1];
+
+  let access_logs_s3_bucket = false;
+  let access_logs_s3_enabled = false;
+
+  for (const attr of albAttrs) {
+    if (attr.Key == 'access_logs.s3.bucket') {
+      access_logs_s3_bucket = true;
+    }
+    if (attr.Key == 'access_logs.s3.enabled') {
+      access_logs_s3_enabled = true;
+    }
+  }
+  expect(access_logs_s3_bucket).toBeTruthy();
+  expect(access_logs_s3_enabled).toBeTruthy();
+});
+
+test('Enable Global Accelerator feature', () => {
+  const accelerator = findResources(v2Template, 'AWS::GlobalAccelerator::Accelerator');
+
+  expect(accelerator.length === 1).toBeTruthy();
+
+  const conditionName = accelerator[0].Condition;
+
+  const condition = findConditionByName(v2Template, conditionName);
+
+  expect(condition['Fn::And'][0]).toEqual({
+    'Fn::Equals': [
+      {
+        Ref: 'EnableGlobalAccelerator',
+      },
+      'Yes',
+    ],
+  });
+
+  expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][0]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-north-1'] });
+  expect(condition['Fn::And'][1]['Fn::Not'][0]['Fn::Or'][1]).toEqual({ 'Fn::Equals': [{ Ref: 'AWS::Region' }, 'cn-northwest-1'] });
+
+});
+
+test('Check security group count', () => {
+  v2Template.resourceCountIs('AWS::EC2::SecurityGroup', 2);
 });

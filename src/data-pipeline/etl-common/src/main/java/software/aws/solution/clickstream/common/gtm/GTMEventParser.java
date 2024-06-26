@@ -49,11 +49,15 @@ public final class GTMEventParser extends BaseEventParser {
     }
     public static GTMEventParser getInstance() {
         // use default config rule in java resource file
-        return getInstance(null);
+        return getInstance(null, false);
     }
 
     public static GTMEventParser getInstance(final TransformConfig transformConfig) {
-        if (instance == null) {
+        return getInstance(transformConfig, false);
+    }
+
+    public static GTMEventParser getInstance(final TransformConfig transformConfig, final boolean foreNew) {
+        if (foreNew || instance == null) {
             instance = new GTMEventParser(transformConfig);
         }
         return instance;
@@ -103,7 +107,15 @@ public final class GTMEventParser extends BaseEventParser {
         }
 
         ClickstreamEvent clickstreamEvent = getClickstreamEvent(gtmEvent, index, extraParams);
-        clickstreamEventList.add(clickstreamEvent);
+
+        String eventName = clickstreamEvent.getEventName();
+        long eventTimeMsec =  clickstreamEvent.getEventTimeMsec();
+
+        if (isAllowEvent(eventName, eventTimeMsec)) {
+            clickstreamEventList.add(clickstreamEvent);
+        } else {
+            log.warn("Event name is not allowed, skipping the row, eventName: {}", eventName);
+        }
 
         String eventId = clickstreamEvent.getEventId();
 
@@ -120,18 +132,23 @@ public final class GTMEventParser extends BaseEventParser {
         }
         log.info("isSessionStart: " + isSessionStart);
 
-        if (isFirstVisit) {
+        if (isFirstVisit && isAllowEvent("_first_open", eventTimeMsec)){
             ClickstreamEvent firstVisitEvent = ClickstreamEvent.deepCopy(clickstreamEvent);
             firstVisitEvent.setEventName("_first_open");
             firstVisitEvent.setEventId(eventId + "-first-open");
             clickstreamEventList.add(firstVisitEvent);
         }
 
-        if (isSessionStart) {
+        if (isSessionStart && isAllowEvent("_session_start", eventTimeMsec)) {
             ClickstreamEvent sessionStartEvent = ClickstreamEvent.deepCopy(clickstreamEvent);
             sessionStartEvent.setEventName("_session_start");
             sessionStartEvent.setEventId(eventId + "-session-start");
             clickstreamEventList.add(sessionStartEvent);
+        }
+
+        if (clickstreamEventList.isEmpty()) {
+            log.warn("No event is allowed, skipping the row, gtm eventName: {}", gtmEvent.getEventName());
+            return parseDataResult;
         }
 
         ClickstreamUser clickstreamUser = getClickstreamUser(gtmEvent, clickstreamEvent);
@@ -147,6 +164,8 @@ public final class GTMEventParser extends BaseEventParser {
     private ClickstreamEvent getClickstreamEvent(final GTMEvent gtmEvent, final int index, final ExtraParams extraParams) throws JsonProcessingException {
         ClickstreamEvent clickstreamEvent = new ClickstreamEvent();
 
+        String eventName = mapEventName(gtmEvent);
+
         clickstreamEvent.setEventTimestamp(new Timestamp(extraParams.getIngestTimestamp()));
 
         String eventId = String.format("%s-%s-%s-%s",
@@ -157,7 +176,7 @@ public final class GTMEventParser extends BaseEventParser {
 
         clickstreamEvent.setEventId(eventId);
         clickstreamEvent.setEventTimeMsec(clickstreamEvent.getEventTimestamp().getTime());
-        String eventName = mapEventName(gtmEvent);
+
         clickstreamEvent.setEventName(eventName);
         clickstreamEvent.setEventValue(gtmEvent.getValue());
         clickstreamEvent.setEventValueCurrency(gtmEvent.getCurrency());

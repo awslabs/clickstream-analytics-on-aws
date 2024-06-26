@@ -10,41 +10,39 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-
 import { Duration, CfnCondition, Fn } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { BaseService } from 'aws-cdk-lib/aws-ecs';
 import {
-  ApplicationListener,
   ApplicationProtocol,
   Protocol,
-  // ListenerCertificate,
   ApplicationLoadBalancer,
-  // ListenerAction,
   IpAddressType,
-  SslPolicy,
-  CfnListener,
   ApplicationTargetGroup,
-  ListenerAction,
   CfnLoadBalancer,
+  TargetType,
+  ApplicationListener,
+  CfnListener,
+  SslPolicy,
+  CfnTargetGroup,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
+import { S3BucketProps } from '../../../ingestion-server-v2-stack';
 import { RESOURCE_ID_PREFIX } from '../../server/ingestion-server';
 
 export const PROXY_PORT = 8088;
 
-function createECSTargets(scope : Construct, service: BaseService, proxyContainerName: string) {
+function createECSTargets(
+  scope : Construct,
+  vpc: IVpc,
+  httpListener: ApplicationListener,
+  httpsListener: ApplicationListener,
+) {
   const targetGroup = new ApplicationTargetGroup(scope, 'ECS', {
     protocol: ApplicationProtocol.HTTP,
-    vpc: service.cluster.vpc,
+    vpc: vpc,
     port: PROXY_PORT,
-    targets: [
-      service.loadBalancerTarget({
-        containerName: proxyContainerName,
-        containerPort: PROXY_PORT,
-      }),
-    ],
+    targetType: TargetType.IP,
     healthCheck: {
       enabled: true,
       protocol: Protocol.HTTP,
@@ -56,6 +54,15 @@ function createECSTargets(scope : Construct, service: BaseService, proxyContaine
       unhealthyThresholdCount: 5,
     },
   });
+
+  httpListener.addTargetGroups('ECS', {
+    targetGroups: [targetGroup],
+  });
+
+  httpsListener.addTargetGroups('ECS', {
+    targetGroups: [targetGroup],
+  });
+
   return targetGroup;
 }
 
@@ -67,34 +74,31 @@ export interface ApplicationLoadBalancerProps {
   certificateArn: string;
   domainName: string;
   sg: SecurityGroup;
-  service: BaseService;
   endpointPath: string;
-  httpContainerName: string;
   ipAddressType: IpAddressType;
   protocol: string;
   ports: {
     http: number;
     https: number;
   };
-  albLogPrefix?: string;
-  albLogBucketName?: string;
+  albLogBucket: S3BucketProps;
   enableAccessLog: string;
-  authenticationSecretArn?: string;
-
   isHttps: CfnCondition;
 }
 
 export class ApplicationLoadBalancerV2 extends Construct {
   public readonly alb: ApplicationLoadBalancer;
   public readonly targetGroup: ApplicationTargetGroup;
-  public readonly listener: ApplicationListener;
+  public readonly httpListener: ApplicationListener;
+  public readonly httpsListener: ApplicationListener;
 
   constructor(scope: Construct, id: string, props: ApplicationLoadBalancerProps) {
     super(scope, id);
-    const { alb, targetGroup, listener } = createApplicationLoadBalancer(this, props);
+    const { alb, targetGroup, httpListener, httpsListener } = createApplicationLoadBalancer(this, props);
     this.alb = alb;
     this.targetGroup = targetGroup;
-    this.listener = listener;
+    this.httpListener = httpListener;
+    this.httpsListener = httpsListener;
   }
 }
 
@@ -102,10 +106,6 @@ function createApplicationLoadBalancer(
   scope: Construct,
   props: ApplicationLoadBalancerProps,
 ) {
-  const httpPort = props.ports.http;
-  const httpsPort = props.ports.https;
-  const httpContainerName = props.httpContainerName;
-
   const alb = new ApplicationLoadBalancer(scope, `${RESOURCE_ID_PREFIX}alb`, {
     vpc: props.vpc,
     internetFacing: true,
@@ -145,17 +145,35 @@ function createApplicationLoadBalancer(
     },
     {
       Key: 'access_logs.s3.bucket',
-      Value: props.albLogBucketName,
+      Value: props.albLogBucket.bucketName,
     },
     {
       Key: 'access_logs.s3.prefix',
-      Value: Fn.join('', [props.albLogPrefix ? props.albLogPrefix : '', 'alb-log']),
+      Value: Fn.join('', [props.albLogBucket.prefix ? props.albLogBucket.prefix : '', 'alb-log']),
+    },
+  ];
+
+  const disableAccessLogAlbAttributes: any[] = [
+    ... baseAlbAttributes,
+    {
+      Key: 'access_logs.s3.enabled',
+      Value: 'false',
     },
   ];
 
   const cfnAlb = alb.node.defaultChild as CfnLoadBalancer;
   cfnAlb.addPropertyOverride('LoadBalancerAttributes',
-    Fn.conditionIf(enableAlbAccessLogCondition.logicalId, enableAccessLogAlbAttributes, baseAlbAttributes));
+    Fn.conditionIf(enableAlbAccessLogCondition.logicalId, enableAccessLogAlbAttributes, disableAccessLogAlbAttributes));
+
+  const httpsListener = new ApplicationListener(scope, 'HttpsListener', {
+    loadBalancer: alb,
+    port: props.ports.https,
+    protocol: ApplicationProtocol.HTTPS,
+    sslPolicy: SslPolicy.TLS12,
+    certificates: [{ certificateArn: props.certificateArn }],
+  });
+
+  (httpsListener.node.defaultChild as CfnListener).cfnOptions.condition = props.isHttps;
 
   cfnAlb.addPropertyOverride('Scheme',
     Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, 'internal', 'internet-facing').toString());
@@ -163,29 +181,13 @@ function createApplicationLoadBalancer(
   cfnAlb.addPropertyOverride('Subnets',
     Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, Fn.split(',', props.privateSubnets), Fn.split(',', props.publicSubnets)));
 
-  const targetGroup = createECSTargets(scope, props.service, httpContainerName);
-
   const httpListener = new ApplicationListener(scope, 'HttpListener', {
-    protocol: ApplicationProtocol.HTTP, //NOSONAR it's intended
-    port: httpPort,
-    defaultTargetGroups: [targetGroup],
     loadBalancer: alb,
+    port: props.ports.http,
+    protocol: ApplicationProtocol.HTTP, //NOSONAR
   });
 
-  const cfnListener = httpListener.node.defaultChild as CfnListener;
-  cfnListener.addPropertyOverride('Protocol',
-    Fn.conditionIf(props.isHttps.logicalId, ApplicationProtocol.HTTPS, ApplicationProtocol.HTTP).toString());
-
-  cfnListener.addPropertyOverride('Port',
-    Fn.conditionIf(props.isHttps.logicalId, httpsPort, httpPort).toString());
-
-  cfnListener.addPropertyOverride('SslPolicy',
-    Fn.conditionIf(props.isHttps.logicalId, SslPolicy.TLS12, Fn.ref('AWS::NoValue')));
-
-  cfnListener.addPropertyOverride('Certificates',
-    Fn.conditionIf(props.isHttps.logicalId, [{
-      CertificateArn: props.certificateArn,
-    }], Fn.ref('AWS::NoValue')));
+  const targetGroup = createECSTargets(scope, props.vpc, httpListener, httpsListener);
 
   addCfnNagSuppressRules(
     httpListener.node.defaultChild as CfnListener,
@@ -198,27 +200,30 @@ function createApplicationLoadBalancer(
     ],
   );
 
-  const httpRedirectListener = new ApplicationListener(scope, 'HttpRedirectListener', {
-    protocol: ApplicationProtocol.HTTP, //NOSONAR it's intended
-    port: httpPort,
-    defaultAction: ListenerAction.redirect({
-      protocol: ApplicationProtocol.HTTPS,
-      port: `${httpsPort}`,
-    }),
-    loadBalancer: alb,
-  });
-  (httpRedirectListener.node.defaultChild as CfnListener).cfnOptions.condition = props.isHttps;
-
-  addCfnNagSuppressRules(
-    httpRedirectListener.node.defaultChild as CfnListener,
-    [
-      {
-        id: 'W56',
-        reason:
-          'Using HTTP listener is by design',
+  const cfnTargetGroup = targetGroup.node.defaultChild as CfnTargetGroup;
+  const httpListenerDefaultActions: any[] = [
+    {
+      Type: 'forward',
+      TargetGroupArn: {
+        Ref: cfnTargetGroup.logicalId,
       },
-    ],
-  );
+    },
+  ];
 
-  return { alb, targetGroup, listener: httpListener };
+  const httpRedirectListenerDefaultActions: any[] = [
+    {
+      Type: 'redirect',
+      RedirectConfig: {
+        Port: '443',
+        Protocol: 'HTTPS',
+        StatusCode: 'HTTP_302',
+      },
+    },
+  ];
+
+  const cfnListener = httpListener.node.defaultChild as CfnListener;
+  cfnListener.addPropertyOverride('DefaultActions',
+    Fn.conditionIf(props.isHttps.logicalId, httpRedirectListenerDefaultActions, httpListenerDefaultActions));
+
+  return { alb, targetGroup, httpListener, httpsListener };
 }

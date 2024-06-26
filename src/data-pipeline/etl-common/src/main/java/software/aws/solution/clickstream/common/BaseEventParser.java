@@ -48,7 +48,9 @@ public abstract class BaseEventParser implements EventParser {
 
     private static void addDataResult(final ParseRowResult rowResult, final ParseDataResult result) {
         rowResult.getClickstreamEventList().addAll(result.getClickstreamEventList());
-        rowResult.getClickstreamUserList().add(result.getClickstreamUser());
+        if (result.getClickstreamUser() != null) {
+            rowResult.getClickstreamUserList().add(result.getClickstreamUser());
+        }
         rowResult.getClickstreamItemList().addAll(result.getClickstreamItemList());
     }
 
@@ -182,4 +184,27 @@ public abstract class BaseEventParser implements EventParser {
         return this.getTransformConfig() != null && this.getTransformConfig().isTrafficSourceEnrichmentDisabled();
     }
 
+    protected boolean isAllowEvent(final String eventName, final long eventTimestamp) {
+        TransformConfig transformConfig = getTransformConfig();
+
+        boolean allowEventName = !(transformConfig != null
+                && transformConfig.getAllowEvents() != null
+                && !transformConfig.getAllowEvents().isEmpty()
+                && !transformConfig.getAllowEvents().contains(eventName));
+
+        if (!allowEventName) {
+            log.debug("Event {} is not allowed", eventName);
+            return false;
+        }
+        long latency = System.currentTimeMillis() - eventTimestamp;
+
+        boolean allowEventTime = !(transformConfig != null
+                && transformConfig.getAllowEventTimeMaxLatencyMilisec() > 0
+                && latency >= transformConfig.getAllowEventTimeMaxLatencyMilisec());
+
+        if (!allowEventTime) {
+            log.debug("EventTime {} is not allowed, latency: {}, allowEventTimeMaxLatency: {}", eventTimestamp, latency, transformConfig.getAllowEventTimeMaxLatencyMilisec());
+        }
+        return allowEventTime;
+    }
 }

@@ -27,6 +27,7 @@ import software.aws.solution.clickstream.common.model.*;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
@@ -50,7 +51,7 @@ public class ClickstreamEventParserTest extends BaseTest {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line
         String line = resourceFileContent("/original_data_nozip.json");
 
-        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
         ClickstreamIngestRow row = clickstreamEventParser.ingestLineToRow(line);
 
         String expectedJson = this.resourceFileAsString("/expected/test_parse_line.json");
@@ -60,7 +61,22 @@ public class ClickstreamEventParserTest extends BaseTest {
 
     private static ClickstreamEventParser getClickstreamEventParser() {
         TransformConfig transformConfig = new TransformConfig();
-        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance(transformConfig);
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance(transformConfig, true);
+        return clickstreamEventParser;
+    }
+
+    private static ClickstreamEventParser getClickstreamEventParser(String ...allowEvents) {
+        TransformConfig transformConfig = new TransformConfig();
+        transformConfig.setAllowEvents(List.of(allowEvents));
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance(transformConfig, true);
+        return clickstreamEventParser;
+    }
+
+    private static ClickstreamEventParser getClickstreamEventParser(long maxLatency, String ...allowEvents) {
+        TransformConfig transformConfig = new TransformConfig();
+        transformConfig.setAllowEvents(List.of(allowEvents));
+        transformConfig.setAllowEventTimeMaxLatencyMilisec(maxLatency);
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance(transformConfig, true);
         return clickstreamEventParser;
     }
 
@@ -524,4 +540,65 @@ public class ClickstreamEventParserTest extends BaseTest {
         Assertions.assertNull(event.getDeviceOperatingSystem());
     }
 
+    @Test
+    void test_parse_line_with_allow_events() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_with_allow_events
+        String line = resourceFileContent("/original_data_single.json");
+        log.info(line);
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser("ClickMe");
+        String projectId = "test_project_id";
+        String fileName = "original_data_single.json";
+
+        ParseRowResult rowResult = clickstreamEventParser.parseLineToDBRow(line, projectId, fileName);
+
+        ClickstreamEvent eventV2 = rowResult.getClickstreamEventList().get(0);
+
+        Assertions.assertEquals("ClickMe", eventV2.getEventName());
+    }
+
+    @Test
+    void test_parse_line_with_allow_events2() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_with_allow_events2
+        String line = resourceFileContent("/original_data_single.json");
+        log.info(line);
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser("ClickMe1", "ClickMe2");
+        String projectId = "test_project_id";
+        String fileName = "original_data_single.json";
+
+        ParseRowResult rowResult = clickstreamEventParser.parseLineToDBRow(line, projectId, fileName);
+
+        Assertions.assertEquals(0, rowResult.getClickstreamEventList().size());
+        Assertions.assertEquals(0, rowResult.getClickstreamUserList().size());
+        Assertions.assertEquals(0, rowResult.getClickstreamItemList().size());
+    }
+
+    @Test
+    void test_parse_line_with_allow_event_max_latency() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_with_allow_event_max_latency
+        String line = resourceFileContent("/original_data_single.json");
+        log.info(line);
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser(10000, "ClickMe");
+        String projectId = "test_project_id";
+        String fileName = "original_data_single.json";
+
+        ParseRowResult rowResult = clickstreamEventParser.parseLineToDBRow(line, projectId, fileName);
+
+        Assertions.assertEquals(0, rowResult.getClickstreamEventList().size());
+        Assertions.assertEquals(0, rowResult.getClickstreamUserList().size());
+        Assertions.assertEquals(0, rowResult.getClickstreamItemList().size());
+    }
+
+    @Test
+    void test_parse_line_with_allow_event_max_latency2() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_with_allow_event_max_latency2
+        String line = resourceFileContent("/original_data_single.json");
+        log.info(line);
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser(Long.MAX_VALUE, "ClickMe");
+        String projectId = "test_project_id";
+        String fileName = "original_data_single.json";
+
+        ParseRowResult rowResult = clickstreamEventParser.parseLineToDBRow(line, projectId, fileName);
+
+        Assertions.assertEquals(1, rowResult.getClickstreamEventList().size());
+    }
 }

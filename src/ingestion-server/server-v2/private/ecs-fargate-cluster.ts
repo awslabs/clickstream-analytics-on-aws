@@ -10,7 +10,6 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import {
   Cluster,
@@ -19,13 +18,11 @@ import {
 } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+import { ECSClusterProps } from './ecs-ec2-cluster';
 import { ECSFargateService } from './ecs-fargate-service';
 import { createProxyAndWorkerECRImages } from '../../server/private/ecr';
-import { IngestionServerV2Props, RESOURCE_ID_PREFIX } from '../ingestion-server-v2';
+import { RESOURCE_ID_PREFIX } from '../ingestion-server-v2';
 
-export interface ECSFargateClusterProps extends IngestionServerV2Props {
-  ecsSecurityGroup: ISecurityGroup;
-}
 
 export interface ECSFargateServiceResult {
   ecsService: FargateService;
@@ -44,7 +41,7 @@ export class ECSFargateCluster extends Construct {
   public readonly httpContainerName: string;
   public readonly ecsInfraRole: IRole;
 
-  constructor(scope: Construct, id: string, props: ECSFargateClusterProps) {
+  constructor(scope: Construct, id: string, props: ECSClusterProps) {
     super(scope, id);
 
     const ecsFargateClusterInfo = createECSFargateClusterAndService(this, props);
@@ -59,7 +56,7 @@ export class ECSFargateCluster extends Construct {
 
 function createECSFargateClusterAndService(
   scope: Construct,
-  props: ECSFargateClusterProps,
+  props: ECSClusterProps,
 ): ECSFargateClusterResult {
   const vpc = props.vpc;
 
@@ -70,7 +67,7 @@ function createECSFargateClusterAndService(
 
   const ecsSetting = props.fleetProps;
 
-  const platform: Platform = ecsSetting.isArm ? Platform.LINUX_ARM64 : Platform.LINUX_AMD64;
+  const platform: Platform = ecsSetting.arch;
 
   const { proxyImage, workerImage } = createProxyAndWorkerECRImages(
     scope,

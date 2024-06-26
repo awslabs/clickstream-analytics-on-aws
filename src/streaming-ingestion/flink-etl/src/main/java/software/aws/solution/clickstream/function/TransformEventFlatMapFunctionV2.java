@@ -33,18 +33,25 @@ public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, Str
     private final String appId;
     private final EventParser eventParser;
     private final List<ClickstreamEventEnrichment> enrichments;
+
     @Getter
     private final OutputTag<ClickstreamEvent> tableRowOutputTag;
+    private final boolean withCustomParameters;
+
     public TransformEventFlatMapFunctionV2(final String projectId,
                                            final String appId,
                                            final EventParser eventParser,
-                                           final List<ClickstreamEventEnrichment> enrichments) {
+                                           final List<ClickstreamEventEnrichment> enrichments,
+                                           final boolean withCustomParameters
+    ) {
         this.projectId = projectId;
         this.appId = appId;
         this.eventParser = eventParser;
         this.enrichments = enrichments;
         this.tableRowOutputTag = new OutputTag<>("table-row-" + appId) {
         };
+        this.withCustomParameters = withCustomParameters;
+
     }
 
     @Override
@@ -59,6 +66,9 @@ public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, Str
                     enrichment.enrich(clickstreamEvent);
                 }
                 clickstreamEvent.getProcessInfo().put("process_time", Instant.now().toString());
+                if (!withCustomParameters) {
+                    clickstreamEvent.setCustomParameters(null);
+                }
                 out.collect(clickstreamEvent.toJson());
 
                 ctx.output(tableRowOutputTag, clickstreamEvent);

@@ -33,7 +33,7 @@ import { RESOURCE_ID_PREFIX } from '../../server/ingestion-server';
 
 export const PROXY_PORT = 8088;
 
-function addECSTargetsToListener(
+export function addECSTargetsToListener(
   service: Ec2Service,
   listener: ApplicationListener,
   proxyContainerName: string,

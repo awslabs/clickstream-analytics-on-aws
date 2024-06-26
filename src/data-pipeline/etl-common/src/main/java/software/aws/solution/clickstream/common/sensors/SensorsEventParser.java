@@ -70,7 +70,11 @@ public final class SensorsEventParser extends BaseEventParser {
     }
 
     public static SensorsEventParser getInstance(final TransformConfig transformConfig) {
-        if (instance == null) {
+        return getInstance(transformConfig, false);
+    }
+
+    public static SensorsEventParser getInstance(final TransformConfig transformConfig, final boolean foreNew) {
+        if (foreNew || instance == null) {
             instance = new SensorsEventParser(transformConfig);
         }
         return instance;
@@ -126,7 +130,9 @@ public final class SensorsEventParser extends BaseEventParser {
 
         ClickstreamEvent clickstreamEvent = getClickstreamEvent(sensorsEvent, index, extraParams);
 
-        clickstreamEventList.add(clickstreamEvent);
+        if (isAllowEvent(clickstreamEvent.getEventName(), clickstreamEvent.getEventTimeMsec())) {
+            clickstreamEventList.add(clickstreamEvent);
+        }
 
         String eventId = clickstreamEvent.getEventId();
 
@@ -136,11 +142,16 @@ public final class SensorsEventParser extends BaseEventParser {
         }
         log.info("isFirstVisit: " + isFirstVisit);
 
-        if (isFirstVisit) {
+        if (isFirstVisit && isAllowEvent("_first_open", clickstreamEvent.getEventTimeMsec())) {
             ClickstreamEvent firstVisitEvent = ClickstreamEvent.deepCopy(clickstreamEvent);
             firstVisitEvent.setEventName("_first_open");
             firstVisitEvent.setEventId(eventId + "-first-open");
             clickstreamEventList.add(firstVisitEvent);
+        }
+
+        if (clickstreamEventList.isEmpty()) {
+            log.warn("No event to process, skipping the row, sensors eventName: {}", sensorsEvent.getEvent());
+            return parseDataResult;
         }
 
         ClickstreamUser clickstreamUser = getClickstreamUser(sensorsEvent, clickstreamEvent);
@@ -197,6 +208,7 @@ public final class SensorsEventParser extends BaseEventParser {
 
     private ClickstreamEvent getClickstreamEvent(final SensorsEvent sensorsEvent, final int index, final ExtraParams extraParams) throws JsonProcessingException {
         ClickstreamEvent clickstreamEvent = new ClickstreamEvent();
+        String eventName = mapEventName(sensorsEvent);
 
         clickstreamEvent.setEventTimestamp(new Timestamp(extraParams.getIngestTimestamp()));
 
@@ -207,7 +219,7 @@ public final class SensorsEventParser extends BaseEventParser {
 
         clickstreamEvent.setEventId(eventId);
         clickstreamEvent.setEventTimeMsec(clickstreamEvent.getEventTimestamp().getTime());
-        String eventName = mapEventName(sensorsEvent);
+
         clickstreamEvent.setEventName(eventName);
         clickstreamEvent.setIngestTimeMsec(extraParams.getIngestTimestamp());
 

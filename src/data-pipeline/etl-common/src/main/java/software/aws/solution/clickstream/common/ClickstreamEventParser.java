@@ -78,7 +78,11 @@ public final class ClickstreamEventParser extends BaseEventParser {
     }
 
     public static ClickstreamEventParser getInstance(final TransformConfig transformConfig) {
-        if (instance == null) {
+        return getInstance(transformConfig, false);
+    }
+
+    public static ClickstreamEventParser getInstance(final TransformConfig transformConfig, final boolean forceNew) {
+        if (forceNew || instance == null) {
             instance = new ClickstreamEventParser(transformConfig);
         }
         return instance;
@@ -109,6 +113,12 @@ public final class ClickstreamEventParser extends BaseEventParser {
         TimeShiftInfo timeShiftInfo = getEventTimeShiftInfo(ingestEvent, extraParams);
 
         ClickstreamEvent clickstreamEvent = getClickstreamEvent(ingestEvent, index, extraParams, timeShiftInfo);
+
+        if (!isAllowEvent(clickstreamEvent.getEventName(), clickstreamEvent.getEventTimeMsec())) {
+            log.warn("Event name is not allowed, skipping the row, event: {}", clickstreamEvent.getEventName());
+            return parseDataResult;
+        }
+
         clickstreamEventList.add(clickstreamEvent);
 
         // User
@@ -230,6 +240,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
 
     private ClickstreamEvent getClickstreamEvent(final Event ingestEvent, final int index, final ExtraParams extraParams, final TimeShiftInfo timeShiftInfo) {
         ClickstreamEvent clickstreamEvent = new ClickstreamEvent();
+
         Map<String, List<String>> uriParams = getUriParams(extraParams.getUri());
 
         clickstreamEvent.setEventTimeMsec(ingestEvent.getEventTimestamp() + timeShiftInfo.getTimeDiff());

@@ -91,6 +91,7 @@ function addSGCfnNagSuppressRules(
 export function createALBSecurityGroupV2(
   scope: Construct,
   vpc: IVpc,
+  ecsSecurityGroup: ISecurityGroup,
   port: {
     http: number;
     https: number;
@@ -103,7 +104,7 @@ export function createALBSecurityGroupV2(
     expression: Fn.conditionEquals(enableAuthentication, 'Yes'),
   });
 
-  const securityGroupEgress = [
+  const securityGroupEgressAll = [
     {
       CidrIp: '0.0.0.0/0',
       Description: 'from 0.0.0.0/0:ALL PORTS',
@@ -112,10 +113,18 @@ export function createALBSecurityGroupV2(
       ToPort: 65535,
     },
   ];
-
+  const securityGroupEgressToEcs = [
+    {
+      DestinationSecurityGroupId: ecsSecurityGroup.securityGroupId,
+      Description: 'Load balancer to target',
+      IpProtocol: 'tcp',
+      FromPort: 8088,
+      ToPort: 8088,
+    },
+  ];
   const cfnAlbSg = albSg.node.defaultChild as CfnSecurityGroup;
   cfnAlbSg.addPropertyOverride('SecurityGroupEgress',
-    Fn.conditionIf(enableAuthenticationCondition.logicalId, securityGroupEgress, Fn.ref('AWS::NoValue')));
+    Fn.conditionIf(enableAuthenticationCondition.logicalId, securityGroupEgressAll, securityGroupEgressToEcs));
 
   addSGCfnNagSuppressRules(albSg);
   return albSg;

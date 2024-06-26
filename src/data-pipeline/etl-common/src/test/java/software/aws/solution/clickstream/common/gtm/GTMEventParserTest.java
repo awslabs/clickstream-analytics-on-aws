@@ -25,6 +25,7 @@ import software.aws.solution.clickstream.common.model.*;
 import software.aws.solution.clickstream.common.sensors.SensorsEventParser;
 
 import java.io.*;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
@@ -60,7 +61,7 @@ public class GTMEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        GTMEventParser gtmEventParser = GTMEventParser.getInstance();
+        GTMEventParser gtmEventParser = getGtmEventParser();
         ClickstreamIngestRow row = gtmEventParser.ingestLineToRow(firstLine);
         GTMEvent event = gtmEventParser.ingestDataToEvent(row.getData());
 
@@ -78,7 +79,7 @@ public class GTMEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        GTMEventParser gtmEventParser = GTMEventParser.getInstance();
+        GTMEventParser gtmEventParser = getGtmEventParser();
         ParseRowResult rowResult = gtmEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
 
         ClickstreamEvent csEvent = rowResult.getClickstreamEventList().get(0);
@@ -94,7 +95,7 @@ public class GTMEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        GTMEventParser gtmEventParser = GTMEventParser.getInstance();
+        GTMEventParser gtmEventParser = getGtmEventParser();
         ParseRowResult rowResult = gtmEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
 
         ClickstreamUser csUser = rowResult.getClickstreamUserList().get(0);
@@ -110,7 +111,7 @@ public class GTMEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        GTMEventParser gtmEventParser = GTMEventParser.getInstance();
+        GTMEventParser gtmEventParser = getGtmEventParser();
         ParseRowResult rowResult = gtmEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
 
         Assertions.assertEquals(0, rowResult.getClickstreamItemList().size(), "test_gtm_parseLineToDBRow_item");
@@ -125,7 +126,7 @@ public class GTMEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        GTMEventParser gtmEventParser = GTMEventParser.getInstance();
+        GTMEventParser gtmEventParser = getGtmEventParser();
         ParseRowResult rowResult = gtmEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-items.json");
 
         ClickstreamItem csItem = rowResult.getClickstreamItemList().get(0);
@@ -141,7 +142,7 @@ public class GTMEventParserTest extends BaseTest {
         String jsonStr = "{\"test_by\":\"Mike\", \"event_name\":\"Optimizely\",\"optimizelyExp\":\"20230918_tg_checkoutpromoremoval.OG\",\"engagement_time_msec\":1,\"x-ga-protocol_version\":\"2\",\"x-ga-measurement_id\":\"G-000000002\",\"x-ga-gtm_version\":\"45je39i0\",\"x-ga-page_id\":1049432985,\"client_id\":\"ZPO/+IzUVgQhDUCuBoG7RF6r1d70inLj6FxhhVhA5Dk=.1695261246\",\"language\":\"en-us\",\"screen_resolution\":\"393x786\",\"x-ga-ur\":\"US\",\"client_hints\":{\"architecture\":\"\",\"bitness\":\"\",\"full_version_list\":[],\"mobile\":false,\"model\":\"\",\"platform\":\"\",\"platform_version\":\"\",\"wow64\":false},\"x-sst-system_properties\":{\"uc\":\"US\",\"gse\":\"1\",\"tft\":\"1695261241324\",\"request_start_time_ms\":1695261246955},\"ga_session_id\":\"1695261245\",\"ga_session_number\":\"ss\",\"x-ga-mp2-seg\":\"0\",\"page_location\":\"https://www.example.com/zh_HK/product/couch-duck-by-ssebong/iphone-15-pro-max/ultra-bounce-case-magsafe-compatible\",\"page_title\":\"Couch duck – example\",\"x-ga-request_count\":2,\"x-ga-tfd\":7201,\"ip_override\":\"130.44.212.105\",\"user_agent\":\"Mozilla/5.0 (Linux; U; Android 8.1.0; zh-cn; MI 6X Build/OPM1.171019.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.128 Mobile Safari/537.36\",\"x-ga-js_client_id\":\"1531615311.1695261246\"}";
         System.out.println(jsonStr);
 
-        GTMEventParser eventParser = GTMEventParser.getInstance();
+        GTMEventParser eventParser = getGtmEventParser();
         GTMEvent gtmEvent = eventParser.ingestDataToEvent(jsonStr);
 
         assertEquals(1, gtmEvent.getEngagementTimeMsec());
@@ -157,7 +158,7 @@ public class GTMEventParserTest extends BaseTest {
 
         String firstLine = lines.split("\n")[0];
 
-        GTMEventParser gtmEventParser = GTMEventParser.getInstance();
+        GTMEventParser gtmEventParser = getGtmEventParser();
         ParseRowResult rowResult = gtmEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-items.json");
 
         ClickstreamUser csUser = rowResult.getClickstreamUserList().get(0);
@@ -170,7 +171,7 @@ public class GTMEventParserTest extends BaseTest {
     void test_parse_empty_data() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_parse_empty_data
 
-        GTMEventParser eventParser = GTMEventParser.getInstance();
+        GTMEventParser eventParser = getGtmEventParser();
         ExtraParams extraParams = ExtraParams.builder().build();
         ParseDataResult r = eventParser.parseData("", extraParams, 0);
         Assertions.assertEquals(0, r.getClickstreamEventList().size());
@@ -187,6 +188,69 @@ public class GTMEventParserTest extends BaseTest {
         Assertions.assertEquals(0, r.getClickstreamEventList().size());
         Assertions.assertEquals(0, r.getClickstreamItemList().size());
         Assertions.assertNull(r.getClickstreamUser());
+    }
+
+    private static GTMEventParser getGtmEventParser() {
+        GTMEventParser eventParser = GTMEventParser.getInstance(null, true);
+        return eventParser;
+    }
+
+    @Test
+    void test_gtm_parseLineToDBRow_allow_event() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_parseLineToDBRow_allow_event
+
+        String lines = resourceFileContent("/gtm-server/server-session-start.json");
+
+        String firstLine = lines.split("\n")[0];
+        TransformConfig transformConfig = new TransformConfig();
+        transformConfig.setAllowEvents(List.of("_user_engagement"));
+
+        GTMEventParser gtmEventParser = getGtmEventParser(transformConfig);
+
+        ParseRowResult rowResult = gtmEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
+        Assertions.assertEquals(1, rowResult.getClickstreamEventList().size());
+
+        ClickstreamEvent csEvent = rowResult.getClickstreamEventList().get(0);
+        assertEquals("_user_engagement", csEvent.getEventName());
+    }
+
+    @Test
+    void test_gtm_parseLineToDBRow_allow_event2() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_parseLineToDBRow_allow_event2
+
+        String lines = resourceFileContent("/gtm-server/server-session-start.json");
+
+        String firstLine = lines.split("\n")[0];
+        TransformConfig transformConfig = new TransformConfig();
+        transformConfig.setAllowEvents(List.of("_user_engagement", "_session_start"));
+
+        GTMEventParser gtmEventParser = getGtmEventParser(transformConfig);
+
+        ParseRowResult rowResult = gtmEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
+        Assertions.assertEquals(2, rowResult.getClickstreamEventList().size());
+    }
+
+    @Test
+    void test_gtm_parseLineToDBRow_allow_event3() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_parseLineToDBRow_allow_event3
+
+        String lines = resourceFileContent("/gtm-server/server-session-start.json");
+
+        String firstLine = lines.split("\n")[0];
+        TransformConfig transformConfig = new TransformConfig();
+        transformConfig.setAllowEvents(List.of("clickMe"));
+
+        GTMEventParser gtmEventParser = getGtmEventParser(transformConfig);
+
+        ParseRowResult rowResult = gtmEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
+        Assertions.assertEquals(0, rowResult.getClickstreamEventList().size());
+        Assertions.assertEquals(0, rowResult.getClickstreamUserList().size());
+        Assertions.assertEquals(0, rowResult.getClickstreamUserList().size());
+    }
+
+    private static GTMEventParser getGtmEventParser(TransformConfig transformConfig) {
+        GTMEventParser gtmEventParser = GTMEventParser.getInstance(transformConfig, true);
+        return gtmEventParser;
     }
 
 }

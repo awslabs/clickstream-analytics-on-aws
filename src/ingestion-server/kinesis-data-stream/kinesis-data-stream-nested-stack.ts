@@ -120,7 +120,6 @@ export function createKinesisNestStack(
     startingPosition: StartingPosition.LATEST,
   };
 
-
   // ON_DEMAND
   const onDemandStack = new KinesisDataStreamToS3NestedStack(
     scope,

@@ -78,6 +78,11 @@ export enum SINK_TYPE_MODE {
   SINK_TYPE_MSK='MSK',
 }
 
+export enum ECS_INFRA_TYPE_MODE {
+  FARGATE='FARGATE',
+  EC2='EC2',
+}
+
 export enum REDSHIFT_MODE {
   PROVISIONED='Provisioned',
   SERVERLESS='Serverless',
