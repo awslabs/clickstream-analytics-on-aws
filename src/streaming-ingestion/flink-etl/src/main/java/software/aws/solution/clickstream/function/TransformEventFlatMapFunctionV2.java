@@ -33,6 +33,7 @@ public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, Str
     private final String appId;
     private final EventParser eventParser;
     private final List<ClickstreamEventEnrichment> enrichments;
+    private final List<String> streamIngestionAllowEventList;
 
     @Getter
     private final OutputTag<ClickstreamEvent> tableRowOutputTag;
@@ -42,7 +43,8 @@ public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, Str
                                            final String appId,
                                            final EventParser eventParser,
                                            final List<ClickstreamEventEnrichment> enrichments,
-                                           final boolean withCustomParameters
+                                           final boolean withCustomParameters,
+                                           final List<String> streamIngestionAllowEventList
     ) {
         this.projectId = projectId;
         this.appId = appId;
@@ -51,6 +53,7 @@ public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, Str
         this.tableRowOutputTag = new OutputTag<>("table-row-" + appId) {
         };
         this.withCustomParameters = withCustomParameters;
+        this.streamIngestionAllowEventList = streamIngestionAllowEventList;
 
     }
 
@@ -69,8 +72,13 @@ public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, Str
                 if (!withCustomParameters) {
                     clickstreamEvent.setCustomParameters(null);
                 }
-                out.collect(clickstreamEvent.toJson());
-
+                // to stream ingestion
+                if (streamIngestionAllowEventList == null
+                        || "ALL".equals(streamIngestionAllowEventList.get(0))
+                        || streamIngestionAllowEventList.contains(clickstreamEvent.getEventName())) {
+                    out.collect(clickstreamEvent.toJson());
+                }
+                // to table agg
                 ctx.output(tableRowOutputTag, clickstreamEvent);
             }
         } catch (Exception e) {

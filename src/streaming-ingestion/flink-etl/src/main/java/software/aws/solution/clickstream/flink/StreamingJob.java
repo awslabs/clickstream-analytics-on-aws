@@ -43,13 +43,15 @@ import software.aws.solution.clickstream.plugin.enrich.UAEnrichmentV2;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
+
+import static org.apache.flink.table.api.Expressions.$;
+import static org.apache.flink.table.api.Expressions.dateFormat;
 
 @Slf4j
 public class StreamingJob {
@@ -102,7 +104,14 @@ public class StreamingJob {
         TransformConfig transformConfig = new TransformConfig();
         transformConfig.setTrafficSourceEnrichmentDisabled(!props.isTrafficSourceEnrich());
         transformConfig.setAppRuleConfig(getAppRuleConfig(props));
-        transformConfig.setAllowEvents(props.getAllowEventList());
+
+        List<String> allowEvents = props.getAllowEventList();
+        if (props.isEnableWindowAgg()) {
+            allowEvents = List.of("ALL");
+            log.info("Enable window aggregation, transformConfig.allowEvents: { ALL }");
+        }
+        transformConfig.setAllowEvents(allowEvents);
+
         long allowEventTimeMaxLatencyMilisec = Math.round(props.getAllowRetentionHours() * 3600 * 1000);
         // at least 1 seconds
         transformConfig.setAllowEventTimeMaxLatencyMilisec(allowEventTimeMaxLatencyMilisec >= 1000 ? allowEventTimeMaxLatencyMilisec : 0);
@@ -205,11 +214,15 @@ public class StreamingJob {
         log.info("transformAndSinkV2 appId: {}", appId);
         boolean withCustomParameters = props.isWithCustomParameters();
 
+        List<String> streamIngestionAllowEventList = props.getAllowEventList();
+
         TransformEventFlatMapFunctionV2 transformEventProcessFunction = new TransformEventFlatMapFunctionV2(projectId, appId, eventParser,
-                getEnrichments(), withCustomParameters);
+                getEnrichments(), withCustomParameters, streamIngestionAllowEventList);
         SingleOutputStreamOperator<String> transformedData = inputStream.process(transformEventProcessFunction).name("TransformEventFunction-" + appId);
 
-        transformedData.sinkTo(outKinesisSink).name(appId);
+        if (props.isEnableStreamIngestion()) {
+            transformedData.sinkTo(outKinesisSink).name(appId);
+        }
         aggStreamTable(appId, transformedData.getSideOutput(transformEventProcessFunction.getTableRowOutputTag()));
     }
 
@@ -230,19 +243,22 @@ public class StreamingJob {
         if (sql.isEmpty()) {
             return;
         }
-        Table agg10MinutesEventAndUserTable = tableEnv.sqlQuery(sql);
-
+        Table aggTable = tableEnv.sqlQuery(sql).addColumns(
+                dateFormat($("window_start"), "yyyyMMdd").as("date")
+        );
         String sinkTable = getAggSinkTable(appId);
-        this.statementSet.add(agg10MinutesEventAndUserTable.insertInto(sinkTable));
+        this.statementSet.add(aggTable.insertInto(sinkTable));
     }
 
     private String getAggSql(final String viewName) {
         int windowSlide = this.props.getWindowSlideMinutes();
         int windowSize = this.props.getWindowSizeMinutes();
+        String[] aggTypes = this.props.getWindowAggTypes();
         String sql = AggSqlProvider.builder()
                 .viewName(viewName)
                 .windowSize(windowSize)
                 .windowSlide(windowSlide)
+                .addAggTypes(aggTypes)
                 .build()
                 .getSql();
 
@@ -251,20 +267,15 @@ public class StreamingJob {
     }
 
     String getAggSinkTable(final String appId) {
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String dateYMD = format.format(System.currentTimeMillis());
-
         String bucket = this.props.getDataBucketName();
         String projectId = this.props.getProjectId();
-        String fileName = "agg_10_minutes_event_user.json";
-        String sinkTable = fileName.replace(".json", "_" + appId);
+        String fileName =  "agg_result.json";
+        String sinkTableName = fileName.replace(".json", "_" + appId);
 
-        String s3Path = String.format("s3://%s/clickstream/%s/flink/AggReports/appId=%s/date=%s/%s", bucket, projectId, appId, dateYMD, fileName);
+        String s3Path = String.format("s3://%s/clickstream/%s/flink/AggReports/%s/%s", bucket, projectId, appId, fileName);
 
         if ("_".equals(bucket)) { // Test local
-            s3Path = "file:///tmp/" + fileName;
+            s3Path = Paths.get("/", "tmp", appId, fileName).toString();
         }
         log.info("Agg Sink table path: {}", s3Path);
         Schema schema = Schema.newBuilder()
@@ -272,15 +283,17 @@ public class StreamingJob {
                 .column("window_end", DataTypes.TIMESTAMP(3))
                 .column("data_type", DataTypes.STRING())
                 .column("data", DataTypes.STRING())
+                .column("date", DataTypes.STRING())
                 .build();
 
-        tableEnv.createTemporaryTable(sinkTable, TableDescriptor.forConnector("filesystem")
+        tableEnv.createTemporaryTable(sinkTableName, TableDescriptor.forConnector("filesystem")
                 .schema(schema)
+                .partitionedBy("date")
                 .option("path", s3Path)
                 .format(FormatDescriptor.forFormat("json")
                         .build())
                 .build());
-        return sinkTable;
+        return sinkTableName;
     }
 
     private List<ClickstreamEventEnrichment> getEnrichments() throws IOException {

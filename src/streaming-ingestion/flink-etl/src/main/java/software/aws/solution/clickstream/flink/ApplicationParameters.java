@@ -56,6 +56,7 @@ public class ApplicationParameters {
     private String appRuleConfigPath;
     private List<AppIdStream> appIdStreamList;
     private int parallelism = 0;
+    private boolean enableStreamIngestion= true;
     private boolean isWithCustomParameters;
     private double allowRetentionHours;
     private List<String> allowEventList;
@@ -147,7 +148,12 @@ public class ApplicationParameters {
          parameters.setWindowAggTypes(windowAggTypeStr.split(","));
          log.info("windowAggTypesStr: {}", windowAggTypeStr);
 
-        return parameters;
+         boolean enableStreamIngestion = Boolean.parseBoolean(props.getProperty("enableStreamIngestion", "true"));
+         parameters.setEnableStreamIngestion(enableStreamIngestion);
+         log.info("enableStreamIngestion: {}", enableStreamIngestion);
+
+         validate(parameters);
+         return parameters;
     }
 
 
@@ -183,6 +189,7 @@ public class ApplicationParameters {
         parameters.setWithCustomParameters(true);
         parameters.setAllowRetentionHours(0);
         parameters.setAllowEventList(null);
+        parameters.setEnableStreamIngestion(true);
 
         if (args.length > 5) {
             parameters.setTransformVersion(args[5]);
@@ -236,9 +243,27 @@ public class ApplicationParameters {
             parameters.setWindowAggTypes(args[15].split(","));
         }
 
+        if (args.length > 16) { // enableStreamIngestion
+            parameters.setEnableStreamIngestion(Boolean.parseBoolean(args[16]));
+        }
+
         parameters.setRegion(args[2].split(":")[3]);
         parameters.setAppIdStreamList(getConfig(parameters.getAppIdStreamConfig(), parameters.getRegion()));
+
+        validate(parameters);
+
+        log.info("ApplicationParameters: {}", parameters);
         return parameters;
+    }
+
+    private static void validate(final ApplicationParameters parameters) {
+        if (!parameters.isEnableStreamIngestion() && !parameters.isEnableWindowAgg()) {
+            throw new ClickstreamException("Both enableStreamIngestion and enableWindowAgg are false, at least one should be true");
+        }
+
+        if (parameters.getWindowSlideMinutes() > parameters.getWindowSizeMinutes()) {
+            throw new ClickstreamException("windowSlideMinutes should be less than or equal to windowSizeMinutes");
+        }
     }
 
     public static ApplicationParameters loadApplicationParameters(final String[] args, final boolean isLocal) throws IOException {

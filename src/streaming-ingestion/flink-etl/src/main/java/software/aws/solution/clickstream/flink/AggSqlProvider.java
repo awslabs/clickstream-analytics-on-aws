@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -25,6 +26,7 @@ public class AggSqlProvider {
     public static final String EVENT_NAME_TOP_RANK = "eventNameTopRank";
     public static final String PAGE_TITLE_TOP_RANK = "pageTitleTopRank";
     public static final String EVENT_AND_USER_COUNT = "eventAndUserCount";
+    public static final String TRAFFIC_SOURCE_SOURCE_TOP_RANK = "trafficSourceSourceTopRank";
     public static final String ALL = "ALL";
     private final String viewName;
     private final int windowSize;
@@ -57,6 +59,11 @@ public class AggSqlProvider {
                 aggTypes.add(aggType);
                 return this;
             }
+
+         public AggSqlProviderBuilder addAggTypes(final String[] aggTypes) {
+             this.aggTypes.addAll(Arrays.asList(aggTypes));
+             return this;
+         }
          public AggSqlProvider build() {
              return new AggSqlProvider(viewName, windowSize, windowSlide, aggTypes);
          }
@@ -90,55 +97,24 @@ public class AggSqlProvider {
              sqlList.add(sql1);
          }
 
-         String sql2 = String.format(// NOSONAR
-                 selectWindow
-                         +     "JSON_OBJECT(KEY 'page_title' VALUE page_title, KEY 'event_count' VALUE event_count, KEY 'user_count' VALUE user_count, KEY 'rank' VALUE rownum) data \n"
-                         + "FROM (\n"
-                         + "    SELECT *, \n"
-                         + "           ROW_NUMBER() OVER (\n"
-                         + "               PARTITION BY window_start, window_end \n"
-                         + "               ORDER BY event_count DESC\n"
-                         + "           ) AS rownum\n"
-                         + "    FROM (\n"
-                         + "        SELECT window_start, \n"
-                         + "               window_end, \n"
-                         + "               pageViewPageTitle page_title, \n"
-                         + "               COUNT(eventId) AS event_count, \n"
-                         + "               COUNT(distinct userPseudoId) AS user_count\n"
-                         + "        FROM %s\n"
-                         + "        GROUP BY window_start, window_end, pageViewPageTitle\n"
-                         + "    )\n"
-                         + ") \n"
-                         + "WHERE rownum <= 10\n", PAGE_TITLE_TOP_RANK, cumulateTable);
+         String sql2 = getGroupBySql(PAGE_TITLE_TOP_RANK, selectWindow,  "pageViewPageTitle", cumulateTable);
 
          if (aggTypes.contains(ALL) || aggTypes.contains(PAGE_TITLE_TOP_RANK)) {
              sqlList.add(sql2);
          }
 
-         String sql3 = String.format(// NOSONAR
-                 selectWindow
-                         +     "JSON_OBJECT(KEY 'event_name' VALUE event_name, KEY 'event_count' VALUE event_count, KEY 'user_count' VALUE user_count, KEY 'rank' VALUE rownum) data \n"
-                         + "FROM (\n"
-                         + "    SELECT *, \n"
-                         + "           ROW_NUMBER() OVER (\n"
-                         + "               PARTITION BY window_start, window_end \n"
-                         + "               ORDER BY event_count DESC\n"
-                         + "           ) AS rownum\n"
-                         + "    FROM (\n"
-                         + "        SELECT window_start, \n"
-                         + "               window_end, \n"
-                         + "               eventName event_name, \n"
-                         + "               COUNT(eventId) AS event_count, \n"
-                         + "               COUNT(distinct userPseudoId) AS user_count\n"
-                         + "        FROM %s\n"
-                         + "        GROUP BY window_start, window_end, eventName\n"
-                         + "    )\n"
-                         + ") \n"
-                         + "WHERE rownum <= 10\n", EVENT_NAME_TOP_RANK, cumulateTable);
+         String sql3 =  getGroupBySql(EVENT_NAME_TOP_RANK, selectWindow,  "eventName", cumulateTable);
 
          if (aggTypes.contains(ALL) || aggTypes.contains(EVENT_NAME_TOP_RANK)) {
              sqlList.add(sql3);
          }
+
+         String sql4 =  getGroupBySql(TRAFFIC_SOURCE_SOURCE_TOP_RANK, selectWindow,  "trafficSourceSource", cumulateTable);
+
+         if (aggTypes.contains(ALL) || aggTypes.contains(TRAFFIC_SOURCE_SOURCE_TOP_RANK)) {
+             sqlList.add(sql4);
+         }
+
          if (!sqlList.isEmpty()) {
              return String.join("\nUNION ALL\n", sqlList);
          } else {
@@ -146,5 +122,29 @@ public class AggSqlProvider {
              return "";
          }
      }
+
+    private static String getGroupBySql(final String aggType, final String selectWindow, final String groupColumn, final String cumulateTable) {
+        String sql2 = String.format(// NOSONAR
+                selectWindow
+                        +     "JSON_OBJECT(KEY '%s' VALUE %s, KEY 'event_count' VALUE event_count, KEY 'user_count' VALUE user_count, KEY 'rank' VALUE rownum) data \n"
+                        + "FROM (\n"
+                        + "    SELECT *, \n"
+                        + "           ROW_NUMBER() OVER (\n"
+                        + "               PARTITION BY window_start, window_end \n"
+                        + "               ORDER BY event_count DESC\n"
+                        + "           ) AS rownum\n"
+                        + "    FROM (\n"
+                        + "        SELECT window_start, \n"
+                        + "               window_end, \n"
+                        + "               %s, \n"
+                        + "               COUNT(eventId) AS event_count, \n"
+                        + "               COUNT(distinct userPseudoId) AS user_count\n"
+                        + "        FROM %s\n"
+                        + "        GROUP BY window_start, window_end, %s\n"
+                        + "    )\n"
+                        + ") \n"
+                        + "WHERE rownum <= 10\n", aggType, groupColumn, groupColumn, groupColumn, cumulateTable, groupColumn);
+        return sql2;
+    }
 
 }

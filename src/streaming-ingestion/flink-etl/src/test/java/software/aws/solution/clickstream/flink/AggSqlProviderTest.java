@@ -14,13 +14,17 @@
 package software.aws.solution.clickstream.flink;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 //  ./gradlew clean test --tests  software.aws.solution.clickstream.flink.AggSqlProviderTest
-public class AggSqlProviderTest {
+public class AggSqlProviderTest extends BaseFlinkTest {
 
     private AggSqlProvider aggSqlProvider;
 
@@ -35,76 +39,13 @@ public class AggSqlProviderTest {
     }
 
     @Test
-    public void returnsCorrectSqlForGivenParameters() {
-        String expectedSql = "SELECT window_start, window_end, 'eventAndUserCount' as data_type, \n" +
-                "JSON_OBJECT(KEY 'user_count' VALUE COUNT(distinct userPseudoId), KEY 'event_count' VALUE COUNT(eventId)) data \n" +
-                "FROM TABLE(\n" +
-                "            CUMULATE(\n" +
-                "                TABLE testView, \n" +
-                "                DESCRIPTOR(event_time), \n" +
-                "                INTERVAL '10' MINUTES, \n" +
-                "                INTERVAL '60' MINUTES\n" +
-                "            )\n" +
-                "        )\n" +
-                "GROUP BY window_start, window_end\n" +
-                "\n" +
-                "UNION ALL\n" +
-                "SELECT window_start, window_end, 'pageTitleTopRank' as data_type, \n" +
-                "JSON_OBJECT(KEY 'page_title' VALUE page_title, KEY 'event_count' VALUE event_count, KEY 'user_count' VALUE user_count, KEY 'rank' VALUE rownum) data \n" +
-                "FROM (\n" +
-                "    SELECT *, \n" +
-                "           ROW_NUMBER() OVER (\n" +
-                "               PARTITION BY window_start, window_end \n" +
-                "               ORDER BY event_count DESC\n" +
-                "           ) AS rownum\n" +
-                "    FROM (\n" +
-                "        SELECT window_start, \n" +
-                "               window_end, \n" +
-                "               pageViewPageTitle page_title, \n" +
-                "               COUNT(eventId) AS event_count, \n" +
-                "               COUNT(distinct userPseudoId) AS user_count\n" +
-                "        FROM TABLE(\n" +
-                "            CUMULATE(\n" +
-                "                TABLE testView, \n" +
-                "                DESCRIPTOR(event_time), \n" +
-                "                INTERVAL '10' MINUTES, \n" +
-                "                INTERVAL '60' MINUTES\n" +
-                "            )\n" +
-                "        )\n" +
-                "        GROUP BY window_start, window_end, pageViewPageTitle\n" +
-                "    )\n" +
-                ") \n" +
-                "WHERE rownum <= 10\n" +
-                "\n" +
-                "UNION ALL\n" +
-                "SELECT window_start, window_end, 'eventNameTopRank' as data_type, \n" +
-                "JSON_OBJECT(KEY 'event_name' VALUE event_name, KEY 'event_count' VALUE event_count, KEY 'user_count' VALUE user_count, KEY 'rank' VALUE rownum) data \n" +
-                "FROM (\n" +
-                "    SELECT *, \n" +
-                "           ROW_NUMBER() OVER (\n" +
-                "               PARTITION BY window_start, window_end \n" +
-                "               ORDER BY event_count DESC\n" +
-                "           ) AS rownum\n" +
-                "    FROM (\n" +
-                "        SELECT window_start, \n" +
-                "               window_end, \n" +
-                "               eventName event_name, \n" +
-                "               COUNT(eventId) AS event_count, \n" +
-                "               COUNT(distinct userPseudoId) AS user_count\n" +
-                "        FROM TABLE(\n" +
-                "            CUMULATE(\n" +
-                "                TABLE testView, \n" +
-                "                DESCRIPTOR(event_time), \n" +
-                "                INTERVAL '10' MINUTES, \n" +
-                "                INTERVAL '60' MINUTES\n" +
-                "            )\n" +
-                "        )\n" +
-                "        GROUP BY window_start, window_end, eventName\n" +
-                "    )\n" +
-                ") \n" +
-                "WHERE rownum <= 10";
-        String actualSql = aggSqlProvider.getSql();
-        assertEquals(expectedSql.trim(), actualSql.trim());
+    public void returnsCorrectSqlForGivenParameters() throws IOException {
+        String fileName = "/expected/agg-all.sql";
+        String expectedSql = IOUtils.resourceToString(fileName, StandardCharsets.UTF_8).trim();
+
+        String actualSql = aggSqlProvider.getSql().trim();
+        assertEquals(expectedSql.replaceAll("\\s+", ""),
+                actualSql.replaceAll("\\s+", ""));
     }
 
     @Test
