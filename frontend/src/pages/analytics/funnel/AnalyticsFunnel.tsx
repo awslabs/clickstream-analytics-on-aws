@@ -53,7 +53,7 @@ import { analyticsEventSelectReducer } from 'components/eventselect/reducer/anal
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
-import { StateActionType, HelpPanelType } from 'context/reducer';
+import { HelpPanelType, StateActionType } from 'context/reducer';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -66,16 +66,16 @@ import {
   isAnalystAuthorRole,
 } from 'ts/utils';
 import {
-  validEventAnalyticsItem,
+  getDashboardCreateParameters,
   getDateRange,
   getEventAndConditions,
-  getDashboardCreateParameters,
-  getIntervalInSeconds,
   getGlobalEventCondition,
-  getLngFromLocalStorage,
   getGroupCondition,
-  validMultipleEventAnalyticsItems,
+  getIntervalInSeconds,
+  getLngFromLocalStorage,
   validateFilterConditions,
+  validEventAnalyticsItem,
+  validMultipleEventAnalyticsItems,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker, {
@@ -94,6 +94,7 @@ interface AnalyticsFunnelProps {
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
   groupParameters: CategoryItemType[];
+  segmentParameters?: CategoryItemType[];
   loadingEvents: boolean;
 }
 
@@ -111,6 +112,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     categoryEvents,
     presetParameters,
     groupParameters,
+    segmentParameters,
     loadingEvents,
   } = props;
   const { appId } = useParams();
@@ -387,6 +389,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
     setDateRangeValue(DEFAULT_WEEK_RANGE);
     setTimeGranularity({
@@ -440,6 +443,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
   }, [presetParameters]);
 

@@ -23,6 +23,7 @@ import {
 export type ResetFilterData = {
   type: 'resetFilterData';
   presetParameters: CategoryItemType[];
+  segmentParameters?: CategoryItemType[];
 };
 
 export type ChangeRelationShip = {
@@ -72,9 +73,13 @@ export const analyticsSegmentFilterReducer = (
 ): SegmentationFilterDataType => {
   switch (action.type) {
     case 'resetFilterData': {
+      const conditionOptions = action.segmentParameters
+        ? [...action.presetParameters, ...action.segmentParameters]
+        : action.presetParameters;
+
       return {
         ...INIT_SEGMENTATION_DATA,
-        conditionOptions: action.presetParameters,
+        conditionOptions,
         enableChangeRelation: true,
       };
     }

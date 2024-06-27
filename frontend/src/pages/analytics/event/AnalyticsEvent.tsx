@@ -19,8 +19,8 @@ import {
   IMetadataBuiltInList,
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
-  SPECIAL_CHARACTERS_PATTERN,
   QuickSightChartType,
+  SPECIAL_CHARACTERS_PATTERN,
 } from '@aws/clickstream-base-lib';
 import {
   Button,
@@ -51,7 +51,7 @@ import { analyticsEventSelectReducer } from 'components/eventselect/reducer/anal
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
-import { StateActionType, HelpPanelType } from 'context/reducer';
+import { HelpPanelType, StateActionType } from 'context/reducer';
 
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -70,9 +70,9 @@ import {
   getGlobalEventCondition,
   getGroupCondition,
   getLngFromLocalStorage,
+  validateFilterConditions,
   validEventAnalyticsItem,
   validMultipleEventAnalyticsItems,
-  validateFilterConditions,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker, {
@@ -91,6 +91,7 @@ interface AnalyticsEventProps {
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
   groupParameters: CategoryItemType[];
+  segmentParameters?: CategoryItemType[];
   loadingEvents: boolean;
 }
 
@@ -108,6 +109,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     categoryEvents,
     presetParameters,
     groupParameters,
+    segmentParameters,
     loadingEvents,
   } = props;
   const { appId } = useParams();
@@ -176,6 +178,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
     setDateRangeValue(DEFAULT_WEEK_RANGE);
     setExploreEmbedUrl('');
@@ -383,6 +386,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
+      segmentParameters,
     });
   }, [presetParameters]);
 

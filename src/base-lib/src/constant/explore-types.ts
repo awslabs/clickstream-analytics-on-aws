@@ -33,6 +33,10 @@ export enum MetadataValueType {
   BOOLEAN = 'boolean',
 }
 
+export enum ExtendedMetadataValueType {
+  USER_SEGMENT = 'UserSegment'
+}
+
 export enum MetadataParameterType {
   PUBLIC = 'Public',
   PRIVATE = 'Private',
@@ -202,3 +206,4 @@ export const MUSTACHE_RENDER_CATEGORIES = {
   category_session: ConditionCategoryFrontend.SESSION,
   category_sdk: ConditionCategoryFrontend.SDK,
 };
+

@@ -26,7 +26,8 @@
     "session": "Session",
     "outbound": "Outbound",
     "upgrade": "Upgrade",
-    "outer": "Solution properties"
+    "outer": "Solution properties",
+    "segment": "Segment"
   },
   "dashboard": {
     "title": "Dashboards",
