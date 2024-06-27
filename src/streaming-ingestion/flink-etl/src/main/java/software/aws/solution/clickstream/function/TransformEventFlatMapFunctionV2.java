@@ -74,7 +74,6 @@ public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, Str
                 }
                 // to stream ingestion
                 if (streamIngestionAllowEventList == null
-                        || "ALL".equals(streamIngestionAllowEventList.get(0))
                         || streamIngestionAllowEventList.contains(clickstreamEvent.getEventName())) {
                     out.collect(clickstreamEvent.toJson());
                 }

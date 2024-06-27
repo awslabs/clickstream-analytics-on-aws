@@ -107,8 +107,8 @@ public class StreamingJob {
 
         List<String> allowEvents = props.getAllowEventList();
         if (props.isEnableWindowAgg()) {
-            allowEvents = List.of("ALL");
-            log.info("Enable window aggregation, transformConfig.allowEvents: { ALL }");
+            allowEvents = null;
+            log.info("Enable window aggregation, set transformConfig.allowEvents: null for ALL events");
         }
         transformConfig.setAllowEvents(allowEvents);
 
@@ -222,6 +222,8 @@ public class StreamingJob {
 
         if (props.isEnableStreamIngestion()) {
             transformedData.sinkTo(outKinesisSink).name(appId);
+        } else {
+            transformedData.sinkTo(new DiscardSink()).name("Discarding-" + appId).setParallelism(1);
         }
         aggStreamTable(appId, transformedData.getSideOutput(transformEventProcessFunction.getTableRowOutputTag()));
     }
