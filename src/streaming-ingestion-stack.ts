@@ -123,6 +123,7 @@ export class StreamingIngestionStack extends Stack {
     const mappingConfigKey = `${pipeline.dataBucket.prefix}${projectId}/flink-config/app-id-stream-config.json`;
     const appIdStreamConfigS3Path = `s3://${dataBucket.bucketName}/${mappingConfigKey}`;
     const appRuleConfigPathS3Path = `s3://${dataBucket.bucketName}/clickstream/${projectId}/rules/`;
+    const aggReportS3KeyPrefix = `clickstream/${projectId}/flink/AggReports/`;
     this.flinkApp = new Application(this, 'ClickstreamStreamingIngestion', {
       code: ApplicationCode.fromBucket(dataBucket, applicationJarKey),
       propertyGroups: {
@@ -136,12 +137,17 @@ export class StreamingIngestionStack extends Stack {
           appRuleConfigPath: appRuleConfigPathS3Path,
           transformVersion: 'v2',
           transformerName: eventProcessing.transformerName,
+          enableStreamIngestion: eventProcessing.enableStreamIngestion,
           enableUaEnrich: eventProcessing.enableUaEnrich,
           enableIpEnrich: eventProcessing.enableIpEnrich,
           enableTrafficSourceEnrich: eventProcessing.enableTrafficSourceEnrich,
           withCustomParameters: eventProcessing.withCustomParameters,
           allowEventList: eventProcessing.allowEvents,
           allowRetentionHours: eventProcessing.retentionHours + '',
+          enableWindowAgg: eventProcessing.enableWindowAgg,
+          windowAggTypes: eventProcessing.windowAggTypes,
+          windowSizeMinutes: eventProcessing.windowSizeMinutes + '',
+          windowSlideMinutes: eventProcessing.windowSlideMinutes + '',
         },
       },
       runtime: Runtime.of('FLINK-1_18'),
@@ -159,6 +165,7 @@ export class StreamingIngestionStack extends Stack {
     dataBucket.grantRead(this.flinkApp, applicationJarKey);
     dataBucket.grantRead(this.flinkApp, geoDBKey);
     dataBucket.grantRead(this.flinkApp, mappingConfigKey);
+    dataBucket.grantWrite(this.flinkApp, aggReportS3KeyPrefix + '*');
     this.flinkApp.addToRolePolicy(new PolicyStatement({
       actions: [
         'kinesis:PutRecord',

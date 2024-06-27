@@ -244,6 +244,44 @@ describe('common parameter test of StreamingIngestionStack', () => {
     });
   });
 
+  test('Should has Parameter EnableStreamIngestion', () => {
+    template.hasParameter('EnableStreamIngestion', {
+      Type: 'String',
+      Default: 'true',
+      AllowedValues: ['true', 'false'],
+    });
+  });
+
+  test('Should has Parameter EnableWindowAgg', () => {
+    template.hasParameter('EnableWindowAgg', {
+      Type: 'String',
+      Default: 'false',
+      AllowedValues: ['true', 'false'],
+    });
+  });
+
+  test('Should has Parameter WindowAggTypes', () => {
+    template.hasParameter('WindowAggTypes', {
+      Type: 'CommaDelimitedList',
+    });
+  });
+
+  test('Should has Parameter WindowSizeMinutes', () => {
+    template.hasParameter('WindowSizeMinutes', {
+      Type: 'Number',
+      Default: 60,
+      MinValue: 1,
+    });
+  });
+
+  test('Should has Parameter WindowSlideMinutes', () => {
+    template.hasParameter('WindowSlideMinutes', {
+      Type: 'Number',
+      Default: 10,
+      MinValue: 1,
+    });
+  });
+
 });
 
 describe('have custom resource to provisioning sink kinesis', () => {
@@ -602,6 +640,38 @@ describe('managed Flink application for real-time data processing', () => {
           },
           {
             Action: [
+              's3:DeleteObject*',
+              's3:PutObject',
+              's3:PutObjectLegalHold',
+              's3:PutObjectRetention',
+              's3:PutObjectTagging',
+              's3:PutObjectVersionTagging',
+              's3:Abort*',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                Ref: 'IngestionPipelineS3BucketArn',
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      Ref: 'IngestionPipelineS3BucketArn',
+                    },
+                    '/clickstream/',
+                    {
+                      Ref: 'ProjectId',
+                    },
+                    '/flink/AggReports/*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
               'kinesis:PutRecord',
               'kinesis:PutRecords',
               'kinesis:ListShards',
@@ -819,12 +889,19 @@ describe('managed Flink application for real-time data processing', () => {
                 appRuleConfigPath: Match.anyValue(),
                 transformVersion: 'v2',
                 transformerName: Match.anyValue(),
-                allowEventList: Match.anyValue(),
-                allowRetentionHours: Match.anyValue(),
+
+                enableStreamIngestion: Match.anyValue(),
                 enableUaEnrich: Match.anyValue(),
                 enableIpEnrich: Match.anyValue(),
                 enableTrafficSourceEnrich: Match.anyValue(),
                 withCustomParameters: Match.anyValue(),
+                allowEventList: Match.anyValue(),
+                allowRetentionHours: Match.anyValue(),
+
+                enableWindowAgg: Match.anyValue(),
+                windowAggTypes: Match.anyValue(),
+                windowSizeMinutes: Match.anyValue(),
+                windowSlideMinutes: Match.anyValue(),
               },
             },
           ],
