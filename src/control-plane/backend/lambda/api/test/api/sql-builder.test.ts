@@ -24065,13 +24065,21 @@ describe('SQL Builder test', () => {
     with
       user_segment_base as (
         select
-          user_id
+          a.user_pseudo_id as user_id
         from
-          shop.shop.segment_user
+          shop.shop.user_v2 a
+          left join (
+            select
+              user_id
+            from
+              shop.shop.segment_user
+            where
+              segment_id in ('111111', '33333', '22222', '44444')
+          ) b on a.user_pseudo_id = b.user_id
         where
-          segment_id not in ('111111', '33333', '22222', '44444')
+          b.user_id is null
         group by
-          user_id
+          1
       ),
       base_data as (
         select
@@ -24368,11 +24376,9 @@ describe('SQL Builder test', () => {
         from
           (
             select
-              user_id
+              user_pseudo_id as user_id
             from
-              shop.shop.segment_user
-            group by
-              user_id
+              shop.shop.user_v2
           ) a
           left join (
             select
@@ -24795,13 +24801,19 @@ describe('SQL Builder test', () => {
         from
           (
             select
-              user_id
+              t1.user_pseudo_id as user_id
             from
-              shop.shop.segment_user
+              shop.shop.user_v2 t1
+              left join (
+                select
+                  user_id
+                from
+                  shop.shop.segment_user
+                where
+                  segment_id in ('22222', '44444')
+              ) t2 on t1.user_pseudo_id = t2.user_id
             where
-              segment_id not in ('22222', '44444')
-            group by
-              user_id
+              t2.user_id is null
           ) a
           join (
             select
@@ -25089,11 +25101,9 @@ describe('SQL Builder test', () => {
             from
               (
                 select
-                  user_id
+                  user_pseudo_id as user_id
                 from
-                  shop.shop.segment_user
-                group by
-                  user_id
+                  shop.shop.user_v2
               ) a
               left join (
                 select
