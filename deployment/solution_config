@@ -1,5 +1,6 @@
 SOLUTION_ID='SO0219'
 
+SOLUTION_ECR_IMAGE_PLATFORM='linux/amd64'
 SOLUTION_ECR_ACCOUNT=366590864501
 SOLUTION_ECR_REPO_NAME='clickstream-analytics-on-aws'
 SOLUTION_ECR_BUILD_VERSION=$(curl -s https://s3.amazonaws.com/aws-gcr-solutions/clickstream-analytics-on-aws/latest/version)
