@@ -495,3 +495,5 @@ export const TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME = 'traffic_source_category_r
 export const TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME = 'traffic_source_channel_rule_v1.json';
 
 export const EXPLORE_SEGMENT_DUMMY_PROPERTY = 'segment_id';
+
+export const SINK_STREAM_NAME_PREFIX = 'clickstream_streaming_sink_';

@@ -11,17 +11,19 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON } from '@aws/clickstream-base-lib';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, SINK_STREAM_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import moment from 'moment-timezone';
 import { PipelineServ } from './pipeline';
+import { awsAccountId, awsPartition } from '../common/constants';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getPipelineStatusType, getStackOutputFromPipelineStatus, isEmpty, paginateData } from '../common/utils';
+import { getPipelineStatusType, getStackName, getStackOutputFromPipelineStatus, isEmpty, paginateData } from '../common/utils';
 import { IApplication } from '../model/application';
 import { CPipeline, IAppTimezone, IPipeline } from '../model/pipeline';
-import { updateFlinkApplicationEnvironmentProperties } from '../store/aws/flink';
+import { describeStack } from '../store/aws/cloudformation';
+import { updateFlinkApplication } from '../store/aws/flink';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -269,39 +271,41 @@ export class ApplicationServ {
           streamEnableAppIds.splice(index, 1);
         }
       }
-      const streamingSinkKinesisConfig = this.getStreamingSinkKinesisConfig(latestPipeline, streamEnableAppIds);
-      const updateRes = await updateFlinkApplicationEnvironmentProperties(latestPipeline.region, flinkAppName, streamingSinkKinesisConfig);
+
+      const streamingSinkKinesisConfig = await this.getStreamingSinkKinesisConfig(latestPipeline, streamEnableAppIds);
+      const updateRes = await updateFlinkApplication(latestPipeline.region, flinkAppName, streamEnableAppIds, streamingSinkKinesisConfig);
       if (!updateRes) {
         return res.status(500).json(new ApiFail('Failed to update Flink application environment properties.'));
       }
       latestPipeline.streaming = {
         ...latestPipeline.streaming,
         appIdStreamList: streamEnableAppIds,
+        retentionHours: latestPipeline.streaming?.retentionHours ?? 1,
       };
-      await store.updatePipelineAtCurrentVersion(latestPipeline);
+      const pipeline = new CPipeline(latestPipeline);
+      await pipeline.updateStreamingApp(streamEnableAppIds);
       return res.status(200).json(new ApiSuccess(null, 'Application streaming updated.'));
     } catch (error) {
       next(error);
     }
   };
 
-  private getStreamingSinkKinesisConfig(pipeline: IPipeline, streamingSinkKinesis: string[]) {
+  private async getStreamingSinkKinesisConfig(pipeline: IPipeline, streamEnableAppIds: string[]) {
     const enableConfigs: any[] = [];
     try {
-      const sinkKinesis = getStackOutputFromPipelineStatus(
-        pipeline.stackDetails ?? pipeline.status?.stackDetails,
-        PipelineStackType.STREAMING, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON);
-      if (!sinkKinesis) {
+      const streamingStack = await describeStack(
+        pipeline.region,
+        getStackName(pipeline.pipelineId, PipelineStackType.STREAMING, pipeline.ingestionServer.sinkType),
+      );
+      if (!streamingStack) {
         return enableConfigs;
       }
-      const sinks = JSON.parse(sinkKinesis);
-      for (let [key, value] of Object.entries(sinks)) {
-        if (streamingSinkKinesis.includes(key)) {
-          enableConfigs.push({
-            appId: key,
-            streamArn: value,
-          });
-        }
+      const streamingStackIdPrefix = streamingStack?.StackId?.split('/')[2].split('-')[0];
+      for (let appId of streamEnableAppIds) {
+        enableConfigs.push({
+          appId: appId,
+          streamArn: `arn:${awsPartition}:kinesis:${pipeline.region}:${awsAccountId}:stream/${SINK_STREAM_NAME_PREFIX}${pipeline.projectId}_${appId}_${streamingStackIdPrefix}`,
+        });
       }
       return enableConfigs;
     } catch (error) {

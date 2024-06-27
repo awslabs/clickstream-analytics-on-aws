@@ -1671,6 +1671,12 @@ export class CStreamingStack extends JSONObject {
   })
     RedshiftUserParam?: string;
 
+  @JSONObject.optional('1')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
+    return stack._pipeline?.streaming?.retentionHours ?? '1';
+  })
+    RetentionHours?: string;
+
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CStreamingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);

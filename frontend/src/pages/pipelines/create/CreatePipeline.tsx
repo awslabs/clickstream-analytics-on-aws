@@ -59,6 +59,7 @@ import {
   DEFAULT_TRANSFORM_SDK_IDS,
   EIngestionType,
   ENetworkType,
+  EVENT_REFRESH_UNIT_LIST,
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
@@ -934,6 +935,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     } else {
       createPipelineObj.streaming = {
         appIdStreamList: pipelineInfo.streaming?.appIdStreamList ?? [],
+        retentionHours: pipelineInfo.selectedStreamingDataRangeUnit?.value === 'day'
+        ? parseInt(pipelineInfo.streamingDataRangeValue) * 24
+        : parseInt(pipelineInfo.streamingDataRangeValue) || 1,
       };
     }
     return createPipelineObj;
@@ -2677,6 +2681,13 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   const setUpdateStreaming = async (pipelineInfo: IExtPipeline) => {
     pipelineInfo.enableStreaming =
       pipelineInfo.streaming?.appIdStreamList !== undefined;
+      const reverseStreamingDataRange = reverseFreshnessInHour(
+        pipelineInfo.streaming?.retentionHours ?? 1
+      );
+      pipelineInfo.streamingDataRangeValue = reverseStreamingDataRange.value;
+      pipelineInfo.selectedStreamingDataRangeUnit = EVENT_REFRESH_UNIT_LIST.filter(
+        (type) => type.value === reverseStreamingDataRange.unit
+      )[0];
   };
 
   const setUpdateQuickSightUser = async (pipelineInfo: IExtPipeline) => {
