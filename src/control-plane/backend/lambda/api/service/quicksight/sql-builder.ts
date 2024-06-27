@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, EXPLORE_SEGMENT_DUMMY_PROPERTY, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType, QuickSightChartType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, EXPLORE_SEGMENT_DUMMY_PROPERTY, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType, QuickSightChartType, TABLE_NAME_USER_V2 } from '@aws/clickstream-base-lib';
 import { format } from 'sql-formatter';
 import { formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks, isValidGroupingCondition } from './reporting-utils';
 import { logger } from '../../common/powertools';
@@ -189,7 +189,6 @@ export interface EventNonNestColProps {
 
 export const EVENT_USER_VIEW = 'clickstream_event_view_v3';
 export const USER_SEGMENT_TABLE = 'segment_user';
-export const USER_TABLE = 'user_v2';
 
 export function buildFunnelTableView(sqlParameters: SQLParameters, requestAciton: ExploreRequestAction) : string {
 
@@ -1938,7 +1937,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             from (
               select 
                 user_pseudo_id as user_id 
-              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} 
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${TABLE_NAME_USER_V2} 
             ) a
             left join (
               select 
@@ -1956,7 +1955,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
           with user_segment_base as (
             select 
               a.user_pseudo_id as user_id
-            from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} a
+            from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${TABLE_NAME_USER_V2} a
             left join 
             ( select user_id from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
                where segment_id in ('${segmentsNotIn.join('\',\'')}')
@@ -1980,7 +1979,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
               from (
                 select 
                   user_pseudo_id as user_id 
-                from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} 
+                from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${TABLE_NAME_USER_V2} 
               ) a
               left join (
                 select 
@@ -2012,7 +2011,7 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
             (
               select 
                 t1.user_pseudo_id as user_id
-              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} t1
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${TABLE_NAME_USER_V2} t1
               left join 
               ( select user_id from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
                where segment_id in ('${segmentsNotIn.join('\',\'')}')
