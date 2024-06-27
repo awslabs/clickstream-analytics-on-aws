@@ -103,13 +103,13 @@ public class AggSqlProvider {
              sqlList.add(sql2);
          }
 
-         String sql3 =  getGroupBySql(EVENT_NAME_TOP_RANK, selectWindow,  "eventName", cumulateTable);
+         String sql3 = getGroupBySql(EVENT_NAME_TOP_RANK, selectWindow,  "eventName", cumulateTable);
 
          if (aggTypes.contains(ALL) || aggTypes.contains(EVENT_NAME_TOP_RANK)) {
              sqlList.add(sql3);
          }
 
-         String sql4 =  getGroupBySql(TRAFFIC_SOURCE_SOURCE_TOP_RANK, selectWindow,  "trafficSourceSource", cumulateTable);
+         String sql4 = getGroupBySql(TRAFFIC_SOURCE_SOURCE_TOP_RANK, selectWindow,  "trafficSourceSource", cumulateTable);
 
          if (aggTypes.contains(ALL) || aggTypes.contains(TRAFFIC_SOURCE_SOURCE_TOP_RANK)) {
              sqlList.add(sql4);
