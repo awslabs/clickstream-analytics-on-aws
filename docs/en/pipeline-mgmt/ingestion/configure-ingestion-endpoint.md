@@ -18,12 +18,18 @@ The solution creates a web service as an ingestion endpoint to collect data sent
     * Warm pool: Warm pool gives you the ability to decrease latency of ingestion service scale up. For more information, please refer to [Warm pools for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html).
 
 * **Enable HTTPS**: Users can choose HTTPS/HTTP protocol for the Ingestion endpoint.
+
+    !!! warning "Warning"
+
+        If you switch between enabling HTTPS and disabling HTTPS, ingestion service interruption will occur.
+
     * Enable HTTPS: If users choose to enable HTTPS, the ingestion server will provide HTTPS endpoint. 
         * Domain name: input a domain name.  
          
-        !!! note "Note"
+            !!! note "Note"
 
-            Once the ingestion server is created, use the custom endpoint to create an alias or CNAME mapping in your Domain Name System (DNS) for the custom endpoint.
+                Once the ingestion server is created, use the custom endpoint to create an alias or CNAME mapping in your Domain Name System (DNS) for the custom endpoint.
+              
         * SSL Certificate: User need to select an ACM certificate corresponding to the domain name that you input. If there is no ACM certificate, please refer [create public certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) to create it.
 
     * Disable HTTPS: If users choose to disable HTTPS, the ingestion server will provide HTTP endpoint.
@@ -32,20 +38,18 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 
             DO NOT use HTTP in production, because data will be sent without any encryption, and there are high risks of data being leaked or tampered during transmission. Please acknowledge the risk to proceed.
 
-    !!! warning "Warning"
-
-        If you switch between enabling HTTPS and disabling HTTPS, ingestion service interruption will occur.
-
 * **Cross-Origin Resource Sharing (CORS)**: You can enable CORS to limit requests to data ingestion API from a specific domain. Note that, you need to input a complete internet address, e.g., `https://www.example.com`, `http://localhost:8080`. Use comma to separate domain if you have multiple domain for this setting.
 
-        !!! warning "Warning"
+    !!! warning "Warning"
 
-            CORS is a mandatory setting if you are collecting data from a website. If you do not set value for this parameter, the ingestion server to reject all the requests from Web platform.
+        CORS is a mandatory setting if you are collecting data from a website. If you do not set value for this parameter, the ingestion server to reject all the requests from Web platform.
 
 * Additional Settings
     * Request path: User can input the path of ingestion endpoint to collect data, the default path is "/collect".
     * AWS Global Accelerator: User can choose to create an accelerator to get static IP addresses that act as a global fixed entry point to your ingestion server, which will improves the availability and performance of your ingestion server. 
-      **Note** That additional charges apply.
+      
+        **Note**: That additional charges apply.
+
     * Authentication: User can use OIDC provider to authenticate the request sent to your ingestion server. If you plan to enable it, please create an OIDC client in the OIDC provider then create a secret in AWS Secret Manager with information:
         * issuer
         * token endpoint
