@@ -1,0 +1,19 @@
+{
+  "appId": "shop",
+  "client_timestamp": "1719469182900",
+  "compression": null,
+  "data": "[{\"event_type\":\"_page_view\",\"event_id\":\"9029c8fd-ed51-4da0-a7ea-40aad4d3ad45\",\"device_id\":\"564ea695-00d1-4fdf-beb2-9c54682a4217\",\"unique_id\":\"c631fe47-bf74-4fcf-a3ff-0e5380250d10\",\"app_id\":\"shop\",\"timestamp\":1719466410498,\"host_name\":\"test.cloudfront.net\",\"locale\":\"en-US\",\"system_language\":\"en\",\"country_code\":\"US\",\"zone_offset\":28800000,\"make\":\"Gecko\",\"platform\":\"Web\",\"screen_height\":1440,\"screen_width\":2560,\"viewport_height\":1302,\"viewport_width\":1276,\"sdk_name\":\"aws-solution-clickstream-sdk\",\"sdk_version\":\"0.12.1\",\"user\":{\"_user_first_touch_timestamp\":{\"value\":1719466021378,\"set_timestamp\":1719466021378},\"_user_id\":{\"value\":\"58\",\"set_timestamp\":1719466046946}},\"attributes\":{\"_traffic_source_source\":\"amazon\",\"_traffic_source_medium\":\"cpc\",\"_traffic_source_campaign\":\"summer_promotion\",\"_traffic_source_campaign_id\":\"summer_promotion_01\",\"_traffic_source_term\":\"running_shoes\",\"_traffic_source_content\":\"banner_ad_1\",\"_traffic_source_clid\":\"amazon_ad_123\",\"_traffic_source_clid_platform\":\"amazon_ads\",\"_session_id\":\"80250d10-20240627-052701378\",\"_session_start_timestamp\":1719466021378,\"_session_duration\":389120,\"_session_number\":1,\"_page_title\":\"Retail Demo Store\",\"_page_url\":\"https://test.cloudfront.net/product/ecc45e4c-9249-4b06-9f99-aa068eebddf4?feature=home_product_recs\",\"_latest_referrer\":\"\",\"_page_referrer\":\"https://test.cloudfront.net/\",\"_page_referrer_title\":\"Retail Demo Store\",\"_entrances\":0,\"_previous_timestamp\":1719466409801,\"_engagement_time_msec\":697}}]",
+  "date": "2024-06-27T06:19:45+00:00",
+  "fakeIp": null,
+  "ingest_time": 1719469185000,
+  "ip": "72.21.198.67",
+  "method": "POST",
+  "path": "/collect",
+  "platform": "Web",
+  "rid": "0ae1d0c2989e6a7a5619097967d65a7e",
+  "server_ingest_time": 1719469185000,
+  "source_type": "http_server",
+  "timestamp": "2024-06-27T06:19:45.547102438Z",
+  "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:126.0) Gecko/20100101 Firefox/126.0",
+  "uri": "/collect?platform=Web&appId=shop&event_bundle_sequence_id=43&upload_timestamp=1719469182900&hashCode=366095c8"
+} 
