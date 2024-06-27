@@ -119,9 +119,6 @@ describe('Test update pipeline when not enable data processing or data modeling'
         changeDBUser={() => {
           return;
         }}
-        changeDataLoadCronExp={() => {
-          return;
-        }}
         dataProcessorIntervalInvalidError={false}
         redshiftServerlessVpcEmptyError={false}
         redshiftServerlessSGEmptyError={false}
@@ -249,9 +246,6 @@ describe('Test update pipeline when not enable data processing or data modeling'
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeDataLoadCronExp={() => {
           return;
         }}
         dataProcessorIntervalInvalidError={false}

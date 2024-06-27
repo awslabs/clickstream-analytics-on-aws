@@ -116,9 +116,6 @@ describe('Test data processing settings', () => {
         changeDBUser={() => {
           return;
         }}
-        changeDataLoadCronExp={() => {
-          return;
-        }}
         dataProcessorIntervalInvalidError={false}
         redshiftServerlessVpcEmptyError={false}
         redshiftServerlessSGEmptyError={false}
@@ -243,9 +240,6 @@ describe('Test redshift settings', () => {
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeDataLoadCronExp={() => {
           return;
         }}
         dataProcessorIntervalInvalidError={false}
@@ -429,9 +423,6 @@ describe('Test redshift settings', () => {
         changeDBUser={() => {
           return;
         }}
-        changeDataLoadCronExp={() => {
-          return;
-        }}
         dataProcessorIntervalInvalidError={false}
         redshiftServerlessVpcEmptyError={false}
         redshiftServerlessSGEmptyError={false}
@@ -552,9 +543,6 @@ describe('Test MSK kafkaConnector settings', () => {
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeDataLoadCronExp={() => {
           return;
         }}
         dataProcessorIntervalInvalidError={false}
@@ -686,9 +674,6 @@ describe('Test MSK kafkaConnector settings', () => {
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeDataLoadCronExp={() => {
           return;
         }}
         dataProcessorIntervalInvalidError={false}

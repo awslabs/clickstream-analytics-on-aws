@@ -12,7 +12,7 @@
  */
 
 import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
-import { ApplicationRestoreType, ApplicationStatus, KinesisAnalyticsV2 } from '@aws-sdk/client-kinesis-analytics-v2';
+import { ApplicationRestoreType, ApplicationStatus, DescribeApplicationCommandOutput, KinesisAnalyticsV2 } from '@aws-sdk/client-kinesis-analytics-v2';
 import { logger } from '../../common/powertools';
 
 export const updateFlinkApplication = async (
@@ -33,7 +33,12 @@ export const updateFlinkApplication = async (
       return true;
     }
     // Update flink application
-    await updateFlinkApplicationConfig(region, applicationName, streamingSinkKinesisConfig);
+    await updateFlinkApplicationConfig(
+      region,
+      applicationName,
+      application,
+      streamingSinkKinesisConfig,
+    );
     if ((streamEnableAppIds && streamEnableAppIds.length > 0) &&
     application.ApplicationDetail?.ApplicationStatus === ApplicationStatus.READY) {
       // Start flink application
@@ -47,22 +52,20 @@ export const updateFlinkApplication = async (
 };
 
 export const updateFlinkApplicationConfig = async (
-  region: string, applicationName: string, streamingSinkKinesisConfig: any[],
+  region: string, applicationName: string, application: DescribeApplicationCommandOutput,
+  streamingSinkKinesisConfig: any[],
 ) => {
   const kinesisAnalytics = new KinesisAnalyticsV2({
     ...aws_sdk_client_common_config,
     region,
   });
   try {
-    const flinkApplication = await kinesisAnalytics.describeApplication({
-      ApplicationName: applicationName,
-    });
     const propertyGroupDescriptions =
-      flinkApplication.ApplicationDetail?.ApplicationConfigurationDescription?.EnvironmentPropertyDescriptions?.PropertyGroupDescriptions;
+    application.ApplicationDetail?.ApplicationConfigurationDescription?.EnvironmentPropertyDescriptions?.PropertyGroupDescriptions;
     const appIdStreamListStr = JSON.stringify({
       appIdStreamList: streamingSinkKinesisConfig,
     });
-    for (const propertyGroup of propertyGroupDescriptions || []) {
+    for (const propertyGroup of propertyGroupDescriptions ?? []) {
       if (propertyGroup.PropertyGroupId === 'EnvironmentProperties' && propertyGroup.PropertyMap) {
         propertyGroup.PropertyMap.appIdStreamConfig = appIdStreamListStr;
         break;
@@ -70,7 +73,7 @@ export const updateFlinkApplicationConfig = async (
     }
     const updateRes = await kinesisAnalytics.updateApplication({
       ApplicationName: applicationName,
-      CurrentApplicationVersionId: flinkApplication.ApplicationDetail?.ApplicationVersionId,
+      CurrentApplicationVersionId: application.ApplicationDetail?.ApplicationVersionId,
       ApplicationConfigurationUpdate: {
         EnvironmentPropertyUpdates: {
           PropertyGroups: propertyGroupDescriptions,

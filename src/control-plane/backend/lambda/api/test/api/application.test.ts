@@ -1288,6 +1288,7 @@ describe('Application test', () => {
           },
         ],
       });
+    mockClients.sfnMock.on(StartExecutionCommand).resolves({});
     mockClients.ddbMock.on(UpdateCommand).resolves({});
     mockClients.kinesisAnalyticsV2Mock.on(DescribeApplicationCommand).resolves({
       ApplicationDetail: {

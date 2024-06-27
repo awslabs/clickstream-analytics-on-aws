@@ -569,7 +569,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       pipelineInfo.enableStreaming &&
       pipelineInfo.selectedTransformPlugins.length > 0 &&
       pipelineInfo.selectedTransformPlugins[0].id &&
-      !['BUILT-IN-4', 'BUILT-IN-5'].includes(pipelineInfo.selectedTransformPlugins[0].id)
+      !['BUILT-IN-4', 'BUILT-IN-5'].includes(
+        pipelineInfo.selectedTransformPlugins[0].id
+      )
     ) {
       return false;
     }
@@ -577,10 +579,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   };
 
   const validateRedshiftForStreaming = () => {
-    if (
-      pipelineInfo.enableStreaming &&
-      !pipelineInfo.enableRedshift
-    ) {
+    if (pipelineInfo.enableStreaming && !pipelineInfo.enableRedshift) {
       return false;
     }
     return true;
@@ -969,9 +968,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     } else {
       createPipelineObj.streaming = {
         appIdStreamList: pipelineInfo.streaming?.appIdStreamList ?? [],
-        retentionHours: pipelineInfo.selectedStreamingDataRangeUnit?.value === 'day'
-        ? parseInt(pipelineInfo.streamingDataRangeValue) * 24
-        : parseInt(pipelineInfo.streamingDataRangeValue) || 1,
+        retentionHours:
+          pipelineInfo.selectedStreamingDataRangeUnit?.value === 'day'
+            ? parseInt(pipelineInfo.streamingDataRangeValue) * 24
+            : parseInt(pipelineInfo.streamingDataRangeValue) || 1,
       };
     }
     return createPipelineObj;
@@ -2707,11 +2707,12 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   const setUpdateStreaming = async (pipelineInfo: IExtPipeline) => {
     pipelineInfo.enableStreaming =
       pipelineInfo.streaming?.appIdStreamList !== undefined;
-      const reverseStreamingDataRange = reverseFreshnessInHour(
-        pipelineInfo.streaming?.retentionHours ?? 1
-      );
-      pipelineInfo.streamingDataRangeValue = reverseStreamingDataRange.value;
-      pipelineInfo.selectedStreamingDataRangeUnit = EVENT_REFRESH_UNIT_LIST.filter(
+    const reverseStreamingDataRange = reverseFreshnessInHour(
+      pipelineInfo.streaming?.retentionHours ?? 1
+    );
+    pipelineInfo.streamingDataRangeValue = reverseStreamingDataRange.value;
+    pipelineInfo.selectedStreamingDataRangeUnit =
+      EVENT_REFRESH_UNIT_LIST.filter(
         (type) => type.value === reverseStreamingDataRange.unit
       )[0];
   };
