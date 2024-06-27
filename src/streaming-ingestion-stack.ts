@@ -123,7 +123,7 @@ export class StreamingIngestionStack extends Stack {
     const mappingConfigKey = `${pipeline.dataBucket.prefix}${projectId}/flink-config/app-id-stream-config.json`;
     const appIdStreamConfigS3Path = `s3://${dataBucket.bucketName}/${mappingConfigKey}`;
     const appRuleConfigPathS3Path = `s3://${dataBucket.bucketName}/clickstream/${projectId}/rules/`;
-    const aggReportS3KeyPrefix = `clickstream/${projectId}/flink/AggReports/`
+    const aggReportS3KeyPrefix = `clickstream/${projectId}/flink/AggReports/`;
     this.flinkApp = new Application(this, 'ClickstreamStreamingIngestion', {
       code: ApplicationCode.fromBucket(dataBucket, applicationJarKey),
       propertyGroups: {
