@@ -839,6 +839,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             data,
             'quicksight'
           );
+          const flinkAvailable = findServiceAvailability(data, 'flink');
           setPipelineInfo((prev) => {
             return {
               ...prev,
@@ -848,6 +849,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
                 MSK: mskAvailable,
                 QUICK_SIGHT: quickSightAvailable,
+                FLINK: flinkAvailable,
               },
             };
           });

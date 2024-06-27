@@ -99,10 +99,13 @@ export const pingServiceResource = async (region: string, service: string) => {
     case 'global-accelerator':
       resourceName = 'AWS::GlobalAccelerator::Accelerator';
       break;
+    case 'flink':
+      resourceName = 'AWS::KinesisAnalyticsV2::Application';
+      break;
     default:
       break;
   };
   if (!resourceName) return false;
   const resource = await describeType(region, resourceName);
-  return resource?.Arn ? true : false;
+  return !!resource?.Arn;
 };

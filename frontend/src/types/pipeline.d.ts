@@ -255,6 +255,7 @@ declare global {
       REDSHIFT_SERVERLESS: boolean;
       MSK: boolean;
       QUICK_SIGHT: boolean;
+      FLINK: boolean;
     };
     showServiceStatus: boolean;
     enrichPluginChanged: boolean;
