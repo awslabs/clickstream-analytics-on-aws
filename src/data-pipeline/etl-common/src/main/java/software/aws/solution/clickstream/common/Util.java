@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
 @Slf4j
@@ -185,9 +186,9 @@ public final class Util {
         return params;
     }
 
-    public static UrlParseResult parseUrl(final String url) {
+    public static Optional<UrlParseResult> parseUrl(final String url) {
         if (url == null || url.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
         String schemaUrl = url;
         if (!url.substring(0, Math.min(url.length(), 15)).contains("://")) {
@@ -210,7 +211,7 @@ public final class Util {
             }
         }
         log.debug("parseUrl(): result host: {}",  result.getHostName());
-        return result;
+        return Optional.of(result);
     }
 
     private static UrlParseResult extractFromUrl(final String schemaUrl) throws URISyntaxException {
