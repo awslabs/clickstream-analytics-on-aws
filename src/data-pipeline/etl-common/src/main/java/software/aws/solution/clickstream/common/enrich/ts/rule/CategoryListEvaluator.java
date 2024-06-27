@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,10 +104,16 @@ public final class CategoryListEvaluator {
             return categoryAndTerms;
         }
 
-        UrlParseResult r = Util.parseUrl(theReferrerUrl);
-        String hostName = r.getHostName();
-        String path = r.getPath();
-        Map<String, List<String>> urlParams = r.getQueryParameters();
+        Optional<UrlParseResult> r = Util.parseUrl(theReferrerUrl);
+        String hostName = "";
+        String path = "";
+        Map<String, List<String>> urlParams = new HashMap<>();
+
+        if (r.isPresent()) {
+             hostName = r.get().getHostName();
+             path = r.get().getPath();
+             urlParams = r.get().getQueryParameters();
+        }
 
         List<String> candidateUrls = getCandidateUrls(theReferrerUrl, hostName, path);
 

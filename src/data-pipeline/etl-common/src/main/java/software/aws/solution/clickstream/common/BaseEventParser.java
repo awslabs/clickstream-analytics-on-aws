@@ -27,6 +27,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import static software.aws.solution.clickstream.common.Util.deCodeUri;
 import static software.aws.solution.clickstream.common.Util.decompress;
@@ -149,11 +150,12 @@ public abstract class BaseEventParser implements EventParser {
             return;
         }
         clickstreamEvent.setPageViewPageUrl(deCodeUri(url));
-        UrlParseResult urlParseResult = Util.parseUrl(url);
+        Optional<UrlParseResult> urlParseResultOpt = Util.parseUrl(url);
 
-        if (urlParseResult == null) {
+        if (urlParseResultOpt.isEmpty()) {
             return;
         }
+        UrlParseResult urlParseResult = urlParseResultOpt.get();
 
         if (urlParseResult.getPath() != null) {
             clickstreamEvent.setPageViewPageUrlPath(urlParseResult.getPath());

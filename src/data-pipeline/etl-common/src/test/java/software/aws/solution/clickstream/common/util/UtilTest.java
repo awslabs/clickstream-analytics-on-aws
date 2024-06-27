@@ -169,13 +169,13 @@ public class UtilTest extends BaseTest {
     void  test_parseUrl() {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.util.UtilTest.test_parseUrl
         String url = "https://www.example.com/abc/test?param1=value1&param2=value2";
-        UrlParseResult result = Util.parseUrl(url);
+        UrlParseResult result = Util.parseUrl(url).get();
         assertEquals("www.example.com", result.getHostName());
         assertEquals("param1=value1&param2=value2", result.getQueryString());
         assertEquals("/abc/test", result.getPath());
 
-        assertNull(Util.parseUrl(null));
-        assertNull(Util.parseUrl(""));
+        assertTrue(Util.parseUrl(null).isEmpty());
+        assertTrue(Util.parseUrl("").isEmpty());
         assertNotNull(Util.parseUrl("https://www.example.com/"));
         assertNotNull(Util.parseUrl("https://www.example.com/?"));
     }

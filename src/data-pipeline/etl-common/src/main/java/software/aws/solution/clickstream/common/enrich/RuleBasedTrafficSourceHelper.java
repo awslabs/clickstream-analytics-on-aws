@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static software.aws.solution.clickstream.common.Util.getUriParams;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
@@ -189,7 +190,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         String pageHostName = null;
         if (pageUrl != null && !pageUrl.isEmpty()) {
             trafficSourceUtm = getUtmSourceFromUrl(pageUrl);
-            pageHostName = parseUrl(pageUrl).getHostName();
+            Optional<UrlParseResult> r = parseUrl(pageUrl);
+            if (r.isPresent()) {
+                pageHostName = r.get().getHostName();
+            }
         }
         CategoryTrafficSource result = parse(trafficSourceUtm, pageHostName, pageReferrer, latestReferrer, latestReferrerHost);
         categoryTrafficSourceCache.put(cachedKey, result);
@@ -339,7 +343,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
         String pageReferrerHost = null;
         if (pageReferrer != null && !pageReferrer.isEmpty()) {
-             pageReferrerHost = parseUrl(pageReferrer).getHostName();
+             Optional<UrlParseResult> r = parseUrl(pageReferrer);
+             if (r.isPresent()) {
+                 pageReferrerHost = r.get().getHostName();
+             }
         }
         boolean isInternalReferrer = pageHostName != null && pageHostName.equalsIgnoreCase(pageReferrerHost);
         boolean isInternalLatestReferrer = pageHostName != null && pageHostName.equalsIgnoreCase(latestReferrerHost);
