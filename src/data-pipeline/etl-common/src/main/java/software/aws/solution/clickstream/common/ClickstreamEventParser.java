@@ -23,9 +23,13 @@ import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceUtm;
 import software.aws.solution.clickstream.common.ingest.*;
 import software.aws.solution.clickstream.common.model.*;
 
-import java.sql.*;
-import java.time.*;
-import java.util.*;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -398,8 +402,11 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setPageViewLatestReferrerHost(ingestEvent.getAttributes().getLatestReferrerHost());
         if (ingestEvent.getAttributes().getLatestReferrer() != null
                 && clickstreamEvent.getPageViewLatestReferrerHost() == null) {
-            UrlParseResult latestReferrerUrlParseResult = parseUrl(ingestEvent.getAttributes().getLatestReferrer());
-            clickstreamEvent.setPageViewLatestReferrerHost(latestReferrerUrlParseResult.getHostName());
+
+            Optional<UrlParseResult> r = parseUrl(ingestEvent.getAttributes().getLatestReferrer());
+            if (r.isPresent()) {
+                clickstreamEvent.setPageViewLatestReferrerHost(r.get().getHostName());
+            }
         }
         clickstreamEvent.setPageViewEntrances(ingestEvent.getAttributes().getEntrances());
     }
