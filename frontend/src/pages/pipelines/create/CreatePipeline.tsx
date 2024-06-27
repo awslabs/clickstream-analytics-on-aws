@@ -81,6 +81,7 @@ import {
 } from 'ts/const';
 import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 import {
+  alertMsg,
   checkStringValidRegex,
   defaultGenericsValue,
   defaultStr,
@@ -562,6 +563,29 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     return true;
   };
 
+  const validateTransformerForStreaming = () => {
+    if (
+      pipelineInfo.dataCollectionSDK === 'thirdparty' &&
+      pipelineInfo.enableStreaming &&
+      pipelineInfo.selectedTransformPlugins.length > 0 &&
+      pipelineInfo.selectedTransformPlugins[0].id &&
+      !['BUILT-IN-4', 'BUILT-IN-5'].includes(pipelineInfo.selectedTransformPlugins[0].id)
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+  const validateRedshiftForStreaming = () => {
+    if (
+      pipelineInfo.enableStreaming &&
+      !pipelineInfo.enableRedshift
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   const checkDataProcessingInterval = (info: IExtPipeline) => {
     if (
       info.selectedExcutionType?.value === ExecutionType.FIXED_RATE &&
@@ -658,6 +682,16 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       ) {
         return false;
       }
+    }
+
+    if (!validateTransformerForStreaming()) {
+      alertMsg(t('pipeline:valid.transformerForStreamingError'));
+      return false;
+    }
+
+    if (!validateRedshiftForStreaming()) {
+      alertMsg(t('pipeline:valid.redshiftMustEnableForStreaming'));
+      return false;
     }
 
     return true;
@@ -2194,14 +2228,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         },
                       },
                     },
-                  };
-                });
-              }}
-              changeDataLoadCronExp={(cron) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    dataLoadCronExp: cron,
                   };
                 });
               }}

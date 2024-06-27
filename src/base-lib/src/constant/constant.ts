@@ -497,3 +497,6 @@ export const TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME = 'traffic_source_channel_rul
 export const EXPLORE_SEGMENT_DUMMY_PROPERTY = 'segment_id';
 
 export const SINK_STREAM_NAME_PREFIX = 'clickstream_streaming_sink_';
+export const CLICKSTREAM_TRANSFORMER_NAME_PARAMETER = 'clickstream';
+export const GTM_TRANSFORMER_NAME_PARAMETER = 'gtm';
+export const SENSORS_TRANSFORMER_NAME_PARAMETER = 'sensors';

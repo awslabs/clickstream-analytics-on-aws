@@ -96,7 +96,6 @@ interface DataProcessingProps {
   changeRedshiftSubnets: (subnets: readonly SelectProps.Option[]) => void;
   changeBaseCapacity: (capacity: SelectProps.Option) => void;
   changeDBUser: (user: string) => void;
-  changeDataLoadCronExp: (cron: string) => void;
   dataProcessorIntervalCronInvalidError: boolean;
   dataProcessorIntervalInvalidError: boolean;
   redshiftServerlessVpcEmptyError: boolean;
