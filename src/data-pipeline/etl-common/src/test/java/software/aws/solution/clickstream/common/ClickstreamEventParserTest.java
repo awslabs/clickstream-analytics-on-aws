@@ -525,13 +525,13 @@ public class ClickstreamEventParserTest extends BaseTest {
     }
 
     @Test
-    void test_parse_line_with_empty_page_referrer() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_with_empty_page_referrer
-        String line = resourceFileContent("/empty_page_referrer.json");
+    void test_parse_line_with_empty_latest_referrer() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_with_empty_latest_referrer
+        String line = resourceFileContent("/empty_latest_referrer.json");
         log.info(line);
         ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
         String projectId = "test_project_id";
-        String fileName = "empty_page_referrer.json";
+        String fileName = "empty_latest_referrer.json";
 
         ParseRowResult rowResult = clickstreamEventParser.parseLineToDBRow(line, projectId, fileName);
 
