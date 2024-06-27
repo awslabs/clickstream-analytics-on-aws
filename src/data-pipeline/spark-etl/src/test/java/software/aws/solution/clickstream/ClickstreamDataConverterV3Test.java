@@ -51,10 +51,10 @@ public class ClickstreamDataConverterV3Test extends BaseSparkTest {
     }
 
     @Test
-    public void test_empty_referrer() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.ClickstreamDataConverterV3Test.test_empty_referrer
+    public void test_empty_latest_referrer() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.ClickstreamDataConverterV3Test.test_empty_latest_referrer
 
-        String filePath = "/empty_referrer.json";
+        String filePath = "/empty_latest_referrer.json";
         Dataset<Row> dataset = readJsonDataset(filePath);
         dataset = addFileName(dataset);
         System.setProperty(PROJECT_ID_PROP, "projectId1");
