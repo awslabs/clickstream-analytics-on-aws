@@ -88,8 +88,7 @@ public class StreamingJobV2Test extends BaseFlinkTest {
                 "10", // windowSlideMinutes
                 "60", // windowSizeMinutes
                 enableWindowAgg + "", // enableWindowAgg
-                "ALL" // windowAggTypes
-
+                "ALL" // "eventAndUserCount" //"ALL" // windowAggTypes
         };
     }
 

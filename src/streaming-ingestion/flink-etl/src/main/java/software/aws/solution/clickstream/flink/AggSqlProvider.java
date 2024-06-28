@@ -15,14 +15,25 @@ package software.aws.solution.clickstream.flink;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.table.catalog.ResolvedSchema;
 
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static software.aws.solution.clickstream.flink.Utils.readResourceAsString;
 
 @Slf4j
 @AllArgsConstructor
 public class AggSqlProvider {
+    public enum WindowTVF {
+        TUMBLE, SESSION, HOP, CUMULATE
+    }
     public static final String EVENT_NAME_TOP_RANK = "eventNameTopRank";
     public static final String PAGE_TITLE_TOP_RANK = "pageTitleTopRank";
     public static final String EVENT_AND_USER_COUNT = "eventAndUserCount";
@@ -32,12 +43,16 @@ public class AggSqlProvider {
     private final int windowSize;
     private final int windowSlide;
     private final List<String> aggTypes;
+    private final ResolvedSchema sourceTableSchema;
+    private final WindowTVF windowTVF; // TUMBLE, SESSION, HOP, CUMULATE
 
      public static class AggSqlProviderBuilder {
          private String viewName;
          private int windowSize = 60;
          private int windowSlide = 10;
-         private List<String> aggTypes = new ArrayList<>();
+         private ResolvedSchema sourceTableSchema;
+         private WindowTVF windowTVF;
+         private final List<String> aggTypes = new ArrayList<>();
 
          public AggSqlProviderBuilder viewName(final String viewName) {
              this.viewName = viewName;
@@ -64,8 +79,32 @@ public class AggSqlProvider {
              this.aggTypes.addAll(Arrays.asList(aggTypes));
              return this;
          }
+
+         public AggSqlProviderBuilder sourceTableSchema(final ResolvedSchema sourceTableSchema) {
+             this.sourceTableSchema = sourceTableSchema;
+             return this;
+         }
+         public AggSqlProviderBuilder windowTVF(final WindowTVF windowTVF) {
+             this.windowTVF = windowTVF;
+             return this;
+         }
+         public AggSqlProviderBuilder windowTVF(final String windowType) {
+             this.windowTVF = WindowTVF.valueOf(windowType.toUpperCase());
+             return this;
+         }
          public AggSqlProvider build() {
-             return new AggSqlProvider(viewName, windowSize, windowSlide, aggTypes);
+                Objects.requireNonNull(viewName, "viewName must be provided");
+                if (aggTypes.isEmpty()) {
+                    log.warn("No aggregation type is provided, default to all");
+                    aggTypes.add(ALL);
+                }
+
+                if (windowTVF == null) {
+                    log.warn("windowType is not provided, default to CUMULATE");
+                    windowTVF = WindowTVF.CUMULATE;
+                }
+
+             return new AggSqlProvider(viewName, windowSize, windowSlide, aggTypes, sourceTableSchema, windowTVF);
          }
      }
 
@@ -75,76 +114,70 @@ public class AggSqlProvider {
 
      public String getSql() {
          List<String> sqlList = new ArrayList<>();
+         boolean hasWindowSlide = windowTVF == WindowTVF.CUMULATE || windowTVF == WindowTVF.HOP;
+         String param6SqlComment = "--";
+         if (hasWindowSlide) {
+             param6SqlComment =  "";
+         }
 
-         String cumulateTable = String.format("TABLE(\n"
-                 + "            CUMULATE(\n"
-                 + "                TABLE %s, \n"
-                 + "                DESCRIPTOR(event_time), \n"
-                 + "                INTERVAL '%s' MINUTES, \n"
-                 + "                INTERVAL '%s' MINUTES\n"
-                 + "            )\n"
-                 + "        )", viewName, windowSlide, windowSize);
-
-         String selectWindow = "SELECT window_start, window_end, '%s' as data_type, \n";
-         String sql1 = String.format(// NOSONAR
-                 selectWindow
-                         +      "JSON_OBJECT(KEY 'user_count' VALUE COUNT(distinct userPseudoId), KEY 'event_count' VALUE COUNT(eventId)) data \n"
-                         + "FROM %s\n"
-                         + "GROUP BY window_start, window_end\n",
-                 EVENT_AND_USER_COUNT, cumulateTable);
+         String sql1Template = readResourceAsString("/sql/event_user_count.template.sql");
+         String sql1 = MessageFormat.format(sql1Template,  viewName, windowSlide, windowSize, windowTVF);
 
          if (aggTypes.contains(ALL) || aggTypes.contains(EVENT_AND_USER_COUNT)) {
              sqlList.add(sql1);
          }
-
-         String sql2 = getGroupBySql(PAGE_TITLE_TOP_RANK, selectWindow,  "pageViewPageTitle", cumulateTable);
+         int topN = 10;
+         String topNSqlTemplate = readResourceAsString("/sql/top_n_cumulate.template.sql");
 
          if (aggTypes.contains(ALL) || aggTypes.contains(PAGE_TITLE_TOP_RANK)) {
-             sqlList.add(sql2);
+             String topNSql = MessageFormat.format(topNSqlTemplate,  viewName, windowSlide, windowSize, windowTVF, "pageViewPageTitle", topN, param6SqlComment);
+             sqlList.add(topNSql);
          }
-
-         String sql3 = getGroupBySql(EVENT_NAME_TOP_RANK, selectWindow,  "eventName", cumulateTable);
 
          if (aggTypes.contains(ALL) || aggTypes.contains(EVENT_NAME_TOP_RANK)) {
-             sqlList.add(sql3);
+             String topNSql = MessageFormat.format(topNSqlTemplate,  viewName, windowSlide, windowSize, windowTVF, "eventName", topN, param6SqlComment);
+             sqlList.add(topNSql);
          }
-
-         String sql4 = getGroupBySql(TRAFFIC_SOURCE_SOURCE_TOP_RANK, selectWindow,  "trafficSourceSource", cumulateTable);
 
          if (aggTypes.contains(ALL) || aggTypes.contains(TRAFFIC_SOURCE_SOURCE_TOP_RANK)) {
-             sqlList.add(sql4);
+             String topNSql = MessageFormat.format(topNSqlTemplate,  viewName, windowSlide, windowSize, windowTVF, "trafficSourceSource", topN, param6SqlComment);
+             sqlList.add(topNSql);
          }
 
+         sqlList.addAll(extractCustomAggSqlList(topNSqlTemplate, param6SqlComment));
+
+         String retSql = "";
          if (!sqlList.isEmpty()) {
-             return String.join("\nUNION ALL\n", sqlList);
+             retSql = String.join("\nUNION ALL\n", sqlList);
          } else {
              log.warn("No aggregation type is provided, aggTypes: {}", String.join(",", aggTypes));
-             return "";
          }
+         log.info("AggSqlProvider.getSql: \n{}", retSql);
+         return retSql;
      }
 
-    private static String getGroupBySql(final String aggType, final String selectWindow, final String groupColumn, final String cumulateTable) {
-        String sql2 = String.format(// NOSONAR
-                selectWindow
-                        +     "JSON_OBJECT(KEY '%s' VALUE %s, KEY 'event_count' VALUE event_count, KEY 'user_count' VALUE user_count, KEY 'rank' VALUE rownum) data \n"
-                        + "FROM (\n"
-                        + "    SELECT *, \n"
-                        + "           ROW_NUMBER() OVER (\n"
-                        + "               PARTITION BY window_start, window_end \n"
-                        + "               ORDER BY event_count DESC\n"
-                        + "           ) AS rownum\n"
-                        + "    FROM (\n"
-                        + "        SELECT window_start, \n"
-                        + "               window_end, \n"
-                        + "               %s, \n"
-                        + "               COUNT(eventId) AS event_count, \n"
-                        + "               COUNT(distinct userPseudoId) AS user_count\n"
-                        + "        FROM %s\n"
-                        + "        GROUP BY window_start, window_end, %s\n"
-                        + "    )\n"
-                        + ") \n"
-                        + "WHERE rownum <= 10\n", aggType, groupColumn, groupColumn, groupColumn, cumulateTable, groupColumn);
-        return sql2;
+    private List<String> extractCustomAggSqlList(final String topNSqlTemplate, final String param6SqlComment) {
+         List<String> sqlsList = new ArrayList<>();
+         if (this.sourceTableSchema == null) {
+             log.warn("sourceTableSchema is not provided, skip custom aggregation");
+             return sqlsList;
+         }
+        for (String aggType: aggTypes) {
+           Pattern pattern = Pattern.compile("^([a-zA-Z0-9]+)Top(\\d+)Rank$");
+           Matcher m =  pattern.matcher(aggType);
+           if (m.matches()) {
+               String field = m.group(1);
+               int n = Integer.parseInt(m.group(2));
+
+               if (n > 0 && this.sourceTableSchema.getColumn(field).isPresent()) {
+                   String topNSql = MessageFormat.format(topNSqlTemplate, viewName, windowSlide, windowSize, windowTVF, field, n, param6SqlComment);
+                   sqlsList.add(topNSql);
+               } else {
+                     log.warn("Invalid aggType: {}, field: {}, n: {}", aggType, field, n);
+               }
+           }
+        }
+        return sqlsList;
     }
 
 }

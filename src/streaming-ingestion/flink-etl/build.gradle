@@ -128,8 +128,8 @@ test {
         exceptionFormat = 'full'
         events = ['passed', 'skipped', 'failed', 'standardOut', 'standardError']
     }
-    minHeapSize = "256m" // initial heap size
-    maxHeapSize = "2048m" // maximum heap size
+    minHeapSize = "512m" // initial heap size
+    maxHeapSize = "4096m" // maximum heap size
 }
 
 application {

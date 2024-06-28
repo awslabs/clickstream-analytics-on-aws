@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 @Slf4j
@@ -154,6 +155,17 @@ public final class Utils {
             return Long.parseLong(System.getProperty("_LOCAL_TEST_TIME"));
         }
         return Instant.now().toEpochMilli();
+    }
+
+    public static String readResourceAsString(final String fileName) {
+        try (InputStream is = Utils.class.getResourceAsStream(fileName);
+             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+             BufferedReader reader = new BufferedReader(isr)) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        } catch (IOException | NullPointerException e) {
+            log.error("Failed to read resource file: {}", fileName, e);
+            throw new ClickstreamException(e);
+        }
     }
 
 }

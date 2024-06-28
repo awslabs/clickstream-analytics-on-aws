@@ -29,6 +29,7 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.util.OutputTag;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.RuleConfig;
@@ -242,7 +243,7 @@ public class StreamingJob {
         log.info("{} Table schema: {}", appId, table.getResolvedSchema());
         String viewName = "clickstream_" + appId;
         tableEnv.createTemporaryView(viewName, table);
-        String sql = getAggSql(viewName);
+        String sql = getAggSql(viewName, table.getResolvedSchema());
         if (sql.isEmpty()) {
             return;
         }
@@ -253,15 +254,18 @@ public class StreamingJob {
         this.statementSet.add(aggTable.insertInto(sinkTable));
     }
 
-    private String getAggSql(final String viewName) {
+    private String getAggSql(final String viewName, final ResolvedSchema schema) {
         int windowSlide = this.props.getWindowSlideMinutes();
         int windowSize = this.props.getWindowSizeMinutes();
         String[] aggTypes = this.props.getWindowAggTypes();
+        AggSqlProvider.WindowTVF windowTVF = this.props.getWindowTVF();
         String sql = AggSqlProvider.builder()
                 .viewName(viewName)
                 .windowSize(windowSize)
                 .windowSlide(windowSlide)
+                .sourceTableSchema(schema)
                 .addAggTypes(aggTypes)
+                .windowTVF(windowTVF)
                 .build()
                 .getSql();
 
@@ -285,7 +289,11 @@ public class StreamingJob {
                 .column("window_start", DataTypes.TIMESTAMP(3))
                 .column("window_end", DataTypes.TIMESTAMP(3))
                 .column("data_type", DataTypes.STRING())
-                .column("data", DataTypes.STRING())
+                .column("event_count", DataTypes.BIGINT())
+                .column("user_count", DataTypes.BIGINT())
+                .column("top_rank", DataTypes.BIGINT())
+                .column("property_name", DataTypes.STRING())
+                .column("property_value", DataTypes.STRING())
                 .column("date", DataTypes.STRING())
                 .build();
 

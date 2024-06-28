@@ -112,6 +112,7 @@ class ApplicationParametersTest {
         props.setProperty("enableWindowAgg", "true");
         // AggSqlProvider.EVENT_NAME_TOP_RANK, AggSqlProvider.EVENT_AND_USER_COUNT, AggSqlProvider.PAGE_TITLE_TOP_RANK
         props.setProperty("windowAggTypes", "eventNameTopRank,eventAndUserCount,pageTitleTopRank");
+        props.setProperty("windowTVF", "HOP");
 
         return props;
     }
@@ -270,6 +271,7 @@ class ApplicationParametersTest {
         Assertions.assertFalse(params.isEnableWindowAgg());
         Assertions.assertEquals("ALL", String.join(",", params.getWindowAggTypes()));
         Assertions.assertTrue(params.isEnableStreamIngestion());
+        Assertions.assertEquals(AggSqlProvider.WindowTVF.CUMULATE, params.getWindowTVF());
     }
 
     @Test
@@ -301,6 +303,7 @@ class ApplicationParametersTest {
         Assertions.assertEquals(String.join(",", new String[] {AggSqlProvider.EVENT_NAME_TOP_RANK,
                 AggSqlProvider.EVENT_AND_USER_COUNT, AggSqlProvider.PAGE_TITLE_TOP_RANK}),
                 String.join(",", params.getWindowAggTypes()));
+        Assertions.assertEquals(AggSqlProvider.WindowTVF.HOP, params.getWindowTVF());
     }
 
     @Test

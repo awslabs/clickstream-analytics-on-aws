@@ -70,6 +70,7 @@ public class ApplicationParameters {
     private int windowSizeMinutes = 60;
     private boolean enableWindowAgg = false;
     private String[] windowAggTypes = new String[] {"ALL"};
+    private AggSqlProvider.WindowTVF windowTVF = AggSqlProvider.WindowTVF.CUMULATE;
 
      static ApplicationParameters fromProperties(final Properties props) {
         ApplicationParameters parameters = new ApplicationParameters();
@@ -152,6 +153,10 @@ public class ApplicationParameters {
          parameters.setEnableStreamIngestion(enableStreamIngestion);
          log.info("enableStreamIngestion: {}", enableStreamIngestion);
 
+         String windowType = props.getProperty("windowTVF", AggSqlProvider.WindowTVF.CUMULATE.name());
+         parameters.setWindowTVF(AggSqlProvider.WindowTVF.valueOf(windowType));
+         log.info("windowType: {}", windowType);
+
          validate(parameters);
          return parameters;
     }
@@ -190,6 +195,7 @@ public class ApplicationParameters {
         parameters.setAllowRetentionHours(0);
         parameters.setAllowEventList(null);
         parameters.setEnableStreamIngestion(true);
+        parameters.setWindowTVF(AggSqlProvider.WindowTVF.CUMULATE);
 
         if (args.length > 5) {
             parameters.setTransformVersion(args[5]);
@@ -223,6 +229,18 @@ public class ApplicationParameters {
             parameters.setAllowEventList(List.of(args[10].split(",")));
         }
 
+        setMoreParametersFromArgs(args, parameters);
+
+        parameters.setRegion(args[2].split(":")[3]);
+        parameters.setAppIdStreamList(getConfig(parameters.getAppIdStreamConfig(), parameters.getRegion()));
+
+        validate(parameters);
+
+        log.info("ApplicationParameters: {}", parameters);
+        return parameters;
+    }
+
+    private static void setMoreParametersFromArgs(final String[] args, final ApplicationParameters parameters) {
         if (args.length > 11) { // transformerName
             parameters.setTransformerName(args[11]);
         }
@@ -247,13 +265,9 @@ public class ApplicationParameters {
             parameters.setEnableStreamIngestion(Boolean.parseBoolean(args[16]));
         }
 
-        parameters.setRegion(args[2].split(":")[3]);
-        parameters.setAppIdStreamList(getConfig(parameters.getAppIdStreamConfig(), parameters.getRegion()));
-
-        validate(parameters);
-
-        log.info("ApplicationParameters: {}", parameters);
-        return parameters;
+        if (args.length > 17) { // windowType
+            parameters.setWindowTVF(AggSqlProvider.WindowTVF.valueOf(args[17]));
+        }
     }
 
     private static void validate(final ApplicationParameters parameters) {
@@ -286,7 +300,6 @@ public class ApplicationParameters {
         }
         return null;
     }
-
 }
 
 
