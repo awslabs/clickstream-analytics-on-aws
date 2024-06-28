@@ -1805,3 +1805,71 @@ test('Should has AppRegistryAssociation', () => {
     ResourceType: 'CFN_STACK',
   });
 });
+
+
+test('Should has InitAppConfigCustomResource', () => {
+  const template = nestedTemplates[0];
+  template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+    ServiceToken: {
+      'Fn::GetAtt': [
+        Match.anyValue(),
+        'Arn',
+      ],
+    },
+    appIds: {
+      Ref: Match.anyValue(),
+    },
+  });
+});
+
+
+test('InitAppConfigLambda can read and write rules', () => {
+  const template = nestedTemplates[0];
+  template.hasResourceProperties('AWS::IAM::Policy', {
+    PolicyDocument: {
+      Statement: [
+        Match.anyValue(),
+        {
+          Action: [
+            's3:GetObject*',
+            's3:GetBucket*',
+            's3:List*',
+            's3:DeleteObject*',
+            's3:PutObject',
+            's3:PutObjectLegalHold',
+            's3:PutObjectRetention',
+            's3:PutObjectTagging',
+            's3:PutObjectVersionTagging',
+            's3:Abort*',
+          ],
+          Effect: 'Allow',
+          Resource: [
+            Match.anyValue(),
+            {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':s3:::',
+                  {
+                    Ref: Match.anyValue(),
+                  },
+                  '/clickstream/',
+                  {
+                    Ref: Match.anyValue(),
+                  },
+                  '/rules/*',
+                ],
+              ],
+            },
+          ],
+        },
+      ],
+      Version: '2012-10-17',
+    },
+
+  });
+});

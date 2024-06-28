@@ -293,3 +293,73 @@ export function createEMRServerlessApplicationCustomResource(
   cr.node.addDependency(policy);
   return cr;
 }
+
+// createInitAppConfigCustomResource
+export interface InitAppConfigCustomResourceProps {
+  projectId: string;
+  pipelineS3Bucket: IBucket;
+  pipelineS3Prefix: string;
+  appIds: string;
+}
+
+function createInitAppConfigLambda(
+  scope: Construct,
+  props: InitAppConfigCustomResourceProps,
+): SolutionNodejsFunction {
+
+  const fn = new SolutionNodejsFunction(scope, 'InitAppConfigLambda', {
+    entry: join(
+      __dirname,
+      '..',
+      'lambda',
+      'init-app-config',
+      'index.ts',
+    ),
+    handler: 'handler',
+    memorySize: 256,
+    timeout: Duration.minutes(1),
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
+    environment: {
+      STACK_ID: getShortIdOfStack(Stack.of(scope)),
+      PROJECT_ID: props.projectId,
+      PIPELINE_S3_BUCKET_NAME: props.pipelineS3Bucket.bucketName,
+      PIPELINE_S3_PREFIX: props.pipelineS3Prefix,
+      APP_IDS: props.appIds,
+    },
+  });
+
+  props.pipelineS3Bucket.grantReadWrite(fn, props.pipelineS3Prefix + '*');
+  props.pipelineS3Bucket.grantReadWrite(fn, 'clickstream/' + props.projectId + '/rules/*');
+
+  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
+    rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('CDK'));
+
+  return fn;
+}
+
+export function createInitAppConfigCustomResource(
+  scope: Construct,
+  props: InitAppConfigCustomResourceProps,
+): CustomResource {
+
+  const fn = createInitAppConfigLambda(scope, props);
+
+  const provider = new Provider(
+    scope,
+    'InitAppConfigCustomResourceProvider',
+    {
+      onEventHandler: fn,
+      logRetention: RetentionDays.FIVE_DAYS,
+    },
+  );
+  const cr = new CustomResource(scope, 'InitAppConfigCustomResource', {
+    serviceToken: provider.serviceToken,
+    properties: {
+      appIds: props.appIds,
+    },
+  });
+
+  return cr;
+}
