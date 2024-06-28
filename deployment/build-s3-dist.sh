@@ -220,13 +220,6 @@ else
     export SOLUTION_ECR_BUILD_VERSION
 fi
 
-if [[ -z $SOLUTION_ECR_ACCOUNT ]]; then
-    echo "SOLUTION_ECR_ACCOUNT is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_ECR_ACCOUNT
-fi
-
 if [[ -z $SOLUTION_ECR_REPO_NAME ]]; then
     echo "SOLUTION_ECR_REPO_NAME is missing from ../solution_config"
     exit 1
