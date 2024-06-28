@@ -601,4 +601,19 @@ public class ClickstreamEventParserTest extends BaseTest {
 
         Assertions.assertEquals(1, rowResult.getClickstreamEventList().size());
     }
+
+    @Test
+    void test_parse_line_with_empty_latest_referrer() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_with_empty_latest_referrer
+        String line = resourceFileContent("/empty_latest_referrer.json");
+        log.info(line);
+        ClickstreamEventParser clickstreamEventParser = getClickstreamEventParser();
+        String projectId = "test_project_id";
+        String fileName = "empty_latest_referrer.json";
+
+        ParseRowResult rowResult = clickstreamEventParser.parseLineToDBRow(line, projectId, fileName);
+
+        Assertions.assertEquals(1, rowResult.getClickstreamEventList().size());
+        Assertions.assertEquals(1, rowResult.getClickstreamUserList().size());
+    }
 }

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, EXPLORE_SEGMENT_DUMMY_PROPERTY, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType, QuickSightChartType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, EXPLORE_SEGMENT_DUMMY_PROPERTY, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType, QuickSightChartType, TABLE_NAME_USER_V2 } from '@aws/clickstream-base-lib';
 import { format } from 'sql-formatter';
 import { formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks, isValidGroupingCondition } from './reporting-utils';
 import { logger } from '../../common/powertools';
@@ -1936,9 +1936,8 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
               a.user_id
             from (
               select 
-                user_id 
-              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-              group by user_id
+                user_pseudo_id as user_id 
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${TABLE_NAME_USER_V2} 
             ) a
             left join (
               select 
@@ -1955,10 +1954,15 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
         userSegmentBaseSQl = `
           with user_segment_base as (
             select 
-              user_id 
-            from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-            where segment_id not in ('${segmentsNotIn.join('\',\'')}')
-            group by user_id
+              a.user_pseudo_id as user_id
+            from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${TABLE_NAME_USER_V2} a
+            left join 
+            ( select user_id from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+               where segment_id in ('${segmentsNotIn.join('\',\'')}')
+            ) b
+            on a.user_pseudo_id = b.user_id
+            where b.user_id is null
+            group by 1
           ),
         `;
       }
@@ -1974,9 +1978,8 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
                 a.user_id
               from (
                 select 
-                  user_id 
-                from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-                group by user_id
+                  user_pseudo_id as user_id 
+                from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${TABLE_NAME_USER_V2} 
               ) a
               left join (
                 select 
@@ -2002,14 +2005,19 @@ export function buildSegmentBaseSql(sqlParameters: BaseSQLParameters) {
       } else {
         userSegmentBaseSQl = `
           with user_segment_base as (
-            select
+            select 
               a.user_id
-            from (
+            from
+            (
               select 
-                user_id 
-              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
-              where segment_id not in ('${segmentsNotIn.join('\',\'')}')
-              group by user_id
+                t1.user_pseudo_id as user_id
+              from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${TABLE_NAME_USER_V2} t1
+              left join 
+              ( select user_id from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_SEGMENT_TABLE} 
+               where segment_id in ('${segmentsNotIn.join('\',\'')}')
+              ) t2
+              on t1.user_pseudo_id = t2.user_id
+              where t2.user_id is null
             ) a
             join 
             (

@@ -152,7 +152,7 @@ export function createStackParameters(scope: Construct): {
     description:
     'Number of Flink application parallelism.',
     type: 'Number',
-    default: '2',
+    default: '1',
     minValue: 1,
   });
 
