@@ -20,6 +20,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.v2.DiscardingSink;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.FormatDescriptor;
@@ -223,7 +224,7 @@ public class StreamingJob {
         if (props.isEnableStreamIngestion()) {
             transformedData.sinkTo(outKinesisSink).name(appId);
         } else {
-            transformedData.sinkTo(new DiscardSink()).name("Discarding-" + appId).setParallelism(1);
+            transformedData.sinkTo(new DiscardingSink<>()).name("Discarding-" + appId).setParallelism(1);
         }
         aggStreamTable(appId, transformedData.getSideOutput(transformEventProcessFunction.getTableRowOutputTag()));
     }
