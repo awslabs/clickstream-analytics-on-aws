@@ -12,8 +12,10 @@
  */
 
 import {
+  CLICKSTREAM_TRANSFORMER_NAME_PARAMETER,
   CORS_PATTERN,
   DOMAIN_NAME_PATTERN,
+  GTM_TRANSFORMER_NAME_PARAMETER,
   KAFKA_BROKERS_PATTERN,
   KAFKA_TOPIC_PATTERN,
   MULTI_EMAIL_PATTERN,
@@ -36,6 +38,7 @@ import {
   S3_PREFIX_PATTERN,
   SCHEDULE_EXPRESSION_PATTERN,
   SECURITY_GROUP_PATTERN,
+  SENSORS_TRANSFORMER_NAME_PARAMETER,
   SUBNETS_PATTERN,
   SUBNETS_THREE_AZ_PATTERN,
   SolutionVersion,
@@ -1670,6 +1673,25 @@ export class CStreamingStack extends JSONObject {
     );
   })
     RedshiftUserParam?: string;
+
+  @JSONObject.optional('1')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
+    return stack._pipeline?.streaming?.retentionHours ?? '1';
+  })
+    RetentionHours?: string;
+
+  @JSONObject.optional(CLICKSTREAM_TRANSFORMER_NAME_PARAMETER)
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
+    if (!stack._pipeline?.dataProcessing?.transformPlugin || stack._pipeline?.dataProcessing?.transformPlugin === 'BUILT-IN-1') {
+      return CLICKSTREAM_TRANSFORMER_NAME_PARAMETER;
+    } else if (stack._pipeline?.dataProcessing?.transformPlugin === 'BUILT-IN-4') {
+      return GTM_TRANSFORMER_NAME_PARAMETER;
+    } else if (stack._pipeline?.dataProcessing?.transformPlugin === 'BUILT-IN-5') {
+      return SENSORS_TRANSFORMER_NAME_PARAMETER;
+    }
+    return CLICKSTREAM_TRANSFORMER_NAME_PARAMETER;
+  })
+    TransformerName?: string;
 
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CStreamingStack, _key:string, _value:string) => {

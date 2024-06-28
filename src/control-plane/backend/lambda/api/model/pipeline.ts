@@ -220,6 +220,7 @@ export interface Reporting {
 }
 
 export interface Streaming {
+  readonly retentionHours: number;
   readonly appIdStreamList: string[];
   readonly appIdRealtimeList?: string[];
   readonly bucket?: S3Bucket;
@@ -639,6 +640,25 @@ export class CPipeline {
       parameterKey: 'QuickSightTimezoneParam',
       parameterValue: this.pipeline.timezone ? JSON.stringify(this.pipeline.timezone) : '',
     });
+    // update workflow
+    this.stackManager.updateWorkflowForApp(updateList);
+    // create new execution
+    const execWorkflow = this.stackManager.getExecWorkflow();
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this._setExecution(executionArn);
+    this.pipeline.statusType = PipelineStatusType.UPDATING;
+    // update pipeline metadata
+    this.pipeline.workflow = this.stackManager.getWorkflow();
+    this.pipeline.updateAt = Date.now();
+    await store.updatePipelineAtCurrentVersion(this.pipeline);
+  }
+
+  public async updateStreamingApp(appIds: string[]): Promise<void> {
+    this.pipeline.lastAction = 'Update';
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    this._setExecution(executionName);
+    // update appIds and timezone
+    const updateList: { stackType: PipelineStackType; parameterKey: string; parameterValue: string }[] = [];
     updateList.push({
       stackType: PipelineStackType.STREAMING,
       parameterKey: 'AppIds',
