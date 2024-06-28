@@ -155,7 +155,7 @@ const enableAlarms = async (data: { region: string; alarmNames: string[] }) => {
 const checkServicesAvailable = async (params: { region: string }) => {
   const result: any = await apiRequest(
     'get',
-    `/env/ping?region=${params.region}&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator`,
+    `/env/ping?region=${params.region}&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,flink`,
     ``
   );
   return result;

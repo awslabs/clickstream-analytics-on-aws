@@ -12,13 +12,14 @@
  */
 
 import { join } from 'path';
+import { SINK_STREAM_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { Arn, CustomResource, Duration, RemovalPolicy, Stack } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { KINESIS_SINK_CR_OUTPUT_ATTR, SINK_STREAM_NAME_PREFIX } from './constant';
+import { KINESIS_SINK_CR_OUTPUT_ATTR } from './constant';
 import { KinesisProperties } from './model';
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';

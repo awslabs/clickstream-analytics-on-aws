@@ -59,6 +59,8 @@ const getServiceStatus = (data: ServiceAvailableResponse[]) => {
   const quickSightAvailable =
     data.find((element) => element.service === 'quicksight')?.available ||
     false;
+  const flinkAvailable =
+    data.find((element) => element.service === 'flink')?.available || false;
 
   return {
     agaAvailable,
@@ -66,6 +68,7 @@ const getServiceStatus = (data: ServiceAvailableResponse[]) => {
     redshiftServerlessAvailable,
     mskAvailable,
     quickSightAvailable,
+    flinkAvailable,
   };
 };
 
@@ -77,6 +80,7 @@ describe('Test AGA service available', () => {
       { service: 'emr-serverless', available: true },
       { service: 'redshift-serverless', available: true },
       { service: 'msk', available: true },
+      { service: 'flink', available: true },
     ];
     const {
       agaAvailable,
@@ -84,6 +88,7 @@ describe('Test AGA service available', () => {
       redshiftServerlessAvailable,
       mskAvailable,
       quickSightAvailable,
+      flinkAvailable
     } = getServiceStatus(data);
     const configIngestionDom = render(
       <ConfigIngestion
@@ -95,6 +100,7 @@ describe('Test AGA service available', () => {
             REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
+            FLINK: flinkAvailable
           },
         }}
         changeEnableStreaming={() => {
@@ -238,6 +244,7 @@ describe('Test AGA service available', () => {
       { service: 'emr-serverless', available: true },
       { service: 'redshift-serverless', available: true },
       { service: 'msk', available: true },
+      { service: 'flink', available: true },
     ];
     const {
       agaAvailable,
@@ -245,6 +252,7 @@ describe('Test AGA service available', () => {
       redshiftServerlessAvailable,
       mskAvailable,
       quickSightAvailable,
+      flinkAvailable,
     } = getServiceStatus(data);
     const configIngestionDom = render(
       <ConfigIngestion
@@ -256,6 +264,7 @@ describe('Test AGA service available', () => {
             REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
+            FLINK: flinkAvailable,
           },
         }}
         changeEnableStreaming={() => {
@@ -401,6 +410,7 @@ describe('Test QuickSight service available', () => {
       { service: 'emr-serverless', available: true },
       { service: 'redshift-serverless', available: true },
       { service: 'msk', available: true },
+      { service: 'flink', available: true },
     ];
     const {
       agaAvailable,
@@ -408,6 +418,7 @@ describe('Test QuickSight service available', () => {
       redshiftServerlessAvailable,
       mskAvailable,
       quickSightAvailable,
+      flinkAvailable,
     } = getServiceStatus(data);
     const reportingDom = render(
       <Reporting
@@ -419,6 +430,7 @@ describe('Test QuickSight service available', () => {
             REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
+            FLINK: flinkAvailable,
           },
         }}
         changeEnableReporting={() => {
@@ -447,6 +459,7 @@ describe('Test QuickSight service available', () => {
       { service: 'emr-serverless', available: true },
       { service: 'redshift-serverless', available: true },
       { service: 'msk', available: true },
+      { service: 'flink', available: true },
     ];
     const {
       agaAvailable,
@@ -454,6 +467,7 @@ describe('Test QuickSight service available', () => {
       redshiftServerlessAvailable,
       mskAvailable,
       quickSightAvailable,
+      flinkAvailable,
     } = getServiceStatus(data);
     const reportingDom = render(
       <Reporting
@@ -465,6 +479,7 @@ describe('Test QuickSight service available', () => {
             REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
+            FLINK: flinkAvailable,
           },
         }}
         changeEnableReporting={() => {
@@ -499,6 +514,7 @@ describe('Test EMR Serverless service available', () => {
       { service: 'emr-serverless', available: false },
       { service: 'redshift-serverless', available: true },
       { service: 'msk', available: true },
+      { service: 'flink', available: true },
     ];
     const {
       agaAvailable,
@@ -506,6 +522,7 @@ describe('Test EMR Serverless service available', () => {
       redshiftServerlessAvailable,
       mskAvailable,
       quickSightAvailable,
+      flinkAvailable,
     } = getServiceStatus(data);
     const dataProcessingDom = render(
       <DataProcessing
@@ -517,6 +534,7 @@ describe('Test EMR Serverless service available', () => {
             REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
+            FLINK: flinkAvailable,
           },
         }}
         changeEnableDataProcessing={() => {
@@ -580,9 +598,6 @@ describe('Test EMR Serverless service available', () => {
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeDataLoadCronExp={() => {
           return;
         }}
         dataProcessorIntervalInvalidError={false}
@@ -613,6 +628,7 @@ describe('Test EMR Serverless service available', () => {
       { service: 'emr-serverless', available: true },
       { service: 'redshift-serverless', available: true },
       { service: 'msk', available: true },
+      { service: 'flink', available: true },
     ];
     const {
       agaAvailable,
@@ -620,6 +636,7 @@ describe('Test EMR Serverless service available', () => {
       redshiftServerlessAvailable,
       mskAvailable,
       quickSightAvailable,
+      flinkAvailable,
     } = getServiceStatus(data);
     const dataProcessingDom = render(
       <DataProcessing
@@ -631,6 +648,7 @@ describe('Test EMR Serverless service available', () => {
             REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
+            FLINK: flinkAvailable,
           },
         }}
         changeEnableDataProcessing={() => {
@@ -694,9 +712,6 @@ describe('Test EMR Serverless service available', () => {
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeDataLoadCronExp={() => {
           return;
         }}
         dataProcessorIntervalInvalidError={false}
@@ -729,6 +744,7 @@ describe('Test Redsfhift Serverless service available', () => {
       { service: 'emr-serverless', available: true },
       { service: 'redshift-serverless', available: false },
       { service: 'msk', available: true },
+      { service: 'flink', available: true },
     ];
     const {
       agaAvailable,
@@ -736,6 +752,7 @@ describe('Test Redsfhift Serverless service available', () => {
       redshiftServerlessAvailable,
       mskAvailable,
       quickSightAvailable,
+      flinkAvailable,
     } = getServiceStatus(data);
     const dataProcessingDom = render(
       <DataProcessing
@@ -747,6 +764,7 @@ describe('Test Redsfhift Serverless service available', () => {
             REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
+            FLINK: flinkAvailable,
           },
         }}
         changeEnableDataProcessing={() => {
@@ -810,9 +828,6 @@ describe('Test Redsfhift Serverless service available', () => {
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeDataLoadCronExp={() => {
           return;
         }}
         dataProcessorIntervalInvalidError={false}
@@ -848,6 +863,7 @@ describe('Test Redsfhift Serverless service available', () => {
       { service: 'emr-serverless', available: true },
       { service: 'redshift-serverless', available: true },
       { service: 'msk', available: true },
+      { service: 'flink', available: true },
     ];
     const {
       agaAvailable,
@@ -855,6 +871,7 @@ describe('Test Redsfhift Serverless service available', () => {
       redshiftServerlessAvailable,
       mskAvailable,
       quickSightAvailable,
+      flinkAvailable,
     } = getServiceStatus(data);
     const dataProcessingDom = render(
       <DataProcessing
@@ -866,6 +883,7 @@ describe('Test Redsfhift Serverless service available', () => {
             REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
+            FLINK: flinkAvailable,
           },
         }}
         changeEnableDataProcessing={() => {
@@ -929,9 +947,6 @@ describe('Test Redsfhift Serverless service available', () => {
           return;
         }}
         changeDBUser={() => {
-          return;
-        }}
-        changeDataLoadCronExp={() => {
           return;
         }}
         dataProcessorIntervalInvalidError={false}
@@ -970,6 +985,7 @@ describe('Test MSK service available', () => {
       { service: 'emr-serverless', available: true },
       { service: 'redshift-serverless', available: true },
       { service: 'msk', available: false },
+      { service: 'flink', available: true },
     ];
     const {
       agaAvailable,
@@ -977,6 +993,7 @@ describe('Test MSK service available', () => {
       redshiftServerlessAvailable,
       mskAvailable,
       quickSightAvailable,
+      flinkAvailable,
     } = getServiceStatus(data);
     const configIntestionDom = render(
       <ConfigIngestion
@@ -988,6 +1005,7 @@ describe('Test MSK service available', () => {
             REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
+            FLINK: flinkAvailable,
           },
         }}
         changeEnableStreaming={() => {
@@ -1132,6 +1150,7 @@ describe('Test MSK service available', () => {
       { service: 'emr-serverless', available: true },
       { service: 'redshift-serverless', available: true },
       { service: 'msk', available: true },
+      { service: 'flink', available: true },
     ];
     const {
       agaAvailable,
@@ -1139,6 +1158,7 @@ describe('Test MSK service available', () => {
       redshiftServerlessAvailable,
       mskAvailable,
       quickSightAvailable,
+      flinkAvailable,
     } = getServiceStatus(data);
     const bufferMSKDom = render(
       <BufferMSK
@@ -1150,6 +1170,7 @@ describe('Test MSK service available', () => {
             REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
+            FLINK: flinkAvailable,
           },
         }}
         changeSelfHosted={() => {
