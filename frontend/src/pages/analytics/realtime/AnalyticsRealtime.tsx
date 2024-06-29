@@ -15,6 +15,7 @@ import {
   Alert,
   AppLayout,
   Button,
+  ButtonDropdown,
   ColumnLayout,
   Container,
   ContentLayout,
@@ -37,13 +38,21 @@ import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 const AnalyticsRealtime: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
+
+  let intervalId: any = 0;
+
   const [checked, setChecked] = React.useState(false);
   const [loadingData, setLoadingData] = useState(false);
+  const [loadingFrameData, setLoadingFrameData] = useState(false);
   const [enableStreamModule, setEnableStreamModule] = useState(false);
   const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
+  const [autoRefreshText, setAutoRefreshText] = useState(
+    t('analytics:realtime.autoRefresh.title')
+  );
+  const [autoRefreshInterval, setAutoRefreshInterval] = useState(0);
 
-  const getRealtime = async () => {
-    setLoadingData(true);
+  const getRealtime = async (refresh: boolean) => {
+    setLoadingFrameData(true);
     try {
       const { success, data }: ApiResponse<any> = await embedRealtimeUrl(
         defaultStr(projectId),
@@ -55,11 +64,13 @@ const AnalyticsRealtime: React.FC = () => {
         setDashboardEmbedUrl(data.EmbedUrl);
       }
     } catch (error) {
-      setChecked(!checked);
+      if (!refresh) {
+        setChecked(!checked);
+      }
       setDashboardEmbedUrl('');
-      setLoadingData(false);
+      setLoadingFrameData(false);
     }
-    setLoadingData(false);
+    setLoadingFrameData(false);
   };
 
   const loadPipeline = async () => {
@@ -87,9 +98,24 @@ const AnalyticsRealtime: React.FC = () => {
       setLoadingData(false);
     } catch (error) {
       setLoadingData(false);
-      console.log(error);
     }
   };
+
+  const setRefreshInterval = () => {
+    window.clearInterval(intervalId);
+    if (autoRefreshInterval > 0) {
+      intervalId = setInterval(() => {
+        getRealtime(true);
+      }, autoRefreshInterval);
+    }
+  };
+
+  useEffect(() => {
+    setRefreshInterval();
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [autoRefreshInterval]);
 
   useEffect(() => {
     if (projectId && appId) {
@@ -102,7 +128,7 @@ const AnalyticsRealtime: React.FC = () => {
       setDashboardEmbedUrl('');
     }
     if (projectId && appId && enableStreamModule) {
-      getRealtime();
+      getRealtime(false);
     }
   }, [checked]);
 
@@ -168,6 +194,88 @@ const AnalyticsRealtime: React.FC = () => {
                               : t('analytics:labels.realtimeStopped')}
                           </Toggle>
                         </div>
+                        <div className="cs-analytics-realtime-auto-refresh">
+                          <Button
+                            iconName="refresh"
+                            variant="icon"
+                            onClick={() => getRealtime(true)}
+                          />
+                          <ButtonDropdown
+                            items={[
+                              {
+                                text: defaultStr(
+                                  t('analytics:realtime.autoRefresh.close')
+                                ),
+                                id: 'close',
+                              },
+                              {
+                                text: defaultStr(
+                                  t('analytics:realtime.autoRefresh.seconds15')
+                                ),
+                                id: 'seconds15',
+                              },
+                              {
+                                text: defaultStr(
+                                  t('analytics:realtime.autoRefresh.seconds30')
+                                ),
+                                id: 'seconds30',
+                              },
+                              {
+                                text: defaultStr(
+                                  t('analytics:realtime.autoRefresh.minute1')
+                                ),
+                                id: 'minute1',
+                              },
+                              {
+                                text: defaultStr(
+                                  t('analytics:realtime.autoRefresh.minute5')
+                                ),
+                                id: 'minute5',
+                              },
+                              {
+                                text: defaultStr(
+                                  t('analytics:realtime.autoRefresh.minute10')
+                                ),
+                                id: 'minute10',
+                              },
+                            ]}
+                            onItemClick={(e) => {
+                              if (e.detail.id === 'close') {
+                                setAutoRefreshText(
+                                  t('analytics:realtime.autoRefresh.title')
+                                );
+                                setAutoRefreshInterval(0);
+                              } else if (e.detail.id === 'seconds15') {
+                                setAutoRefreshText(
+                                  t('analytics:realtime.autoRefresh.seconds15')
+                                );
+                                setAutoRefreshInterval(15000);
+                              } else if (e.detail.id === 'seconds30') {
+                                setAutoRefreshText(
+                                  t('analytics:realtime.autoRefresh.seconds30')
+                                );
+                                setAutoRefreshInterval(30000);
+                              } else if (e.detail.id === 'minute1') {
+                                setAutoRefreshText(
+                                  t('analytics:realtime.autoRefresh.minute1')
+                                );
+                                setAutoRefreshInterval(60000);
+                              } else if (e.detail.id === 'minute5') {
+                                setAutoRefreshText(
+                                  t('analytics:realtime.autoRefresh.minute5')
+                                );
+                                setAutoRefreshInterval(300000);
+                              } else if (e.detail.id === 'minute10') {
+                                setAutoRefreshText(
+                                  t('analytics:realtime.autoRefresh.minute10')
+                                );
+                                setAutoRefreshInterval(600000);
+                              }
+                            }}
+                          >
+                            {autoRefreshText}
+                          </ButtonDropdown>
+                        </div>
                       </ColumnLayout>
                     ) : (
                       <Alert
@@ -189,7 +297,7 @@ const AnalyticsRealtime: React.FC = () => {
                     <br />
                     {!checked ? null : (
                       <>
-                        {loadingData ? (
+                        {loadingFrameData ? (
                           <Loading isPage />
                         ) : (
                           <ExploreEmbedFrame
