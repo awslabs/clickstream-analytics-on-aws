@@ -198,9 +198,11 @@ const AnalyticsRealtime: React.FC = () => {
                           <Button
                             iconName="refresh"
                             variant="icon"
+                            disabled={!checked}
                             onClick={() => getRealtime(true)}
                           />
                           <ButtonDropdown
+                            disabled={!checked}
                             items={[
                               {
                                 text: defaultStr(
