@@ -17,6 +17,8 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.IOException;
 
@@ -25,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static software.aws.solution.clickstream.util.ContextUtil.APP_IDS_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
 
+@Execution(ExecutionMode.CONCURRENT)
 class UAEnrichmentTest extends BaseSparkTest {
 
     private final UAEnrichment uaEnrichment = new UAEnrichment();

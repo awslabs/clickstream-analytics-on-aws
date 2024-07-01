@@ -20,6 +20,8 @@ import org.apache.spark.sql.SaveMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.model.ModelV2;
 import software.aws.solution.clickstream.util.*;
@@ -33,7 +35,7 @@ import static software.aws.solution.clickstream.transformer.BaseTransformerV3.TA
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
 
-
+@Execution(ExecutionMode.CONCURRENT)
 @Slf4j
 class TransformerV3Test extends BaseSparkTest {
 
