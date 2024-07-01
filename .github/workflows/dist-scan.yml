@@ -193,7 +193,7 @@ jobs:
         run: |
           bash .github/workflows/sonarqube/sonar-configure.sh
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v2.1.0
+        uses: SonarSource/sonarqube-scan-action@v2.2.0
         env:
           SONAR_HOST_URL: http://sonarqube:9000
           SONAR_TOKEN: ${{ env.SONARQUBE_TOKEN }}
