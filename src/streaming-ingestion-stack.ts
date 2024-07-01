@@ -143,7 +143,7 @@ export class StreamingIngestionStack extends Stack {
           allowRetentionHours: eventProcessing.retentionHours + '',
         },
       },
-      runtime: Runtime.of('FLINK-1_18'),
+      runtime: Runtime.of('FLINK-1_19'),
       checkpointingEnabled: true, // default is true
       logLevel: LogLevel.ERROR, // default is INFO
       metricsLevel: MetricsLevel.TASK, // default is APPLICATION
