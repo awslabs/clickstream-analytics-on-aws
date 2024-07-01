@@ -12,9 +12,12 @@
  */
 
 import {
+  CLICKSTREAM_TRANSFORMER_NAME_PARAMETER,
+  GTM_TRANSFORMER_NAME_PARAMETER,
   KINESIS_DATA_STREAM_ARN_PATTERN,
   KMS_KEY_ARN_PATTERN,
   S3_BUCKET_ARN_PATTERN,
+  SENSORS_TRANSFORMER_NAME_PARAMETER,
   SUBNETS_PATTERN,
 } from '@aws/clickstream-base-lib';
 import { CfnParameter, Fn } from 'aws-cdk-lib';
@@ -181,7 +184,7 @@ export function createStackParameters(scope: Construct): {
     description: 'The name of the transformer',
     type: 'String',
     default: 'clickstream',
-    allowedValues: ['clickstream', 'gtm', 'sensors'],
+    allowedValues: [CLICKSTREAM_TRANSFORMER_NAME_PARAMETER, GTM_TRANSFORMER_NAME_PARAMETER, SENSORS_TRANSFORMER_NAME_PARAMETER],
   });
 
   const retentionHoursParam = new CfnParameter(scope, 'RetentionHours', {

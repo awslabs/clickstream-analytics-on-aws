@@ -967,7 +967,7 @@
                     },
                     {
                         "Name": "day_diff",
-                        "DataType": "INTEGER"
+                        "DataType": "STRING"
                     },
                     {
                         "Name": "total_users",
@@ -7395,7 +7395,7 @@
                                     ],
                                     "Colors": [
                                         {
-                                            "NumericalDimensionField": {
+                                            "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.day_diff.2.1715343040286",
                                                 "Column": {
                                                     "DataSetIdentifier": "Retention_View",
@@ -7962,30 +7962,11 @@
                                 "LineChartAggregatedFieldWells": {
                                     "Category": [
                                         {
-                                            "NumericalDimensionField": {
+                                            "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.day_diff.0.1711696674313",
                                                 "Column": {
                                                     "DataSetIdentifier": "Retention_View",
                                                     "ColumnName": "day_diff"
-                                                },
-                                                "FormatConfiguration": {
-                                                    "FormatConfiguration": {
-                                                        "NumberDisplayFormatConfiguration": {
-                                                            "SeparatorConfiguration": {
-                                                                "DecimalSeparator": "DOT",
-                                                                "ThousandsSeparator": {
-                                                                    "Symbol": "COMMA",
-                                                                    "Visibility": "VISIBLE"
-                                                                }
-                                                            },
-                                                            "NegativeValueConfiguration": {
-                                                                "DisplayMode": "NEGATIVE"
-                                                            },
-                                                            "NullValueFormatConfiguration": {
-                                                                "NullString": "null"
-                                                            }
-                                                        }
-                                                    }
                                                 }
                                             }
                                         }
@@ -12504,8 +12485,8 @@
                             "CustomFilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
-                                    "1",
-                                    "7"
+                                    "   1",
+                                    "   7"
                                 ],
                                 "NullOption": "NON_NULLS_ONLY"
                             }

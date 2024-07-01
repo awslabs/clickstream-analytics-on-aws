@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { SINK_STREAM_NAME_PREFIX } from './constant';
+import { SINK_STREAM_NAME_PREFIX } from '@aws/clickstream-base-lib';
 
 export function getSinkStreamName(projectId: string, appId: string, suffix: string): string {
   return `${SINK_STREAM_NAME_PREFIX}${projectId}_${appId}_${suffix}`.toLowerCase();

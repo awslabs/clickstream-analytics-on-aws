@@ -11,11 +11,10 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_STREAMING_INGESTION_APP_TRAFFIC_SOURCE_RULE_CONFIG_S3_PATH, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, SolutionInfo } from '@aws/clickstream-base-lib';
+import { OUTPUT_STREAMING_INGESTION_APP_TRAFFIC_SOURCE_RULE_CONFIG_S3_PATH, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, SINK_STREAM_NAME_PREFIX, SolutionInfo } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { REDSHIFT_MODE } from '../../src/common/model';
-import { SINK_STREAM_NAME_PREFIX } from '../../src/streaming-ingestion/private/constant';
 import { StreamingIngestionStack } from '../../src/streaming-ingestion-stack';
 import { CFN_FN } from '../constants';
 import { RefAnyValue, findConditionByName, findFirstResourceByKeyPrefix } from '../utils';

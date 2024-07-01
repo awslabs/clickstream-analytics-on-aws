@@ -26,6 +26,7 @@ import {
   InitPartitionCustomResourceProps,
   createCopyAssetsCustomResource,
   createEMRServerlessApplicationCustomResource,
+  createInitAppConfigCustomResource,
   createInitPartitionCustomResource,
 } from './utils/custom-resource';
 import { createMetricsWidget } from './utils/metrics';
@@ -208,6 +209,14 @@ export class DataPipelineConstruct extends Construct {
       projectId: props.projectId,
       emrApplicationId,
       dataProcessingCronOrRateExpression: this.props.scheduleExpression,
+    });
+
+    // InitAppConfig rule files
+    createInitAppConfigCustomResource(this, {
+      projectId: this.props.projectId,
+      pipelineS3Bucket: this.props.pipelineS3Bucket,
+      pipelineS3Prefix: this.props.pipelineS3Prefix,
+      appIds: this.props.appIds,
     });
   }
 

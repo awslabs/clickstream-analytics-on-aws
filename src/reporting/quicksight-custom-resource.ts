@@ -1113,7 +1113,14 @@ function _getDataSetDefs(
         lookbackColumn: 'first_date',
         customSql: `
         -- clickstream-builtin-dashboard
-        SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} `,
+        SELECT 
+          platform,
+          first_date,
+          LPAD(day_diff::varchar, 4, ' ') as day_diff,
+          returned_user_count,
+          total_users
+        FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} 
+        `,
         columns: [
           {
             Name: 'platform',
@@ -1125,7 +1132,7 @@ function _getDataSetDefs(
           },
           {
             Name: 'day_diff',
-            Type: 'INTEGER',
+            Type: 'STRING',
           },
           {
             Name: 'returned_user_count',
@@ -2051,7 +2058,13 @@ function _getDataSetDefs(
         useSpice: 'no',
         customSql: `
         -- clickstream-builtin-dashboard
-        SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))`,
+        SELECT 
+          platform,
+          first_date,
+          LPAD(day_diff::varchar, 4, ' ') as day_diff,
+          returned_user_count,
+          total_users
+        FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))`,
         columns: [
           {
             Name: 'platform',
@@ -2063,7 +2076,7 @@ function _getDataSetDefs(
           },
           {
             Name: 'day_diff',
-            Type: 'INTEGER',
+            Type: 'STRING',
           },
           {
             Name: 'returned_user_count',

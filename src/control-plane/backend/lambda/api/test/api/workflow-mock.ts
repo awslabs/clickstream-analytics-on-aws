@@ -1155,6 +1155,14 @@ export const STREAMING_BASE_PARAMETERS = [
     ParameterKey: 'RedshiftUserParam.#',
     ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserName`,
   },
+  {
+    ParameterKey: 'RetentionHours',
+    ParameterValue: '1',
+  },
+  {
+    ParameterKey: 'TransformerName',
+    ParameterValue: 'clickstream',
+  },
 ];
 
 export const BASE_METRICS_PARAMETERS = [

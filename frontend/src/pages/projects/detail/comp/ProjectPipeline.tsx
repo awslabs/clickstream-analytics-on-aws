@@ -103,6 +103,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
       });
       if (resData.success) {
         setSelectedItems([]);
+        reloadPipeline('false');
         listApplicationByProject();
         setShowDeleteModal(false);
         setLoadingDelete(false);
@@ -121,6 +122,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
       });
       if (resData.success) {
         setSelectedItems([]);
+        reloadPipeline('false');
         listApplicationByProject();
       }
     } catch (error) {

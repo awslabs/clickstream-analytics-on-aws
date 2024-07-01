@@ -59,6 +59,7 @@ import {
   DEFAULT_TRANSFORM_SDK_IDS,
   EIngestionType,
   ENetworkType,
+  EVENT_REFRESH_UNIT_LIST,
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
@@ -80,6 +81,7 @@ import {
 } from 'ts/const';
 import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 import {
+  alertMsg,
   checkStringValidRegex,
   defaultGenericsValue,
   defaultStr,
@@ -561,6 +563,28 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     return true;
   };
 
+  const validateTransformerForStreaming = () => {
+    if (
+      pipelineInfo.dataCollectionSDK === 'thirdparty' &&
+      pipelineInfo.enableStreaming &&
+      pipelineInfo.selectedTransformPlugins.length > 0 &&
+      pipelineInfo.selectedTransformPlugins[0].id &&
+      !['BUILT-IN-4', 'BUILT-IN-5'].includes(
+        pipelineInfo.selectedTransformPlugins[0].id
+      )
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+  const validateRedshiftForStreaming = () => {
+    if (pipelineInfo.enableStreaming && !pipelineInfo.enableRedshift) {
+      return false;
+    }
+    return true;
+  };
+
   const checkDataProcessingInterval = (info: IExtPipeline) => {
     if (
       info.selectedExcutionType?.value === ExecutionType.FIXED_RATE &&
@@ -657,6 +681,16 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       ) {
         return false;
       }
+    }
+
+    if (!validateTransformerForStreaming()) {
+      alertMsg(t('pipeline:valid.transformerForStreamingError'));
+      return false;
+    }
+
+    if (!validateRedshiftForStreaming()) {
+      alertMsg(t('pipeline:valid.redshiftMustEnableForStreaming'));
+      return false;
     }
 
     return true;
@@ -839,6 +873,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             data,
             'quicksight'
           );
+          const flinkAvailable = findServiceAvailability(data, 'flink');
           setPipelineInfo((prev) => {
             return {
               ...prev,
@@ -848,6 +883,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
                 MSK: mskAvailable,
                 QUICK_SIGHT: quickSightAvailable,
+                FLINK: flinkAvailable,
               },
             };
           });
@@ -932,6 +968,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     } else {
       createPipelineObj.streaming = {
         appIdStreamList: pipelineInfo.streaming?.appIdStreamList ?? [],
+        retentionHours:
+          pipelineInfo.selectedStreamingDataRangeUnit?.value === 'day'
+            ? parseInt(pipelineInfo.streamingDataRangeValue) * 24
+            : parseInt(pipelineInfo.streamingDataRangeValue) || 1,
       };
     }
     return createPipelineObj;
@@ -2191,14 +2231,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changeDataLoadCronExp={(cron) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    dataLoadCronExp: cron,
-                  };
-                });
-              }}
             />
           ),
         },
@@ -2675,6 +2707,14 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   const setUpdateStreaming = async (pipelineInfo: IExtPipeline) => {
     pipelineInfo.enableStreaming =
       pipelineInfo.streaming?.appIdStreamList !== undefined;
+    const reverseStreamingDataRange = reverseFreshnessInHour(
+      pipelineInfo.streaming?.retentionHours ?? 1
+    );
+    pipelineInfo.streamingDataRangeValue = reverseStreamingDataRange.value;
+    pipelineInfo.selectedStreamingDataRangeUnit =
+      EVENT_REFRESH_UNIT_LIST.filter(
+        (type) => type.value === reverseStreamingDataRange.unit
+      )[0];
   };
 
   const setUpdateQuickSightUser = async (pipelineInfo: IExtPipeline) => {

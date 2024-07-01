@@ -2889,7 +2889,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             {
               tableName: 'Retention_View',
               useSpice: 'no',
-              customSql: "\n        -- clickstream-builtin-dashboard\n        SELECT * FROM {{schema}}.clickstream_retention_view_v3 where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))",
+              customSql: "\n        -- clickstream-builtin-dashboard\n        SELECT \n          platform,\n          first_date,\n          LPAD(day_diff::varchar, 4, ' ') as day_diff,\n          returned_user_count,\n          total_users\n        FROM {{schema}}.clickstream_retention_view_v3 where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))",
               columns:
                   [
                     {
@@ -2902,7 +2902,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                     },
                     {
                       Name: 'day_diff',
-                      Type: 'INTEGER',
+                      Type: 'STRING',
                     },
                     {
                       Name: 'returned_user_count',
@@ -4713,7 +4713,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               tableName: 'Retention_View',
               useSpice: 'yes',
               lookbackColumn: 'first_date',
-              customSql: '\n        -- clickstream-builtin-dashboard\n        SELECT * FROM {{schema}}.clickstream_retention_view_v3 ',
+              customSql: "\n        -- clickstream-builtin-dashboard\n        SELECT \n          platform,\n          first_date,\n          LPAD(day_diff::varchar, 4, ' ') as day_diff,\n          returned_user_count,\n          total_users\n        FROM {{schema}}.clickstream_retention_view_v3 \n        ",
               columns:
                   [
                     {
@@ -4726,7 +4726,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                     },
                     {
                       Name: 'day_diff',
-                      Type: 'INTEGER',
+                      Type: 'STRING',
                     },
                     {
                       Name: 'returned_user_count',

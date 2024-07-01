@@ -166,6 +166,7 @@ declare global {
     };
     timezone?: IAppTimezone[];
     streaming?: {
+      retentionHours: number;
       appIdStreamList: string[];
       appIdRealtimeList?: string[];
     };
@@ -255,6 +256,7 @@ declare global {
       REDSHIFT_SERVERLESS: boolean;
       MSK: boolean;
       QUICK_SIGHT: boolean;
+      FLINK: boolean;
     };
     showServiceStatus: boolean;
     enrichPluginChanged: boolean;

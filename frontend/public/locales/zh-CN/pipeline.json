@@ -52,7 +52,9 @@
     "stackRollbackFailed": "某些堆栈处于 ROLLBACK_FAILED 状态，无法更新。",
     "transformPluginEmptyError": "使用第三方 SDK 时需选择转换插件。",
     "tagsKeyValueEmpty": "标签键和值不能为空。",
-    "quickSightUserEmptyError": "请选择QuickSight管理员用户"
+    "quickSightUserEmptyError": "请选择QuickSight管理员用户",
+    "transformerForStreamingError": "当前选择的插件不支持实时数据处理",
+    "redshiftMustEnableForStreaming": "实时数据处理需要启用数据处理模块"
   },
   "create": {
     "basicInfo": "基本配置",

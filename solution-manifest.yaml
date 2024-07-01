@@ -1,0 +1,32 @@
+---
+id: SO0219
+name: clickstream-analytics-on-aws
+version: v1.2.0
+cloudformation_templates: 
+  - template: cloudfront-s3-control-plane-stack-global.template.json
+    main_template: true
+  - template: cloudfront-s3-control-plane-stack-global-customdomain.template.json
+    main_template: true
+  - template: cloudfront-s3-control-plane-stack-global-oidc.template.json
+    main_template: true    
+  - template: cloudfront-s3-control-plane-stack-global-customdomain-oidc.template.json
+    main_template: true  
+  - template: private-exist-vpc-control-plane-stack.template.json
+    main_template: true  
+  - template: cloudfront-s3-control-plane-stack-cn.template.json
+    main_template: true
+  - template: ingestion-server-s3-stack.template.json
+  - template: ingestion-server-kafka-stack.template.json
+  - template: ingestion-server-kinesis-stack.template.json
+  - template: ingestion-server-v2-stack.template.json
+  - template: kafka-s3-sink-stack.template.json
+  - template: data-pipeline-stack.template.json
+  - template: data-analytics-redshift-stack.template.json
+  - template: data-reporting-quicksight-stack.template.json
+  - template: metrics-stack.template.json
+  - template: data-modeling-athena-stack.template.json
+  - template: service-catalog-appregistry-stack.template.json
+  - template: streaming-ingestion-stack.template.json
+build_environment:
+  build_image: 'aws/codebuild/standard:7.0'
+  compute_type: 'BUILD_GENERAL1_2XLARGE'

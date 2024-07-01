@@ -42,7 +42,7 @@ import {
   DEFAULT_MSK_SINK_INTERVAL,
   EIngestionType,
   ENetworkType,
-  EXCUTION_UNIT_LIST,
+  EVENT_REFRESH_UNIT_LIST,
   MAX_KDS_BATCH_SIZE,
   MAX_KDS_SINK_INTERVAL,
   MAX_MSK_BATCH_SIZE,
@@ -225,7 +225,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   const [selectedStreamingDataRangeUnit, setSelectedStreamingDataRangeUnit] =
     useState(
       defaultSelectOptions(
-        EXCUTION_UNIT_LIST[2],
+        EVENT_REFRESH_UNIT_LIST[0],
         pipelineInfo.selectedStreamingDataRangeUnit
       )
     );
@@ -1093,7 +1093,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                           detail.selectedOption
                         );
                       }}
-                      options={EXCUTION_UNIT_LIST}
+                      options={EVENT_REFRESH_UNIT_LIST}
                     />
                   </div>
                 </div>

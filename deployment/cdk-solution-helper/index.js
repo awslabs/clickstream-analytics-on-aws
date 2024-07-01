@@ -162,9 +162,6 @@ fs.readdirSync(global_s3_assets).forEach(file => {
 
 
   updateECRImagesForECSTaskDefinition(template);
-  updateECRImagesForLambda(template);
-  updateECSTaskExecutionRolePolicy(template);
-
 
   // Clean-up parameters section
   const parameters = (template.Parameters) ? template.Parameters : {};
@@ -204,61 +201,14 @@ function updateECRImagesForECSTaskDefinition(template) {
     const resourceName = tDef.Metadata['aws:cdk:path'].split("/").slice(-2, -1);
     for (let cDef of tDef.Properties.ContainerDefinitions) {
       const cName = cDef.Name;
-      const fullName = `${resourceName}-${cName}`;
-      const newImage = `%%SOLUTION_ECR_ACCOUNT%%.dkr.ecr.\${AWS::Region}.\${AWS::URLSuffix}/%%SOLUTION_ECR_REPO_NAME%%:%%SOLUTION_ECR_BUILD_VERSION%%-${fullName}`;
+      // TODO change back to cName
+      const repoSuffix = cName === 'worker' ? 'vector' : 'nginx';
+      const newImage = `%%PUBLIC_ECR_REGISTRY%%/clickstream-${repoSuffix}:%%PUBLIC_ECR_TAG%%`;
 
       cDef.Image["Fn::Sub"] = newImage;
 
     }
   }
-
-}
-
-function updateECRImagesForLambda(template) {
-  const lambdaFns = getResourcesByType(template, 'AWS::Lambda::Function');
-  for (let fn of lambdaFns) {
-    if (fn.Properties.Code && fn.Properties.Code.ImageUri) {
-      // "cloudfront-s3-control-plane-stack-cn/ClickStreamApi/ClickStreamApiFunction/Resource"
-      const resourceName = fn.Metadata['aws:cdk:path'].split("/").slice(-2, -1);
-      const newImage = `%%SOLUTION_ECR_ACCOUNT%%.dkr.ecr.\${AWS::Region}.\${AWS::URLSuffix}/%%SOLUTION_ECR_REPO_NAME%%:%%SOLUTION_ECR_BUILD_VERSION%%-${resourceName}`;
-      fn.Properties.Code.ImageUri["Fn::Sub"] = newImage;
-    }
-  }
-}
-
-function updateECSTaskExecutionRolePolicy(template) {
-  const {
-    resource: executionRolePolicy,
-    key
-  } = getFirstResource(template, "AWS::IAM::Policy", "/ExecutionRole/DefaultPolicy/Resource");
-
-  if (!executionRolePolicy) {
-    return;
-  }
-  executionRolePolicy.Properties.PolicyDocument.Statement.push({
-    "Action": [
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:BatchGetImage"
-    ],
-    "Effect": "Allow",
-    "Resource": {
-      "Fn::Join": [
-        "",
-        [
-          "arn:",
-          {
-            "Ref": "AWS::Partition"
-          },
-          ":ecr:",
-          {
-            "Ref": "AWS::Region"
-          },
-          `:%%SOLUTION_ECR_ACCOUNT%%:repository/%%SOLUTION_ECR_REPO_NAME%%`
-        ]
-      ]
-    }
-  });
 }
 
 function getResourcesByType(template, resourceType) {

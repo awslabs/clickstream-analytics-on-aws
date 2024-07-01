@@ -8,8 +8,10 @@ For the clickstream project, you can specify the basic configuration of the data
       include-markdown "./vpc-prerequisites.md"
     %}
 * **Data collection SDK**: specify the SDK type that the client uses.
+
     - If you choose **Clickstream SDK**, please refer to [SDK manual][clickstream-sdks] for the available Clickstream SDKs and integration guides.
     - If you choose **Third-Party SDK**, you need to follow up on [this step][custom-plugin] to add a custom transformer plug-in to map the data to solution schema (if data modeling & reporting are needed). Note that the solution has built-in support for Google Tag Manager for server-side tagging, you can follow up on [Guidance for Using Google Tag Manager for Server-Side Website Analytics on AWS][gtm-guidance] to set up the GTM server-side servers on AWS.
+
 * **Data location**: specify the S3 bucket where the clickstream data is stored.
     
     !!! info "Note"

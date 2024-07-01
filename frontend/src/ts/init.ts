@@ -204,6 +204,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     REDSHIFT_SERVERLESS: false,
     MSK: false,
     QUICK_SIGHT: false,
+    FLINK: false,
   },
   showServiceStatus: false,
   enrichPluginChanged: false,

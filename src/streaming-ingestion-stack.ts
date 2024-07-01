@@ -12,7 +12,7 @@
  */
 
 import path from 'path';
-import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON, OUTPUT_STREAMING_INGESTION_APP_TRAFFIC_SOURCE_RULE_CONFIG_S3_PATH, SolutionInfo } from '@aws/clickstream-base-lib';
+import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON, OUTPUT_STREAMING_INGESTION_APP_TRAFFIC_SOURCE_RULE_CONFIG_S3_PATH, SolutionInfo, SINK_STREAM_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { Application, ApplicationCode, LogLevel, MetricsLevel, Runtime } from '@aws-cdk/aws-kinesisanalytics-flink-alpha';
 import {
   Arn,
@@ -39,7 +39,6 @@ import { getExistVpc } from './common/vpc-utils';
 import {
   createStackParameters,
 } from './streaming-ingestion/parameter';
-import { SINK_STREAM_NAME_PREFIX } from './streaming-ingestion/private/constant';
 import { KinesisSink } from './streaming-ingestion/private/kinesis-sink';
 import { StreamingIngestionRedshiftStack } from './streaming-ingestion/private/redshift-stack';
 

@@ -352,6 +352,9 @@ export const isStreamingDisabled = (
   update?: boolean,
   pipelineInfo?: IExtPipeline
 ) => {
+  if (!pipelineInfo?.serviceStatus.FLINK) {
+    return true;
+  }
   if (!update) {
     return (
       !pipelineInfo?.enableRedshift ||

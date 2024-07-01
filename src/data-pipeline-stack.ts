@@ -296,6 +296,7 @@ function addCfnNag(stack: Stack) {
     'partitionSyncerLambdaRole/DefaultPolicy/Resource',
     'CopyAssetsCustomResourceLambdaRole/DefaultPolicy/Resource',
     'InitPartitionLambdaRole/DefaultPolicy/Resource',
+    'InitAppConfigLambdaRole/DefaultPolicy/Resource',
     'CreateEMRServelsssApplicationLambdaRole/DefaultPolicy/Resource',
   ].forEach(
     p => addCfnNagToStack(stack, [ruleRolePolicyWithWildcardResources(p, 'CDK', 'Lambda')]),
@@ -316,6 +317,7 @@ function addCfnNag(stack: Stack) {
   addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
   addCfnNagForCustomResourceProvider(stack, 'GetInterval', 'dataProcessGetIntervalCustomResourceProvider', '');
   addCfnNagForCustomResourceProvider(stack, 'CreateEMRServelsssApplication', 'CreateEMRServelsssApplicationCustomResourceProvider', '');
+  addCfnNagForCustomResourceProvider(stack, 'InitAppConfig', 'InitAppConfigCustomResourceProvider', '');
   addCfnNagForBucketDeployment(stack, 'data-pipeline');
 
 }

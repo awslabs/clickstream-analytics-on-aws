@@ -61,12 +61,10 @@ jest.mock('@aws-sdk/client-emr-serverless', () => {
 
 
 const putStringToS3Mock = jest.fn(() => { });
-const isObjectExistMock = jest.fn(() => true);
 
 const mockS3Functions = {
   readS3ObjectAsJson: jest.fn(() => undefined),
   putStringToS3: putStringToS3Mock,
-  isObjectExist: isObjectExistMock,
   listObjectsByPrefix: jest.fn((_b, _k, f) => {
     [
       {
@@ -155,7 +153,6 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
         sizeTotal: 43008,
       },
     });
-    expect(isObjectExistMock.mock.calls.length).toEqual(4);
   });
 
   test('ignore starting data processing job when no files found', async () => {
@@ -449,74 +446,3 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
   });
 
 });
-
-
-describe('Data Process -- EMR Serverless job submitter function rule files do not exist', () => {
-
-  const context = getMockContext();
-  const lambdaMock = mockClient(LambdaClient);
-  const isObjectExistFalseMock = jest.fn(() => false);
-  beforeEach(() => {
-    lambdaMock.reset();
-    mockS3Functions.isObjectExist = isObjectExistFalseMock;
-  });
-
-  test('start data processing job1', async () => {
-    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
-    const jobInfo = await EMRServerlessUtil.start({
-      startTimestamp,
-      endTimestamp,
-    }, context);
-    expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
-    expect(jobInfo).toEqual({
-      jobRunId: 'jobId007',
-      objectsInfo: {
-        objectCount: 4,
-        sizeTotal: 43008,
-      },
-    });
-    expect(isObjectExistFalseMock.mock.calls.length).toEqual(4);
-    expect(putStringToS3Mock.mock.calls[0][0]).toContain('b.hatena.ne.jp');
-    expect(putStringToS3Mock.mock.calls[0][1]).toEqual('test-pipe-line-bucket');
-    expect(putStringToS3Mock.mock.calls[0][2]).toEqual('pipeline-prefix/test_proj_001/rules/app1/traffic_source_category_rule_v1.json');
-
-    expect(putStringToS3Mock.mock.calls[1][0]).toContain('__empty__');
-    expect(putStringToS3Mock.mock.calls[1][2]).toEqual('pipeline-prefix/test_proj_001/rules/app1/traffic_source_channel_rule_v1.json');
-
-    expect(putStringToS3Mock.mock.calls[2][2]).toEqual('pipeline-prefix/test_proj_001/rules/app2/traffic_source_category_rule_v1.json');
-    expect(putStringToS3Mock.mock.calls[3][2]).toEqual('pipeline-prefix/test_proj_001/rules/app2/traffic_source_channel_rule_v1.json');
-
-  });
-
-
-  test('start data processing job with PIPELINE_S3_PREFIX=clickstream/project_id', async () => {
-    process.env.PIPELINE_S3_PREFIX = 'clickstream/test_proj_001/';
-    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
-    const jobInfo = await EMRServerlessUtil.start({
-      startTimestamp,
-      endTimestamp,
-    }, context);
-    expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
-    expect(jobInfo).toEqual({
-      jobRunId: 'jobId007',
-      objectsInfo: {
-        objectCount: 4,
-        sizeTotal: 43008,
-      },
-    });
-    expect(isObjectExistFalseMock.mock.calls.length).toEqual(4);
-    expect(putStringToS3Mock.mock.calls[0][0]).toContain('b.hatena.ne.jp');
-    expect(putStringToS3Mock.mock.calls[0][1]).toEqual('test-pipe-line-bucket');
-    expect(putStringToS3Mock.mock.calls[0][2]).toEqual('clickstream/test_proj_001/rules/app1/traffic_source_category_rule_v1.json');
-
-    expect(putStringToS3Mock.mock.calls[1][0]).toContain('__empty__');
-    expect(putStringToS3Mock.mock.calls[1][2]).toEqual('clickstream/test_proj_001/rules/app1/traffic_source_channel_rule_v1.json');
-
-    expect(putStringToS3Mock.mock.calls[2][2]).toEqual('clickstream/test_proj_001/rules/app2/traffic_source_category_rule_v1.json');
-    expect(putStringToS3Mock.mock.calls[3][2]).toEqual('clickstream/test_proj_001/rules/app2/traffic_source_channel_rule_v1.json');
-
-    process.env.PIPELINE_S3_PREFIX = 'pipeline-prefix/';
-
-  });
-});
-
