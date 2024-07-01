@@ -15,14 +15,19 @@ package software.aws.solution.clickstream;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.util.*;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.util.*;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
 
+@Execution(ExecutionMode.CONCURRENT)
 @Slf4j
 public class ETLRunnerBaseTest extends BaseSparkTest {
 
@@ -92,8 +97,10 @@ public class ETLRunnerBaseTest extends BaseSparkTest {
                 ));
         return runnerConfig;
     }
+
     @Test
     void testGetConfig() {
         this.getRunnerConfig(newArrayList("software.aws.solution.clickstream.transformer.FakeTransformer"), "test");
     }
+
 }

@@ -16,6 +16,8 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.model.*;
 import software.aws.solution.clickstream.transformer.*;
 
@@ -23,6 +25,7 @@ import java.io.*;
 
 import static java.util.Objects.*;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class MaxLengthTransformerV2Test extends BaseSparkTest {
     @Test
     public void test_max_len_transform_v2() throws IOException {

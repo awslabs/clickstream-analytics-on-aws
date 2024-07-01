@@ -19,6 +19,8 @@ import static software.aws.solution.clickstream.transformer.TransformerNameEnum.
 import static software.aws.solution.clickstream.transformer.TransformerNameEnum.GTM_SERVER_DATA;
 import static software.aws.solution.clickstream.transformer.TransformerNameEnum.SENSORS_DATA;
 
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.common.ClickstreamEventParser;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.TransformConfig;
@@ -28,6 +30,7 @@ import software.aws.solution.clickstream.udfconverter.EventParserFactory;
 
 import java.util.HashMap;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class EventParserFactoryTest {
 
     @Test

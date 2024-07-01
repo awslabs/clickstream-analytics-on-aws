@@ -19,10 +19,15 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.util.ETLRunnerConfig;
 import software.aws.solution.clickstream.util.TableName;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -31,6 +36,7 @@ import static software.aws.solution.clickstream.util.ContextUtil.FILTER_BOT_BY_U
 import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 
+@Execution(ExecutionMode.CONCURRENT)
 @Slf4j
 public class ETLRunnerForSensorsDataTest extends ETLRunnerBaseTest {
 
@@ -42,7 +48,8 @@ public class ETLRunnerForSensorsDataTest extends ETLRunnerBaseTest {
         System.setProperty(FILTER_BOT_BY_UA_PROP, "true");
         System.setProperty("force.merge", "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/etl_runner/test_sensors_data_runner_" + System.currentTimeMillis());
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        addGeoLite2FileToSpark();
 
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.sensors.SensorsDataTransformerV2");

@@ -15,6 +15,8 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.udfconverter.ClickstreamDataConverterV3;
 
 import java.io.*;
@@ -22,6 +24,7 @@ import java.io.*;
 import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class ClickstreamDataConverterV3Test extends BaseSparkTest {
     private ClickstreamDataConverterV3 converter;
     @BeforeEach

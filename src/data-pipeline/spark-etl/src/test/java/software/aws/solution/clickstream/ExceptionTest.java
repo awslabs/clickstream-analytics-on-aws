@@ -15,11 +15,14 @@ package software.aws.solution.clickstream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.common.exception.*;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
 import java.io.IOException;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class ExceptionTest {
     @Test
     public void testExecuteTransformerExceptionIsRuntimeException() {

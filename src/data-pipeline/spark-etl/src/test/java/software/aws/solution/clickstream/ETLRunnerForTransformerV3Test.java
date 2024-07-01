@@ -17,6 +17,8 @@ package software.aws.solution.clickstream;
 import com.clearspring.analytics.util.*;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.util.*;
 
@@ -30,8 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static software.aws.solution.clickstream.transformer.BaseTransformerV3.TABLE_VERSION_SUFFIX_V3;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
-import static software.aws.solution.clickstream.TransformerV3.ETL_USER_V2_PROPS;
 
+@Execution(ExecutionMode.CONCURRENT)
 class ETLRunnerForTransformerV3Test extends ETLRunnerBaseTest {
 
     @Test
@@ -42,7 +44,7 @@ class ETLRunnerForTransformerV3Test extends ETLRunnerBaseTest {
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         setWarehouseDir("should_executeTransformers_with_TransformerV3_1");
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
 
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV3");
@@ -88,7 +90,7 @@ class ETLRunnerForTransformerV3Test extends ETLRunnerBaseTest {
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         setWarehouseDir("should_executeTransformers_with_TransformerV3_parquet");
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
 
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV3");
@@ -139,7 +141,8 @@ class ETLRunnerForTransformerV3Test extends ETLRunnerBaseTest {
         System.setProperty("force.merge", "true");
         setWarehouseDir("should_executeTransformers_with_TransformerV3_2");
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
+
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV3");
         transformers.add("software.aws.solution.clickstream.UAEnrichmentV2");

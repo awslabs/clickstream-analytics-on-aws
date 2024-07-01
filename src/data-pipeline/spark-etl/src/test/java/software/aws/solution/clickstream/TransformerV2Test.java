@@ -19,6 +19,8 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.IOException;
@@ -32,7 +34,7 @@ import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
 import static software.aws.solution.clickstream.ETLRunner.TRANSFORM_METHOD_NAME;
 
-
+@Execution(ExecutionMode.CONCURRENT)
 @Slf4j
 class TransformerV2Test extends BaseSparkTest {
 

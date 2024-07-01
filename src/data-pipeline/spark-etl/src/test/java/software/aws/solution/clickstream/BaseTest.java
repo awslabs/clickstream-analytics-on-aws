@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.*;
 import com.google.common.io.*;
 import org.apache.logging.log4j.*;
 import org.apache.logging.log4j.core.config.*;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.junit.jupiter.api.*;
 import software.aws.solution.clickstream.util.*;
 
