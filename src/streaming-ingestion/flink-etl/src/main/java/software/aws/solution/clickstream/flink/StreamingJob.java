@@ -301,6 +301,8 @@ public class StreamingJob {
                 .schema(schema)
                 .partitionedBy("date")
                 .option("path", s3Path)
+                .option("sink.rolling-policy.check-interval", "1 min")
+                .option("sink.rolling-policy.rollover-interval", "5 min")
                 .format(FormatDescriptor.forFormat("json")
                         .build())
                 .build());

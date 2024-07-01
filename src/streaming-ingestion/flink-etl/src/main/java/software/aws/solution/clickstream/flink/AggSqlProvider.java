@@ -121,7 +121,7 @@ public class AggSqlProvider {
          }
 
          String sql1Template = readResourceAsString("/sql/event_user_count.template.sql");
-         String sql1 = MessageFormat.format(sql1Template,  viewName, windowSlide, windowSize, windowTVF);
+         String sql1 = MessageFormat.format(sql1Template, viewName, windowSlide, windowSize, windowTVF, param6SqlComment);
 
          if (aggTypes.contains(ALL) || aggTypes.contains(EVENT_AND_USER_COUNT)) {
              sqlList.add(sql1);

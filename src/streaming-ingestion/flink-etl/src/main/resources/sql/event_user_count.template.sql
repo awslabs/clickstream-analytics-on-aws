@@ -9,10 +9,10 @@ SELECT
     CAST(NULL AS VARCHAR) as property_value
 FROM TABLE(
             {3}(
-                TABLE {0},
-                DESCRIPTOR(event_time),
-                INTERVAL ''{1}'' MINUTES,
-                INTERVAL ''{2}'' MINUTES
+                TABLE {0}
+                ,DESCRIPTOR(event_time)
+                {4},INTERVAL ''{1}'' MINUTES
+                ,INTERVAL ''{2}'' MINUTES
             )
         )
 GROUP BY window_start, window_end
