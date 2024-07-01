@@ -14,6 +14,8 @@
 package software.aws.solution.clickstream;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.common.Constant;
 
 import java.io.*;
@@ -21,6 +23,7 @@ import java.io.*;
 import static java.util.Objects.requireNonNull;
 import static software.aws.solution.clickstream.util.ContextUtil.FILTER_BOT_BY_UA_PROP;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class UAEnrichmentV2Test extends BaseSparkTest {
     UAEnrichmentV2 converter = new UAEnrichmentV2();
     @Test

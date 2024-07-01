@@ -15,6 +15,8 @@ package software.aws.solution.clickstream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.util.*;
 
 import java.net.URISyntaxException;
@@ -25,6 +27,7 @@ import java.util.Objects;
 import static com.google.common.collect.Lists.newArrayList;
 import static software.aws.solution.clickstream.util.ContextUtil.DEBUG_LOCAL_PROP;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class ContextUtilTest {
     @Test
     public void testSetContextProperties() {

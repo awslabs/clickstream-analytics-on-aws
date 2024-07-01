@@ -16,6 +16,8 @@ package software.aws.solution.clickstream;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import scala.collection.Iterator;
 import software.aws.solution.clickstream.transformer.*;
 
@@ -23,6 +25,7 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static software.aws.solution.clickstream.util.ContextUtil.DEBUG_LOCAL_PROP;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class EventParamsConverterTest extends BaseSparkTest {
 
     @Test

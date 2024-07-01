@@ -18,9 +18,12 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.BaseSparkTest;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
@@ -28,6 +31,7 @@ import static org.apache.spark.sql.functions.expr;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.common.Util.deCodeUri;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class ServerDataConverterTest extends BaseSparkTest {
     ServerDataConverter converter = new ServerDataConverter();
 
@@ -115,13 +119,15 @@ public class ServerDataConverterTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "gtm_server_demo_https");
         System.setProperty(DEBUG_LOCAL_PROP, "false");
+        String uniqueWarehouseDir = "/tmp/warehouse/" + UUID.randomUUID();
+        System.setProperty(WAREHOUSE_DIR_PROP, uniqueWarehouseDir);
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/test-convert-corrupt.json")).getPath());
         Dataset<Row> outDataset = converter.transform(dataset);
         Assertions.assertEquals(0, outDataset.count());
         Dataset<Row> corrupDataset =
-                spark.read().json("/tmp/warehouse/etl_gtm_corrupted_json_data");
+                spark.read().json(uniqueWarehouseDir + "/etl_gtm_corrupted_json_data");
         Assertions.assertTrue(corrupDataset.count() > 0);
     }
 

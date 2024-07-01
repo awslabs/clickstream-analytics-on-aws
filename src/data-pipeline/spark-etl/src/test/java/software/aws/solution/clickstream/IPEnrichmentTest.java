@@ -17,24 +17,32 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.lit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 
+@Execution(ExecutionMode.CONCURRENT)
 class IPEnrichmentTest extends BaseSparkTest {
 
     private final IPEnrichment ipEnrichment = new IPEnrichment();
 
     @Test
-    public void should_enrich_ip() {
+    public void should_enrich_ip() throws URISyntaxException, IOException {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data.json")).getPath());
         Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);
@@ -65,8 +73,8 @@ class IPEnrichmentTest extends BaseSparkTest {
     }
 
     @Test
-    public void should_return_empty_when_enrich_unrecognized_ip() {
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+    public void should_return_empty_when_enrich_unrecognized_ip() throws IOException {
+        addGeoLite2FileToSpark();
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data_with_ip_error.json")).getPath());
         Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);
@@ -83,7 +91,7 @@ class IPEnrichmentTest extends BaseSparkTest {
         // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.IPEnrichmentTest.ip_enrich_for_data_v2
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data_v2.json")).getPath());
         Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);
@@ -98,7 +106,7 @@ class IPEnrichmentTest extends BaseSparkTest {
         // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.IPEnrichmentTest.empty_ip_enrich_for_data_v2
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data_v2_empty_ip.json")).getPath());
         Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);

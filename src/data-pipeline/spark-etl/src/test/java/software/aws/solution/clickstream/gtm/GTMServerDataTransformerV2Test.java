@@ -17,6 +17,8 @@ import lombok.extern.slf4j.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.*;
 import software.aws.solution.clickstream.util.*;
 
@@ -29,7 +31,7 @@ import static java.util.Objects.*;
 import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 
-
+@Execution(ExecutionMode.CONCURRENT)
 @Slf4j
 public class GTMServerDataTransformerV2Test extends BaseSparkTest {
     GTMServerDataTransformerV2 transformer;
