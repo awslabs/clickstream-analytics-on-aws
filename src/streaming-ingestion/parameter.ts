@@ -198,6 +198,7 @@ export function createStackParameters(scope: Construct): {
     type: 'String',
     default: 'true',
     allowedValues: ['true', 'false'],
+
   });
 
   const retentionHoursParam = new CfnParameter(scope, 'RetentionHours', {

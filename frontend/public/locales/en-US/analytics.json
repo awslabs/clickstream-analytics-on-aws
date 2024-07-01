@@ -52,7 +52,16 @@
     "title": "Realtime",
     "description": "You can view key metrics of your apps and website in realtime here.",
     "disableMessage": "This project has not enabled real-time dashboard, please contact your admin to turn on real-time dashboard.",
-    "configProject": "Configure project"
+    "configProject": "Configure project",
+    "autoRefresh": {
+      "title": "Auto refresh",
+      "close": "Close",
+      "seconds15": "15 seconds",
+      "seconds30": "30 seconds",
+      "minute1": "1 minute",
+      "minute5": "5 minutes",
+      "minute10": "10 minutes"
+    }
   },
   "analyzes": {
     "title": "Analyses",

@@ -15,9 +15,12 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import static org.apache.spark.sql.functions.lit;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class SimpleEnrich {
     public Dataset<Row> transform(final Dataset<Row> dataset) {
         return dataset.withColumn("enrichBy", lit("software.aws.solution.clickstream.SimpleEnrich.transform"));

@@ -16,11 +16,14 @@ package software.aws.solution.clickstream;
 import com.clearspring.analytics.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.util.*;
 
 import java.nio.file.Paths;
 import java.util.List;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class DataProcessorTest extends BaseSparkTest{
     @Test
     public void testMain() {

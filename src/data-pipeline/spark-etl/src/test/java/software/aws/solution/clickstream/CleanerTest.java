@@ -16,12 +16,15 @@ package software.aws.solution.clickstream;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.transformer.*;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 
+@Execution(ExecutionMode.CONCURRENT)
 class CleanerTest extends BaseSparkTest {
     private final Cleaner cleaner = new Cleaner();
 

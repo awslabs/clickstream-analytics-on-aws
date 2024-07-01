@@ -19,6 +19,8 @@ import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.BaseSparkTest;
 import software.aws.solution.clickstream.util.TableName;
 
@@ -31,6 +33,7 @@ import static software.aws.solution.clickstream.util.ContextUtil.APP_IDS_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 
+@Execution(ExecutionMode.CONCURRENT)
 @Slf4j
 public class SensorsDataTransformerV2Test extends BaseSparkTest {
     private SensorsDataTransformerV2 transformer;

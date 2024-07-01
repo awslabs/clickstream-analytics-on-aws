@@ -17,6 +17,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
 import lombok.extern.slf4j.*;
+import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
@@ -33,13 +37,16 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
@@ -54,9 +61,21 @@ public class BaseSparkTest extends BaseTest {
     public static final String PROCESS_TIME = "process_time";
     public static final String INPUT_FILE_NAME = "input_file_name";
     protected SparkSession spark;
+    protected JavaSparkContext jsc;
 
     @BeforeAll
-    public static void downloadResources() {
+    public static void initResources() {
+
+        Configurator.setRootLevel(Level.WARN);
+        Configurator.setLevel("software.aws.solution.clickstream", Level.DEBUG);
+        ContextUtil.setEnableEventTimeShift(true);
+
+        try {
+            FileUtils.deleteDirectory(new File("/tmp/spark-" + System.getProperty("user.name")));
+        } catch (IOException e) {
+            log.error("delete /tmp/spark-{} failed", System.getProperty("user.name"), e);
+        }
+
        if (!needDownloadFile()) {
            return;
        }
@@ -122,29 +141,47 @@ public class BaseSparkTest extends BaseTest {
 
     @BeforeEach
     public void init() {
+        String uniqueWarehouseDir = "/tmp/warehouse/" + UUID.randomUUID();
+        System.setProperty(WAREHOUSE_DIR_PROP, uniqueWarehouseDir);
+        String theWarehouseDir =  ContextUtil.getWarehouseDir() != null ?  ContextUtil.getWarehouseDir() : uniqueWarehouseDir;
         System.setProperty(JOB_NAME_PROP, "test-job");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse");
         String dbName = "test_db";
         System.setProperty(DATABASE_PROP, dbName);
         System.setProperty(USER_KEEP_DAYS_PROP, String.valueOf(365 * 100));
         System.setProperty(ITEM_KEEP_DAYS_PROP, String.valueOf(365 * 100));
+        String uniqueTempDir = "/tmp/spark-test-" + UUID.randomUUID();
 
         spark = SparkSession.builder()
                 .appName("Test Spark App")
-                .master("local[*]")
+                .master("local[2]")  // Explicitly set the master URL
+                .config("spark.local.dir", uniqueTempDir)
                 .config("spark.driver.bindAddress", "127.0.0.1")
-                .config("spark.sql.warehouse.dir", ContextUtil.getWarehouseDir())
+                .config("spark.sql.warehouse.dir", theWarehouseDir)
                 .config("spark.sql.mapKeyDedupPolicy", "LAST_WIN")
                 .config("spark.sql.session.timeZone", "UTC")
+                .config("spark.driver.allowMultipleContexts", "true")
+                .config("spark.sql.hive.metastore.version", "3.1.0")
+                .config("spark.sql.hive.metastore.jars", "builtin")
+                .config("hive.metastore.uris", "")
+                .config("spark.sql.catalogImplementation", "in-memory")
                 .enableHiveSupport()
                 .getOrCreate();
-        spark.sql("DROP DATABASE IF EXISTS " + dbName + " CASCADE");
-        spark.sql("CREATE DATABASE IF NOT EXISTS " + dbName);
+
+        jsc = new JavaSparkContext(spark.sparkContext());
     }
 
     @AfterEach
     public void clear() {
-        spark.stop();
+        if (spark != null) {
+            spark.stop();
+        }
+        if (jsc != null) {
+            jsc.close();
+        }
+        System.clearProperty(APP_IDS_PROP);
+        System.clearProperty(PROJECT_ID_PROP);
+        SparkSession.clearActiveSession();
+        SparkSession.clearDefaultSession();
     }
 
     public static boolean needDownloadFile(){
@@ -262,5 +299,12 @@ public class BaseSparkTest extends BaseTest {
         TransformConfig transformRuleConfig = new TransformConfig();
         transformRuleConfig.setAppRuleConfig(appRuleConfig);
         return transformRuleConfig;
+    }
+
+    void addGeoLite2FileToSpark() throws IOException {
+        Path tempDir = Files.createTempDirectory("spark-test-geo");
+        Path tempFile = tempDir.resolve("GeoLite2-City.mmdb");
+        Files.copy(requireNonNull(getClass().getResourceAsStream("/GeoLite2-City.mmdb")), tempFile, StandardCopyOption.REPLACE_EXISTING);
+        spark.sparkContext().addFile(tempFile.toString());
     }
 }

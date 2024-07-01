@@ -18,6 +18,8 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.transformer.*;
 
 import java.util.List;
@@ -26,6 +28,7 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.udf;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class MaxLengthTransformerTest extends BaseSparkTest {
     @Test
     public void test_transform() {
