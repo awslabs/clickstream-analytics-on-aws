@@ -173,7 +173,7 @@ const UserSegments: React.FC = () => {
                       <SpaceBetween direction="horizontal" size="xs">
                         <ButtonDropdown
                           onItemClick={(e) => {
-                            const hrefPath = `/analytics/${projectId}/app/${appId}/segments/${selectedSegment[0].segmentId}/`;
+                            const hrefPath = `/analytics/${projectId}/app/${appId}/segments/${selectedSegment[0]?.segmentId}/`;
 
                             if (e.detail.id === 'delete') {
                               confirmDeleteSegments();
@@ -182,7 +182,9 @@ const UserSegments: React.FC = () => {
                             } else if (e.detail.id === 'edit') {
                               window.location.href = hrefPath + 'edit';
                             } else if (e.detail.id === 'detail') {
-                              window.location.href = hrefPath + 'details';
+                              navigate(hrefPath + 'details');
+                            } else if (e.detail.id === 'import') {
+                              navigate(`/analytics/${projectId}/app/${appId}/segments/import`);
                             }
                           }}
                           loading={loadingDelete}
@@ -207,6 +209,10 @@ const UserSegments: React.FC = () => {
                               id: 'delete',
                               disabled: disableAction,
                             },
+                            {
+                              text: defaultStr(t('button.import')),
+                              id: 'import',
+                            }
                           ]}
                         >
                           {t('button.actions')}

@@ -26,6 +26,7 @@
     "segments": "分群",
     "createSegment": "创建分群",
     "editSegment": "编辑分群",
+    "importSegment": "导入分群",
     "data-management": "数据管理"
   },
   "nav": {
@@ -215,6 +216,7 @@
     "reorder": "重新排序",
     "apply": "应用",
     "newGroup": "添加分组",
+    "import": "导入",
     "export": "导出",
     "refreshSegment": "刷新分群",
     "streamEnable": "开启实时流",

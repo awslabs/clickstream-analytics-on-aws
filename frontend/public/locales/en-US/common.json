@@ -26,6 +26,7 @@
     "segments": "Segments",
     "createSegment": "Create Segment",
     "editSegment": "Edit Segment",
+    "importSegment": "Import Segment",
     "data-management": "Data Management"
   },
   "nav": {
@@ -215,6 +216,7 @@
     "reorder": "Reorder",
     "apply": "Apply",
     "newGroup": "Add Group",
+    "import": "Import",
     "export": "Export",
     "refreshSegment": "Refresh Segment",
     "streamEnable": "Streaming Enable",

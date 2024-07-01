@@ -469,7 +469,9 @@
       "selectUserGroup": "Please select user segment group",
       "segmentDescPlaceholder": "Provide a short description",
       "filterByTimeRange": "Filter by a date and time range",
-      "appTimezone": "the app's timezone"
+      "appTimezone": "the app's timezone",
+      "importSegmentTitle": "Import Segment",
+      "importSegmentDesc": "Define a segment, then import the segment manually"
     },
     "details": {
       "title": "Segment Details",

@@ -13,9 +13,9 @@
 
 import { Alert } from '@cloudscape-design/components';
 import { getUserDetails } from 'apis/user';
+import CommonAlert from 'components/common/alert';
 import Loading from 'components/common/Loading';
 import RoleRoute from 'components/common/RoleRoute';
-import CommonAlert from 'components/common/alert';
 import { UserContext } from 'context/UserContext';
 import AlarmsList from 'pages/alarms/AlarmList';
 import AnalyticsHome from 'pages/analytics/AnalyticsHome';
@@ -27,17 +27,19 @@ import AnalyticsDashboardFullWindow from 'pages/analytics/dashboard/full/Analyti
 import AnalyticsDataManagement from 'pages/analytics/data-management/AnalyticsDataManagement';
 import AnalyticsExplore from 'pages/analytics/explore/AnalyticsExplore';
 import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
-import AddUserSegments from 'pages/analytics/segments/AddUserSegment';
+import AddUserSegment from 'pages/analytics/segments/AddUserSegment';
+import ImportUserSegment from 'pages/analytics/segments/ImportUserSegment';
 import UserSegmentDetails from 'pages/analytics/segments/UserSegmentDetails';
 import UserSegments from 'pages/analytics/segments/UserSegments';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
+import Home from 'pages/home/Home';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';
-import PluginList from 'pages/plugins/PluginList';
 import CreatePlugin from 'pages/plugins/create/CreatePlugin';
-import Projects from 'pages/projects/Projects';
+import PluginList from 'pages/plugins/PluginList';
 import ProjectDetail from 'pages/projects/detail/ProjectDetail';
+import Projects from 'pages/projects/Projects';
 import UserList from 'pages/user/UserList';
 import React, { Suspense, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -45,7 +47,6 @@ import { AuthContextProps } from 'react-oidc-context';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { IUserRole, LAST_VISIT_URL } from 'ts/const';
 import { getIntersectArrays, getUserInfoFromLocalStorage } from 'ts/utils';
-import Home from './pages/home/Home';
 
 interface LoginCallbackProps {
   auth: AuthContextProps;
@@ -462,7 +463,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
               >
-                <AddUserSegments actionType="new" />
+                <AddUserSegment actionType="new" />
               </RoleRoute>
             }
           />
@@ -475,7 +476,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
               >
-                <AddUserSegments actionType="duplicate" />
+                <AddUserSegment actionType="duplicate" />
               </RoleRoute>
             }
           />
@@ -488,7 +489,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
               >
-                <AddUserSegments actionType="edit" />
+                <AddUserSegment actionType="edit" />
               </RoleRoute>
             }
           />
@@ -502,6 +503,19 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
               >
                 <UserSegmentDetails />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/analytics/:projectId/app/:appId/segments/import"
+            element={
+              <RoleRoute
+                sessionExpired={sessionExpired}
+                layout="analytics"
+                auth={auth}
+                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+              >
+                <ImportUserSegment />
               </RoleRoute>
             }
           />
