@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { SolutionVersion } from '@aws/clickstream-base-lib';
 import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
 import { EC2Client } from '@aws-sdk/client-ec2';
 import {
@@ -111,10 +112,10 @@ import {
   removeParameters,
   replaceStackInputProps,
   replaceStackProps,
+  setTagsWithVersion,
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, LEVEL1, LEVEL2, LEVEL3, dictionaryTableName } from '../../common/constants';
 // eslint-disable-next-line import/order
-import { SINK_TYPE_MODE } from '../../common/model-ln';
 import { ENetworkType, IngestionType, WorkflowState, WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { getStackPrefix } from '../../common/utils';
 import { server } from '../../index';
@@ -216,7 +217,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
                         },
                       ),
                     },
@@ -295,7 +295,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
                         },
                       ),
                     },
@@ -335,7 +334,7 @@ describe('Workflow test', () => {
         ...S3_INGESTION_PIPELINE.ingestionServer,
         ingestionType: IngestionType.Fargate,
       },
-      templateVersion: FULL_SOLUTION_VERSION,
+      templateVersion: SolutionVersion.V_1_2_0.fullVersion,
     });
     await pipeline.resourcesCheck();
     const wf = await generateWorkflow(pipeline.getPipeline(), pipeline.getResources()!);
@@ -346,19 +345,18 @@ describe('Workflow test', () => {
           {
             StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
+              ServiceCatalogAppRegistry: setTagsWithVersion(ServiceCatalogAppRegistryStack, SolutionVersion.V_1_2_0),
               [LEVEL1]: {
                 Branches: [
                   {
                     StartAt: 'Metrics',
                     States: {
-                      Metrics: replaceStackInputProps(MetricsStack,
+                      Metrics: replaceStackInputProps(setTagsWithVersion(MetricsStack, SolutionVersion.V_1_2_0),
                         {
                           Parameters: [
                             ...BASE_METRICS_EMAILS_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
-                          Tags: Tags,
                         },
                       ),
                     },
@@ -366,19 +364,13 @@ describe('Workflow test', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: replaceStackInputProps(IngestionStack,
+                      Ingestion: replaceStackInputProps(setTagsWithVersion(IngestionStack, SolutionVersion.V_1_2_0),
                         {
                           StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
                           Parameters: [
                             ...INGESTION_S3_FARGATE_PARAMETERS,
-                            {
-                              ParameterKey: 'SinkType',
-                              ParameterValue: SINK_TYPE_MODE.SINK_TYPE_S3,
-                            },
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
-                          Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-stack.template.json',
                         },
                       ),
                     },
@@ -464,7 +456,6 @@ describe('Workflow test', () => {
                           ],
                           Tags: Tags,
                           Region: 'cn-north-1',
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
                         },
                       ),
                     },
@@ -539,7 +530,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                         },
                       ),
                     },
@@ -615,7 +605,6 @@ describe('Workflow test', () => {
                               APPREGISTRY_APPLICATION_ARN_PARAMETER,
                             ],
                             Tags: Tags,
-                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                           },
                         ),
                         {
@@ -729,7 +718,6 @@ describe('Workflow test', () => {
                             ],
                             Region: 'cn-north-1',
                             Tags: Tags,
-                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                           },
                         ),
                         {
@@ -831,7 +819,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -917,7 +904,6 @@ describe('Workflow test', () => {
                           ],
                           Region: 'cn-north-1',
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -992,7 +978,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
                         },
                       ),
                     },
@@ -1083,7 +1068,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
                         },
                       ),
                     },
@@ -1192,7 +1176,6 @@ describe('Workflow test', () => {
                               APPREGISTRY_APPLICATION_ARN_PARAMETER,
                             ],
                             Tags: Tags,
-                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                           },
                         ),
                         {
@@ -1327,7 +1310,6 @@ describe('Workflow test', () => {
                               APPREGISTRY_APPLICATION_ARN_PARAMETER,
                             ],
                             Tags: Tags,
-                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                           },
                         ),
                         {
@@ -1477,7 +1459,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -1584,7 +1565,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -1707,7 +1687,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -1853,7 +1832,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -1977,7 +1955,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -2116,7 +2093,6 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -2265,7 +2241,6 @@ describe('Workflow test', () => {
                               APPREGISTRY_APPLICATION_ARN_PARAMETER,
                             ],
                             Tags: Tags,
-                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
                           },
                         ),
                         {
@@ -4703,7 +4678,6 @@ describe('Workflow test with boundary', () => {
                             BOUNDARY_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
                         },
                       ),
                     },

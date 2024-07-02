@@ -49,7 +49,7 @@ import { Parameter } from '@aws-sdk/client-cloudformation';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
 import { analyticsMetadataTable, awsAccountId, awsPartition, awsRegion, clickStreamTableName } from '../common/constants';
-import { PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
+import { ECS_INFRA_TYPE_MODE, PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
 import { isSupportVersion, supportVersions } from '../common/parameter-reflect';
 import {
   validateDataProcessingInterval,
@@ -174,6 +174,16 @@ export class CIngestionServerStack extends JSONObject {
     AppIds?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
+      return ECS_INFRA_TYPE_MODE.FARGATE;
+    }
+    return ECS_INFRA_TYPE_MODE.EC2;
+  })
+  @supportVersions([SolutionVersion.V_1_2_0, SolutionVersion.ANY])
+    EcsInfraType?: string;
+
+  @JSONObject.optional('')
   @JSONObject.custom( (stack :CIngestionServerStack, key:string, _value:any) => {
     const defaultValue = stack._pipeline?.network.vpcId;
     validatePattern(key, VPC_ID_PATTERN, defaultValue);
@@ -283,6 +293,7 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
     return stack._pipeline?.ingestionServer.loadBalancer.notificationsTopicArn ?? '';
   })
+  @supportVersions([SolutionVersion.ANY, SolutionVersion.V_1_1_6])
     NotificationsTopicArn?: string;
 
   @JSONObject.optional('No')
@@ -511,6 +522,7 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
     return getSinkType(stack._pipeline!);
   })
+  @supportVersions([SolutionVersion.V_1_2_0, SolutionVersion.ANY])
     SinkType?: string;
 
   @JSONObject.optional('')

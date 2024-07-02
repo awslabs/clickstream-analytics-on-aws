@@ -84,7 +84,7 @@ describe('system api test', () => {
   it('fetch info with current version and remote version with newer build number', async () => {
 
     doMockFetch({
-      Description: '(SO0219) Clickstream Analytics on AWS (Version v1.1.6)(Build 202404071513)- Control Plane',
+      Description: '(SO0219) Clickstream Analytics on AWS (Version v1.2.0)(Build 202404071513)- Control Plane',
       Metadata: {},
     });
 
@@ -97,7 +97,7 @@ describe('system api test', () => {
     expect(res.body).toEqual({
       data: {
         version,
-        remoteVersion: 'v1.1.6-202404071513',
+        remoteVersion: 'v1.2.0-202404071513',
         templateUrl: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/${process.env.TEMPLATE_FILE}`,
         hasUpdate: true,
       },
@@ -109,7 +109,7 @@ describe('system api test', () => {
   it('fetch info with current version and remote version with newer micro version', async () => {
 
     doMockFetch({
-      Description: '(SO0219) Clickstream Analytics on AWS (Version v1.1.7)(Build 202404071513)- Control Plane',
+      Description: '(SO0219) Clickstream Analytics on AWS (Version v1.2.1)(Build 202404071513)- Control Plane',
       Metadata: {},
     });
 
@@ -122,7 +122,7 @@ describe('system api test', () => {
     expect(res.body).toEqual({
       data: {
         version,
-        remoteVersion: 'v1.1.7-202404071513',
+        remoteVersion: 'v1.2.1-202404071513',
         templateUrl: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/${process.env.TEMPLATE_FILE}`,
         hasUpdate: true,
       },
