@@ -54,7 +54,7 @@ router_segment.post(
   ]),
   async (req: Request, res: Response, next: NextFunction) => {
     return segmentServ.import(req, res, next);
-  }
+  },
 );
 
 // List segments of an app
