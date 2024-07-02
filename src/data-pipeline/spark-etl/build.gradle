@@ -89,8 +89,7 @@ tasks.named('test') {
 
 test {
     forkEvery = 1
-    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-
+    maxParallelForks = Math.min(Runtime.runtime.availableProcessors().intdiv(2) ?: 1, 6)
     maxHeapSize = "4g"
     minHeapSize = "1g"
 }
