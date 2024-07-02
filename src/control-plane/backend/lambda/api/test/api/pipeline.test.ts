@@ -86,8 +86,9 @@ import {
   stackDetailsWithOutputs,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
 } from './pipeline-mock';
+import { expectParameter } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, LEVEL1, LEVEL2, LEVEL3, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
-import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
+import { BuiltInTagKeys, ECS_INFRA_TYPE_MODE, PipelineStatusType, SINK_TYPE_MODE } from '../../common/model-ln';
 import { PipelineServerProtocol } from '../../common/types';
 import { getDefaultTags, getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
@@ -4089,9 +4090,13 @@ describe('Pipeline test', () => {
       const dataProcessingInput = level1State.Branches.L[2].M.States.M.DataProcessing.M.Data.M.Input;
       const ingestionState = level1State.Branches.L[1].M.States.M.Ingestion;
       const ingestionInput = ingestionState.M.Data.M.Input;
+
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
+        expectParameter(ingestionInput.M.Parameters, 'EcsInfraType', ECS_INFRA_TYPE_MODE.EC2) &&
+        expectParameter(ingestionInput.M.Parameters, 'SinkType', SINK_TYPE_MODE.SINK_TYPE_KDS) &&
+        expectParameter(ingestionInput.M.Parameters, 'NotificationsTopicArn', undefined) &&
         ingestionInput.M.TemplateURL.S === 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-stack.template.json' &&
         dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
       ).toBeTruthy();
@@ -4162,6 +4167,9 @@ describe('Pipeline test', () => {
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
+        expectParameter(ingestionInput.M.Parameters, 'EcsInfraType', undefined) &&
+        expectParameter(ingestionInput.M.Parameters, 'SinkType', undefined) &&
+        expectParameter(ingestionInput.M.Parameters, 'NotificationsTopicArn', 'arn:aws:sns:us-east-1:111122223333:test') &&
         ingestionInput.M.TemplateURL.S === 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json' &&
         dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
       ).toBeTruthy();

@@ -33,7 +33,6 @@ import {
   CKafkaConnectorStack,
   CMetricsStack,
   CReportingStack,
-  getStackParameters,
 } from './stacks';
 import {
   CFN_RULE_PREFIX,
@@ -551,12 +550,7 @@ export class CPipeline {
     if (!ingestionTemplateURL) {
       throw new ClickStreamBadRequestError(`Template: ${ingestionTemplateKey} not found in dictionary.`);
     }
-    const templateVersion = this.pipeline.templateVersion;
-    this.pipeline.templateVersion = oldPipeline.templateVersion;
-    const ingestionStack = new CIngestionServerStack(this.pipeline, this.resources!);
-    const ingestionStackParameters = getStackParameters(ingestionStack, SolutionVersion.Of(this.pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-    await this.stackManager.setIngestionStackTemplate(ingestionTemplateURL, ingestionStackParameters);
-    this.pipeline.templateVersion = templateVersion;
+    await this.stackManager.resetIngestionStackTemplate(ingestionTemplateURL, oldPipeline.templateVersion);
   }
 
   public async refreshStatus(refresh?: string): Promise<void> {

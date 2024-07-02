@@ -19,6 +19,20 @@ import { FULL_SOLUTION_VERSION, LEVEL1 } from '../../common/constants';
 import { BuiltInTagKeys, SINK_TYPE_MODE } from '../../common/model-ln';
 import { getStackPrefix } from '../../common/utils';
 
+export function expectParameter(parameters: any, key: string, value: string | undefined) {
+  let parameter: Parameter | undefined;
+  for (let p of parameters.L) {
+    if (p.M.ParameterKey.S === key) {
+      parameter = {
+        ParameterKey: p.M.ParameterKey.S,
+        ParameterValue: p.M.ParameterValue.S,
+      };
+    }
+  }
+  console.log(`Expect Parameter: ${key}=${value}, Actual Parameter: ${parameter?.ParameterKey}=${parameter?.ParameterValue}`);
+  return parameter?.ParameterValue === value;
+};
+
 export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   // Deep Copy
   const parameters = cloneDeep(base);
