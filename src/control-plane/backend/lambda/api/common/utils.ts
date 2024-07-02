@@ -38,7 +38,7 @@ import { cloneDeep } from 'lodash';
 import { FULL_SOLUTION_VERSION, amznRequestContextHeader, awsUrlSuffix } from './constants';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IDictionary } from '../model/dictionary';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter, IMetadataBuiltInList } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
@@ -272,20 +272,17 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   return names.get(key) ?? '';
 }
 
-function getSinkType(pipeline: IPipeline): string | undefined {
-  if (pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
-    switch (pipeline?.ingestionServer.sinkType) {
-      case PipelineSinkType.S3:
-        return SINK_TYPE_MODE.SINK_TYPE_S3;
-      case PipelineSinkType.KAFKA:
-        return SINK_TYPE_MODE.SINK_TYPE_MSK;
-      case PipelineSinkType.KINESIS:
-        return SINK_TYPE_MODE.SINK_TYPE_KDS;
-      default:
-        return undefined;
-    }
+function getSinkType(pipeline: IPipeline): string {
+  switch (pipeline?.ingestionServer.sinkType) {
+    case PipelineSinkType.S3:
+      return SINK_TYPE_MODE.SINK_TYPE_S3;
+    case PipelineSinkType.KAFKA:
+      return SINK_TYPE_MODE.SINK_TYPE_MSK;
+    case PipelineSinkType.KINESIS:
+      return SINK_TYPE_MODE.SINK_TYPE_KDS;
+    default:
+      return SINK_TYPE_MODE.SINK_TYPE_S3;
   }
-  return undefined;
 }
 
 function replaceTemplateVersion(templateUrl: string, version: string): string {

@@ -16,8 +16,22 @@ import { Parameter } from '@aws-sdk/client-cloudformation';
 import { cloneDeep } from 'lodash';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { FULL_SOLUTION_VERSION, LEVEL1 } from '../../common/constants';
-import { BuiltInTagKeys } from '../../common/model-ln';
+import { BuiltInTagKeys, SINK_TYPE_MODE } from '../../common/model-ln';
 import { getStackPrefix } from '../../common/utils';
+
+export function expectParameter(parameters: any, key: string, value: string | undefined) {
+  let parameter: Parameter | undefined;
+  for (let p of parameters.L) {
+    if (p.M.ParameterKey.S === key) {
+      parameter = {
+        ParameterKey: p.M.ParameterKey.S,
+        ParameterValue: p.M.ParameterValue.S,
+      };
+    }
+  }
+  console.log(`Expect Parameter: ${key}=${value}, Actual Parameter: ${parameter?.ParameterKey}=${parameter?.ParameterValue}`);
+  return parameter?.ParameterValue === value;
+};
 
 export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   // Deep Copy
@@ -78,6 +92,10 @@ const BASE_INGESTION_PARAMETERS: Parameter[] = [
     ParameterValue: `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
   },
   {
+    ParameterKey: 'EcsInfraType',
+    ParameterValue: 'EC2',
+  },
+  {
     ParameterKey: 'VpcId',
     ParameterValue: 'vpc-00000000000000001',
   },
@@ -124,10 +142,6 @@ const BASE_INGESTION_PARAMETERS: Parameter[] = [
   {
     ParameterKey: 'ScaleOnCpuUtilizationPercent',
     ParameterValue: '50',
-  },
-  {
-    ParameterKey: 'NotificationsTopicArn',
-    ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
   },
   {
     ParameterKey: 'EnableGlobalAccelerator',
@@ -198,6 +212,10 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
       ParameterKey: 'WorkerStopTimeout',
       ParameterValue: '90',
     },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'S3',
+    },
   ],
 );
 
@@ -213,17 +231,20 @@ export const INGESTION_S3_PRIVATE_PARAMETERS = replaceParameters(
   },
 );
 
-export const INGESTION_S3_FARGATE_PARAMETERS = replaceParameters(
-  INGESTION_S3_PARAMETERS,
-  {
-    ParameterKey: 'WorkerStopTimeout',
-    ParameterValue: '90',
-  },
+export const INGESTION_S3_FARGATE_PARAMETERS = mergeParameters(INGESTION_S3_PARAMETERS, [
   {
     ParameterKey: 'WorkerStopTimeout',
     ParameterValue: '120',
   },
-);
+  {
+    ParameterKey: 'SinkType',
+    ParameterValue: SINK_TYPE_MODE.SINK_TYPE_S3,
+  },
+  {
+    ParameterKey: 'EcsInfraType',
+    ParameterValue: 'FARGATE',
+  },
+]);
 
 export const INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(
   INGESTION_S3_PARAMETERS,
@@ -258,6 +279,10 @@ export const INGESTION_KAFKA_PARAMETERS = mergeParameters(
       ParameterKey: 'KafkaBrokers',
       ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
     },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'MSK',
+    },
   ],
 );
 
@@ -279,6 +304,10 @@ export const INGESTION_MSK_PARAMETERS = mergeParameters(
     {
       ParameterKey: 'KafkaBrokers',
       ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+    },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'MSK',
     },
   ],
 );
@@ -305,6 +334,10 @@ export const INGESTION_MSK_WITHOUT_APP_PARAMETERS = mergeParameters(
     {
       ParameterKey: 'KafkaBrokers',
       ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+    },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'MSK',
     },
   ],
 );
@@ -339,6 +372,10 @@ export const INGESTION_KINESIS_ON_DEMAND_PARAMETERS = mergeParameters(
     {
       ParameterKey: 'KinesisDataS3Prefix',
       ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
+    },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'KDS',
     },
   ],
 );
@@ -378,6 +415,10 @@ export const INGESTION_THIRDPARTY_SDK_KINESIS_ON_DEMAND_PARAMETERS = mergeParame
       ParameterKey: 'KinesisDataS3Prefix',
       ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
     },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'KDS',
+    },
   ],
 );
 
@@ -411,6 +452,10 @@ export const INGESTION_KINESIS_PROVISIONED_PARAMETERS = mergeParameters(
     {
       ParameterKey: 'KinesisDataS3Prefix',
       ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
+    },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'KDS',
     },
   ],
 );
@@ -1269,7 +1314,7 @@ export const IngestionStack = {
       ],
       StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
       Tags: InitTags,
-      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-stack.template.json',
     },
   },
   End: true,
@@ -1291,7 +1336,7 @@ export const IngestionStackCn = {
       ],
       StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
       Tags: InitTags,
-      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-stack.template.json',
     },
   },
   End: true,
@@ -1591,6 +1636,18 @@ export const ServiceCatalogAppRegistryStackCn = {
 export function removeParametersFromStack(stack: any, parameters: Parameter[]) {
   const newStack = cloneDeep(stack);
   newStack.Data.Input.Parameters = removeParameters(newStack.Data.Input.Parameters, parameters);
+  return newStack;
+}
+
+export function insertAfterParametersInStack(stack: any, parameterKey: string, newParameters: Parameter[]) {
+  const newStack = cloneDeep(stack);
+  for (const param of newStack.Data.Input.Parameters as Parameter[]) {
+    if (param.ParameterKey === parameterKey) {
+      const index = newStack.Data.Input.Parameters.indexOf(param);
+      newStack.Data.Input.Parameters.splice(index + 1, 0, ...newParameters);
+      break;
+    }
+  }
   return newStack;
 }
 
