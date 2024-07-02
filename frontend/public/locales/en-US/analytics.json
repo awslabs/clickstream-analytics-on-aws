@@ -469,7 +469,9 @@
       "selectUserGroup": "Please select user segment group",
       "segmentDescPlaceholder": "Provide a short description",
       "filterByTimeRange": "Filter by a date and time range",
-      "appTimezone": "the app's timezone"
+      "appTimezone": "the app's timezone",
+      "importSegmentTitle": "Import Segment",
+      "importSegmentDesc": "Define a segment, then import the segment manually"
     },
     "details": {
       "title": "Segment Details",
@@ -492,7 +494,8 @@
       "export": "Export",
       "segmentUserSample": "User Samples",
       "segmentUserSampleDesc": "User samples from latest completed segment refresh",
-      "noSampleData": "No sample data available"
+      "noSampleData": "No sample data available",
+      "importedSegment": "Imported Segment"
     },
     "valid": {
       "nameEmptyError": "Please input segment name.",

@@ -60,6 +60,7 @@ const UserSegmentDetails: React.FC = () => {
   const [isJobsLoading, setIsJobsLoading] = useState(false);
   const [segmentSample, setSegmentSample] = useState<SegmentJobStatusItem>();
   const [isSampleDataLoading, setIsSampleDataLoading] = useState(false);
+  const [isImportedSegment, setIsImportedSegment] = useState(false);
 
   const params = useParams();
   const projectId = params.projectId ?? '';
@@ -81,41 +82,31 @@ const UserSegmentDetails: React.FC = () => {
     },
   ];
 
-  // Get segment setting details
-  useEffect(() => {
-    const getSegmentDetails = async () => {
-      setIsLoading(true);
+  const getSegmentDetails = async () => {
+    setIsLoading(true);
 
-      const segmentApiResponse = await getSegmentById({
-        appId: appId,
-        segmentId: segmentId,
-      });
-      if (segmentApiResponse.success) {
-        const segment: SegmentDdbItem = segmentApiResponse.data;
-        setSegment(segment);
-      }
+    const segmentApiResponse = await getSegmentById({
+      appId: appId,
+      segmentId: segmentId,
+    });
+    if (segmentApiResponse.success) {
+      const segment: SegmentDdbItem = segmentApiResponse.data;
+      setSegment(segment);
+      setIsImportedSegment(!!segment.isImported);
+    }
 
-      // Get app details for timezone info
-      const appApiResponse = await getApplicationDetail({
-        id: appId,
-        pid: projectId,
-      });
-      if (appApiResponse.success) {
-        const { timezone } = appApiResponse.data;
-        setTimezone(timezone);
-      }
+    // Get app details for timezone info
+    const appApiResponse = await getApplicationDetail({
+      id: appId,
+      pid: projectId,
+    });
+    if (appApiResponse.success) {
+      const { timezone } = appApiResponse.data;
+      setTimezone(timezone);
+    }
 
-      setIsLoading(false);
-    };
-
-    getSegmentDetails();
-  }, []);
-
-  // Get segment job history and sample data
-  useEffect(() => {
-    getSegmentJobHistory();
-    getSegmentSampleData();
-  }, []);
+    setIsLoading(false);
+  };
 
   const getSegmentJobHistory = async () => {
     setIsJobsLoading(true);
@@ -138,6 +129,13 @@ const UserSegmentDetails: React.FC = () => {
 
     setIsSampleDataLoading(false);
   };
+
+  // Get segment setting details, job history and sample data
+  useEffect(() => {
+    getSegmentDetails();
+    getSegmentJobHistory();
+    getSegmentSampleData();
+  }, []);
 
   const renderSegmentTrendChart = () => {
     const getTimeLabel = (time: number) =>
@@ -274,22 +272,26 @@ const UserSegmentDetails: React.FC = () => {
                         description={defaultStr(segment?.description)}
                         actions={
                           <SpaceBetween direction="horizontal" size="s">
-                            <Button
-                              iconName="refresh"
-                              onClick={() => {
-                                getSegmentJobHistory();
-                                getSegmentSampleData();
-                              }}
-                            />
+                            {!isImportedSegment && (
+                              <Button
+                                iconName="refresh"
+                                onClick={() => {
+                                  getSegmentJobHistory();
+                                  getSegmentSampleData();
+                                }}
+                              />
+                            )}
                             <ButtonDropdown
                               items={[
                                 {
                                   text: defaultStr(t('button.edit')),
                                   id: 'edit',
+                                  disabled: isImportedSegment,
                                 },
                                 {
                                   text: defaultStr(t('button.duplicate')),
                                   id: 'duplicate',
+                                  disabled: isImportedSegment,
                                 },
                                 {
                                   text: defaultStr(t('button.delete')),
@@ -298,6 +300,7 @@ const UserSegmentDetails: React.FC = () => {
                                 {
                                   text: defaultStr(t('button.refreshSegment')),
                                   id: 'refresh',
+                                  disabled: isImportedSegment,
                                 },
                               ]}
                               onItemClick={async (e) => {
@@ -354,245 +357,274 @@ const UserSegmentDetails: React.FC = () => {
                     }
                   >
                     <Box padding={{ vertical: 's' }}>
-                      <ColumnLayout columns={4} variant="text-grid">
-                        <div>
-                          <Box variant="awsui-key-label">
-                            {t('analytics:segment.details.refreshSchedule')}
-                          </Box>
-                          <Box margin={{ top: 'xxs' }}>
-                            {getRefreshSchedule(segment, timezone)}
-                          </Box>
-                        </div>
-                        <div>
-                          <Box variant="awsui-key-label">
-                            {t('analytics:segment.details.refreshExpiration')}
-                          </Box>
-                          <Box margin={{ top: 'xxs' }}>
-                            {getAutoRefreshExpiration(segment, timezone)}
-                          </Box>
-                        </div>
-                        <div>
-                          <Box variant="awsui-key-label">
-                            {t('analytics:segment.details.createdBy')}
-                          </Box>
-                          <Box margin={{ top: 'xxs' }}>
-                            {getCreatedByInfo(segment, timezone)}
-                          </Box>
-                        </div>
-                        <div>
-                          <Box variant="awsui-key-label">
-                            {t('analytics:segment.details.updatedBy')}
-                          </Box>
-                          <Box margin={{ top: 'xxs' }}>
-                            {getUpdatedByInfo(segment, timezone)}
-                          </Box>
-                        </div>
-                      </ColumnLayout>
+                      {ternary(
+                        isImportedSegment,
+                        <ColumnLayout columns={4} variant="text-grid">
+                          <div>
+                            <Box variant="awsui-key-label">
+                              {t('analytics:segment.details.importedSegment')}
+                            </Box>
+                            <Box margin={{ top: 'xxs' }}>{t('yes')}</Box>
+                          </div>
+                          <div>
+                            <Box variant="awsui-key-label">
+                              {t('analytics:segment.details.createdBy')}
+                            </Box>
+                            <Box margin={{ top: 'xxs' }}>
+                              {getCreatedByInfo(segment, timezone)}
+                            </Box>
+                          </div>
+                        </ColumnLayout>,
+                        <ColumnLayout columns={4} variant="text-grid">
+                          <div>
+                            <Box variant="awsui-key-label">
+                              {t('analytics:segment.details.refreshSchedule')}
+                            </Box>
+                            <Box margin={{ top: 'xxs' }}>
+                              {getRefreshSchedule(segment, timezone)}
+                            </Box>
+                          </div>
+                          <div>
+                            <Box variant="awsui-key-label">
+                              {t('analytics:segment.details.refreshExpiration')}
+                            </Box>
+                            <Box margin={{ top: 'xxs' }}>
+                              {getAutoRefreshExpiration(segment, timezone)}
+                            </Box>
+                          </div>
+                          <div>
+                            <Box variant="awsui-key-label">
+                              {t('analytics:segment.details.createdBy')}
+                            </Box>
+                            <Box margin={{ top: 'xxs' }}>
+                              {getCreatedByInfo(segment, timezone)}
+                            </Box>
+                          </div>
+                          <div>
+                            <Box variant="awsui-key-label">
+                              {t('analytics:segment.details.updatedBy')}
+                            </Box>
+                            <Box margin={{ top: 'xxs' }}>
+                              {getUpdatedByInfo(segment, timezone)}
+                            </Box>
+                          </div>
+                        </ColumnLayout>
+                      )}
                     </Box>
-                    <Box margin={{ vertical: 'l' }}>
-                      {renderSegmentTrendChart()}
-                    </Box>
-                    <Table
-                      loading={isJobsLoading}
-                      header={
-                        <Header
-                          variant="h2"
-                          description={t(
-                            'analytics:segment.details.segmentHistoryDesc'
-                          )}
-                        >
-                          {t('analytics:segment.details.segmentHistory')}
-                        </Header>
-                      }
-                      variant="borderless"
-                      columnDefinitions={[
-                        {
-                          id: 'date',
-                          header: t('analytics:segment.details.date'),
-                          cell: (e: SegmentJobStatusItem) => e.date,
-                        },
-                        {
-                          id: 'status',
-                          header: t('analytics:segment.details.jobStatus'),
-                          cell: (e: SegmentJobStatusItem) =>
-                            renderJobStatusCell(e.jobStatus),
-                        },
-                        {
-                          id: 'startTime',
-                          header: t('analytics:segment.details.startTime'),
-                          cell: (e: SegmentJobStatusItem) =>
-                            getDateTimeWithTimezoneString(
-                              e.jobStartTime,
-                              timezone
-                            ),
-                        },
-                        {
-                          id: 'endTime',
-                          header: t('analytics:segment.details.endTime'),
-                          cell: (e: SegmentJobStatusItem) =>
-                            ternary(
-                              e.jobEndTime === 0,
-                              '-',
-                              getDateTimeWithTimezoneString(
-                                e.jobEndTime,
-                                timezone
-                              )
-                            ),
-                        },
-                        {
-                          id: 'userNumber',
-                          header: t('analytics:segment.details.userNumber'),
-                          cell: (e: SegmentJobStatusItem) =>
-                            e.jobStatus === SegmentJobStatus.COMPLETED
-                              ? e.segmentUserNumber
-                              : '-',
-                        },
-                        {
-                          id: 'percentageOfTotalUser',
-                          header: t(
-                            'analytics:segment.details.percentageOfTotalUser'
-                          ),
-                          cell: (e: SegmentJobStatusItem) => {
-                            if (e.jobStatus !== SegmentJobStatus.COMPLETED) {
-                              return '-';
-                            }
-
-                            const percentage =
-                              (e.segmentUserNumber / e.totalUserNumber) * 100;
-                            return percentage.toFixed(2) + '%';
+                    {!isImportedSegment && (
+                      <Box margin={{ vertical: 'l' }}>
+                        {renderSegmentTrendChart()}
+                      </Box>
+                    )}
+                    {!isImportedSegment && (
+                      <Table
+                        loading={isJobsLoading}
+                        header={
+                          <Header
+                            variant="h2"
+                            description={t(
+                              'analytics:segment.details.segmentHistoryDesc'
+                            )}
+                          >
+                            {t('analytics:segment.details.segmentHistory')}
+                          </Header>
+                        }
+                        variant="borderless"
+                        columnDefinitions={[
+                          {
+                            id: 'date',
+                            header: t('analytics:segment.details.date'),
+                            cell: (e: SegmentJobStatusItem) => e.date,
                           },
-                        },
-                        {
-                          id: 'export',
-                          header: t('analytics:segment.details.export'),
-                          cell: (e: SegmentJobStatusItem) =>
-                            renderExportDownloadLink(e),
-                        },
-                      ]}
-                      items={segmentJobs}
-                    />
+                          {
+                            id: 'status',
+                            header: t('analytics:segment.details.jobStatus'),
+                            cell: (e: SegmentJobStatusItem) =>
+                              renderJobStatusCell(e.jobStatus),
+                          },
+                          {
+                            id: 'startTime',
+                            header: t('analytics:segment.details.startTime'),
+                            cell: (e: SegmentJobStatusItem) =>
+                              getDateTimeWithTimezoneString(
+                                e.jobStartTime,
+                                timezone
+                              ),
+                          },
+                          {
+                            id: 'endTime',
+                            header: t('analytics:segment.details.endTime'),
+                            cell: (e: SegmentJobStatusItem) =>
+                              ternary(
+                                e.jobEndTime === 0,
+                                '-',
+                                getDateTimeWithTimezoneString(
+                                  e.jobEndTime,
+                                  timezone
+                                )
+                              ),
+                          },
+                          {
+                            id: 'userNumber',
+                            header: t('analytics:segment.details.userNumber'),
+                            cell: (e: SegmentJobStatusItem) =>
+                              e.jobStatus === SegmentJobStatus.COMPLETED
+                                ? e.segmentUserNumber
+                                : '-',
+                          },
+                          {
+                            id: 'percentageOfTotalUser',
+                            header: t(
+                              'analytics:segment.details.percentageOfTotalUser'
+                            ),
+                            cell: (e: SegmentJobStatusItem) => {
+                              if (e.jobStatus !== SegmentJobStatus.COMPLETED) {
+                                return '-';
+                              }
+
+                              const percentage =
+                                (e.segmentUserNumber / e.totalUserNumber) * 100;
+                              return percentage.toFixed(2) + '%';
+                            },
+                          },
+                          {
+                            id: 'export',
+                            header: t('analytics:segment.details.export'),
+                            cell: (e: SegmentJobStatusItem) =>
+                              renderExportDownloadLink(e),
+                          },
+                        ]}
+                        items={segmentJobs}
+                      />
+                    )}
                   </Container>
-                  <Box margin={{ vertical: 'm' }}>
-                    <Table
-                      loading={isSampleDataLoading}
-                      header={
-                        <Header
-                          variant="h2"
-                          description={t(
-                            'analytics:segment.details.segmentUserSampleDesc'
-                          )}
-                        >
-                          {t('analytics:segment.details.segmentUserSample')}
-                        </Header>
-                      }
-                      variant="container"
-                      columnDefinitions={[
-                        {
-                          id: 'user_pseudo_id',
-                          header: 'User pseudo id',
-                          cell: (e: SegmentUserItem) => e.user_pseudo_id,
-                        },
-                        {
-                          id: 'user_id',
-                          header: 'User id',
-                          cell: (e: SegmentUserItem) => e.user_id,
-                        },
-                        {
-                          id: 'event_timestamp',
-                          header: 'Event timestamp',
-                          cell: (e: SegmentUserItem) => e.event_timestamp,
-                        },
-                        {
-                          id: 'user_properties_json_str',
-                          header: 'User properties',
-                          cell: (e: SegmentUserItem) =>
-                            e.user_properties_json_str,
-                        },
-                        {
-                          id: 'first_touch_time_msec',
-                          header: 'First touch time',
-                          cell: (e: SegmentUserItem) => e.first_touch_time_msec,
-                        },
-                        {
-                          id: 'first_visit_date',
-                          header: 'First visit date',
-                          cell: (e: SegmentUserItem) => e.first_visit_date,
-                        },
-                        {
-                          id: 'first_app_install_source',
-                          header: 'First app install source',
-                          cell: (e: SegmentUserItem) =>
-                            e.first_app_install_source,
-                        },
-                        {
-                          id: 'first_referrer',
-                          header: 'First referrer',
-                          cell: (e: SegmentUserItem) => e.first_referrer,
-                        },
-                        {
-                          id: 'first_traffic_category',
-                          header: 'First traffic category',
-                          cell: (e: SegmentUserItem) =>
-                            e.first_traffic_category,
-                        },
-                        {
-                          id: 'first_traffic_source',
-                          header: 'First traffic source',
-                          cell: (e: SegmentUserItem) => e.first_traffic_source,
-                        },
-                        {
-                          id: 'first_traffic_medium',
-                          header: 'First traffic medium',
-                          cell: (e: SegmentUserItem) => e.first_traffic_medium,
-                        },
-                        {
-                          id: 'first_traffic_campaign_id',
-                          header: 'First traffic campaign id',
-                          cell: (e: SegmentUserItem) =>
-                            e.first_traffic_campaign_id,
-                        },
-                        {
-                          id: 'first_traffic_campaign',
-                          header: 'First traffic campaign',
-                          cell: (e: SegmentUserItem) =>
-                            e.first_traffic_campaign,
-                        },
-                        {
-                          id: 'first_traffic_content',
-                          header: 'First traffic content',
-                          cell: (e: SegmentUserItem) => e.first_traffic_content,
-                        },
-                        {
-                          id: 'first_traffic_term',
-                          header: 'First traffic term',
-                          cell: (e: SegmentUserItem) => e.first_traffic_term,
-                        },
-                        {
-                          id: 'first_traffic_clid_platform',
-                          header: 'First traffic clid platform',
-                          cell: (e: SegmentUserItem) =>
-                            e.first_traffic_clid_platform,
-                        },
-                        {
-                          id: 'first_traffic_clid',
-                          header: 'First traffic clid',
-                          cell: (e: SegmentUserItem) => e.first_traffic_clid,
-                        },
-                        {
-                          id: 'first_traffic_channel_group',
-                          header: 'First traffic channel group',
-                          cell: (e: SegmentUserItem) =>
-                            e.first_traffic_channel_group,
-                        },
-                      ]}
-                      items={segmentSample?.sampleData || []}
-                      empty={
-                        <Box variant="h5">
-                          {t('analytics:segment.details.noSampleData')}
-                        </Box>
-                      }
-                    />
-                  </Box>
+                  {!isImportedSegment && (
+                    <Box margin={{ vertical: 'm' }}>
+                      <Table
+                        loading={isSampleDataLoading}
+                        header={
+                          <Header
+                            variant="h2"
+                            description={t(
+                              'analytics:segment.details.segmentUserSampleDesc'
+                            )}
+                          >
+                            {t('analytics:segment.details.segmentUserSample')}
+                          </Header>
+                        }
+                        variant="container"
+                        columnDefinitions={[
+                          {
+                            id: 'user_pseudo_id',
+                            header: 'User pseudo id',
+                            cell: (e: SegmentUserItem) => e.user_pseudo_id,
+                          },
+                          {
+                            id: 'user_id',
+                            header: 'User id',
+                            cell: (e: SegmentUserItem) => e.user_id,
+                          },
+                          {
+                            id: 'event_timestamp',
+                            header: 'Event timestamp',
+                            cell: (e: SegmentUserItem) => e.event_timestamp,
+                          },
+                          {
+                            id: 'user_properties_json_str',
+                            header: 'User properties',
+                            cell: (e: SegmentUserItem) =>
+                              e.user_properties_json_str,
+                          },
+                          {
+                            id: 'first_touch_time_msec',
+                            header: 'First touch time',
+                            cell: (e: SegmentUserItem) =>
+                              e.first_touch_time_msec,
+                          },
+                          {
+                            id: 'first_visit_date',
+                            header: 'First visit date',
+                            cell: (e: SegmentUserItem) => e.first_visit_date,
+                          },
+                          {
+                            id: 'first_app_install_source',
+                            header: 'First app install source',
+                            cell: (e: SegmentUserItem) =>
+                              e.first_app_install_source,
+                          },
+                          {
+                            id: 'first_referrer',
+                            header: 'First referrer',
+                            cell: (e: SegmentUserItem) => e.first_referrer,
+                          },
+                          {
+                            id: 'first_traffic_category',
+                            header: 'First traffic category',
+                            cell: (e: SegmentUserItem) =>
+                              e.first_traffic_category,
+                          },
+                          {
+                            id: 'first_traffic_source',
+                            header: 'First traffic source',
+                            cell: (e: SegmentUserItem) =>
+                              e.first_traffic_source,
+                          },
+                          {
+                            id: 'first_traffic_medium',
+                            header: 'First traffic medium',
+                            cell: (e: SegmentUserItem) =>
+                              e.first_traffic_medium,
+                          },
+                          {
+                            id: 'first_traffic_campaign_id',
+                            header: 'First traffic campaign id',
+                            cell: (e: SegmentUserItem) =>
+                              e.first_traffic_campaign_id,
+                          },
+                          {
+                            id: 'first_traffic_campaign',
+                            header: 'First traffic campaign',
+                            cell: (e: SegmentUserItem) =>
+                              e.first_traffic_campaign,
+                          },
+                          {
+                            id: 'first_traffic_content',
+                            header: 'First traffic content',
+                            cell: (e: SegmentUserItem) =>
+                              e.first_traffic_content,
+                          },
+                          {
+                            id: 'first_traffic_term',
+                            header: 'First traffic term',
+                            cell: (e: SegmentUserItem) => e.first_traffic_term,
+                          },
+                          {
+                            id: 'first_traffic_clid_platform',
+                            header: 'First traffic clid platform',
+                            cell: (e: SegmentUserItem) =>
+                              e.first_traffic_clid_platform,
+                          },
+                          {
+                            id: 'first_traffic_clid',
+                            header: 'First traffic clid',
+                            cell: (e: SegmentUserItem) => e.first_traffic_clid,
+                          },
+                          {
+                            id: 'first_traffic_channel_group',
+                            header: 'First traffic channel group',
+                            cell: (e: SegmentUserItem) =>
+                              e.first_traffic_channel_group,
+                          },
+                        ]}
+                        items={segmentSample?.sampleData || []}
+                        empty={
+                          <Box variant="h5">
+                            {t('analytics:segment.details.noSampleData')}
+                          </Box>
+                        }
+                      />
+                    </Box>
+                  )}
                 </>
               )}
             </ContentLayout>

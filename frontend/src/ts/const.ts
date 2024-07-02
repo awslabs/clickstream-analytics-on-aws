@@ -560,6 +560,7 @@ export const INIT_SEGMENT_OBJ: ExtendSegment = {
     filterGroups: [],
     operator: 'and',
   },
+  isImported: false,
   // extends fields
   refreshType: 'manual',
   autoRefreshOption: SEGMENT_AUTO_REFRESH_OPTIONS[0],

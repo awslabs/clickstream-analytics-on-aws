@@ -73,6 +73,41 @@ export class SegmentServ {
     }
   }
 
+  public async import(req: Request, res: Response, next: NextFunction) {
+    try {
+      const now = Date.now();
+      const input = req.body;
+      const operator = res.get('X-Click-Stream-Operator') ?? 'Unknown operator';
+
+      const segment: Segment = {
+        segmentId: uuidv4(),
+        segmentType: input.segmentType,
+        name: input.name,
+        description: input.description ?? '',
+        projectId: input.projectId,
+        appId: input.appId,
+        createBy: operator,
+        createAt: now,
+        lastUpdateBy: operator,
+        lastUpdateAt: now,
+        refreshSchedule: input.refreshSchedule,
+        criteria: input.criteria,
+        eventBridgeRuleArn: '',
+        uiRenderingObject: input.uiRenderingObject ?? {},
+        sql: '',
+        isImported: true,
+      };
+
+      // Save segment setting to DDB
+      const id = await segmentStore.create(segment);
+      logger.info('Create new segment setting, id: ' + id);
+
+      return res.status(201).json(new ApiSuccess({ id }, 'Segment created successfully.'));
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   public async list(req: Request, res: Response, next: NextFunction) {
     try {
       const { appId } = req.query;
@@ -276,6 +311,7 @@ export class SegmentServ {
       criteria: input.criteria,
       eventBridgeRuleArn: '',
       uiRenderingObject: input.uiRenderingObject ?? {},
+      isImported: input.isImported,
     };
   }
 

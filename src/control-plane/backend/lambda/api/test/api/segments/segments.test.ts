@@ -112,6 +112,34 @@ describe('Segments test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
 
+  test('Import segment', async () => {
+    const input = {
+      segmentType: 'User',
+      name: 'Test_user_segment',
+      description: 'For test',
+      projectId: MOCK_PROJECT_ID,
+      appId: MOCK_APP_ID,
+      refreshSchedule: {
+        cron: 'Manual',
+      },
+      criteria: {
+        operator: 'and',
+        filterGroups: [],
+      },
+    };
+
+    const res = await request(app).post('/api/segments/import').send(input);
+
+    expect(res.statusCode).toBe(201);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.body.success).toEqual(true);
+    expect(res.body.message).toEqual('Segment created successfully.');
+    expect(eventBridgeClientMock).toHaveReceivedCommandTimes(PutRuleCommand, 0);
+    expect(eventBridgeClientMock).toHaveReceivedCommandTimes(PutTargetsCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+  });
+
   test('List segments', async () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [MOCK_USER_SEGMENT_DDB_ITEM],

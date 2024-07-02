@@ -38,7 +38,11 @@ export const getSegmentById = async (params: {
 };
 
 export const createSegment = async (segmentObj: Segment) => {
-  return await apiRequest('post', `/segments`, segmentObj);
+  return await apiRequest('post', '/segments', segmentObj);
+};
+
+export const importSegment = async (segmentObj: Segment) => {
+  return await apiRequest('post', '/segments/import', segmentObj);
 };
 
 export const updateSegment = async (segmentObj: Segment) => {
