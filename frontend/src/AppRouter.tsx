@@ -13,9 +13,9 @@
 
 import { Alert } from '@cloudscape-design/components';
 import { getUserDetails } from 'apis/user';
-import CommonAlert from 'components/common/alert';
 import Loading from 'components/common/Loading';
 import RoleRoute from 'components/common/RoleRoute';
+import CommonAlert from 'components/common/alert';
 import { UserContext } from 'context/UserContext';
 import AlarmsList from 'pages/alarms/AlarmList';
 import AnalyticsHome from 'pages/analytics/AnalyticsHome';
@@ -36,10 +36,10 @@ import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
 import Home from 'pages/home/Home';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';
-import CreatePlugin from 'pages/plugins/create/CreatePlugin';
 import PluginList from 'pages/plugins/PluginList';
-import ProjectDetail from 'pages/projects/detail/ProjectDetail';
+import CreatePlugin from 'pages/plugins/create/CreatePlugin';
 import Projects from 'pages/projects/Projects';
+import ProjectDetail from 'pages/projects/detail/ProjectDetail';
 import UserList from 'pages/user/UserList';
 import React, { Suspense, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

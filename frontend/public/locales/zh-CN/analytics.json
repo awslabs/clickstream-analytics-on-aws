@@ -494,7 +494,8 @@
       "export": "导出",
       "segmentUserSample": "用户取样",
       "segmentUserSampleDesc": "从最近一次分群刷新结果中取样的用户",
-      "noSampleData": "无可用样例数据"
+      "noSampleData": "无可用样例数据",
+      "importedSegment": "导入分群"
     },
     "valid": {
       "nameEmptyError": "请输入分群名称。",

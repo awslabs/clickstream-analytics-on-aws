@@ -43,7 +43,7 @@ export const createSegment = async (segmentObj: Segment) => {
 
 export const importSegment = async (segmentObj: Segment) => {
   return await apiRequest('post', '/segments/import', segmentObj);
-}
+};
 
 export const updateSegment = async (segmentObj: Segment) => {
   return await apiRequest(

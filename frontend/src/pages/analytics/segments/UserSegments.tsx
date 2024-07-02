@@ -50,7 +50,6 @@ const UserSegments: React.FC = () => {
 
   const [loadingData, setLoadingData] = useState(false);
   const [segmentList, setSegmentList] = useState<Segment[]>([]);
-  const [disableAction, setDisableAction] = useState(true);
   const [selectedSegment, setSelectedSegment] = useState<Segment[]>([]);
   const [loadingDelete, setLoadingDelete] = useState(false);
 
@@ -136,14 +135,6 @@ const UserSegments: React.FC = () => {
     }
   }, [projectId, appId]);
 
-  useEffect(() => {
-    if (selectedSegment.length > 0) {
-      setDisableAction(false);
-    } else {
-      setDisableAction(true);
-    }
-  }, [selectedSegment]);
-
   return (
     <div className="flex">
       <AnalyticsNavigation
@@ -184,7 +175,9 @@ const UserSegments: React.FC = () => {
                             } else if (e.detail.id === 'detail') {
                               navigate(hrefPath + 'details');
                             } else if (e.detail.id === 'import') {
-                              navigate(`/analytics/${projectId}/app/${appId}/segments/import`);
+                              navigate(
+                                `/analytics/${projectId}/app/${appId}/segments/import`
+                              );
                             }
                           }}
                           loading={loadingDelete}
@@ -192,27 +185,31 @@ const UserSegments: React.FC = () => {
                             {
                               text: defaultStr(t('button.viewDetails')),
                               id: 'detail',
-                              disabled: disableAction,
+                              disabled: selectedSegment.length === 0,
                             },
                             {
                               text: defaultStr(t('button.duplicate')),
                               id: 'duplicate',
-                              disabled: disableAction,
+                              disabled:
+                                selectedSegment.length === 0 ||
+                                selectedSegment[0].isImported,
                             },
                             {
                               text: defaultStr(t('button.edit')),
                               id: 'edit',
-                              disabled: disableAction,
+                              disabled:
+                                selectedSegment.length === 0 ||
+                                selectedSegment[0].isImported,
                             },
                             {
                               text: defaultStr(t('button.delete')),
                               id: 'delete',
-                              disabled: disableAction,
+                              disabled: selectedSegment.length === 0,
                             },
                             {
                               text: defaultStr(t('button.import')),
                               id: 'import',
-                            }
+                            },
                           ]}
                         >
                           {t('button.actions')}

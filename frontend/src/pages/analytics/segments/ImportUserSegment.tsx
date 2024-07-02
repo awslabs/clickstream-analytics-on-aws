@@ -59,7 +59,9 @@ const ImportUserSegment: React.FC = () => {
 
   const saveUserSegment = async () => {
     if (!segmentName.trim()) {
-      setSegmentNameError(defaultStr(t('analytics:segment.valid.nameEmptyError')));
+      setSegmentNameError(
+        defaultStr(t('analytics:segment.valid.nameEmptyError'))
+      );
       return;
     }
 
@@ -90,13 +92,15 @@ const ImportUserSegment: React.FC = () => {
       <div className="flex-1">
         <AppLayout
           headerVariant="high-contrast"
-          tools={<HelpInfo/>}
+          tools={<HelpInfo />}
           navigationHide
           content={
             <ContentLayout
               headerVariant="high-contrast"
               header={
-                <Header description={t('analytics:segment.comp.importSegmentDesc')}>
+                <Header
+                  description={t('analytics:segment.comp.importSegmentDesc')}
+                >
                   {t('analytics:segment.comp.importSegmentTitle')}
                 </Header>
               }
@@ -106,7 +110,9 @@ const ImportUserSegment: React.FC = () => {
                   <SpaceBetween direction="horizontal" size="xs">
                     <Button
                       onClick={() => {
-                        navigate(`/analytics/${projectId}/app/${appId}/segments`);
+                        navigate(
+                          `/analytics/${projectId}/app/${appId}/segments`
+                        );
                       }}
                     >
                       {t('button.cancel')}
@@ -125,7 +131,9 @@ const ImportUserSegment: React.FC = () => {
               >
                 <Container
                   header={
-                    <Header>{t('analytics:segment.comp.userSegmentSettings')}</Header>
+                    <Header>
+                      {t('analytics:segment.comp.userSegmentSettings')}
+                    </Header>
                   }
                 >
                   <SpaceBetween direction="vertical" size="m">
@@ -137,7 +145,7 @@ const ImportUserSegment: React.FC = () => {
                       <Input
                         value={segmentName}
                         placeholder={defaultStr(
-                          t('analytics:segment.comp.segmentNamePlaceholder'),
+                          t('analytics:segment.comp.segmentNamePlaceholder')
                         )}
                         onChange={(e) => {
                           setSegmentName(e.detail.value);
@@ -147,12 +155,16 @@ const ImportUserSegment: React.FC = () => {
                     </FormField>
                     <FormField
                       label={t('analytics:segment.comp.segmentDescription')}
-                      description={t('analytics:segment.comp.segmentDescriptionDesc')}
+                      description={t(
+                        'analytics:segment.comp.segmentDescriptionDesc'
+                      )}
                     >
                       <Input
                         value={segmentDesc}
                         placeholder={defaultStr(
-                          t('analytics:segment.comp.segmentDescriptionPlaceholder'),
+                          t(
+                            'analytics:segment.comp.segmentDescriptionPlaceholder'
+                          )
                         )}
                         onChange={(e) => {
                           setSegmentDesc(e.detail.value);
@@ -165,7 +177,7 @@ const ImportUserSegment: React.FC = () => {
             </ContentLayout>
           }
           headerSelector="#header"
-          breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems}/>}
+          breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
         />
       </div>
     </div>

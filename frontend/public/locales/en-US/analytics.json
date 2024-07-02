@@ -494,7 +494,8 @@
       "export": "Export",
       "segmentUserSample": "User Samples",
       "segmentUserSampleDesc": "User samples from latest completed segment refresh",
-      "noSampleData": "No sample data available"
+      "noSampleData": "No sample data available",
+      "importedSegment": "Imported Segment"
     },
     "valid": {
       "nameEmptyError": "Please input segment name.",
