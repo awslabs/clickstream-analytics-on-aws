@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static software.aws.solution.clickstream.flink.ApplicationParameters.ENVIRONMENT_PROPERTIES;
 class ApplicationParametersTest {
     @BeforeEach
@@ -105,6 +106,43 @@ class ApplicationParametersTest {
         props.setProperty("withCustomParameters", "false");
         props.setProperty("allowRetentionHours", "24");
         props.setProperty("allowEventList", allowEvents);
+
+        props.setProperty("windowSlideMinutes", "5");
+        props.setProperty("windowSizeMinutes", "30");
+        props.setProperty("enableWindowAgg", "true");
+        // AggSqlProvider.EVENT_NAME_TOP_RANK, AggSqlProvider.EVENT_AND_USER_COUNT, AggSqlProvider.PAGE_TITLE_TOP_RANK
+        props.setProperty("windowAggTypes", "eventNameTopRank,eventAndUserCount,pageTitleTopRank");
+        props.setProperty("windowTVF", "HOP");
+
+        return props;
+    }
+
+    private static Properties getPropertiesV5(boolean enableWindowAgg, boolean enableStreamIngestion, int windowSlideMinutes,  int windowSizeMinutes) {
+        String configText = "{\"appIdStreamList\":[" +
+                "{\"appId\":\"app1\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink\"}" +
+                ",{\"appId\":\"app2\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
+                ",{\"appId\":\"app3\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
+                "]}";
+        Properties props = new Properties();
+        props.setProperty("inputStreamArn", "arn:aws:kinesis:us-east-1:123456789012:stream/testStream");
+        props.setProperty("dataBucketName", "testBucket");
+        props.setProperty("projectId", "project1");
+        props.setProperty("geoFileKey", "testKey/t.txt");
+        props.setProperty("appIdStreamConfig", configText);
+        props.setProperty("transformVersion", "v2");
+        props.setProperty("appRuleConfigPath", "s3://test/project1/rules/");
+        props.setProperty("enableUaEnrich", "true");
+        props.setProperty("enableIpEnrich", "true");
+        props.setProperty("enableTrafficSourceEnrich", "false");
+        props.setProperty("withCustomParameters", "false");
+        props.setProperty("allowRetentionHours", "24");
+        props.setProperty("allowEventList", "ALL");
+
+        props.setProperty("windowSlideMinutes", windowSlideMinutes + "");
+        props.setProperty("windowSizeMinutes", windowSizeMinutes + "");
+        props.setProperty("enableWindowAgg", enableWindowAgg ? "true" : "false");
+        props.setProperty("enableStreamIngestion", enableStreamIngestion ? "true" : "false");
+        props.setProperty("windowAggTypes", "ALL");
 
         return props;
     }
@@ -227,6 +265,13 @@ class ApplicationParametersTest {
         Assertions.assertNull(params.getAllowEventList());
         Assertions.assertTrue(params.isWithCustomParameters());
         Assertions.assertEquals(0, params.getAllowRetentionHours());
+
+        Assertions.assertEquals(10, params.getWindowSlideMinutes());
+        Assertions.assertEquals(60, params.getWindowSizeMinutes());
+        Assertions.assertFalse(params.isEnableWindowAgg());
+        Assertions.assertEquals("ALL", String.join(",", params.getWindowAggTypes()));
+        Assertions.assertTrue(params.isEnableStreamIngestion());
+        Assertions.assertEquals(AggSqlProvider.WindowTVF.CUMULATE, params.getWindowTVF());
     }
 
     @Test
@@ -252,5 +297,22 @@ class ApplicationParametersTest {
 
         Assertions.assertEquals(24, params.getAllowRetentionHours());
         Assertions.assertFalse(params.isWithCustomParameters());
+        Assertions.assertEquals(5, params.getWindowSlideMinutes());
+        Assertions.assertEquals(30, params.getWindowSizeMinutes());
+        Assertions.assertTrue(params.isEnableWindowAgg());
+        Assertions.assertEquals(String.join(",", new String[] {AggSqlProvider.EVENT_NAME_TOP_RANK,
+                AggSqlProvider.EVENT_AND_USER_COUNT, AggSqlProvider.PAGE_TITLE_TOP_RANK}),
+                String.join(",", params.getWindowAggTypes()));
+        Assertions.assertEquals(AggSqlProvider.WindowTVF.HOP, params.getWindowTVF());
+    }
+
+    @Test
+    void testCreateApplicationParametersFromProps_error1() throws IOException {
+        //  ./gradlew  test --tests  software.aws.solution.clickstream.flink.ApplicationParametersTest.testCreateApplicationParametersFromProps_error1
+        Properties props1 = getPropertiesV5(false, false, 5, 30);
+        Assertions.assertThrows(ClickstreamException.class, () -> {ApplicationParameters.fromProperties(props1);});
+
+        Properties props2 = getPropertiesV5(true, false, 10, 3);
+        Assertions.assertThrows(ClickstreamException.class, () -> {ApplicationParameters.fromProperties(props2);});
     }
 }

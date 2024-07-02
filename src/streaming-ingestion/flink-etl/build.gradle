@@ -43,6 +43,7 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 java.targetCompatibility = JavaVersion.VERSION_11
 
 shadowJar {
+    zip64 true
     exclude 'META-INF/*.SF'
     exclude 'META-INF/*.DSA'
     exclude 'META-INF/*.RSA'
@@ -71,14 +72,20 @@ dependencies {
     api "org.apache.flink:flink-connector-kinesis:$flinkKinesisVersion"
     api "org.apache.flink:flink-connector-aws-kinesis-streams:$flinkKinesisVersion"
     api "org.apache.flink:flink-streaming-java:$flinkVersion"
+    api "org.apache.flink:flink-table-api-java:$flinkVersion"
+    api "org.apache.flink:flink-table-api-java-bridge:$flinkVersion"
     api "org.apache.flink:flink-clients:$flinkVersion"
     api "software.amazon.awssdk:bom:$awsSdkVersion"
     api "software.amazon.awssdk:s3:$awsSdkVersion"
-//    compileOnly "org.apache.flink:flink-streaming-java:$flinkVersion"
-//    compileOnly "org.apache.flink:flink-clients:$flinkVersion"
+
     testImplementation "org.apache.flink:flink-runtime:$flinkVersion"
     testImplementation "org.apache.flink:flink-test-utils:$flinkVersion"
     testImplementation "org.apache.flink:flink-test-utils-junit:$flinkVersion"
+
+    testImplementation "org.apache.flink:flink-table-planner_2.12:$flinkVersion"
+    api "org.apache.flink:flink-connector-files:$flinkVersion"
+    api "org.apache.flink:flink-json:$flinkVersion"
+    api "org.apache.flink:flink-s3-fs-hadoop:$flinkVersion"
 
     runtimeOnly "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
     runtimeOnly "org.apache.logging.log4j:log4j-api:${log4jVersion}"
@@ -121,8 +128,8 @@ test {
         exceptionFormat = 'full'
         events = ['passed', 'skipped', 'failed', 'standardOut', 'standardError']
     }
-    minHeapSize = "256m" // initial heap size
-    maxHeapSize = "2048m" // maximum heap size
+    minHeapSize = "512m" // initial heap size
+    maxHeapSize = "4096m" // maximum heap size
 }
 
 application {

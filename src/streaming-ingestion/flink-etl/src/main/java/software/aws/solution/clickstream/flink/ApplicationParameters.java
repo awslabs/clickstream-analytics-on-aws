@@ -56,6 +56,7 @@ public class ApplicationParameters {
     private String appRuleConfigPath;
     private List<AppIdStream> appIdStreamList;
     private int parallelism = 0;
+    private boolean enableStreamIngestion= true;
     private boolean isWithCustomParameters;
     private double allowRetentionHours;
     private List<String> allowEventList;
@@ -64,6 +65,12 @@ public class ApplicationParameters {
     private boolean ipEnrich;
     private boolean trafficSourceEnrich;
     private String transformerName;
+
+    private int windowSlideMinutes = 10;
+    private int windowSizeMinutes = 60;
+    private boolean enableWindowAgg = false;
+    private String[] windowAggTypes = new String[] {"ALL"};
+    private AggSqlProvider.WindowTVF windowTVF = AggSqlProvider.WindowTVF.CUMULATE;
 
      static ApplicationParameters fromProperties(final Properties props) {
         ApplicationParameters parameters = new ApplicationParameters();
@@ -126,7 +133,32 @@ public class ApplicationParameters {
          parameters.setTransformerName(transformerName);
          log.info("transformerName: {}", transformerName);
 
-        return parameters;
+         int windowSlideMinutes = Integer.parseInt(props.getProperty("windowSlideMinutes", "10"));
+         parameters.setWindowSlideMinutes(windowSlideMinutes);
+         log.info("windowSlideMinutes: {}", windowSlideMinutes);
+
+         int windowSizeMinutes = Integer.parseInt(props.getProperty("windowSizeMinutes", "60"));
+         parameters.setWindowSizeMinutes(windowSizeMinutes);
+         log.info("windowSizeMinutes: {}", windowSizeMinutes);
+
+         boolean enableWindowAgg = Boolean.parseBoolean(props.getProperty("enableWindowAgg", "false"));
+         parameters.setEnableWindowAgg(enableWindowAgg);
+         log.info("enableWindowAgg: {}", enableWindowAgg);
+
+         String windowAggTypeStr = props.getProperty("windowAggTypes", AggSqlProvider.ALL);
+         parameters.setWindowAggTypes(windowAggTypeStr.split(","));
+         log.info("windowAggTypesStr: {}", windowAggTypeStr);
+
+         boolean enableStreamIngestion = Boolean.parseBoolean(props.getProperty("enableStreamIngestion", "true"));
+         parameters.setEnableStreamIngestion(enableStreamIngestion);
+         log.info("enableStreamIngestion: {}", enableStreamIngestion);
+
+         String windowType = props.getProperty("windowTVF", AggSqlProvider.WindowTVF.CUMULATE.name());
+         parameters.setWindowTVF(AggSqlProvider.WindowTVF.valueOf(windowType));
+         log.info("windowType: {}", windowType);
+
+         validate(parameters);
+         return parameters;
     }
 
 
@@ -162,6 +194,8 @@ public class ApplicationParameters {
         parameters.setWithCustomParameters(true);
         parameters.setAllowRetentionHours(0);
         parameters.setAllowEventList(null);
+        parameters.setEnableStreamIngestion(true);
+        parameters.setWindowTVF(AggSqlProvider.WindowTVF.CUMULATE);
 
         if (args.length > 5) {
             parameters.setTransformVersion(args[5]);
@@ -195,13 +229,55 @@ public class ApplicationParameters {
             parameters.setAllowEventList(List.of(args[10].split(",")));
         }
 
+        setMoreParametersFromArgs(args, parameters);
+
+        parameters.setRegion(args[2].split(":")[3]);
+        parameters.setAppIdStreamList(getConfig(parameters.getAppIdStreamConfig(), parameters.getRegion()));
+
+        validate(parameters);
+
+        log.info("ApplicationParameters: {}", parameters);
+        return parameters;
+    }
+
+    private static void setMoreParametersFromArgs(final String[] args, final ApplicationParameters parameters) {
         if (args.length > 11) { // transformerName
             parameters.setTransformerName(args[11]);
         }
 
-        parameters.setRegion(args[2].split(":")[3]);
-        parameters.setAppIdStreamList(getConfig(parameters.getAppIdStreamConfig(), parameters.getRegion()));
-        return parameters;
+        if (args.length > 12) { // windowSlideMinutes
+            parameters.setWindowSizeMinutes(Integer.parseInt(args[12]));
+        }
+
+        if (args.length > 13) { // windowSizeMinutes
+            parameters.setWindowSizeMinutes(Integer.parseInt(args[13]));
+        }
+
+        if (args.length > 14) { // enableWindowAgg
+            parameters.setEnableWindowAgg(Boolean.parseBoolean(args[14]));
+        }
+
+        if (args.length > 15) { // windowAggTypes
+            parameters.setWindowAggTypes(args[15].split(","));
+        }
+
+        if (args.length > 16) { // enableStreamIngestion
+            parameters.setEnableStreamIngestion(Boolean.parseBoolean(args[16]));
+        }
+
+        if (args.length > 17) { // windowType
+            parameters.setWindowTVF(AggSqlProvider.WindowTVF.valueOf(args[17]));
+        }
+    }
+
+    private static void validate(final ApplicationParameters parameters) {
+        if (!parameters.isEnableStreamIngestion() && !parameters.isEnableWindowAgg()) {
+            throw new ClickstreamException("Both enableStreamIngestion and enableWindowAgg are false, at least one should be true");
+        }
+
+        if (parameters.getWindowSlideMinutes() > parameters.getWindowSizeMinutes()) {
+            throw new ClickstreamException("windowSlideMinutes should be less than or equal to windowSizeMinutes");
+        }
     }
 
     public static ApplicationParameters loadApplicationParameters(final String[] args, final boolean isLocal) throws IOException {
@@ -224,7 +300,6 @@ public class ApplicationParameters {
         }
         return null;
     }
-
 }
 
 
