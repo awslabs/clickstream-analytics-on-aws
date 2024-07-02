@@ -86,7 +86,7 @@ export interface IngestionServerNestStackProps extends StackProps {
 
   // authentication parameters
   readonly enableAuthentication: string;
-  readonly authenticationSecretArn?: string;
+  readonly authenticationSecretArn: string;
 
   // Kafka parameters
   readonly kafkaBrokers?: string;
@@ -149,11 +149,6 @@ export class IngestionServerNestedStack extends NestedStack {
       };
     }
 
-    let authenticationSecretArn;
-    if (props.enableAuthentication == 'Yes') {
-      authenticationSecretArn = props.authenticationSecretArn;
-    }
-
     const isPrivateSubnetsCondition = getALBSubnetsCondtion(this, props.publicSubnetIds, props.privateSubnetIds);
 
     const fleetCommonProps = {
@@ -201,7 +196,7 @@ export class IngestionServerNestedStack extends NestedStack {
       enableGlobalAccelerator: props.enableGlobalAccelerator,
       devMode: props.devMode,
       enableAuthentication: props.enableAuthentication,
-      authenticationSecretArn,
+      authenticationSecretArn: props.authenticationSecretArn,
       projectId: props.projectId,
       appIds: props.appIds,
       clickStreamSDK: props.clickStreamSDK,
@@ -394,6 +389,7 @@ export class IngestionServerStack extends Stack {
       protocol: protocolParam.valueAsString,
       enableGlobalAccelerator: enableGlobalAcceleratorParam.valueAsString,
       enableAuthentication: enableAuthenticationParam.valueAsString,
+      authenticationSecretArn: authenticationSecretArnParam.valueAsString,
       devMode: devModeParam.valueAsString,
       projectId: projectIdParam.valueAsString,
       clickStreamSDK: clickStreamSDKParam.valueAsString,
@@ -422,7 +418,6 @@ export class IngestionServerStack extends Stack {
       domainNameParam,
       certificateArnParam,
       enableAuthenticationParam,
-      authenticationSecretArnParam,
     });
     let stackConditionsAndProps = commonConditionsAndProps;
 

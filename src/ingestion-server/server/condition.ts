@@ -31,7 +31,6 @@ export function createCommonConditions(
     domainNameParam: CfnParameter;
     certificateArnParam: CfnParameter;
     enableAuthenticationParam: CfnParameter;
-    authenticationSecretArnParam: CfnParameter;
   },
 ) {
   // ALB enableAccessLogCondition
@@ -144,7 +143,6 @@ export function createCommonConditions(
       condition: enableAuthenticationCondition,
       serverProps: {
         enableAuthentication: 'Yes',
-        authenticationSecretArn: props.authenticationSecretArnParam.valueAsString,
       },
     },
 
@@ -152,7 +150,6 @@ export function createCommonConditions(
       condition: enableAuthenticationConditionNeg,
       serverProps: {
         enableAuthentication: 'No',
-        authenticationSecretArn: undefined,
       },
     },
 

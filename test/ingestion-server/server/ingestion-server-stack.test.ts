@@ -597,6 +597,7 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
     'AppIds',
     'ClickStreamSDK',
     'WorkerStopTimeout',
+    'AuthenticationSecretArn',
   ];
 
   console.log('');
@@ -682,6 +683,7 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
     'DomainName',
     'AppIds',
     'ClickStreamSDK',
+    'AuthenticationSecretArn',
     'WorkerStopTimeout',
   ];
 
@@ -773,6 +775,7 @@ test('Check parameters for S3 nested stack - has minimum parameters', () => {
     'DomainName',
     'AppIds',
     'ClickStreamSDK',
+    'AuthenticationSecretArn',
     'WorkerStopTimeout',
   ];
 

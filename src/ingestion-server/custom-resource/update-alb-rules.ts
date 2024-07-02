@@ -28,7 +28,7 @@ export interface UpdateAlbRulesCustomResourceProps {
   targetGroupArn: string;
   listenerArn: string;
   enableAuthentication: string;
-  authenticationSecretArn?: string;
+  authenticationSecretArn: string;
   endpointPath: string;
   domainName?: string;
   protocol: string;
@@ -38,7 +38,7 @@ export function updateAlbRulesCustomResource(
   scope: Construct,
   props: UpdateAlbRulesCustomResourceProps,
 ) {
-  const fn = createUpdateAlbRulesLambda(scope, props.listenerArn, props.authenticationSecretArn);
+  const fn = createUpdateAlbRulesLambda(scope, props.listenerArn, props.enableAuthentication, props.authenticationSecretArn);
   const provider = new Provider(
     scope,
     'updateAlbRulesCustomResourceProvider',
@@ -64,7 +64,12 @@ export function updateAlbRulesCustomResource(
   return { customResource: cr, fn };
 }
 
-function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, inputAuthenticationSecretArn?: string): SolutionNodejsFunction {
+function createUpdateAlbRulesLambda(
+  scope: Construct,
+  listenerArn: string,
+  enableAuthentication: string,
+  authenticationSecretArn: string,
+): SolutionNodejsFunction {
   const policyStatements = [
     new PolicyStatement({
       actions: [
@@ -85,7 +90,6 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, input
   ];
 
   const role = createLambdaRole(scope, 'updateAlbRulesLambdaRole', false, policyStatements);
-  const authenticationSecretArn = inputAuthenticationSecretArn || '';
 
   const authPolicy = new Policy(scope, 'updateAlbRulesLambdaAuthPolicy', {
     statements: [
@@ -103,7 +107,7 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, input
     scope,
     'authEnableCondition',
     {
-      expression: Fn.conditionNot(Fn.conditionEquals(authenticationSecretArn, '')),
+      expression: Fn.conditionEquals(enableAuthentication, 'Yes'),
     },
   );
   (authPolicy.node.defaultChild as CfnPolicy).cfnOptions.condition = authEnableCondition;

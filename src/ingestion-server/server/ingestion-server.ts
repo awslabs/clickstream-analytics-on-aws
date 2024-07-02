@@ -124,7 +124,7 @@ export interface IngestionServerProps {
   readonly enableAuthentication: string;
   readonly enableGlobalAccelerator: string;
   readonly devMode: string;
-  readonly authenticationSecretArn?: string;
+  readonly authenticationSecretArn: string;
   readonly projectId: string;
   readonly appIds: string;
   readonly clickStreamSDK: string;
@@ -140,7 +140,7 @@ interface UpdateAlbRulesInput {
   readonly protocol: ApplicationProtocol;
   readonly enableAuthentication: string;
   readonly domainName?: string;
-  readonly authenticationSecretArn?: string;
+  readonly authenticationSecretArn: string;
 }
 
 
