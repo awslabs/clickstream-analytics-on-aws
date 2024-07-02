@@ -212,6 +212,10 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
       ParameterKey: 'WorkerStopTimeout',
       ParameterValue: '90',
     },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'S3',
+    },
   ],
 );
 
@@ -275,6 +279,10 @@ export const INGESTION_KAFKA_PARAMETERS = mergeParameters(
       ParameterKey: 'KafkaBrokers',
       ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
     },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'MSK',
+    },
   ],
 );
 
@@ -296,6 +304,10 @@ export const INGESTION_MSK_PARAMETERS = mergeParameters(
     {
       ParameterKey: 'KafkaBrokers',
       ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+    },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'MSK',
     },
   ],
 );
@@ -322,6 +334,10 @@ export const INGESTION_MSK_WITHOUT_APP_PARAMETERS = mergeParameters(
     {
       ParameterKey: 'KafkaBrokers',
       ParameterValue: 'test1.com:9092,test2.com:9092,test3.com:9092',
+    },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'MSK',
     },
   ],
 );
@@ -356,6 +372,10 @@ export const INGESTION_KINESIS_ON_DEMAND_PARAMETERS = mergeParameters(
     {
       ParameterKey: 'KinesisDataS3Prefix',
       ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
+    },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'KDS',
     },
   ],
 );
@@ -395,6 +415,10 @@ export const INGESTION_THIRDPARTY_SDK_KINESIS_ON_DEMAND_PARAMETERS = mergeParame
       ParameterKey: 'KinesisDataS3Prefix',
       ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
     },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'KDS',
+    },
   ],
 );
 
@@ -428,6 +452,10 @@ export const INGESTION_KINESIS_PROVISIONED_PARAMETERS = mergeParameters(
     {
       ParameterKey: 'KinesisDataS3Prefix',
       ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
+    },
+    {
+      ParameterKey: 'SinkType',
+      ParameterValue: 'KDS',
     },
   ],
 );

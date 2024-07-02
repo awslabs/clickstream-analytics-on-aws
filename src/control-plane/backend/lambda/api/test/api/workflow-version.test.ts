@@ -258,6 +258,9 @@ describe('Workflow test with pipeline version', () => {
                                 ParameterKey: 'EcsInfraType',
                               },
                               {
+                                ParameterKey: 'SinkType',
+                              },
+                              {
                                 ParameterKey: 'AppRegistryApplicationArn.#',
                               },
                             ],
@@ -417,6 +420,9 @@ describe('Workflow test with pipeline version', () => {
                               {
                                 ParameterKey: 'EcsInfraType',
                               },
+                              {
+                                ParameterKey: 'SinkType',
+                              },
                             ],
                           ), 'ScaleOnCpuUtilizationPercent', [
                             {
@@ -552,6 +558,9 @@ describe('Workflow test with pipeline version', () => {
                               {
                                 ParameterKey: 'EcsInfraType',
                               },
+                              {
+                                ParameterKey: 'SinkType',
+                              },
                             ],
                           ), 'ScaleOnCpuUtilizationPercent', [
                             {
@@ -680,6 +689,9 @@ describe('Workflow test with pipeline version', () => {
                             [
                               {
                                 ParameterKey: 'EcsInfraType',
+                              },
+                              {
+                                ParameterKey: 'SinkType',
                               },
                             ],
                           ), 'ScaleOnCpuUtilizationPercent', [
@@ -924,6 +936,9 @@ describe('Workflow test with pipeline version in China region', () => {
                                 ParameterKey: 'EcsInfraType',
                               },
                               {
+                                ParameterKey: 'SinkType',
+                              },
+                              {
                                 ParameterKey: 'AppRegistryApplicationArn',
                               },
                             ],
@@ -1067,6 +1082,9 @@ describe('Workflow test with pipeline version in China region', () => {
                               {
                                 ParameterKey: 'EcsInfraType',
                               },
+                              {
+                                ParameterKey: 'SinkType',
+                              },
                             ],
                           ), 'ScaleOnCpuUtilizationPercent', [
                             {
@@ -1185,6 +1203,9 @@ describe('Workflow test with pipeline version in China region', () => {
                             [
                               {
                                 ParameterKey: 'EcsInfraType',
+                              },
+                              {
+                                ParameterKey: 'SinkType',
                               },
                             ],
                           ), 'ScaleOnCpuUtilizationPercent', [
@@ -1346,6 +1367,9 @@ describe('Workflow test with pipeline version in China region', () => {
                             [
                               {
                                 ParameterKey: 'EcsInfraType',
+                              },
+                              {
+                                ParameterKey: 'SinkType',
                               },
                             ],
                           ), 'ScaleOnCpuUtilizationPercent', [
