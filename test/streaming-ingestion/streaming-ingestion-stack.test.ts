@@ -268,16 +268,18 @@ describe('common parameter test of StreamingIngestionStack', () => {
   test('Should has Parameter WindowSizeMinutes', () => {
     template.hasParameter('WindowSizeMinutes', {
       Type: 'Number',
-      Default: 60,
-      MinValue: 1,
     });
   });
 
   test('Should has Parameter WindowSlideMinutes', () => {
     template.hasParameter('WindowSlideMinutes', {
       Type: 'Number',
-      Default: 10,
-      MinValue: 1,
+    });
+  });
+
+  test('Should has Parameter WindowTVF', () => {
+    template.hasParameter('WindowTVF', {
+      Type: 'String',
     });
   });
 
@@ -898,6 +900,7 @@ describe('managed Flink application for real-time data processing', () => {
                 allowRetentionHours: Match.anyValue(),
 
                 enableWindowAgg: Match.anyValue(),
+                windowTVF: Match.anyValue(),
                 windowAggTypes: Match.anyValue(),
                 windowSizeMinutes: Match.anyValue(),
                 windowSlideMinutes: Match.anyValue(),

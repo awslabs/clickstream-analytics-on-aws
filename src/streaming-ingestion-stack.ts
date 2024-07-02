@@ -144,6 +144,7 @@ export class StreamingIngestionStack extends Stack {
           allowEventList: eventProcessing.allowEvents,
           allowRetentionHours: eventProcessing.retentionHours + '',
           enableWindowAgg: eventProcessing.enableWindowAgg,
+          windowTVF: eventProcessing.windowTVF,
           windowAggTypes: eventProcessing.windowAggTypes,
           windowSizeMinutes: eventProcessing.windowSizeMinutes + '',
           windowSlideMinutes: eventProcessing.windowSlideMinutes + '',

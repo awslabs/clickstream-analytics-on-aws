@@ -83,6 +83,7 @@ export interface StreamingIngestionStackProps {
       withCustomParameters: string;
       enableWindowAgg: string;
       windowAggTypes: string;
+      windowTVF: string;
       windowSizeMinutes: number;
       windowSlideMinutes: number;
     };
@@ -252,23 +253,32 @@ export function createStackParameters(scope: Construct): {
 
   // windowAggTypes
   const windowAggTypesParam = new CfnParameter(scope, 'WindowAggTypes', {
-    description: 'The window aggregation types, use comma to separate multiple types',
+    description: 'The window aggregation data types, use comma to separate multiple types',
     type: 'CommaDelimitedList',
-    default: 'eventNameTopRank,pageTitleTopRank,eventAndUserCount,trafficSourceSourceTopRank',
+    default: 'eventNameTopRank,pageTitleTopRank,eventAndUserCount,trafficSourceSourceTopRank,platformTop5Rank',
+  });
+
+  // windowTVF
+  const windowTVFParam = new CfnParameter(scope, 'WindowTVF', {
+    description: 'The Flink windowing table-valued functions',
+    type: 'String',
+    default: 'HOP',
+    allowedValues: ['TUMBLE', 'HOP', 'CUMULATE', 'SESSION'],
   });
 
   // windowSizeMinutes
   const windowSizeMinutesParam = new CfnParameter(scope, 'WindowSizeMinutes', {
-    description: 'The window size in minutes',
-    type: 'Number',
-    default: 60,
-    minValue: 1,
-  });
-  // windowSlideMinutes
-  const windowSlideMinutesParam = new CfnParameter(scope, 'WindowSlideMinutes', {
-    description: 'The window slide in minutes',
+    description: 'The window size(TUMBLE, HOP, CUMULATE) or gap(SESSION) in minutes',
     type: 'Number',
     default: 10,
+    minValue: 1,
+  });
+
+  // windowSlideMinutes
+  const windowSlideMinutesParam = new CfnParameter(scope, 'WindowSlideMinutes', {
+    description: 'The window slide(HOP)/step(CUMULATE) in minutes',
+    type: 'Number',
+    default: 2,
     minValue: 1,
   });
 
@@ -293,6 +303,7 @@ export function createStackParameters(scope: Construct): {
       withCustomParametersParam.logicalId,
 
       enableWindowAggParam.logicalId,
+      windowTVFParam.logicalId,
       windowAggTypesParam.logicalId,
       windowSizeMinutesParam.logicalId,
       windowSlideMinutesParam.logicalId,
@@ -346,7 +357,10 @@ export function createStackParameters(scope: Construct): {
       default: 'Enable window aggregation in Flink',
     },
     [windowAggTypesParam.logicalId]: {
-      default: 'The window aggregation types',
+      default: 'The window aggregation data types',
+    },
+    [windowTVFParam.logicalId]: {
+      default: 'The window TVF',
     },
     [windowSizeMinutesParam.logicalId]: {
       default: 'The window size in minutes',
@@ -556,7 +570,7 @@ export function createStackParameters(scope: Construct): {
           windowAggTypes: Fn.join(',', windowAggTypesParam.valueAsList), // convert to string
           windowSizeMinutes: windowSizeMinutesParam.valueAsNumber,
           windowSlideMinutes: windowSlideMinutesParam.valueAsNumber,
-
+          windowTVF: windowTVFParam.valueAsString,
         },
       },
     },
