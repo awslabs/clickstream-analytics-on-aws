@@ -63,8 +63,10 @@ import {
   ServiceCatalogAppRegistryStack,
   ServiceCatalogAppRegistryStackCn,
   Tags,
+  insertAfterParametersInStack,
   mergeParametersFromStack,
   removeParametersFromStack,
+  replaceStackInputProps,
   setTagsToStack,
   setTagsWithVersion,
 } from './workflow-mock';
@@ -247,13 +249,27 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: removeParametersFromStack(
-                        setTagsWithVersion(IngestionStack, SolutionVersion.V_1_0_0),
-                        [
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn.#',
-                          },
-                        ],
+                      Ingestion: replaceStackInputProps(
+                        insertAfterParametersInStack(
+                          removeParametersFromStack(
+                            setTagsWithVersion(IngestionStack, SolutionVersion.V_1_0_0),
+                            [
+                              {
+                                ParameterKey: 'EcsInfraType',
+                              },
+                              {
+                                ParameterKey: 'AppRegistryApplicationArn.#',
+                              },
+                            ],
+                          ), 'ScaleOnCpuUtilizationPercent', [
+                            {
+                              ParameterKey: 'NotificationsTopicArn',
+                              ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                            },
+                          ]),
+                        {
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                        },
                       ),
                     },
                   },
@@ -393,7 +409,25 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_0),
+                      Ingestion: replaceStackInputProps(
+                        insertAfterParametersInStack(
+                          removeParametersFromStack(
+                            setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_0),
+                            [
+                              {
+                                ParameterKey: 'EcsInfraType',
+                              },
+                            ],
+                          ), 'ScaleOnCpuUtilizationPercent', [
+                            {
+                              ParameterKey: 'NotificationsTopicArn',
+                              ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                            },
+                          ]),
+                        {
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                        },
+                      ),
                     },
                   },
                   {
@@ -510,7 +544,25 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_5),
+                      Ingestion: replaceStackInputProps(
+                        insertAfterParametersInStack(
+                          removeParametersFromStack(
+                            setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_5),
+                            [
+                              {
+                                ParameterKey: 'EcsInfraType',
+                              },
+                            ],
+                          ), 'ScaleOnCpuUtilizationPercent', [
+                            {
+                              ParameterKey: 'NotificationsTopicArn',
+                              ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                            },
+                          ]),
+                        {
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                        },
+                      ),
                     },
                   },
                   {
@@ -621,7 +673,25 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_6),
+                      Ingestion: replaceStackInputProps(
+                        insertAfterParametersInStack(
+                          removeParametersFromStack(
+                            setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_6),
+                            [
+                              {
+                                ParameterKey: 'EcsInfraType',
+                              },
+                            ],
+                          ), 'ScaleOnCpuUtilizationPercent', [
+                            {
+                              ParameterKey: 'NotificationsTopicArn',
+                              ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                            },
+                          ]),
+                        {
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                        },
+                      ),
                     },
                   },
                   {
@@ -845,12 +915,27 @@ describe('Workflow test with pipeline version in China region', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: removeParametersFromStack(
-                        setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_0_0), [
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn',
-                          },
-                        ],
+                      Ingestion: replaceStackInputProps(
+                        insertAfterParametersInStack(
+                          removeParametersFromStack(
+                            setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_0_0),
+                            [
+                              {
+                                ParameterKey: 'EcsInfraType',
+                              },
+                              {
+                                ParameterKey: 'AppRegistryApplicationArn',
+                              },
+                            ],
+                          ), 'ScaleOnCpuUtilizationPercent', [
+                            {
+                              ParameterKey: 'NotificationsTopicArn',
+                              ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                            },
+                          ]),
+                        {
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                        },
                       ),
                     },
                   },
@@ -974,7 +1059,25 @@ describe('Workflow test with pipeline version in China region', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_0),
+                      Ingestion: replaceStackInputProps(
+                        insertAfterParametersInStack(
+                          removeParametersFromStack(
+                            setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_0),
+                            [
+                              {
+                                ParameterKey: 'EcsInfraType',
+                              },
+                            ],
+                          ), 'ScaleOnCpuUtilizationPercent', [
+                            {
+                              ParameterKey: 'NotificationsTopicArn',
+                              ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                            },
+                          ]),
+                        {
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                        },
+                      ),
                     },
                   },
                   {
@@ -1075,7 +1178,25 @@ describe('Workflow test with pipeline version in China region', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_5),
+                      Ingestion: replaceStackInputProps(
+                        insertAfterParametersInStack(
+                          removeParametersFromStack(
+                            setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_5),
+                            [
+                              {
+                                ParameterKey: 'EcsInfraType',
+                              },
+                            ],
+                          ), 'ScaleOnCpuUtilizationPercent', [
+                            {
+                              ParameterKey: 'NotificationsTopicArn',
+                              ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                            },
+                          ]),
+                        {
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                        },
+                      ),
                     },
                   },
                   {
@@ -1218,7 +1339,25 @@ describe('Workflow test with pipeline version in China region', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_6),
+                      Ingestion: replaceStackInputProps(
+                        insertAfterParametersInStack(
+                          removeParametersFromStack(
+                            setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_6),
+                            [
+                              {
+                                ParameterKey: 'EcsInfraType',
+                              },
+                            ],
+                          ), 'ScaleOnCpuUtilizationPercent', [
+                            {
+                              ParameterKey: 'NotificationsTopicArn',
+                              ParameterValue: 'arn:aws:sns:us-east-1:111122223333:test',
+                            },
+                          ]),
+                        {
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                        },
+                      ),
                     },
                   },
                   {
