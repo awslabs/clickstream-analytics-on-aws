@@ -79,6 +79,7 @@ import {
   getStackPrefix,
   getStackTags,
   getStateMachineExecutionName,
+  getStreamEnableAppIdsFromPipeline,
   getTemplateUrl,
   getUpdateTags,
   isEmpty,
@@ -1051,17 +1052,11 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Streaming not enabled.');
     }
     // Save pipeline status
-    const appIdRealtimeList = this.pipeline.streaming?.appIdRealtimeList ?? [];
-    if (enable && !appIdRealtimeList.includes(appId)) {
-      if (!this.pipeline.streaming.appIdStreamList.includes(appId)) {
-        throw new ClickStreamBadRequestError('AppId not found in stream list.');
-      }
-      appIdRealtimeList.push(appId);
-    }
-    if (!enable && appIdRealtimeList.includes(appId)) {
-      const index = appIdRealtimeList.indexOf(appId);
-      appIdRealtimeList.splice(index, 1);
-    }
+    const appIdRealtimeList = getStreamEnableAppIdsFromPipeline(
+      this.pipeline.streaming?.appIdRealtimeList ?? [],
+      appId,
+      enable,
+    );
     this.pipeline.streaming = {
       ...this.pipeline.streaming,
       appIdRealtimeList,

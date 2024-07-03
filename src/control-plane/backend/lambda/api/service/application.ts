@@ -11,19 +11,16 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, SINK_STREAM_NAME_PREFIX } from '@aws/clickstream-base-lib';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN } from '@aws/clickstream-base-lib';
 import moment from 'moment-timezone';
 import { PipelineServ } from './pipeline';
-import { awsAccountId, awsPartition } from '../common/constants';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getPipelineStatusType, getStackName, getStackOutputFromPipelineStatus, isEmpty, paginateData } from '../common/utils';
+import { getPipelineStatusType, getStreamEnableAppIdsFromPipeline, isEmpty, paginateData } from '../common/utils';
 import { IApplication } from '../model/application';
-import { CPipeline, IAppTimezone, IPipeline } from '../model/pipeline';
-import { describeStack } from '../store/aws/cloudformation';
-import { updateFlinkApplication } from '../store/aws/flink';
+import { CPipeline, IAppTimezone } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -255,28 +252,12 @@ export class ApplicationServ {
         statusType === PipelineStatusType.UPDATING) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
-      const flinkAppArn = getStackOutputFromPipelineStatus(
-        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-        PipelineStackType.STREAMING, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN);
-      const flinkAppName = flinkAppArn?.split('/').pop();
-      if (!flinkAppName) {
-        return res.status(404).json(new ApiFail('The flink application not found.'));
-      }
-      const streamEnableAppIds = latestPipeline.streaming?.appIdStreamList ?? [];
-      if (enable && !streamEnableAppIds.includes(id)) {
-        streamEnableAppIds.push(id);
-      } else if (!enable && streamEnableAppIds.includes(id)) {
-        const index = streamEnableAppIds.indexOf(id);
-        if (index > -1) {
-          streamEnableAppIds.splice(index, 1);
-        }
-      }
+      const streamEnableAppIds = getStreamEnableAppIdsFromPipeline(
+        latestPipeline.streaming?.appIdStreamList ?? [],
+        id,
+        enable,
+      );
 
-      const streamingSinkKinesisConfig = await this.getStreamingSinkKinesisConfig(latestPipeline, streamEnableAppIds);
-      const updateRes = await updateFlinkApplication(latestPipeline.region, flinkAppName, streamEnableAppIds, streamingSinkKinesisConfig);
-      if (!updateRes) {
-        return res.status(500).json(new ApiFail('Failed to update Flink application environment properties.'));
-      }
       latestPipeline.streaming = {
         ...latestPipeline.streaming,
         appIdStreamList: streamEnableAppIds,
@@ -289,28 +270,4 @@ export class ApplicationServ {
       next(error);
     }
   };
-
-  private async getStreamingSinkKinesisConfig(pipeline: IPipeline, streamEnableAppIds: string[]) {
-    const enableConfigs: any[] = [];
-    try {
-      const streamingStack = await describeStack(
-        pipeline.region,
-        getStackName(pipeline.pipelineId, PipelineStackType.STREAMING, pipeline.ingestionServer.sinkType),
-      );
-      if (!streamingStack) {
-        return enableConfigs;
-      }
-      const streamingStackIdPrefix = streamingStack?.StackId?.split('/')[2].split('-')[0];
-      for (let appId of streamEnableAppIds) {
-        enableConfigs.push({
-          appId: appId,
-          streamArn: `arn:${awsPartition}:kinesis:${pipeline.region}:${awsAccountId}:stream/${SINK_STREAM_NAME_PREFIX}${pipeline.projectId}_${appId}_${streamingStackIdPrefix}`,
-        });
-      }
-      return enableConfigs;
-    } catch (error) {
-      logger.error('Failed to parse sink kinesis');
-      return enableConfigs;
-    }
-  }
 }

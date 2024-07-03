@@ -1331,8 +1331,8 @@ describe('Application test', () => {
       success: true,
       message: 'Application streaming updated.',
     });
-    expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(DescribeApplicationCommand, 1);
-    expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(UpdateApplicationCommand, 1);
+    expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(DescribeApplicationCommand, 0);
+    expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(UpdateApplicationCommand, 0);
   });
   afterAll((done) => {
     server.close();

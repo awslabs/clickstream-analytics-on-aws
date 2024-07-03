@@ -682,6 +682,19 @@ function getStackOutputFromPipelineStatus(stackDetails: PipelineStatusDetail[] |
   return '';
 }
 
+function getStreamEnableAppIdsFromPipeline(oldAppIdList: string[], appId: string, enable: boolean) {
+  const streamEnableAppIds = cloneDeep(oldAppIdList);
+  if (enable && !streamEnableAppIds.includes(appId)) {
+    streamEnableAppIds.push(appId);
+  } else if (!enable && streamEnableAppIds.includes(appId)) {
+    const index = streamEnableAppIds.indexOf(appId);
+    if (index > -1) {
+      streamEnableAppIds.splice(index, 1);
+    }
+  }
+  return streamEnableAppIds;
+}
+
 function getVersionFromTags(tags: Tag[] | undefined) {
   let version = '';
   if (!tags) {
@@ -1566,4 +1579,5 @@ export {
   getAppRegistryStackTags,
   readMetadataFromSqlFile,
   getTemplateUrl,
+  getStreamEnableAppIdsFromPipeline,
 };
