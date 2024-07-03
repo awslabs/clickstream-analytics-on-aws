@@ -77,12 +77,34 @@ public class AggSqlProviderTest extends BaseFlinkTest {
                 "    CAST(NULL AS VARCHAR) as property_value\n" +
                 "FROM TABLE(\n" +
                 "            CUMULATE(\n" +
-                "                TABLE testView,\n" +
-                "                DESCRIPTOR(event_time),\n" +
-                "                INTERVAL '10' MINUTES,\n" +
-                "                INTERVAL '60' MINUTES\n" +
+                "                TABLE testView\n" +
+                "                ,DESCRIPTOR(event_time)\n" +
+                "                ,INTERVAL '10' MINUTES\n" +
+                "                ,INTERVAL '60' MINUTES\n" +
                 "            )\n" +
                 "        )\n" +
+                "GROUP BY window_start, window_end\n" +
+                "\n" +
+                "UNION ALL\n" +
+                "\n" +
+                "SELECT\n" +
+                "    window_start,\n" +
+                "    window_end,\n" +
+                "    'newUser' as data_type,\n" +
+                "    CAST(NULL AS BIGINT) AS event_count,\n" +
+                "    COUNT(distinct userPseudoId) AS user_count,\n" +
+                "    CAST(NULL AS INTEGER) as top_rank,\n" +
+                "    CAST(NULL AS VARCHAR) as property_name,\n" +
+                "    CAST(NULL AS VARCHAR) as property_value\n" +
+                "FROM TABLE(\n" +
+                "            CUMULATE(\n" +
+                "                TABLE testView\n" +
+                "                ,DESCRIPTOR(event_time)\n" +
+                "                ,INTERVAL '10' MINUTES\n" +
+                "                ,INTERVAL '60' MINUTES\n" +
+                "            )\n" +
+                "        )\n" +
+                "WHERE eventName IN ('_first_open', '_first_visit')\n" +
                 "GROUP BY window_start, window_end";
         String actualSql = aggSqlProvider.getSql();
         assertEquals(expectedSql.trim(), actualSql.trim());

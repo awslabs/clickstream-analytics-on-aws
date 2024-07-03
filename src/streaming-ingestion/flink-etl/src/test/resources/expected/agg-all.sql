@@ -9,12 +9,34 @@ SELECT
     CAST(NULL AS VARCHAR) as property_value
 FROM TABLE(
             CUMULATE(
-                TABLE testView,
-                DESCRIPTOR(event_time),
-                INTERVAL '10' MINUTES,
-                INTERVAL '60' MINUTES
+                TABLE testView
+                ,DESCRIPTOR(event_time)
+                ,INTERVAL '10' MINUTES
+                ,INTERVAL '60' MINUTES
             )
         )
+GROUP BY window_start, window_end
+
+UNION ALL
+
+SELECT
+    window_start,
+    window_end,
+    'newUser' as data_type,
+    CAST(NULL AS BIGINT) AS event_count,
+    COUNT(distinct userPseudoId) AS user_count,
+    CAST(NULL AS INTEGER) as top_rank,
+    CAST(NULL AS VARCHAR) as property_name,
+    CAST(NULL AS VARCHAR) as property_value
+FROM TABLE(
+            CUMULATE(
+                TABLE testView
+                ,DESCRIPTOR(event_time)
+                ,INTERVAL '10' MINUTES
+                ,INTERVAL '60' MINUTES
+            )
+        )
+WHERE eventName IN ('_first_open', '_first_visit')
 GROUP BY window_start, window_end
 
 UNION ALL
@@ -51,7 +73,6 @@ SELECT
     )
 )
 WHERE rownum <= 10
-
 UNION ALL
 SELECT
     window_start,
@@ -86,7 +107,6 @@ SELECT
     )
 )
 WHERE rownum <= 10
-
 UNION ALL
 SELECT
     window_start,
