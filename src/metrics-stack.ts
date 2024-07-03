@@ -12,7 +12,7 @@
  */
 
 import { EMAIL_PATTERN, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_METRICS_SNS_TOPIC_ARN_NAME, PROJECT_ID_PATTERN, SolutionInfo } from '@aws/clickstream-base-lib';
-import { Aspects, CfnOutput, CfnParameter, Fn, Stack, StackProps } from 'aws-cdk-lib';
+import { Aspects, CfnOutput, CfnParameter, Fn, Stack, StackProps, RemovalPolicy, Duration } from 'aws-cdk-lib';
 import { PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -72,6 +72,8 @@ export class MetricsStack extends Stack {
 
     const snsKey = new Key(this, 'snsKey', {
       enableKeyRotation: true,
+      removalPolicy: RemovalPolicy.DESTROY,
+      pendingWindow: Duration.days(7),
     });
 
     snsKey.addToResourcePolicy(new PolicyStatement({
