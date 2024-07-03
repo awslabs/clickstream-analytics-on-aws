@@ -183,9 +183,9 @@ Clickstream Unity SDK 支持以下数据类型：
 | ushort   | 	0 to 65,535                                            | (ushort)1000           |
 | long     | -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807 | 9876543210L            |
 | ulong    | 0 to 18,446,744,073,709,551,615                         | 12345678901234567890UL |
-| float    | ±1.5e−45 to ±3.4e^38                                    | 19.99f                 |
-| double   | ±5e-324 to ±1.7e+308                                    | 3.141592653589793      |
-| decimal  | ±1.0e-28 to ±7.9228e28                                  | 0.075m                 |
+| float    | +-1.5e−45 to +-3.4e38                                   | 19.99f                 |        
+| double   | +-5e-324 to +-1.7e+308                                  | 3.141592653589793      |        
+| decimal  | +-1.0e-28 to +-7.9228e28                                | 0.075m                 |        
 | bool     | true, false                                             | true                   |
 | string   | max support 1024 characters                             | "clickstream"          |
 
