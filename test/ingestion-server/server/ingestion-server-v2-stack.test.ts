@@ -945,6 +945,20 @@ test('Each of kinesis nested templates has Kinesis::Stream', () => {
   }
 });
 
+test('Each of kinesis nested templates has AWS::Kinesis::Stream with correct properties', () => {
+  if (v2Stack.kinesisNestedStacks) {
+    [
+      v2Stack.kinesisNestedStacks.onDemandStack,
+      v2Stack.kinesisNestedStacks.provisionedStack,
+    ]
+      .map((s) => Template.fromStack(s))
+      .forEach((t) => {
+        t.hasResource('AWS::Kinesis::Stream', {
+          DeletionPolicy: 'Delete',
+        });
+      });
+  }
+});
 
 test('Lambda has POWERTOOLS ENV set', () => {
   if (v2Stack.kinesisNestedStacks) {
