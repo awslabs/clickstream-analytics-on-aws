@@ -18,18 +18,22 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.StructType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.BaseSparkTest;
 import software.aws.solution.clickstream.util.DatasetUtil;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.expr;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class GTMServerDataTransformerTest extends BaseSparkTest {
     GTMServerDataTransformer transformer = new GTMServerDataTransformer();
 
@@ -132,6 +136,8 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
+        String uniqueWarehouseDir = "/tmp/warehouse/" + UUID.randomUUID();
+        System.setProperty(WAREHOUSE_DIR_PROP, uniqueWarehouseDir);
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
@@ -139,17 +145,17 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         List<Dataset<Row>> datasetList = transformer.transform(dataset);
         Map<String, StructType> schemaMap = DatasetUtil.getSchemaMap();
 
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/etl_gtm_user_visit_incremental_v1"));
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/etl_gtm_user_visit_full_v1"));
+        Assertions.assertNotNull(schemaMap.get(uniqueWarehouseDir + "/etl_gtm_user_visit_incremental_v1"));
+        Assertions.assertNotNull(schemaMap.get(uniqueWarehouseDir + "/etl_gtm_user_visit_full_v1"));
 
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/etl_gtm_user_referrer_full_v1"));
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/etl_gtm_user_referrer_incremental_v1"));
+        Assertions.assertNotNull(schemaMap.get(uniqueWarehouseDir + "/etl_gtm_user_referrer_full_v1"));
+        Assertions.assertNotNull(schemaMap.get(uniqueWarehouseDir + "/etl_gtm_user_referrer_incremental_v1"));
 
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/user_full_v1"));
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/user_incremental_v1"));
+        Assertions.assertNotNull(schemaMap.get(uniqueWarehouseDir + "/user_full_v1"));
+        Assertions.assertNotNull(schemaMap.get(uniqueWarehouseDir + "/user_incremental_v1"));
 
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/item_full_v1"));
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/item_incremental_v1"));
+        Assertions.assertNotNull(schemaMap.get(uniqueWarehouseDir + "/item_full_v1"));
+        Assertions.assertNotNull(schemaMap.get(uniqueWarehouseDir + "/item_incremental_v1"));
 
         Dataset<Row> eventDataset = transformer.postTransform(datasetList.get(0));
         Assertions.assertTrue(eventDataset.count() > 1);

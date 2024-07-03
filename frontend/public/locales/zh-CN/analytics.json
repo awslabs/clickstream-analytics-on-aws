@@ -52,7 +52,16 @@
     "title": "实时",
     "description": "您可以在此处实时查看应用程序和网站的点击流数据以及相关指标。",
     "disableMessage": "此项目尚未启用实时面板，请与管理员联系以打开实时面板。",
-    "configProject": "配置项目"
+    "configProject": "配置项目",
+    "autoRefresh": {
+      "title": "自动刷新",
+      "close": "关闭",
+      "seconds15": "15 秒",
+      "seconds30": "30 秒",
+      "minute1": "1 分钟",
+      "minute5": "5 分钟",
+      "minute10": "10 分钟"
+    }
   },
   "analyzes": {
     "title": "分析",

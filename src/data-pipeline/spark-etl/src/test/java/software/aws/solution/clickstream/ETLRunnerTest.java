@@ -17,6 +17,8 @@ package software.aws.solution.clickstream;
 import com.clearspring.analytics.util.*;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.common.TransformConfig;
 import software.aws.solution.clickstream.util.*;
 
@@ -30,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
 
+@Execution(ExecutionMode.CONCURRENT)
 class ETLRunnerTest extends ETLRunnerBaseTest {
 
     @Test
@@ -109,8 +112,10 @@ class ETLRunnerTest extends ETLRunnerBaseTest {
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(APP_IDS_PROP, "id1,id2,uba-app");
         System.setProperty(PROJECT_ID_PROP, "projectId1");
+        String uniqueWarehouseDir = "/tmp/warehouse/" + UUID.randomUUID();
+        System.setProperty(WAREHOUSE_DIR_PROP, uniqueWarehouseDir);
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
 
         List<String> transformers = Lists.newArrayList();
 
@@ -192,8 +197,13 @@ class ETLRunnerTest extends ETLRunnerBaseTest {
     }
 
     @Test
-    public void should_executeTransformers_with_error() {
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+    public void should_executeTransformers_with_error() throws IOException {
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        String uniqueWarehouseDir = "/tmp/warehouse/" + UUID.randomUUID();
+        System.setProperty(WAREHOUSE_DIR_PROP, uniqueWarehouseDir);
+
+        addGeoLite2FileToSpark();
+
         List<String> transformers = Lists.newArrayList();
 
         transformers.add("software.aws.solution.clickstream.Transformer");
@@ -235,7 +245,7 @@ class ETLRunnerTest extends ETLRunnerBaseTest {
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/TransformerV2_1");
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
 
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV2");
@@ -272,7 +282,8 @@ class ETLRunnerTest extends ETLRunnerBaseTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/TransformerV2_2");
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
+
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV2");
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
@@ -298,7 +309,8 @@ class ETLRunnerTest extends ETLRunnerBaseTest {
         System.setProperty("force.merge", "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/TransformerV2_3");
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
+
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV2");
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
@@ -348,7 +360,8 @@ class ETLRunnerTest extends ETLRunnerBaseTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/TransformerV2_user_item_params");
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
+
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV2");
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
@@ -399,7 +412,8 @@ class ETLRunnerTest extends ETLRunnerBaseTest {
         System.setProperty("force.merge", "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/TransformerV2_with_empty_user");
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
+
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV2");
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
@@ -471,7 +485,8 @@ class ETLRunnerTest extends ETLRunnerBaseTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty("force.merge", "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/etl_runner/should_executeTransformers_with_GTM_server_transformer");
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        addGeoLite2FileToSpark();
 
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.gtm.GTMServerDataTransformer");

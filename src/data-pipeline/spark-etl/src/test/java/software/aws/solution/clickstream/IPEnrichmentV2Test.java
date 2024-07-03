@@ -15,6 +15,8 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.model.*;
 
@@ -22,7 +24,7 @@ import java.io.*;
 
 import static java.util.Objects.*;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
-
+@Execution(ExecutionMode.CONCURRENT)
 class IPEnrichmentV2Test extends BaseSparkTest {
 
     private final IPEnrichmentV2 ipEnrichment = new IPEnrichmentV2();
@@ -33,7 +35,7 @@ class IPEnrichmentV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
 
         Dataset<Row> dataset =
                 spark.read().schema(ModelV2.EVENT_TYPE).json(requireNonNull(getClass().getResource("/event_v2/transformed_data_event_v2.json")).getPath());

@@ -16,15 +16,19 @@ package software.aws.solution.clickstream.gtm;
 
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.*;
 
 import java.io.*;
+import java.util.UUID;
 
 import static java.util.Objects.*;
 import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.common.Util.deCodeUri;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class ServerDataConverterV2Test extends BaseSparkTest {
     ServerDataConverterV2 converter;
     @BeforeEach
@@ -142,6 +146,8 @@ public class ServerDataConverterV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "gtm_server_demo_https");
         System.setProperty(DEBUG_LOCAL_PROP, "false");
+        String uniqueWarehouseDir = "/tmp/warehouse/" + UUID.randomUUID();
+        System.setProperty(WAREHOUSE_DIR_PROP, uniqueWarehouseDir);
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/test-convert-corrupt-v2.json")).getPath());
@@ -149,7 +155,7 @@ public class ServerDataConverterV2Test extends BaseSparkTest {
 
         Assertions.assertEquals(0, outDataset.count());
         Dataset<Row> corrupDataset =
-                spark.read().json("/tmp/warehouse/etl_corrupted_json_gtm_server_data").filter(col("rid").equalTo("ssssss9dc4d91c00000v2"));
+                spark.read().json(uniqueWarehouseDir + "/etl_corrupted_json_gtm_server_data").filter(col("rid").equalTo("ssssss9dc4d91c00000v2"));
         Assertions.assertTrue(corrupDataset.count() > 0);
 
        Assertions.assertTrue(corrupDataset.select(expr("dataOut._corrupt_record"))

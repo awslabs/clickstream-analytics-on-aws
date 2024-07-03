@@ -16,6 +16,8 @@ package software.aws.solution.clickstream;
 import com.clearspring.analytics.util.*;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.util.*;
 
@@ -28,6 +30,7 @@ import static software.aws.solution.clickstream.util.ContextUtil.APP_IDS_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class ETLRunnerForGtmV2Test extends ETLRunnerBaseTest {
 
     @Test
@@ -37,7 +40,7 @@ public class ETLRunnerForGtmV2Test extends ETLRunnerBaseTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty("force.merge", "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/etl_runner/test_GTM_server_runner_v2_" + System.currentTimeMillis());
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        addGeoLite2FileToSpark();
 
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2");
@@ -90,7 +93,8 @@ public class ETLRunnerForGtmV2Test extends ETLRunnerBaseTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty("force.merge", "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/etl_runner/test_GTM_server_runner_parquet_v2");
-        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        addGeoLite2FileToSpark();
 
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2");

@@ -87,6 +87,13 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+test {
+    forkEvery = 1
+    maxParallelForks = Math.min(Runtime.runtime.availableProcessors().intdiv(2) ?: 1, 6)
+    maxHeapSize = "4g"
+    minHeapSize = "1g"
+}
+
 application {
     // Define the main class for the application.
     mainClass = 'software.aws.solution.clickstream.DataProcessor'
