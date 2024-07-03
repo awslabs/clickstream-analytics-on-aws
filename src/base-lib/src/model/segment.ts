@@ -35,6 +35,7 @@ export interface Segment {
   eventBridgeRuleArn?: string;
   sql?: string;
   uiRenderingObject?: any;
+  isImported?: boolean;
 }
 
 export interface RefreshSchedule {
