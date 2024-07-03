@@ -185,7 +185,7 @@ Clickstream Unity SDK supports the following data types:
 | ushort    | 0 ~ 65,535                                             | (ushort)1000           |
 | long      | -9,223,372,036,854,775,808 ~ 9,223,372,036,854,775,807 | 9876543210L            |
 | ulong     | 0 ~ 18,446,744,073,709,551,615                         | 12345678901234567890UL |
-| float     | +- 1.5E−45 ~ +- 3.4E+38                                | 19.99f                 |
+| float     | +- 1.5E-45 ~ +- 3.4E+38                                | 19.99f                 |
 | double    | +- 5E-324 ~ +- 1.7E+308                                | 3.141592653589793      |
 | decimal   | +- 1.0E-28 ~ +- 7.9228E+28                             | 0.075m                 |
 | bool      | true, false                                            | true                   |
