@@ -302,7 +302,7 @@ public class StreamingJob {
                 .partitionedBy("date")
                 .option("path", s3Path)
                 .option("sink.rolling-policy.check-interval", "1 min")
-                .option("sink.rolling-policy.rollover-interval", "5 min")
+                .option("sink.rolling-policy.rollover-interval", "2 min")
                 .format(FormatDescriptor.forFormat("json")
                         .build())
                 .build());
