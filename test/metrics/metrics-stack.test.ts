@@ -242,6 +242,11 @@ test('has Key for cloudwatch to Decrypt', () => {
       Version: '2012-10-17',
     },
     EnableKeyRotation: true,
+    PendingWindowInDays: 7,
+  });
+  template.hasResource('AWS::KMS::Key', {
+    DeletionPolicy: 'Delete',
+    UpdateReplacePolicy: 'Delete',
   });
 });
 
