@@ -1,9 +1,3 @@
 SOLUTION_ID='SO0219'
 
 SOLUTION_ECR_IMAGE_PLATFORM='linux/amd64'
-SOLUTION_ECR_REPO_NAME='clickstream-analytics-on-aws'
-SOLUTION_ECR_BUILD_VERSION=$(curl -s https://s3.amazonaws.com/aws-gcr-solutions/clickstream-analytics-on-aws/latest/version)
-SOLUTION_CN_TEMPLATES=(
-https://aws-gcr-solutions.s3.cn-north-1.amazonaws.com.cn/clickstream-analytics-on-aws/latest/cn/cloudfront-s3-control-plane-stack-cn.template.json
-https://aws-gcr-solutions.s3.cn-north-1.amazonaws.com.cn/clickstream-analytics-on-aws/latest/cn/private-exist-vpc-control-plane-stack.template.json
-)

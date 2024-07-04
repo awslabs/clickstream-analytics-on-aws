@@ -213,34 +213,12 @@ else
     export SOLUTION_ID
 fi
 
-if [[ -z $SOLUTION_ECR_BUILD_VERSION ]]; then
-    echo "SOLUTION_ECR_BUILD_VERSION is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_ECR_BUILD_VERSION
-fi
-
-if [[ -z $SOLUTION_ECR_REPO_NAME ]]; then
-    echo "SOLUTION_ECR_REPO_NAME is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_ECR_REPO_NAME
-fi
-
 if [[ -z $SOLUTION_ECR_IMAGE_PLATFORM ]]; then
     echo "SOLUTION_ECR_IMAGE_PLATFORM is missing from ../solution_config"
     exit 1
-else 
+else
     export SOLUTION_ECR_IMAGE_PLATFORM
 fi
-
-if [[ -z ${SOLUTION_CN_TEMPLATES[@]} ]]; then
-    echo "SOLUTION_CN_TEMPLATES is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_CN_TEMPLATES
-fi
-
 
 # Validate command line input - must provide bucket
 [[ -z $1 ]] && { usage; exit 1; } || { SOLUTION_BUCKET=$1; }
@@ -366,17 +344,6 @@ do_replace "*.template.json" %%TEMPLATE_OUTPUT_BUCKET%% ${TEMPLATE_OUTPUT_BUCKET
 do_replace_1 "*.template.json" %%PUBLIC_ECR_REGISTRY%% ${PUBLIC_ECR_REGISTRY}
 do_replace "*.template.json" %%PUBLIC_ECR_TAG%% ${PUBLIC_ECR_TAG}
 
-
-for cn_template in ${SOLUTION_CN_TEMPLATES[@]}; do 
-   echo $cn_template
-   template_name=$(basename $cn_template)
-   if [[ $(echo $template_name | grep 'stack.template.json') ]]; then
-       template_name=$(echo $template_name | sed 's/stack.template.json/stack-cn.template.json/')
-   fi 
-   echo $template_name
-   do_cmd curl -s $cn_template -o ./$template_name
-done
- 
 echo "------------------------------------------------------------------------------"
 echo "${bold}[Packing] Source code artifacts${normal}"
 echo "------------------------------------------------------------------------------"
