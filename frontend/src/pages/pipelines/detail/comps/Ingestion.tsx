@@ -92,7 +92,9 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
   };
 
   const isStreamingEnable = () => {
-    return pipelineInfo?.enableStreaming || pipelineInfo?.streaming?.appIdStreamList;
+    return (
+      pipelineInfo?.enableStreaming || pipelineInfo?.streaming?.appIdStreamList
+    );
   };
 
   return (
@@ -367,7 +369,7 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
                   <StatusIndicator type="success">
                     {t('enabled')}
                   </StatusIndicator>
-                  <br/>
+                  <br />
                   {pipelineInfo?.streaming?.appIdStreamList &&
                   pipelineInfo.streamApplication
                     ? pipelineInfo.streamApplication
