@@ -219,8 +219,8 @@
     "import": "Import",
     "export": "Export",
     "refreshSegment": "Refresh Segment",
-    "streamEnable": "Streaming Enable",
-    "streamDisable": "Streaming Disable"
+    "streamEnable": "Enable Streaming",
+    "streamDisable": "Disable Streaming"
   },
   "item": "item",
   "items": "items",

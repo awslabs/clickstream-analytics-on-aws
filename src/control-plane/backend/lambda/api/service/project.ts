@@ -11,18 +11,61 @@
  *  and limitations under the License.
  */
 
-import { DEFAULT_DASHBOARD_NAME, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, SolutionVersion, aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
-import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import {
+  DEFAULT_DASHBOARD_NAME,
+  OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
+  OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+  OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
+  QUICKSIGHT_ANALYSIS_INFIX,
+  QUICKSIGHT_DASHBOARD_INFIX,
+  QUICKSIGHT_RESOURCE_NAME_PREFIX,
+  SINK_STREAM_NAME_PREFIX,
+  SolutionVersion,
+  aws_sdk_client_common_config,
+} from '@aws/clickstream-base-lib';
+import { ApplicationStatus } from '@aws-sdk/client-kinesis-analytics-v2';
+import {
+  QuickSight,
+  ResourceNotFoundException,
+} from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
-import { FULL_SOLUTION_VERSION } from '../common/constants';
+import {
+  FULL_SOLUTION_VERSION,
+  awsAccountId,
+  awsPartition,
+} from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getPipelineStatusType, getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, isFinallyPipelineStatus, paginateData, pipelineAnalysisStudioEnabled } from '../common/utils';
+import {
+  getPipelineStatusType,
+  getReportingDashboardsUrl,
+  getStackName,
+  getStackOutputFromPipelineStatus,
+  getStreamEnableAppIdsFromPipeline,
+  isEmpty,
+  isFinallyPipelineStatus,
+  paginateData,
+  pipelineAnalysisStudioEnabled,
+} from '../common/utils';
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { checkFolder, createPublishDashboard, deleteClickstreamUser, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, getDashboardDetail, listDashboardsByApp } from '../store/aws/quicksight';
+import { describeStack } from '../store/aws/cloudformation';
+import {
+  describeApplication,
+  updateFlinkApplication,
+} from '../store/aws/flink';
+import {
+  checkFolder,
+  createPublishDashboard,
+  deleteClickstreamUser,
+  deleteDatasetOfPublishDashboard,
+  generateEmbedUrlForRegisteredUser,
+  getClickstreamUserArn,
+  getDashboardDetail,
+  listDashboardsByApp,
+} from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -37,19 +80,29 @@ export class ProjectServ {
     return pipelines[0];
   }
 
-  private getPresetAppDashboard(pipeline: IPipeline, appId: string, realtime: boolean = false) {
+  private getPresetAppDashboard(
+    pipeline: IPipeline,
+    appId: string,
+    realtime: boolean = false,
+  ) {
     const stackDashboards = getReportingDashboardsUrl(
-      pipeline.stackDetails ?? pipeline.status?.stackDetails, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX);
+      pipeline.stackDetails ?? pipeline.status?.stackDetails,
+      PipelineStackType.REPORTING,
+      OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+    );
     if (stackDashboards.length === 0) {
       return undefined;
     }
-    const appDashboard = stackDashboards.find((item: any) => item.appId === appId);
+    const appDashboard = stackDashboards.find(
+      (item: any) => item.appId === appId,
+    );
     if (appDashboard) {
       if (realtime) {
         const presetDashboard: IDashboard = {
           id: appDashboard.realtimeDashboardId,
           name: 'Realtime Dashboard',
-          description: 'Realtime user lifecycle analysis dashboard created by solution.',
+          description:
+            'Realtime user lifecycle analysis dashboard created by solution.',
           projectId: pipeline.projectId,
           appId: appId,
           region: pipeline.region,
@@ -62,7 +115,8 @@ export class ProjectServ {
       const presetDashboard: IDashboard = {
         id: appDashboard.dashboardId,
         name: DEFAULT_DASHBOARD_NAME,
-        description: 'Out-of-the-box user lifecycle analysis dashboard created by solution.',
+        description:
+          'Out-of-the-box user lifecycle analysis dashboard created by solution.',
         projectId: pipeline.projectId,
         appId: appId,
         region: pipeline.region,
@@ -81,7 +135,9 @@ export class ProjectServ {
       const { projectId, appId } = req.params;
       const pipeline = await this.getPipelineByProjectId(projectId);
       if (!pipeline) {
-        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+        return res
+          .status(404)
+          .json(new ApiFail('The latest pipeline not found.'));
       }
       // check folder and move preset dashboard to folder
       const presetAppDashboard = this.getPresetAppDashboard(pipeline, appId);
@@ -93,39 +149,59 @@ export class ProjectServ {
         pipeline.reporting?.quickSight?.user ?? '',
         presetAppDashboard?.id,
       );
-      const result = await listDashboardsByApp(pipeline.region, projectId, appId);
+      const result = await listDashboardsByApp(
+        pipeline.region,
+        projectId,
+        appId,
+      );
       const items = paginateData(result, true, pageSize, pageNumber);
-      return res.json(new ApiSuccess({
-        totalCount: result.length,
-        items: items,
-      }));
+      return res.json(
+        new ApiSuccess({
+          totalCount: result.length,
+          items: items,
+        }),
+      );
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async createDashboard(req: any, res: any, next: any) {
     try {
-      const dashboardId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DASHBOARD_INFIX}${uuidv4().replace(/-/g, '')}`;
+      const dashboardId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DASHBOARD_INFIX}${uuidv4().replace(
+        /-/g,
+        '',
+      )}`;
       req.body.id = dashboardId;
       req.body.operator = res.get('X-Click-Stream-Operator');
 
       const pipeline = await this.getPipelineByProjectId(req.body.projectId);
       if (!pipeline) {
-        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+        return res
+          .status(404)
+          .json(new ApiFail('The latest pipeline not found.'));
       }
       const defaultDataSourceArn = getStackOutputFromPipelineStatus(
         pipeline.stackDetails ?? pipeline.status?.stackDetails,
         PipelineStackType.REPORTING,
-        OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN);
+        OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
+      );
 
       if (isEmpty(defaultDataSourceArn)) {
-        return res.status(400).json(new ApiFail('Default data source ARN and owner principal is required.'));
+        return res
+          .status(400)
+          .json(
+            new ApiFail(
+              'Default data source ARN and owner principal is required.',
+            ),
+          );
       }
       req.body.region = pipeline.region;
       const dashboard: IDashboard = req.body;
       if (dashboard.sheets.length === 0) {
-        return res.status(400).json(new ApiFail('Dashboard sheets is required.'));
+        return res
+          .status(400)
+          .json(new ApiFail('Dashboard sheets is required.'));
       }
       await createPublishDashboard(
         dashboard,
@@ -133,11 +209,13 @@ export class ProjectServ {
         pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
         pipeline.reporting?.quickSight?.user ?? '',
       );
-      return res.status(201).json(new ApiSuccess({ id: dashboardId }, 'Dashboard created.'));
+      return res
+        .status(201)
+        .json(new ApiSuccess({ id: dashboardId }, 'Dashboard created.'));
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async getDashboard(req: any, res: any, next: any) {
     try {
@@ -146,10 +224,17 @@ export class ProjectServ {
 
       const pipeline = await this.getPipelineByProjectId(projectId);
       if (!pipeline) {
-        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+        return res
+          .status(404)
+          .json(new ApiFail('The latest pipeline not found.'));
       }
 
-      const dashboard = await getDashboardDetail(pipeline.region, projectId, appId, dashboardId);
+      const dashboard = await getDashboardDetail(
+        pipeline.region,
+        projectId,
+        appId,
+        dashboardId,
+      );
       if (!dashboard) {
         return res.status(404).json(new ApiFail('Dashboard not found.'));
       }
@@ -172,18 +257,22 @@ export class ProjectServ {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async deleteDashboard(req: any, res: any, next: any) {
     try {
       const { dashboardId, projectId, appId } = req.params;
       const pipeline = await this.getPipelineByProjectId(projectId);
       if (!pipeline) {
-        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+        return res
+          .status(404)
+          .json(new ApiFail('The latest pipeline not found.'));
       }
       const presetAppDashboard = this.getPresetAppDashboard(pipeline, appId);
       if (presetAppDashboard?.id === dashboardId) {
-        return res.status(400).json(new ApiFail('Preset Dashboard not allowed to delete.'));
+        return res
+          .status(400)
+          .json(new ApiFail('Preset Dashboard not allowed to delete.'));
       }
       const quickSightClient = new QuickSight({
         region: pipeline.region,
@@ -197,7 +286,10 @@ export class ProjectServ {
         });
         await quickSightClient.deleteAnalysis({
           AwsAccountId: process.env.AWS_ACCOUNT_ID,
-          AnalysisId: dashboardId.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX),
+          AnalysisId: dashboardId.replace(
+            QUICKSIGHT_DASHBOARD_INFIX,
+            QUICKSIGHT_ANALYSIS_INFIX,
+          ),
         });
       } catch (err) {
         //dashboard can be delete by other interface/op, catch this exception to allow clear data in ddb.
@@ -211,7 +303,7 @@ export class ProjectServ {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async getAnalyzes(req: any, res: any, next: any) {
     try {
@@ -219,10 +311,14 @@ export class ProjectServ {
       const { allowedDomain } = req.query;
       const pipeline = await this.getPipelineByProjectId(projectId);
       if (!pipeline) {
-        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+        return res
+          .status(404)
+          .json(new ApiFail('The latest pipeline not found.'));
       }
       if (!pipeline.reporting?.quickSight?.accountName) {
-        return res.status(400).json(new ApiFail('The latest pipeline not enable reporting.'));
+        return res
+          .status(400)
+          .json(new ApiFail('The latest pipeline not enable reporting.'));
       }
       const principals = await getClickstreamUserArn(
         SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
@@ -238,46 +334,154 @@ export class ProjectServ {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async getRealtime(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.params;
-      const { allowedDomain, enable } = req.query;
+      const { allowedDomain } = req.query;
+      const enable = req.query.enable === 'true';
       const pipeline = await this.getPipelineByProjectId(projectId);
       if (!pipeline) {
-        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+        return res
+          .status(404)
+          .json(new ApiFail('The latest pipeline not found.'));
       }
       if (!pipeline.reporting?.quickSight?.accountName) {
-        return res.status(400).json(new ApiFail('The latest pipeline not enable reporting.'));
+        return res
+          .status(400)
+          .json(new ApiFail('The latest pipeline not enable reporting.'));
       }
-      const pipe = new CPipeline(pipeline);
-      if (enable === 'false') {
-        await pipe.realtime(false, appId);
-        return res.json(new ApiSuccess({
-          EmbedUrl: '',
-        }));
-      } else if (enable === 'true') {
-        await pipe.realtime(true, appId);
-        const principals = await getClickstreamUserArn(
-          SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
-          pipeline.reporting?.quickSight?.user ?? '',
+
+      if (pipeline.streaming?.appIdRealtimeList?.includes(appId) !== enable) {
+        const flinkAppArn = getStackOutputFromPipelineStatus(
+          pipeline.stackDetails ?? pipeline.status?.stackDetails,
+          PipelineStackType.STREAMING,
+          OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
         );
-        const presetRealtimeDashboard = this.getPresetAppDashboard(pipeline, appId, true);
-        const embed = await generateEmbedUrlForRegisteredUser(
+        const flinkAppName = flinkAppArn?.split('/').pop();
+        if (!flinkAppName) {
+          return res
+            .status(404)
+            .json(new ApiFail('The flink application not found.'));
+        }
+        // check flink application status
+        const flinkApplication = await describeApplication(
           pipeline.region,
-          principals.publishUserArn,
-          allowedDomain,
-          {
-            initialPath: `/dashboards/${presetRealtimeDashboard?.id}`,
-          },
+          flinkAppName,
         );
-        return res.json(new ApiSuccess(embed));
+        if (
+          !flinkApplication ||
+          (flinkApplication.ApplicationDetail?.ApplicationStatus !==
+            ApplicationStatus.READY &&
+            flinkApplication.ApplicationDetail?.ApplicationStatus !==
+              ApplicationStatus.RUNNING)
+        ) {
+          return res
+            .status(400)
+            .json(new ApiFail('The flink application status not allow update.'));
+        }
+
+        const streamEnableAppIds = getStreamEnableAppIdsFromPipeline(
+          pipeline.streaming?.appIdStreamList ?? [],
+          appId,
+          enable,
+        );
+        const streamingSinkKinesisConfig =
+        await this.getStreamingSinkKinesisConfig(pipeline, streamEnableAppIds);
+        logger.debug(
+          `streamingSinkKinesisConfig: ${JSON.stringify(
+            streamingSinkKinesisConfig,
+          )}`,
+        );
+        const updateRes = await updateFlinkApplication(
+          pipeline.region,
+          flinkAppName,
+          flinkApplication,
+          streamEnableAppIds,
+          streamingSinkKinesisConfig,
+        );
+        if (!updateRes) {
+          return res
+            .status(500)
+            .json(new ApiFail('Failed to update Flink application.'));
+        }
       }
+
+      const embed = await this._generateRealtimeEmbedUrl(
+        pipeline,
+        appId,
+        enable,
+        allowedDomain,
+      );
+      return res.json(
+        new ApiSuccess(embed),
+      );
     } catch (error) {
       next(error);
     }
-  };
+  }
+
+  private async _generateRealtimeEmbedUrl(pipeline: IPipeline, appId: string, enable: boolean, allowedDomain: string) {
+    const pipe = new CPipeline(pipeline);
+    if (!enable) {
+      await pipe.realtime(false, appId);
+      return {
+        EmbedUrl: '',
+      };
+    }
+    await pipe.realtime(true, appId);
+    const principals = await getClickstreamUserArn(
+      SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
+      pipeline.reporting?.quickSight?.user ?? '',
+    );
+    const presetRealtimeDashboard = this.getPresetAppDashboard(
+      pipeline,
+      appId,
+      true,
+    );
+    const embed = await generateEmbedUrlForRegisteredUser(
+      pipeline.region,
+      principals.publishUserArn,
+      allowedDomain,
+      {
+        initialPath: `/dashboards/${presetRealtimeDashboard?.id}`,
+      },
+    );
+    return embed;
+  }
+
+  private async getStreamingSinkKinesisConfig(
+    pipeline: IPipeline,
+    streamEnableAppIds: string[],
+  ) {
+    const enableConfigs: any[] = [];
+    try {
+      const streamingStack = await describeStack(
+        pipeline.region,
+        getStackName(
+          pipeline.pipelineId,
+          PipelineStackType.STREAMING,
+          pipeline.ingestionServer.sinkType,
+        ),
+      );
+      if (!streamingStack) {
+        return enableConfigs;
+      }
+      const streamingStackIdPrefix =
+        streamingStack?.StackId?.split('/')[2].split('-')[0];
+      for (let appId of streamEnableAppIds) {
+        enableConfigs.push({
+          appId: appId,
+          streamArn: `arn:${awsPartition}:kinesis:${pipeline.region}:${awsAccountId}:stream/${SINK_STREAM_NAME_PREFIX}${pipeline.projectId}_${appId}_${streamingStackIdPrefix}`,
+        });
+      }
+      return enableConfigs;
+    } catch (error) {
+      logger.error('Failed to parse sink kinesis');
+      return enableConfigs;
+    }
+  }
 
   public async list(req: any, res: any, next: any) {
     try {
@@ -286,28 +490,35 @@ export class ProjectServ {
       const pipelines = await store.listPipeline('', 'latest', 'asc');
       const apps = await store.listAllApplication();
       for (let project of projects) {
-        const pipeline = pipelines.find((item: IPipeline) => item.projectId === project.id);
+        const pipeline = pipelines.find(
+          (item: IPipeline) => item.projectId === project.id,
+        );
         if (pipeline) {
           project.pipelineId = pipeline.pipelineId;
           project.pipelineVersion = pipeline.templateVersion ?? '';
-          project.analysisStudioEnabled = pipelineAnalysisStudioEnabled(pipeline);
+          project.analysisStudioEnabled =
+            pipelineAnalysisStudioEnabled(pipeline);
         } else {
           project.pipelineId = '';
           project.pipelineVersion = '';
           project.analysisStudioEnabled = false;
         }
-        const projectApps = apps.filter((item: IApplication) => item.projectId === project.id);
+        const projectApps = apps.filter(
+          (item: IApplication) => item.projectId === project.id,
+        );
         project.applications = projectApps;
       }
       const items = paginateData(projects, true, pageSize, pageNumber);
-      return res.json(new ApiSuccess({
-        totalCount: projects.length,
-        items: items,
-      }));
+      return res.json(
+        new ApiSuccess({
+          totalCount: projects.length,
+          items: items,
+        }),
+      );
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async create(req: any, res: any, next: any) {
     try {
@@ -318,21 +529,23 @@ export class ProjectServ {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async details(req: any, res: any, next: any) {
     try {
       const { id } = req.params;
       const result = await store.getProject(id);
       if (!result) {
-        logger.warn(`No Project with ID ${id} found in the databases while trying to retrieve a Project`);
+        logger.warn(
+          `No Project with ID ${id} found in the databases while trying to retrieve a Project`,
+        );
         return res.status(404).json(new ApiFail('Project not found'));
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async update(req: any, res: any, next: any) {
     try {
@@ -343,7 +556,7 @@ export class ProjectServ {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async delete(req: any, res: any, next: any) {
     try {
@@ -354,7 +567,11 @@ export class ProjectServ {
         const latestPipeline = latestPipelines[0];
         const statusType = getPipelineStatusType(latestPipeline);
         if (!isFinallyPipelineStatus(statusType)) {
-          return res.status(400).json(new ApiFail('The pipeline current status does not allow delete.'));
+          return res
+            .status(400)
+            .json(
+              new ApiFail('The pipeline current status does not allow delete.'),
+            );
         }
         const pipeline = new CPipeline(latestPipeline);
         await pipeline.delete();
@@ -370,7 +587,7 @@ export class ProjectServ {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async verification(req: any, res: any, next: any) {
     try {
@@ -380,14 +597,13 @@ export class ProjectServ {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async saveRequestId(id: string) {
     await store.saveRequestId(id);
-  };
+  }
 
   public async deleteRequestId(id: string) {
     await store.deleteRequestId(id);
-  };
-
+  }
 }

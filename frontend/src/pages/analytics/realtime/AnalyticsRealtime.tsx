@@ -51,7 +51,7 @@ const AnalyticsRealtime: React.FC = () => {
   );
   const [autoRefreshInterval, setAutoRefreshInterval] = useState(0);
 
-  const getRealtime = async (refresh: boolean) => {
+  const getRealtime = async () => {
     setLoadingFrameData(true);
     try {
       const { success, data }: ApiResponse<any> = await embedRealtimeUrl(
@@ -64,9 +64,6 @@ const AnalyticsRealtime: React.FC = () => {
         setDashboardEmbedUrl(data.EmbedUrl);
       }
     } catch (error) {
-      if (!refresh) {
-        setChecked(!checked);
-      }
       setDashboardEmbedUrl('');
       setLoadingFrameData(false);
     }
@@ -105,7 +102,7 @@ const AnalyticsRealtime: React.FC = () => {
     window.clearInterval(intervalId);
     if (autoRefreshInterval > 0) {
       intervalId = setInterval(() => {
-        getRealtime(true);
+        getRealtime();
       }, autoRefreshInterval);
     }
   };
@@ -128,7 +125,7 @@ const AnalyticsRealtime: React.FC = () => {
       setDashboardEmbedUrl('');
     }
     if (projectId && appId && enableStreamModule) {
-      getRealtime(false);
+      getRealtime();
     }
   }, [checked]);
 
@@ -199,7 +196,7 @@ const AnalyticsRealtime: React.FC = () => {
                             iconName="refresh"
                             variant="icon"
                             disabled={!checked}
-                            onClick={() => getRealtime(true)}
+                            onClick={() => getRealtime()}
                           />
                           <ButtonDropdown
                             disabled={!checked}
