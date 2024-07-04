@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Duration, Stack, Fn, CfnResource } from 'aws-cdk-lib';
+import { Duration, Stack, Fn, CfnResource, RemovalPolicy } from 'aws-cdk-lib';
 import { StreamMode, Stream, StreamEncryption } from 'aws-cdk-lib/aws-kinesis';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
@@ -34,6 +34,7 @@ export function createKinesisDataStream(scope: Construct, props: KinesisDataStre
       streamMode: StreamMode.ON_DEMAND,
       retentionPeriod: Duration.hours(props.dataRetentionHours),
       encryption: StreamEncryption.MANAGED,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
   } else {
     kinesisDataStream = new Stream(scope, 'kinesisStreamProvisioned', {
@@ -42,6 +43,7 @@ export function createKinesisDataStream(scope: Construct, props: KinesisDataStre
       streamMode: StreamMode.PROVISIONED,
       retentionPeriod: Duration.hours(props.dataRetentionHours),
       encryption: StreamEncryption.MANAGED,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
   }
   addCfnNagSuppressRules(

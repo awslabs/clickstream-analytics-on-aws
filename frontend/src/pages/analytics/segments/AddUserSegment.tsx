@@ -36,7 +36,7 @@ import SegmentEditor from './components/SegmentEditor';
 type AddUserSegmentsProps = {
   actionType: string;
 };
-const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
+const AddUserSegment: React.FC<AddUserSegmentsProps> = ({
   actionType,
 }: AddUserSegmentsProps) => {
   const { t } = useTranslation();
@@ -151,4 +151,4 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
     </div>
   );
 };
-export default AddUserSegments;
+export default AddUserSegment;

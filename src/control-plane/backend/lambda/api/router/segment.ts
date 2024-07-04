@@ -41,6 +41,22 @@ router_segment.post(
   },
 );
 
+// Import segment
+router_segment.post(
+  '/import',
+  validate([
+    body().custom(isValidEmpty).custom(isXSSRequest),
+    body('segmentType').isIn(['User', 'Session', 'Event']),
+    body('name').notEmpty().trim(),
+    body('description').isString().trim(),
+    body('projectId').notEmpty(),
+    body('appId').notEmpty(),
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    return segmentServ.import(req, res, next);
+  },
+);
+
 // List segments of an app
 router_segment.get(
   '',

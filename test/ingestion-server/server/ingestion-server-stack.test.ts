@@ -597,6 +597,7 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
     'AppIds',
     'ClickStreamSDK',
     'WorkerStopTimeout',
+    'AuthenticationSecretArn',
   ];
 
   console.log('');
@@ -682,6 +683,7 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
     'DomainName',
     'AppIds',
     'ClickStreamSDK',
+    'AuthenticationSecretArn',
     'WorkerStopTimeout',
   ];
 
@@ -773,6 +775,7 @@ test('Check parameters for S3 nested stack - has minimum parameters', () => {
     'DomainName',
     'AppIds',
     'ClickStreamSDK',
+    'AuthenticationSecretArn',
     'WorkerStopTimeout',
   ];
 
@@ -1106,6 +1109,20 @@ test('Each of kinesis nested templates has Kinesis::Stream', () => {
   }
 });
 
+test('Each of kinesis nested templates has AWS::Kinesis::Stream with correct properties', () => {
+  if (kinesisStack.kinesisNestedStacks) {
+    [
+      kinesisStack.kinesisNestedStacks.onDemandStack,
+      kinesisStack.kinesisNestedStacks.provisionedStack,
+    ]
+      .map((s) => Template.fromStack(s))
+      .forEach((t) => {
+        t.hasResource('AWS::Kinesis::Stream', {
+          DeletionPolicy: 'Delete',
+        });
+      });
+  }
+});
 
 test('Lambda has POWERTOOLS ENV set', () => {
   if (kinesisStack.kinesisNestedStacks) {

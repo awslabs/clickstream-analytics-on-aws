@@ -469,7 +469,9 @@
       "selectUserGroup": "请选择用户分群组",
       "segmentDescPlaceholder": "提供简短描述",
       "filterByTimeRange": "按日期和时间范围过滤",
-      "appTimezone": "应用程序使用时区"
+      "appTimezone": "应用程序使用时区",
+      "importSegmentTitle": "导入分群",
+      "importSegmentDesc": "自定义分群，并手动导入分群用户"
     },
     "details": {
       "title": "分群详细信息",
@@ -492,7 +494,8 @@
       "export": "导出",
       "segmentUserSample": "用户取样",
       "segmentUserSampleDesc": "从最近一次分群刷新结果中取样的用户",
-      "noSampleData": "无可用样例数据"
+      "noSampleData": "无可用样例数据",
+      "importedSegment": "导入分群"
     },
     "valid": {
       "nameEmptyError": "请输入分群名称。",
