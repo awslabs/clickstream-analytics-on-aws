@@ -228,7 +228,7 @@ export class ProjectServ {
       }
       const principals = await getClickstreamUserArn(
         SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
-        pipeline.reporting?.quickSight?.user ?? '',
+        pipeline.reporting?.quickSight?.user,
       );
       const embed = await generateEmbedUrlForRegisteredUser(
         pipeline.region,
@@ -310,7 +310,7 @@ export class ProjectServ {
       }
       const principals = await getClickstreamUserArn(
         SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
-        pipeline.reporting?.quickSight?.user ?? '',
+        pipeline.reporting?.quickSight?.user,
       );
       const embed = await generateEmbedUrlForRegisteredUser(
         pipeline.region,

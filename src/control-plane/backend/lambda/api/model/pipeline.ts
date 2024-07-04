@@ -789,7 +789,7 @@ export class CPipeline {
       await registerClickstreamUser();
       const quickSightUser = await getClickstreamUserArn(
         SolutionVersion.Of(this.pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
-        this.pipeline.reporting.quickSight?.user ?? '',
+        this.pipeline.reporting.quickSight?.user,
       );
       this.resources = {
         ...this.resources,
