@@ -25,7 +25,7 @@ import {
   SpaceBetween,
   Toggle,
 } from '@cloudscape-design/components';
-import { embedRealtimeUrl, getPipelineDetailByProjectId } from 'apis/analytics';
+import { embedRealtimeUrl, getPipelineDetailByProjectId, realtimeDryRun } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
@@ -43,6 +43,7 @@ const AnalyticsRealtime: React.FC = () => {
 
   const [checked, setChecked] = React.useState(false);
   const [loadingData, setLoadingData] = useState(false);
+  const [loadingDruRun, setLoadingDryRun] = useState(false);
   const [loadingFrameData, setLoadingFrameData] = useState(false);
   const [enableStreamModule, setEnableStreamModule] = useState(false);
   const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
@@ -58,7 +59,6 @@ const AnalyticsRealtime: React.FC = () => {
         defaultStr(projectId),
         defaultStr(appId),
         window.location.origin,
-        checked
       );
       if (success && data.EmbedUrl) {
         setDashboardEmbedUrl(data.EmbedUrl);
@@ -69,6 +69,24 @@ const AnalyticsRealtime: React.FC = () => {
     }
     setLoadingFrameData(false);
   };
+
+  const getRealtimeDryRun = async (checked) => {
+    setLoadingDryRun(true);
+    try {
+      const { success }: ApiResponse<any> = await realtimeDryRun(
+        defaultStr(projectId),
+        defaultStr(appId),
+        checked
+      );
+      if (success) {
+        setLoadingDryRun(false);
+        setChecked(checked);
+      }
+    } catch (error) {
+      setDashboardEmbedUrl('');
+    }
+    setLoadingDryRun(false);
+  }
 
   const loadPipeline = async () => {
     setLoadingData(true);
@@ -181,8 +199,9 @@ const AnalyticsRealtime: React.FC = () => {
                       <ColumnLayout columns={2}>
                         <div>
                           <Toggle
+                            disabled={loadingDruRun}
                             onChange={({ detail }) =>
-                              setChecked(detail.checked)
+                              getRealtimeDryRun(detail.checked)
                             }
                             checked={checked}
                           >

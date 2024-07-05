@@ -336,10 +336,9 @@ export class ProjectServ {
     }
   }
 
-  public async getRealtime(req: any, res: any, next: any) {
+  public async getRealtimeDryRun(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.params;
-      const { allowedDomain } = req.query;
       const enable = req.query.enable === 'true';
       const pipeline = await this.getPipelineByProjectId(projectId);
       if (!pipeline) {
@@ -352,67 +351,100 @@ export class ProjectServ {
           .status(400)
           .json(new ApiFail('The latest pipeline not enable reporting.'));
       }
-
-      if (pipeline.streaming?.appIdRealtimeList?.includes(appId) !== enable) {
-        const flinkAppArn = getStackOutputFromPipelineStatus(
-          pipeline.stackDetails ?? pipeline.status?.stackDetails,
-          PipelineStackType.STREAMING,
-          OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
-        );
-        const flinkAppName = flinkAppArn?.split('/').pop();
-        if (!flinkAppName) {
-          return res
-            .status(404)
-            .json(new ApiFail('The flink application not found.'));
-        }
-        // check flink application status
-        const flinkApplication = await describeApplication(
-          pipeline.region,
-          flinkAppName,
-        );
-        if (
-          !flinkApplication ||
-          (flinkApplication.ApplicationDetail?.ApplicationStatus !==
-            ApplicationStatus.READY &&
-            flinkApplication.ApplicationDetail?.ApplicationStatus !==
-              ApplicationStatus.RUNNING)
-        ) {
-          return res
-            .status(400)
-            .json(new ApiFail('The flink application status not allow update.'));
-        }
-
-        const streamEnableAppIds = getStreamEnableAppIdsFromPipeline(
-          pipeline.streaming?.appIdStreamList ?? [],
-          appId,
-          enable,
-        );
-        const streamingSinkKinesisConfig =
-        await this.getStreamingSinkKinesisConfig(pipeline, streamEnableAppIds);
-        logger.debug(
-          `streamingSinkKinesisConfig: ${JSON.stringify(
-            streamingSinkKinesisConfig,
-          )}`,
-        );
-        const updateRes = await updateFlinkApplication(
-          pipeline.region,
-          flinkAppName,
-          flinkApplication,
-          streamEnableAppIds,
-          streamingSinkKinesisConfig,
-        );
-        if (!updateRes) {
-          return res
-            .status(500)
-            .json(new ApiFail('Failed to update Flink application.'));
-        }
+      if (!pipeline.streaming?.appIdStreamList?.includes(appId)) {
+        return res
+          .status(400)
+          .json(new ApiFail('The appId not allow to enable realtime.'));
+      }
+      const flinkAppArn = getStackOutputFromPipelineStatus(
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
+        PipelineStackType.STREAMING,
+        OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
+      );
+      const flinkAppName = flinkAppArn?.split('/').pop();
+      if (!flinkAppName) {
+        return res
+          .status(404)
+          .json(new ApiFail('The flink application not found.'));
+      }
+      // check flink application status
+      const flinkApplication = await describeApplication(
+        pipeline.region,
+        flinkAppName,
+      );
+      if (
+        !flinkApplication ||
+        (flinkApplication.ApplicationDetail?.ApplicationStatus !==
+          ApplicationStatus.READY &&
+          flinkApplication.ApplicationDetail?.ApplicationStatus !==
+            ApplicationStatus.RUNNING)
+      ) {
+        return res
+          .status(400)
+          .json(new ApiFail('The flink application status not allow update, please try again later.'));
       }
 
-      const embed = await this._generateRealtimeEmbedUrl(
-        pipeline,
+      const streamEnableAppIds = getStreamEnableAppIdsFromPipeline(
+        pipeline.streaming?.appIdRealtimeList ?? [],
         appId,
         enable,
+      );
+      const streamingSinkKinesisConfig =
+      await this.getStreamingSinkKinesisConfig(pipeline, streamEnableAppIds);
+      logger.debug(
+        `streamingSinkKinesisConfig: ${JSON.stringify(
+          streamingSinkKinesisConfig,
+        )}`,
+      );
+      const updateRes = await updateFlinkApplication(
+        pipeline.region,
+        flinkAppName,
+        flinkApplication,
+        streamEnableAppIds,
+        streamingSinkKinesisConfig,
+      );
+      if (!updateRes) {
+        return res
+          .status(500)
+          .json(new ApiFail('Failed to update Flink application.'));
+      }
+      const pipe = new CPipeline(pipeline);
+      await pipe.realtime(enable, appId);
+      return res.json(
+        new ApiSuccess('OK'),
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async getRealtime(req: any, res: any, next: any) {
+    try {
+      const { projectId, appId } = req.params;
+      const { allowedDomain } = req.query;
+      const pipeline = await this.getPipelineByProjectId(projectId);
+      if (!pipeline) {
+        return res
+          .status(404)
+          .json(new ApiFail('The latest pipeline not found.'));
+      }
+
+      const principals = await getClickstreamUserArn(
+        SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
+        pipeline.reporting?.quickSight?.user ?? '',
+      );
+      const presetRealtimeDashboard = this.getPresetAppDashboard(
+        pipeline,
+        appId,
+        true,
+      );
+      const embed = await generateEmbedUrlForRegisteredUser(
+        pipeline.region,
+        principals.publishUserArn,
         allowedDomain,
+        {
+          initialPath: `/dashboards/${presetRealtimeDashboard?.id}`,
+        },
       );
       return res.json(
         new ApiSuccess(embed),
@@ -420,35 +452,6 @@ export class ProjectServ {
     } catch (error) {
       next(error);
     }
-  }
-
-  private async _generateRealtimeEmbedUrl(pipeline: IPipeline, appId: string, enable: boolean, allowedDomain: string) {
-    const pipe = new CPipeline(pipeline);
-    if (!enable) {
-      await pipe.realtime(false, appId);
-      return {
-        EmbedUrl: '',
-      };
-    }
-    await pipe.realtime(true, appId);
-    const principals = await getClickstreamUserArn(
-      SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
-      pipeline.reporting?.quickSight?.user ?? '',
-    );
-    const presetRealtimeDashboard = this.getPresetAppDashboard(
-      pipeline,
-      appId,
-      true,
-    );
-    const embed = await generateEmbedUrlForRegisteredUser(
-      pipeline.region,
-      principals.publishUserArn,
-      allowedDomain,
-      {
-        initialPath: `/dashboards/${presetRealtimeDashboard?.id}`,
-      },
-    );
-    return embed;
   }
 
   private async getStreamingSinkKinesisConfig(

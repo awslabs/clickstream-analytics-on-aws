@@ -69,6 +69,11 @@ router_project.get(
     return projectServ.getAnalyzes(req, res, next);
   });
 
+router_project.get(
+  '/:projectId/:appId/realtimeDryRun',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return projectServ.getRealtimeDryRun(req, res, next);
+  });
 
 router_project.get(
   '/:projectId/:appId/realtime',

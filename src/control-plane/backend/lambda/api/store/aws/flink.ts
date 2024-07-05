@@ -18,6 +18,7 @@ import {
   DescribeApplicationCommandOutput,
   KinesisAnalyticsV2,
 } from '@aws-sdk/client-kinesis-analytics-v2';
+import { isEmpty } from 'lodash';
 import { logger } from '../../common/powertools';
 
 export const describeApplication = async (
@@ -47,34 +48,35 @@ export const updateFlinkApplication = async (
   streamingSinkKinesisConfig: any[],
 ) => {
   try {
-    if (
-      (!streamEnableAppIds || streamEnableAppIds.length === 0) &&
-      application.ApplicationDetail?.ApplicationStatus ===
-        ApplicationStatus.RUNNING
-    ) {
-      // Disable all the streams, stop flink application
-      logger.debug(
-        'Disabling all the streams and stopping the Flink application',
+    if (isEmpty(streamEnableAppIds)) {
+      if (application.ApplicationDetail?.ApplicationStatus === ApplicationStatus.RUNNING) {
+        // Disable all the streams, stop flink application
+        logger.debug(
+          'Disabling all the streams and stopping the Flink application',
+        );
+        await stopFlinkApplication(region, applicationName);
+        return true;
+      }
+      // Update flink application
+      await updateFlinkApplicationConfig(
+        region,
+        applicationName,
+        application,
+        streamingSinkKinesisConfig,
       );
-      await stopFlinkApplication(region, applicationName);
-      return true;
-    }
-    // Update flink application
-    await updateFlinkApplicationConfig(
-      region,
-      applicationName,
-      application,
-      streamingSinkKinesisConfig,
-    );
-    if (
-      streamEnableAppIds &&
-      streamEnableAppIds.length > 0 &&
-      application.ApplicationDetail?.ApplicationStatus ===
-        ApplicationStatus.READY
-    ) {
-      // Start flink application
-      logger.debug('Starting the Flink application');
-      await startFlinkApplication(region, applicationName);
+    } else {
+      // Update flink application
+      await updateFlinkApplicationConfig(
+        region,
+        applicationName,
+        application,
+        streamingSinkKinesisConfig,
+      );
+      if (application.ApplicationDetail?.ApplicationStatus === ApplicationStatus.READY) {
+        // Start flink application
+        logger.debug('Starting the Flink application');
+        await startFlinkApplication(region, applicationName);
+      }
     }
     return true;
   } catch (error) {
