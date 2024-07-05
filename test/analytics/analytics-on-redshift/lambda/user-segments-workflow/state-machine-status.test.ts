@@ -33,13 +33,10 @@ describe('User segments workflow segment-job-status lambda tests', () => {
 
   beforeEach(() => {
     event = {
-      input: {
-        appId: 'app-id',
-        segmentId: 'segment-id',
-        jobRunId: 'job-run-id',
-        scheduleIsExpired: false,
-      },
-      stateMachineArn: 'arn:aws:states:us-east-1:111122223333:workflow/abc',
+      appId: 'app-id',
+      segmentId: 'segment-id',
+      jobRunId: 'job-run-id',
+      scheduleIsExpired: false,
     };
   });
 
