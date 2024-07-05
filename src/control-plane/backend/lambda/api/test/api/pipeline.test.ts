@@ -85,6 +85,7 @@ import {
   MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
   stackDetailsWithOutputs,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_V2_INGESTION_WORKFLOW,
 } from './pipeline-mock';
 import { expectParameter } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, LEVEL1, LEVEL2, LEVEL3, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
@@ -3729,7 +3730,7 @@ describe('Pipeline test', () => {
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main' &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'Admin/fakeUser' &&
         reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser' &&
-        ingestionInput.M.TemplateURL.S === 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+        ingestionInput.M.TemplateURL.S === 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kinesis-stack.template.json',
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -4070,7 +4071,7 @@ describe('Pipeline test', () => {
       subnetsIsolated: true,
       update: true,
       updatePipeline: {
-        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_V2_INGESTION_WORKFLOW,
         timezone: [
           {
             appId: `${MOCK_APP_ID}_1`,
@@ -4132,7 +4133,7 @@ describe('Pipeline test', () => {
       Tags: getDefaultTags(MOCK_PROJECT_ID),
     });
   });
-  it('Upgrade old pipeline', async () => {
+  it('Upgrade old pipeline that use v1 ingestion server stack', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);

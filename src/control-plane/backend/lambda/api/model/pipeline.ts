@@ -86,7 +86,7 @@ import {
   isEmpty,
 } from '../common/utils';
 import { StackManager } from '../service/stack';
-import { generateWorkflow } from '../service/stack-excution';
+import { generateWorkflow, getIngestionStackTemplateUrl } from '../service/stack-excution';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
@@ -543,7 +543,8 @@ export class CPipeline {
     if (!oldPipeline.templateVersion) {
       throw new Error('Old pipeline template version is empty.');
     }
-    if (SolutionVersion.Of(oldPipeline.templateVersion).greaterThanOrEqualTo(SolutionVersion.V_1_2_0)) {
+    const ingestionStackTemplateUrl = getIngestionStackTemplateUrl(oldPipeline.workflow?.Workflow!, oldPipeline);
+    if (ingestionStackTemplateUrl?.includes('/ingestion-server-v2-stack.template.json')) {
       return;
     }
     const ingestionTemplateKey = `${PipelineStackType.INGESTION}_${oldPipeline.ingestionServer.sinkType}`;

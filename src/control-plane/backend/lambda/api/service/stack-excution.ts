@@ -694,6 +694,27 @@ function getWorkflowSates(state: WorkflowState): any[] {
   return states;
 }
 
+export function getIngestionStackTemplateUrl(state: WorkflowState, pipeline: IPipeline): string | undefined {
+  let templateUrl: string | undefined;
+  if (state.Type === WorkflowStateType.PARALLEL) {
+    for (let branch of state.Branches as WorkflowParallelBranch[]) {
+      for (let key of Object.keys(branch.States)) {
+        templateUrl = getIngestionStackTemplateUrl(branch.States[key], pipeline);
+        if (templateUrl) {
+          return templateUrl;
+        }
+      }
+    }
+  } else if (state.Type === WorkflowStateType.STACK) {
+    if (state.Data?.Input.StackName ===
+      getStackName(pipeline.pipelineId, PipelineStackType.INGESTION, pipeline.ingestionServer.sinkType)
+    ) {
+      templateUrl = state.Data.Input.TemplateURL;
+    }
+  }
+  return templateUrl;
+}
+
 export function removeParameters(base: Parameter[], attach: Parameter[]) {
   const parameters = cloneDeep(base);
   const keys = parameters.map(p => p.ParameterKey);
