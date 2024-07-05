@@ -90,14 +90,18 @@ export class UserSegmentsWorkflow extends Construct {
     props.clickstreamMetadataDdbTable.grantReadWriteData(segmentJobInitFunc);
 
     // Define task for checking state machine status
-    const stateMachineStatusFunc = this.constructNodejsFunction('state-machine-status', [], {
+    const stateMachineStatusFunc = this.constructNodejsFunction('state-machine-status', [
+      new PolicyStatement({
+        actions: ['dynamodb:Query'],
+        resources: [`${props.clickstreamMetadataDdbTable.tableArn}/index/prefix-time-index`],
+      }),
+    ], {
       CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbTable.tableArn,
     });
     const stateMachineStatusTask = new LambdaInvoke(this, 'WorkflowTask-StateMachineStatus', {
       lambdaFunction: stateMachineStatusFunc,
       outputPath: '$.Payload',
     });
-    props.clickstreamMetadataDdbTable.grantReadData(stateMachineStatusFunc);
 
     // Define task for segment query execution
     const executeSegmentQueryFunc = this.constructNodejsFunction('execute-segment-query', [], {

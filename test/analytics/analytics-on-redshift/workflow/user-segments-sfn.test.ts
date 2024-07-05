@@ -188,25 +188,19 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
               Resource: '*',
             },
             {
-              Action: [
-                'dynamodb:BatchGetItem',
-                'dynamodb:GetRecords',
-                'dynamodb:GetShardIterator',
-                'dynamodb:Query',
-                'dynamodb:GetItem',
-                'dynamodb:Scan',
-                'dynamodb:ConditionCheckItem',
-                'dynamodb:DescribeTable',
-              ],
+              Action: 'dynamodb:Query',
               Effect: 'Allow',
-              Resource: [
-                {
-                  Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
-                },
-                {
-                  Ref: 'AWS::NoValue',
-                },
-              ],
+              Resource: {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
+                    },
+                    '/index/prefix-time-index',
+                  ],
+                ],
+              },
             },
           ],
           Version: '2012-10-17',
