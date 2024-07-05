@@ -61,7 +61,10 @@
       "minute1": "1 分钟",
       "minute5": "5 分钟",
       "minute10": "10 分钟"
-    }
+    },
+    "costTipTitle": "费用提示",
+    "costTipContent": "请注意，开启实时报表后将产生额外费用，具体见文档: ",
+    "costTipLink": "费用"
   },
   "analyzes": {
     "title": "分析",

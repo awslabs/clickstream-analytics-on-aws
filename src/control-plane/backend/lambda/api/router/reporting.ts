@@ -103,6 +103,19 @@ router_reporting.post(
     return reportingServ.cleanQuickSightResources(req, res, next);
   });
 
+router_reporting.get(
+  '/:projectId/:appId/realtimeDryRun',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return reportingServ.getRealtimeDryRun(req, res, next);
+  });
+
+router_reporting.get(
+  '/:projectId/:appId/realtime',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return reportingServ.getRealtime(req, res, next);
+  });
+
+
 export {
   router_reporting,
 };

@@ -15,15 +15,12 @@ import {
   DEFAULT_DASHBOARD_NAME,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
   OUTPUT_REPORT_DASHBOARDS_SUFFIX,
-  OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
   QUICKSIGHT_RESOURCE_NAME_PREFIX,
-  SINK_STREAM_NAME_PREFIX,
   SolutionVersion,
   aws_sdk_client_common_config,
 } from '@aws/clickstream-base-lib';
-import { ApplicationStatus } from '@aws-sdk/client-kinesis-analytics-v2';
 import {
   QuickSight,
   ResourceNotFoundException,
@@ -31,8 +28,6 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import {
   FULL_SOLUTION_VERSION,
-  awsAccountId,
-  awsPartition,
 } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -40,9 +35,7 @@ import { ApiFail, ApiSuccess } from '../common/types';
 import {
   getPipelineStatusType,
   getReportingDashboardsUrl,
-  getStackName,
   getStackOutputFromPipelineStatus,
-  getStreamEnableAppIdsFromPipeline,
   isEmpty,
   isFinallyPipelineStatus,
   paginateData,
@@ -51,11 +44,6 @@ import {
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { describeStack } from '../store/aws/cloudformation';
-import {
-  describeApplication,
-  updateFlinkApplication,
-} from '../store/aws/flink';
 import {
   checkFolder,
   createPublishDashboard,
@@ -333,156 +321,6 @@ export class ProjectServ {
       return res.json(new ApiSuccess(embed));
     } catch (error) {
       next(error);
-    }
-  }
-
-  public async getRealtimeDryRun(req: any, res: any, next: any) {
-    try {
-      const { projectId, appId } = req.params;
-      const enable = req.query.enable === 'true';
-      const pipeline = await this.getPipelineByProjectId(projectId);
-      if (!pipeline) {
-        return res
-          .status(404)
-          .json(new ApiFail('The latest pipeline not found.'));
-      }
-      if (!pipeline.reporting?.quickSight?.accountName) {
-        return res
-          .status(400)
-          .json(new ApiFail('The latest pipeline not enable reporting.'));
-      }
-      if (!pipeline.streaming?.appIdStreamList?.includes(appId)) {
-        return res
-          .status(400)
-          .json(new ApiFail('The appId not allow to enable realtime.'));
-      }
-      const flinkAppArn = getStackOutputFromPipelineStatus(
-        pipeline.stackDetails ?? pipeline.status?.stackDetails,
-        PipelineStackType.STREAMING,
-        OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
-      );
-      const flinkAppName = flinkAppArn?.split('/').pop();
-      if (!flinkAppName) {
-        return res
-          .status(404)
-          .json(new ApiFail('The flink application not found.'));
-      }
-      // check flink application status
-      const flinkApplication = await describeApplication(
-        pipeline.region,
-        flinkAppName,
-      );
-      if (
-        !flinkApplication ||
-        (flinkApplication.ApplicationDetail?.ApplicationStatus !==
-          ApplicationStatus.READY &&
-          flinkApplication.ApplicationDetail?.ApplicationStatus !==
-            ApplicationStatus.RUNNING)
-      ) {
-        return res
-          .status(400)
-          .json(new ApiFail('The flink application status not allow update, please try again later.'));
-      }
-
-      const streamEnableAppIds = getStreamEnableAppIdsFromPipeline(
-        pipeline.streaming?.appIdRealtimeList ?? [],
-        appId,
-        enable,
-      );
-      const streamingSinkKinesisConfig =
-      await this.getStreamingSinkKinesisConfig(pipeline, streamEnableAppIds);
-      logger.debug(
-        `streamingSinkKinesisConfig: ${JSON.stringify(
-          streamingSinkKinesisConfig,
-        )}`,
-      );
-      const updateRes = await updateFlinkApplication(
-        pipeline.region,
-        flinkAppName,
-        flinkApplication,
-        streamEnableAppIds,
-        streamingSinkKinesisConfig,
-      );
-      if (!updateRes) {
-        return res
-          .status(500)
-          .json(new ApiFail('Failed to update Flink application.'));
-      }
-      const pipe = new CPipeline(pipeline);
-      await pipe.realtime(enable, appId);
-      return res.json(
-        new ApiSuccess('OK'),
-      );
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  public async getRealtime(req: any, res: any, next: any) {
-    try {
-      const { projectId, appId } = req.params;
-      const { allowedDomain } = req.query;
-      const pipeline = await this.getPipelineByProjectId(projectId);
-      if (!pipeline) {
-        return res
-          .status(404)
-          .json(new ApiFail('The latest pipeline not found.'));
-      }
-
-      const principals = await getClickstreamUserArn(
-        SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
-        pipeline.reporting?.quickSight?.user ?? '',
-      );
-      const presetRealtimeDashboard = this.getPresetAppDashboard(
-        pipeline,
-        appId,
-        true,
-      );
-      const embed = await generateEmbedUrlForRegisteredUser(
-        pipeline.region,
-        principals.publishUserArn,
-        allowedDomain,
-        {
-          initialPath: `/dashboards/${presetRealtimeDashboard?.id}`,
-        },
-      );
-      return res.json(
-        new ApiSuccess(embed),
-      );
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  private async getStreamingSinkKinesisConfig(
-    pipeline: IPipeline,
-    streamEnableAppIds: string[],
-  ) {
-    const enableConfigs: any[] = [];
-    try {
-      const streamingStack = await describeStack(
-        pipeline.region,
-        getStackName(
-          pipeline.pipelineId,
-          PipelineStackType.STREAMING,
-          pipeline.ingestionServer.sinkType,
-        ),
-      );
-      if (!streamingStack) {
-        return enableConfigs;
-      }
-      const streamingStackIdPrefix =
-        streamingStack?.StackId?.split('/')[2].split('-')[0];
-      for (let appId of streamEnableAppIds) {
-        enableConfigs.push({
-          appId: appId,
-          streamArn: `arn:${awsPartition}:kinesis:${pipeline.region}:${awsAccountId}:stream/${SINK_STREAM_NAME_PREFIX}${pipeline.projectId}_${appId}_${streamingStackIdPrefix}`,
-        });
-      }
-      return enableConfigs;
-    } catch (error) {
-      logger.error('Failed to parse sink kinesis');
-      return enableConfigs;
     }
   }
 

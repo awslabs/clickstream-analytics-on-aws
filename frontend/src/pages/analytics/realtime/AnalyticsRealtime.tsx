@@ -25,18 +25,23 @@ import {
   SpaceBetween,
   Toggle,
 } from '@cloudscape-design/components';
-import { embedRealtimeUrl, getPipelineDetailByProjectId, realtimeDryRun } from 'apis/analytics';
+import {
+  embedRealtimeUrl,
+  getPipelineDetailByProjectId,
+  realtimeDryRun,
+} from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { buildDocumentLink } from 'ts/url';
 import { defaultStr } from 'ts/utils';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 
 const AnalyticsRealtime: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { projectId, appId } = useParams();
 
   let intervalId: any = 0;
@@ -45,6 +50,7 @@ const AnalyticsRealtime: React.FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [loadingDruRun, setLoadingDryRun] = useState(false);
   const [loadingFrameData, setLoadingFrameData] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(true);
   const [enableStreamModule, setEnableStreamModule] = useState(false);
   const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
   const [autoRefreshText, setAutoRefreshText] = useState(
@@ -58,7 +64,7 @@ const AnalyticsRealtime: React.FC = () => {
       const { success, data }: ApiResponse<any> = await embedRealtimeUrl(
         defaultStr(projectId),
         defaultStr(appId),
-        window.location.origin,
+        window.location.origin
       );
       if (success && data.EmbedUrl) {
         setDashboardEmbedUrl(data.EmbedUrl);
@@ -86,7 +92,7 @@ const AnalyticsRealtime: React.FC = () => {
       setDashboardEmbedUrl('');
     }
     setLoadingDryRun(false);
-  }
+  };
 
   const loadPipeline = async () => {
     setLoadingData(true);
@@ -196,105 +202,137 @@ const AnalyticsRealtime: React.FC = () => {
                 ) : (
                   <>
                     {enableStreamModule ? (
-                      <ColumnLayout columns={2}>
-                        <div>
-                          <Toggle
-                            disabled={loadingDruRun}
-                            onChange={({ detail }) =>
-                              getRealtimeDryRun(detail.checked)
-                            }
-                            checked={checked}
-                          >
-                            {checked
-                              ? t('analytics:labels.realtimeStarted')
-                              : t('analytics:labels.realtimeStopped')}
-                          </Toggle>
-                        </div>
-                        <div className="cs-analytics-realtime-auto-refresh">
-                          <Button
-                            iconName="refresh"
-                            variant="icon"
-                            disabled={!checked}
-                            onClick={() => getRealtime()}
-                          />
-                          <ButtonDropdown
-                            disabled={!checked}
-                            items={[
-                              {
-                                text: defaultStr(
-                                  t('analytics:realtime.autoRefresh.close')
-                                ),
-                                id: 'close',
-                              },
-                              {
-                                text: defaultStr(
-                                  t('analytics:realtime.autoRefresh.seconds15')
-                                ),
-                                id: 'seconds15',
-                              },
-                              {
-                                text: defaultStr(
-                                  t('analytics:realtime.autoRefresh.seconds30')
-                                ),
-                                id: 'seconds30',
-                              },
-                              {
-                                text: defaultStr(
-                                  t('analytics:realtime.autoRefresh.minute1')
-                                ),
-                                id: 'minute1',
-                              },
-                              {
-                                text: defaultStr(
-                                  t('analytics:realtime.autoRefresh.minute5')
-                                ),
-                                id: 'minute5',
-                              },
-                              {
-                                text: defaultStr(
-                                  t('analytics:realtime.autoRefresh.minute10')
-                                ),
-                                id: 'minute10',
-                              },
-                            ]}
-                            onItemClick={(e) => {
-                              if (e.detail.id === 'close') {
-                                setAutoRefreshText(
-                                  t('analytics:realtime.autoRefresh.title')
-                                );
-                                setAutoRefreshInterval(0);
-                              } else if (e.detail.id === 'seconds15') {
-                                setAutoRefreshText(
-                                  t('analytics:realtime.autoRefresh.seconds15')
-                                );
-                                setAutoRefreshInterval(15000);
-                              } else if (e.detail.id === 'seconds30') {
-                                setAutoRefreshText(
-                                  t('analytics:realtime.autoRefresh.seconds30')
-                                );
-                                setAutoRefreshInterval(30000);
-                              } else if (e.detail.id === 'minute1') {
-                                setAutoRefreshText(
-                                  t('analytics:realtime.autoRefresh.minute1')
-                                );
-                                setAutoRefreshInterval(60000);
-                              } else if (e.detail.id === 'minute5') {
-                                setAutoRefreshText(
-                                  t('analytics:realtime.autoRefresh.minute5')
-                                );
-                                setAutoRefreshInterval(300000);
-                              } else if (e.detail.id === 'minute10') {
-                                setAutoRefreshText(
-                                  t('analytics:realtime.autoRefresh.minute10')
-                                );
-                                setAutoRefreshInterval(600000);
+                      <div>
+                        <ColumnLayout columns={2}>
+                          <div>
+                            <Toggle
+                              disabled={loadingDruRun}
+                              onChange={({ detail }) =>
+                                getRealtimeDryRun(detail.checked)
                               }
-                            }}
-                          >
-                            {autoRefreshText}
-                          </ButtonDropdown>
-                        </div>
-                      </ColumnLayout>
+                              checked={checked}
+                            >
+                              {checked
+                                ? t('analytics:labels.realtimeStarted')
+                                : t('analytics:labels.realtimeStopped')}
+                            </Toggle>
+                          </div>
+                          <div className="cs-analytics-realtime-auto-refresh">
+                            <Button
+                              iconName="refresh"
+                              variant="icon"
+                              disabled={!checked}
+                              onClick={() => getRealtime()}
+                            />
+                            <ButtonDropdown
+                              disabled={!checked}
+                              items={[
+                                {
+                                  text: defaultStr(
+                                    t('analytics:realtime.autoRefresh.close')
+                                  ),
+                                  id: 'close',
+                                },
+                                {
+                                  text: defaultStr(
+                                    t(
+                                      'analytics:realtime.autoRefresh.seconds15'
+                                    )
+                                  ),
+                                  id: 'seconds15',
+                                },
+                                {
+                                  text: defaultStr(
+                                    t(
+                                      'analytics:realtime.autoRefresh.seconds30'
+                                    )
+                                  ),
+                                  id: 'seconds30',
+                                },
+                                {
+                                  text: defaultStr(
+                                    t('analytics:realtime.autoRefresh.minute1')
+                                  ),
+                                  id: 'minute1',
+                                },
+                                {
+                                  text: defaultStr(
+                                    t('analytics:realtime.autoRefresh.minute5')
+                                  ),
+                                  id: 'minute5',
+                                },
+                                {
+                                  text: defaultStr(
+                                    t('analytics:realtime.autoRefresh.minute10')
+                                  ),
+                                  id: 'minute10',
+                                },
+                              ]}
+                              onItemClick={(e) => {
+                                if (e.detail.id === 'close') {
+                                  setAutoRefreshText(
+                                    t('analytics:realtime.autoRefresh.title')
+                                  );
+                                  setAutoRefreshInterval(0);
+                                } else if (e.detail.id === 'seconds15') {
+                                  setAutoRefreshText(
+                                    t(
+                                      'analytics:realtime.autoRefresh.seconds15'
+                                    )
+                                  );
+                                  setAutoRefreshInterval(15000);
+                                } else if (e.detail.id === 'seconds30') {
+                                  setAutoRefreshText(
+                                    t(
+                                      'analytics:realtime.autoRefresh.seconds30'
+                                    )
+                                  );
+                                  setAutoRefreshInterval(30000);
+                                } else if (e.detail.id === 'minute1') {
+                                  setAutoRefreshText(
+                                    t('analytics:realtime.autoRefresh.minute1')
+                                  );
+                                  setAutoRefreshInterval(60000);
+                                } else if (e.detail.id === 'minute5') {
+                                  setAutoRefreshText(
+                                    t('analytics:realtime.autoRefresh.minute5')
+                                  );
+                                  setAutoRefreshInterval(300000);
+                                } else if (e.detail.id === 'minute10') {
+                                  setAutoRefreshText(
+                                    t('analytics:realtime.autoRefresh.minute10')
+                                  );
+                                  setAutoRefreshInterval(600000);
+                                }
+                              }}
+                            >
+                              {autoRefreshText}
+                            </ButtonDropdown>
+                          </div>
+                        </ColumnLayout>
+                        {alertVisible && (
+                          <div className="cs-analytics-realtime-tips">
+                            <Alert
+                              dismissible
+                              statusIconAriaLabel="Info"
+                              header={t('analytics:realtime.costTipTitle')}
+                              onDismiss={() => setAlertVisible(false)}
+                            >
+                              {t('analytics:realtime.costTipContent')}
+                              <Link
+                                href={buildDocumentLink(
+                                  i18n.language,
+                                  '',
+                                  '/plan-deployment/cost'
+                                )}
+                                external
+                              >
+                                {t('analytics:realtime.costTipLink')}
+                              </Link>
+                            </Alert>
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <Alert
                         statusIconAriaLabel="Info"

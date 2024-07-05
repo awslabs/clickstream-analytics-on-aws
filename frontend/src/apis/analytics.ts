@@ -284,7 +284,7 @@ export const realtimeDryRun = async (
 ) => {
   const result: any = await apiRequest(
     'get',
-    `project/${projectId}/${appId}/realtimeDryRun?enable=${enable}`
+    `reporting/${projectId}/${appId}/realtimeDryRun?enable=${enable}`
   );
   return result;
 };
@@ -292,11 +292,11 @@ export const realtimeDryRun = async (
 export const embedRealtimeUrl = async (
   projectId: string,
   appId: string,
-  allowedDomain: string,
+  allowedDomain: string
 ) => {
   const result: any = await apiRequest(
     'get',
-    `project/${projectId}/${appId}/realtime?allowedDomain=${allowedDomain}`
+    `reporting/${projectId}/${appId}/realtime?allowedDomain=${allowedDomain}`
   );
   return result;
 };

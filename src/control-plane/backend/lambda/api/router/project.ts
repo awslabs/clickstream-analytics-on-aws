@@ -70,18 +70,6 @@ router_project.get(
   });
 
 router_project.get(
-  '/:projectId/:appId/realtimeDryRun',
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return projectServ.getRealtimeDryRun(req, res, next);
-  });
-
-router_project.get(
-  '/:projectId/:appId/realtime',
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return projectServ.getRealtime(req, res, next);
-  });
-
-router_project.get(
   '',
   validate([
     query().custom((value: any, { req }: any) => defaultPageValueValid(value, {
