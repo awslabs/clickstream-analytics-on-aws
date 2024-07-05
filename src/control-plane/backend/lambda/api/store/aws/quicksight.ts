@@ -43,7 +43,8 @@ const promisePool = pLimit(3);
 
 export const registerClickstreamUser = async () => {
   try {
-    if (awsRegion.startsWith('cn')) {
+    const accountSubscription = await describeClickstreamAccountSubscription();
+    if (accountSubscription?.authenticationType !== 'IDENTITY_POOL') {
       return;
     }
     const identityRegion = await sdkClient.QuickSightIdentityRegion();

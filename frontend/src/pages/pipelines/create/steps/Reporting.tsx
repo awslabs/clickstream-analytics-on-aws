@@ -259,7 +259,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                                   'finished'
                                 )}
                                 placeholder={defaultStr(
-                                  t('pipeline:create.quickSIghtPlaceholder')
+                                  t('pipeline:create.quickSightPlaceholder')
                                 )}
                                 selectedOption={
                                   pipelineInfo.selectedQuickSightUser
