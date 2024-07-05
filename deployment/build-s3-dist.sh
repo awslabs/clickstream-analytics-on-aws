@@ -168,6 +168,8 @@ update_dict() {
 
     sed -i'' -e 's/__SOLUTION_NAME__/'$SOLUTION_NAME'/g' src/control-plane/backend/lambda/api/config/dictionary.json
     sed -i'' -e 's/__DIST_OUTPUT_BUCKET__/'$TEMPLATE_OUTPUT_BUCKET'/g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's/__BUCKET_REGION__/'$TEMPLATE_OUTPUT_BUCKET_REGION'/g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's/__URL_SUFFIX__/'$AWS_URL_SUFFIX'/g' src/control-plane/backend/lambda/api/config/dictionary.json
     sed -i'' -e 's~__TARGET__~'$target'~g' src/control-plane/backend/lambda/api/config/dictionary.json
     sed -i'' -e 's~__PREFIX__~'$prefix'~g' src/control-plane/backend/lambda/api/config/dictionary.json
     sed -i'' -e 's/__SOLUTION_VERSION__/'$VERSION'/g' src/control-plane/backend/lambda/api/config/dictionary.json
@@ -189,6 +191,8 @@ solution_name="$2"
 export SOLUTION_NAME="$solution_name"
 export SOLUTION_TRADEMARKEDNAME="$solution_name"
 export VERSION="$3"
+export TEMPLATE_OUTPUT_BUCKET_REGION='us-east-1'
+export AWS_URL_SUFFIX='amazonaws.com'
 
 #------------------------------------------------------------------------------
 # INITIALIZATION
