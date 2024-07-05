@@ -3684,6 +3684,8 @@ describe('Workflow test', () => {
           dist_output_bucket: 'EXAMPLE-BUCKET',
           target: 'feature-rel/main',
           prefix: 'cn/',
+          bucket_region: 'cn-north-1',
+          url_suffix: 'amazonaws.com.cn',
           version: 'v1.0.0',
         },
       },
@@ -3693,7 +3695,7 @@ describe('Workflow test', () => {
     await pipeline.resourcesCheck();
     await generateWorkflow(pipeline.getPipeline(), pipeline.getResources()!);
     let templateURL = await pipeline.getTemplateUrl('Ingestion_s3');
-    expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/cn/ingestion-server-s3-stack.template.json');
+    expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com.cn/clickstream-branch-main/v1.0.0/cn/ingestion-server-s3-stack.template.json');
     templateURL = await pipeline.getTemplateUrl('Ingestion_no');
     expect(templateURL).toEqual(undefined);
   });
@@ -3711,6 +3713,8 @@ describe('Workflow test', () => {
           name: 'clickstream-branch-main',
           dist_output_bucket: 'EXAMPLE-BUCKET',
           target: 'feature-rel/main',
+          bucket_region: 'us-east-1',
+          url_suffix: 'amazonaws.com',
           prefix: 'default/',
           version: 'latest',
         },
@@ -3756,6 +3760,8 @@ describe('Workflow test', () => {
           name: 'clickstream-branch-main',
           dist_output_bucket: 'EXAMPLE-BUCKET',
           target: 'feature-rel/main',
+          bucket_region: 'us-east-1',
+          url_suffix: 'amazonaws.com',
           prefix: 'null',
           version: 'latest',
         },
@@ -3798,6 +3804,8 @@ describe('Workflow test', () => {
           dist_output_bucket: 'EXAMPLE-BUCKET',
           target: 'feature-rel/main',
           prefix: '',
+          bucket_region: 'us-east-1',
+          url_suffix: 'amazonaws.com',
           version: 'latest',
         },
       },
@@ -3819,6 +3827,8 @@ describe('Workflow test', () => {
         data: {
           name: 'clickstream-branch-main',
           dist_output_bucket: 'EXAMPLE-BUCKET',
+          bucket_region: 'us-east-1',
+          url_suffix: 'amazonaws.com',
           target: 'feature-rel/main',
           prefix: null,
           version: 'latest',
