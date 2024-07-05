@@ -47,6 +47,7 @@ import {
   dictionaryMock,
 } from './ddb-mock';
 import {
+  BASE_PIPELINE_ATTRIBUTES,
   KAFKA_INGESTION_PIPELINE,
   KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
@@ -377,6 +378,98 @@ describe('Workflow test', () => {
                             },
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
+                          Tags: Tags,
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-stack.template.json',
+                        },
+                      ),
+                    },
+                  },
+                ],
+                Next: LEVEL2,
+                Type: WorkflowStateType.PARALLEL,
+              },
+              [LEVEL2]: {
+                Branches: [],
+                Next: LEVEL3,
+                Type: WorkflowStateType.PARALLEL,
+              },
+              [LEVEL3]: {
+                Branches: [],
+                End: true,
+                Type: WorkflowStateType.PARALLEL,
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: WorkflowStateType.PARALLEL,
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+  it('Generate Workflow ingestion-server-s3-fargate with empty NotificationsTopicArn', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      noVpcEndpoint: true,
+    });
+    const pipeline: CPipeline = new CPipeline({
+      ...cloneDeep(S3_INGESTION_PIPELINE),
+      ingestionServer: {
+        ...S3_INGESTION_PIPELINE.ingestionServer,
+        ingestionType: IngestionType.Fargate,
+        loadBalancer: {
+          ...BASE_PIPELINE_ATTRIBUTES.ingestionServer.loadBalancer,
+          notificationsTopicArn: '',
+          authenticationSecretArn: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
+        },
+      },
+      templateVersion: FULL_SOLUTION_VERSION,
+    });
+    await pipeline.resourcesCheck();
+    const wf = await generateWorkflow(pipeline.getPipeline(), pipeline.getResources()!);
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
+              [LEVEL1]: {
+                Branches: [
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: replaceStackInputProps(MetricsStack,
+                        {
+                          Parameters: [
+                            ...BASE_METRICS_EMAILS_PARAMETERS,
+                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                          ],
+                          Tags: Tags,
+                        },
+                      ),
+                    },
+                  },
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: replaceStackInputProps(IngestionStack,
+                        {
+                          StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
+                          Parameters: removeParameters([
+                            ...INGESTION_S3_FARGATE_PARAMETERS,
+                            {
+                              ParameterKey: 'SinkType',
+                              ParameterValue: SINK_TYPE_MODE.SINK_TYPE_S3,
+                            },
+                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                          ],
+                          [{
+                            ParameterKey: 'NotificationsTopicArn',
+                          }],
+                          ),
                           Tags: Tags,
                           TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-stack.template.json',
                         },

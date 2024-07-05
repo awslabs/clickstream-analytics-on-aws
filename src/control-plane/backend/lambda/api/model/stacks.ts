@@ -281,7 +281,11 @@ export class CIngestionServerStack extends JSONObject {
 
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
-    return stack._pipeline?.ingestionServer.loadBalancer.notificationsTopicArn ?? '';
+    const notificationsTopicArn = stack._pipeline?.ingestionServer.loadBalancer.notificationsTopicArn;
+    if (isEmpty(notificationsTopicArn)) {
+      return undefined;
+    }
+    return notificationsTopicArn;
   })
     NotificationsTopicArn?: string;
 
