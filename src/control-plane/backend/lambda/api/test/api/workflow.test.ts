@@ -116,7 +116,6 @@ import {
   setTagsWithVersion,
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, LEVEL1, LEVEL2, LEVEL3, dictionaryTableName } from '../../common/constants';
-// eslint-disable-next-line import/order
 import { ENetworkType, IngestionType, WorkflowState, WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { getStackPrefix } from '../../common/utils';
 import { server } from '../../index';
@@ -452,10 +451,6 @@ describe('Workflow test', () => {
                           StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
                           Parameters: removeParameters([
                             ...INGESTION_S3_FARGATE_PARAMETERS,
-                            {
-                              ParameterKey: 'SinkType',
-                              ParameterValue: SINK_TYPE_MODE.SINK_TYPE_S3,
-                            },
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           [{
