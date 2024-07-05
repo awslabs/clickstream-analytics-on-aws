@@ -329,10 +329,11 @@ iOS: 参考 [Swift SDK 事件属性](./swift.md#_18)
 
 原生 SDK 版本依赖关系
 
-| React Native SDK 版本     | Android SDK 版本 | Swift SDK 版本     |
-|-------------------------|----------------|------------------|
-| 0.2.1                   | 0.13.0         | 0.12.3           |
-| 0.1.0 ~ 0.2.0           | 0.12.0         | 0.11.0           |
+| React Native SDK 版本 | Android SDK 版本 | Swift SDK 版本  |
+|---------------------|----------------|---------------|
+| 0.3.0               | 0.14.0         | 0.12.4        |
+| 0.2.1               | 0.13.0         | 0.12.3        |
+| 0.1.0 ~ 0.2.0       | 0.12.0         | 0.11.0        |
 
 ## 示例项目
 集成 SDK 的示例 [React Native 项目](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/react-native)
