@@ -29,7 +29,6 @@ import {
   LogLevel,
   StateMachine,
   Succeed,
-  TaskInput,
   Wait,
   WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
@@ -68,10 +67,10 @@ export class UserSegmentsWorkflow extends Construct {
     super(scope, id);
 
     this.props = props;
-    this.userSegmentsWorkflow = this.createWorkflow(id, props);
+    this.userSegmentsWorkflow = this.createWorkflow(props);
   }
 
-  private createWorkflow(id: string, props: UserSegmentsWorkflowProps): IStateMachine {
+  private createWorkflow(props: UserSegmentsWorkflowProps): IStateMachine {
     const pipelineBucket = Bucket.fromBucketName(this, 'PipelineS3Bucket', props.pipelineS3Bucket);
     pipelineBucket.grantReadWrite(props.redshiftAssociatedRole, `${props.segmentsS3Prefix}*`);
 
@@ -91,19 +90,14 @@ export class UserSegmentsWorkflow extends Construct {
     props.clickstreamMetadataDdbTable.grantReadWriteData(segmentJobInitFunc);
 
     // Define task for checking state machine status
+    const stateMachineStatusFunc = this.constructNodejsFunction('state-machine-status', [], {
+      CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbTable.tableArn,
+    });
     const stateMachineStatusTask = new LambdaInvoke(this, 'WorkflowTask-StateMachineStatus', {
-      lambdaFunction: this.constructNodejsFunction('state-machine-status', [
-        new PolicyStatement({
-          actions: ['states:ListExecutions'],
-          resources: [`arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stateMachine:${id}StateMachine*`],
-        }),
-      ]),
-      payload: TaskInput.fromObject({
-        'stateMachineArn.$': '$$.StateMachine.Id',
-        'input.$': '$',
-      }),
+      lambdaFunction: stateMachineStatusFunc,
       outputPath: '$.Payload',
     });
+    props.clickstreamMetadataDdbTable.grantReadData(stateMachineStatusFunc);
 
     // Define task for segment query execution
     const executeSegmentQueryFunc = this.constructNodejsFunction('execute-segment-query', [], {

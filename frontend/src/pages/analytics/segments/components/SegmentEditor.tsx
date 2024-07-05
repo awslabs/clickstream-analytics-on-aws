@@ -87,12 +87,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
 
   useEffect(() => {
     const cron = segmentObject.refreshSchedule.cron;
-    if (
-      cron === 'Manual' ||
-      cron === 'Custom' ||
-      !autoRefreshDay ||
-      !autoRefreshTime
-    ) {
+    if (cron === 'Manual' || cron === 'Custom' || !autoRefreshTime) {
       return;
     }
 

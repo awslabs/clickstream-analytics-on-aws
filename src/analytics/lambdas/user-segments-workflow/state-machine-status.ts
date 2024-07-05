@@ -11,15 +11,18 @@
  *  and limitations under the License.
  */
 
-import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
-import { ExecutionStatus, ListExecutionsCommand, ListExecutionsCommandInput, SFNClient } from '@aws-sdk/client-sfn';
+import {
+  aws_sdk_client_common_config,
+  logger,
+  parseDynamoDBTableARN,
+  SegmentJobStatus,
+} from '@aws/clickstream-base-lib';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { SegmentJobInitOutput } from './segment-job-init';
 import { handleBackoffTimeInfo } from '../../../common/workflow';
 
-export interface StateMachineStatusEvent {
-  stateMachineArn: string;
-  input: SegmentJobInitOutput;
-}
+export type StateMachineStatusEvent = SegmentJobInitOutput;
 
 export interface StateMachineStatusOutput {
   appId: string;
@@ -33,27 +36,32 @@ export enum StateMachineStatus {
   BUSY = 'BUSY',
 }
 
-const sfnClient = new SFNClient({
+const { ddbRegion, ddbTableName } = parseDynamoDBTableARN(process.env.CLICKSTREAM_METADATA_DDB_ARN!);
+const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
-  region: process.env.AWS_REGION,
+  region: ddbRegion,
 });
+const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
 const _handler = async (event: StateMachineStatusEvent) => {
   try {
-    // Get state machine executions status
-    const request: ListExecutionsCommandInput = {
-      stateMachineArn: event.stateMachineArn,
-      statusFilter: ExecutionStatus.RUNNING,
-    };
-    const command = new ListExecutionsCommand(request);
-    const response = await sfnClient.send(command);
-    logger.info(`Workflow step function executions number: ${response.executions?.length}`);
+    // Get running segment jobs
+    const response = await ddbDocClient.send(new QueryCommand({
+      TableName: ddbTableName,
+      IndexName: 'prefix-time-index',
+      KeyConditionExpression: 'prefix = :prefix',
+      FilterExpression: 'jobStatus = :status',
+      ExpressionAttributeValues: {
+        ':prefix': `SEGMENT_JOB_FOR#${event.segmentId}`,
+        ':status': SegmentJobStatus.IN_PROGRESS,
+      },
+    }));
 
     const output: StateMachineStatusOutput = {
-      appId: event.input.appId,
-      segmentId: event.input.segmentId,
-      jobRunId: event.input.jobRunId,
-      stateMachineStatus: (response.executions === undefined || response.executions.length <= 1) ?
+      appId: event.appId,
+      segmentId: event.segmentId,
+      jobRunId: event.jobRunId,
+      stateMachineStatus: (response.Items === undefined || response.Items.length === 0) ?
         StateMachineStatus.IDLE : StateMachineStatus.BUSY,
     };
     return output;
