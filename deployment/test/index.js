@@ -17,7 +17,8 @@ const path = require('path');
 const outTagImageShellFile = process.env.OUT_TAG_IMAGE_SHELL_FILE || 'tag-images.sh';
 const solutionEcrAccount = process.env.SOLUTION_ECR_ACCOUNT || '366590864501';
 const solutionEcrRepoName = process.env.SOLUTION_ECR_REPO_NAME || 'clickstream-analytics-on-aws';
-const solutionEcrBuildVersion = process.env.SOLUTION_ECR_BUILD_VERSION;
+const publicECRRegistry = process.env.PUBLIC_ECR_REGISTRY;
+const publicECRTag = process.env.PUBLIC_ECR_TAG;
 
 const isInGlobalPipeline = process.env.DIST_OUTPUT_BUCKET == 'aws-gcr-solutions' ? false : true;
 
@@ -83,7 +84,7 @@ function check_cross_stack_output(d, file_name) {
   if (Outputs) {
     for (const k of Object.keys(Outputs)) {
       if (k.startsWith('ExportsOutput')) {
-        throw new Error(`Found unexpected cross-stacks ouptut in template ${template_file}`);
+        throw new Error(`Found unexpected cross-stacks output in template ${template_file}`);
       }
     }
   }
@@ -99,52 +100,15 @@ function check_ecr_images(d, file_name) {
     console.log(`isInGlobalPipeline: ${isInGlobalPipeline}, check check_ecr_images for ${template_file}`);
 
     taskDef[0].Properties.ContainerDefinitions.map(c => c['Image']['Fn::Sub']).forEach(ecrUri => {
-      if (!(ecrUri.startsWith(`${solutionEcrAccount}.dkr.ecr`) && ecrUri.includes(`${solutionEcrRepoName}:${solutionEcrBuildVersion}`))) {
+      if (!(ecrUri.startsWith(`${publicECRRegistry}`) && ecrUri.endsWith(`:${publicECRTag}`))) {
         console.log(ecrUri);
 
-        console.log(`${solutionEcrAccount}.dkr.ecr`);
-        console.log(`${solutionEcrRepoName}:${solutionEcrBuildVersion}`);
+        console.log(`${publicECRRegistry}`);
+        console.log(`${solutionEcrRepoName}:${publicECRTag}`);
 
         throw new Error("ECR URI Error");
       }
     });
-
-    const statementExpected = {
-      "Action": [
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage"
-      ],
-      "Effect": "Allow",
-      "Resource": {
-        "Fn::Join": [
-          "",
-          [
-            "arn:",
-            {
-              "Ref": "AWS::Partition"
-            },
-            ":ecr:",
-            {
-              "Ref": "AWS::Region"
-            },
-            `:${solutionEcrAccount}:repository/${solutionEcrRepoName}`
-          ]
-        ]
-      }
-    };
-
-    getResourcesByType(template, 'AWS::IAM::Policy').filter(p => p.Metadata['aws:cdk:path'].endsWith('/ExecutionRole/DefaultPolicy/Resource'))
-      .forEach(p => {
-        const statement = p.Properties.PolicyDocument.Statement;
-        if (!JSON.stringify(statement).includes(JSON.stringify(statementExpected))) {
-          console.log("Got:")
-          console.log(JSON.stringify(statement, null, 2));
-          console.log("Expected includes:")
-          console.log(JSON.stringify(statementExpected, null, 2));
-          throw new Error("ExecutionRole Error");
-        }
-      })
   }
 }
 

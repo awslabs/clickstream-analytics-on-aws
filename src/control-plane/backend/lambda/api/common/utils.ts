@@ -35,7 +35,7 @@ import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { cloneDeep } from 'lodash';
-import { FULL_SOLUTION_VERSION, amznRequestContextHeader, awsUrlSuffix } from './constants';
+import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
