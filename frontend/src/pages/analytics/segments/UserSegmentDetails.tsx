@@ -17,6 +17,7 @@ import {
   SegmentJobStatus,
   SegmentJobStatusItem,
   SegmentUserItem,
+  sleep,
 } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
@@ -77,7 +78,7 @@ const UserSegmentDetails: React.FC = () => {
       href: `/analytics/${projectId}/app/${appId}/segments`,
     },
     {
-      text: segmentId,
+      text: defaultStr(segment?.name),
       href: `/analytics/${projectId}/app/${appId}/segments/${segmentId}`,
     },
   ];
@@ -335,6 +336,9 @@ const UserSegmentDetails: React.FC = () => {
                                         segmentId,
                                         appId,
                                       });
+
+                                      // Wait a few second for the segment job being recorded in ddb by the segment job sfn
+                                      await sleep(3000);
                                       await getSegmentJobHistory();
                                     } catch (error) {
                                       console.error(

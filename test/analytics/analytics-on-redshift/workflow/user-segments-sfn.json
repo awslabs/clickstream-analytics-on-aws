@@ -24,7 +24,7 @@
           "Arn"
         ]
       },
-      "\",\"Payload\":{\"stateMachineArn.$\":\"$$.StateMachine.Id\",\"input.$\":\"$\"}}},\"WorkflowWait-StateMachineStatus\":{\"Type\":\"Wait\",\"SecondsPath\":\"$.waitTimeInfo.waitTime\",\"Next\":\"WorkflowTask-StateMachineStatus\"},\"WorkflowChoice-StateMachineStatus\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.stateMachineStatus\",\"StringEquals\":\"IDLE\",\"Next\":\"WorkflowTask-ExecuteSegmentQuery\"}],\"Default\":\"WorkflowWait-StateMachineStatus\"},\"WorkflowTask-ExecuteSegmentQuery\":{\"Next\":\"WorkflowTask-SegmentJobStatus\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      "\",\"Payload.$\":\"$\"}},\"WorkflowWait-StateMachineStatus\":{\"Type\":\"Wait\",\"SecondsPath\":\"$.waitTimeInfo.waitTime\",\"Next\":\"WorkflowTask-StateMachineStatus\"},\"WorkflowChoice-StateMachineStatus\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.stateMachineStatus\",\"StringEquals\":\"IDLE\",\"Next\":\"WorkflowTask-ExecuteSegmentQuery\"}],\"Default\":\"WorkflowWait-StateMachineStatus\"},\"WorkflowTask-ExecuteSegmentQuery\":{\"Next\":\"WorkflowTask-SegmentJobStatus\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
       {
         "Ref": "AWS::Partition"
       },
