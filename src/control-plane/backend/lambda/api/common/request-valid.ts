@@ -11,9 +11,10 @@
  *  and limitations under the License.
  */
 
-import { APP_ID_PATTERN, EMAIL_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN, SPECIAL_CHARACTERS_PATTERN } from '@aws/clickstream-base-lib';
+import { APP_ID_PATTERN, EMAIL_PATTERN, FILTER_TIME_ZONE, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN, SPECIAL_CHARACTERS_PATTERN } from '@aws/clickstream-base-lib';
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
+import momentTimezone from 'moment-timezone';
 import { ALLOW_UPLOADED_FILE_TYPES, awsRegion } from './constants';
 import { validateXSS } from './stack-params-valid';
 import { ApiFail, AssumeRoleType } from './types';
@@ -122,6 +123,19 @@ export const isValidAppId: CustomValidator = value => {
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
     return Promise.reject(`Validation error: app name: ${value} not match ${APP_ID_PATTERN}. Please check and try again.`);
+  }
+  return true;
+};
+
+export const isTimezoneValid: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
+  }
+  const tzs = momentTimezone.tz
+    .names()
+    .filter((tz) => !FILTER_TIME_ZONE.includes(tz));
+  if (!tzs.includes(value)) {
+    return Promise.reject('Timezone is invalid.');
   }
   return true;
 };

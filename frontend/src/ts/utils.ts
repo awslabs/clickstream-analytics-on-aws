@@ -15,6 +15,7 @@ import {
   IMetadataBuiltInList,
   ServerlessRedshiftRPUByRegionMapping,
   SolutionVersion,
+  FILTER_TIME_ZONE,
 } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
@@ -29,7 +30,6 @@ import {
   CLICK_STREAM_USER_DATA,
   EPipelineStatus,
   ExecutionType,
-  FILTER_TIME_ZONE,
   IUserRole,
   SinkType,
 } from './const';
