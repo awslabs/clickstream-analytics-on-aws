@@ -25,7 +25,7 @@ import {
 import { PolicyEvaluationDecisionType, SimulateCustomPolicyCommand } from '@aws-sdk/client-iam';
 import { ListNodesCommand } from '@aws-sdk/client-kafka';
 import { ListAliasesCommand } from '@aws-sdk/client-kms';
-import { DescribeAccountSubscriptionCommand, Edition, RegisterUserCommand, ResourceExistsException } from '@aws-sdk/client-quicksight';
+import { DescribeAccountSubscriptionCommand, Edition, ListUsersCommand, RegisterUserCommand, ResourceExistsException } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
 import { BucketLocationConstraint, GetBucketLocationCommand, GetBucketPolicyCommand } from '@aws-sdk/client-s3';
@@ -967,6 +967,19 @@ function mockQuickSight(quickSightMock: any, standard?: boolean, userExisted?: b
       AccountName: 'ck',
       Edition: standard ? Edition.STANDARD : Edition.ENTERPRISE,
     },
+  });
+  quickSightMock.on(ListUsersCommand).resolves({
+    UserList: [
+      {
+        Arn: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/GCRUser',
+      },
+      {
+        Arn: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+      },
+      {
+        Arn: 'arn:aws:quicksight:us-east-1:123456789012:user/clickstream-acc-xxx/clickstream-user-xxx',
+      },
+    ],
   });
   if (userExisted) {
     quickSightMock.on(RegisterUserCommand).rejects(
