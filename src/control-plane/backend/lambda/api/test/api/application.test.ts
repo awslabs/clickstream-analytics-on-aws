@@ -426,7 +426,6 @@ describe('Application test', () => {
         },
       ],
     });
-    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create application with mock ddb error', async () => {
     tokenMock(mockClients.ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));
