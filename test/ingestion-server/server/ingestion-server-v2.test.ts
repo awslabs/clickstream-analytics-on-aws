@@ -140,6 +140,20 @@ test('ECS service ScalingPolicy is configured', () => {
   template.resourceCountIs('AWS::ApplicationAutoScaling::ScalingPolicy', 1);
 });
 
+test('ECS service ScalingPolicy ScaleInCooldown is 45 minutes and ScaleOutCooldown is 1 minute', () => {
+  const app = new App();
+  let commonTestStackProps = generateCommonTestStackProps();
+  commonTestStackProps.withMskConfig = true;
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
+  const template = Template.fromStack(stack);
+  const scalingPolicy = findFirstResource(
+    template,
+    'AWS::ApplicationAutoScaling::ScalingPolicy',
+  )?.resource;
+  expect(scalingPolicy.Properties.TargetTrackingScalingPolicyConfiguration.ScaleInCooldown == 2700).toBeTruthy();
+  expect(scalingPolicy.Properties.TargetTrackingScalingPolicyConfiguration.ScaleOutCooldown == 60).toBeTruthy();
+});
+
 test('The ECS service has one task which has two containers', () => {
   const app = new App();
   let commonTestStackProps = generateCommonTestStackProps();
