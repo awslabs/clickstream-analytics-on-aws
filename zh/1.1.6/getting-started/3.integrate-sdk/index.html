@@ -1147,6 +1147,30 @@
         <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
+      刷新历史数据
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="刷新历史数据">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      刷新历史数据
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
       下一步
     </span>
   </a>
@@ -2887,6 +2911,30 @@
         <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
+      刷新历史数据
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="刷新历史数据">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      刷新历史数据
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
       下一步
     </span>
   </a>
@@ -2941,7 +2989,7 @@
 <p>更新流水线以添加您刚刚添加的应用程序可能需要大约 3 ~ 5 分钟的时间。当您看到流水线状态再次变为 <strong>Active</strong> 时，它已准备好接收来自您的应用程序的数据。</p>
 <p>我们已经完成了将应用程序添加到项目的所有步骤。</p>
 <h2 id="_2">生成示例数据</h2>
-<p>您可能无法立即访问将 SDK 与您的应用程序集成。在这种情况下，我们提供了一个 Python 脚本，用于生成示例数据到您刚刚配置的流水线，以便您可以查看和体验分析仪表板。</p>
+<p>您可能无法立即访问将 SDK 与您的应用程序集成。在这种情况下，我们提供了一个 Python 脚本，用于生成一个购物应用过去 30 天的示例数据到您刚刚配置的流水线，以便您可以查看和体验分析仪表板。</p>
 <h3 id="_3">先决条件</h3>
 <ul>
 <li>Python 3.8+</li>
@@ -2972,10 +3020,33 @@
 </li>
 </ol>
 <p>在终端中按下 <code>Enter</code> 键执行该程序。如果您看到以下输出，则表示程序执行已完成。</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>job<span class="w"> </span>finished,<span class="w"> </span>upload<span class="w"> </span><span class="m">4360476</span><span class="w"> </span>events,<span class="w"> </span>cost:<span class="w"> </span>95100ms
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>job<span class="w"> </span>finished,<span class="w"> </span>upload<span class="w"> </span><span class="m">1106400</span><span class="w"> </span>events,<span class="w"> </span>cost:<span class="w"> </span>96252ms
 </span></code></pre></div>
-<p>该过程将花费约10分钟，默认配置。作业完成后，您可以进行下一步操作。</p>
-<h2 id="_5">下一步</h2>
+<p>在默认配置下该过程将花费约 2 分钟。</p>
+<h2 id="_5">刷新历史数据</h2>
+<p>此解决方案每次仅计算前一天的指标并在开箱即用的仪表板中展示，我们刚刚发送了过去 30 天的数据，因此我们需要刷新所有的历史数据，以便它们显示在分析工作坊的仪表板中。</p>
+<p>在刷新历史数据之前，我们需要确保之前发送的事件都已加载到 Redshift 中。</p>
+<ol>
+<li>打开您的 Project 详细信息页面，单击 <strong>View Details</strong>（查看详细信息）按钮，然后进入您的项目的管道详细信息页面。</li>
+<li>在管道详细信息页面中，单击并打开 <strong>Monitoring</strong>（监控）选项卡，然后单击 <strong>View in CloudWatch</strong>（在 CloudWatch 中查看） 按钮以进入解决方案 CloudWatch 仪表板。</li>
+<li>向下滚动并找到 CloudWatch 仪表板中的 <strong>Data Modeling - Redshift Serverless</strong> 部分，然后确保 <strong>'Load data to redshift tables' workflow</strong> 表中的所有状态变为 <strong>ExecutionsSucceeded</strong>。</li>
+</ol>
+<h3 id="_6">刷新历史数据</h3>
+<p>将所有事件加载到 Redshift 后，我们可以按照以下步骤刷新历史数据。</p>
+<ol>
+<li>在数据管道所在区域的 AWS 控制台中打开 <strong>Step Functions</strong> 服务。</li>
+<li>搜索并找到名为 <code>RefreshMaterializedViewsWorkflowRefreshMVStateMachine</code> 的状态机，然后单击进入详细信息页面。</li>
+<li>在详细信息页面中单击 <strong>Start Execution</strong>（启动执行）按钮。</li>
+<li>复制以下 JSON 内容，将 <code>refreshEndTime</code> 值更改为当前时间戳，将 <code>refreshStartTime</code> 更改为30天前的时间戳，然后将其粘贴到输入面板中并单击 <strong>Start Execution</strong>（启动执行）按钮:
+   <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;refreshEndTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1715658451000</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;refreshStartTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1713066451000</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
+</span></code></pre></div></li>
+<li>返回状态机详细信息页面，您将发现一个新的执行已开始，让我们等待状态变为 <strong>Succeeded</strong>，此过程将需要大约 7 分钟。</li>
+</ol>
+<p>现在所有历史数据都已刷新，请继续进行下一步。</p>
+<h2 id="_7">下一步</h2>
 <ul>
 <li><a href="../4.view-dashboard/">查看仪表板</a></li>
 </ul>
