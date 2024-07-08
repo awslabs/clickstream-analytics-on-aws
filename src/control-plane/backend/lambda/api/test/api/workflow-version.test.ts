@@ -949,7 +949,7 @@ describe('Workflow test with pipeline version in China region', () => {
                             },
                           ]),
                         {
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com.cn/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -1093,7 +1093,7 @@ describe('Workflow test with pipeline version in China region', () => {
                             },
                           ]),
                         {
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com.cn/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -1215,7 +1215,7 @@ describe('Workflow test with pipeline version in China region', () => {
                             },
                           ]),
                         {
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com.cn/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -1379,7 +1379,7 @@ describe('Workflow test with pipeline version in China region', () => {
                             },
                           ]),
                         {
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com.cn/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },

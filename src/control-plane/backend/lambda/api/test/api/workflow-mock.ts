@@ -1468,7 +1468,7 @@ export const DataModelingAthenaStackCn = {
       ],
       StackName: `${getStackPrefix()}-DataModelingAthena-6666-6666`,
       Tags: Tags,
-      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com.cn/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
     },
   },
   End: true,
