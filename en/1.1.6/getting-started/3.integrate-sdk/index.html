@@ -1143,6 +1143,30 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#refresh-historical-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Refresh historical events
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Refresh historical events">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refresh-historical-events_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Refresh historical events
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#next" class="md-nav__link">
     <span class="md-ellipsis">
       Next
@@ -2904,6 +2928,30 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#refresh-historical-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Refresh historical events
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Refresh historical events">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refresh-historical-events_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Refresh historical events
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#next" class="md-nav__link">
     <span class="md-ellipsis">
       Next
@@ -2960,7 +3008,7 @@
 <p>It will take about 3 ~ 5 minutes to update the pipeline with the application you just add. When you see the pipeline status become <strong>Active</strong> again, it is ready to receive data from your application. </p>
 <p>We have completed all the steps of adding an application to a project.</p>
 <h2 id="generate-sample-data">Generate sample data</h2>
-<p>You might not have immediate access to integrate SDK with your app. In this case, we provide a Python script to generate sample data to the pipeline you just configured, so that you can view and experience the analytics dashboards.</p>
+<p>You might not have immediate access to integrate SDK with your app. In this case, we provide a Python script that generates the last 30 days of sample data for a shopping app into the pipeline you just configured, so that you can view and experience the analytics dashboards.</p>
 <h3 id="prerequisites">Prerequisites</h3>
 <ul>
 <li>Python 3.8+</li>
@@ -2991,9 +3039,32 @@
 </li>
 </ol>
 <p>Hit <code>Enter</code> key in terminal to execute the program. If you see the following output, this means that the program execution is complete.</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>job<span class="w"> </span>finished,<span class="w"> </span>upload<span class="w"> </span><span class="m">4360476</span><span class="w"> </span>events,<span class="w"> </span>cost:<span class="w"> </span>95100ms
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>job<span class="w"> </span>finished,<span class="w"> </span>upload<span class="w"> </span><span class="m">1106400</span><span class="w"> </span>events,<span class="w"> </span>cost:<span class="w"> </span>96252ms
 </span></code></pre></div>
-<p>This process will take about 10 minutes with default configuration. After job is finished, you can move to next step.</p>
+<p>This process will take about 2 minutes with default configuration.</p>
+<h2 id="refresh-historical-events">Refresh historical events</h2>
+<p>This solution only calculates the metrics in the out-of-the-box dashboards for the previous day, and we just sent the last 30 days of data, so we need to refresh the historical metrics for all events to show up in the Analytics Studio dashboard.</p>
+<p>Before refreshing historical events, we need to make sure the events we just sent are loaded into Redshift.</p>
+<ol>
+<li>Go your project detail page, click the <strong>View Details</strong> button, and then enter your project pipeline details page.</li>
+<li>In the pipeline details page, click and open <strong>Monitoring</strong> tab, and then click <strong>View in CloudWatch</strong> button to enter the solution CloudWatch dashboard.</li>
+<li>Scroll down and find <strong>Data Modeling - Redshift Serverless</strong> section in the CloudWatch dashboard, then make sure all status in <strong>'Load data to redshift tables' workflow</strong> table are <strong>ExecutionsSucceeded</strong>.</li>
+</ol>
+<h3 id="refresh-historical-events_1">Refresh historical events</h3>
+<p>Once all events are loaded into Redshift, we can follow the steps below to refresh historical events.</p>
+<ol>
+<li>Search and open the <strong>Step Functions</strong> service in the AWS console and select the region where your data pipeline is located.</li>
+<li>Search and find the state machine named <code>RefreshMaterializedViewsWorkflowRefreshMVStateMachine</code>, then click into the detail page.</li>
+<li>Click the <strong>Start Execution</strong> button in the details page.</li>
+<li>Copy the following JSON content and change the <code>refreshEndTime</code> value to the current timestamp and the <code>refreshStartTime</code> to a timestamp 30 days ago, then paste it into the input panel and click the <strong>Start execution</strong> button:
+   <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;refreshEndTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1715658451000</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;refreshStartTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1713066451000</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
+</span></code></pre></div></li>
+<li>Return to the state machine detail page, you will find that a new execution has started, let's wait the status chang to <strong>Succeeded</strong>, this process will take about 7 minutes.</li>
+</ol>
+<p>Now that all the historical events has been refreshed, you can move to next step.</p>
 <h2 id="next">Next</h2>
 <ul>
 <li><a href="../4.view-dashboard/">Analyze data</a></li>
