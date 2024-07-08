@@ -1781,7 +1781,7 @@ describe('Workflow test', () => {
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
                           ],
                           Tags: Tags,
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-stack.template.json',
                         },
                       ),
                     },
