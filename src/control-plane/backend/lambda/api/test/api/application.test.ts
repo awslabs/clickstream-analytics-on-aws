@@ -218,6 +218,7 @@ describe('Application test', () => {
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
+        timezone: 'America/New_York',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -225,6 +226,206 @@ describe('Application test', () => {
     expect(res.body.success).toEqual(true);
     expect(mockClients.sfnMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
     expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
+  });
+  it('Create application with error timezone', async () => {
+    tokenMock(mockClients.ddbMock, false);
+    projectExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+            workflow: {
+              Version: '2022-03-15',
+              Workflow: {
+                Type: WorkflowStateType.PARALLEL,
+                End: true,
+                Branches: [
+                  {
+                    States: {
+                      Ingestion: {
+                        Type: WorkflowStateType.STACK,
+                        Data: {
+                          Input: {
+                            Region: 'ap-southeast-1',
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                            Action: 'Create',
+                            Parameters: [
+                              {
+                                ParameterKey: 'AppIds',
+                                ParameterValue: '',
+                              },
+                            ],
+                            StackName: `${getStackPrefix()}-Ingestion-kinesis-${MOCK_PIPELINE_ID}`,
+                          },
+                          Callback: {
+                            BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                            BucketName: 'EXAMPLE_BUCKET',
+                          },
+                        },
+                        End: true,
+                      },
+                    },
+                    StartAt: 'Ingestion',
+                  },
+                  {
+                    States: {
+                      DataProcessing: {
+                        Type: WorkflowStateType.STACK,
+                        Data: {
+                          Input: {
+                            Region: 'ap-southeast-1',
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                            Action: 'Create',
+                            Parameters: [
+                              {
+                                ParameterKey: 'AppIds',
+                                ParameterValue: '',
+                              },
+                            ],
+                            StackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
+                          },
+                          Callback: {
+                            BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                            BucketName: 'EXAMPLE_BUCKET',
+                          },
+                        },
+                        Next: 'DataModeling',
+                      },
+                      Reporting: {
+                        Type: WorkflowStateType.STACK,
+                        Data: {
+                          Input: {
+                            Region: 'ap-southeast-1',
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                            Action: 'Create',
+                            Parameters: [
+                              {
+                                ParameterKey: 'RedShiftDBSchemaParam',
+                                ParameterValue: '',
+                              },
+                            ],
+                            StackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
+                          },
+                          Callback: {
+                            BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                            BucketName: 'EXAMPLE_BUCKET',
+                          },
+                        },
+                        End: true,
+                      },
+                      DataModeling: {
+                        Type: WorkflowStateType.STACK,
+                        Data: {
+                          Input: {
+                            Region: 'ap-southeast-1',
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                            Action: 'Create',
+                            Parameters: [
+                              {
+                                ParameterKey: 'AppIds',
+                                ParameterValue: '',
+                              },
+                            ],
+                            StackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+                          },
+                          Callback: {
+                            BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                            BucketName: 'EXAMPLE_BUCKET',
+                          },
+                        },
+                        Next: 'Reporting',
+                      },
+                    },
+                    StartAt: 'DataProcessing',
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [],
+                            StackName: `${getStackPrefix()}-Metrics-6666-6666`,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: WorkflowStateType.STACK,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      })
+      .resolvesOnce({
+        Items: [
+          {
+            name: MOCK_APP_NAME,
+            appId: `${MOCK_APP_ID}_0`,
+          },
+        ],
+      });
+
+    mockClients.sfnMock.on(StartExecutionCommand).callsFake(input => {
+      const executionInput = JSON.parse(input.input);
+      const ingestionInput = executionInput.Branches[0].States.Ingestion;
+      const dataProcessingInput = executionInput.Branches[1].States.DataProcessing;
+      const dataModelingInput = executionInput.Branches[1].States.DataModeling;
+      const reportingInput = executionInput.Branches[1].States.Reporting;
+      const metricsInput = executionInput.Branches[2].States.Metrics;
+      if (
+        ingestionInput.Type === WorkflowStateType.STACK && ingestionInput.Data.Input.Action === 'Update' &&
+        dataProcessingInput.Type === WorkflowStateType.STACK && dataProcessingInput.Data.Input.Action === 'Update' &&
+        dataModelingInput.Type === WorkflowStateType.STACK && dataModelingInput.Data.Input.Action === 'Update' &&
+        reportingInput.Type === WorkflowStateType.STACK && reportingInput.Data.Input.Action === 'Update' &&
+        metricsInput.Type === WorkflowStateType.PASS && metricsInput.Data.Input.Action === 'Create'
+      ) {
+        return {
+          executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+        };
+      } else {
+        throw new Error('mocked StartExecutionCommand rejection');
+      }
+    });
+    mockClients.ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/app')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        name: MOCK_APP_NAME,
+        appId: MOCK_APP_ID,
+        description: 'Description of App-01',
+        platform: 'Web',
+        sdk: 'Clickstream SDK',
+        timezone: 'Asia/Beijing',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Parameter verification failed.',
+      error: [
+        {
+          location: 'body',
+          msg: 'Timezone is invalid.',
+          param: 'timezone',
+          value: 'Asia/Beijing',
+        },
+      ],
+    });
   });
   it('Create application with mock ddb error', async () => {
     tokenMock(mockClients.ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));
@@ -296,6 +497,7 @@ describe('Application test', () => {
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
+        timezone: 'America/New_York',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -348,6 +550,7 @@ describe('Application test', () => {
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
+        timezone: 'America/New_York',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -373,6 +576,7 @@ describe('Application test', () => {
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
+        timezone: 'America/New_York',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
@@ -405,6 +609,11 @@ describe('Application test', () => {
           param: 'appId',
         },
         {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: 'timezone',
+        },
+        {
           location: 'headers',
           msg: 'Value is empty.',
           param: 'x-click-stream-request-id',
@@ -432,6 +641,7 @@ describe('Application test', () => {
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
+        timezone: 'America/New_York',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -463,6 +673,7 @@ describe('Application test', () => {
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
+        timezone: 'America/New_York',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -519,6 +730,7 @@ describe('Application test', () => {
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
+        timezone: 'America/New_York',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -574,6 +786,7 @@ describe('Application test', () => {
         description: 'Description of App-01',
         platform: 'Web',
         sdk: 'Clickstream SDK',
+        timezone: 'America/New_York',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -591,6 +804,7 @@ describe('Application test', () => {
         createAt: 1674202173912,
         type: 'APP#e250bc17-405f-4473-862d-2346d6cefb49',
         sdk: 'Clickstream SDK',
+        timezone: 'America/New_York',
         operator: '',
         description: 'Description of App-01',
         appId: MOCK_APP_ID,
