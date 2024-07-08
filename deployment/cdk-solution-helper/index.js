@@ -137,7 +137,7 @@ fs.readdirSync(global_s3_assets).forEach(file => {
       'Fn::Join': [
         '',
         [
-          'https://%%TEMPLATE_OUTPUT_BUCKET%%.s3.%%BUCKET_REGION%%',
+          'https://%%TEMPLATE_OUTPUT_BUCKET%%.s3.%%BUCKET_REGION%%.',
           '%%AWS_URL_SUFFIX%%',
           '/',
           `%%SOLUTION_NAME%%/%%VERSION%%/${templateName}`
