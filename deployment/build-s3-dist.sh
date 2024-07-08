@@ -345,6 +345,8 @@ do_replace "*.template.json" %%BUCKET_NAME%% ${SOLUTION_BUCKET}
 do_replace "*.template.json" %%SOLUTION_NAME%% ${SOLUTION_TRADEMARKEDNAME}
 do_replace "*.template.json" %%VERSION%% ${VERSION}
 do_replace "*.template.json" %%TEMPLATE_OUTPUT_BUCKET%% ${TEMPLATE_OUTPUT_BUCKET}
+do_replace "*.template.json" %%BUCKET_REGION%% ${TEMPLATE_OUTPUT_BUCKET_REGION}
+do_replace "*.template.json" %%AWS_URL_SUFFIX%% ${AWS_URL_SUFFIX}
 do_replace_1 "*.template.json" %%PUBLIC_ECR_REGISTRY%% ${PUBLIC_ECR_REGISTRY}
 do_replace "*.template.json" %%PUBLIC_ECR_TAG%% ${PUBLIC_ECR_TAG}
 
