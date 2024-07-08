@@ -63,7 +63,7 @@
       "minute10": "10 minutes"
     },
     "costTipTitle": "Cost reminder",
-    "costTipContent": "Please note that opening real-time reports will incur additional fees, as detailed in the documentation: ",
+    "costTipContent": "Please note that opening real-time reports will incur additional cost, refer to the following documentation for more details: ",
     "costTipLink": "Cost"
   },
   "analyzes": {
