@@ -174,6 +174,21 @@ test('ECS service ScalingPolicy is configured', () => {
   template.resourceCountIs('AWS::ApplicationAutoScaling::ScalingPolicy', 1);
 });
 
+test('ECS service ScalingPolicy ScaleInCooldown is 45 minutes and ScaleOutCooldown is 1 minute', () => {
+  const app = new App();
+  const stack = new TestStack(app
+    , 'test', {
+      withMskConfig: true,
+    });
+  const template = Template.fromStack(stack);
+  const scalingPolicy = findFirstResource(
+    template,
+    'AWS::ApplicationAutoScaling::ScalingPolicy',
+  )?.resource;
+  expect(scalingPolicy.Properties.TargetTrackingScalingPolicyConfiguration.ScaleInCooldown == 2700).toBeTruthy();
+  expect(scalingPolicy.Properties.TargetTrackingScalingPolicyConfiguration.ScaleOutCooldown == 60).toBeTruthy();
+});
+
 test('ALB default protocol is http', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {

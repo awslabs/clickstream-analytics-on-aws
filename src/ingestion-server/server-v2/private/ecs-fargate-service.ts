@@ -99,8 +99,8 @@ export class ECSFargateService extends AbstractECSService {
 
     scalableTarget.scaleOnCpuUtilization('CpuScaling', {
       targetUtilizationPercent: props.fleetProps.scaleOnCpuUtilizationPercent || 50,
-      scaleInCooldown: Duration.seconds(45),
-      scaleOutCooldown: Duration.seconds(1),
+      scaleInCooldown: Duration.minutes(45),
+      scaleOutCooldown: Duration.minutes(1),
     });
 
     const ecsServiceInfo: ECSFargateServiceResult = {

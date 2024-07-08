@@ -123,6 +123,7 @@ export class IngestionCommonResources extends Construct {
 
     new CfnOutput(this, id + OUTPUT_INGESTION_SERVER_DNS_SUFFIX, {
       value: ingestionServerDNS,
+      key: id + OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
       description: 'Server DNS',
     });
 
@@ -131,6 +132,7 @@ export class IngestionCommonResources extends Construct {
         `https://${props.domainName}${props.serverEndpointPath}`,
         `http://${ingestionServerDNS}${props.serverEndpointPath}`).toString(),
       description: 'Server Url',
+      key: id + OUTPUT_INGESTION_SERVER_URL_SUFFIX,
     });
   }
 }
