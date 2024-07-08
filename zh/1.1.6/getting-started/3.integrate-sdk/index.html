@@ -1105,15 +1105,6 @@
         <li class="md-nav__item">
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
-      步骤
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
       生成示例数据
     </span>
   </a>
@@ -1122,7 +1113,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       先决条件
     </span>
@@ -1131,9 +1122,18 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      发送示例数据
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      步骤
+      刷新历史数据
     </span>
   </a>
   
@@ -1146,30 +1146,6 @@
       
         <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      刷新历史数据
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="刷新历史数据">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      刷新历史数据
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       下一步
     </span>
@@ -2869,15 +2845,6 @@
         <li class="md-nav__item">
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
-      步骤
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
       生成示例数据
     </span>
   </a>
@@ -2886,7 +2853,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       先决条件
     </span>
@@ -2895,9 +2862,18 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      发送示例数据
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      步骤
+      刷新历史数据
     </span>
   </a>
   
@@ -2910,30 +2886,6 @@
       
         <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      刷新历史数据
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="刷新历史数据">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      刷新历史数据
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       下一步
     </span>
@@ -2961,7 +2913,6 @@
 
 <h1 id="3-sdk">步骤 3 - 集成 SDK</h1>
 <p>一旦流水线的状态变为“Active”，它就准备好接收点击流数据了。现在您需要在流水线中注册一个应用程序，然后将 SDK 集成到您的应用程序中，以使其能够将数据发送到流水线。</p>
-<h2 id="_1">步骤</h2>
 <ol>
 <li>登录 <strong>AWS 控制台上的 Clickstream Analytics</strong>。</li>
 <li>在左侧导航窗格中，选择 <strong>Projects</strong>，然后选择之前创建的项目（<code>quickstart</code>），点击其标题，进入项目页面。</li>
@@ -2988,13 +2939,13 @@
 </ol>
 <p>更新流水线以添加您刚刚添加的应用程序可能需要大约 3 ~ 5 分钟的时间。当您看到流水线状态再次变为 <strong>Active</strong> 时，它已准备好接收来自您的应用程序的数据。</p>
 <p>我们已经完成了将应用程序添加到项目的所有步骤。</p>
-<h2 id="_2">生成示例数据</h2>
+<h2 id="_1">生成示例数据</h2>
 <p>您可能无法立即访问将 SDK 与您的应用程序集成。在这种情况下，我们提供了一个 Python 脚本，用于生成一个购物应用过去 30 天的示例数据到您刚刚配置的流水线，以便您可以查看和体验分析仪表板。</p>
-<h3 id="_3">先决条件</h3>
+<h3 id="_2">先决条件</h3>
 <ul>
 <li>Python 3.8+</li>
 </ul>
-<h3 id="_4">步骤</h3>
+<h3 id="_3">发送示例数据</h3>
 <ol>
 <li>将代码库克隆到本地环境。
    <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git clone https://github.com/awslabs/clickstream-analytics-on-aws.git
@@ -3023,7 +2974,7 @@
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>job<span class="w"> </span>finished,<span class="w"> </span>upload<span class="w"> </span><span class="m">1106400</span><span class="w"> </span>events,<span class="w"> </span>cost:<span class="w"> </span>96252ms
 </span></code></pre></div>
 <p>在默认配置下该过程将花费约 2 分钟。</p>
-<h2 id="_5">刷新历史数据</h2>
+<h3 id="_4">刷新历史数据</h3>
 <p>此解决方案每次仅计算前一天的指标并在开箱即用的仪表板中展示，我们刚刚发送了过去 30 天的数据，因此我们需要刷新所有的历史数据，以便它们显示在分析工作坊的仪表板中。</p>
 <p>在刷新历史数据之前，我们需要确保之前发送的事件都已加载到 Redshift 中。</p>
 <ol>
@@ -3031,7 +2982,6 @@
 <li>在管道详细信息页面中，单击并打开 <strong>Monitoring</strong>（监控）选项卡，然后单击 <strong>View in CloudWatch</strong>（在 CloudWatch 中查看） 按钮以进入解决方案 CloudWatch 仪表板。</li>
 <li>向下滚动并找到 CloudWatch 仪表板中的 <strong>Data Modeling - Redshift Serverless</strong> 部分，然后确保 <strong>'Load data to redshift tables' workflow</strong> 表中的所有状态变为 <strong>ExecutionsSucceeded</strong>。</li>
 </ol>
-<h3 id="_6">刷新历史数据</h3>
 <p>将所有事件加载到 Redshift 后，我们可以按照以下步骤刷新历史数据。</p>
 <ol>
 <li>在数据管道所在区域的 AWS 控制台中打开 <strong>Step Functions</strong> 服务。</li>
@@ -3046,7 +2996,7 @@
 <li>返回状态机详细信息页面，您将发现一个新的执行已开始，让我们等待状态变为 <strong>Succeeded</strong>，此过程将需要大约 7 分钟。</li>
 </ol>
 <p>现在所有历史数据都已刷新，请继续进行下一步。</p>
-<h2 id="_7">下一步</h2>
+<h2 id="_5">下一步</h2>
 <ul>
 <li><a href="../4.view-dashboard/">查看仪表板</a></li>
 </ul>
