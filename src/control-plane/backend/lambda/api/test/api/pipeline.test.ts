@@ -4374,7 +4374,7 @@ describe('Pipeline test', () => {
       success: true,
       message: 'Pipeline upgraded.',
     });
-    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 0);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 1);
   });
   it('Upgrade pipeline without some app timezone', async () => {
     tokenMock(ddbMock, false);

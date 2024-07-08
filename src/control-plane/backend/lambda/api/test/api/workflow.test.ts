@@ -1728,6 +1728,170 @@ describe('Workflow test', () => {
     };
     expect(wf).toEqual(expected);
   });
+  it('Generate Workflow with specify reporting user', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      noVpcEndpoint: true,
+    });
+    const pipeline: CPipeline = new CPipeline({
+      ...cloneDeep(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE),
+      templateVersion: FULL_SOLUTION_VERSION,
+      reporting: {
+        quickSight: {
+          accountName: 'clickstream-acc-xxx',
+          user: 'arn:aws:quicksight:us-east-1:123456789012:user/clickstream-acc-xxx/clickstream-user-xxx',
+        },
+      },
+    });
+    await pipeline.resourcesCheck();
+    const wf = await generateWorkflow(pipeline.getPipeline(), pipeline.getResources()!);
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
+              [LEVEL1]: {
+                Branches: [
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: replaceStackInputProps(MetricsStack,
+                        {
+                          Parameters: [
+                            ...BASE_METRICS_EMAILS_PARAMETERS,
+                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                          ],
+                          Tags: Tags,
+                        },
+                      ),
+                    },
+                  },
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: replaceStackInputProps(IngestionStack,
+                        {
+                          StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+                          Parameters: [
+                            ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
+                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                          ],
+                          Tags: Tags,
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-stack.template.json',
+                        },
+                      ),
+                    },
+                  },
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: replaceStackInputProps(DataProcessingStack,
+                        {
+                          Parameters: [
+                            ...DATA_PROCESSING_PLUGIN3_PARAMETERS,
+                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                          ],
+                          Tags: Tags,
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                        },
+                      ),
+                    },
+                  },
+                ],
+                Next: LEVEL2,
+                Type: WorkflowStateType.PARALLEL,
+              },
+              [LEVEL2]: {
+                Branches: [
+                  {
+                    StartAt: 'DataModelingAthena',
+                    States: {
+                      DataModelingAthena: replaceStackInputProps(DataModelingAthenaStack,
+                        {
+                          StackName: `${getStackPrefix()}-DataModelingAthena-6666-6666`,
+                          Parameters: [
+                            ...BASE_ATHENA_PARAMETERS,
+                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                          ],
+                          Tags: Tags,
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+                        },
+                      ),
+                    },
+                  },
+                  {
+                    StartAt: 'DataModelingRedshift',
+                    States: {
+                      DataModelingRedshift: replaceStackInputProps(DataModelingRedshiftStack,
+                        {
+                          StackName: `${getStackPrefix()}-DataModelingRedshift-6666-6666`,
+                          Parameters: [
+                            ...MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
+                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                          ],
+                          Tags: Tags,
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                        },
+                      ),
+                    },
+                  },
+                ],
+                Next: LEVEL3,
+                Type: WorkflowStateType.PARALLEL,
+              },
+              [LEVEL3]: {
+                Branches: [
+                  {
+                    StartAt: 'Reporting',
+                    States: {
+                      Reporting: replaceStackInputProps(ReportingStack,
+                        {
+                          StackName: `${getStackPrefix()}-Reporting-6666-6666`,
+                          Parameters: mergeParameters(
+                            removeParameters(
+                              [
+                                ...REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
+                                APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                              ],
+                              [
+                                {
+                                  ParameterKey: 'QuickSightPrincipalParam',
+                                },
+                              ]),
+                            [
+                              {
+                                ParameterKey: 'QuickSightUserParam',
+                                ParameterValue: 'clickstream-user-xxx',
+                              },
+                              {
+                                ParameterKey: 'QuickSightOwnerPrincipalParam',
+                                ParameterValue: 'arn:aws:quicksight:us-east-1:123456789012:user/clickstream-acc-xxx/clickstream-user-xxx',
+                              },
+                            ],
+                          ),
+                          Tags: Tags,
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+                        },
+                      ),
+                    },
+                  },
+                ],
+                End: true,
+                Type: WorkflowStateType.PARALLEL,
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: WorkflowStateType.PARALLEL,
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
   it('Generate Workflow ingestion-server-kinesis ON_DEMAND + DataProcessing + provisioned redshift + quicksight', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(mockClients, {

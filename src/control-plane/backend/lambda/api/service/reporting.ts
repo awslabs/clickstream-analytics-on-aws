@@ -1041,7 +1041,7 @@ export class ReportingService {
     const quickSight = sdkClient.QuickSight({ region: dashboardCreateParameters.region });
     const principals = await getClickstreamUserArn(
       SolutionVersion.Of(pipeline?.templateVersion ?? FULL_SOLUTION_VERSION),
-      pipeline?.reporting?.quickSight?.user ?? '',
+      pipeline?.reporting?.quickSight?.user,
     );
 
     //create quicksight dataset
@@ -1263,7 +1263,7 @@ export class ReportingService {
       //warmup principal
       await getClickstreamUserArn(
         SolutionVersion.Of(latestPipeline.templateVersion ?? FULL_SOLUTION_VERSION),
-        latestPipeline.reporting?.quickSight?.user ?? '',
+        latestPipeline.reporting?.quickSight?.user,
       );
 
       //warm up redshift serverless

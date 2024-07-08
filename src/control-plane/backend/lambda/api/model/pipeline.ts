@@ -92,7 +92,7 @@ import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { getKeyArnByAlias } from '../store/aws/kms';
-import { QuickSightUserArns, getClickstreamUserArn, registerClickstreamUser } from '../store/aws/quicksight';
+import { QuickSightUserArns, getClickstreamUserArn, listUsers, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
 import { isBucketExist } from '../store/aws/s3';
 import { getExecutionDetail, listExecutions } from '../store/aws/sfn';
@@ -786,10 +786,18 @@ export class CPipeline {
     }
 
     if (this.pipeline.reporting) {
+      if (this.pipeline.reporting.quickSight?.user) {
+        const qsUsers = await listUsers();
+        const qsUserArns = qsUsers?.map(u => u.Arn);
+        // check if the user not exists
+        if (!qsUserArns?.includes(this.pipeline.reporting.quickSight?.user)) {
+          throw new ClickStreamBadRequestError(`Validation error: QuickSight user ${this.pipeline.reporting.quickSight?.user} not found. Please check and try again.`);
+        }
+      }
       await registerClickstreamUser();
       const quickSightUser = await getClickstreamUserArn(
         SolutionVersion.Of(this.pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
-        this.pipeline.reporting.quickSight?.user ?? '',
+        this.pipeline.reporting.quickSight?.user,
       );
       this.resources = {
         ...this.resources,

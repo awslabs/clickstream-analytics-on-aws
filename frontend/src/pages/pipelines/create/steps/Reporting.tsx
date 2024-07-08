@@ -68,6 +68,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   const [loadingQuickSight, setLoadingQuickSight] = useState(false);
   const [quickSightEnabled, setQuickSightEnabled] = useState(false);
   const [quickSightEnterprise, setQuickSightEnterprise] = useState(false);
+  const [authenticationType, setAuthenticationType] = useState('');
   const [quickSightUserOptions, setQuickSightUserOptions] =
     useState<SelectProps.Options>([]);
 
@@ -84,10 +85,12 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
       ) {
         setQuickSightEnabled(true);
         changeQuickSightDisabled(false);
+        setAuthenticationType(data.authenticationType);
         changeQuickSightAccountName(data.accountName);
       } else {
         changeEnableReporting(false);
         setQuickSightEnabled(false);
+        setAuthenticationType('');
         changeQuickSightDisabled(true);
       }
       if (success && data && data.edition.includes('ENTERPRISE')) {
@@ -95,6 +98,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
       }
     } catch (error) {
       setLoadingQuickSight(false);
+      setAuthenticationType('');
     }
   };
 
@@ -163,136 +167,127 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
           {loadingQuickSight ? (
             <Spinner />
           ) : (
-            <>
-              <SpaceBetween direction="vertical" size="l">
-                <FormField>
-                  <Toggle
-                    controlId="test-quicksight-id"
-                    disabled={isReportingDisabled(update, pipelineInfo)}
-                    onChange={({ detail }) =>
-                      changeEnableReporting(detail.checked)
-                    }
-                    checked={pipelineInfo.enableReporting}
-                    description={
-                      <div>
-                        <Trans
-                          i18nKey="pipeline:create.createSampleQuickSightDesc"
-                          components={{
-                            learnmore_anchor: (
-                              <Link
-                                external
-                                href={buildDocumentLink(
-                                  i18n.language,
-                                  PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN,
-                                  PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN
-                                )}
-                              />
-                            ),
-                            guide_anchor: (
-                              <Link
-                                external
-                                href={buildDocumentLink(
-                                  i18n.language,
-                                  PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
-                                  PIPELINE_QUICKSIGHT_GUIDE_LINK_CN
-                                )}
-                              />
-                            ),
-                          }}
-                        />
-                      </div>
-                    }
-                  >
-                    <b>{t('pipeline:create.createSampleQuickSight')}</b>
-                  </Toggle>
-                </FormField>
-
-                {pipelineInfo.enableReporting &&
-                  (loadingQuickSight ? (
-                    <Spinner />
-                  ) : (
-                    <>
-                      {!quickSightEnabled && (
-                        <Alert
-                          type="warning"
-                          header={t('pipeline:create.quickSightNotSub')}
-                        >
-                          {t('pipeline:create.quickSightNotSubDesc1')}
-                          <Link
-                            external
-                            href={buildQuickSightSubscriptionLink()}
-                          >
-                            {t('pipeline:create.quickSightSubscription')}
-                          </Link>
-                          {t('pipeline:create.quickSightNotSubDesc2')}
-                        </Alert>
-                      )}
-
-                      {quickSightEnabled && !quickSightEnterprise && (
-                        <Alert
-                          type="warning"
-                          header={t('pipeline:create.quickSightNotEnterprise')}
-                        >
-                          {t('pipeline:create.quickSightNotEnterpriseDesc')}
-                        </Alert>
-                      )}
-
-                      {pipelineInfo.region.startsWith('cn') &&
-                        pipelineInfo.enableReporting &&
-                        quickSightEnabled &&
-                        quickSightEnterprise && (
-                          <>
-                            <FormField
-                              label={t('pipeline:create.quickSightUser')}
-                              description={t(
-                                'pipeline:create.quickSightUserDesc'
+            <SpaceBetween direction="vertical" size="l">
+              <FormField>
+                <Toggle
+                  controlId="test-quicksight-id"
+                  disabled={isReportingDisabled(update, pipelineInfo)}
+                  onChange={({ detail }) =>
+                    changeEnableReporting(detail.checked)
+                  }
+                  checked={pipelineInfo.enableReporting}
+                  description={
+                    <div>
+                      <Trans
+                        i18nKey="pipeline:create.createSampleQuickSightDesc"
+                        components={{
+                          learnmore_anchor: (
+                            <Link
+                              external
+                              href={buildDocumentLink(
+                                i18n.language,
+                                PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN,
+                                PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN
                               )}
-                              errorText={ternary(
-                                quickSightUserEmptyError,
-                                t('pipeline:valid.quickSightUserEmptyError'),
-                                ''
+                            />
+                          ),
+                          guide_anchor: (
+                            <Link
+                              external
+                              href={buildDocumentLink(
+                                i18n.language,
+                                PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
+                                PIPELINE_QUICKSIGHT_GUIDE_LINK_CN
                               )}
-                            >
-                              <div className="flex">
-                                <div className="flex-1">
-                                  <Select
-                                    statusType={ternary(
-                                      loadingUsers,
-                                      'loading',
-                                      'finished'
-                                    )}
-                                    placeholder={defaultStr(
-                                      t('pipeline:create.quickSIghtPlaceholder')
-                                    )}
-                                    selectedOption={
-                                      pipelineInfo.selectedQuickSightUser
-                                    }
-                                    onChange={({ detail }) =>
-                                      changeQuickSightSelectedUser(
-                                        detail.selectedOption
-                                      )
-                                    }
-                                    options={quickSightUserOptions}
-                                    filteringType="auto"
-                                  />
-                                </div>
-                                <div className="ml-10">
-                                  <Button
-                                    loading={loadingUsers}
-                                    onClick={() => {
-                                      getQuickSightUserList();
-                                    }}
-                                    iconName="refresh"
-                                  />
-                                </div>
-                              </div>
-                            </FormField>
-                          </>
-                        )}
-                    </>
-                  ))}
-              </SpaceBetween>
-            </>
+                            />
+                          ),
+                        }}
+                      />
+                    </div>
+                  }
+                >
+                  <b>{t('pipeline:create.createSampleQuickSight')}</b>
+                </Toggle>
+              </FormField>
+
+              {pipelineInfo.enableReporting &&
+                (loadingQuickSight ? (
+                  <Spinner />
+                ) : (
+                  <>
+                    {!quickSightEnabled && (
+                      <Alert
+                        type="warning"
+                        header={t('pipeline:create.quickSightNotSub')}
+                      >
+                        {t('pipeline:create.quickSightNotSubDesc1')}
+                        <Link external href={buildQuickSightSubscriptionLink()}>
+                          {t('pipeline:create.quickSightSubscription')}
+                        </Link>
+                        {t('pipeline:create.quickSightNotSubDesc2')}
+                      </Alert>
+                    )}
+
+                    {quickSightEnabled && !quickSightEnterprise && (
+                      <Alert
+                        type="warning"
+                        header={t('pipeline:create.quickSightNotEnterprise')}
+                      >
+                        {t('pipeline:create.quickSightNotEnterpriseDesc')}
+                      </Alert>
+                    )}
+
+                    {authenticationType !== 'IDENTITY_POOL' &&
+                      pipelineInfo.enableReporting &&
+                      quickSightEnabled &&
+                      quickSightEnterprise && (
+                        <FormField
+                          label={t('pipeline:create.quickSightUser')}
+                          description={t('pipeline:create.quickSightUserDesc')}
+                          errorText={ternary(
+                            quickSightUserEmptyError,
+                            t('pipeline:valid.quickSightUserEmptyError'),
+                            ''
+                          )}
+                        >
+                          <div className="flex">
+                            <div className="flex-1">
+                              <Select
+                                statusType={ternary(
+                                  loadingUsers,
+                                  'loading',
+                                  'finished'
+                                )}
+                                placeholder={defaultStr(
+                                  t('pipeline:create.quickSightPlaceholder')
+                                )}
+                                selectedOption={
+                                  pipelineInfo.selectedQuickSightUser
+                                }
+                                onChange={({ detail }) =>
+                                  changeQuickSightSelectedUser(
+                                    detail.selectedOption
+                                  )
+                                }
+                                options={quickSightUserOptions}
+                                filteringType="auto"
+                              />
+                            </div>
+                            <div className="ml-10">
+                              <Button
+                                loading={loadingUsers}
+                                onClick={() => {
+                                  getQuickSightUserList();
+                                }}
+                                iconName="refresh"
+                              />
+                            </div>
+                          </div>
+                        </FormField>
+                      )}
+                  </>
+                ))}
+            </SpaceBetween>
           )}
         </>
       ) : (

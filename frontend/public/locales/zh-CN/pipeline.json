@@ -228,7 +228,7 @@
     "quickSightNotEnterprise": "您的账户中的 QuickSight 版本不是企业版",
     "quickSightNotEnterpriseDesc": "解决方案控制面板需要 QuickSight Enterprise，你可以在 QuickSight 管理控制台中升级版本。",
     "quickSightSubscription": "订阅",
-    "quickSIghtPlaceholder": "选择 quicksight 用户",
+    "quickSightPlaceholder": "选择 quicksight 用户",
     "quickSightUser": "QuickSight 用户",
     "quickSightUserDesc": "为解决方案选择一个QuickSight管理员用户以创建数据集和分析。",
     "ingestSettings": "摄取设置",
