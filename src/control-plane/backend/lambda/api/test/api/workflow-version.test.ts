@@ -783,7 +783,7 @@ describe('Workflow test with pipeline version in China region', () => {
   });
 
   it('Generate workflow current version in China region', async () => {
-    dictionaryMock(ddbMock);
+    dictionaryMock(ddbMock, undefined, 'cn-north-1');
     createPipelineMock(mockClients, {
       publicAZContainPrivateAZ: true,
       subnetsCross3AZ: true,
@@ -886,7 +886,7 @@ describe('Workflow test with pipeline version in China region', () => {
   });
 
   it('Generate workflow v1.0.0 in China region', async () => {
-    dictionaryMock(ddbMock);
+    dictionaryMock(ddbMock, undefined, 'cn-north-1');
     createPipelineMock(mockClients, {
       publicAZContainPrivateAZ: true,
       subnetsCross3AZ: true,
@@ -949,7 +949,7 @@ describe('Workflow test with pipeline version in China region', () => {
                             },
                           ]),
                         {
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com.cn/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -1038,7 +1038,7 @@ describe('Workflow test with pipeline version in China region', () => {
   });
 
   it('Generate workflow v1.1.0 in China region', async () => {
-    dictionaryMock(ddbMock);
+    dictionaryMock(ddbMock, undefined, 'cn-north-1');
     createPipelineMock(mockClients, {
       publicAZContainPrivateAZ: true,
       subnetsCross3AZ: true,
@@ -1093,7 +1093,7 @@ describe('Workflow test with pipeline version in China region', () => {
                             },
                           ]),
                         {
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com.cn/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -1160,7 +1160,7 @@ describe('Workflow test with pipeline version in China region', () => {
   });
 
   it('Generate workflow v1.1.5 in China region', async () => {
-    dictionaryMock(ddbMock);
+    dictionaryMock(ddbMock, undefined, 'cn-north-1');
     createPipelineMock(mockClients, {
       publicAZContainPrivateAZ: true,
       subnetsCross3AZ: true,
@@ -1215,7 +1215,7 @@ describe('Workflow test with pipeline version in China region', () => {
                             },
                           ]),
                         {
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com.cn/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
@@ -1312,7 +1312,7 @@ describe('Workflow test with pipeline version in China region', () => {
   });
 
   it('Generate workflow v1.1.6 in China region', async () => {
-    dictionaryMock(ddbMock);
+    dictionaryMock(ddbMock, undefined, 'cn-north-1');
     createPipelineMock(mockClients, {
       publicAZContainPrivateAZ: true,
       subnetsCross3AZ: true,
@@ -1379,7 +1379,7 @@ describe('Workflow test with pipeline version in China region', () => {
                             },
                           ]),
                         {
-                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com.cn/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
                         },
                       ),
                     },
