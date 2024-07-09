@@ -65,7 +65,7 @@ weight: 1
 
 ### Fargate 类型
 
-| Request Per Second | ALB cost | Fargate cost  |  Buffer type      | Buffer cost | S3 cost   |  Total (USD/Month) |
+| 每日数据量/每秒请求数（RPS） | ALB 费用  | Fargate 费用 |  缓冲类型（Buffer type） | 缓冲费用（Buffer cost） | S3 费用   |   总计（美元/月） |
 | ------------------ | --- | ---  |  --------------   | ----------- | ---  |  --------- |
 | 10RPS (49GB/month)             |  $28.8  |  $18 |  Kinesis (On-Demand) |    $38       |   $3  |     $87.8  |
 |                    |  $28.8  |  $18 |  Kinesis (Provisioned 2 shard)   |      $22       |  $3   |   $71.8  |
