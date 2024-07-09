@@ -686,6 +686,15 @@ export class CPipeline {
       parameterKey: 'AppIds',
       parameterValue: appIds.join(','),
     });
+    let parallelism = '1';
+    if (appIds.length > 1) {
+      parallelism = appIds.length.toString();
+    }
+    updateList.push({
+      stackType: PipelineStackType.STREAMING,
+      parameterKey: 'Parallelism',
+      parameterValue: parallelism,
+    });
     // update workflow
     this.stackManager.updateWorkflowForApp(updateList);
     // create new execution

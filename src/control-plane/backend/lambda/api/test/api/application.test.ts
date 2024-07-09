@@ -24,9 +24,10 @@ import request from 'supertest';
 import { mockClients, resetAllMockClient } from './aws-sdk-mock-util';
 import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_SOLUTION_VERSION, createEventRuleMock, createSNSTopicMock, MOCK_EXECUTION_ID_OLD } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
-import { clickStreamTableName } from '../../common/constants';
+import { APPREGISTRY_APPLICATION_ARN_PARAMETER, STREAMING_BASE_PARAMETERS, ServiceCatalogAppRegistryStack, StreamingStack, Tags, expectJsonParameter, mergeParameters, replaceStackInputProps } from './workflow-mock';
+import { LEVEL3, clickStreamTableName } from '../../common/constants';
 import { PipelineStackType, PipelineStatusType } from '../../common/model-ln';
-import { PipelineServerProtocol, WorkflowStateType } from '../../common/types';
+import { PipelineServerProtocol, WorkflowState, WorkflowStateType } from '../../common/types';
 import { getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -1473,29 +1474,43 @@ describe('Application test', () => {
               Workflow: {
                 Branches: [
                   {
-                    StartAt: 'Ingestion',
+                    StartAt: 'ServiceCatalogAppRegistry',
                     States: {
-                      Ingestion: {
-                        Data: {
-                          Callback: {
-                            BucketName: 'EXAMPLE_BUCKET',
-                            BucketPrefix: '/ingestion',
+                      ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack as WorkflowState,
+                      [LEVEL3]: {
+                        Branches: [
+                          {
+                            StartAt: 'Streaming',
+                            States: {
+                              Streaming: replaceStackInputProps(StreamingStack,
+                                {
+                                  StackName: `${getStackPrefix()}-Streaming-6666-6666`,
+                                  Parameters: mergeParameters(
+                                    [
+                                      ...STREAMING_BASE_PARAMETERS,
+                                      APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                                    ],
+                                    [
+                                      {
+                                        ParameterKey: 'Parallelism',
+                                        ParameterValue: '2',
+                                      },
+                                    ]),
+                                  Tags: Tags,
+                                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/streaming-ingestion-stack.template.json',
+                                },
+                              ),
+                            },
                           },
-                          Input: {
-                            Action: 'Create',
-                            Parameters: [],
-                            StackName: 'clickstream-ingestion1',
-                            TemplateURL: 'https://example.com',
-                          },
-                        },
+                        ],
                         End: true,
-                        Type: 'Stack',
+                        Type: WorkflowStateType.PARALLEL,
                       },
                     },
                   },
                 ],
                 End: true,
-                Type: 'Parallel',
+                Type: WorkflowStateType.PARALLEL,
               },
             },
             executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
@@ -1503,7 +1518,16 @@ describe('Application test', () => {
         ],
       });
     mockClients.sfnMock.on(StartExecutionCommand).resolves({});
-    mockClients.ddbMock.on(UpdateCommand).resolves({});
+    mockClients.ddbMock.on(UpdateCommand).callsFake(input => {
+      const branches = input.ExpressionAttributeValues[':workflow'].Workflow.Branches;
+      const level3state = branches[0].States[LEVEL3];
+      const streamingState = level3state.Branches[0].States.Streaming;
+      const streamingStateParameters = streamingState.Data.Input.Parameters;
+      console.log(JSON.stringify(streamingStateParameters, null, 2));
+      expect(
+        expectJsonParameter(streamingStateParameters, 'Parallelism', '2'),
+      ).toBeTruthy();
+    });
     mockClients.kinesisAnalyticsV2Mock.on(DescribeApplicationCommand).resolves({
       ApplicationDetail: {
         ApplicationARN: 'arn:aws:kinesisanalytics:us-east-1:555555555555:application/ClickstreamStreamingIngestion204CC39E-F3',

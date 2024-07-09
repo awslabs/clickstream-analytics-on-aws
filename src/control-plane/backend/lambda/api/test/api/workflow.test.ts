@@ -2398,10 +2398,17 @@ describe('Workflow test', () => {
                       Streaming: replaceStackInputProps(StreamingStack,
                         {
                           StackName: `${getStackPrefix()}-Streaming-6666-6666`,
-                          Parameters: [
-                            ...STREAMING_BASE_PARAMETERS,
-                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
-                          ],
+                          Parameters: mergeParameters(
+                            [
+                              ...STREAMING_BASE_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            [
+                              {
+                                ParameterKey: 'Parallelism',
+                                ParameterValue: '2',
+                              },
+                            ]),
                           Tags: Tags,
                           TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/streaming-ingestion-stack.template.json',
                         },

@@ -1709,6 +1709,15 @@ export class CStreamingStack extends JSONObject {
   })
     TransformerName?: string;
 
+  @JSONObject.optional('1')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
+    if (!stack._resources?.appIds || stack._resources?.appIds.length === 0) {
+      return '1';
+    }
+    return stack._resources?.appIds.length.toString();
+  })
+    Parallelism?: string;
+
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CStreamingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);

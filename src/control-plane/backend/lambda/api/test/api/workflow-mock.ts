@@ -32,6 +32,11 @@ export function expectParameter(parameters: any, key: string, value: string | un
   console.log(`Expect Parameter: ${key}=${value}, Actual Parameter: ${parameter?.ParameterKey}=${parameter?.ParameterValue}`);
   return parameter?.ParameterValue === value;
 };
+export function expectJsonParameter(parameters: any, key: string, value: string | undefined) {
+  const parameter = parameters.find((p: any) => p.ParameterKey === key);
+  console.log(`Expect Parameter: ${key}=${value}, Actual Parameter: ${parameter?.ParameterKey}=${parameter?.ParameterValue}`);
+  return parameter?.ParameterValue === value;
+};
 
 export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   // Deep Copy
@@ -1207,6 +1212,10 @@ export const STREAMING_BASE_PARAMETERS = [
   {
     ParameterKey: 'TransformerName',
     ParameterValue: 'clickstream',
+  },
+  {
+    ParameterKey: 'Parallelism',
+    ParameterValue: '1',
   },
 ];
 
