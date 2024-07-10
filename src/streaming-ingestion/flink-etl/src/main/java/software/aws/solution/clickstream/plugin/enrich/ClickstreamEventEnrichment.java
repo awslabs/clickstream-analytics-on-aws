@@ -17,7 +17,11 @@ package software.aws.solution.clickstream.plugin.enrich;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public interface ClickstreamEventEnrichment extends Serializable {
     void enrich(ClickstreamEvent event);
+    default void config(Map<String, Object> config) {
+        // Default implementation
+    }
 }
