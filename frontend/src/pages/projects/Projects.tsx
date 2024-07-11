@@ -198,6 +198,7 @@ const Projects: React.FC = () => {
       content={
         <ContentLayout
           headerVariant="high-contrast"
+          disableOverlap
           header={
             <ProjectsHeader
               totalProject={totalCount}

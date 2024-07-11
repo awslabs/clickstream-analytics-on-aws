@@ -1,6 +1,7 @@
 {
   "labels": {
-    "title": "User",
+    "title": "Users",
+    "tableTitle": "User List",
     "tableColumnUserId": "User ID",
     "tableColumnName": "User name",
     "tableColumnRole": "Role",

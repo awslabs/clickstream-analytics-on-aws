@@ -15,9 +15,9 @@ import { Header } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const PluginHeader: React.FC = () => {
+const UserHeader: React.FC = () => {
   const { t } = useTranslation();
-  return <Header variant="h1">{t('plugin:plugins')}</Header>;
+  return <Header variant="h1">{t('user:labels.title')}</Header>;
 };
 
-export default PluginHeader;
+export default UserHeader;

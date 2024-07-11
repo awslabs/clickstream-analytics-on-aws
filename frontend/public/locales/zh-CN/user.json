@@ -1,6 +1,7 @@
 {
   "labels": {
     "title": "用户",
+    "tableTitle": "用户列表",
     "tableColumnUserId": "用户ID",
     "tableColumnName": "用户名",
     "tableColumnRole": "角色",
