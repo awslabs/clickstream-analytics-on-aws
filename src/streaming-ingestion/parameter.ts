@@ -190,7 +190,7 @@ export function createStackParameters(scope: Construct): {
   const retentionHoursParam = new CfnParameter(scope, 'RetentionHours', {
     description: 'The retention hours of events in the event table',
     type: 'Number',
-    default: 1.0,
+    default: 24.0,
     minValue: 0.01,
   });
 

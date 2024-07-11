@@ -136,7 +136,7 @@ export function UserTableHeader({
         }
         {...props}
       >
-        {t('user:labels.title')}
+        {t('user:labels.tableTitle')}
       </Header>
     </div>
   );

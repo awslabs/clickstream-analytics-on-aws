@@ -42,7 +42,6 @@ import {
   DEFAULT_MSK_SINK_INTERVAL,
   EIngestionType,
   ENetworkType,
-  EVENT_REFRESH_UNIT_LIST,
   MAX_KDS_BATCH_SIZE,
   MAX_KDS_SINK_INTERVAL,
   MAX_MSK_BATCH_SIZE,
@@ -66,7 +65,6 @@ import {
 } from 'ts/url';
 import {
   checkDisable,
-  defaultSelectOptions,
   defaultStr,
   isDisabled,
   isStreamingDisabled,
@@ -119,7 +117,6 @@ interface ConfigIngestionProps {
   changeAckownledge: () => void;
 
   changeEnableStreaming: (enable: boolean) => void;
-  changeStreamingDataRangeValue: (value: string) => void;
 
   publicSubnetError: boolean;
   privateSubnetError: boolean;
@@ -186,7 +183,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeAckownledge,
     changeEnableALBAuthentication,
     changeEnableStreaming,
-    changeStreamingDataRangeValue,
     publicSubnetError,
     privateSubnetError,
     privateSubnetDiffWithPublicError,
@@ -222,13 +218,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     useState<SelectProps.Options>([]);
   const [ssmSecretOptionList, setSsmSecretOptionList] =
     useState<SelectProps.Options>([]);
-  const [selectedStreamingDataRangeUnit, setSelectedStreamingDataRangeUnit] =
-    useState(
-      defaultSelectOptions(
-        EVENT_REFRESH_UNIT_LIST[0],
-        pipelineInfo.selectedStreamingDataRangeUnit
-      )
-    );
 
   // get subnet list
   const getSubnetListByRegionAndVPC = async (region: string, vpcId: string) => {
@@ -1065,39 +1054,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               >
                 <b>{t('pipeline:create.enableStreaming')}</b>
               </Toggle>
-              <FormField
-                label={t('pipeline:create.streamingDataRangeTitle')}
-                description={t('pipeline:create.streamingDataRangeDesc')}
-              >
-                <div className="flex">
-                  <div style={{ width: 250 }}>
-                    <Input
-                      disabled={isStreamingDisabled(update, pipelineInfo)}
-                      type="number"
-                      placeholder="3"
-                      value={pipelineInfo.streamingDataRangeValue}
-                      onChange={(e) => {
-                        if (!POSITIVE_INTEGER_REGEX.test(e.detail.value)) {
-                          return false;
-                        }
-                        changeStreamingDataRangeValue(e.detail.value);
-                      }}
-                    />
-                  </div>
-                  <div className="ml-10">
-                    <Select
-                      disabled={isStreamingDisabled(update, pipelineInfo)}
-                      selectedOption={selectedStreamingDataRangeUnit}
-                      onChange={({ detail }) => {
-                        setSelectedStreamingDataRangeUnit(
-                          detail.selectedOption
-                        );
-                      }}
-                      options={EVENT_REFRESH_UNIT_LIST}
-                    />
-                  </div>
-                </div>
-              </FormField>
             </SpaceBetween>
           </SpaceBetween>
         </Container>

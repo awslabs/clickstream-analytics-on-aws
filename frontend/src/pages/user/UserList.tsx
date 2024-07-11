@@ -27,6 +27,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { IUserRole, TABLE_FILTER_OPTIONS, TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
+import UserHeader from './UserHeader';
 import UserTable from './UserTable';
 
 interface IUserTableItem {
@@ -247,7 +248,7 @@ const UserList: React.FC = () => {
       headerVariant="high-contrast"
       toolsHide
       content={
-        <ContentLayout headerVariant="high-contrast">
+        <ContentLayout headerVariant="high-contrast" header={<UserHeader />}>
           <UserTable
             tableColumnDefinitions={COLUMN_DEFINITIONS}
             tableContentDisplay={CONTENT_DISPLAY}
@@ -255,7 +256,7 @@ const UserList: React.FC = () => {
             tableI18nStrings={{
               loadingText: t('user:labels.tableLoading') || 'Loading',
               emptyText: t('user:labels.tableEmpty'),
-              headerTitle: t('user:labels.title'),
+              headerTitle: t('user:labels.tableTitle'),
               filteringAriaLabel: t('user:labels.filteringAriaLabel'),
               filteringPlaceholder: t('user:labels.filteringPlaceholder'),
               groupPropertiesText: t('button.groupPropertiesText'),
