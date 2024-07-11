@@ -11,15 +11,17 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
+import { OUTPUT_REPORT_DASHBOARDS_SUFFIX, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
 import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { ApplicationStatus, DescribeApplicationCommand, StartApplicationCommand, StopApplicationCommand, UpdateApplicationCommand } from '@aws-sdk/client-kinesis-analytics-v2';
+import { GenerateEmbedUrlForRegisteredUserCommand } from '@aws-sdk/client-quicksight';
 import {
   QueryCommand,
 } from '@aws-sdk/lib-dynamodb';
 import request from 'supertest';
 import { mockClients, resetAllMockClient } from './aws-sdk-mock-util';
 import { MOCK_APP_ID, MOCK_PIPELINE_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION, appExistedMock, projectExistedMock } from './ddb-mock';
+import { awsAccountId } from '../../common/constants';
 import { PipelineStackType, PipelineStatusType } from '../../common/model-ln';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -352,6 +354,79 @@ describe('Realtime test', () => {
     expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(DescribeApplicationCommand, 1);
     expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(UpdateApplicationCommand, 0);
     expect(mockClients.kinesisAnalyticsV2Mock).toHaveReceivedCommandTimes(StopApplicationCommand, 1);
+  });
+  it('Embedding realtime', async () => {
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(QueryCommand).resolvesOnce(
+      {
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            streaming: {
+              appIdStreamList: [MOCK_APP_ID],
+              appIdRealtimeList: [MOCK_APP_ID],
+            },
+            reporting: {
+              quickSight: {
+                accountName: 'clickstream-acc-xxx',
+              },
+            },
+            stackDetails: [
+              {
+                stackName: `Clickstream-Streaming-${MOCK_PIPELINE_ID}`,
+                stackType: PipelineStackType.STREAMING,
+                stackStatus: StackStatus.CREATE_COMPLETE,
+                stackStatusReason: '',
+                stackTemplateVersion: MOCK_SOLUTION_VERSION,
+                outputs: [
+                  {
+                    OutputKey: OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
+                    OutputValue: 'arn:aws:kinesisanalytics:us-east-1:555555555555:application/ClickstreamStreamingIngestion204CC39E-F3mJRaAOKJaL',
+                  },
+                ],
+              },
+              {
+                stackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
+                stackType: PipelineStackType.REPORTING,
+                stackStatus: StackStatus.CREATE_COMPLETE,
+                stackStatusReason: '',
+                stackTemplateVersion: MOCK_SOLUTION_VERSION,
+                outputs: [
+                  {
+                    OutputKey: OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+                    OutputValue: '[{"appId":"app_7777_7777","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1","realtimeDashboardId":"clickstream_dashboard_rt_v1_notepad_mtzfsocy_app1"}]',
+                  },
+                ],
+              },
+            ],
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      },
+    );
+    mockClients.quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    const res = await request(app).get(`/api/reporting/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/realtime?allowedDomain=https://example.com`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toEqual('');
+    expect(res.body.success).toEqual(true);
+    expect(mockClients.quickSightMock).toHaveReceivedNthSpecificCommandWith(1, GenerateEmbedUrlForRegisteredUserCommand, {
+      AllowedDomains: ['https://example.com'],
+      AwsAccountId: awsAccountId,
+      ExperienceConfiguration: {
+        QuickSightConsole: {
+          InitialPath: '/dashboards/clickstream_dashboard_rt_v1_notepad_mtzfsocy_app1',
+        },
+      },
+      UserArn: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamPublishUser',
+    });
   });
   afterAll((done) => {
     server.close();

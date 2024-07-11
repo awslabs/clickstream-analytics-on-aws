@@ -312,7 +312,7 @@ function metadataUserAttributeExistedMock(ddbMock: any, projectId:string, appId:
   });
 }
 
-function dictionaryMock(ddbMock: any, name?: string): any {
+function dictionaryMock(ddbMock: any, name?: string, bucketRegion?: string): any {
   if (!name || name === 'BuiltInPlugins') {
     ddbMock.on(GetCommand, {
       TableName: dictionaryTableName,
@@ -347,6 +347,8 @@ function dictionaryMock(ddbMock: any, name?: string): any {
           dist_output_bucket: 'EXAMPLE-BUCKET',
           target: 'feature-rel/main',
           prefix: 'default/',
+          bucket_region: bucketRegion?.startsWith('cn-') ? bucketRegion : (bucketRegion ?? 'us-east-1'),
+          url_suffix: bucketRegion?.startsWith('cn-') ? 'amazonaws.com.cn' : 'amazonaws.com',
           version: MOCK_SOLUTION_VERSION,
         },
       },

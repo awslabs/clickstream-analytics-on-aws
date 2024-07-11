@@ -4,7 +4,8 @@ set -euxo pipefail
 
 export SOLUTION_NAME='test-clickstream-001'
 export BUILD_VERSION=ci-latest-001
-
+export PUBLIC_ECR_TAG=1.2.0-dev
+export PUBLIC_ECR_REGISTRY='public.ecr.aws/testid'
 # in global pipeline
 export CODEBUILD_SRC_DIR=`pwd`
 cd deployment/
@@ -18,4 +19,6 @@ export SOLUTION_TRADEMARKEDNAME
 export SOLUTION_ECR_BUILD_VERSION
 export SOLUTION_ECR_ACCOUNT
 export SOLUTION_ECR_REPO_NAME
+export PUBLIC_ECR_REGISTRY
+export PUBLIC_ECR_TAG 
 node ./test/index.js

@@ -31,7 +31,7 @@ The following are cost estimations for monthly data volumes of 10/100/1000 RPS (
 Ingestion module includes the following cost components:
 
 - Application load balancer and public IPv4 addresses
-- EC2 for ECS
+- EC2 for ECS / Fargate for ECS
 - Data sink (Kinesis Data Streams | Kafka | Direct to S3)
 - S3 storage
 
@@ -42,6 +42,8 @@ Key assumptions include:
 - KDS configuration (on-demand, provision)
 - 10/100/1000RPS
 - Three public subnets are used
+
+### EC2 Type
 
 | Request Per Second | ALB cost | EC2 cost  |  Buffer type      | Buffer cost | S3 cost   |  Total (USD/Month) |
 | ------------------ | --- | ---  |  --------------   | ----------- | ---  |  --------- |
@@ -57,6 +59,23 @@ Key assumptions include:
 |                         |  $262.8   |  $122  |  Kinesis (Provisioned 10 shard)   |    $180         |   $14  |     $578.8  |
 |           |  $262.8   | $122  |      MSK (m5.large * 2, connector MCU * 2~3)              |      $590       |  $14  |     $988.8
 |           |  $262.8   | $122   |      None              |            |  $14   |     $398.8 
+
+### Fargate Type
+
+| Request Per Second | ALB cost | Fargate cost  |  Buffer type      | Buffer cost | S3 cost   |  Total (USD/Month) |
+| ------------------ | --- | ---  |  --------------   | ----------- | ---  |  --------- |
+| 10RPS (49GB/month)             |  $28.8  |  $18 |  Kinesis (On-Demand) |    $38       |   $3  |     $87.8  |
+|                    |  $28.8  |  $18 |  Kinesis (Provisioned 2 shard)   |      $22       |  $3   |   $71.8  |
+|                    |  $28.8  |  $18 |  MSK (m5.large * 2, connector MCU * 1)   |       $417      |   $3  |     $466.8   |
+|                         | $28.8    |  $18 |  None              |             |  $3    |      $49.8   |
+|100RPS (490GB/month)          |  $53.8  |  $18  |  Kinesis(On-demand)              |      $115       |  $4   |     $190.8 |
+|                         | $53.8    |   $18 |  Kinesis (Provisioned 2 shard)   |      $26       | $4    |     $101.8  |
+|           |   $53.8  |  $18  |   MSK (m5.large * 2, connector MCU * 1)              |      $417       |  $4   |     $492.8
+|           |   $53.8  |  $18 |      None              |             |  $4    |     $75.8
+|1000RPS (4900GB/month)          |   $262.8  |   $72 |      Kinesis(On-demand)              |      $1051       |  $14   |    $1399.8 |
+|                         |  $262.8   |  $72  |  Kinesis (Provisioned 10 shard)   |    $180         |   $14  |     $528.8  |
+|           |  $262.8   | $72  |      MSK (m5.large * 2, connector MCU * 2~3)              |      $590       |  $14  |     $938.8
+|           |  $262.8   | $72   |      None              |            |  $14   |     $348.8 
 
 ### Data transfer
 There are associated costs when data is transferred from EC2 to the downstream data sink. Below is an example of data transfer costs based on 1000 RPS and a 2KB request payload.
