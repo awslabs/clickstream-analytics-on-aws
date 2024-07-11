@@ -59,7 +59,6 @@ import {
   DEFAULT_TRANSFORM_SDK_IDS,
   EIngestionType,
   ENetworkType,
-  EVENT_REFRESH_UNIT_LIST,
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
