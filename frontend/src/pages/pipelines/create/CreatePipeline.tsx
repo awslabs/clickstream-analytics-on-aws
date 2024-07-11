@@ -968,7 +968,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     } else {
       createPipelineObj.streaming = {
         appIdStreamList: pipelineInfo.streaming?.appIdStreamList ?? [],
-        retentionHours: 24,
       };
     }
     return createPipelineObj;
@@ -2696,14 +2695,6 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   const setUpdateStreaming = async (pipelineInfo: IExtPipeline) => {
     pipelineInfo.enableStreaming =
       pipelineInfo.streaming?.appIdStreamList !== undefined;
-    const reverseStreamingDataRange = reverseFreshnessInHour(
-      pipelineInfo.streaming?.retentionHours ?? 24
-    );
-    pipelineInfo.streamingDataRangeValue = reverseStreamingDataRange.value;
-    pipelineInfo.selectedStreamingDataRangeUnit =
-      EVENT_REFRESH_UNIT_LIST.filter(
-        (type) => type.value === reverseStreamingDataRange.unit
-      )[0];
   };
 
   const setUpdateQuickSightUser = async (pipelineInfo: IExtPipeline) => {

@@ -166,7 +166,7 @@ declare global {
     };
     timezone?: IAppTimezone[];
     streaming?: {
-      retentionHours: number;
+      retentionHours?: number;
       appIdStreamList: string[];
       appIdRealtimeList?: string[];
     };

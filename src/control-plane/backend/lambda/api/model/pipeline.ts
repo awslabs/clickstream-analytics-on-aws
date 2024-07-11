@@ -222,7 +222,7 @@ export interface Reporting {
 }
 
 export interface Streaming {
-  readonly retentionHours: number;
+  readonly retentionHours?: number;
   readonly appIdStreamList: string[];
   readonly appIdRealtimeList?: string[];
   readonly bucket?: S3Bucket;
