@@ -35,10 +35,10 @@ import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { cloneDeep } from 'lodash';
-import { FULL_SOLUTION_VERSION, amznRequestContextHeader, awsUrlSuffix } from './constants';
+import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IDictionary } from '../model/dictionary';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter, IMetadataBuiltInList } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
@@ -272,20 +272,17 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   return names.get(key) ?? '';
 }
 
-function getSinkType(pipeline: IPipeline): string | undefined {
-  if (pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
-    switch (pipeline?.ingestionServer.sinkType) {
-      case PipelineSinkType.S3:
-        return SINK_TYPE_MODE.SINK_TYPE_S3;
-      case PipelineSinkType.KAFKA:
-        return SINK_TYPE_MODE.SINK_TYPE_MSK;
-      case PipelineSinkType.KINESIS:
-        return SINK_TYPE_MODE.SINK_TYPE_KDS;
-      default:
-        return undefined;
-    }
+function getSinkType(pipeline: IPipeline): string {
+  switch (pipeline?.ingestionServer.sinkType) {
+    case PipelineSinkType.S3:
+      return SINK_TYPE_MODE.SINK_TYPE_S3;
+    case PipelineSinkType.KAFKA:
+      return SINK_TYPE_MODE.SINK_TYPE_MSK;
+    case PipelineSinkType.KINESIS:
+      return SINK_TYPE_MODE.SINK_TYPE_KDS;
+    default:
+      return SINK_TYPE_MODE.SINK_TYPE_S3;
   }
-  return undefined;
 }
 
 function replaceTemplateVersion(templateUrl: string, version: string): string {
@@ -680,6 +677,19 @@ function getStackOutputFromPipelineStatus(stackDetails: PipelineStatusDetail[] |
     }
   }
   return '';
+}
+
+function getStreamEnableAppIdsFromPipeline(oldAppIdList: string[], appId: string, enable: boolean) {
+  const streamEnableAppIds = cloneDeep(oldAppIdList);
+  if (enable && !streamEnableAppIds.includes(appId)) {
+    streamEnableAppIds.push(appId);
+  } else if (!enable && streamEnableAppIds.includes(appId)) {
+    const index = streamEnableAppIds.indexOf(appId);
+    if (index > -1) {
+      streamEnableAppIds.splice(index, 1);
+    }
+  }
+  return streamEnableAppIds;
 }
 
 function getVersionFromTags(tags: Tag[] | undefined) {
@@ -1477,8 +1487,9 @@ function getTemplateUrl(templateName: string, solutionMetadata?: IDictionary, us
   const solutionName = solutionMetadata?.data.name;
   // default/ or cn/ or 'null',''
   const prefix = isEmpty(solutionMetadata?.data.prefix) ? '' : solutionMetadata?.data.prefix;
-  const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
-  const s3Host = `https://${solutionMetadata?.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
+  const s3Region = solutionMetadata?.data.bucket_region;
+  const urlSuffix = solutionMetadata?.data.url_suffix;
+  const s3Host = `https://${solutionMetadata?.data.dist_output_bucket}.s3.${s3Region}.${urlSuffix}`;
 
   let version = (useTarget || solutionMetadata?.data.version === 'latest') ?
     solutionMetadata?.data.target : solutionMetadata?.data.version;
@@ -1566,4 +1577,5 @@ export {
   getAppRegistryStackTags,
   readMetadataFromSqlFile,
   getTemplateUrl,
+  getStreamEnableAppIdsFromPipeline,
 };

@@ -16,6 +16,7 @@ import {
   ColumnLayout,
   SpaceBetween,
   Link,
+  StatusIndicator,
 } from '@cloudscape-design/components';
 import InfoTitle from 'components/common/title/InfoTitle';
 import DomainNameWithStatus from 'pages/common/DomainNameWithStatus';
@@ -88,6 +89,12 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
     }
 
     return '-';
+  };
+
+  const isStreamingEnable = () => {
+    return (
+      pipelineInfo?.enableStreaming || pipelineInfo?.streaming?.appIdStreamList
+    );
   };
 
   return (
@@ -356,9 +363,24 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             {t('pipeline:detail.streamingApplication')}
           </Box>
           <div>
-            {pipelineInfo?.streaming?.appIdStreamList
-              ? pipelineInfo.streamApplication
-              : t('no')}
+            <div>
+              {isStreamingEnable() ? (
+                <div>
+                  <StatusIndicator type="success">
+                    {t('enabled')}
+                  </StatusIndicator>
+                  <br />
+                  {pipelineInfo?.streaming?.appIdStreamList &&
+                  pipelineInfo.streamApplication
+                    ? pipelineInfo.streamApplication
+                    : '-'}
+                </div>
+              ) : (
+                <StatusIndicator type="stopped">
+                  {t('disabled')}
+                </StatusIndicator>
+              )}
+            </div>
           </div>
         </div>
       </SpaceBetween>

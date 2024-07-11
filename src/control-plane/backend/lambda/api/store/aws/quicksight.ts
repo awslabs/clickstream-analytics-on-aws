@@ -43,7 +43,8 @@ const promisePool = pLimit(3);
 
 export const registerClickstreamUser = async () => {
   try {
-    if (awsRegion.startsWith('cn')) {
+    const accountSubscription = await describeClickstreamAccountSubscription();
+    if (accountSubscription?.authenticationType !== 'IDENTITY_POOL') {
       return;
     }
     const identityRegion = await sdkClient.QuickSightIdentityRegion();
@@ -269,15 +270,14 @@ export interface QuickSightUserArns {
   exploreUserName: string;
 }
 
-export const getClickstreamUserArn = async (templateVersion: SolutionVersion, userArn: string): Promise<QuickSightUserArns> => {
+export const getClickstreamUserArn = async (templateVersion: SolutionVersion, userArn: string | undefined): Promise<QuickSightUserArns> => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
   const isChinaRegion = process.env.AWS_REGION?.startsWith('cn');
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
   const partition = isChinaRegion ? 'aws-cn' : 'aws';
-  const publishUserName = isChinaRegion ? userArn?.split('/').pop() :
+  const publishUserName = userArn ? userArn.split('/').pop() :
     `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`;
-  const publishUserArn = isChinaRegion ? userArn :
-    `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
+  const publishUserArn = userArn ?? `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
 
   if (templateVersion.greaterThan(SolutionVersion.V_1_1_4)) {
     // remove explore user
@@ -289,10 +289,9 @@ export const getClickstreamUserArn = async (templateVersion: SolutionVersion, us
     };
   }
 
-  const exploreUserName = isChinaRegion ? userArn?.split('/').pop() :
+  const exploreUserName = userArn ? userArn.split('/').pop() :
     `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`;
-  const exploreUserArn = isChinaRegion ? userArn :
-    `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${exploreUserName}`;
+  const exploreUserArn = userArn ?? `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${exploreUserName}`;
   return {
     publishUserArn: publishUserArn ?? '',
     publishUserName: publishUserName ?? '',

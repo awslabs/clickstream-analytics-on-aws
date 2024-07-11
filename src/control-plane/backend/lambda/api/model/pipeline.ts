@@ -79,18 +79,20 @@ import {
   getStackPrefix,
   getStackTags,
   getStateMachineExecutionName,
+  getStreamEnableAppIdsFromPipeline,
   getTemplateUrl,
+  getTemplateUrlFromResource,
   getUpdateTags,
   isEmpty,
 } from '../common/utils';
 import { StackManager } from '../service/stack';
-import { generateWorkflow } from '../service/stack-excution';
+import { generateWorkflow, getIngestionStackTemplateUrl } from '../service/stack-excution';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { getKeyArnByAlias } from '../store/aws/kms';
-import { QuickSightUserArns, getClickstreamUserArn, registerClickstreamUser } from '../store/aws/quicksight';
+import { QuickSightUserArns, getClickstreamUserArn, listUsers, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
 import { isBucketExist } from '../store/aws/s3';
 import { getExecutionDetail, listExecutions } from '../store/aws/sfn';
@@ -518,19 +520,39 @@ export class CPipeline {
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
     await this.resourcesCheck();
     this.pipeline.workflow = await generateWorkflow(this.pipeline, this.resources!);
+    this.stackManager.setWorkflow(this.pipeline.workflow);
     this.stackManager.setExecWorkflow(this.pipeline.workflow);
     const oldStackNames = this.stackManager.getWorkflowStacks(oldPipeline.workflow?.Workflow!);
     // update workflow
     this.stackManager.upgradeWorkflow(oldStackNames);
     // update workflow callback
     this.stackManager.setPipelineWorkflowCallback(executionName);
+    // update workflow ingestion stack template
+    await this._updateIngestionServerStackTemplate(oldPipeline);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
     this._setExecution(executionArn);
+    this.pipeline.workflow = this.stackManager.getWorkflow();
     this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
     await store.updatePipeline(this.pipeline, oldPipeline);
+  }
+
+  private async _updateIngestionServerStackTemplate(oldPipeline: IPipeline): Promise<void> {
+    if (!oldPipeline.templateVersion) {
+      throw new Error('Old pipeline template version is empty.');
+    }
+    const ingestionStackTemplateUrl = getIngestionStackTemplateUrl(oldPipeline.workflow?.Workflow!, oldPipeline);
+    if (ingestionStackTemplateUrl?.includes('/ingestion-server-v2-stack.template.json')) {
+      return;
+    }
+    const ingestionTemplateKey = `${PipelineStackType.INGESTION}_${oldPipeline.ingestionServer.sinkType}`;
+    const ingestionTemplateURL = await getTemplateUrlFromResource(this.resources!, ingestionTemplateKey);
+    if (!ingestionTemplateURL) {
+      throw new ClickStreamBadRequestError(`Template: ${ingestionTemplateKey} not found in dictionary.`);
+    }
+    await this.stackManager.resetIngestionStackTemplate(ingestionTemplateURL, oldPipeline.templateVersion);
   }
 
   public async refreshStatus(refresh?: string): Promise<void> {
@@ -764,10 +786,18 @@ export class CPipeline {
     }
 
     if (this.pipeline.reporting) {
+      if (this.pipeline.reporting.quickSight?.user) {
+        const qsUsers = await listUsers();
+        const qsUserArns = qsUsers?.map(u => u.Arn);
+        // check if the user not exists
+        if (!qsUserArns?.includes(this.pipeline.reporting.quickSight?.user)) {
+          throw new ClickStreamBadRequestError(`Validation error: QuickSight user ${this.pipeline.reporting.quickSight?.user} not found. Please check and try again.`);
+        }
+      }
       await registerClickstreamUser();
       const quickSightUser = await getClickstreamUserArn(
         SolutionVersion.Of(this.pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
-        this.pipeline.reporting.quickSight?.user ?? '',
+        this.pipeline.reporting.quickSight?.user,
       );
       this.resources = {
         ...this.resources,
@@ -1051,17 +1081,11 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Streaming not enabled.');
     }
     // Save pipeline status
-    const appIdRealtimeList = this.pipeline.streaming?.appIdRealtimeList ?? [];
-    if (enable && !appIdRealtimeList.includes(appId)) {
-      if (!this.pipeline.streaming.appIdStreamList.includes(appId)) {
-        throw new ClickStreamBadRequestError('AppId not found in stream list.');
-      }
-      appIdRealtimeList.push(appId);
-    }
-    if (!enable && appIdRealtimeList.includes(appId)) {
-      const index = appIdRealtimeList.indexOf(appId);
-      appIdRealtimeList.splice(index, 1);
-    }
+    const appIdRealtimeList = getStreamEnableAppIdsFromPipeline(
+      this.pipeline.streaming?.appIdRealtimeList ?? [],
+      appId,
+      enable,
+    );
     this.pipeline.streaming = {
       ...this.pipeline.streaming,
       appIdRealtimeList,

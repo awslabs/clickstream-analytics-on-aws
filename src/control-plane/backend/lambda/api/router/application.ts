@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
-import { defaultOrderValueValid, defaultPageValueValid, isApplicationExisted, isProjectExisted, isRequestIdExisted, isValidAppId, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
+import { defaultOrderValueValid, defaultPageValueValid, isApplicationExisted, isProjectExisted, isRequestIdExisted, isTimezoneValid, isValidAppId, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { ApplicationServ } from '../service/application';
 
 const router_app: express.Router = express.Router();
@@ -46,6 +46,8 @@ router_app.post(
       .custom(isProjectExisted),
     body('appId')
       .custom(isValidAppId),
+    body('timezone')
+      .custom(isTimezoneValid),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -82,6 +84,8 @@ router_app.put(
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('projectId')
       .custom(isProjectExisted),
+    body('timezone')
+      .custom(isTimezoneValid),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {

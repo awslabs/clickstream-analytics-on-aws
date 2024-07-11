@@ -149,6 +149,7 @@ public class BaseSparkTest extends BaseTest {
         System.setProperty(DATABASE_PROP, dbName);
         System.setProperty(USER_KEEP_DAYS_PROP, String.valueOf(365 * 100));
         System.setProperty(ITEM_KEEP_DAYS_PROP, String.valueOf(365 * 100));
+        System.setProperty("debug.local.path", "/tmp/spark-debug-" + UUID.randomUUID());
         String uniqueTempDir = "/tmp/spark-test-" + UUID.randomUUID();
 
         spark = SparkSession.builder()

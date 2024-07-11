@@ -228,7 +228,7 @@
     "quickSightNotEnterprise": "QuickSight edition is not enterprise in your account",
     "quickSightNotEnterpriseDesc": "The solution dashboard need the QuickSight Enterprise, you can upgrade edition in QuickSight Management Console.",
     "quickSightSubscription": "Subscription",
-    "quickSIghtPlaceholder": "Select a quicksight user",
+    "quickSightPlaceholder": "Select a quicksight user",
     "quickSightUser": "QuickSight user",
     "quickSightUserDesc": "Select a QuickSight user for the solution to create datasets and analyses.",
     "ingestSettings": "Ingestion setting",

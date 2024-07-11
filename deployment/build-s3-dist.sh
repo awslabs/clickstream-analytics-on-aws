@@ -168,6 +168,8 @@ update_dict() {
 
     sed -i'' -e 's/__SOLUTION_NAME__/'$SOLUTION_NAME'/g' src/control-plane/backend/lambda/api/config/dictionary.json
     sed -i'' -e 's/__DIST_OUTPUT_BUCKET__/'$TEMPLATE_OUTPUT_BUCKET'/g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's/__BUCKET_REGION__/'$TEMPLATE_OUTPUT_BUCKET_REGION'/g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's/__URL_SUFFIX__/'$AWS_URL_SUFFIX'/g' src/control-plane/backend/lambda/api/config/dictionary.json
     sed -i'' -e 's~__TARGET__~'$target'~g' src/control-plane/backend/lambda/api/config/dictionary.json
     sed -i'' -e 's~__PREFIX__~'$prefix'~g' src/control-plane/backend/lambda/api/config/dictionary.json
     sed -i'' -e 's/__SOLUTION_VERSION__/'$VERSION'/g' src/control-plane/backend/lambda/api/config/dictionary.json
@@ -189,6 +191,8 @@ solution_name="$2"
 export SOLUTION_NAME="$solution_name"
 export SOLUTION_TRADEMARKEDNAME="$solution_name"
 export VERSION="$3"
+export TEMPLATE_OUTPUT_BUCKET_REGION='us-east-1'
+export AWS_URL_SUFFIX='amazonaws.com'
 
 #------------------------------------------------------------------------------
 # INITIALIZATION
@@ -213,34 +217,12 @@ else
     export SOLUTION_ID
 fi
 
-if [[ -z $SOLUTION_ECR_BUILD_VERSION ]]; then
-    echo "SOLUTION_ECR_BUILD_VERSION is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_ECR_BUILD_VERSION
-fi
-
-if [[ -z $SOLUTION_ECR_REPO_NAME ]]; then
-    echo "SOLUTION_ECR_REPO_NAME is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_ECR_REPO_NAME
-fi
-
 if [[ -z $SOLUTION_ECR_IMAGE_PLATFORM ]]; then
     echo "SOLUTION_ECR_IMAGE_PLATFORM is missing from ../solution_config"
     exit 1
-else 
+else
     export SOLUTION_ECR_IMAGE_PLATFORM
 fi
-
-if [[ -z ${SOLUTION_CN_TEMPLATES[@]} ]]; then
-    echo "SOLUTION_CN_TEMPLATES is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_CN_TEMPLATES
-fi
-
 
 # Validate command line input - must provide bucket
 [[ -z $1 ]] && { usage; exit 1; } || { SOLUTION_BUCKET=$1; }
@@ -363,20 +345,11 @@ do_replace "*.template.json" %%BUCKET_NAME%% ${SOLUTION_BUCKET}
 do_replace "*.template.json" %%SOLUTION_NAME%% ${SOLUTION_TRADEMARKEDNAME}
 do_replace "*.template.json" %%VERSION%% ${VERSION}
 do_replace "*.template.json" %%TEMPLATE_OUTPUT_BUCKET%% ${TEMPLATE_OUTPUT_BUCKET}
+do_replace "*.template.json" %%BUCKET_REGION%% ${TEMPLATE_OUTPUT_BUCKET_REGION}
+do_replace "*.template.json" %%AWS_URL_SUFFIX%% ${AWS_URL_SUFFIX}
 do_replace_1 "*.template.json" %%PUBLIC_ECR_REGISTRY%% ${PUBLIC_ECR_REGISTRY}
 do_replace "*.template.json" %%PUBLIC_ECR_TAG%% ${PUBLIC_ECR_TAG}
 
-
-for cn_template in ${SOLUTION_CN_TEMPLATES[@]}; do 
-   echo $cn_template
-   template_name=$(basename $cn_template)
-   if [[ $(echo $template_name | grep 'stack.template.json') ]]; then
-       template_name=$(echo $template_name | sed 's/stack.template.json/stack-cn.template.json/')
-   fi 
-   echo $template_name
-   do_cmd curl -s $cn_template -o ./$template_name
-done
- 
 echo "------------------------------------------------------------------------------"
 echo "${bold}[Packing] Source code artifacts${normal}"
 echo "------------------------------------------------------------------------------"

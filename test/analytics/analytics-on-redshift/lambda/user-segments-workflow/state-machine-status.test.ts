@@ -11,43 +11,43 @@
  *  and limitations under the License.
  */
 
-import { ListExecutionsCommand, SFNClient } from '@aws-sdk/client-sfn';
+import { SegmentJobStatus } from '@aws/clickstream-base-lib';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
+
 import {
   handler,
   StateMachineStatus,
   StateMachineStatusEvent,
 } from '../../../../../src/analytics/lambdas/user-segments-workflow/state-machine-status';
+import {
+  MOCK_SEGMENT_JOB_STATUS_ITEM,
+} from '../../../../../src/control-plane/backend/lambda/api/test/api/segments/segments-mock';
 import { getMockContext } from '../../../../common/lambda-context';
 
 describe('User segments workflow segment-job-status lambda tests', () => {
-  const sfnClientMock = mockClient(SFNClient);
+  const ddbDocClientMock = mockClient(DynamoDBDocumentClient);
   const contextMock = getMockContext();
-  const executionListItem = {
-    executionArn: 'arn:aws:states:us-east-1:111122223333:execution/abc',
-    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:workflow/abc',
-    name: 'abc',
-    status: undefined,
-    startDate: new Date(),
-  };
   let event: StateMachineStatusEvent;
 
   beforeEach(() => {
     event = {
-      input: {
-        appId: 'app-id',
-        segmentId: 'segment-id',
-        jobRunId: 'job-run-id',
-        scheduleIsExpired: false,
-      },
-      stateMachineArn: 'arn:aws:states:us-east-1:111122223333:workflow/abc',
+      appId: 'app-id',
+      segmentId: 'segment-id',
+      jobRunId: 'job-run-id',
+      scheduleIsExpired: false,
     };
   });
 
   test('state machine is busy on the first invocation', async () => {
-    sfnClientMock.on(ListExecutionsCommand).resolves({
-      executions: [executionListItem, executionListItem],
+    ddbDocClientMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          ...MOCK_SEGMENT_JOB_STATUS_ITEM,
+          jobStatus: SegmentJobStatus.IN_PROGRESS,
+        },
+      ],
     });
 
     const resp = await handler(event, contextMock);
@@ -65,8 +65,8 @@ describe('User segments workflow segment-job-status lambda tests', () => {
   });
 
   test('state machine is idle on the 5th invocation', async () => {
-    sfnClientMock.on(ListExecutionsCommand).resolves({
-      executions: [executionListItem],
+    ddbDocClientMock.on(QueryCommand).resolves({
+      Items: [],
     });
 
     const resp = await handler({

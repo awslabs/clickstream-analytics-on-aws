@@ -85,9 +85,11 @@ import {
   MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
   stackDetailsWithOutputs,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_V2_INGESTION_WORKFLOW,
 } from './pipeline-mock';
+import { expectParameter } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, LEVEL1, LEVEL2, LEVEL3, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
-import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
+import { BuiltInTagKeys, ECS_INFRA_TYPE_MODE, PipelineStatusType, SINK_TYPE_MODE } from '../../common/model-ln';
 import { PipelineServerProtocol } from '../../common/types';
 import { getDefaultTags, getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
@@ -3717,6 +3719,8 @@ describe('Pipeline test', () => {
       const dataProcessingInput = dataProcessingState.M.Data.M.Input;
       const reportingState = level3State.M.Branches.L[0].M.States.M.Reporting;
       const reportInput = reportingState.M.Data.M.Input;
+      const ingestionState = level1State.M.Branches.L[1].M.States.M.Ingestion;
+      const ingestionInput = ingestionState.M.Data.M.Input;
 
       expect(
         expressionAttributeValues[':timezone'].L.length === 0 &&
@@ -3725,7 +3729,8 @@ describe('Pipeline test', () => {
         dataProcessingInput.M.Tags.L[1].M.Value.S === 'v1.0.0' &&
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main' &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'Admin/fakeUser' &&
-        reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser',
+        reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser' &&
+        ingestionInput.M.TemplateURL.S === 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kinesis-stack.template.json',
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -4066,6 +4071,78 @@ describe('Pipeline test', () => {
       subnetsIsolated: true,
       update: true,
       updatePipeline: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_V2_INGESTION_WORKFLOW,
+        timezone: [
+          {
+            appId: `${MOCK_APP_ID}_1`,
+            timezone: 'Asia/Shanghai',
+          },
+          {
+            appId: `${MOCK_APP_ID}_2`,
+            timezone: 'Asia/Shanghai',
+          },
+        ],
+        templateVersion: SolutionVersion.V_1_2_0.fullVersion,
+      },
+    });
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
+      const level1State = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M[LEVEL1].M;
+      const dataProcessingInput = level1State.Branches.L[2].M.States.M.DataProcessing.M.Data.M.Input;
+      const ingestionState = level1State.Branches.L[1].M.States.M.Ingestion;
+      const ingestionInput = ingestionState.M.Data.M.Input;
+
+      expect(
+        expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
+        expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
+        expectParameter(ingestionInput.M.Parameters, 'EcsInfraType', ECS_INFRA_TYPE_MODE.EC2) &&
+        expectParameter(ingestionInput.M.Parameters, 'SinkType', SINK_TYPE_MODE.SINK_TYPE_KDS) &&
+        expectParameter(ingestionInput.M.Parameters, 'NotificationsTopicArn', undefined) &&
+        ingestionInput.M.TemplateURL.S === 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-stack.template.json' &&
+        dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
+      ).toBeTruthy();
+    });
+    const res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline upgraded.',
+    });
+    expect(snsMock).toHaveReceivedCommandTimes(CreateTopicCommand, 1);
+    expect(snsMock).toHaveReceivedCommandTimes(SNSTagResourceCommand, 1);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(PutRuleCommand, 1);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(EventTagResourceCommand, 1);
+    expect(snsMock).toHaveReceivedCommandWith(CreateTopicCommand, {
+      Name: `ClickstreamTopicForCFN-${MOCK_PIPELINE_ID}`,
+    });
+    expect(snsMock).toHaveReceivedCommandWith(SNSTagResourceCommand, {
+      ResourceArn: 'arn:aws:sns:ap-southeast-1:111122223333:ck-clickstream-branch-main',
+      Tags: getDefaultTags(MOCK_PROJECT_ID),
+    });
+    expect(cloudWatchEventsMock).toHaveReceivedCommandWith(PutRuleCommand, {
+      Name: `ClickstreamRuleForCFN-${MOCK_PROJECT_ID}`,
+      EventPattern: `{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:aws:cloudformation:ap-southeast-1:555555555555:stack/${getStackPrefix()}*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}`,
+    });
+    expect(cloudWatchEventsMock).toHaveReceivedCommandWith(EventTagResourceCommand, {
+      ResourceARN: 'arn:aws:events:ap-southeast-1:111122223333:rule/ck-clickstream-branch-main',
+      Tags: getDefaultTags(MOCK_PROJECT_ID),
+    });
+  });
+  it('Upgrade old pipeline that use v1 ingestion server stack', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
         timezone: [
           {
@@ -4077,15 +4154,24 @@ describe('Pipeline test', () => {
             timezone: 'Asia/Shanghai',
           },
         ],
+        templateVersion: SolutionVersion.V_1_1_5.fullVersion,
       },
     });
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const level1State = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M[LEVEL1].M;
-      const dataProcessingInput = level1State.Branches.L[2].M.States.M.DataProcessing.M.Data.M.Input;
+      const branches = expressionAttributeValues[':workflow'].M.Workflow.M.Branches;
+      const level1State = branches.L[0].M.States.M[LEVEL1];
+      const ingestionState = level1State.M.Branches.L[1].M.States.M.Ingestion;
+      const ingestionInput = ingestionState.M.Data.M.Input;
+      const dataProcessingState = level1State.M.Branches.L[2].M.States.M.DataProcessing;
+      const dataProcessingInput = dataProcessingState.M.Data.M.Input;
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
+        expectParameter(ingestionInput.M.Parameters, 'EcsInfraType', undefined) &&
+        expectParameter(ingestionInput.M.Parameters, 'SinkType', undefined) &&
+        expectParameter(ingestionInput.M.Parameters, 'NotificationsTopicArn', 'arn:aws:sns:us-east-1:111122223333:test') &&
+        ingestionInput.M.TemplateURL.S === 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json' &&
         dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
       ).toBeTruthy();
     });
@@ -4288,7 +4374,7 @@ describe('Pipeline test', () => {
       success: true,
       message: 'Pipeline upgraded.',
     });
-    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 0);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 1);
   });
   it('Upgrade pipeline without some app timezone', async () => {
     tokenMock(ddbMock, false);

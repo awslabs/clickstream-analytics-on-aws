@@ -16,6 +16,7 @@ package software.aws.solution.clickstream.function;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import software.aws.solution.clickstream.common.EventParser;
@@ -24,11 +25,18 @@ import software.aws.solution.clickstream.common.Util;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.plugin.enrich.ClickstreamEventEnrichment;
 
+import java.io.File;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static software.aws.solution.clickstream.flink.StreamingJob.CACHED_FILE_GEO_LITE_2_CITY_MMDB;
 
 @Slf4j
+
 public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, String> {
+
     private final String projectId;
     private final String appId;
     private final EventParser eventParser;
@@ -58,7 +66,20 @@ public class TransformEventFlatMapFunctionV2 extends ProcessFunction<String, Str
     }
 
     @Override
+    public void open(final Configuration parameters) {
+
+        File cachedGeoFile = this.getRuntimeContext().getDistributedCache().getFile(CACHED_FILE_GEO_LITE_2_CITY_MMDB);
+        Map<String, Object> configMap = new HashMap<>();
+        configMap.put(CACHED_FILE_GEO_LITE_2_CITY_MMDB, cachedGeoFile);
+
+        for (ClickstreamEventEnrichment enrichment : enrichments) {
+            enrichment.config(configMap);
+        }
+    }
+
+    @Override
     public void processElement(final String value, final ProcessFunction<String, String>.Context ctx, final Collector<String> out) {
+
         String delimiter = "/";
         String fileName = "file://" + appId + delimiter + Instant.now().toString();
         try {

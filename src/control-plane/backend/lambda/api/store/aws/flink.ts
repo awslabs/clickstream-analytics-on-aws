@@ -12,11 +12,18 @@
  */
 
 import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
-import { ApplicationRestoreType, ApplicationStatus, DescribeApplicationCommandOutput, KinesisAnalyticsV2 } from '@aws-sdk/client-kinesis-analytics-v2';
+import {
+  ApplicationRestoreType,
+  ApplicationStatus,
+  DescribeApplicationCommandOutput,
+  KinesisAnalyticsV2,
+} from '@aws-sdk/client-kinesis-analytics-v2';
+import { isEmpty } from 'lodash';
 import { logger } from '../../common/powertools';
 
-export const updateFlinkApplication = async (
-  region: string, applicationName: string, streamEnableAppIds: string[], streamingSinkKinesisConfig: any[],
+export const describeApplication = async (
+  region: string,
+  applicationName: string,
 ) => {
   const kinesisAnalytics = new KinesisAnalyticsV2({
     ...aws_sdk_client_common_config,
@@ -26,23 +33,50 @@ export const updateFlinkApplication = async (
     const application = await kinesisAnalytics.describeApplication({
       ApplicationName: applicationName,
     });
-    if ((!streamEnableAppIds || streamEnableAppIds.length === 0) &&
-    application.ApplicationDetail?.ApplicationStatus === ApplicationStatus.RUNNING) {
-      // Disable all the streams, stop flink application
-      await stopFlinkApplication(region, applicationName);
-      return true;
-    }
-    // Update flink application
-    await updateFlinkApplicationConfig(
-      region,
-      applicationName,
-      application,
-      streamingSinkKinesisConfig,
-    );
-    if ((streamEnableAppIds && streamEnableAppIds.length > 0) &&
-    application.ApplicationDetail?.ApplicationStatus === ApplicationStatus.READY) {
-      // Start flink application
-      await startFlinkApplication(region, applicationName);
+    return application;
+  } catch (error) {
+    logger.error(`Failed to check Flink application: ${error}`);
+    return undefined;
+  }
+};
+
+export const updateFlinkApplication = async (
+  region: string,
+  applicationName: string,
+  application: DescribeApplicationCommandOutput,
+  streamEnableAppIds: string[],
+  streamingSinkKinesisConfig: any[],
+) => {
+  try {
+    if (isEmpty(streamEnableAppIds)) {
+      if (application.ApplicationDetail?.ApplicationStatus === ApplicationStatus.RUNNING) {
+        // Disable all the streams, stop flink application
+        logger.debug(
+          'Disabling all the streams and stopping the Flink application',
+        );
+        await stopFlinkApplication(region, applicationName);
+        return true;
+      }
+      // Update flink application
+      await updateFlinkApplicationConfig(
+        region,
+        applicationName,
+        application,
+        streamingSinkKinesisConfig,
+      );
+    } else {
+      // Update flink application
+      await updateFlinkApplicationConfig(
+        region,
+        applicationName,
+        application,
+        streamingSinkKinesisConfig,
+      );
+      if (application.ApplicationDetail?.ApplicationStatus === ApplicationStatus.READY) {
+        // Start flink application
+        logger.debug('Starting the Flink application');
+        await startFlinkApplication(region, applicationName);
+      }
     }
     return true;
   } catch (error) {
@@ -52,7 +86,9 @@ export const updateFlinkApplication = async (
 };
 
 export const updateFlinkApplicationConfig = async (
-  region: string, applicationName: string, application: DescribeApplicationCommandOutput,
+  region: string,
+  applicationName: string,
+  application: DescribeApplicationCommandOutput,
   streamingSinkKinesisConfig: any[],
 ) => {
   const kinesisAnalytics = new KinesisAnalyticsV2({
@@ -61,34 +97,45 @@ export const updateFlinkApplicationConfig = async (
   });
   try {
     const propertyGroupDescriptions =
-    application.ApplicationDetail?.ApplicationConfigurationDescription?.EnvironmentPropertyDescriptions?.PropertyGroupDescriptions;
+      application.ApplicationDetail?.ApplicationConfigurationDescription
+        ?.EnvironmentPropertyDescriptions?.PropertyGroupDescriptions;
     const appIdStreamListStr = JSON.stringify({
       appIdStreamList: streamingSinkKinesisConfig,
     });
     for (const propertyGroup of propertyGroupDescriptions ?? []) {
-      if (propertyGroup.PropertyGroupId === 'EnvironmentProperties' && propertyGroup.PropertyMap) {
+      if (
+        propertyGroup.PropertyGroupId === 'EnvironmentProperties' &&
+        propertyGroup.PropertyMap
+      ) {
         propertyGroup.PropertyMap.appIdStreamConfig = appIdStreamListStr;
         break;
       }
     }
     const updateRes = await kinesisAnalytics.updateApplication({
       ApplicationName: applicationName,
-      CurrentApplicationVersionId: application.ApplicationDetail?.ApplicationVersionId,
+      CurrentApplicationVersionId:
+        application.ApplicationDetail?.ApplicationVersionId,
       ApplicationConfigurationUpdate: {
         EnvironmentPropertyUpdates: {
           PropertyGroups: propertyGroupDescriptions,
         },
       },
     });
-    logger.debug('Updated Flink application version to: ', { ApplicationVersionId: updateRes.ApplicationDetail?.ApplicationVersionId });
-    return true;
+    logger.debug('Updated Flink application version to: ', {
+      ApplicationVersionId: updateRes.ApplicationDetail?.ApplicationVersionId,
+    });
   } catch (error) {
-    logger.error(`Failed to update Flink application environment properties: ${error}`);
-    return false;
+    logger.error(
+      `Failed to update Flink application environment properties: ${error}`,
+    );
+    throw error;
   }
 };
 
-export const startFlinkApplication = async (region: string, applicationName: string) => {
+export const startFlinkApplication = async (
+  region: string,
+  applicationName: string,
+) => {
   const kinesisAnalytics = new KinesisAnalyticsV2({
     ...aws_sdk_client_common_config,
     region,
@@ -98,7 +145,8 @@ export const startFlinkApplication = async (region: string, applicationName: str
       ApplicationName: applicationName,
       RunConfiguration: {
         ApplicationRestoreConfiguration: {
-          ApplicationRestoreType: ApplicationRestoreType.SKIP_RESTORE_FROM_SNAPSHOT,
+          ApplicationRestoreType:
+            ApplicationRestoreType.SKIP_RESTORE_FROM_SNAPSHOT,
         },
       },
     });
@@ -109,7 +157,10 @@ export const startFlinkApplication = async (region: string, applicationName: str
   }
 };
 
-export const stopFlinkApplication = async (region: string, applicationName: string) => {
+export const stopFlinkApplication = async (
+  region: string,
+  applicationName: string,
+) => {
   const kinesisAnalytics = new KinesisAnalyticsV2({
     ...aws_sdk_client_common_config,
     region,

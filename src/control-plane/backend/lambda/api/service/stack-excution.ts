@@ -12,10 +12,11 @@
  */
 
 import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE, SolutionInfo, SolutionVersion, isEmpty } from '@aws/clickstream-base-lib';
-import { Tag } from '@aws-sdk/client-cloudformation';
+import { Parameter, Tag } from '@aws-sdk/client-cloudformation';
+import { cloneDeep } from 'lodash';
 import { FULL_SOLUTION_VERSION, LEVEL1, LEVEL2, LEVEL3, stackWorkflowS3Bucket } from '../common/constants';
 import { BuiltInTagKeys, PipelineStackType } from '../common/model-ln';
-import { ClickStreamBadRequestError, IngestionType, PipelineSinkType, WorkflowParallelBranch, WorkflowState, WorkflowStateType, WorkflowVersion } from '../common/types';
+import { ClickStreamBadRequestError, PipelineSinkType, WorkflowParallelBranch, WorkflowState, WorkflowStateType, WorkflowVersion } from '../common/types';
 import { getAppRegistryStackTags, getStackName, getStackPrefix, getTemplateUrlFromResource, mergeIntoPipelineTags, mergeIntoStackTags } from '../common/utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { CAppRegistryStack, CAthenaStack, CDataModelingStack, CDataProcessingStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportingStack, CStreamingStack, getStackParameters } from '../model/stacks';
@@ -247,7 +248,7 @@ async function getIngestionBranch(pipeline: IPipeline, resources: CPipelineResou
     return undefined;
   }
   let ingestionTemplateKey = `${PipelineStackType.INGESTION}_${pipeline.ingestionServer.sinkType}`;
-  if (pipeline.ingestionServer.ingestionType === IngestionType.Fargate) {
+  if (SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION).greaterThanOrEqualTo(SolutionVersion.V_1_2_0)) {
     ingestionTemplateKey = `${PipelineStackType.INGESTION}_v2`;
   }
   const ingestionTemplateURL = await getTemplateUrlFromResource(resources, ingestionTemplateKey);
@@ -693,3 +694,36 @@ function getWorkflowSates(state: WorkflowState): any[] {
   return states;
 }
 
+export function getIngestionStackTemplateUrl(state: WorkflowState, pipeline: IPipeline): string | undefined {
+  let templateUrl: string | undefined;
+  if (state.Type === WorkflowStateType.PARALLEL) {
+    for (let branch of state.Branches as WorkflowParallelBranch[]) {
+      for (let key of Object.keys(branch.States)) {
+        templateUrl = getIngestionStackTemplateUrl(branch.States[key], pipeline);
+        if (templateUrl) {
+          return templateUrl;
+        }
+      }
+    }
+  } else if (state.Type === WorkflowStateType.STACK) {
+    if (state.Data?.Input.StackName ===
+      getStackName(pipeline.pipelineId, PipelineStackType.INGESTION, pipeline.ingestionServer.sinkType)
+    ) {
+      templateUrl = state.Data.Input.TemplateURL;
+    }
+  }
+  return templateUrl;
+}
+
+export function removeParameters(base: Parameter[], attach: Parameter[]) {
+  const parameters = cloneDeep(base);
+  const keys = parameters.map(p => p.ParameterKey);
+  for (let att of attach) {
+    if (keys.indexOf(att.ParameterKey) > -1) {
+      const index = keys.indexOf(att.ParameterKey);
+      parameters.splice(index, 1);
+      keys.splice(index, 1);
+    }
+  }
+  return parameters;
+}

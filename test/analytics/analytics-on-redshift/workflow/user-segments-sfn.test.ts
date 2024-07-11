@@ -152,6 +152,9 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
             POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
             POWERTOOLS_LOGGER_LOG_EVENT: 'true',
             LOG_LEVEL: 'WARN',
+            CLICKSTREAM_METADATA_DDB_ARN: {
+              Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
+            },
           },
         },
         Handler: 'index.handler',
@@ -185,21 +188,16 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
               Resource: '*',
             },
             {
-              Action: 'states:ListExecutions',
+              Action: 'dynamodb:Query',
               Effect: 'Allow',
               Resource: {
                 'Fn::Join': [
                   '',
                   [
-                    'arn:',
                     {
-                      Ref: 'AWS::Partition',
+                      Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
                     },
-                    ':states:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':stateMachine:ClickstreamUserSegmentsWorkflowStateMachine*',
+                    '/index/prefix-time-index',
                   ],
                 ],
               },

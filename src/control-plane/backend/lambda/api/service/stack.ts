@@ -12,7 +12,7 @@
  */
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
-import { getStateCallback, updateReportingState, updateStreamingState, workflowToLevel } from './stack-excution';
+import { getStateCallback, removeParameters, updateReportingState, updateStreamingState, workflowToLevel } from './stack-excution';
 import { awsRegion, stackWorkflowStateMachineArn } from '../common/constants';
 import { PipelineStackType, PipelineStatusDetail } from '../common/model-ln';
 import {
@@ -39,6 +39,10 @@ export class StackManager {
       this.workflow = JSON.parse(JSON.stringify(pipeline.workflow));
       this.execWorkflow = JSON.parse(JSON.stringify(pipeline.workflow));
     }
+  }
+
+  public setWorkflow(workflow: WorkflowTemplate) {
+    this.workflow = JSON.parse(JSON.stringify(workflow));
   }
 
   public setExecWorkflow(workflow: WorkflowTemplate) {
@@ -320,6 +324,48 @@ export class StackManager {
     }
     state.Data!.Callback = getStateCallback(this.pipeline);
     return state;
+  }
+
+  public async resetIngestionStackTemplate(templateUrl: string, templateVersion: string) {
+    if (!this.execWorkflow || !this.workflow) {
+      throw new Error('Pipeline workflow is empty.');
+    }
+    this.execWorkflow.Workflow = this._resetIngestionStackTemplate(this.execWorkflow.Workflow, templateUrl, templateVersion);
+    this.workflow.Workflow = this._resetIngestionStackTemplate(this.workflow.Workflow, templateUrl, templateVersion);
+  }
+
+  private _resetIngestionStackTemplate(state: WorkflowState, templateUrl: string, templateVersion: string): WorkflowState {
+    if (state.Type === WorkflowStateType.PARALLEL) {
+      for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        for (let key of Object.keys(branch.States)) {
+          branch.States[key] = this._resetIngestionStackTemplate(branch.States[key], templateUrl, templateVersion);
+        }
+      }
+    } else if (state.Type === WorkflowStateType.STACK && state.Data?.Input.StackName) {
+      if (state.Data.Input.StackName ===
+        getStackName(this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType)) {
+        state.Data.Input.TemplateURL = templateUrl;
+        state.Data.Input.Parameters = removeParameters(
+          [
+            ...state.Data.Input.Parameters,
+            {
+              ParameterKey: 'NotificationsTopicArn',
+              ParameterValue: this.pipeline.ingestionServer.loadBalancer.notificationsTopicArn ?? '',
+            },
+          ],
+          [
+            {
+              ParameterKey: 'SinkType',
+            },
+            {
+              ParameterKey: 'EcsInfraType',
+            },
+          ],
+        );
+      }
+    }
+    return state;
+
   }
 
   public setPipelineWorkflowCallback(executionName: string) {

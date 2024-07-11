@@ -277,15 +277,26 @@ export const embedAnalyzesUrl = async (
   return result;
 };
 
-export const embedRealtimeUrl = async (
+export const realtimeDryRun = async (
   projectId: string,
   appId: string,
-  allowedDomain: string,
   enable: boolean
 ) => {
   const result: any = await apiRequest(
     'get',
-    `project/${projectId}/${appId}/realtime?enable=${enable}&allowedDomain=${allowedDomain}`
+    `reporting/${projectId}/${appId}/realtimeDryRun?enable=${enable}`
+  );
+  return result;
+};
+
+export const embedRealtimeUrl = async (
+  projectId: string,
+  appId: string,
+  allowedDomain: string
+) => {
+  const result: any = await apiRequest(
+    'get',
+    `reporting/${projectId}/${appId}/realtime?allowedDomain=${allowedDomain}`
   );
   return result;
 };

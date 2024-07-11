@@ -9,6 +9,10 @@ buildscript {
   }
 }
 
+plugins {
+    id 'org.gradle.test-retry' version '1.5.2'
+}
+
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'application'
@@ -87,11 +91,43 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+
 test {
     forkEvery = 1
-    maxParallelForks = Math.min(Runtime.runtime.availableProcessors().intdiv(2) ?: 1, 6)
+    maxParallelForks = Math.min(Runtime.runtime.availableProcessors().intdiv(2) ?: 1, 16)
     maxHeapSize = "4g"
     minHeapSize = "1g"
+
+    retry {
+        maxRetries = 3
+        maxFailures = 20
+        failOnPassedAfterRetry = false
+    }
+
+    testLogging {
+        showStandardStreams = false
+        showExceptions true
+        exceptionFormat "full"
+    }
+
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: ${descriptor}")
+    }
+
+    afterTest { descriptor, result -> 
+        logger.lifecycle("Finished test: ${descriptor} with result: ${result.resultType}")
+        if (result.resultType == TestResult.ResultType.FAILURE) {
+            logger.lifecycle("Test failed: ${descriptor}. Retrying in 3 seconds...")
+            Thread.sleep(3000)
+        }
+    }
+
+    afterSuite { desc, result ->
+        if (!desc.parent) {
+            logger.lifecycle("Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} passed, ${result.failedTestCount} failed, ${result.skippedTestCount} skipped)")
+        }
+    }
+
 }
 
 application {

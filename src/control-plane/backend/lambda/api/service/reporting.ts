@@ -27,7 +27,12 @@ import {
   sleep,
   SolutionVersion,
   OUTPUT_REPORTING_QUICKSIGHT_REDSHIFT_DATABASE_NAME,
+  OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
+  SINK_STREAM_NAME_PREFIX,
+  OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+  DEFAULT_DASHBOARD_NAME,
 } from '@aws/clickstream-base-lib';
+import { ApplicationStatus } from '@aws-sdk/client-kinesis-analytics-v2';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { PipelineServ } from './pipeline';
@@ -67,13 +72,16 @@ import {
   warmupRedshift,
 } from './quicksight/reporting-utils';
 import { EventAndCondition, ExploreAnalyticsType, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
-import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
+import { FULL_SOLUTION_VERSION, awsAccountId, awsPartition } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getStackOutputFromPipelineStatus } from '../common/utils';
-import { IPipeline } from '../model/pipeline';
+import { getReportingDashboardsUrl, getStackName, getStackOutputFromPipelineStatus, getStreamEnableAppIdsFromPipeline } from '../common/utils';
+import { CPipeline, IPipeline } from '../model/pipeline';
+import { IDashboard } from '../model/project';
+import { describeStack } from '../store/aws/cloudformation';
+import { describeApplication, updateFlinkApplication } from '../store/aws/flink';
 import { QuickSightUserArns, deleteExploreUser, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -1033,7 +1041,7 @@ export class ReportingService {
     const quickSight = sdkClient.QuickSight({ region: dashboardCreateParameters.region });
     const principals = await getClickstreamUserArn(
       SolutionVersion.Of(pipeline?.templateVersion ?? FULL_SOLUTION_VERSION),
-      pipeline?.reporting?.quickSight?.user ?? '',
+      pipeline?.reporting?.quickSight?.user,
     );
 
     //create quicksight dataset
@@ -1255,7 +1263,7 @@ export class ReportingService {
       //warmup principal
       await getClickstreamUserArn(
         SolutionVersion.Of(latestPipeline.templateVersion ?? FULL_SOLUTION_VERSION),
-        latestPipeline.reporting?.quickSight?.user ?? '',
+        latestPipeline.reporting?.quickSight?.user,
       );
 
       //warm up redshift serverless
@@ -1300,6 +1308,205 @@ export class ReportingService {
       next(error);
     }
   };
+
+  public async getRealtimeDryRun(req: any, res: any, next: any) {
+    try {
+      const { projectId, appId } = req.params;
+      const enable = req.query.enable === 'true';
+      const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+      if (!pipeline) {
+        return res
+          .status(404)
+          .json(new ApiFail('The latest pipeline not found.'));
+      }
+      if (!pipeline.reporting?.quickSight?.accountName) {
+        return res
+          .status(400)
+          .json(new ApiFail('The latest pipeline not enable reporting.'));
+      }
+      if (!pipeline.streaming?.appIdStreamList?.includes(appId)) {
+        return res
+          .status(400)
+          .json(new ApiFail('The appId not allow to enable realtime.'));
+      }
+      const flinkAppArn = getStackOutputFromPipelineStatus(
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
+        PipelineStackType.STREAMING,
+        OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN,
+      );
+      const flinkAppName = flinkAppArn?.split('/').pop();
+      if (!flinkAppName) {
+        return res
+          .status(404)
+          .json(new ApiFail('The flink application not found.'));
+      }
+      // check flink application status
+      const flinkApplication = await describeApplication(
+        pipeline.region,
+        flinkAppName,
+      );
+      if (
+        !flinkApplication ||
+      (flinkApplication.ApplicationDetail?.ApplicationStatus !==
+        ApplicationStatus.READY &&
+        flinkApplication.ApplicationDetail?.ApplicationStatus !==
+          ApplicationStatus.RUNNING)
+      ) {
+        return res
+          .status(400)
+          .json(new ApiFail('The flink application status not allow update, please try again later.'));
+      }
+
+      const streamEnableAppIds = getStreamEnableAppIdsFromPipeline(
+        pipeline.streaming?.appIdRealtimeList ?? [],
+        appId,
+        enable,
+      );
+      const streamingSinkKinesisConfig =
+    await this.getStreamingSinkKinesisConfig(pipeline, streamEnableAppIds);
+      logger.debug(
+        `streamingSinkKinesisConfig: ${JSON.stringify(
+          streamingSinkKinesisConfig,
+        )}`,
+      );
+      const updateRes = await updateFlinkApplication(
+        pipeline.region,
+        flinkAppName,
+        flinkApplication,
+        streamEnableAppIds,
+        streamingSinkKinesisConfig,
+      );
+      if (!updateRes) {
+        return res
+          .status(500)
+          .json(new ApiFail('Failed to update Flink application.'));
+      }
+      const pipe = new CPipeline(pipeline);
+      await pipe.realtime(enable, appId);
+      return res.json(
+        new ApiSuccess('OK'),
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  private getPresetAppDashboard(
+    pipeline: IPipeline,
+    appId: string,
+    realtime: boolean = false,
+  ) {
+    const stackDashboards = getReportingDashboardsUrl(
+      pipeline.stackDetails ?? pipeline.status?.stackDetails,
+      PipelineStackType.REPORTING,
+      OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+    );
+    if (stackDashboards.length === 0) {
+      return undefined;
+    }
+    const appDashboard = stackDashboards.find(
+      (item: any) => item.appId === appId,
+    );
+    if (appDashboard) {
+      if (realtime) {
+        const presetDashboard: IDashboard = {
+          id: appDashboard.realtimeDashboardId,
+          name: 'Realtime Dashboard',
+          description:
+            'Realtime user lifecycle analysis dashboard created by solution.',
+          projectId: pipeline.projectId,
+          appId: appId,
+          region: pipeline.region,
+          sheets: [],
+          createAt: pipeline.createAt,
+          updateAt: pipeline.updateAt,
+        };
+        return presetDashboard;
+      }
+      const presetDashboard: IDashboard = {
+        id: appDashboard.dashboardId,
+        name: DEFAULT_DASHBOARD_NAME,
+        description:
+          'Out-of-the-box user lifecycle analysis dashboard created by solution.',
+        projectId: pipeline.projectId,
+        appId: appId,
+        region: pipeline.region,
+        sheets: [],
+        createAt: pipeline.createAt,
+        updateAt: pipeline.updateAt,
+      };
+      return presetDashboard;
+    }
+    return undefined;
+  }
+
+  public async getRealtime(req: any, res: any, next: any) {
+    try {
+      const { projectId, appId } = req.params;
+      const { allowedDomain } = req.query;
+      const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+      if (!pipeline) {
+        return res
+          .status(404)
+          .json(new ApiFail('The latest pipeline not found.'));
+      }
+
+      const principals = await getClickstreamUserArn(
+        SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
+        pipeline.reporting?.quickSight?.user,
+      );
+      const presetRealtimeDashboard = this.getPresetAppDashboard(
+        pipeline,
+        appId,
+        true,
+      );
+      const embed = await generateEmbedUrlForRegisteredUser(
+        pipeline.region,
+        principals.publishUserArn,
+        allowedDomain,
+        {
+          initialPath: `/dashboards/${presetRealtimeDashboard?.id}`,
+        },
+      );
+      return res.json(
+        new ApiSuccess(embed),
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  private async getStreamingSinkKinesisConfig(
+    pipeline: IPipeline,
+    streamEnableAppIds: string[],
+  ) {
+    const enableConfigs: any[] = [];
+    try {
+      const streamingStack = await describeStack(
+        pipeline.region,
+        getStackName(
+          pipeline.pipelineId,
+          PipelineStackType.STREAMING,
+          pipeline.ingestionServer.sinkType,
+        ),
+      );
+      if (!streamingStack) {
+        return enableConfigs;
+      }
+      const streamingStackIdPrefix =
+      streamingStack?.StackId?.split('/')[2].split('-')[0];
+      for (let appId of streamEnableAppIds) {
+        enableConfigs.push({
+          appId: appId,
+          streamArn: `arn:${awsPartition}:kinesis:${pipeline.region}:${awsAccountId}:stream/${SINK_STREAM_NAME_PREFIX}${pipeline.projectId}_${appId}_${streamingStackIdPrefix}`,
+        });
+      }
+      return enableConfigs;
+    } catch (error) {
+      logger.error('Failed to parse sink kinesis');
+      return enableConfigs;
+    }
+  }
 
 }
 
@@ -1410,3 +1617,4 @@ function _needExploreUserVersion(pipeline: IPipeline) {
   return oldVersions.includes(version);
 
 }
+
