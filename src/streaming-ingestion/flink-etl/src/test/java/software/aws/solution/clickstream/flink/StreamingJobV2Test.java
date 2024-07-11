@@ -26,9 +26,15 @@ import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.flink.mock.MockKinesisSink;
 import software.aws.solution.clickstream.flink.mock.SourceFunctionMock;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
 @Slf4j
 public class StreamingJobV2Test extends BaseFlinkTest {
@@ -87,6 +93,30 @@ public class StreamingJobV2Test extends BaseFlinkTest {
                 parserName // TransformerName
         };
     }
+
+    private  String[] getTestArgsForMultiApps() {
+        return new String[]{
+                "_",
+                TMP_GEO_LITE_2_CITY_MMDB,
+                "arn:aws:kinesis:us-east-1:123456789012:stream/testStream",
+                "project1",
+                "{\"appIdStreamMap\":[" +
+                        "{\"appId\":\"app1\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink\"}" +
+                        ",{\"appId\":\"app2\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
+                        ",{\"appId\":\"app3\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app3Sink\"}" +
+                        ",{\"appId\":\"app4\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app4Sink\"}" +
+                        ",{\"appId\":\"app5\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app5Sink\"}" +
+                        "]}",
+                "v2",
+                getRuleConfigPath(),
+                "IP|UA|TRAFFIC",
+                "true",  // WithCustomParameters
+                "1", // allowRetentionHours
+                "ALL", // AllowEventList
+                "clickstream" // TransformerName
+        };
+    }
+
 
 
     private static String getRuleConfigPath() {
@@ -350,6 +380,57 @@ public class StreamingJobV2Test extends BaseFlinkTest {
     }
 
 
+    @Test
+    void theClusterCanBeStartedForMultiApps() throws Exception {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.flink.StreamingJobV2Test.theClusterCanBeStartedForMultiApps
+        setupRuleFiles(List.of("app3", "app4", "app5"));
+        var args = getTestArgsForMultiApps();
+        var props = ApplicationParameters.loadApplicationParameters(args, true);
+        var streamSourceAndSinkProviderMock = new StreamSourceAndSinkProvider() {
+            @Override
+            public SourceFunction<String> createSource() {
+                return new SourceFunctionMock("/zip_data_app1.json");
+            }
+
+            @Override
+            public Sink<String> createSink(String appId) {
+                return new MockKinesisSink(appId);
+            }
+        };
+
+        env.setRestartStrategy(RestartStrategies.noRestart());
+
+        EventParser eventParser = StreamingJob.getEventParser(props);
+
+        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props, eventParser);
+        steamingJob.executeStreamJob();
+        env.execute("test");
+    }
+
+    private void setupRuleFiles(List<String> appList) throws IOException {
+        appList.forEach(app -> {
+            InputStream channelRuleIn = this.getClass().getResourceAsStream("/ts/rules/app1/traffic_source_channel_rule_v1.json");
+            String channelRulePath = this.getClass().getResource("/ts/rules/app1/traffic_source_channel_rule_v1.json").toString()
+                    .replace("app1", app).replace("file:", "");
+            try {
+                copyInputStreamToFile(channelRuleIn, new File(channelRulePath));
+                channelRuleIn.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            InputStream categoryRuleIn = this.getClass().getResourceAsStream("/ts/rules/app1/traffic_source_category_rule_v1.json");
+            String categoryRulePath = this.getClass().getResource("/ts/rules/app1/traffic_source_category_rule_v1.json").toString()
+                    .replace("app1", app).replace("file:", "");
+            try {
+                copyInputStreamToFile(categoryRuleIn, new File(categoryRulePath));
+                categoryRuleIn.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+    }
 
 
 }
