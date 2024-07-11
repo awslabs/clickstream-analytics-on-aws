@@ -21,7 +21,12 @@ import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.plugin.enrich.IPEnrichmentV2;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static software.aws.solution.clickstream.flink.StreamingJob.CACHED_FILE_GEO_LITE_2_CITY_MMDB;
 
 public class IPEnrichmentV2Test extends BaseFlinkTest {
 
@@ -30,7 +35,11 @@ public class IPEnrichmentV2Test extends BaseFlinkTest {
 
     @BeforeEach
     public void setup() throws IOException {
-        ipEnrichment = new IPEnrichmentV2(new java.io.File(TMP_GEO_LITE_2_CITY_MMDB));
+
+        ipEnrichment = new IPEnrichmentV2();
+        Map<String, Object> configMap = new HashMap<>();
+        configMap.put(CACHED_FILE_GEO_LITE_2_CITY_MMDB, new File(TMP_GEO_LITE_2_CITY_MMDB));
+        ipEnrichment.config(configMap);
     }
 
     @Test

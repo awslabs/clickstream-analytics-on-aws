@@ -14,7 +14,8 @@
 package software.aws.solution.clickstream.function;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.ParseRowResult;
@@ -22,11 +23,16 @@ import software.aws.solution.clickstream.common.Util;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.plugin.enrich.ClickstreamEventEnrichment;
 
+import java.io.File;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static software.aws.solution.clickstream.flink.StreamingJob.CACHED_FILE_GEO_LITE_2_CITY_MMDB;
 
 @Slf4j
-public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<String, String> {
+public class TransformEventFlatMapFunctionV2 extends RichFlatMapFunction<String, String> {
     private final String projectId;
     private final String appId;
     private final EventParser eventParser;
@@ -44,6 +50,18 @@ public class TransformEventFlatMapFunctionV2 implements FlatMapFunction<String, 
         this.eventParser = eventParser;
         this.enrichments = enrichments;
         this.withCustomParameters = withCustomParameters;
+    }
+
+    @Override
+    public void open(final Configuration parameters) {
+
+        File cachedGeoFile = this.getRuntimeContext().getDistributedCache().getFile(CACHED_FILE_GEO_LITE_2_CITY_MMDB);
+        Map<String, Object> configMap = new HashMap<>();
+        configMap.put(CACHED_FILE_GEO_LITE_2_CITY_MMDB, cachedGeoFile);
+
+        for (ClickstreamEventEnrichment enrichment : enrichments) {
+            enrichment.config(configMap);
+        }
     }
 
     @Override

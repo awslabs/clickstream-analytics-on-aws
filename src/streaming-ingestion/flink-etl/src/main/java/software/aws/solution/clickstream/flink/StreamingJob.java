@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StreamingJob {
     public static final String TMP_GEO_LITE_2_CITY_MMDB = "/tmp/GeoLite2-City.mmdb";
+    public static final String CACHED_FILE_GEO_LITE_2_CITY_MMDB = "CACHED_FILE_GEO_LITE_2_CITY_MMDB";
     private final StreamSourceAndSinkProvider streamProvider;
     private final ApplicationParameters props;
     private final HashMap<String, Sink<String>> appSinkMap = new HashMap<>();
@@ -135,10 +136,25 @@ public class StreamingJob {
         }
 
         log.info("Enabled appId list: {}", appIds);
+
+        registerCachedFile();
+
         SourceFunction<String> kinesisSource = this.streamProvider.createSource(); // NOSONAR
         DataStream<String> inputStream = env.addSource(kinesisSource, "Kinesis source"); // NOSONAR
         runWithFlink(inputStream);
         return true;
+    }
+
+    private void registerCachedFile() throws IOException {
+        String bucketName = this.props.getDataBucketName();
+        String geoFileKey = this.props.getGeoFileKey();
+        String region = this.props.getRegion();
+        File dbFile = new File(TMP_GEO_LITE_2_CITY_MMDB); // NOSONAR
+        if (!dbFile.exists()) {
+            dbFile = Utils.getInstance().dowloadS3File(bucketName, geoFileKey, region, TMP_GEO_LITE_2_CITY_MMDB);
+            log.info("Downloaded {} to {}, file size: {}", geoFileKey, dbFile.getAbsolutePath(), dbFile.length());
+        }
+        this.env.registerCachedFile(dbFile.getAbsolutePath(), CACHED_FILE_GEO_LITE_2_CITY_MMDB);
     }
 
     private void runWithFlink(final DataStream<String> inputStream) throws IOException {
@@ -192,19 +208,10 @@ public class StreamingJob {
         transformedData.sinkTo(outKinesisSink).name(appId);
     }
 
-    private List<ClickstreamEventEnrichment> getEnrichments() throws IOException {
-        String bucketName = this.props.getDataBucketName();
-        String geoFileKey = this.props.getGeoFileKey();
-        String region = this.props.getRegion();
-
+    private List<ClickstreamEventEnrichment> getEnrichments() {
         List<ClickstreamEventEnrichment> enrichments = new ArrayList<>();
         if (this.props.isIpEnrich()) {
-            File dbFile = new File(TMP_GEO_LITE_2_CITY_MMDB); // NOSONAR
-            if (!dbFile.exists()) {
-                dbFile = Utils.getInstance().dowloadS3File(bucketName, geoFileKey, region, TMP_GEO_LITE_2_CITY_MMDB);
-                log.info("Downloaded {} to {}, file size: {}", geoFileKey, dbFile.getAbsolutePath(), dbFile.length());
-            }
-           enrichments.add(new IPEnrichmentV2(dbFile));
+           enrichments.add(new IPEnrichmentV2());
         }
         if (this.props.isUaEnrich()) {
             enrichments.add(new UAEnrichmentV2());
