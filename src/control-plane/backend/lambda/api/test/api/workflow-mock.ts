@@ -1202,7 +1202,7 @@ export const STREAMING_BASE_PARAMETERS = [
   },
   {
     ParameterKey: 'RetentionHours',
-    ParameterValue: '1',
+    ParameterValue: '24',
   },
   {
     ParameterKey: 'TransformerName',

@@ -2300,7 +2300,7 @@ describe('Workflow test', () => {
       ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE),
       templateVersion: FULL_SOLUTION_VERSION,
       streaming: {
-        retentionHours: 1,
+        retentionHours: 24,
         appIdStreamList: ['app1', 'app2'],
         bucket: {
           name: 'EXAMPLE_BUCKET',

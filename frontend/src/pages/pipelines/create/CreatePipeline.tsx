@@ -968,10 +968,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     } else {
       createPipelineObj.streaming = {
         appIdStreamList: pipelineInfo.streaming?.appIdStreamList ?? [],
-        retentionHours:
-          pipelineInfo.selectedStreamingDataRangeUnit?.value === 'day'
-            ? parseInt(pipelineInfo.streamingDataRangeValue) * 24
-            : parseInt(pipelineInfo.streamingDataRangeValue) || 1,
+        retentionHours: 24,
       };
     }
     return createPipelineObj;
@@ -1888,14 +1885,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changeStreamingDataRangeValue={(value) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    streamingDataRangeValue: value,
-                  };
-                });
-              }}
             />
           ),
         },
@@ -2708,7 +2697,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     pipelineInfo.enableStreaming =
       pipelineInfo.streaming?.appIdStreamList !== undefined;
     const reverseStreamingDataRange = reverseFreshnessInHour(
-      pipelineInfo.streaming?.retentionHours ?? 1
+      pipelineInfo.streaming?.retentionHours ?? 24
     );
     pipelineInfo.streamingDataRangeValue = reverseStreamingDataRange.value;
     pipelineInfo.selectedStreamingDataRangeUnit =

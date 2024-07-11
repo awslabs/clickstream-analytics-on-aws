@@ -1690,9 +1690,9 @@ export class CStreamingStack extends JSONObject {
   })
     RedshiftUserParam?: string;
 
-  @JSONObject.optional('1')
+  @JSONObject.optional('24')
   @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
-    return stack._pipeline?.streaming?.retentionHours ?? '1';
+    return stack._pipeline?.streaming?.retentionHours ?? '24';
   })
     RetentionHours?: string;
 
