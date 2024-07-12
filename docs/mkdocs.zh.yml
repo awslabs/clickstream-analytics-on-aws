@@ -73,6 +73,7 @@ nav:
         - 设备报告: analytics/dashboard/device.md
         - 详细报告: analytics/dashboard/details.md
         - 自定义报告: analytics/dashboard/custom-analysis.md
+      - 实时: analytics/realtime/index.md  
       - 探索:
         - 概述: analytics/explore/index.md
         - 事件分析: analytics/explore/event.md
@@ -80,8 +81,8 @@ nav:
         - 路径分析: analytics/explore/path.md
         - 留存分析: analytics/explore/retention.md
         - 归因分析: analytics/explore/attribution.md
-      - 分析:
-        - 概述: analytics/analyzes/index.md        
+      - 分析: analytics/analyzes/index.md  
+      - 分群: analytics/segments/index.md    
       - 数据管理:
         - 概述: analytics/data-mgmt/index.md
         - 元数据: analytics/data-mgmt/metadata-mgmt.md

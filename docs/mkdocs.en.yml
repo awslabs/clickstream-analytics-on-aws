@@ -70,6 +70,7 @@ nav:
         - Device report: analytics/dashboard/device.md
         - Details report: analytics/dashboard/details.md
         - Custom report: analytics/dashboard/custom-analysis.md
+      - Realtime: analytics/realtime/index.md
       - Explore:
         - Overview: analytics/explore/index.md
         - Event: analytics/explore/event.md
@@ -77,8 +78,8 @@ nav:
         - Path: analytics/explore/path.md
         - Retention: analytics/explore/retention.md
         - Attribution: analytics/explore/attribution.md
-      - Analyzes:
-        - Overview: analytics/analyzes/index.md        
+      - Analyzes: analytics/analyzes/index.md  
+      - Segments: analytics/segment/index.md      
       - Data management:
         - Overview: analytics/data-mgmt/index.md
         - Metadata: analytics/data-mgmt/metadata-mgmt.md
