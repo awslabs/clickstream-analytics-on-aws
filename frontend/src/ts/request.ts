@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import Axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { reject } from 'lodash';
 import { User } from 'oidc-client-ts';
 import { PROJECT_CONFIG_JSON } from './const';
@@ -88,7 +88,7 @@ export function getRequest<T>(url: string, params?: any): Promise<T> {
     })
     .then((response: AxiosResponse) => {
       const apiRes: ApiResponse<T> = response.data;
-      if (apiRes.success) {
+      if (apiRes?.success) {
         return response.data;
       } else {
         alertMsg(apiRes.message);
@@ -97,7 +97,7 @@ export function getRequest<T>(url: string, params?: any): Promise<T> {
     })
     .catch((err) => {
       errMsg(err);
-      reject(err);
+      throw new AxiosError(err);
     });
 }
 

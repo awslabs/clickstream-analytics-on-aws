@@ -66,8 +66,10 @@ const PipelineDetail: React.FC = () => {
         setLoadingData(false);
         setLoadingPipeline(false);
       }
-    } catch (error) {
-      setLoadingPipeline(false);
+    } catch (error: any) {
+      if (error?.message?.response?.status === 404) {
+        window.location.href = '/error/404';
+      }
     }
   };
 
@@ -96,8 +98,10 @@ const PipelineDetail: React.FC = () => {
       if (success) {
         setProjectInfo(data);
       }
-    } catch (error) {
-      setLoadingData(false);
+    } catch (error: any) {
+      if (error?.message?.response?.status === 404) {
+        window.location.href = '/error/404';
+      }
     }
   };
 

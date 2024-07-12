@@ -56,20 +56,22 @@ const ProjectDetail: React.FC = () => {
   const getProjectDetailById = async (projectId: string) => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<IProject> = await getProjectDetail({
+      const res = await getProjectDetail({
         id: projectId,
       });
-      if (success) {
-        setProjectInfo(data);
-        if (data?.pipelineId && data?.pipelineId !== '') {
+      if (res?.success) {
+        setProjectInfo(res?.data);
+        if (res?.data?.pipelineId && res?.data?.pipelineId !== '') {
           getPipelineByProjectId(projectId, 'false');
         } else {
           setLoadingPipeline(false);
           setLoadingData(false);
         }
       }
-    } catch (error) {
-      setLoadingData(false);
+    } catch (error: any) {
+      if (error?.message?.response?.status === 404) {
+        window.location.href = '/error/404';
+      }
     }
   };
 
