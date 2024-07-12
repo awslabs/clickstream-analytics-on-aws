@@ -34,11 +34,7 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { INIT_SEGMENT_OBJ } from 'ts/const';
-import {
-  buildDocumentLink,
-  FAQ_LINK_CN,
-  FAQ_LINK_EN,
-} from 'ts/url';
+import { buildDocumentLink, FAQ_LINK_CN, FAQ_LINK_EN } from 'ts/url';
 import { defaultStr } from 'ts/utils';
 
 const ImportUserSegment: React.FC = () => {
@@ -193,7 +189,11 @@ const ImportUserSegment: React.FC = () => {
                       guide_anchor: (
                         <Link
                           external
-                          href={buildDocumentLink(i18n.language, FAQ_LINK_EN, FAQ_LINK_CN)}
+                          href={buildDocumentLink(
+                            i18n.language,
+                            FAQ_LINK_EN,
+                            FAQ_LINK_CN
+                          )}
                         />
                       ),
                     }}

@@ -141,7 +141,7 @@ const UserSegments: React.FC = () => {
       const { timezone } = appApiResponse.data;
       setTimezone(timezone);
     }
-  }
+  };
 
   useEffect(() => {
     if (projectId && appId) {

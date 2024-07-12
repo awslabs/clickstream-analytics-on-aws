@@ -374,7 +374,9 @@ const UserSegmentDetails: React.FC = () => {
                             <Box variant="awsui-key-label">
                               {t('analytics:segment.details.segmentId')}
                             </Box>
-                            <Box margin={{ top: 'xxs' }}>{defaultStr(segment?.segmentId, '-')}</Box>
+                            <Box margin={{ top: 'xxs' }}>
+                              {defaultStr(segment?.segmentId, '-')}
+                            </Box>
                           </div>
                           <div>
                             <Box variant="awsui-key-label">
