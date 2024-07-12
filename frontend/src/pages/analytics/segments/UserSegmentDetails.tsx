@@ -46,11 +46,11 @@ import {
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
-import moment from 'moment-timezone';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { createDownloadLink, defaultStr, ternary } from 'ts/utils';
+import { convertCronToRefreshSchedule } from '../analytics-utils';
 
 const UserSegmentDetails: React.FC = () => {
   const { t } = useTranslation();
@@ -372,6 +372,12 @@ const UserSegmentDetails: React.FC = () => {
                           </div>
                           <div>
                             <Box variant="awsui-key-label">
+                              {t('analytics:segment.details.segmentId')}
+                            </Box>
+                            <Box margin={{ top: 'xxs' }}>{defaultStr(segment?.segmentId, '-')}</Box>
+                          </div>
+                          <div>
+                            <Box variant="awsui-key-label">
                               {t('analytics:segment.details.createdBy')}
                             </Box>
                             <Box margin={{ top: 'xxs' }}>
@@ -385,7 +391,7 @@ const UserSegmentDetails: React.FC = () => {
                               {t('analytics:segment.details.refreshSchedule')}
                             </Box>
                             <Box margin={{ top: 'xxs' }}>
-                              {getRefreshSchedule(segment, timezone)}
+                              {convertCronToRefreshSchedule(segment, timezone)}
                             </Box>
                           </div>
                           <div>
@@ -637,25 +643,6 @@ const UserSegmentDetails: React.FC = () => {
       </div>
     </div>
   );
-};
-
-const getRefreshSchedule = (segment, timezone) => {
-  if (!segment) {
-    return '';
-  }
-
-  const type = segment.refreshSchedule.cron;
-  if (type === 'Manual') {
-    return type;
-  } else if (type === 'Custom') {
-    return type + ' | ' + segment.refreshSchedule.cronExpression;
-  } else {
-    const segmentObj = segment.uiRenderingObject.segmentObject;
-    const day = segmentObj.autoRefreshDayOption?.label ?? '';
-    const time = segmentObj.autoRefreshTimeOption?.label ?? '';
-    const tz = moment.tz(timezone).format('z');
-    return `${type} | ${day} ${time}(${tz})`;
-  }
 };
 
 const getAutoRefreshExpiration = (

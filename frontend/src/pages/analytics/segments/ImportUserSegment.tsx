@@ -13,7 +13,9 @@
 
 import { Segment } from '@aws/clickstream-base-lib';
 import {
+  Alert,
   AppLayout,
+  Box,
   Button,
   Container,
   ContentLayout,
@@ -21,6 +23,7 @@ import {
   FormField,
   Header,
   Input,
+  Link,
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { importSegment } from 'apis/segments';
@@ -28,13 +31,18 @@ import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+import { INIT_SEGMENT_OBJ } from 'ts/const';
+import {
+  buildDocumentLink,
+  FAQ_LINK_CN,
+  FAQ_LINK_EN,
+} from 'ts/url';
 import { defaultStr } from 'ts/utils';
-import { INIT_SEGMENT_OBJ } from '../../../ts/const';
 
 const ImportUserSegment: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { projectId, appId } = useParams();
   const navigate = useNavigate();
   const [segmentName, setSegmentName] = useState<string>('');
@@ -174,6 +182,24 @@ const ImportUserSegment: React.FC = () => {
                   </SpaceBetween>
                 </Container>
               </Form>
+              <Box margin={{ top: 'xl' }}>
+                <Alert
+                  statusIconAriaLabel="Info"
+                  header={t('analytics:segment.comp.importSegmentGuideTitle')}
+                >
+                  <Trans
+                    i18nKey="analytics:segment.comp.importSegmentGuide"
+                    components={{
+                      guide_anchor: (
+                        <Link
+                          external
+                          href={buildDocumentLink(i18n.language, FAQ_LINK_EN, FAQ_LINK_CN)}
+                        />
+                      ),
+                    }}
+                  />
+                </Alert>
+              </Box>
             </ContentLayout>
           }
           headerSelector="#header"

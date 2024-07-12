@@ -413,13 +413,13 @@
     "attributionSelectTouchpointEventInfo": "参与归因分析的事件，通常为推广运营为的点击事件、落地页的进入。"
   },
   "segment": {
-    "title": "用户分群",
-    "desc": "用户分群描述",
+    "title": "分群",
+    "desc": "分群是您用户的一个子集",
     "options": {
       "withInSession": "在同一个会话",
-      "withOutSession": "不在同一个会话",
-      "directlyFollow": "直接关联",
-      "indirectlyFollow": "间接关联"
+      "withOutSession": "跨多个会话",
+      "directlyFollow": "直接跟随",
+      "indirectlyFollow": "间接跟随"
     },
     "type": {
       "userDone": "用户做过",
@@ -427,8 +427,8 @@
       "userIs": "用户是",
       "userIsNot": "用户不是",
       "doneInSequence": "用户依次做过",
-      "userInGroup": "用户在分群组",
-      "userNotInGroup": "用户不在分群组"
+      "userInGroup": "用户在分群",
+      "userNotInGroup": "用户不在分群"
     },
     "calculateOption": {
       "NUMBER_OF_TOTAL": "总次数 (PV)",
@@ -474,7 +474,9 @@
       "filterByTimeRange": "按日期和时间范围过滤",
       "appTimezone": "应用程序使用时区",
       "importSegmentTitle": "导入分群",
-      "importSegmentDesc": "自定义分群，并手动导入分群用户"
+      "importSegmentDesc": "自定义分群，并手动导入分群用户",
+      "importSegmentGuideTitle": "添加用户到分群中",
+      "importSegmentGuide": "保存分群后，请按照<guide_anchor>指南</guide_anchor>将用户添加到分群中。"
     },
     "details": {
       "title": "分群详细信息",
@@ -498,7 +500,8 @@
       "segmentUserSample": "用户取样",
       "segmentUserSampleDesc": "从最近一次分群刷新结果中取样的用户",
       "noSampleData": "无可用样例数据",
-      "importedSegment": "导入分群"
+      "importedSegment": "导入分群",
+      "segmentId": "分群ID"
     },
     "valid": {
       "nameEmptyError": "请输入分群名称。",

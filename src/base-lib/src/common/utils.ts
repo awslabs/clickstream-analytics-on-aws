@@ -115,7 +115,7 @@ export const getDateTimeWithTimezoneString = (
 ) => {
   return moment
     .tz(moment(timestamp), timezone)
-    .format('YYYY-MM-DD HH:mm:ss(z)');
+    .format('YYYY-MM-DD HH:mm:ss (z)');
 };
 
 export const getLocaleDateString = (timestamp: number, timezone: string) => {

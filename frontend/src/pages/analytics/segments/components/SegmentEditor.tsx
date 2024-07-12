@@ -255,7 +255,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                     updateSegmentObject('refreshSchedule', {
                       cron: 'Manual',
                       cronExpression: undefined,
-                      expireAfter: segmentObject.refreshSchedule.expireAfter,
+                      expireAfter: 0,
                     });
                   } else {
                     updateSegmentObject('autoRefreshOption', {
@@ -396,7 +396,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
               )}
             </FormField>
 
-            <FormField
+            {segmentObject.refreshType === 'auto' && <FormField
               label={t('analytics:segment.comp.expirationSettings')}
               description={t('analytics:segment.comp.expirationSettingsDesc')}
             >
@@ -416,7 +416,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                 }}
                 placeholder="YYYY/MM/DD"
               />
-            </FormField>
+            </FormField>}
           </SpaceBetween>
         </Container>
 
