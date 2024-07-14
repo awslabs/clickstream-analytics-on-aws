@@ -14,11 +14,19 @@
 
 * **摄取容量**：此配置设置摄取服务器的容量，摄取服务器将根据处理 CPU 的利用率自动扩展或缩减。
 
-    * 最小容量：摄取服务器将缩减到的最小容量。
+    * **ECS on EC2**：用于具有稳定流量需求的大型工作负载。
 
-    * 最大容量：摄取服务器将扩展到的最大容量。
+        * 最小容量：摄取服务器将缩减到的最小容量。
 
-    * 暖池：暖池使您能够减少具有异常长引导时间的应用程序的延迟。有关更多信息，请参阅[Amazon EC2 Auto Scaling 的暖池](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html)。
+        * 最大容量：摄取服务器将扩展到的最大容量。
+
+        * 暖池：暖池使您能够减少具有异常长引导时间的应用程序的延迟。有关更多信息，请参阅[Amazon EC2 Auto Scaling 的暖池](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html)。
+
+    * **ECS on Fargate**：用于少量、批量、突发流量或者维护预算为零的工作负载。
+
+        * 最小容量：摄取服务器将缩减到的最小容量。
+
+        * 最大容量：摄取服务器将扩展到的最大容量。            
 
 * **启用 HTTPS**：用户可以选择 Ingestion 端点的 HTTPS/HTTP 协议。
 
