@@ -61,7 +61,7 @@ const ProjectDetail: React.FC = () => {
       });
       if (res?.success) {
         setProjectInfo(res?.data);
-        if (res?.data?.pipelineId && res?.data?.pipelineId !== '') {
+        if (res?.data?.pipelineId) {
           getPipelineByProjectId(projectId, 'false');
         } else {
           setLoadingPipeline(false);
