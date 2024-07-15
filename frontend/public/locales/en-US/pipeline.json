@@ -318,9 +318,7 @@
     "streamingTitle": "Real-time analysis settings",
     "streamingDesc": "Enable real-time analysis for this pipeline",
     "enableStreaming": "Enable real-time analysis",
-    "enableStreamingDesc": "Enabling real-time analysis will create the real-time data processing resources (i.e., Flink application) for this pipeline. Note that additional cost apply.",
-    "streamingDataRangeTitle": "Real-time data range",
-    "streamingDataRangeDesc": "Real-time data range is the period to keep the real-time data for, data exceed the data range will be deleted from the real-time data table and won’t be displayed in the dashboard."
+    "enableStreamingDesc": "Enabling real-time analysis will create the real-time data processing resources (i.e., Flink application) for this pipeline. Note that additional cost apply."
   },
   "detail": {
     "ingestion": "Ingestion",

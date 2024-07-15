@@ -106,9 +106,6 @@ describe('Test AGA service available', () => {
         changeEnableStreaming={() => {
           return;
         }}
-        changeStreamingDataRangeValue={() => {
-          return;
-        }}
         changePublicSubnets={() => {
           return;
         }}
@@ -268,9 +265,6 @@ describe('Test AGA service available', () => {
           },
         }}
         changeEnableStreaming={() => {
-          return;
-        }}
-        changeStreamingDataRangeValue={() => {
           return;
         }}
         changePublicSubnets={() => {
@@ -1009,9 +1003,6 @@ describe('Test MSK service available', () => {
           },
         }}
         changeEnableStreaming={() => {
-          return;
-        }}
-        changeStreamingDataRangeValue={() => {
           return;
         }}
         changePublicSubnets={() => {

@@ -12,10 +12,19 @@ The solution creates a web service as an ingestion endpoint to collect data sent
         The availability zones where the public subnets are located must be consistent with those of the private subnets.
 
 * **Ingestion capacity**: This configuration sets the capacity of the ingestion server, and the ingestion server will automatically scale up or down based on the utilization of the processing CPU.
-    * Ingestion Capacity Unit (ICU): A single Ingestion Compute Unit (ICU) represents billable compute and memory units, approximately 8 gigabytes (GB) of memory and 2 vCPUs. 1 ICU generally can support 4000~6000 requests per second.
-    * Minimum capacity: The minimum capacity to which the ingestion server will scale down.
-    * Maximum capacity: The maximum capacity to which the ingestion server will scale up.
-    * Warm pool: Warm pool gives you the ability to decrease latency of ingestion service scale up. For more information, please refer to [Warm pools for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html).
+
+    * **ECS on EC2**: Use for large & stable workloads with consistent traffic demands.
+
+        * Ingestion Capacity Unit (ICU): A single Ingestion Compute Unit (ICU) represents billable compute and memory units, approximately 8 gigabytes (GB) of memory and 2 vCPUs. 1 ICU generally can support 4000~6000 requests per second.
+        * Minimum capacity: The minimum capacity to which the ingestion server will scale down.
+        * Maximum capacity: The maximum capacity to which the ingestion server will scale up.
+        * Warm pool: Warm pool gives you the ability to decrease latency of ingestion service scale up. For more information, please refer to [Warm pools for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html).
+
+    * **ECS on Fargate**: Use if you have tiny, batch, or burst traffic or for zero maintenance overhead.
+
+        * ECS task: ECS task will be created to process the requests and ingest data each task uses approximately 512 MiB of memory and 0.25vCPUs. 1 task generally can support ~100 requests per second.
+        * Minimum capacity: The minimum capacity to which the ingestion server will scale down.
+        * Maximum capacity: The maximum capacity to which the ingestion server will scale up.
 
 * **Enable HTTPS**: Users can choose HTTPS/HTTP protocol for the Ingestion endpoint.
 

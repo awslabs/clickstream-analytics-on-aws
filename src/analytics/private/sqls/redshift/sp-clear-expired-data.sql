@@ -70,6 +70,11 @@ BEGIN
         END IF;        
 	END LOOP;
 
+    -- clean event streaming mv table expired records
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'mv_tbl__ods_events_streaming_mv__0' AND schemaname = '{{schema}}') THEN
+        DELETE FROM {{schema}}.mv_tbl__ods_events_streaming_mv__0 WHERE approximate_arrival_timestamp < current_date - INTERVAL '1 day';
+    END IF;
+
 EXCEPTION WHEN OTHERS THEN
     CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'error message:' || SQLERRM);    
 END;

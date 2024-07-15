@@ -261,7 +261,6 @@ export class ApplicationServ {
       latestPipeline.streaming = {
         ...latestPipeline.streaming,
         appIdStreamList: streamEnableAppIds,
-        retentionHours: latestPipeline.streaming?.retentionHours ?? 1,
       };
       const pipeline = new CPipeline(latestPipeline);
       await pipeline.updateStreamingApp(streamEnableAppIds);
