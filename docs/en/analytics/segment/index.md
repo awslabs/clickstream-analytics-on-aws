@@ -13,7 +13,7 @@ To access Segments, follow below steps:
 3. Specify a **Refresh method**
     - Manual - Segment will be refreshed when user manually triggers refresh
     - Automatic - Segment will be refreshed periodically. You can configure interval (e.g., Daily, Weekly, Monthly) and timing (e.g., 8AM). 
-4. Specify a **Expirations settings**. If you specified Automatically as refresh method, you will need to set an expiration date for a segment after which the segment will stop auto refresh.
+4. Specify **Expirations settings**. If you specified Automatically as refresh method, you will need to set an expiration date for a segment after which the segment will stop auto refresh.
 5. Define the segment by adding **Filter group**.
     - You can have multiple filter groups, you can provide a short description for each filter group. Click **+ Filter group** to add filter group.
     - Specify time range for your filter group, you can choose relative date range or absolute date range.
@@ -35,4 +35,4 @@ Below table describes the available filters to create a segment.
 |**User has not done**| Select users had NOT done certain event.| <li>Total number: total number of the selected event occurred </li> <li>Number of times per day: The total number of times this event occurred per day </li> <li>Number of consecutive days: The number of consecutive days this event occurred </li> <li>Distribution of days: The number of days on which users triggered this event </li> <li> Sum/Max/Min/Average/Distinct count by numerical event attributes</li>|<li>=</li><li>!=</li><li>></li><li><</li> <li>>=</li><li><=</li><li>>=</li><li>between</li>|
 |**User has done in sequence**| Specify an event behavior sequence. Users will only be selected if they trigger these events in the specified order.| <li>Within a session: user must done the selected events within a session </li> <li>Across sessions: user has done the selected events in one or multiple sessions</li> <li>Directly followed: The next event needs to be immediately after the previous one</li> <li> Indirectly followed: There can be other events between the specified step sequence</li>||
 |**User is**/**User is not**|Select users by user attributes.| User attributes|<li>is null</li><li>is not null</li><li>=</li><li>!=</li> <li>in</li><li>not in</li><li>contains</li><li>not contains</li> |
-|**User in segment/User in not segment**| Select users based on whether user belong to a segment or not.| Segments||
+|**User in segment/User not in segment**| Select users based on whether user belong to a segment or not.| Segments||
