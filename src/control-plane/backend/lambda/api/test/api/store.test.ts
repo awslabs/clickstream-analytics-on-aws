@@ -242,6 +242,9 @@ describe('App test', () => {
                   },
                 },
               },
+              ingestionType: {
+                S: 'EC2',
+              },
               loadBalancer: {
                 M: {
                   authenticationSecretArn: {
@@ -531,6 +534,9 @@ describe('App test', () => {
                 S: 'fake.example.com',
               },
             },
+          },
+          ingestionType: {
+            S: 'EC2',
           },
           loadBalancer: {
             M: {

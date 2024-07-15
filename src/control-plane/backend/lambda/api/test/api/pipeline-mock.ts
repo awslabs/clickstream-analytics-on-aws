@@ -20,6 +20,7 @@ import { LEVEL1, LEVEL2, LEVEL3 } from '../../common/constants';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusType } from '../../common/model-ln';
 import {
   DataCollectionSDK,
+  IngestionType,
   KinesisStreamMode,
   PipelineServerProtocol,
   PipelineSinkType,
@@ -83,6 +84,7 @@ export const BASE_PIPELINE_ATTRIBUTES = {
     prefix: 'example/',
   },
   ingestionServer: {
+    ingestionType: IngestionType.EC2,
     size: {
       serverMax: 4,
       warmPoolSize: 1,

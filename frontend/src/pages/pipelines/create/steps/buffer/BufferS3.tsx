@@ -12,9 +12,11 @@
  */
 
 import { FormField, Input, SpaceBetween } from '@cloudscape-design/components';
+import i18n from 'i18n';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { POSITIVE_INTEGER_REGEX } from 'ts/const';
+import { EIngestionType, POSITIVE_INTEGER_REGEX } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 
 interface BufferS3Props {
   update?: boolean;
@@ -59,15 +61,31 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
 
       <FormField
         label={t('pipeline:create.s3.bufferInterval')}
-        description={t('pipeline:create.s3.bufferIntervalDesc')}
+        description={defaultStr(
+          i18n.t('pipeline:create.s3.bufferIntervalDesc', {
+            max:
+              pipelineInfo.ingestionServer.ingestionType ===
+              EIngestionType.Fargate
+                ? '100'
+                : '3600',
+          })
+        )}
         errorText={
           bufferS3IntervalFormatError
-            ? t('pipeline:valid.bufferS3IntervalError')
+            ? defaultStr(
+                i18n.t('pipeline:valid.bufferS3IntervalError', {
+                  max:
+                    pipelineInfo.ingestionServer.ingestionType ===
+                    EIngestionType.Fargate
+                      ? '100'
+                      : '3600',
+                })
+              )
             : ''
         }
       >
         <Input
-          placeholder="300"
+          placeholder="60"
           type="number"
           value={pipelineInfo.ingestionServer.sinkS3.s3BufferInterval.toString()}
           onChange={(e) => {

@@ -86,11 +86,12 @@ import {
   stackDetailsWithOutputs,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_V2_INGESTION_WORKFLOW,
+  BASE_PIPELINE_ATTRIBUTES,
 } from './pipeline-mock';
 import { expectParameter } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, LEVEL1, LEVEL2, LEVEL3, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys, ECS_INFRA_TYPE_MODE, PipelineStatusType, SINK_TYPE_MODE } from '../../common/model-ln';
-import { PipelineServerProtocol } from '../../common/types';
+import { IngestionType, PipelineServerProtocol, PipelineSinkType } from '../../common/types';
 import { getDefaultTags, getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -169,6 +170,91 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+  });
+  it('Create pipeline s3 buffer (EC2) interval error', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...S3_INGESTION_PIPELINE,
+        ingestionServer: {
+          ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
+          size: {
+            serverMax: 2,
+            warmPoolSize: 0,
+            serverMin: 1,
+            scaleOnCpuUtilizationPercent: 50,
+          },
+          sinkType: PipelineSinkType.S3,
+          sinkS3: {
+            sinkBucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: '',
+            },
+            s3BufferSize: 10,
+            s3BufferInterval: 10060,
+          },
+          loadBalancer: {
+            ...BASE_PIPELINE_ATTRIBUTES.ingestionServer.loadBalancer,
+            authenticationSecretArn: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
+          },
+        },
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validation error: the sink batch interval must 60 <= interval <= 3600 for S3 sink. Please check and try again.');
+  });
+  it('Create pipeline s3 buffer (Fargate) interval error', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+    });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...S3_INGESTION_PIPELINE,
+        ingestionServer: {
+          ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
+          ingestionType: IngestionType.Fargate,
+          size: {
+            serverMax: 2,
+            warmPoolSize: 0,
+            serverMin: 1,
+            scaleOnCpuUtilizationPercent: 50,
+          },
+          sinkType: PipelineSinkType.S3,
+          sinkS3: {
+            sinkBucket: {
+              name: 'EXAMPLE_BUCKET',
+              prefix: '',
+            },
+            s3BufferSize: 10,
+            s3BufferInterval: 101,
+          },
+          loadBalancer: {
+            ...BASE_PIPELINE_ATTRIBUTES.ingestionServer.loadBalancer,
+            authenticationSecretArn: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
+          },
+        },
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validation error: the sink batch interval must 60 <= interval <= 100 for S3 sink. Please check and try again.');
   });
   it('Create rule with rule name too long', async () => {
     tokenMock(ddbMock, false);

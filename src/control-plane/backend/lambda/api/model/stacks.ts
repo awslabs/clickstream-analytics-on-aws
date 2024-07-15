@@ -54,6 +54,7 @@ import { isSupportVersion, supportVersions } from '../common/parameter-reflect';
 import {
   validateDataProcessingInterval,
   validatePattern,
+  validateS3SinkBatch,
   validateServerlessRedshiftRPU,
   validateSinkBatch,
 } from '../common/stack-params-valid';
@@ -377,25 +378,25 @@ export class CIngestionServerStack extends JSONObject {
   })
     S3BatchMaxBytes?: number;
 
-  @JSONObject.optional(300)
-  @JSONObject.gte(30)
-  @JSONObject.lte(1800)
+  @JSONObject.optional(60)
+  @JSONObject.gte(60)
+  @JSONObject.lte(3600)
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
     if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.S3) {
       return undefined;
     }
-    return stack._pipeline?.ingestionServer.sinkS3?.s3BufferInterval ?? 300;
+    return stack._pipeline?.ingestionServer.sinkS3?.s3BufferInterval ?? 60;
   })
     S3BatchTimeout?: number;
 
-  @JSONObject.optional(330)
+  @JSONObject.optional(90)
   @JSONObject.gte(60)
-  @JSONObject.lte(1830)
+  @JSONObject.lte(3630)
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
     if (stack._pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
       return 120;
     } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
-      return stack.S3BatchTimeout ? stack.S3BatchTimeout + 30 : 330;
+      return stack.S3BatchTimeout ? stack.S3BatchTimeout + 30 : 90;
     }
     return undefined;
   })
@@ -545,6 +546,9 @@ export class CIngestionServerStack extends JSONObject {
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.ingestionServer.sinkBatch) {
       validateSinkBatch(pipeline.ingestionServer.sinkType, pipeline.ingestionServer.sinkBatch);
+    }
+    if (pipeline.ingestionServer.sinkType == PipelineSinkType.S3) {
+      validateS3SinkBatch(pipeline);
     }
     if (pipeline.ingestionServer.sinkType == PipelineSinkType.KINESIS &&
       !pipeline.ingestionServer.sinkKinesis?.kinesisStreamMode
