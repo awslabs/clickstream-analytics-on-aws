@@ -505,7 +505,6 @@ export class CPipeline {
     newStackTags.sort((a, b) => a.key.localeCompare(b.key));
     oldStackTags.sort((a, b) => a.key.localeCompare(b.key));
     const diffTags = getDiff(newStackTags, oldStackTags);
-    console.log('diffTags:', diffTags);
     return !isEmpty(diffTags.edited) || !isEmpty(diffTags.added) || !isEmpty(diffTags.removed);
   }
 
