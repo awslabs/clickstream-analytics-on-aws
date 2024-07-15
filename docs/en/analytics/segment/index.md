@@ -11,8 +11,8 @@ To access Segments, follow below steps:
 1. Click on **Create Segment +** button
 2. Input **Segment name** and **Description**
 3. Specify a **Refresh method**
-    - Manual - Segment will be refreshed when user manually trigger refresh
-    - Automatically - Segment will be refreshed periodically. You can configure interval (e.g., Daily, Weekly, Monthly) and timing (e.g., 8AM). 
+    - Manual - Segment will be refreshed when user manually triggers refresh
+    - Automatic - Segment will be refreshed periodically. You can configure interval (e.g., Daily, Weekly, Monthly) and timing (e.g., 8AM). 
 4. Specify a **Expirations settings**. If you specified Automatically as refresh method, you will need to set an expiration date for a segment after which the segment will stop auto refresh.
 5. Define the segment by adding **Filter group**.
     - You can have multiple filter groups, you can provide a short description for each filter group. Click **+ Filter group** to add filter group.
