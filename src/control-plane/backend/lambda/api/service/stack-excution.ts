@@ -144,14 +144,14 @@ async function getAppRegistryState(pipeline: IPipeline, resources: CPipelineReso
     throw new ClickStreamBadRequestError('Stack Workflow S3Bucket can not empty.');
   }
 
-  const appRegistryTemplateURL = await getTemplateUrlFromResource(resources, PipelineStackType.APP_REGISTRY);
+  const appRegistryTemplateURL = await getTemplateUrlFromResource(pipeline, resources, PipelineStackType.APP_REGISTRY);
   if (!appRegistryTemplateURL) {
     throw new ClickStreamBadRequestError('Template: AppRegistry not found in dictionary.');
   }
 
   const appRegistryStack = new CAppRegistryStack(pipeline);
   const appRegistryParameters = getStackParameters(appRegistryStack, SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-  const appRegistryStackName = getStackName(pipeline.pipelineId, PipelineStackType.APP_REGISTRY, pipeline.ingestionServer.sinkType);
+  const appRegistryStackName = getStackName(pipeline, PipelineStackType.APP_REGISTRY);
 
   const appRegistryState: WorkflowState = {
     Type: WorkflowStateType.STACK,
@@ -182,14 +182,14 @@ async function getAppRegistryState(pipeline: IPipeline, resources: CPipelineReso
 }
 
 async function getMetricsState(pipeline: IPipeline, resources: CPipelineResources): Promise<WorkflowState> {
-  const metricsTemplateURL = await getTemplateUrlFromResource(resources, PipelineStackType.METRICS);
+  const metricsTemplateURL = await getTemplateUrlFromResource(pipeline, resources, PipelineStackType.METRICS);
   if (!metricsTemplateURL) {
     throw new ClickStreamBadRequestError('Template: metrics not found in dictionary.');
   }
 
   const metricsStack = new CMetricsStack(pipeline, resources);
   const metricsStackParameters = getStackParameters(metricsStack, SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-  const metricsStackStackName = getStackName(pipeline.pipelineId, PipelineStackType.METRICS, pipeline.ingestionServer.sinkType);
+  const metricsStackStackName = getStackName(pipeline, PipelineStackType.METRICS);
   const metricsState: WorkflowState = {
     Type: WorkflowStateType.STACK,
     Data: {
@@ -215,7 +215,7 @@ async function getDataProcessingState(pipeline: IPipeline, resources: CPipelineR
   if (pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA && !pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
     return undefined;
   }
-  const dataPipelineTemplateURL = await getTemplateUrlFromResource(resources, PipelineStackType.DATA_PROCESSING);
+  const dataPipelineTemplateURL = await getTemplateUrlFromResource(pipeline, resources, PipelineStackType.DATA_PROCESSING);
   if (!dataPipelineTemplateURL) {
     throw new ClickStreamBadRequestError('Template: data-pipeline not found in dictionary.');
   }
@@ -223,8 +223,7 @@ async function getDataProcessingState(pipeline: IPipeline, resources: CPipelineR
   const dataProcessingStack = new CDataProcessingStack(pipeline, resources);
   const dataProcessingStackParameters = getStackParameters(
     dataProcessingStack, SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-  const dataProcessingStackName = getStackName(
-    pipeline.pipelineId, PipelineStackType.DATA_PROCESSING, pipeline.ingestionServer.sinkType);
+  const dataProcessingStackName = getStackName(pipeline, PipelineStackType.DATA_PROCESSING);
   const dataProcessingState: WorkflowState = {
     Type: WorkflowStateType.STACK,
     Data: {
@@ -247,17 +246,13 @@ async function getIngestionBranch(pipeline: IPipeline, resources: CPipelineResou
   if (isEmpty(pipeline.ingestionServer)) {
     return undefined;
   }
-  let ingestionTemplateKey = `${PipelineStackType.INGESTION}_${pipeline.ingestionServer.sinkType}`;
-  if (SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION).greaterThanOrEqualTo(SolutionVersion.V_1_2_0)) {
-    ingestionTemplateKey = `${PipelineStackType.INGESTION}_v2`;
-  }
-  const ingestionTemplateURL = await getTemplateUrlFromResource(resources, ingestionTemplateKey);
+  const ingestionTemplateURL = await getTemplateUrlFromResource(pipeline, resources, PipelineStackType.INGESTION);
   if (!ingestionTemplateURL) {
-    throw new ClickStreamBadRequestError(`Template: ${ingestionTemplateKey} not found in dictionary.`);
+    throw new ClickStreamBadRequestError(`Template: ${PipelineStackType.INGESTION} not found in dictionary.`);
   }
   const ingestionStack = new CIngestionServerStack(pipeline, resources);
   const ingestionStackParameters = getStackParameters(ingestionStack, SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-  const ingestionStackName = getStackName(pipeline.pipelineId, PipelineStackType.INGESTION, pipeline.ingestionServer.sinkType);
+  const ingestionStackName = getStackName(pipeline, PipelineStackType.INGESTION);
   const ingestionState: WorkflowState = {
     Type: WorkflowStateType.STACK,
     Data: {
@@ -274,15 +269,14 @@ async function getIngestionBranch(pipeline: IPipeline, resources: CPipelineResou
   };
 
   if (pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA && pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
-    const kafkaConnectorTemplateURL = await getTemplateUrlFromResource(resources, PipelineStackType.KAFKA_CONNECTOR);
+    const kafkaConnectorTemplateURL = await getTemplateUrlFromResource(pipeline, resources, PipelineStackType.KAFKA_CONNECTOR);
     if (!kafkaConnectorTemplateURL) {
       throw new ClickStreamBadRequestError('Template: kafka-s3-sink not found in dictionary.');
     }
     const kafkaConnectorStack = new CKafkaConnectorStack(pipeline, resources);
     const kafkaConnectorStackParameters = getStackParameters(
       kafkaConnectorStack, SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-    const kafkaConnectorStackName = getStackName(
-      pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR, pipeline.ingestionServer.sinkType);
+    const kafkaConnectorStackName = getStackName(pipeline, PipelineStackType.KAFKA_CONNECTOR);
     const kafkaConnectorState: WorkflowState = {
       Type: WorkflowStateType.STACK,
       Data: {
@@ -320,13 +314,13 @@ async function getAthenaState(pipeline: IPipeline, resources: CPipelineResources
   if (!pipeline.dataModeling?.athena) {
     return undefined;
   }
-  const athenaTemplateURL = await getTemplateUrlFromResource(resources, PipelineStackType.ATHENA);
+  const athenaTemplateURL = await getTemplateUrlFromResource(pipeline, resources, PipelineStackType.ATHENA);
   if (!athenaTemplateURL) {
     throw new ClickStreamBadRequestError('Template: Athena not found in dictionary.');
   }
   const athenaStack = new CAthenaStack(pipeline);
   const athenaStackParameters = getStackParameters(athenaStack, SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-  const athenaStackName = getStackName(pipeline.pipelineId, PipelineStackType.ATHENA, pipeline.ingestionServer.sinkType);
+  const athenaStackName = getStackName(pipeline, PipelineStackType.ATHENA);
   const athenaState: WorkflowState = {
     Type: WorkflowStateType.STACK,
     Data: {
@@ -353,7 +347,7 @@ async function getDataModelingState(pipeline: IPipeline, resources: CPipelineRes
   if (pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA && !pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
     return undefined;
   }
-  const dataModelingTemplateURL = await getTemplateUrlFromResource(resources, PipelineStackType.DATA_MODELING_REDSHIFT);
+  const dataModelingTemplateURL = await getTemplateUrlFromResource(pipeline, resources, PipelineStackType.DATA_MODELING_REDSHIFT);
   if (!dataModelingTemplateURL) {
     throw new ClickStreamBadRequestError('Template: data-analytics not found in dictionary.');
   }
@@ -361,8 +355,7 @@ async function getDataModelingState(pipeline: IPipeline, resources: CPipelineRes
   const dataModelingStack = new CDataModelingStack(pipeline, resources);
   const dataModelingStackParameters = getStackParameters(
     dataModelingStack, SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-  const dataModelingStackName = getStackName(
-    pipeline.pipelineId, PipelineStackType.DATA_MODELING_REDSHIFT, pipeline.ingestionServer.sinkType);
+  const dataModelingStackName = getStackName(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
   const dataModelingState: WorkflowState = {
     Type: WorkflowStateType.STACK,
     Data: {
@@ -385,13 +378,13 @@ export async function getReportingState(pipeline: IPipeline, resources: CPipelin
   if (!pipeline.reporting?.quickSight?.accountName) {
     return undefined;
   }
-  const reportTemplateURL = await getTemplateUrlFromResource(resources, PipelineStackType.REPORTING);
+  const reportTemplateURL = await getTemplateUrlFromResource(pipeline, resources, PipelineStackType.REPORTING);
   if (!reportTemplateURL) {
     throw new ClickStreamBadRequestError('Template: quicksight not found in dictionary.');
   }
   const reportStack = new CReportingStack(pipeline, resources);
   const reportStackParameters = getStackParameters(reportStack, SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-  const reportStackName = getStackName(pipeline.pipelineId, PipelineStackType.REPORTING, pipeline.ingestionServer.sinkType);
+  const reportStackName = getStackName(pipeline, PipelineStackType.REPORTING);
   const reportState: WorkflowState = {
     Type: WorkflowStateType.STACK,
     Data: {
@@ -415,13 +408,13 @@ export async function getStreamingState(pipeline: IPipeline, resources: CPipelin
   if (!pipeline.streaming?.appIdStreamList) {
     return undefined;
   }
-  const streamingTemplateURL = await getTemplateUrlFromResource(resources, PipelineStackType.STREAMING);
+  const streamingTemplateURL = await getTemplateUrlFromResource(pipeline, resources, PipelineStackType.STREAMING);
   if (!streamingTemplateURL) {
     throw new ClickStreamBadRequestError('Template: streaming not found in dictionary.');
   }
   const streamingStack = new CStreamingStack(pipeline, resources);
   const streamingStackParameters = getStackParameters(streamingStack, SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-  const streamingStackName = getStackName(pipeline.pipelineId, PipelineStackType.STREAMING, pipeline.ingestionServer.sinkType);
+  const streamingStackName = getStackName(pipeline, PipelineStackType.STREAMING);
   const streamingState: WorkflowState = {
     Type: WorkflowStateType.STACK,
     Data: {
@@ -692,27 +685,6 @@ function getWorkflowSates(state: WorkflowState): any[] {
     }
   }
   return states;
-}
-
-export function getIngestionStackTemplateUrl(state: WorkflowState, pipeline: IPipeline): string | undefined {
-  let templateUrl: string | undefined;
-  if (state.Type === WorkflowStateType.PARALLEL) {
-    for (let branch of state.Branches as WorkflowParallelBranch[]) {
-      for (let key of Object.keys(branch.States)) {
-        templateUrl = getIngestionStackTemplateUrl(branch.States[key], pipeline);
-        if (templateUrl) {
-          return templateUrl;
-        }
-      }
-    }
-  } else if (state.Type === WorkflowStateType.STACK) {
-    if (state.Data?.Input.StackName ===
-      getStackName(pipeline.pipelineId, PipelineStackType.INGESTION, pipeline.ingestionServer.sinkType)
-    ) {
-      templateUrl = state.Data.Input.TemplateURL;
-    }
-  }
-  return templateUrl;
 }
 
 export function removeParameters(base: Parameter[], attach: Parameter[]) {

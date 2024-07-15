@@ -46,6 +46,7 @@ export interface ExecutionDetail {
 
 export enum PipelineStackType {
   INGESTION = 'Ingestion',
+  INGESTION_V2 = 'IngestionV2',
   KAFKA_CONNECTOR = 'KafkaConnector',
   DATA_PROCESSING = 'DataProcessing',
   DATA_MODELING_REDSHIFT = 'DataModelingRedshift',

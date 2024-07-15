@@ -72,6 +72,7 @@ import {
   WorkflowTemplate,
 } from '../common/types';
 import {
+  getIngestionStackType,
   getPipelineStatusType,
   getStackOutputFromPipelineStatus,
   getStackPrefix,
@@ -83,7 +84,7 @@ import {
   isEmpty,
 } from '../common/utils';
 import { StackManager } from '../service/stack';
-import { generateWorkflow, getIngestionStackTemplateUrl } from '../service/stack-excution';
+import { generateWorkflow } from '../service/stack-excution';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
@@ -540,14 +541,13 @@ export class CPipeline {
     if (!oldPipeline.templateVersion) {
       throw new Error('Old pipeline template version is empty.');
     }
-    const ingestionStackTemplateUrl = getIngestionStackTemplateUrl(oldPipeline.workflow?.Workflow!, oldPipeline);
-    if (ingestionStackTemplateUrl?.includes('/ingestion-server-v2-stack.template.json')) {
+    const pipelineStackType = getIngestionStackType(oldPipeline);
+    if (pipelineStackType === PipelineStackType.INGESTION_V2) {
       return;
     }
-    const ingestionTemplateKey = `${PipelineStackType.INGESTION}_${oldPipeline.ingestionServer.sinkType}`;
-    const ingestionTemplateURL = await getTemplateUrlFromResource(this.resources!, ingestionTemplateKey);
+    const ingestionTemplateURL = await getTemplateUrlFromResource(oldPipeline, this.resources!, PipelineStackType.INGESTION);
     if (!ingestionTemplateURL) {
-      throw new ClickStreamBadRequestError(`Template: ${ingestionTemplateKey} not found in dictionary.`);
+      throw new ClickStreamBadRequestError('Template: ingestion stack not found in dictionary.');
     }
     await this.stackManager.resetIngestionStackTemplate(ingestionTemplateURL, oldPipeline.templateVersion);
   }
@@ -883,22 +883,6 @@ export class CPipeline {
 
     return appIds;
   }
-
-  public async getStackTemplateNameUrlMap() {
-    const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
-    const stackTemplateMap = new Map();
-    for (let stackName of stackNames) {
-      const cutPrefixName = stackName.substring(getStackPrefix().length);
-      const stackType = cutPrefixName.split('-')[1] as PipelineStackType;
-      let templateName: string = stackType;
-      if (stackType === PipelineStackType.INGESTION) {
-        templateName = `${stackType}_${this.pipeline.ingestionServer.sinkType}`;
-      }
-      const templateURL = await this.getTemplateUrl(templateName);
-      stackTemplateMap.set(stackName, templateURL);
-    }
-    return stackTemplateMap;
-  };
 
   public async getTemplateUrl(name: string) {
     if (!this.resources?.solution || !this.resources?.templates) {

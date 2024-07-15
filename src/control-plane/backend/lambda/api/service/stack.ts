@@ -68,8 +68,7 @@ export class StackManager {
     this.execWorkflow.Workflow = this.setWorkflowType(this.execWorkflow.Workflow, WorkflowStateType.PASS);
 
     for (let item of updateList) {
-      const stackName = getStackName(
-        this.pipeline.pipelineId, item.stackType, this.pipeline.ingestionServer.sinkType);
+      const stackName = getStackName(this.pipeline, item.stackType);
       this.execWorkflow.Workflow = this.updateStackParameter(
         this.execWorkflow.Workflow, stackName, item.parameterKey, item.parameterValue, 'Update');
       // Update saveWorkflow AppIds Parameter
@@ -129,29 +128,29 @@ export class StackManager {
     }
     if (retryStackTypes.includes(PipelineStackType.INGESTION)) {
       retryStackNames.push(
-        getStackName(this.pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR, this.pipeline.ingestionServer.sinkType),
+        getStackName(this.pipeline, PipelineStackType.KAFKA_CONNECTOR),
       );
       retryStackNames.push(
-        getStackName(this.pipeline.pipelineId, PipelineStackType.STREAMING, this.pipeline.ingestionServer.sinkType),
+        getStackName(this.pipeline, PipelineStackType.STREAMING),
       );
     }
     if (retryStackTypes.includes(PipelineStackType.DATA_PROCESSING)) {
       retryStackNames.push(
-        getStackName(this.pipeline.pipelineId, PipelineStackType.ATHENA, this.pipeline.ingestionServer.sinkType),
+        getStackName(this.pipeline, PipelineStackType.ATHENA),
       );
       retryStackNames.push(
-        getStackName(this.pipeline.pipelineId, PipelineStackType.DATA_MODELING_REDSHIFT, this.pipeline.ingestionServer.sinkType),
+        getStackName(this.pipeline, PipelineStackType.DATA_MODELING_REDSHIFT),
       );
       retryStackNames.push(
-        getStackName(this.pipeline.pipelineId, PipelineStackType.REPORTING, this.pipeline.ingestionServer.sinkType),
+        getStackName(this.pipeline, PipelineStackType.REPORTING),
       );
     }
     if (retryStackTypes.includes(PipelineStackType.ATHENA) || retryStackTypes.includes(PipelineStackType.DATA_MODELING_REDSHIFT)) {
       retryStackNames.push(
-        getStackName(this.pipeline.pipelineId, PipelineStackType.REPORTING, this.pipeline.ingestionServer.sinkType),
+        getStackName(this.pipeline, PipelineStackType.REPORTING),
       );
       retryStackNames.push(
-        getStackName(this.pipeline.pipelineId, PipelineStackType.STREAMING, this.pipeline.ingestionServer.sinkType),
+        getStackName(this.pipeline, PipelineStackType.STREAMING),
       );
     }
     return Array.from(new Set(retryStackNames));
@@ -342,8 +341,7 @@ export class StackManager {
         }
       }
     } else if (state.Type === WorkflowStateType.STACK && state.Data?.Input.StackName) {
-      if (state.Data.Input.StackName ===
-        getStackName(this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType)) {
+      if (state.Data.Input.StackName.includes(PipelineStackType.INGESTION)) {
         state.Data.Input.TemplateURL = templateUrl;
         state.Data.Input.Parameters = removeParameters(
           [

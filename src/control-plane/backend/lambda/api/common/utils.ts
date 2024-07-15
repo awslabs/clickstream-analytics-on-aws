@@ -38,7 +38,7 @@ import { cloneDeep } from 'lodash';
 import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType, WorkflowParallelBranch, WorkflowState, WorkflowStateType } from './types';
 import { IDictionary } from '../model/dictionary';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter, IMetadataBuiltInList } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
@@ -258,9 +258,47 @@ function getStackPrefix(): string {
   return `${prefix}-${SolutionInfo.SOLUTION_SHORT_NAME}`;
 }
 
-function getStackName(pipelineId: string, key: PipelineStackType, sinkType: string): string {
+function getIngestionStackTemplateUrl(state: WorkflowState | undefined, pipeline: IPipeline): string | undefined {
+  let templateUrl: string | undefined;
+  if (!state) {
+    return templateUrl;
+  }
+  if (state.Type === WorkflowStateType.PARALLEL) {
+    for (let branch of state.Branches as WorkflowParallelBranch[]) {
+      for (let key of Object.keys(branch.States)) {
+        templateUrl = getIngestionStackTemplateUrl(branch.States[key], pipeline);
+        if (templateUrl) {
+          return templateUrl;
+        }
+      }
+    }
+  } else if (state.Type === WorkflowStateType.STACK) {
+    if (state.Data?.Input.StackName.includes(PipelineStackType.INGESTION)) {
+      templateUrl = state.Data.Input.TemplateURL;
+    }
+  }
+  return templateUrl;
+}
+
+function getIngestionStackType(pipeline: IPipeline): PipelineStackType {
+  if (pipeline.workflow?.Workflow) {
+    const ingestionStackTemplateUrl = getIngestionStackTemplateUrl(pipeline.workflow?.Workflow, pipeline);
+    if (ingestionStackTemplateUrl && ingestionStackTemplateUrl?.includes('/ingestion-server-v2-stack.template.json')) {
+      return PipelineStackType.INGESTION_V2;
+    }
+  }
+  if (SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION).greaterThanOrEqualTo(SolutionVersion.V_1_2_0)) {
+    return PipelineStackType.INGESTION_V2;
+  }
+  return PipelineStackType.INGESTION;
+}
+
+function getStackName(pipeline: IPipeline, key: PipelineStackType): string {
+  const sinkType = pipeline.ingestionServer.sinkType;
+  const pipelineId = pipeline.pipelineId;
   const names: Map<string, string> = new Map();
   names.set(PipelineStackType.INGESTION, `${getStackPrefix()}-${PipelineStackType.INGESTION}-${sinkType}-${pipelineId}`);
+  names.set(PipelineStackType.INGESTION_V2, `${getStackPrefix()}-${PipelineStackType.INGESTION}-${pipelineId}`);
   names.set(PipelineStackType.KAFKA_CONNECTOR, `${getStackPrefix()}-${PipelineStackType.KAFKA_CONNECTOR}-${pipelineId}`);
   names.set(PipelineStackType.DATA_PROCESSING, `${getStackPrefix()}-${PipelineStackType.DATA_PROCESSING}-${pipelineId}`);
   names.set(PipelineStackType.DATA_MODELING_REDSHIFT, `${getStackPrefix()}-${PipelineStackType.DATA_MODELING_REDSHIFT}-${pipelineId}`);
@@ -269,6 +307,10 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   names.set(PipelineStackType.ATHENA, `${getStackPrefix()}-${PipelineStackType.ATHENA}-${pipelineId}`);
   names.set(PipelineStackType.APP_REGISTRY, `${getStackPrefix()}-${PipelineStackType.APP_REGISTRY}-${pipelineId}`);
   names.set(PipelineStackType.STREAMING, `${getStackPrefix()}-${PipelineStackType.STREAMING}-${pipelineId}`);
+  if (key === PipelineStackType.INGESTION) {
+    const pipelineStackType = getIngestionStackType(pipeline);
+    return names.get(pipelineStackType) ?? '';
+  }
   return names.get(key) ?? '';
 }
 
@@ -654,7 +696,7 @@ function paginateData(data: any[], pagination: boolean, pageSize: number, pageNu
 }
 
 function getValueFromStackOutputSuffix(pipeline: IPipeline, stackType: PipelineStackType, suffix: string) {
-  const stackName = getStackName(pipeline.pipelineId, stackType, pipeline.ingestionServer.sinkType);
+  const stackName = getStackName(pipeline, stackType);
   return `#.${stackName}.${suffix}`;
 }
 
@@ -1472,11 +1514,21 @@ function readAndIterateFile(filePath: string): any[] {
   }
 }
 
-export function getTemplateUrlFromResource(resources: CPipelineResources, name: string) {
-  if (!resources.solution || !resources.templates || isEmpty(resources.templates.data[name])) {
+export function getTemplateUrlFromResource(pipeline: IPipeline, resources: CPipelineResources, name: PipelineStackType) {
+  if (!resources.solution || !resources.templates) {
     return undefined;
   }
-  const templateName = resources.templates.data[name] as string;
+  let stackType: string = name;
+  if (name === PipelineStackType.INGESTION) {
+    stackType = getIngestionStackType(pipeline);
+    if (stackType === PipelineStackType.INGESTION) {
+      stackType = `${PipelineStackType.INGESTION}_${pipeline.ingestionServer.sinkType}`;
+    }
+  }
+  if (isEmpty(resources.templates.data[stackType])) {
+    return undefined;
+  }
+  const templateName = resources.templates.data[stackType] as string;
   return getTemplateUrl(templateName, resources.solution);
 };
 
@@ -1575,4 +1627,6 @@ export {
   readMetadataFromSqlFile,
   getTemplateUrl,
   getStreamEnableAppIdsFromPipeline,
+  getIngestionStackType,
+  getIngestionStackTemplateUrl,
 };
