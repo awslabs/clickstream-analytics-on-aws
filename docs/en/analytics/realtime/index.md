@@ -6,7 +6,7 @@ Realtime lets you monitor clickstream data on your website or app in second-leve
 2. You must enable realtime streaming for the app.
 
 ## Start and stop
-You can start and stop the realtime data streaming by switching on and off the toggle to avoid unnecessary cost. In the backend, this option starts and stops the Flink application which process the clickstream events. 
+You can start and stop the realtime data streaming by switching on and off the toggle to avoid unnecessary cost. In the backend, this option starts and stops the Flink application which processes the clickstream events. 
 
 ## Data sources and metrics
 Realtime report is created based on the following QuickSight datasets:
