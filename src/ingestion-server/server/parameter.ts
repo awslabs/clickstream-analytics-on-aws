@@ -244,7 +244,6 @@ export function createV2StackParameters(scope: Construct) {
     type: 'Number',
     default: '120',
     minValue: 60,
-    maxValue: 120,
   });
 
   const commonParameters = createCommonParameters(scope);
