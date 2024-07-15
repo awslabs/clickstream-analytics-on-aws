@@ -16,6 +16,8 @@ package software.aws.solution.clickstream.flink;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.connector.sink2.Sink;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.configuration.ConfigOptions;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
@@ -103,6 +105,18 @@ public class StreamingJob {
         }
     }
 
+    private static void configEnv(final StreamExecutionEnvironment env) {
+        Configuration config = new Configuration();
+        config.set(ConfigOptions.key("taskmanager.execution.timeout").longType().defaultValue(300000L), 300000L);
+        // Set the RPC timeout
+        config.set(ConfigOptions.key("akka.ask.timeout").stringType().defaultValue("60 s"), "60 s");
+        // Set the state backend transfer timeout
+        config.set(ConfigOptions.key("state.backend.rocksdb.checkpoint.transfer.timeout").longType().defaultValue(60000L), 60000L);
+        // Set the checkpoint timeout
+        config.set(ConfigOptions.key("execution.checkpointing.timeout").longType().defaultValue(600000L), 600000L);
+        env.configure(config);
+    }
+
     static EventParser getEventParser(final ApplicationParameters props) throws IOException {
         TransformConfig transformConfig = new TransformConfig();
         transformConfig.setTrafficSourceEnrichmentDisabled(!props.isTrafficSourceEnrich());
@@ -161,7 +175,7 @@ public class StreamingJob {
         }
 
         log.info("Enabled appId list: {}", appIds);
-
+        configEnv(env);
         registerCachedFile();
 
         SourceFunction<String> kinesisSource = this.streamProvider.createSource(); // NOSONAR
