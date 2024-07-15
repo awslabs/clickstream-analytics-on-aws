@@ -38,7 +38,7 @@
     "kafkaSGEmptyError": "请选择安全组",
     "bufferS3PrefixError": "S3 前缀长度必须小于 1024 个字符。",
     "bufferS3SizeError": "缓冲区大小数字必须介于 1 到 50 之间。",
-    "bufferS3IntervalError": "缓冲间隔数必须介于 60 和 3600 之间。",
+    "bufferS3IntervalError": "缓冲间隔数必须介于 60 和 {{max}} 之间。",
     "bufferKDSModeEmptyError": "请选择模式",
     "bufferKDSShardNumError": "分片数必须介于 1 和 10000 之间",
     "redshiftServerlessVpcEmptyError": "请选择一个 vpc",
@@ -119,7 +119,7 @@
       "bufferSize": "缓冲区大小",
       "bufferSizeDesc": "在发送到 Amazon S3 之前指定要缓冲的数据大小。缓冲区大小越大，成本可能越低，延迟越高，缓冲区大小越小，交付速度越快，成本越高。最小：1 MiB，最大：50 MiB",
       "bufferInterval": "缓冲间隔",
-      "bufferIntervalDesc": "间隔越高，收集数据的时间越长，数据的大小可能越大。较低的间隔发送数据的频率更高，在查看较短的数据活动周期时可能更有优势。最小：60，最大：3600"
+      "bufferIntervalDesc": "间隔越高，收集数据的时间越长，数据的大小可能越大。较低的间隔发送数据的频率更高，在查看较短的数据活动周期时可能更有优势。最小：60，最大：{{max}}"
     },
     "pipeline": "数据管道",
     "name": "名称",

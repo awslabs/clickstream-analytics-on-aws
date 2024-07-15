@@ -16,7 +16,7 @@ import { ConnectivityType, NatGateway, SecurityGroupRule, VpcEndpoint } from '@a
 import { CronDate, parseExpression } from 'cron-parser';
 import { SOLUTION_COMMON_VPC_ENDPOINTS, SOLUTION_DATA_MODELING_VPC_ENDPOINTS, SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS, SOLUTION_INGESTION_VPC_ENDPOINTS, SOLUTION_VPC_ENDPOINTS } from './constants';
 import { REDSHIFT_MODE } from './model-ln';
-import { ClickStreamBadRequestError, ClickStreamSubnet, ENetworkType, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
+import { ClickStreamBadRequestError, ClickStreamSubnet, ENetworkType, IngestionServerSinkBatchProps, IngestionServerSizeProps, IngestionType, PipelineSinkType, Policy, SubnetType } from './types';
 import { checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRedshiftRPU, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { describeNatGateways, describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
@@ -128,6 +128,33 @@ export const validateSinkBatch = (sinkType: PipelineSinkType, sinkBatch: Ingesti
     }
   }
   return true;
+};
+
+export const validateS3SinkBatch = (pipeline: IPipeline) => {
+  if (pipeline.ingestionServer.ingestionType === IngestionType.EC2) {
+    if (
+      pipeline.ingestionServer.sinkS3?.s3BufferInterval &&
+      (pipeline.ingestionServer.sinkS3?.s3BufferInterval < 60
+      || pipeline.ingestionServer.sinkS3?.s3BufferInterval > 3600)
+    ) {
+      throw new ClickStreamBadRequestError(
+        'Validation error: the sink batch interval must 60 <= interval <= 3600 for S3 sink. ' +
+        'Please check and try again.',
+      );
+    }
+  }
+  if (pipeline.ingestionServer.ingestionType === IngestionType.Fargate) {
+    if (
+      pipeline.ingestionServer.sinkS3?.s3BufferInterval &&
+      (pipeline.ingestionServer.sinkS3?.s3BufferInterval < 60
+      || pipeline.ingestionServer.sinkS3?.s3BufferInterval > 100)
+    ) {
+      throw new ClickStreamBadRequestError(
+        'Validation error: the sink batch interval must 60 <= interval <= 100 for S3 sink. ' +
+        'Please check and try again.',
+      );
+    }
+  }
 };
 
 export const validateIngestionServerNum = (serverSize: IngestionServerSizeProps) => {

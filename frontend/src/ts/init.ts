@@ -85,7 +85,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
         prefix: '',
       },
       s3BufferSize: 10,
-      s3BufferInterval: 300,
+      s3BufferInterval: 60,
     },
     sinkKafka: {
       brokers: [],

@@ -38,7 +38,7 @@
     "kafkaSGEmptyError": "Please select security group",
     "bufferS3PrefixError": "S3 prefix length must less than 1024 characters.",
     "bufferS3SizeError": "Buffer size number must between in 1 and 50.",
-    "bufferS3IntervalError": "Buffer interval number must between in 60 and 3600.",
+    "bufferS3IntervalError": "Buffer interval number must between in 60 and {{max}}.",
     "bufferKDSModeEmptyError": "Please select provision mode",
     "bufferKDSShardNumError": "Shard number must between in 1 and 10000",
     "redshiftServerlessVpcEmptyError": "Please select a vpc",
@@ -119,7 +119,7 @@
       "bufferSize": "Buffer size",
       "bufferSizeDesc": "Specify the data size to buffer before sending to Amazon S3. The higher buffer size may be lower in cost with higher latency, the lower buffer size will be faster in delivery with higher cost. Min: 1 MiB, Max: 50 MiB",
       "bufferInterval": "Buffer interval",
-      "bufferIntervalDesc": "The higher interval allows more time to collect data and the size of data may be bigger. The lower interval sends the data more frequently and may be more advantageous when looking at shorter cycles of data activity. Min: 60, Max: 3600"
+      "bufferIntervalDesc": "The higher interval allows more time to collect data and the size of data may be bigger. The lower interval sends the data more frequently and may be more advantageous when looking at shorter cycles of data activity. Min: 60, Max: {{max}}"
     },
     "pipeline": "Pipeline",
     "name": "Name",

@@ -384,8 +384,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
       // check buffer interval
       if (
-        pipelineInfo.ingestionServer.sinkS3.s3BufferInterval > 3600 ||
-        pipelineInfo.ingestionServer.sinkS3.s3BufferInterval < 60
+        pipelineInfo.ingestionServer.sinkS3.s3BufferInterval < 60 ||
+        (pipelineInfo.ingestionServer.ingestionType === EIngestionType.EC2 &&
+          pipelineInfo.ingestionServer.sinkS3.s3BufferInterval > 3600) ||
+        (pipelineInfo.ingestionServer.ingestionType ===
+          EIngestionType.Fargate &&
+          pipelineInfo.ingestionServer.sinkS3.s3BufferInterval > 100)
       ) {
         setBufferS3IntervalFormatError(true);
         return false;
@@ -2839,7 +2843,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           ),
           s3BufferInterval: defaultGenericsValue(
             data.ingestionServer.sinkS3?.s3BufferInterval,
-            300
+            60
           ),
         },
         sinkKafka: {
