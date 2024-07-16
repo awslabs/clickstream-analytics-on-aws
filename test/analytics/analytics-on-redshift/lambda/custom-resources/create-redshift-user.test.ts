@@ -21,7 +21,7 @@ import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 describe('Custom resource - Create redshift serverless namespace', () => {
 
   const context = getMockContext();
-  const callback: CdkCustomResourceCallback = async (_response) => {};
+  const callback: CdkCustomResourceCallback<{}> = async (_response) => {};
 
   const redshiftDataMock = mockClient(RedshiftDataClient);
 

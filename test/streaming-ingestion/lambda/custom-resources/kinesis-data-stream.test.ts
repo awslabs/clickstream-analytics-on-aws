@@ -30,8 +30,7 @@ import { basicCloudFormationEvent } from '../../../common/lambda-events';
 describe('Custom resource - manage the lifecycle of sink kinesis data stream', () => {
 
   const context = getMockContext();
-  const callback: CdkCustomResourceCallback = async (_response) => {//
-  };
+  const callback: CdkCustomResourceCallback<{}> = async (_response) => {};
 
   const kinesisMock = mockClient(KinesisClient);
   const lambdaMock = mockClient(LambdaClient);

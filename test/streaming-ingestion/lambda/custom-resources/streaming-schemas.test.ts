@@ -29,7 +29,7 @@ import { loadSQLFromFS } from '../../../fs-utils';
 describe('Custom resource - manage stream schema in Redshift', () => {
 
   const context = getMockContext();
-  const callback: CdkCustomResourceCallback = async (_response) => {/** do nothing */};
+  const callback: CdkCustomResourceCallback<{}> = async (_response) => {};
 
   const s3Mock = mockClient(S3Client);
   const sfnMock = mockClient(SFNClient);

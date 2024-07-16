@@ -23,7 +23,7 @@ import 'aws-sdk-client-mock-jest';
 describe('Custom resource - Associate IAM role to redshift cluster', () => {
 
   const context = getMockContext();
-  const callback: CdkCustomResourceCallback = async (_response) => {};
+  const callback: CdkCustomResourceCallback<{}> = async (_response) => {};
   const redshiftServerlessMock = mockClient(RedshiftServerlessClient);
   const redshiftMock = mockClient(RedshiftClient);
 
