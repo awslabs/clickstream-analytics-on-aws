@@ -333,6 +333,10 @@
   "checkingAvailable": "Checking AWS services availability",
   "error": {
     "notFoundTitle": "404 Not Found",
-    "notFoundMessage": "The page you are looking for does not exist."
+    "notFoundMessage": "The page you are looking for does not exist.",
+    "notFoundProjectTitle": "Project Not Found",
+    "notFoundProjectMessage": "The project you are looking for does not exist.",
+    "notFoundPipelineTitle": "Pipeline Not Found",
+    "notFoundPipelineMessage": "The pipeline you are looking for does not exist."
   }
 }

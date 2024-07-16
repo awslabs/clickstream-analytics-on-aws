@@ -33,7 +33,7 @@ import UserSegmentDetails from 'pages/analytics/segments/UserSegmentDetails';
 import UserSegments from 'pages/analytics/segments/UserSegments';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
-import NotFound from 'pages/error-page/404';
+import NotFound from 'pages/error-page/NotFound';
 import Home from 'pages/home/Home';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';

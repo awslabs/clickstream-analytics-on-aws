@@ -26,6 +26,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
+import NoFoundProject from './comp/NoFoundProject';
 import NonePipeline from './comp/NonePipeline';
 import ProjectPipeline from './comp/ProjectPipeline';
 
@@ -38,6 +39,7 @@ const ProjectDetail: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [projectPipeline, setProjectPipeline] = useState<IPipeline>();
   const [projectInfo, setProjectInfo] = useState<IProject>();
+  const [projectNoFound, setProjectNoFound] = useState(false);
 
   const getPipelineByProjectId = async (projectId: string, refresh: string) => {
     setLoadingPipeline(true);
@@ -48,13 +50,14 @@ const ProjectDetail: React.FC = () => {
       });
     if (success) {
       setProjectPipeline(data);
-      setLoadingPipeline(false);
-      setLoadingData(false);
     }
+    setLoadingPipeline(false);
+    setLoadingData(false);
   };
 
   const getProjectDetailById = async (projectId: string) => {
     setLoadingData(true);
+    setProjectNoFound(false);
     try {
       const res = await getProjectDetail({
         id: projectId,
@@ -63,16 +66,14 @@ const ProjectDetail: React.FC = () => {
         setProjectInfo(res?.data);
         if (res?.data?.pipelineId) {
           getPipelineByProjectId(projectId, 'false');
-        } else {
-          setLoadingPipeline(false);
-          setLoadingData(false);
         }
       }
     } catch (error: any) {
       if (error?.message?.response?.status === 404) {
-        window.location.href = '/error/404';
+        setProjectNoFound(true);
       }
     }
+    setLoadingData(false);
   };
 
   const breadcrumbItems = [
@@ -97,7 +98,9 @@ const ProjectDetail: React.FC = () => {
   }, [id]);
 
   const renderProjectDetail = () => {
-    if (!projectPipeline?.projectId) {
+    if (projectNoFound) {
+      return <NoFoundProject />;
+    } else if (!projectPipeline?.projectId) {
       return <NonePipeline projectId={id?.toString()} />;
     } else {
       return (
