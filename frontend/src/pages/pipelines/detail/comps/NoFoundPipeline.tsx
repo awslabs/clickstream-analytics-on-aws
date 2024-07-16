@@ -22,9 +22,9 @@ const NoFoundPipeline: React.FC = () => {
       <div className="mt-10">
         <Alert
           statusIconAriaLabel="Info"
-          header={t('error.notFoundProjectTitle')}
+          header={t('error.notFoundPipelineTitle')}
         >
-          {t('error.notFoundProjectMessage')}
+          {t('error.notFoundPipelineMessage')}
         </Alert>
       </div>
     </Container>
