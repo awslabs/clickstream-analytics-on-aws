@@ -420,7 +420,6 @@ export class CPipeline {
     await this._mergeUpdateParameters(oldPipeline);
     // update tags
     this.pipeline.tags = getUpdateTags(newTags, oldPipeline);
-    console.log('tags:', this.pipeline.tags);
     if (this._editStackTags(oldPipeline)) {
       this.stackManager.updateWorkflowTags(this.pipeline.tags);
     }
