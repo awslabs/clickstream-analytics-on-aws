@@ -255,7 +255,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                     updateSegmentObject('refreshSchedule', {
                       cron: 'Manual',
                       cronExpression: undefined,
-                      expireAfter: segmentObject.refreshSchedule.expireAfter,
+                      expireAfter: 0,
                     });
                   } else {
                     updateSegmentObject('autoRefreshOption', {
@@ -396,27 +396,31 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
               )}
             </FormField>
 
-            <FormField
-              label={t('analytics:segment.comp.expirationSettings')}
-              description={t('analytics:segment.comp.expirationSettingsDesc')}
-            >
-              <DatePicker
-                value={segmentObject.expireDate}
-                isDateEnabled={(date) => date.getTime() > new Date().getTime()}
-                onChange={(e) => {
-                  updateSegmentObject('expireDate', e.detail.value);
-                  updateSegmentObject('refreshSchedule', {
-                    ...segmentObject.refreshSchedule,
-                    expireAfter: ternary(
-                      e.detail.value,
-                      new Date(e.detail.value).getTime(),
-                      0
-                    ),
-                  });
-                }}
-                placeholder="YYYY/MM/DD"
-              />
-            </FormField>
+            {segmentObject.refreshType === 'auto' && (
+              <FormField
+                label={t('analytics:segment.comp.expirationSettings')}
+                description={t('analytics:segment.comp.expirationSettingsDesc')}
+              >
+                <DatePicker
+                  value={segmentObject.expireDate}
+                  isDateEnabled={(date) =>
+                    date.getTime() > new Date().getTime()
+                  }
+                  onChange={(e) => {
+                    updateSegmentObject('expireDate', e.detail.value);
+                    updateSegmentObject('refreshSchedule', {
+                      ...segmentObject.refreshSchedule,
+                      expireAfter: ternary(
+                        e.detail.value,
+                        new Date(e.detail.value).getTime(),
+                        0
+                      ),
+                    });
+                  }}
+                  placeholder="YYYY/MM/DD"
+                />
+              </FormField>
+            )}
           </SpaceBetween>
         </Container>
 

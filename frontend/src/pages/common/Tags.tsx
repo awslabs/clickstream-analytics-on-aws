@@ -12,10 +12,9 @@
  */
 
 import { TagEditor, TagEditorProps } from '@cloudscape-design/components';
-import { isEqual } from 'lodash';
-import React, { useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { alertMsg, defaultStr } from 'ts/utils';
+import { defaultStr } from 'ts/utils';
 
 interface TagsProps {
   tags: TagEditorProps.Tag[];
@@ -25,7 +24,6 @@ interface TagsProps {
 const Tags: React.FC<TagsProps> = (props: TagsProps) => {
   const { t } = useTranslation();
   const { tags, changeTags } = props;
-  const prevItemsRef = useRef(tags.slice(0, 3));
 
   const renderTagLimit = (availableTags: number, tagLimit: number) => {
     if (availableTags === tagLimit) {
@@ -92,24 +90,7 @@ const Tags: React.FC<TagsProps> = (props: TagsProps) => {
       }}
       tags={tags}
       onChange={(event) => {
-        if (event.detail.tags.length >= 3) {
-          const prevItems = prevItemsRef.current;
-          const currentItems = event.detail.tags.slice(0, 3);
-          let changeCount = 0;
-          for (let i = 0; i < currentItems.length; i++) {
-            if (!isEqual(prevItems[i], currentItems[i])) {
-              changeCount = changeCount + 1;
-            }
-          }
-          if (changeCount > 0) {
-            alertMsg(t('tag.deleteTips'), 'error');
-            return;
-          } else {
-            changeTags(event.detail.tags);
-          }
-        } else {
-          changeTags(event.detail.tags);
-        }
+        changeTags(event.detail.tags);
       }}
     />
   );

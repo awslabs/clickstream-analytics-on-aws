@@ -35,7 +35,7 @@ describe('utils functions tests', () => {
   });
 
   test('returns locale date time with timezone', () => {
-    expect(getDateTimeWithTimezoneString(1714981584000, 'Asia/Shanghai')).toEqual('2024-05-06 15:46:24(CST)');
+    expect(getDateTimeWithTimezoneString(1714981584000, 'Asia/Shanghai')).toEqual('2024-05-06 15:46:24 (CST)');
   });
 
   test('returns locale date string', () => {

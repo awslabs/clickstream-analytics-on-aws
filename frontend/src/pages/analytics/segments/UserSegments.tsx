@@ -22,6 +22,7 @@ import {
   SpaceBetween,
   Table,
 } from '@cloudscape-design/components';
+import { getApplicationDetail } from 'apis/application';
 import { deleteSegment, getSegmentsList } from 'apis/segments';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
@@ -32,6 +33,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
+import { convertCronToRefreshSchedule } from '../analytics-utils';
 
 const UserSegments: React.FC = () => {
   const { t } = useTranslation();
@@ -52,6 +54,7 @@ const UserSegments: React.FC = () => {
   const [segmentList, setSegmentList] = useState<Segment[]>([]);
   const [selectedSegment, setSelectedSegment] = useState<Segment[]>([]);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [timezone, setTimezone] = useState('');
 
   const renderSegmentDetailsLink = (e: Segment) => {
     return (
@@ -80,7 +83,7 @@ const UserSegments: React.FC = () => {
       id: 'refreshSchedule',
       header: 'Refresh Schedule',
       cell: (e: Segment) => {
-        return e.refreshSchedule.cronExpression;
+        return convertCronToRefreshSchedule(e, timezone);
       },
     },
     {
@@ -129,9 +132,21 @@ const UserSegments: React.FC = () => {
     }
   };
 
+  const getTimezoneInfo = async (projectId: string, appId: string) => {
+    const appApiResponse = await getApplicationDetail({
+      id: appId,
+      pid: projectId,
+    });
+    if (appApiResponse.success) {
+      const { timezone } = appApiResponse.data;
+      setTimezone(timezone);
+    }
+  };
+
   useEffect(() => {
     if (projectId && appId) {
       listAllSegments();
+      getTimezoneInfo(projectId, appId);
     }
   }, [projectId, appId]);
 
@@ -174,10 +189,6 @@ const UserSegments: React.FC = () => {
                               window.location.href = hrefPath + 'edit';
                             } else if (e.detail.id === 'detail') {
                               navigate(hrefPath + 'details');
-                            } else if (e.detail.id === 'import') {
-                              navigate(
-                                `/analytics/${projectId}/app/${appId}/segments/import`
-                              );
                             }
                           }}
                           loading={loadingDelete}
@@ -206,14 +217,19 @@ const UserSegments: React.FC = () => {
                               id: 'delete',
                               disabled: selectedSegment.length === 0,
                             },
-                            {
-                              text: defaultStr(t('button.import')),
-                              id: 'import',
-                            },
                           ]}
                         >
                           {t('button.actions')}
                         </ButtonDropdown>
+                        <Button
+                          onClick={() => {
+                            navigate(
+                              `/analytics/${projectId}/app/${appId}/segments/import`
+                            );
+                          }}
+                        >
+                          {t('button.import')}
+                        </Button>
                         <Button
                           iconAlign="right"
                           iconName="add-plus"

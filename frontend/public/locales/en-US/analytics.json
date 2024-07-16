@@ -413,11 +413,11 @@
     "attributionSelectTouchpointEventInfo": "Events to be included in the attribution analysis, e.g., click events for promotion spot, landing page visits."
   },
   "segment": {
-    "title": "User Segments",
-    "desc": "User Segments description",
+    "title": "Segments",
+    "desc": "A segment is a subset of your users",
     "options": {
       "withInSession": "Within a session",
-      "withOutSession": "Without a session",
+      "withOutSession": "Across sessions",
       "directlyFollow": "Directly followed",
       "indirectlyFollow": "Indirectly followed"
     },
@@ -427,8 +427,8 @@
       "userIs": "User is",
       "userIsNot": "User is not",
       "doneInSequence": "User has done in sequence",
-      "userInGroup": "User in segment group",
-      "userNotInGroup": "User not in segment group"
+      "userInGroup": "User in segment",
+      "userNotInGroup": "User not in segment"
     },
     "calculateOption": {
       "NUMBER_OF_TOTAL": "Total number (PV)",
@@ -474,7 +474,9 @@
       "filterByTimeRange": "Filter by a date and time range",
       "appTimezone": "the app's timezone",
       "importSegmentTitle": "Import Segment",
-      "importSegmentDesc": "Define a segment, then import the segment manually"
+      "importSegmentDesc": "Define a segment, then import the segment manually",
+      "importSegmentGuideTitle": "Add users to segment",
+      "importSegmentGuide": "After saving the segment, please follow the <guide_anchor>guide</guide_anchor> to add users into the segment."
     },
     "details": {
       "title": "Segment Details",
@@ -498,7 +500,8 @@
       "segmentUserSample": "User Samples",
       "segmentUserSampleDesc": "User samples from latest completed segment refresh",
       "noSampleData": "No sample data available",
-      "importedSegment": "Imported Segment"
+      "importedSegment": "Imported Segment",
+      "segmentId": "Segment ID"
     },
     "valid": {
       "nameEmptyError": "Please input segment name.",

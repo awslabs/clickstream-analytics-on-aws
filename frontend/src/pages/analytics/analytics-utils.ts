@@ -29,6 +29,7 @@ import {
   MetadataValueType,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
   ParameterCondition,
+  Segment,
   SegmentCriteria,
   SegmentFilter,
   SegmentFilterConditionType,
@@ -1383,6 +1384,28 @@ export const convertCronExpByTimeRange = (
   }
 
   return '';
+};
+
+export const convertCronToRefreshSchedule = (
+  segment: Segment | undefined,
+  timezone: string
+) => {
+  if (!segment) {
+    return '';
+  }
+
+  const type = segment.refreshSchedule.cron;
+  if (type === 'Manual') {
+    return type;
+  } else if (type === 'Custom') {
+    return type + ' | ' + segment.refreshSchedule.cronExpression;
+  } else {
+    const segmentObj = segment.uiRenderingObject.segmentObject;
+    const day = defaultStr(segmentObj.autoRefreshDayOption?.label);
+    const time = defaultStr(segmentObj.autoRefreshTimeOption?.label);
+    const tz = moment.tz(timezone).format('z');
+    return `${type} | ${day} ${time} (${tz})`;
+  }
 };
 
 export const convertSegmentListToFilterOptions = (
