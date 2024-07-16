@@ -1192,26 +1192,23 @@ function getStackTags(pipeline: IPipeline) {
   return stackTags;
 };
 
-function getUpdateTags(newPipeline: IPipeline, oldPipeline: IPipeline) {
+function getUpdateTags(newTags: ITag[], oldPipeline: IPipeline) {
   const updateTags: ITag[] = [];
-  if (oldPipeline.tags) {
-    for (let tag of oldPipeline.tags) {
-      if (tag.key === BuiltInTagKeys.CLICKSTREAM_PROJECT ||
-        tag.key === BuiltInTagKeys.AWS_SOLUTION ||
-        tag.key === BuiltInTagKeys.AWS_SOLUTION_VERSION) {
-        updateTags.push(tag);
-      }
+  const newTagKeys = newTags?.map(tag => tag.key) ?? [];
+  for (let tag of oldPipeline.tags) {
+    if ((tag.key === BuiltInTagKeys.CLICKSTREAM_PROJECT ||
+      tag.key === BuiltInTagKeys.AWS_SOLUTION ||
+      tag.key === BuiltInTagKeys.AWS_SOLUTION_VERSION) && newTagKeys.includes(tag.key)) {
+      updateTags.push(tag);
     }
   }
-  if (newPipeline.tags) {
-    for (let tag of newPipeline.tags) {
-      if (tag.key != BuiltInTagKeys.CLICKSTREAM_PROJECT &&
-        tag.key != BuiltInTagKeys.AWS_SOLUTION &&
-        tag.key != BuiltInTagKeys.AWS_SOLUTION_VERSION &&
-        !tag.key.startsWith('#.')
-      ) {
-        updateTags.push(tag);
-      }
+  for (let tag of newTags) {
+    if (tag.key != BuiltInTagKeys.CLICKSTREAM_PROJECT &&
+      tag.key != BuiltInTagKeys.AWS_SOLUTION &&
+      tag.key != BuiltInTagKeys.AWS_SOLUTION_VERSION &&
+      !tag.key.startsWith('#.')
+    ) {
+      updateTags.push(tag);
     }
   }
   return updateTags;
