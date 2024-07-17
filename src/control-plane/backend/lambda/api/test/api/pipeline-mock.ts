@@ -1657,7 +1657,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_V2_INGEST
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-v2-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `${getStackPrefix()}-Ingestion-kinesis-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Ingestion-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,

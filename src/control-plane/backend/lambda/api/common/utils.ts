@@ -285,6 +285,8 @@ function getIngestionStackType(pipeline: IPipeline): PipelineStackType {
     const ingestionStackTemplateUrl = getIngestionStackTemplateUrl(pipeline.workflow?.Workflow, pipeline);
     if (ingestionStackTemplateUrl && ingestionStackTemplateUrl?.includes('/ingestion-server-v2-stack.template.json')) {
       return PipelineStackType.INGESTION_V2;
+    } else if (ingestionStackTemplateUrl) {
+      return PipelineStackType.INGESTION;
     }
   }
   if (SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION).greaterThanOrEqualTo(SolutionVersion.V_1_2_0)) {
