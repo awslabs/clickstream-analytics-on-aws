@@ -199,9 +199,7 @@ function updateECRImagesForECSTaskDefinition(template) {
     const resourceName = tDef.Metadata['aws:cdk:path'].split("/").slice(-2, -1);
     for (let cDef of tDef.Properties.ContainerDefinitions) {
       const cName = cDef.Name;
-      // TODO change back to cName
-      const repoSuffix = cName === 'worker' ? 'vector' : 'nginx';
-      const newImage = `%%PUBLIC_ECR_REGISTRY%%/clickstream-${repoSuffix}:%%PUBLIC_ECR_TAG%%`;
+      const newImage = `%%PUBLIC_ECR_REGISTRY%%/clickstream-${cName}:%%PUBLIC_ECR_TAG%%`;
 
       cDef.Image["Fn::Sub"] = newImage;
 
