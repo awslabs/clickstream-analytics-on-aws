@@ -15,14 +15,31 @@ import { Alert, Container, ContentLayout } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const NotFound: React.FC = () => {
+interface NotFoundProps {
+  object: string;
+}
+
+const NotFound: React.FC<NotFoundProps> = (props: NotFoundProps) => {
   const { t } = useTranslation();
+  const { object } = props;
+
+  const getObjectName = (type: string) => {
+    if (type === 'pipeline') {
+      return t('error.notFoundPipeline');
+    } else if (type === 'project') {
+      return t('error.notFoundProject');
+    }
+    return t('error.notFoundPage');
+  };
+
   return (
-    <ContentLayout>
+    <ContentLayout headerVariant="high-contrast">
       <Container>
         <div className="mt-10">
           <Alert statusIconAriaLabel="Info" header={t('error.notFoundTitle')}>
-            {t('error.notFoundMessage')}
+            {t('error.notFoundMessage', {
+              object: getObjectName(object),
+            })}
           </Alert>
         </div>
       </Container>

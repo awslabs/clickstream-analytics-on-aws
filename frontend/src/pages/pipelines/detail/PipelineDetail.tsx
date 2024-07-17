@@ -24,7 +24,7 @@ import { getProjectDetail } from 'apis/project';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
-import NoFoundProject from 'pages/projects/detail/comp/NoFoundProject';
+import NotFound from 'pages/error-page/NotFound';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
@@ -32,7 +32,6 @@ import { defaultStr } from 'ts/utils';
 import Alarms from './comps/Alarms';
 import Ingestion from './comps/Ingestion';
 import Monitoring from './comps/Monitoring';
-import NoFoundPipeline from './comps/NoFoundPipeline';
 import Processing from './comps/Processing';
 import Reporting from './comps/Reporting';
 import Tags from './comps/Tags';
@@ -133,9 +132,9 @@ const PipelineDetail: React.FC = () => {
 
   const renderPipelineDetail = () => {
     if (projectNoFound) {
-      return <NoFoundProject />;
+      return <NotFound object="project" />;
     } else if (pipelineNoFound) {
-      return <NoFoundPipeline />;
+      return <NotFound object="pipeline" />;
     } else {
       return (
         <SpaceBetween direction="vertical" size="l">

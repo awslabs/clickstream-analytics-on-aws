@@ -534,7 +534,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                   IUserRole.ANALYST_READER,
                 ]}
               >
-                <NotFound />
+                <NotFound object="page" />
               </RoleRoute>
             }
           />

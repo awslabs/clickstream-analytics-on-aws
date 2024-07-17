@@ -22,11 +22,11 @@ import { getProjectDetail } from 'apis/project';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
+import NotFound from 'pages/error-page/NotFound';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
-import NoFoundProject from './comp/NoFoundProject';
 import NonePipeline from './comp/NonePipeline';
 import ProjectPipeline from './comp/ProjectPipeline';
 
@@ -71,9 +71,9 @@ const ProjectDetail: React.FC = () => {
     } catch (error: any) {
       if (error?.message?.response?.status === 404) {
         setProjectNoFound(true);
+        setLoadingData(false);
       }
     }
-    setLoadingData(false);
   };
 
   const breadcrumbItems = [
@@ -99,8 +99,8 @@ const ProjectDetail: React.FC = () => {
 
   const renderProjectDetail = () => {
     if (projectNoFound) {
-      return <NoFoundProject />;
-    } else if (!projectPipeline?.projectId) {
+      return <NotFound object="project" />;
+    } else if (!projectPipeline?.pipelineId) {
       return <NonePipeline projectId={id?.toString()} />;
     } else {
       return (
