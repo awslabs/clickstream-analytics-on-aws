@@ -131,7 +131,7 @@
    <figcaption>图 8:  流处理模块架构</figcaption>
 </figure>
 
-假设您为数据管道启用了流式功能，使用 KDS 作为摄取数据宿。该解决方案部署了一个Amazon Managed Service for Apache Flink 应用程序，用于近实时处理事件，然后将转换和富化后的事件输出到每个应用专用的 Kinesis 数据流。该解决方案利用[Amazon Redshift 流式摄取][redshift-streaming-ingestion]将事件摄取到 Redshift 中。
+假设您为数据管道启用了流式功能，使用 KDS 作为摄取数据宿。该解决方案部署了一个Amazon Managed Service for Apache Flink 应用程序，用于近实时处理事件，然后将转换和丰富后的事件输出到每个应用专用的 Kinesis 数据流。该解决方案利用[Amazon Redshift 流式摄取][redshift-streaming-ingestion]将事件摄取到 Redshift 中。
 
 1. Flink 应用程序消费由摄取模块管理的KDS中的事件。
 2. Flink 应用程序转换和丰富事件，然后将事件输出到其他 Kinesis 数据流供应用程序使用。

@@ -19,6 +19,7 @@ The following AWS services are included in this solution:
 | [AWS Lambda][lambda] | **Supporting**. To integrate with kinds of AWS services. For example, sink ingestion data to S3, manage the lifecycle of AWS resources. |
 | [Amazon Managed Streaming for Apache Kafka (MSK)][msk] | **Supporting**. To provide the ingestion buffer with Apache Kafka. |
 | [Amazon EMR Serverless][emr-serverless] | **Supporting**. To process the ingested data. |
+| [Amazon Managed Service for Apache Flink][flink] | **Supporting**. To process the ingested data in real-time. |
 | [Amazon Glue][glue] | **Supporting**. To manage the data catalog of ingested data. |
 | [Amazon EventBridge][eventbridge] | **Supporting**. To integrate with AWS services with events or schedule. |
 | [Amazon Redshift][redshift] | **Supporting**. To analyze your Clickstream data in data warehouse. |
@@ -56,3 +57,4 @@ The following AWS services are included in this solution:
 [aga]: https://aws.amazon.com/global-accelerator/
 [quicksight]: https://aws.amazon.com/quicksight/
 [cloudformation]: https://aws.amazon.com/cloudformation/
+[flink]: https://aws.amazon.com/managed-service-apache-flink/

@@ -21,11 +21,12 @@ This solution provides native SDKs for help you easily collect and report in-app
 - [Swift SDK][clickstream-swift]
 - [Web SDK][clickstream-web]
 - [Flutter SDK][clickstream-flutter]
+- [React Native SDK][clickstream-rn]
 - [WeChat Mini Program SDK][clickstream-wechat]
 
 ### Data pipeline
 
-This solution uses the web console to manage the project and its data pipeline. The data pipeline consists of four modules.
+This solution uses the web console to manage the project and its data pipeline. The data pipeline consists of five modules.
 
 #### Ingestion module
 
@@ -59,6 +60,13 @@ The data modeling module loads the processed data into lake house. It supports t
   - specify the interval to update user dimension table
 - support use Athena to query the data in data lake
 
+#### Streaming module
+
+The streaming module provides real-time data processing, enrichment, and visualization. It supports the following features:
+
+- configure the streaming processing per application
+- support starting and stopping the streaming processing on demand
+
 #### Reporting module
 
 The reporting module creates a secure connection to the data warehouse and provisions the out-of-box dashboards in business intelligence Amazon QuickSight.
@@ -68,3 +76,4 @@ The reporting module creates a secure connection to the data warehouse and provi
 [clickstream-web]: https://github.com/awslabs/clickstream-web
 [clickstream-flutter]: https://github.com/awslabs/clickstream-flutter
 [clickstream-wechat]: https://github.com/awslabs/clickstream-wechat
+[clickstream-rn]: https://github.com/awslabs/clickstream-react-native
