@@ -24,6 +24,7 @@ import { getProjectDetail } from 'apis/project';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
+import NotFound from 'pages/error-page/NotFound';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
@@ -47,6 +48,8 @@ const PipelineDetail: React.FC = () => {
     useState<IPipelineExtend>();
   const [loadingPipeline, setLoadingPipeline] = useState(false);
   const [loadingPipelineExtend, setLoadingPipelineExtend] = useState(false);
+  const [projectNoFound, setProjectNoFound] = useState(false);
+  const [pipelineNoFound, setPipelineNoFound] = useState(false);
 
   const { activeTab } = location.state || {};
   const [detailActiveTab, setDetailActiveTab] = useState(
@@ -54,8 +57,9 @@ const PipelineDetail: React.FC = () => {
   );
 
   const getProjectPipelineDetail = async (refresh: string) => {
+    setLoadingPipeline(true);
+    setPipelineNoFound(false);
     try {
-      setLoadingPipeline(true);
       const { success, data }: ApiResponse<IExtPipeline> =
         await getPipelineDetail({
           projectId: defaultStr(pid),
@@ -63,12 +67,13 @@ const PipelineDetail: React.FC = () => {
         });
       if (success) {
         setProjectPipeline(data);
-        setLoadingData(false);
-        setLoadingPipeline(false);
       }
-    } catch (error) {
-      setLoadingPipeline(false);
+    } catch (error: any) {
+      if (error?.message?.response?.status === 404) {
+        setPipelineNoFound(true);
+      }
     }
+    setLoadingPipeline(false);
   };
 
   const getProjectPipelineExtend = async () => {
@@ -96,9 +101,12 @@ const PipelineDetail: React.FC = () => {
       if (success) {
         setProjectInfo(data);
       }
-    } catch (error) {
-      setLoadingData(false);
+    } catch (error: any) {
+      if (error?.message?.response?.status === 404) {
+        setProjectNoFound(true);
+      }
     }
+    setLoadingData(false);
   };
 
   const breadcrumbItems = [
@@ -122,6 +130,96 @@ const PipelineDetail: React.FC = () => {
     getProjectPipelineExtend();
   }, []);
 
+  const renderPipelineDetail = () => {
+    if (projectNoFound) {
+      return <NotFound object="project" />;
+    } else if (pipelineNoFound) {
+      return <NotFound object="pipeline" />;
+    } else {
+      return (
+        <SpaceBetween direction="vertical" size="l">
+          <BasicInfo
+            pipelineInfo={projectPipeline}
+            projectPipelineExtend={projectPipelineExtend}
+            loadingRefresh={loadingPipeline}
+            loadingPipelineExtend={loadingPipelineExtend}
+            reloadPipeline={(refresh: string) => {
+              getProjectPipelineDetail(refresh);
+            }}
+          />
+          <Container disableContentPaddings>
+            <Tabs
+              activeTabId={detailActiveTab}
+              onChange={(e) => {
+                setDetailActiveTab(e.detail.activeTabId);
+              }}
+              tabs={[
+                {
+                  label: t('pipeline:detail.ingestion'),
+                  id: 'ingestion',
+                  content: (
+                    <div className="pd-20">
+                      <Ingestion pipelineInfo={projectPipeline} />
+                    </div>
+                  ),
+                },
+                {
+                  label: t('pipeline:detail.processing'),
+                  id: 'processing',
+                  content: (
+                    <div className="pd-20">
+                      <Processing
+                        pipelineInfo={projectPipeline}
+                        pipelineExtend={projectPipelineExtend}
+                        displayPipelineExtend={true}
+                      />
+                    </div>
+                  ),
+                },
+                {
+                  label: t('pipeline:detail.reporting'),
+                  id: 'reporting',
+                  content: (
+                    <div className="pd-20">
+                      <Reporting pipelineInfo={projectPipeline} />
+                    </div>
+                  ),
+                },
+                {
+                  label: t('pipeline:detail.monitoring'),
+                  id: 'monitoring',
+                  content: (
+                    <div className="pd-20">
+                      <Monitoring pipelineInfo={projectPipeline} />
+                    </div>
+                  ),
+                },
+                {
+                  label: t('pipeline:detail.alarms'),
+                  id: 'alarms',
+                  content: (
+                    <div className="pd-20">
+                      <Alarms pipelineInfo={projectPipeline} />
+                    </div>
+                  ),
+                },
+                {
+                  label: t('pipeline:detail.tags'),
+                  id: 'tags',
+                  content: (
+                    <div className="pd-20">
+                      <Tags pipelineInfo={projectPipeline} />
+                    </div>
+                  ),
+                },
+              ]}
+            />
+          </Container>
+        </SpaceBetween>
+      );
+    }
+  };
+
   return (
     <AppLayout
       headerVariant="high-contrast"
@@ -135,89 +233,7 @@ const PipelineDetail: React.FC = () => {
             </SpaceBetween>
           }
         >
-          {loadingData ? (
-            <Loading />
-          ) : (
-            <SpaceBetween direction="vertical" size="l">
-              <BasicInfo
-                pipelineInfo={projectPipeline}
-                projectPipelineExtend={projectPipelineExtend}
-                loadingRefresh={loadingPipeline}
-                loadingPipelineExtend={loadingPipelineExtend}
-                reloadPipeline={(refresh: string) => {
-                  getProjectPipelineDetail(refresh);
-                }}
-              />
-              <Container disableContentPaddings>
-                <Tabs
-                  activeTabId={detailActiveTab}
-                  onChange={(e) => {
-                    setDetailActiveTab(e.detail.activeTabId);
-                  }}
-                  tabs={[
-                    {
-                      label: t('pipeline:detail.ingestion'),
-                      id: 'ingestion',
-                      content: (
-                        <div className="pd-20">
-                          <Ingestion pipelineInfo={projectPipeline} />
-                        </div>
-                      ),
-                    },
-                    {
-                      label: t('pipeline:detail.processing'),
-                      id: 'processing',
-                      content: (
-                        <div className="pd-20">
-                          <Processing
-                            pipelineInfo={projectPipeline}
-                            pipelineExtend={projectPipelineExtend}
-                            displayPipelineExtend={true}
-                          />
-                        </div>
-                      ),
-                    },
-                    {
-                      label: t('pipeline:detail.reporting'),
-                      id: 'reporting',
-                      content: (
-                        <div className="pd-20">
-                          <Reporting pipelineInfo={projectPipeline} />
-                        </div>
-                      ),
-                    },
-                    {
-                      label: t('pipeline:detail.monitoring'),
-                      id: 'monitoring',
-                      content: (
-                        <div className="pd-20">
-                          <Monitoring pipelineInfo={projectPipeline} />
-                        </div>
-                      ),
-                    },
-                    {
-                      label: t('pipeline:detail.alarms'),
-                      id: 'alarms',
-                      content: (
-                        <div className="pd-20">
-                          <Alarms pipelineInfo={projectPipeline} />
-                        </div>
-                      ),
-                    },
-                    {
-                      label: t('pipeline:detail.tags'),
-                      id: 'tags',
-                      content: (
-                        <div className="pd-20">
-                          <Tags pipelineInfo={projectPipeline} />
-                        </div>
-                      ),
-                    },
-                  ]}
-                />
-              </Container>
-            </SpaceBetween>
-          )}
+          {loadingData ? <Loading /> : renderPipelineDetail()}
         </ContentLayout>
       }
       headerSelector="#header"

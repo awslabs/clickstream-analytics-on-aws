@@ -330,5 +330,12 @@
   "enabled": "Enabled",
   "disabled": "Disabled",
   "maxMindCopyRight": "IP Enrichment plug-in includes GeoLite2 data created by MaxMind, available from ",
-  "checkingAvailable": "Checking AWS services availability"
+  "checkingAvailable": "Checking AWS services availability",
+  "error": {
+    "notFoundTitle": "Resources Not Found",
+    "notFoundMessage": "The {{object}} you are looking for does not exist.",
+    "notFoundPage": "page",
+    "notFoundProject": "project",
+    "notFoundPipeline": "pipeline"
+  }
 }

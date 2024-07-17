@@ -22,6 +22,7 @@ import { getProjectDetail } from 'apis/project';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
+import NotFound from 'pages/error-page/NotFound';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -38,6 +39,7 @@ const ProjectDetail: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [projectPipeline, setProjectPipeline] = useState<IPipeline>();
   const [projectInfo, setProjectInfo] = useState<IProject>();
+  const [projectNoFound, setProjectNoFound] = useState(false);
 
   const getPipelineByProjectId = async (projectId: string, refresh: string) => {
     setLoadingPipeline(true);
@@ -48,28 +50,29 @@ const ProjectDetail: React.FC = () => {
       });
     if (success) {
       setProjectPipeline(data);
-      setLoadingPipeline(false);
-      setLoadingData(false);
     }
+    setLoadingPipeline(false);
+    setLoadingData(false);
   };
 
   const getProjectDetailById = async (projectId: string) => {
     setLoadingData(true);
+    setProjectNoFound(false);
     try {
-      const { success, data }: ApiResponse<IProject> = await getProjectDetail({
+      const res = await getProjectDetail({
         id: projectId,
       });
-      if (success) {
-        setProjectInfo(data);
-        if (data?.pipelineId && data?.pipelineId !== '') {
+      if (res?.success) {
+        setProjectInfo(res?.data);
+        if (res?.data?.pipelineId) {
           getPipelineByProjectId(projectId, 'false');
-        } else {
-          setLoadingPipeline(false);
-          setLoadingData(false);
         }
       }
-    } catch (error) {
-      setLoadingData(false);
+    } catch (error: any) {
+      if (error?.message?.response?.status === 404) {
+        setProjectNoFound(true);
+        setLoadingData(false);
+      }
     }
   };
 
@@ -95,7 +98,9 @@ const ProjectDetail: React.FC = () => {
   }, [id]);
 
   const renderProjectDetail = () => {
-    if (!projectPipeline?.projectId) {
+    if (projectNoFound) {
+      return <NotFound object="project" />;
+    } else if (!projectPipeline?.pipelineId) {
       return <NonePipeline projectId={id?.toString()} />;
     } else {
       return (

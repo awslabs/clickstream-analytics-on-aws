@@ -330,5 +330,12 @@
   "enabled": "已启用",
   "disabled": "已禁用",
   "maxMindCopyRight": "IP 富化插件使用 MaxMind 创建的 Geolite2 数据，可从以下网址获得 ",
-  "checkingAvailable": "检查亚马逊云科技服务的可用性"
+  "checkingAvailable": "检查亚马逊云科技服务的可用性",
+  "error": {
+    "notFoundTitle": "资源不存在",
+    "notFoundMessage": "您要查找的{{object}}不存在。",
+    "notFoundPage": "页面",
+    "notFoundProject": "项目",
+    "notFoundPipeline": "数据管道"
+  }
 }

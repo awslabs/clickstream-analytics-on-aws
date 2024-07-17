@@ -33,6 +33,7 @@ import UserSegmentDetails from 'pages/analytics/segments/UserSegmentDetails';
 import UserSegments from 'pages/analytics/segments/UserSegments';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
+import NotFound from 'pages/error-page/NotFound';
 import Home from 'pages/home/Home';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
 import PipelineDetail from 'pages/pipelines/detail/PipelineDetail';
@@ -516,6 +517,24 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
               >
                 <ImportUserSegment />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="*"
+            element={
+              <RoleRoute
+                sessionExpired={sessionExpired}
+                layout="common"
+                auth={auth}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.OPERATOR,
+                  IUserRole.ANALYST_READER,
+                ]}
+              >
+                <NotFound object="page" />
               </RoleRoute>
             }
           />
