@@ -39,6 +39,7 @@ export const basicCloudFormationUpdateEvent: CdkCustomResourceEvent = {
     ServiceToken: 'ServiceToken1',
   },
   OldResourceProperties: {
+    ServiceToken: 'ServiceToken1',
   },
 };
 

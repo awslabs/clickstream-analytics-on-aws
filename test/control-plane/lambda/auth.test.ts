@@ -100,7 +100,7 @@ describe('Auth test', () => {
   it('auth catch exception', async () => {
     const TOKEN = 'Bearer eyJraWQiOiJQWFh0eGxCaXlISTJSZ3ZQUFY1VGxnTERqNkc0bHkxT0hnSitRZ2xvbnBnPSIsImFsZyI6IlJTMjU2In0.eyJhdF9oYXNoIjoiamhRTFU4c1FRMXgyWGFkdWhIWE5xdyIsInN1YiI6IjcxNmJlNTMwLTkwYzEtNzBkMi03NzUyLWYyMzM2OWMxOTg5NSIsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTIuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0yX3FNcmZIUlRhaCIsImNvZ25pdG86dXNlcm5hbWUiOiI3MTZiZTUzMC05MGMxLTcwZDItNzc1Mi1mMjMzNjljMTk4OTUiLCJvcmlnaW5fanRpIjoiZDA5NjU2ZTEtNzI1NC00ODNlLWI0ZGQtZGIzYmQ1YzJhOGIyIiwiYXVkIjoiMXNhZXRjcDhwbDlsdTlrNTVmN2NyNTF0OGYiLCJldmVudF9pZCI6IjAwNGVhNDQ1LWU0YjctNDY5ZS1hMDk4LTQwYTU4Mjc5MDRlMiIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNjg5MTQ4MzI5LCJleHAiOjE2ODkxNTU0NzYsImlhdCI6MTY4OTE1MTg3NiwianRpIjoiNzQ3MGQyOGQtMTgzZC00ZjdjLTgzMTMtZTZiMTk1NTQzNjJkIiwiZW1haWwiOiJtaW5nZmVpcUBhbWF6b24uY29tIn0.JZiSa52FhVd_dAVucOWpwRSwBKV4NQp1UpxuGfaeJwoepYhLkv89g0Pnr5tZdizLUNsdZwUyULvnlsHditXhYWfcs7nPRvgAJfU3HsCJkITxc31kfZbj3CETXujdfU7eX0_HFlfxEwzc9AuYbj3qL5oNpasLUNdKsZRQzMNt8hlcn5gLCtnudFsoseHbtw1hRkviIwgdhDItHB3xh2UO26F3NIaTPfpiM98-1NThWDAHlsJL5hz3MXCbyvIz5qfQETwryTBVnTPXShJRA8hALO0aSDWMKqBbAFctflssEFG1Cp12NhElqZ5s16Ut8JUaF6AwGC1oQROAQidhFIx1VQ';
     const context = getMockContext();
-    const callback: CdkCustomResourceCallback = async (_response) => {};
+    const callback: CdkCustomResourceCallback<{}> = async (_response) => {};
     const errorEvent: APIGatewayTokenAuthorizerEvent = {
       type: 'TOKEN',
       methodArn: 'arn:aws:execute-api:us-east-2:123456789012:ymy8tbxw7b/*/GET/',
