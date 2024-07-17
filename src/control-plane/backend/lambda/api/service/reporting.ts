@@ -1496,14 +1496,15 @@ export class ReportingService {
       const streamingStackIdPrefix =
       streamingStack?.StackId?.split('/')[2].split('-')[0];
       for (let appId of streamEnableAppIds) {
+        const streamName = `${SINK_STREAM_NAME_PREFIX}${pipeline.projectId}_${appId}_${streamingStackIdPrefix}`;
         enableConfigs.push({
           appId: appId,
-          streamArn: `arn:${awsPartition}:kinesis:${pipeline.region}:${awsAccountId}:stream/${SINK_STREAM_NAME_PREFIX}${pipeline.projectId}_${appId}_${streamingStackIdPrefix}`,
+          streamArn: `arn:${awsPartition}:kinesis:${pipeline.region}:${awsAccountId}:stream/${streamName.toLowerCase()}`,
         });
       }
       return enableConfigs;
     } catch (error) {
-      logger.error('Failed to parse sink kinesis');
+      logger.error('Failed to parse sink kinesis', { error });
       return enableConfigs;
     }
   }
