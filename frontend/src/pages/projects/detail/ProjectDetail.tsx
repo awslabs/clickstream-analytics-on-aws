@@ -71,7 +71,6 @@ const ProjectDetail: React.FC = () => {
     } catch (error: any) {
       if (error?.message?.response?.status === 404) {
         setProjectNoFound(true);
-        setLoadingData(false);
       }
     }
     setLoadingData(false);
