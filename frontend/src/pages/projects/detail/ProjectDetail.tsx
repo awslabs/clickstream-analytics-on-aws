@@ -68,6 +68,7 @@ const ProjectDetail: React.FC = () => {
           getPipelineByProjectId(projectId, 'false');
         }
       }
+      setLoadingData(false);
     } catch (error: any) {
       if (error?.message?.response?.status === 404) {
         setProjectNoFound(true);
