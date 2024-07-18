@@ -65,14 +65,15 @@ const ProjectDetail: React.FC = () => {
       if (res?.success) {
         setProjectInfo(res?.data);
         if (res?.data?.pipelineId) {
-          getPipelineByProjectId(projectId, 'false');
+          await getPipelineByProjectId(projectId, 'false');
         }
       }
     } catch (error: any) {
       if (error?.message?.response?.status === 404) {
         setProjectNoFound(true);
-        setLoadingData(false);
       }
+    } finally {
+      setLoadingData(false);
     }
   };
 
