@@ -72,8 +72,9 @@ const ProjectDetail: React.FC = () => {
       if (error?.message?.response?.status === 404) {
         setProjectNoFound(true);
       }
+    } finally {
+      setLoadingData(false);
     }
-    setLoadingData(false);
   };
 
   const breadcrumbItems = [
