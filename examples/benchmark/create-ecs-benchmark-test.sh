@@ -16,9 +16,6 @@ SECURITY_GROUP_ID=""
 LOG_GROUP_NAME="/ecs/clickstream-sample-data-log-${TEST_NAME}"
 ROLE_NAME="clickstream-sample-data-ecs-task-role-${TEST_NAME}-${AWS_REGION}"
 
-# backup amplifyconfiguration.json for later checking
-cp -f amplifyconfiguration.json "amplifyconfiguration-${TEST_NAME}.json"
-
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 ROLE="arn:aws:iam::${AWS_ACCOUNT_ID}:role/${ROLE_NAME}"
 
@@ -104,8 +101,14 @@ FULL_IMAGE_NAME="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REP
 # Get the login command from ECR and execute it directly
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
+echo "requests~=2.28.2" > requirements.txt
+cp -rf ../standalone-data-generator standalone-data-generator
+
 # Build your Docker image locally
 docker build -t $IMAGE_NAME -f $DOCKERFILE_PATH .
+
+rm -rf standalone-data-generator
+rm -f requirements.txt
 
 # Check if ECR repository exists
 REPO_EXISTS=$(aws ecr describe-repositories --repository-names "${ECR_REPO_NAME}" --region ${AWS_REGION} 2>&1)

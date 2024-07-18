@@ -29,14 +29,14 @@ app_provider = AppProvider()
 
 def init_all_user():
     user_list = []
-    for _ in range(configure.ALL_USER_REALTIME_PERFORMANCE):
+    for _ in range(configure.ALL_USER_REALTIME_BENCHMARK):
         user_list.append(app_provider.get_random_user())
     return user_list
 
 
 def get_user_event_of_duration(users, start_timestamp):
     all_events = []
-    end_timestamp = start_timestamp + configure.BATCH_EVENT_DURATION_IN_MINUTES_PERFORMANCE * 60 * 1000
+    end_timestamp = start_timestamp + configure.BATCH_EVENT_DURATION_IN_MINUTES_BENCHMARK * 60 * 1000
     global global_total_events_for_duration, global_total_users_for_duration
     removed_users = []
     for user in users:
@@ -74,7 +74,7 @@ def send_user_event_of_duration(users, all_events):
                 break
             send_event_real_time.send_events_of_day(users[i], chunk)
             if configure.NEED_SLEEP:
-                time.sleep(configure.PERFORMANCE_SLEEP_TIME)
+                time.sleep(configure.BENCHMARK_SLEEP_TIME)
 
 
 def create_duration_event(day_users):
@@ -82,12 +82,12 @@ def create_duration_event(day_users):
     global_total_users_for_duration = 0
     global_total_events_for_duration = 0
     start_timestamp = utils.current_timestamp()
-    end_timestamp = start_timestamp + configure.BATCH_EVENT_DURATION_IN_MINUTES_PERFORMANCE * 60 * 1000
+    end_timestamp = start_timestamp + configure.BATCH_EVENT_DURATION_IN_MINUTES_BENCHMARK * 60 * 1000
     end_timestamp_min = utils.get_end_timestamp_minute(end_timestamp)
     print("\nstart send event until: " + end_timestamp_min + ", day user number: " + str(len(day_users)))
 
-    executor = ThreadPoolExecutor(configure.THREAD_NUMBER_FOR_USER_PERFORMANCE + 1)
-    n = int(len(day_users) / configure.THREAD_NUMBER_FOR_USER_PERFORMANCE) + 1
+    executor = ThreadPoolExecutor(configure.THREAD_NUMBER_FOR_USER_BENCHMARK + 1)
+    n = int(len(day_users) / configure.THREAD_NUMBER_FOR_USER_BENCHMARK) + 1
     user_arr = [day_users[i:i + n] for i in range(0, len(day_users), n)]
 
     handled_thread_count = 0
@@ -95,8 +95,8 @@ def create_duration_event(day_users):
         all_events = get_user_event_of_duration(users, start_timestamp)
         handled_thread_count += 1
         print("started thread: " + str(handled_thread_count) + " with " + str(len(all_events)) + " users")
-        if handled_thread_count == configure.THREAD_NUMBER_FOR_USER_PERFORMANCE:
-            print("\nall events count in " + str(configure.BATCH_EVENT_DURATION_IN_MINUTES_PERFORMANCE) + " minutes: " + str(
+        if handled_thread_count == configure.THREAD_NUMBER_FOR_USER_BENCHMARK:
+            print("\nall events count in " + str(configure.BATCH_EVENT_DURATION_IN_MINUTES_BENCHMARK) + " minutes: " + str(
                 global_total_events_for_duration) + ", user count: " + str(global_total_users_for_duration) + "\n")
         executor.submit(send_user_event_of_duration, users, all_events)
     executor.shutdown(wait=True)
@@ -114,7 +114,7 @@ if __name__ == '__main__':
         day_users = []
         while True:
             if day != utils.get_current_day():
-                users_count = random.choices(configure.RANDOM_DAU_PERFORMANCE)[0]
+                users_count = random.choices(configure.RANDOM_DAU_BENCHMARK)[0]
                 day_users = random.sample(users, users_count)
                 day = utils.get_current_day()
             create_duration_event(day_users)
