@@ -1485,9 +1485,8 @@ export class ReportingService {
       const streamingStack = await describeStack(
         pipeline.region,
         getStackName(
-          pipeline.pipelineId,
+          pipeline,
           PipelineStackType.STREAMING,
-          pipeline.ingestionServer.sinkType,
         ),
       );
       if (!streamingStack) {

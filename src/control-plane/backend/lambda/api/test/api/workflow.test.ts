@@ -211,7 +211,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_S3_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -289,7 +289,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_S3_PRIVATE_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -366,7 +366,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(setTagsWithVersion(IngestionStack, SolutionVersion.V_1_2_0),
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_S3_FARGATE_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -448,7 +448,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: removeParameters([
                             ...INGESTION_S3_FARGATE_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -537,7 +537,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_S3_PARAMETERS,
                             APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
@@ -612,7 +612,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-kafka-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_KAFKA_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -687,7 +687,7 @@ describe('Workflow test', () => {
                       Ingestion: replaceStackProps(
                         replaceStackInputProps(IngestionStack,
                           {
-                            StackName: `${getStackPrefix()}-Ingestion-kafka-6666-6666`,
+                            StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                             Parameters: [
                               ...INGESTION_KAFKA_PARAMETERS,
                               APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -799,7 +799,7 @@ describe('Workflow test', () => {
                       Ingestion: replaceStackProps(
                         replaceStackInputProps(IngestionStack,
                           {
-                            StackName: `${getStackPrefix()}-Ingestion-kafka-6666-6666`,
+                            StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                             Parameters: [
                               ...INGESTION_MSK_PARAMETERS,
                               APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
@@ -901,7 +901,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -985,7 +985,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_KINESIS_PROVISIONED_PARAMETERS,
                             APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
@@ -1060,7 +1060,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_S3_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -1150,7 +1150,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -1258,7 +1258,7 @@ describe('Workflow test', () => {
                       Ingestion: replaceStackProps(
                         replaceStackInputProps(IngestionStack,
                           {
-                            StackName: `${getStackPrefix()}-Ingestion-kafka-6666-6666`,
+                            StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                             Parameters: [
                               ...INGESTION_MSK_PARAMETERS,
                               APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -1392,7 +1392,7 @@ describe('Workflow test', () => {
                       Ingestion: replaceStackProps(
                         replaceStackInputProps(IngestionStack,
                           {
-                            StackName: `${getStackPrefix()}-Ingestion-kafka-6666-6666`,
+                            StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                             Parameters: [
                               ...INGESTION_MSK_PARAMETERS,
                               APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -1541,7 +1541,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -1647,7 +1647,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -1775,7 +1775,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -1933,7 +1933,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -2078,7 +2078,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_THIRDPARTY_SDK_KINESIS_ON_DEMAND_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -2201,7 +2201,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -2338,7 +2338,7 @@ describe('Workflow test', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -2397,10 +2397,18 @@ describe('Workflow test', () => {
                       Streaming: replaceStackInputProps(StreamingStack,
                         {
                           StackName: `${getStackPrefix()}-Streaming-6666-6666`,
-                          Parameters: [
-                            ...STREAMING_BASE_PARAMETERS,
-                            APPREGISTRY_APPLICATION_ARN_PARAMETER,
-                          ],
+                          Parameters: mergeParameters(
+                            [
+                              ...STREAMING_BASE_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            [
+                              {
+                                ParameterKey: 'KinesisSourceStreamArn.#',
+                                ParameterValue: `#.${getStackPrefix()}-Ingestion-6666-6666.KinesisArn`,
+                              },
+                            ],
+                          ),
                           Tags: Tags,
                           TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/streaming-ingestion-stack.template.json',
                         },
@@ -2486,7 +2494,7 @@ describe('Workflow test', () => {
                       Ingestion: replaceStackProps(
                         replaceStackInputProps(IngestionStack,
                           {
-                            StackName: `${getStackPrefix()}-Ingestion-kafka-6666-6666`,
+                            StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                             Parameters: [
                               ...INGESTION_MSK_WITHOUT_APP_PARAMETERS,
                               APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -4482,7 +4490,7 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-northeast-1',
-                    StackName: 'Clickstream-Ingestion-kinesis-80a00964678e487d8425bca0000f5d08',
+                    StackName: 'Clickstream-Ingestion-80a00964678e487d8425bca0000f5d08',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main-express/v0.8.0-main-202305281546-dc6d410d/default/ingestion-server-kinesis-stack.template.json',
                     Parameters: [],
                     Tags: [],
@@ -4932,7 +4940,7 @@ describe('Workflow test with boundary', () => {
                     States: {
                       Ingestion: replaceStackInputProps(IngestionStack,
                         {
-                          StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
+                          StackName: `${getStackPrefix()}-Ingestion-6666-6666`,
                           Parameters: [
                             ...INGESTION_S3_PARAMETERS,
                             APPREGISTRY_APPLICATION_ARN_PARAMETER,

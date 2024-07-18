@@ -161,7 +161,12 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: setTagsToStack(IngestionStack, Tags),
+                      Ingestion: replaceStackInputProps(
+                        setTagsToStack(IngestionStack, Tags),
+                        {
+                          StackName: 'test-prefix-Clickstream-Ingestion-6666-6666',
+                        },
+                      ),
                     },
                   },
                   {
@@ -831,7 +836,12 @@ describe('Workflow test with pipeline version in China region', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: setTagsToStack(IngestionStackCn, Tags),
+                      Ingestion: replaceStackInputProps(
+                        setTagsToStack(IngestionStackCn, Tags),
+                        {
+                          StackName: 'test-prefix-Clickstream-Ingestion-6666-6666',
+                        },
+                      ),
                     },
                   },
                   {
