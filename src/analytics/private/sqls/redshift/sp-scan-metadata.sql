@@ -14,7 +14,7 @@ results = []
 data = json.loads(json_in)
 for key, value_dict in data.items():
 	if 'value' in value_dict:
-		value = value_dict['value']
+		value = value_dict['value'][:100]
 		type = value_dict['type']
 		results.append({'key': key, 'value': value, 'type': type})
 return json.dumps(results)
