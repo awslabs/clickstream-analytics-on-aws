@@ -19,6 +19,7 @@
 | [AWS Lambda][lambda] | **支持**。 与各云服务集成。例如，将摄取数据接收到 S3和管理 AWS 资源的生命周期。 |
 | [Amazon Managed Streaming for Apache Kafka (MSK)][msk] | **支持**。 为摄取缓冲区提供 Apache Kafka。 |
 | [Amazon EMR Serverless][emr-serverless] | **支持**。 处理摄取的数据。 |
+| [Amazon Managed Service for Apache Flink][flink] | **支持**。实时处理摄取的数据。 |
 | [Amazon Glue][glue] | **支持**。 管理已摄取数据的元数据目录。 |
 | [Amazon EventBridge][eventbridge] | **支持**。 通过触发事件或定时事件与云服务集成。 |
 | [Amazon Redshift][redshift] | **支持**。 分析数据仓库中的点击流数据。 |
@@ -56,3 +57,4 @@
 [aga]: https://aws.amazon.com/global-accelerator/
 [quicksight]: https://aws.amazon.com/quicksight/
 [cloudformation]: https://aws.amazon.com/cloudformation/
+[flink]: https://aws.amazon.com/managed-service-apache-flink/

@@ -21,6 +21,7 @@
 - [Swift 软件开发工具包][clickstream-swift]
 - [Web 软件开发工具包][clickstream-web]
 - [Flutter 软件开发工具包][clickstream-flutter]
+- [React Native 软件开发工具包][clickstream-rn]
 - [微信小程序软件开发工具包][clickstream-wechat]
 
 ### 数据管道
@@ -59,6 +60,13 @@
   - 指定更新用户维度表的刷新时间间隔
 - 支持使用 Athena 查询数据湖中的数据
 
+#### 流处理模块
+
+流式传输模块提供实时数据处理、丰富和可视化。它支持以下功能：
+
+- 按应用程序配置流式传输处理
+- 支持按需启动和停止流式处理
+
 #### 报表模块
 
 报告模块创建与数据仓库的安全连接，并在商业智能 Amazon QuickSight 中配置开箱即用的仪表板。
@@ -68,3 +76,4 @@
 [clickstream-web]: https://github.com/awslabs/clickstream-web
 [clickstream-flutter]: https://github.com/awslabs/clickstream-flutter
 [clickstream-wechat]: https://github.com/awslabs/clickstream-wechat
+[clickstream-rn]: https://github.com/awslabs/clickstream-react-native
