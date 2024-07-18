@@ -3906,7 +3906,8 @@ describe('Pipeline test', () => {
         expressionAttributeValues[':timezone'].L.length === 0 &&
         expressionAttributeValues[':templateVersion'].S === SolutionVersion.V_1_2_0.fullVersion &&
         expressionAttributeValues[':tags'].L[0].M.value.S === SolutionVersion.V_1_2_0.fullVersion &&
-        dataProcessingInput.M.Tags.L[1].M.Value.S === SolutionVersion.V_1_2_0.fullVersion &&
+        dataProcessingInput.M.Tags.L[0].M.Value.S === SolutionVersion.V_1_2_0.fullVersion &&
+        dataProcessingInput.M.Tags.L[1].M.Value.S === 'test-value' &&
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main' &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'Admin/fakeUser' &&
         reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser' &&
