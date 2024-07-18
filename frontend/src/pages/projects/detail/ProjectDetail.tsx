@@ -65,7 +65,7 @@ const ProjectDetail: React.FC = () => {
       if (res?.success) {
         setProjectInfo(res?.data);
         if (res?.data?.pipelineId) {
-          getPipelineByProjectId(projectId, 'false');
+          await getPipelineByProjectId(projectId, 'false');
         }
       }
       setLoadingData(false);
@@ -75,6 +75,7 @@ const ProjectDetail: React.FC = () => {
         setLoadingData(false);
       }
     }
+    setLoadingData(false);
   };
 
   const breadcrumbItems = [
