@@ -72,8 +72,10 @@ const PipelineDetail: React.FC = () => {
       if (error?.message?.response?.status === 404) {
         setPipelineNoFound(true);
       }
+    } finally {
+      setLoadingPipeline(false);
+      setLoadingData(false);
     }
-    setLoadingPipeline(false);
   };
 
   const getProjectPipelineExtend = async () => {
@@ -105,8 +107,8 @@ const PipelineDetail: React.FC = () => {
       if (error?.message?.response?.status === 404) {
         setProjectNoFound(true);
       }
+      setLoadingData(false);
     }
-    setLoadingData(false);
   };
 
   const breadcrumbItems = [
