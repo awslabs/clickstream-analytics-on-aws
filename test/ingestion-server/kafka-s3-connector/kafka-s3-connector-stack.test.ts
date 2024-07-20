@@ -68,7 +68,7 @@ test('Parameters settings are as expected', () => {
     [
       'PluginUrl',
       'String',
-      'https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.2.2/confluentinc-kafka-connect-s3-10.2.2.zip',
+      'https://d2p6pa21dvn84.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.2.2/confluentinc-kafka-connect-s3-10.2.2.zip',
     ],
     ['RotateIntervalMS', 'Number', '3000000'],
     ['FlushSize', 'Number', '50000'],

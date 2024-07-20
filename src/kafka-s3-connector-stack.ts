@@ -107,7 +107,7 @@ export class KafkaS3SinkConnectorStack extends Stack {
       minValue: 1,
     });
 
-    const defaultPluginUrl = 'https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.2.2/confluentinc-kafka-connect-s3-10.2.2.zip';
+    const defaultPluginUrl = 'https://d2p6pa21dvn84.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.2.2/confluentinc-kafka-connect-s3-10.2.2.zip';
     const pluginUrlParam = new CfnParameter(this, 'PluginUrl', {
       description: 'S3 sink plugin download url',
       type: 'String',
