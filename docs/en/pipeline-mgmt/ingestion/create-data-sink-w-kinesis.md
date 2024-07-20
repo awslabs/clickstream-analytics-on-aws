@@ -12,3 +12,11 @@ Two modes are available: **On-demand** and **Provisioned**
 ## Additional Settings
 * **Sink maximum interval**: With this configuration, you can specify the maximum interval (in seconds) that records should be buffered before streaming to the AWS service.
 * **Batch size**: With this configuration, you can specify the maximum number of records to deliver in a single batch.
+
+## Enable realtime analysis
+Enable this option if you want to view the clickstream data in realtime.
+
+!!! warning "Warning"
+
+    Enable realtime data analysis will incur additional cost, please check [cost](../../plan-deployment/cost.md) for more details.
+

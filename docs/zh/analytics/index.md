@@ -5,8 +5,10 @@
 分析工作坊了包含以下模块。
 
 - [仪表板](./dashboard/index.md)。查看现成的仪表板和自定义仪表板。
+- [实时](./realtime/index.md)。实时查看点击流数据。
 - [探索](./explore/index.md)。用户用于发现超越现成仪表板的洞见的高级分析模型。
 - [分析](./analyzes/index.md)。用于创建和修改仪表板，以及管理数据集的作者界面。
+- [分群](./segments/index.md)。创建用户分群。
 - [数据管理](./data-mgmt/index.md)。查看和管理点击流数据的元数据。
 
 ## 术语表
