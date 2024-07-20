@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.2.x/deployment/within-vpc/">
+        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.2.x/analytics/realtime/">
       
       
-        <link rel="prev" href="../with-oidc/">
+        <link rel="prev" href="../dashboard/custom-analysis/">
       
       
-        <link rel="next" href="../../getting-started/">
+        <link rel="next" href="../explore/">
       
       
       <link rel="icon" href="../../images/favicon.ico">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Intranet - Clickstream Analytics on AWS</title>
+        <title>Realtime - Clickstream Analytics on AWS</title>
       
     
     
@@ -102,7 +102,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#launch-within-vpc" class="md-skip">
+        <a href="#realtime" class="md-skip">
           Skip to content
         </a>
       
@@ -140,7 +140,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Intranet
+              Realtime
             
           </span>
         </div>
@@ -819,8 +819,6 @@
                 
   
   
-    
-  
   
   
     
@@ -830,11 +828,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" >
         
           
           <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
@@ -848,7 +846,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_5">
             <span class="md-nav__icon md-icon"></span>
             Deployment
@@ -862,7 +860,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../deployment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -883,7 +881,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../with-cognito/" class="md-nav__link">
+      <a href="../../deployment/with-cognito/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -904,7 +902,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../with-oidc/" class="md-nav__link">
+      <a href="../../deployment/with-oidc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -922,30 +920,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Intranet
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../deployment/within-vpc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -954,80 +932,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deployment-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Deployment Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-1-create-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 1. Create OIDC client
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-launch-the-stack" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 2. Launch the stack
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-update-the-callback-url-of-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3. Update the callback URL of OIDC client
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-launch-the-web-console" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 4. Launch the web console
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1905,6 +1809,8 @@
                 
   
   
+    
+  
   
   
     
@@ -1914,11 +1820,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_9" checked>
         
           
           <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
@@ -1932,7 +1838,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1_9">
             <span class="md-nav__icon md-icon"></span>
             Analytics Studio
@@ -1946,7 +1852,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2005,7 +1911,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/dashboard/" class="md-nav__link">
+      <a href="../dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2026,7 +1932,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/dashboard/acquisition/" class="md-nav__link">
+      <a href="../dashboard/acquisition/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2047,7 +1953,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/dashboard/engagement/" class="md-nav__link">
+      <a href="../dashboard/engagement/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2068,7 +1974,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/dashboard/retention/" class="md-nav__link">
+      <a href="../dashboard/retention/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2089,7 +1995,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/dashboard/device/" class="md-nav__link">
+      <a href="../dashboard/device/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2110,7 +2016,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/dashboard/details/" class="md-nav__link">
+      <a href="../dashboard/details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2131,7 +2037,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/dashboard/custom-analysis/" class="md-nav__link">
+      <a href="../dashboard/custom-analysis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2157,10 +2063,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../analytics/realtime/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Realtime
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -2169,6 +2095,53 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#start-and-stop" class="md-nav__link">
+    <span class="md-ellipsis">
+      Start and stop
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-sources-and-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data sources and metrics
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2219,7 +2192,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/explore/" class="md-nav__link">
+      <a href="../explore/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2240,7 +2213,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/explore/event/" class="md-nav__link">
+      <a href="../explore/event/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2261,7 +2234,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/explore/funnel/" class="md-nav__link">
+      <a href="../explore/funnel/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2282,7 +2255,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/explore/path/" class="md-nav__link">
+      <a href="../explore/path/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2303,7 +2276,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/explore/retention/" class="md-nav__link">
+      <a href="../explore/retention/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2324,7 +2297,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/explore/attribution/" class="md-nav__link">
+      <a href="../explore/attribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2353,7 +2326,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/analyzes/" class="md-nav__link">
+      <a href="../analyzes/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2374,7 +2347,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/segment/" class="md-nav__link">
+      <a href="../segment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2433,7 +2406,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/data-mgmt/" class="md-nav__link">
+      <a href="../data-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2454,7 +2427,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/data-mgmt/metadata-mgmt/" class="md-nav__link">
+      <a href="../data-mgmt/metadata-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2475,7 +2448,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../analytics/data-mgmt/traffic-source/" class="md-nav__link">
+      <a href="../data-mgmt/traffic-source/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2870,45 +2843,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#deployment-overview" class="md-nav__link">
+  <a href="#start-and-stop" class="md-nav__link">
     <span class="md-ellipsis">
-      Deployment Overview
+      Start and stop
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-create-oidc-client" class="md-nav__link">
+  <a href="#data-sources-and-metrics" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 1. Create OIDC client
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-launch-the-stack" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 2. Launch the stack
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-update-the-callback-url-of-oidc-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3. Update the callback URL of OIDC client
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-launch-the-web-console" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 4. Launch the web console
+      Data sources and metrics
     </span>
   </a>
   
@@ -2932,145 +2878,63 @@
   
 
 
-<h1 id="launch-within-vpc">Launch within VPC</h1>
-<p><strong>Time to deploy</strong>: Approximately 30 minutes</p>
+<h1 id="realtime">Realtime</h1>
+<p>Realtime lets you monitor clickstream data on your website or app in second-level latency. </p>
 <h2 id="prerequisites">Prerequisites</h2>
-<p>Review all the <a href="../../plan-deployment/cost/">considerations</a> and make sure you have the following in the target region you want to deploy the solution:</p>
-<ul>
-<li>At least one Amazon VPC.</li>
-<li>At least two private (with NAT gateways or instances) <a href="https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html#subnet-types">subnets</a> across two AZs.</li>
-</ul>
-<h2 id="deployment-overview">Deployment Overview</h2>
-<p>Use the following steps to deploy this solution on AWS.</p>
-<p><a href="#step-1-create-oidc-client">Step 1. Create OIDC client</a></p>
-<p><a href="#step-2-launch-the-stack">Step 2. Launch the stack</a></p>
-<p><a href="#step-3-update-the-callback-url-of-oidc-client">Step 3. Update the callback url of OIDC client</a></p>
-<p><a href="#step-4-launch-the-web-console">Step 4. Launch the web console</a></p>
-<h2 id="step-1-create-oidc-client">Step 1. Create OIDC client</h2>
-<p>You can use existing OpenID Connect (OIDC) provider or following <a href="../with-oidc/#step-1-create-oidc-client">this guide</a> to create an OIDC client.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>This solution deploys the console in VPC without requiring SSL certificate by default. You have to use an OIDC client to support callback url with <code>http</code> protocol.</p>
-</div>
-<h2 id="step-2-launch-the-stack">Step 2. Launch the stack</h2>
 <ol>
-<li>
-<p>Sign in to the AWS Management Console and use the button below to launch the AWS CloudFormation template.</p>
+<li>You must enable realtime analysis for the data pipeline of your project.</li>
+<li>You must enable realtime streaming for the app.</li>
+</ol>
+<h2 id="start-and-stop">Start and stop</h2>
+<p>You can start and stop the realtime data streaming by switching on and off the toggle to avoid unnecessary cost. In the backend, this option starts and stops the Flink application which processes the clickstream events. </p>
+<h2 id="data-sources-and-metrics">Data sources and metrics</h2>
+<p>Realtime report is created based on the following QuickSight datasets:</p>
 <table>
 <thead>
 <tr>
-<th></th>
-<th>Launch in AWS Console</th>
+<th>QuickSight dataset</th>
+<th>Redshift view / table</th>
+<th>Metric description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Launch in AWS Regions</td>
-<td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://solutions-reference.s3.amazonaws.com/clickstream-analytics-on-aws/latest/private-exist-vpc-control-plane-stack.template.json" target="_blank"><img alt="Launch Stack" src="../../images/launch-stack.webp" /></a></td>
+<td><code>Realtime_Event_Country-rt-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>ods_events_streaming_view</code></td>
+<td>This dataset stores the number of active users on your websites or apps by country in last one hour.</td>
 </tr>
 <tr>
-<td>Launch in AWS China Regions</td>
-<td><a href="https://console.amazonaws.cn/cloudformation/home#/stacks/new?templateURL=https://aws-gcr-solutions.s3.cn-north-1.amazonaws.com.cn/clickstream-analytics-on-aws/latest/cn/private-exist-vpc-control-plane-stack.template.json" target="_blank"><img alt="Launch Stack" src="../../images/launch-stack.webp" /></a></td>
+<td><code>Realtime_Event_City-rt-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>ods_events_streaming_view</code></td>
+<td>This dataset stores the number of active users on your websites or apps by city in last one hour.</td>
+</tr>
+<tr>
+<td><code>Realtime_Event_Platform-rt-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>ods_events_streaming_view</code></td>
+<td>This dataset stores the number of active users on your websites or apps by platform in last one hour.</td>
+</tr>
+<tr>
+<td><code>Realtime_Event_Name-rt-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>ods_events_streaming_view</code></td>
+<td>This dataset stores the number of active users on your websites or apps by event name in last one hour.</td>
+</tr>
+<tr>
+<td><code>Realtime_Event_Page_Screen-rt-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>ods_events_streaming_view</code></td>
+<td>This dataset stores the number of active users on your websites or apps by page title or screen name in last one hour.</td>
+</tr>
+<tr>
+<td><code>Realtime_Event_Traffic-rt-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>ods_events_streaming_view</code></td>
+<td>This dataset stores the number of active users on your websites or apps by traffic source in last one hour.</td>
+</tr>
+<tr>
+<td><code>Realtime_Event_User-rt-&lt;app&gt;-&lt;project&gt;</code></td>
+<td><code>ods_events_streaming_view</code></td>
+<td>This dataset stores the number of active users on your websites or apps by each minute in last one hour.</td>
 </tr>
 </tbody>
 </table>
-</li>
-<li>
-<p>The template is launched in the default region after you log in to the console. To launch the Clickstream Analytics on AWS solution in a different AWS Region, use the Region selector in the console navigation bar.</p>
-</li>
-<li>On the <strong>Create stack</strong> page, verify that the correct template URL shows in the <strong>Amazon S3 URL</strong> text box and choose <strong>Next</strong>.</li>
-<li>On the <strong>Specify stack details</strong> page, assign a name to your solution stack. For information about naming character limitations, refer to <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html" target="_blank">IAM and AWS STS quotas</a> in the <em>AWS Identity and Access Management User Guide</em>.</li>
-<li>
-<p>Under <strong>Parameters</strong>, review the parameters for the template and modify them as necessary.</p>
-<ul>
-<li>This solution uses the following parameters:</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>VPC ID (<code>VpcId</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>Select the VPC in which the solution will be deployed.</td>
-</tr>
-<tr>
-<td>Private Subnet IDs (<code>PrivateSubnets</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>Select the subnets in which the solution will be deployed. <strong>Note</strong>: You must choose two subnets across two AZs at least.</td>
-</tr>
-<tr>
-<td>OpenID Connector Client Id (<code>OIDCClientId</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>OpenID Connect client Id.</td>
-</tr>
-<tr>
-<td>OpenID Connector Issuer (<code>OIDCProvider</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>OpenID Connect provider issuer. The issuer must begin with <code>https://</code></td>
-</tr>
-<tr>
-<td>Admin User Email (<code>Email</code>)</td>
-<td><code>&lt;Requires input&gt;</code></td>
-<td>Specify the email of the Administrator. This email address will receive a temporary password to access the Clickstream Analytics on AWS web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution.</td>
-</tr>
-<tr>
-<td>IAM Role Prefix (<code>IamRolePrefix</code>)</td>
-<td><code>&lt;Optional input&gt;</code></td>
-<td>Specify the prefix for the name of IAM roles created in the solution.</td>
-</tr>
-<tr>
-<td>IAM Role Boundary ARN (<code>IamRoleBoundaryArn</code>)</td>
-<td><code>&lt;Optional input&gt;</code></td>
-<td>Specify <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html">the permissions boundary for the IAM roles</a> created in the solution.</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p>Choose <strong>Next</strong>.</p>
-</li>
-<li>On the <strong>Configure stack options</strong> page, choose <strong>Next</strong>.</li>
-<li>On the <strong>Review</strong> page, review and confirm the settings. Check the box acknowledging that the template creates AWS Identity and Access Management (IAM) resources.</li>
-<li>Choose <strong>Create stack</strong>  to deploy the stack.</li>
-</ol>
-<p>You can view the status of the stack in the AWS CloudFormation console in the <strong>Status</strong> column. You should receive a <strong>CREATE_COMPLETE</strong> status in approximately 10 minutes.</p>
-<h2 id="step-3-update-the-callback-url-of-oidc-client">Step 3. Update the callback URL of OIDC client</h2>
-<ol>
-<li>Sign in to the <a href="https://console.aws.amazon.com/cloudformation/" target="_blank">AWS CloudFormation console</a>.</li>
-<li>Select the solution's stack.</li>
-<li>Choose the <strong>Outputs</strong> tab.</li>
-<li>Obtain the <strong>ControlPlaneURL</strong> as the endpoint.</li>
-<li>Update or add the callback URL <strong>${ControlPlaneURL}/signin</strong> to your OIDC client.<ol>
-<li>For Keycloak, add or update the url in <strong>Valid Redirect URIs</strong>.</li>
-<li>For Authing.cn, add or update the url in <strong>Login Callback URL</strong> of <strong>Authentication Configuration</strong>.</li>
-</ol>
-</li>
-</ol>
-<h2 id="step-4-launch-the-web-console">Step 4. Launch the web console</h2>
-<div class="admonition info">
-<p class="admonition-title">Important</p>
-<p>Your login credentials is managed by the OIDC provider. Before signing in to the Clickstream Analytics on AWS console, make sure you have created at least one user in the OIDC provider's user pool.</p>
-</div>
-<ol>
-<li>Because you deploy the solution console in your VPC without public access, you have to setup a network connection to the solution console serving by an internal application load balancer. There are some options for your reference.<ol>
-<li>(Option 1) Use bastion host, for example, <a href="https://aws.amazon.com/solutions/implementations/linux-bastion/">Linux Bastion Hosts on AWS</a> solution</li>
-<li>(Option 2) Use <a href="https://aws.amazon.com/vpn/client-vpn/">AWS Client VPN</a> or <a href="https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html">AWS Site-to-Site VPN</a></li>
-<li>(Option 3) Use <a href="https://aws.amazon.com/directconnect/">AWS Direct Connect</a></li>
-</ol>
-</li>
-<li>The application load balancer only allows the traffic from specified security group, you can find the security group id from the output named <strong>SourceSecurityGroup</strong> from the stack you deployed in step 2. Then attach the security group to your bastion host or other source to access the solution console.</li>
-<li>Use the previously assigned domain name or the generated <strong>ControlPlaneURL</strong> in a web browser.</li>
-<li>Choose <strong>Sign In</strong>, and navigate to OIDC provider.</li>
-<li>Enter sign-in credentials. You may be asked to change your default password for first-time login, which depends on your OIDC provider's policy.</li>
-<li>After the verification is complete, the system opens the Clickstream Analytics on AWS web console.</li>
-</ol>
-<p>Once you have logged into the Clickstream Analytics on AWS console, you can start to <a href="../../getting-started/1.create-project/">create a project</a> for your applications.</p>
 
 
 
