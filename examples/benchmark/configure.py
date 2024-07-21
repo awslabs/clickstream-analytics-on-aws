@@ -17,36 +17,31 @@ import os
 # application type, you can switch to `enums.Application.Shopping` to send shopping events.
 APP_TYPE = enums.Application.Shopping
 
-# for history event consts
-DURATION_OF_DAYS = 30
-PER_ACTION_DURATION = range(3, 60)
-EVENTS_PER_REQUEST = 10000
-MAX_BATCH_REQUEST_NUMBER = 20
-# gzip process number, for mac m1 is 8, for c5.metal is 50 to meet best performance
-PROCESS_NUMBER = 50
-# control the speed for event send.
-MAX_UPLOAD_THREAD_NUMBER = 10
-REQUEST_SLEEP_TIME = 0.1
-GZIP_TIMES_PER_DAY = 1
-
 # for real-time event consts
 ALL_USER_REALTIME = 100000
 RANDOM_DAU_REALTIME = range(10000, 20000)
 THREAD_NUMBER_FOR_USER = 10
 FLUSH_DURATION = 10
 BATCH_EVENT_DURATION_IN_MINUTES = 20
-IS_LOG_FULL_REQUEST_MESSAGE = True
+IS_LOG_FULL_REQUEST_MESSAGE = False
+
+# for benchmark tool
+ALL_USER_REALTIME_BENCHMARK = 1000000
+RANDOM_DAU_BENCHMARK = range(100000, 100001)
+THREAD_NUMBER_FOR_USER_BENCHMARK = 1
+BATCH_EVENT_DURATION_IN_MINUTES_BENCHMARK = 2
+NEED_SLEEP = True
+# 100 RPS
+# BENCHMARK_SLEEP_TIME = 0.005
+# 10 RPS
+# BENCHMARK_SLEEP_TIME = 0.08
+
+# 1000 RPS
+BENCHMARK_SLEEP_TIME = 0.003
 
 # common settings
 SESSION_TIMES = range(1, 4)
 IS_GZIP = True
-
-# notepad configure
-ALL_USER = 10000
-RANDOM_DAU = range(1000, 2000)
-ACTION_TIMES = range(0, 30)
-# for real-time mode
-PER_ACTION_DURATION_REALTIME = range(0, 5)
 
 # shopping configure
 ALL_USER_SHOPPING = 5000
