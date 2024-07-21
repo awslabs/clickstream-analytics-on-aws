@@ -41,3 +41,5 @@ run below script to clean up all resources of benchmark test tool
 ```
 ./cleanup-ecs-benchmark-test.sh <testName> <region>
 ```
+
+[configure-aws-cli]: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
