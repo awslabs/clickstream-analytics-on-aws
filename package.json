@@ -50,8 +50,8 @@
     "jest-junit": "^15",
     "mock-fs": "^5.2.0",
     "nx": "^15",
-    "projen": "^0.84.4",
-    "ts-jest": "^29.2.2",
+    "projen": "^0.84.6",
+    "ts-jest": "^29.2.3",
     "ts-node": "^10.9.2",
     "typescript": "^4.9.5"
   },
@@ -144,7 +144,7 @@
     ],
     "testTimeout": 30000,
     "testMatch": [
-      "<rootDir>/@(src|test)/**/?(*.)+(spec|test).ts?(x)",
+      "<rootDir>/@(src|test)/**/*(*.)@(spec|test).ts?(x)",
       "<rootDir>/@(src|test)/**/__tests__/**/*.ts?(x)"
     ],
     "clearMocks": true,
