@@ -42,7 +42,7 @@ echo "userPoolPhysicalResourceId: $userPoolPhysicalResourceId"
 issuer="https://cognito-idp.$AWS_REGION.amazonaws.com/$userPoolPhysicalResourceId"
 echo "issuer: $issuer"
 # set environment for auth middleware and role validation
-export ISSUER=https://cognito-idp.us-east-2.amazonaws.com/us-east-2_RIJiB9Z7n
+export ISSUER=$issuer
 export WITH_AUTH_MIDDLEWARE=true
 export WITH_VALIDATE_ROLE=true
 export LOG_LEVEL=DEBUG

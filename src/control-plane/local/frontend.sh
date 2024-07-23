@@ -46,8 +46,8 @@ EOF
 # Create new file aws-exports.json and add the content into file
 cat > ../../../frontend/public/aws-exports.json <<EOF
 {
-    "oidc_provider": "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_RIJiB9Z7n",
-    "oidc_client_id": "umrn1h6mru30bepcrr70l4tnf",
+    "oidc_provider": "https://cognito-idp.$AWS_REGION.amazonaws.com/$userPoolPhysicalResourceId",
+    "oidc_client_id": "$userPoolClientPhysicalResourceId",
     "oidc_redirect_url": "http://localhost:3000/signin",
     "solution_version": "v1",
     "control_plane_mode": "CLOUDFRONT",
