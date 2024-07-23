@@ -522,11 +522,11 @@ function getSubnetRouteTable(routeTables: RouteTable[], subnetId: string) {
 
 function _findVpcEndpointIndex(vpcEndpointServices: string[], serviceName: string) {
   if (serviceName.startsWith('cn.')) {
-    const defaultS3ServiceName = serviceName.substring(3);
+    const defaultServiceName = serviceName.substring(3);
     if (vpcEndpointServices.includes(serviceName)) {
       return vpcEndpointServices.indexOf(serviceName);
-    } else if (vpcEndpointServices.includes(defaultS3ServiceName)) {
-      return vpcEndpointServices.indexOf(defaultS3ServiceName);
+    } else if (vpcEndpointServices.includes(defaultServiceName)) {
+      return vpcEndpointServices.indexOf(defaultServiceName);
     }
     return -1;
   }
