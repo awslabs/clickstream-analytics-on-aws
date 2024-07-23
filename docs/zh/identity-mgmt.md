@@ -30,8 +30,10 @@
 | 插件管理           | Yes | Yes | No | No |
 | 身份管理             | Yes | No  | No | No |
 | 分析工作坊 - 仪表板  | Yes  | No | Yes | Yes |
+| 分析工作坊 - 实时仪表板 | Yes  | No | Yes | Yes (只读) |
 | 分析工作坊 - 探索    | Yes | No  | Yes | Yes |
 | 分析工作坊 - 分析    | Yes | No | Yes | No |
+| 分析工作坊 - 分群 | Yes  | No | Yes | Yes (只读) |
 | 分析工作坊 - 数据管理 | Yes | No | Yes | Yes |
 
 ### 用户角色管理

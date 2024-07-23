@@ -29,7 +29,7 @@
     | [Use OIDC for authentication with custom domain][cloudfront-s3-oidc-custom-domain-template]    | Deploy as public service with custom domain in AWS regions  |
     | [Use OIDC for authentication within VPC][intranet-template]   | Deploy as private service within VPC in AWS regions  |
     | [Use OIDC for authentication with custom domain in AWS China][cloudfront-s3-oidc-cn-template]    | Deploy as public service with custom domain in AWS China regions  |
-    | [Use OIDC for authentication within VPC in AWS China][intranet-cn-template]   | Deploy as private service within VPC in AWS China regions  |
+    | [Use OIDC for authentication within VPC in AWS China][intranet-template]  | Deploy as private service within VPC in AWS China regions  |
 
 4. Under **Parameters**, review the parameters for the template and modify them as necessary. Refer to [Deployment][console-stack] for details about the parameters.
 5. Choose **Next**.
@@ -161,9 +161,8 @@ The solution automatically and asynchronously upgrades the views and materialize
 [cloudfront-s3-custom-domain-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-customdomain.template.json
 [cloudfront-s3-oidc-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-oidc.template.json
 [cloudfront-s3-oidc-custom-domain-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-customdomain-oidc.template.json
-[cloudfront-s3-oidc-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/cloudfront-s3-control-plane-stack-cn.template.json
+[cloudfront-s3-oidc-cn-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-cn.template.json
 [intranet-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/private-exist-vpc-control-plane-stack.template.json
-[intranet-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/private-exist-vpc-control-plane-stack.template.json
 [troubleshooting]: ./troubleshooting.md
 [v115]: https://awslabs.github.io/clickstream-analytics-on-aws/en/1.1.5/upgrade/
 [exploration]: ./analytics/explore/index.md
