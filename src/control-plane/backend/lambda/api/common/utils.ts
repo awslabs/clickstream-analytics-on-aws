@@ -520,6 +520,19 @@ function getSubnetRouteTable(routeTables: RouteTable[], subnetId: string) {
   return !isEmpty(subnetRouteTable) ? subnetRouteTable : mainRouteTable;
 }
 
+function _findVpcEndpointIndex(vpcEndpointServices: string[], serviceName: string) {
+  if (serviceName.startsWith('cn.')) {
+    const defaultServiceName = serviceName.substring(3);
+    if (vpcEndpointServices.includes(serviceName)) {
+      return vpcEndpointServices.indexOf(serviceName);
+    } else if (vpcEndpointServices.includes(defaultServiceName)) {
+      return vpcEndpointServices.indexOf(defaultServiceName);
+    }
+    return -1;
+  }
+  return vpcEndpointServices.indexOf(serviceName);
+}
+
 function checkVpcEndpoint(
   allSubnets: ClickStreamSubnet[],
   isolatedSubnetsAZ: string[],
@@ -531,7 +544,7 @@ function checkVpcEndpoint(
   const vpcEndpointServices = vpcEndpoints.map(endpoint => endpoint.ServiceName!);
   const invalidServices = [];
   for (let service of services) {
-    const index = vpcEndpointServices.indexOf(service);
+    const index = _findVpcEndpointIndex(vpcEndpointServices, service);
     if (index === -1) {
       invalidServices.push({
         service: service,
