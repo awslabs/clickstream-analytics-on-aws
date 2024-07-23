@@ -234,6 +234,9 @@ declare global {
     enableStreaming: boolean;
 
     enableReporting: boolean;
+    quickSightSubscription: boolean;
+    quickSightEnterprise: boolean;
+    quickSightAuthenticationType: string;
     arnAccountId: string;
     enableAuthentication: boolean;
 

@@ -39,7 +39,12 @@ import {
   PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
   PIPELINE_QUICKSIGHT_GUIDE_LINK_CN,
 } from 'ts/url';
-import { defaultStr, isReportingDisabled, ternary } from 'ts/utils';
+import {
+  defaultStr,
+  isReportingDisabled,
+  quickSightUserDisplay,
+  ternary,
+} from 'ts/utils';
 
 interface ReportingProps {
   update?: boolean;
@@ -50,6 +55,9 @@ interface ReportingProps {
   changeQuickSightAccountName: (accountName: string) => void;
   changeLoadingQuickSight?: (loading: boolean) => void;
   changeQuickSightSelectedUser: (user: SelectProps.Option) => void;
+  changeQuickSightSubscription: (subscription: boolean) => void;
+  changeQuickSightAuthenticationType: (authenticationType: string) => void;
+  changeQuickSightEnterprise: (enterprise: boolean) => void;
 }
 
 const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
@@ -63,12 +71,12 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
     changeQuickSightAccountName,
     changeLoadingQuickSight,
     changeQuickSightSelectedUser,
+    changeQuickSightSubscription,
+    changeQuickSightAuthenticationType,
+    changeQuickSightEnterprise,
   } = props;
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingQuickSight, setLoadingQuickSight] = useState(false);
-  const [quickSightEnabled, setQuickSightEnabled] = useState(false);
-  const [quickSightEnterprise, setQuickSightEnterprise] = useState(false);
-  const [authenticationType, setAuthenticationType] = useState('');
   const [quickSightUserOptions, setQuickSightUserOptions] =
     useState<SelectProps.Options>([]);
 
@@ -83,22 +91,23 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
         data &&
         data.accountSubscriptionStatus === 'ACCOUNT_CREATED'
       ) {
-        setQuickSightEnabled(true);
+        changeQuickSightSubscription(true);
         changeQuickSightDisabled(false);
-        setAuthenticationType(data.authenticationType);
+        changeQuickSightAuthenticationType(data.authenticationType);
         changeQuickSightAccountName(data.accountName);
+        getQuickSightUserList();
       } else {
-        changeEnableReporting(false);
-        setQuickSightEnabled(false);
-        setAuthenticationType('');
+        changeQuickSightSubscription(false);
         changeQuickSightDisabled(true);
+        changeQuickSightAuthenticationType('');
+        changeEnableReporting(false);
       }
       if (success && data && data.edition.includes('ENTERPRISE')) {
-        setQuickSightEnterprise(true);
+        changeQuickSightEnterprise(true);
       }
     } catch (error) {
       setLoadingQuickSight(false);
-      setAuthenticationType('');
+      changeQuickSightAuthenticationType('');
     }
   };
 
@@ -110,7 +119,6 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
         await getQuickSightStatus();
       if (success && data) {
         getTheQuickSightDetail();
-        getQuickSightUserList();
       } else {
         setLoadingQuickSight(false);
       }
@@ -215,7 +223,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                   <Spinner />
                 ) : (
                   <>
-                    {!quickSightEnabled && (
+                    {!pipelineInfo.quickSightSubscription && (
                       <Alert
                         type="warning"
                         header={t('pipeline:create.quickSightNotSub')}
@@ -228,63 +236,61 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                       </Alert>
                     )}
 
-                    {quickSightEnabled && !quickSightEnterprise && (
-                      <Alert
-                        type="warning"
-                        header={t('pipeline:create.quickSightNotEnterprise')}
-                      >
-                        {t('pipeline:create.quickSightNotEnterpriseDesc')}
-                      </Alert>
-                    )}
-
-                    {authenticationType !== 'IDENTITY_POOL' &&
-                      pipelineInfo.enableReporting &&
-                      quickSightEnabled &&
-                      quickSightEnterprise && (
-                        <FormField
-                          label={t('pipeline:create.quickSightUser')}
-                          description={t('pipeline:create.quickSightUserDesc')}
-                          errorText={ternary(
-                            quickSightUserEmptyError,
-                            t('pipeline:valid.quickSightUserEmptyError'),
-                            ''
-                          )}
+                    {pipelineInfo.quickSightSubscription &&
+                      !pipelineInfo.quickSightEnterprise && (
+                        <Alert
+                          type="warning"
+                          header={t('pipeline:create.quickSightNotEnterprise')}
                         >
-                          <div className="flex">
-                            <div className="flex-1">
-                              <Select
-                                statusType={ternary(
-                                  loadingUsers,
-                                  'loading',
-                                  'finished'
-                                )}
-                                placeholder={defaultStr(
-                                  t('pipeline:create.quickSightPlaceholder')
-                                )}
-                                selectedOption={
-                                  pipelineInfo.selectedQuickSightUser
-                                }
-                                onChange={({ detail }) =>
-                                  changeQuickSightSelectedUser(
-                                    detail.selectedOption
-                                  )
-                                }
-                                options={quickSightUserOptions}
-                                filteringType="auto"
-                              />
-                            </div>
-                            <div className="ml-10">
-                              <Button
-                                loading={loadingUsers}
-                                onClick={() => {
-                                  getQuickSightUserList();
-                                }}
-                                iconName="refresh"
-                              />
-                            </div>
-                          </div>
-                        </FormField>
+                          {t('pipeline:create.quickSightNotEnterpriseDesc')}
+                        </Alert>
                       )}
+
+                    {quickSightUserDisplay(pipelineInfo) && (
+                      <FormField
+                        label={t('pipeline:create.quickSightUser')}
+                        description={t('pipeline:create.quickSightUserDesc')}
+                        errorText={ternary(
+                          quickSightUserEmptyError,
+                          t('pipeline:valid.quickSightUserEmptyError'),
+                          ''
+                        )}
+                      >
+                        <div className="flex">
+                          <div className="flex-1">
+                            <Select
+                              statusType={ternary(
+                                loadingUsers,
+                                'loading',
+                                'finished'
+                              )}
+                              placeholder={defaultStr(
+                                t('pipeline:create.quickSightPlaceholder')
+                              )}
+                              selectedOption={
+                                pipelineInfo.selectedQuickSightUser
+                              }
+                              onChange={({ detail }) =>
+                                changeQuickSightSelectedUser(
+                                  detail.selectedOption
+                                )
+                              }
+                              options={quickSightUserOptions}
+                              filteringType="auto"
+                            />
+                          </div>
+                          <div className="ml-10">
+                            <Button
+                              loading={loadingUsers}
+                              onClick={() => {
+                                getQuickSightUserList();
+                              }}
+                              iconName="refresh"
+                            />
+                          </div>
+                        </div>
+                      </FormField>
+                    )}
                   </>
                 ))}
             </SpaceBetween>

@@ -148,6 +148,15 @@ describe('Test update pipeline when not enable data processing or data modeling'
         changeQuickSightSelectedUser={() => {
           return;
         }}
+        changeQuickSightSubscription={() => {
+          return;
+        }}
+        changeQuickSightAuthenticationType={() => {
+          return;
+        }}
+        changeQuickSightEnterprise={() => {
+          return;
+        }}
       />
     );
 
@@ -275,6 +284,15 @@ describe('Test update pipeline when not enable data processing or data modeling'
           return;
         }}
         changeQuickSightSelectedUser={() => {
+          return;
+        }}
+        changeQuickSightSubscription={() => {
+          return;
+        }}
+        changeQuickSightAuthenticationType={() => {
+          return;
+        }}
+        changeQuickSightEnterprise={() => {
           return;
         }}
       />

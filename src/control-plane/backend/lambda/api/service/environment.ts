@@ -197,7 +197,7 @@ export class EnvironmentServ {
     try {
       const result = await describeClickstreamAccountSubscription();
       if (!result) {
-        return res.status(404).send(new ApiFail('QuickSight Unsubscription.'));
+        return res.status(400).send(new ApiFail('QuickSight Unsubscription.'));
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {
