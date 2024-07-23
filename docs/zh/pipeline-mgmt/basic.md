@@ -7,6 +7,7 @@
     {%
       include-markdown "./vpc-prerequisites.md"
     %}
+
 * **数据采集SDK**: 指定客户端使用的SDK类型。
 
     - 如果您选择 **Clickstream SDK**，您可以查看[SDK 手册][clickstream-sdks]以获取可用的 Clickstream SDK。

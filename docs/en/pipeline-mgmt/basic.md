@@ -7,6 +7,7 @@ For the clickstream project, you can specify the basic configuration of the data
     {%
       include-markdown "./vpc-prerequisites.md"
     %}
+
 * **Data collection SDK**: specify the SDK type that the client uses.
 
     - If you choose **Clickstream SDK**, please refer to [SDK manual][clickstream-sdks] for the available Clickstream SDKs and integration guides.
