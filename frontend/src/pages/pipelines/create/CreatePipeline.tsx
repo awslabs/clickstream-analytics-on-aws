@@ -90,6 +90,7 @@ import {
   generateRedshiftRPUOptionListByRegion,
   isEmpty,
   isPositiveInteger,
+  quickSightUserDisplay,
   reverseCronDateRange,
   reverseFreshnessInHour,
   reverseRedshiftInterval,
@@ -704,9 +705,20 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       return false;
     }
 
+    if (!pipelineInfo.quickSightSubscription && pipelineInfo.enableReporting) {
+      return false;
+    }
+
     if (
-      pipelineInfo.region.startsWith('cn') &&
-      pipelineInfo.enableReporting &&
+      pipelineInfo.quickSightSubscription &&
+      !pipelineInfo.quickSightEnterprise &&
+      pipelineInfo.enableReporting
+    ) {
+      return false;
+    }
+
+    if (
+      quickSightUserDisplay(pipelineInfo) &&
       !pipelineInfo.selectedQuickSightUser
     ) {
       setQuickSightUserEmptyError(true);
@@ -1048,6 +1060,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       'kafkaBrokers',
       'arnAccountId',
       'enableReporting',
+      'quickSightSubscription',
+      'quickSightEnterprise',
+      'quickSightAuthenticationType',
       'enableStreaming',
       'selectedQuickSightUser',
       'dataConnectionType',
@@ -2274,6 +2289,30 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         accountName: name,
                       },
                     },
+                  };
+                });
+              }}
+              changeQuickSightSubscription={(subscription) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    quickSightSubscription: subscription,
+                  };
+                });
+              }}
+              changeQuickSightAuthenticationType={(authenticationType) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    quickSightAuthenticationType: authenticationType,
+                  };
+                });
+              }}
+              changeQuickSightEnterprise={(enterprise) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    quickSightEnterprise: enterprise,
                   };
                 });
               }}

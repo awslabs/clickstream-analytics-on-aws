@@ -348,11 +348,23 @@ export const isReportingDisabled = (
   }
 };
 
+export const quickSightUserDisplay = (pipelineInfo?: IExtPipeline) => {
+  return (
+    pipelineInfo?.quickSightAuthenticationType !== 'IDENTITY_POOL' &&
+    pipelineInfo?.enableReporting &&
+    pipelineInfo?.quickSightSubscription &&
+    pipelineInfo?.quickSightEnterprise
+  );
+};
+
 export const isStreamingDisabled = (
   update?: boolean,
   pipelineInfo?: IExtPipeline
 ) => {
-  if (!pipelineInfo?.serviceStatus.FLINK) {
+  if (
+    !pipelineInfo?.serviceStatus.FLINK ||
+    !pipelineInfo?.serviceStatus.QUICK_SIGHT
+  ) {
     return true;
   }
   if (!update) {

@@ -440,6 +440,15 @@ describe('Test QuickSight service available', () => {
         changeQuickSightSelectedUser={function (user: OptionDefinition): void {
           throw new Error('Function not implemented.');
         }}
+        changeQuickSightSubscription={() => {
+          return;
+        }}
+        changeQuickSightAuthenticationType={() => {
+          return;
+        }}
+        changeQuickSightEnterprise={() => {
+          return;
+        }}
       />
     );
 
@@ -488,6 +497,15 @@ describe('Test QuickSight service available', () => {
         }}
         changeQuickSightSelectedUser={function (user: OptionDefinition): void {
           throw new Error('Function not implemented.');
+        }}
+        changeQuickSightSubscription={() => {
+          return;
+        }}
+        changeQuickSightAuthenticationType={() => {
+          return;
+        }}
+        changeQuickSightEnterprise={() => {
+          return;
         }}
       />
     );
