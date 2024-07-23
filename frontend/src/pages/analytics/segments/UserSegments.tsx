@@ -27,17 +27,23 @@ import { deleteSegment, getSegmentsList } from 'apis/segments';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
+import { UserContext } from 'context/UserContext';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
-import { defaultStr } from 'ts/utils';
+import {
+  defaultStr,
+  getUserInfoFromLocalStorage,
+  isAnalystAuthorRole,
+} from 'ts/utils';
 import { convertCronToRefreshSchedule } from '../analytics-utils';
 
 const UserSegments: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const { projectId, appId } = useParams();
   const breadcrumbItems = [
     {
@@ -69,26 +75,26 @@ const UserSegments: React.FC = () => {
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
-      header: 'Name',
+      header: t('analytics:segment.columnHeader.name'),
       cell: (e: Segment) => renderSegmentDetailsLink(e),
     },
     {
       id: 'description',
-      header: 'Description',
+      header: t('analytics:segment.columnHeader.description'),
       cell: (e: Segment) => {
         return e.description;
       },
     },
     {
       id: 'refreshSchedule',
-      header: 'Refresh Schedule',
+      header: t('analytics:segment.columnHeader.refreshSchedule'),
       cell: (e: Segment) => {
         return convertCronToRefreshSchedule(e, timezone);
       },
     },
     {
       id: 'createAt',
-      header: 'Create At',
+      header: t('analytics:segment.columnHeader.createAt'),
       cell: (e: Segment) => {
         return moment(e.createAt).format(TIME_FORMAT) || '-';
       },
@@ -203,45 +209,53 @@ const UserSegments: React.FC = () => {
                               id: 'duplicate',
                               disabled:
                                 selectedSegment.length === 0 ||
-                                selectedSegment[0].isImported,
+                                selectedSegment[0].isImported ||
+                                !isAnalystAuthorRole(currentUser?.roles),
                             },
                             {
                               text: defaultStr(t('button.edit')),
                               id: 'edit',
                               disabled:
                                 selectedSegment.length === 0 ||
-                                selectedSegment[0].isImported,
+                                selectedSegment[0].isImported ||
+                                !isAnalystAuthorRole(currentUser?.roles),
                             },
                             {
                               text: defaultStr(t('button.delete')),
                               id: 'delete',
-                              disabled: selectedSegment.length === 0,
+                              disabled:
+                                selectedSegment.length === 0 ||
+                                !isAnalystAuthorRole(currentUser?.roles),
                             },
                           ]}
                         >
                           {t('button.actions')}
                         </ButtonDropdown>
-                        <Button
-                          onClick={() => {
-                            navigate(
-                              `/analytics/${projectId}/app/${appId}/segments/import`
-                            );
-                          }}
-                        >
-                          {t('button.import')}
-                        </Button>
-                        <Button
-                          iconAlign="right"
-                          iconName="add-plus"
-                          variant="primary"
-                          onClick={() => {
-                            navigate(
-                              `/analytics/${projectId}/app/${appId}/segments/add`
-                            );
-                          }}
-                        >
-                          {t('button.createSegment')}
-                        </Button>
+                        {isAnalystAuthorRole(currentUser?.roles) && (
+                          <>
+                            <Button
+                              onClick={() => {
+                                navigate(
+                                  `/analytics/${projectId}/app/${appId}/segments/import`
+                                );
+                              }}
+                            >
+                              {t('button.import')}
+                            </Button>
+                            <Button
+                              iconAlign="right"
+                              iconName="add-plus"
+                              variant="primary"
+                              onClick={() => {
+                                navigate(
+                                  `/analytics/${projectId}/app/${appId}/segments/add`
+                                );
+                              }}
+                            >
+                              {t('button.createSegment')}
+                            </Button>
+                          </>
+                        )}
                       </SpaceBetween>
                     }
                     description={t('analytics:segment.desc')}

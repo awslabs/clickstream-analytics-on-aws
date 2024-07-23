@@ -512,6 +512,12 @@
       "eventValueBetweenError": "最大值不能小于最小值",
       "attributeEmptyError": "请选择属性",
       "groupEmptyError": "请选择分群组"
+    },
+    "columnHeader": {
+      "name": "名称",
+      "description": "描述",
+      "refreshSchedule": "刷新计划",
+      "createAt": "创建时间"
     }
   }
 }
