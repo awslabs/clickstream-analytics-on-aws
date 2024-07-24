@@ -2664,7 +2664,16 @@
         <li class="md-nav__item">
   <a href="#cloudformation-the-availability-zones-for-subnets-subnet-xyz-are-currently-not-supported" class="md-nav__link">
     <span class="md-ellipsis">
-      问题: 在创建启用数据处理的数据管道时，数据处理 CloudFormation 堆栈遇到了错误 "The availability zones for subnets [subnet-xyz] are currently not supported."。
+      问题: 在创建启用数据处理的数据管道时，数据处理 CloudFormation 堆栈遇到了错误 "The availability zones for subnets [subnet-xyz] are currently not supported."
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-internal-server-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      问题：在解决方案 Web 控制台遇到 "Internal Server Error"
     </span>
   </a>
   
@@ -2935,7 +2944,16 @@
         <li class="md-nav__item">
   <a href="#cloudformation-the-availability-zones-for-subnets-subnet-xyz-are-currently-not-supported" class="md-nav__link">
     <span class="md-ellipsis">
-      问题: 在创建启用数据处理的数据管道时，数据处理 CloudFormation 堆栈遇到了错误 "The availability zones for subnets [subnet-xyz] are currently not supported."。
+      问题: 在创建启用数据处理的数据管道时，数据处理 CloudFormation 堆栈遇到了错误 "The availability zones for subnets [subnet-xyz] are currently not supported."
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-internal-server-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      问题：在解决方案 Web 控制台遇到 "Internal Server Error"
     </span>
   </a>
   
@@ -3103,10 +3121,28 @@
 <p>增加 Redshift 的计算资源（例如，Redshift Serverless 的 RPU）或者减少<a href="../pipeline-mgmt/data-processing/configure-execution-para/#_2">数据处理间隔</a>。然后，<a href="../faq/#_7">重新启动数据加载工作流</a>。</p>
 <h2 id="your-database-generated-a-sql-exception-this-can-be-caused-by-query-timeouts-resource-constraints-unexpected-ddl-alterations-before-or-during-a-query-and-other-database-errors">问题: 在分析工作坊查看仪表板时，收到错误"Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors."</h2>
 <p>仪表板可能正在使用尚未在 Redshift 中就绪的视图或物化视图。本解决方案在创建或更新项目的管道时异步创建或更新仪表板使用的视图和物化视图。创建或更新的持续时间取决于 Redshift 集群的工作负载、已有数据量，完成更新可能需要几分钟到几小时。您可以在管道详情页面的<strong>数据处理和建模</strong>选项卡中的 <strong>Redshift Schemas</strong> 部分跟踪进度。如果后期配置作业失败，您可以通过其链接访问工作流的执行，并通过<strong>操作 - 重启</strong>或<strong>新执行</strong>(输入保持不变)来重新运行作业。</p>
-<h2 id="cloudformation-the-availability-zones-for-subnets-subnet-xyz-are-currently-not-supported">问题: 在创建启用数据处理的数据管道时，数据处理 CloudFormation 堆栈遇到了错误 "The availability zones for subnets [subnet-xyz] are currently not supported."。</h2>
+<h2 id="cloudformation-the-availability-zones-for-subnets-subnet-xyz-are-currently-not-supported">问题: 在创建启用数据处理的数据管道时，数据处理 CloudFormation 堆栈遇到了错误 "The availability zones for subnets [subnet-xyz] are currently not supported."</h2>
 <p>这是因为处理点击流数据的 EMR 无服务器应用程序无法部署在上述错误消息中指定的私有子网中。</p>
-<p><strong>解决方法:</strong></p>
+<p><strong>解决方法：</strong></p>
 <p>请在 EMR 无服务器支持的可用区域中重新创建包含私有子网的项目。您可以参考<a href="https://docs.aws.amazon.com/zh_cn/emr/latest/EMR-Serverless-UserGuide/endpoints-quotas.html#endpoints">此文档</a>来检查部署区域中 EMR 无服务器支持的可用区域。</p>
+<h2 id="web-internal-server-error">问题：在解决方案 Web 控制台遇到 "Internal Server Error"</h2>
+<p><strong>解决方法：</strong></p>
+<p>请按照以下步骤排查此问题：</p>
+<ol>
+<li>在 CloudWatch Logs 中收集详细的错误日志。</li>
+<li>您可以选择以下其中一种方式：<ul>
+<li>提交 AWS 支持工单，包括错误日志，以便进行进一步调查。</li>
+<li>在 GitHub 仓库的<a href="https://github.com/awslabs/clickstream-analytics-on-aws/issues">问题</a>页面为该解决方案开启一个新问题。</li>
+</ul>
+</li>
+</ol>
+<p>要收集运行解决方案 Web 控制台的 Lambda 函数的详细错误日志，请执行以下操作：</p>
+<ol>
+<li>导航到解决方案 Web 控制台的 CloudFormation 堆栈。</li>
+<li>点击<strong>资源</strong>选项卡，搜索<strong>逻辑 ID</strong> 为 <code>ApiFunction68</code> 的 Lambda 函数。</li>
+<li>点击<strong>物理 ID</strong>列中的链接，在函数页面打开 Lambda 函数。</li>
+<li>选择<strong>监控</strong>，然后选择<strong>查看 CloudWatch Logs</strong>。更多详情请参阅<a href="https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs-view.html#monitoring-cloudwatchlogs-console">使用控制台访问日志</a>。</li>
+</ol>
 
 
 
