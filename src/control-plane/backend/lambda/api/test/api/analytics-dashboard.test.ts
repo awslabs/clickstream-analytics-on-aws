@@ -44,10 +44,13 @@ describe('Analytics dashboard test', () => {
     });
     ddbMock.on(PutCommand).resolvesOnce({});
     quickSightMock.on(CreateDataSetCommand).resolvesOnce({});
-    quickSightMock.on(CreateDashboardCommand).resolvesOnce({});
-    quickSightMock.on(CreateDashboardCommand).resolves({});
     quickSightMock.on(CreateAnalysisCommand).resolves({});
     quickSightMock.on(CreateFolderMembershipCommand).resolves({});
+    quickSightMock.on(CreateDashboardCommand).callsFake(input => {
+      expect(
+        input.Permissions[0].Principal === 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamPublishUser',
+      ).toBeTruthy();
+    });
     const res = await request(app)
       .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
