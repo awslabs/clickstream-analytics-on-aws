@@ -25,7 +25,7 @@
     | [使用 OIDC 通过自定义域进行身份验证][cloudfront-s3-oidc-custom-domain-template]    | 在 AWS 区域中部署为具有自定义域名的公开服务  |
     | [在 VPC 内使用 OIDC 进行身份验证][intranet-template]   | 在 AWS 区域的 VPC 内部署为私有服务  |
     | [在 AWS 中国使用 OIDC 对自定义域进行身份验证][cloudfront-s3-oidc-cn-template]    | 在 AWS 中国区域中部署为具有自定义域名的公开服务 |
-    | [在 AWS 中国的 VPC 内使用 OIDC 进行身份验证][intranet-cn-template]   | 在 AWS 中国区域的 VPC 内部署为私有服务  |
+    | [在 AWS 中国的 VPC 内使用 OIDC 进行身份验证][intranet-template]   | 在 AWS 中国区域的 VPC 内部署为私有服务  |
 
 4. 在**参数**下，查看模板的参数并根据需要进行修改。 参数详情请参考[部署][console-stack]。
 5. 选择**下一步**。
@@ -158,9 +158,8 @@
 [cloudfront-s3-custom-domain-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-customdomain.template.json
 [cloudfront-s3-oidc-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-oidc.template.json
 [cloudfront-s3-oidc-custom-domain-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-customdomain-oidc.template.json
-[cloudfront-s3-oidc-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/cloudfront-s3-control-plane-stack-cn.template.json
+[cloudfront-s3-oidc-cn-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-cn.template.json
 [intranet-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/private-exist-vpc-control-plane-stack.template.json
-[intranet-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/private-exist-vpc-control-plane-stack.template.json
 [troubleshooting]: ./troubleshooting.md
 [v115]: https://awslabs.github.io/clickstream-analytics-on-aws/zh/1.1.5/upgrade/
 [exploration]: ./analytics/explore/index.md

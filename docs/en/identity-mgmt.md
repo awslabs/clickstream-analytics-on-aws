@@ -30,8 +30,10 @@ The specific features for roles are shown in the following table:
 | Plugin Management           | Yes | Yes | No | No |
 | Identity Management             | Yes | No  | No | No |
 | Analytics Studio - Dashboards  | Yes  | No | Yes | Yes |
+| Analytics Studio - Realtime Dashboard | Yes  | No | Yes | Yes (readonly) |
 | Analytics Studio - Explore    | Yes | No  | Yes | Yes |
 | Analytics Studio - Analyzes    | Yes | No | Yes | No |
+| Analytics Studio - Segments    | Yes | No | Yes | Yes (readonly) |
 | Analytics Studio - Data Management | Yes | No | Yes | Yes |
 
 ### User roles management

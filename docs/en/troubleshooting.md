@@ -147,7 +147,7 @@ You need to tune the EMR job default configuration, and please refer to the [con
 
 It's caused by the large volume of data to be loaded or the Redshift load being very high. You could mitigate this error by increasing the compute resources of Redshift (for example, RPUs for Redshift serverless) or reducing [the data processing interval][data-processing-param]. Then [restart the data-loading workflow][restart-loading-workflow].
 
-## Problem: Received the error "Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors." when viewing dashboards in Analytics Studio.
+## Problem: Received the error "Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors." when viewing dashboards in Analytics Studio
 
 The dashboard is likely using views or materialized views that are not yet ready in Redshift. The solution asynchronously creates or updates the views and materialized views used by the dashboard after creating or updating the pipeline of the project. The duration of the creation or update depends on the workload of the Redshift cluster and the existing data volume and can take minutes to hours. You can keep track of progress in the **Redshift Schemas** section in the **Processing** tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via **Actions - Redrive** or **New execution** with the input unchanged.
 
@@ -159,7 +159,27 @@ This is due to the EMR serverless application for processing the clickstream dat
 
 Please recreate a project with private subnets in the supported available zones of EMR Serverless. You can refer to [this documentation][emr-serverless-endpoints] to check the supported available zones for EMR Serverless in your deployment region.
 
+## Problem: Encountering "Internal Server Error" in the solution web console
+
+**Resolution:**
+
+To troubleshoot this issue, follow the steps below:
+
+1. Collect verbose error logs in CloudWatch Logs. 
+2. You have the option to choose one of the following:
+    - Submit an AWS support ticket, including the error logs, for further investigation. 
+    - Open an [issue][issues] in the GitHub repository for the solution.
+
+To collect verbose error logs of the Lambda function running the solution web console, do the following:
+
+1. Navigate to the CloudFormation stack of the solution web console.
+2. Click the **Resources** tab to search for the Lambda function with Logical ID `ApiFunction68`.
+3. Click the link in the **Physical ID** column to open the Lambda function on the Function page.
+4. Choose **Monitor** and then select **View logs in CloudWatch**. Refer to [Accessing logs with the console][lambda-logs] for more details.
+
 [log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL
 [data-processing-param]: ./pipeline-mgmt/data-processing/configure-execution-para.md#parameters
 [restart-loading-workflow]: ./faq.md#how-do-i-resume-a-failed-data-loading-workflow
 [emr-serverless-endpoints]: https://docs.aws.amazon.com/zh_cn/emr/latest/EMR-Serverless-UserGuide/endpoints-quotas.html#endpoints
+[issues]: https://github.com/awslabs/clickstream-analytics-on-aws/issues
+[lambda-logs]: https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs-view.html#monitoring-cloudwatchlogs-console
