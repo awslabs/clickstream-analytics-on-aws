@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, SolutionVersion, sleep } from '@aws/clickstream-base-lib';
+import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, SolutionVersion, isEmpty, sleep } from '@aws/clickstream-base-lib';
 import {
   IdentityType,
   UserRole,
@@ -275,9 +275,9 @@ export const getClickstreamUserArn = async (templateVersion: SolutionVersion, us
   const isChinaRegion = process.env.AWS_REGION?.startsWith('cn');
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
   const partition = isChinaRegion ? 'aws-cn' : 'aws';
-  const publishUserName = userArn ? userArn.split('/').pop() :
+  const publishUserName = !isEmpty(userArn) ? userArn!.split('/').pop() :
     `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`;
-  const publishUserArn = userArn ?? `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
+  const publishUserArn = isEmpty(userArn) ? `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}` : userArn;
 
   if (templateVersion.greaterThan(SolutionVersion.V_1_1_4)) {
     // remove explore user
@@ -289,9 +289,9 @@ export const getClickstreamUserArn = async (templateVersion: SolutionVersion, us
     };
   }
 
-  const exploreUserName = userArn ? userArn.split('/').pop() :
+  const exploreUserName = !isEmpty(userArn) ? userArn!.split('/').pop() :
     `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`;
-  const exploreUserArn = userArn ?? `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${exploreUserName}`;
+  const exploreUserArn = isEmpty(userArn) ? `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${exploreUserName}` : userArn;
   return {
     publishUserArn: publishUserArn ?? '',
     publishUserName: publishUserName ?? '',

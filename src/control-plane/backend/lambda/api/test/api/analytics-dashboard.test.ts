@@ -44,10 +44,14 @@ describe('Analytics dashboard test', () => {
     });
     ddbMock.on(PutCommand).resolvesOnce({});
     quickSightMock.on(CreateDataSetCommand).resolvesOnce({});
-    quickSightMock.on(CreateDashboardCommand).resolvesOnce({});
-    quickSightMock.on(CreateDashboardCommand).resolves({});
     quickSightMock.on(CreateAnalysisCommand).resolves({});
     quickSightMock.on(CreateFolderMembershipCommand).resolves({});
+    quickSightMock.on(CreateDashboardCommand).callsFake(input => {
+      console.log(input.Permissions[0].Principal);
+      expect(
+        input.Permissions[0].Principal === 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamPublishUser',
+      ).toBeTruthy();
+    });
     const res = await request(app)
       .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -66,8 +70,8 @@ describe('Analytics dashboard test', () => {
     expect(res.body.message).toEqual('Dashboard created.');
     expect(res.body.success).toEqual(true);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 1);
-    expect(quickSightMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
