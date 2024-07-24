@@ -2674,7 +2674,7 @@
         <li class="md-nav__item">
   <a href="#problem-received-the-error-your-database-generated-a-sql-exception-this-can-be-caused-by-query-timeouts-resource-constraints-unexpected-ddl-alterations-before-or-during-a-query-and-other-database-errors-when-viewing-dashboards-in-analytics-studio" class="md-nav__link">
     <span class="md-ellipsis">
-      Problem: Received the error "Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors." when viewing dashboards in Analytics Studio.
+      Problem: Received the error "Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors." when viewing dashboards in Analytics Studio
     </span>
   </a>
   
@@ -2684,6 +2684,15 @@
   <a href="#problem-when-creating-the-data-pipeline-with-data-processing-enabled-the-data-processing-cloudformation-stack-encountered-error-of-the-availability-zones-for-subnets-subnet-xyz-are-currently-not-supported" class="md-nav__link">
     <span class="md-ellipsis">
       Problem: When creating the data pipeline with data processing enabled, the data processing CloudFormation stack encountered error of "The availability zones for subnets [subnet-xyz] are currently not supported.".
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem-encountering-internal-server-error-in-the-solution-web-console" class="md-nav__link">
+    <span class="md-ellipsis">
+      Problem: Encountering "Internal Server Error" in the solution web console
     </span>
   </a>
   
@@ -2945,7 +2954,7 @@
         <li class="md-nav__item">
   <a href="#problem-received-the-error-your-database-generated-a-sql-exception-this-can-be-caused-by-query-timeouts-resource-constraints-unexpected-ddl-alterations-before-or-during-a-query-and-other-database-errors-when-viewing-dashboards-in-analytics-studio" class="md-nav__link">
     <span class="md-ellipsis">
-      Problem: Received the error "Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors." when viewing dashboards in Analytics Studio.
+      Problem: Received the error "Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors." when viewing dashboards in Analytics Studio
     </span>
   </a>
   
@@ -2955,6 +2964,15 @@
   <a href="#problem-when-creating-the-data-pipeline-with-data-processing-enabled-the-data-processing-cloudformation-stack-encountered-error-of-the-availability-zones-for-subnets-subnet-xyz-are-currently-not-supported" class="md-nav__link">
     <span class="md-ellipsis">
       Problem: When creating the data pipeline with data processing enabled, the data processing CloudFormation stack encountered error of "The availability zones for subnets [subnet-xyz] are currently not supported.".
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem-encountering-internal-server-error-in-the-solution-web-console" class="md-nav__link">
+    <span class="md-ellipsis">
+      Problem: Encountering "Internal Server Error" in the solution web console
     </span>
   </a>
   
@@ -3116,12 +3134,30 @@
 <p>You need to tune the EMR job default configuration, and please refer to the <a href="../pipeline-mgmt/data-processing/configure-execution-para/#config-spark-job-parameters">configure execution parameters</a>.</p>
 <h2 id="problem-data-loading-workflow-failure-due-to-meeting-the-25000-events-limit-in-a-single-execution-history">Problem: data loading workflow failure due to meeting the 25,000 events limit in a single execution history</h2>
 <p>It's caused by the large volume of data to be loaded or the Redshift load being very high. You could mitigate this error by increasing the compute resources of Redshift (for example, RPUs for Redshift serverless) or reducing <a href="../pipeline-mgmt/data-processing/configure-execution-para/#parameters">the data processing interval</a>. Then <a href="../faq/#how-do-i-resume-a-failed-data-loading-workflow">restart the data-loading workflow</a>.</p>
-<h2 id="problem-received-the-error-your-database-generated-a-sql-exception-this-can-be-caused-by-query-timeouts-resource-constraints-unexpected-ddl-alterations-before-or-during-a-query-and-other-database-errors-when-viewing-dashboards-in-analytics-studio">Problem: Received the error "Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors." when viewing dashboards in Analytics Studio.</h2>
+<h2 id="problem-received-the-error-your-database-generated-a-sql-exception-this-can-be-caused-by-query-timeouts-resource-constraints-unexpected-ddl-alterations-before-or-during-a-query-and-other-database-errors-when-viewing-dashboards-in-analytics-studio">Problem: Received the error "Your database generated a SQL exception. This can be caused by query timeouts, resource constraints, unexpected DDL alterations before or during a query, and other database errors." when viewing dashboards in Analytics Studio</h2>
 <p>The dashboard is likely using views or materialized views that are not yet ready in Redshift. The solution asynchronously creates or updates the views and materialized views used by the dashboard after creating or updating the pipeline of the project. The duration of the creation or update depends on the workload of the Redshift cluster and the existing data volume and can take minutes to hours. You can keep track of progress in the <strong>Redshift Schemas</strong> section in the <strong>Processing</strong> tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via <strong>Actions - Redrive</strong> or <strong>New execution</strong> with the input unchanged.</p>
 <h2 id="problem-when-creating-the-data-pipeline-with-data-processing-enabled-the-data-processing-cloudformation-stack-encountered-error-of-the-availability-zones-for-subnets-subnet-xyz-are-currently-not-supported">Problem: When creating the data pipeline with data processing enabled, the data processing CloudFormation stack encountered error of "The availability zones for subnets [subnet-xyz] are currently not supported.".</h2>
 <p>This is due to the EMR serverless application for processing the clickstream data cannot be deployed in the specified private subnets mentioned in the above error message.</p>
 <p><strong>Resolution:</strong></p>
 <p>Please recreate a project with private subnets in the supported available zones of EMR Serverless. You can refer to <a href="https://docs.aws.amazon.com/zh_cn/emr/latest/EMR-Serverless-UserGuide/endpoints-quotas.html#endpoints">this documentation</a> to check the supported available zones for EMR Serverless in your deployment region.</p>
+<h2 id="problem-encountering-internal-server-error-in-the-solution-web-console">Problem: Encountering "Internal Server Error" in the solution web console</h2>
+<p><strong>Resolution:</strong></p>
+<p>To troubleshoot this issue, follow the steps below:</p>
+<ol>
+<li>Collect verbose error logs in CloudWatch Logs. </li>
+<li>You have the option to choose one of the following:<ul>
+<li>Submit an AWS support ticket, including the error logs, for further investigation. </li>
+<li>Open an <a href="https://github.com/awslabs/clickstream-analytics-on-aws/issues">issue</a> in the GitHub repository for the solution.</li>
+</ul>
+</li>
+</ol>
+<p>To collect verbose error logs of the Lambda function running the solution web console, do the following:</p>
+<ol>
+<li>Navigate to the CloudFormation stack of the solution web console.</li>
+<li>Click the <strong>Resources</strong> tab to search for the Lambda function with Logical ID <code>ApiFunction68</code>.</li>
+<li>Click the link in the <strong>Physical ID</strong> column to open the Lambda function on the Function page.</li>
+<li>Choose <strong>Monitor</strong> and then select <strong>View logs in CloudWatch</strong>. Refer to <a href="https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs-view.html#monitoring-cloudwatchlogs-console">Accessing logs with the console</a> for more details.</li>
+</ol>
 
 
 
