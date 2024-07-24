@@ -47,7 +47,6 @@ describe('Analytics dashboard test', () => {
     quickSightMock.on(CreateAnalysisCommand).resolves({});
     quickSightMock.on(CreateFolderMembershipCommand).resolves({});
     quickSightMock.on(CreateDashboardCommand).callsFake(input => {
-      console.log(input.Permissions[0].Principal);
       expect(
         input.Permissions[0].Principal === 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamPublishUser',
       ).toBeTruthy();
