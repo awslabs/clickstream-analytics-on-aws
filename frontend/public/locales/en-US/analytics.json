@@ -512,6 +512,12 @@
       "eventValueBetweenError": "Max value can not be less than min value",
       "attributeEmptyError": "Please select attribute",
       "groupEmptyError": "Please select filter group"
+    },
+    "columnHeader": {
+      "name": "Name",
+      "description": "Description",
+      "refreshSchedule": "Refresh Schedule",
+      "createAt": "Create At"
     }
   }
 }

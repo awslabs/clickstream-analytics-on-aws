@@ -449,7 +449,11 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 sessionExpired={sessionExpired}
                 layout="analytics"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.ANALYST_READER,
+                ]}
               >
                 <UserSegments />
               </RoleRoute>
@@ -501,7 +505,11 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 sessionExpired={sessionExpired}
                 layout="analytics"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.ANALYST_READER,
+                ]}
               >
                 <UserSegmentDetails />
               </RoleRoute>

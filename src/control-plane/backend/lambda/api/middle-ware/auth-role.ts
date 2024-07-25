@@ -26,6 +26,7 @@ routerRoles.set('GET /api/user/details', []);
 routerRoles.set('GET /api/system/info', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('GET /api/pipeline/:id', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('GET /api/app', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('GET /api/app/:id', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('GET /api/project', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('GET /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('POST /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
@@ -34,6 +35,9 @@ routerRoles.set('DELETE /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, I
 routerRoles.set('GET /api/project/:pid/analyzes', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('GET /api/reporting/:pid/:aid/realtime', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('GET /api/reporting/:pid/:aid/realtimeDryRun', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('GET /api/traffic/detail', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('POST /api/traffic/action', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('GET /api/segments', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 
 routerRoles.set('ALL /api/env/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
 routerRoles.set('ALL /api/app/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
@@ -47,8 +51,6 @@ routerRoles.set('DELETE /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('ALL /api/reporting/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('ALL /api/user/*', [IUserRole.ADMIN]);
 routerRoles.set('ALL /api/segments/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('ALL /api/traffic/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-
 
 const FORBIDDEN_MESSAGE = 'Insufficient permissions to access the API.';
 const HTTP_METHODS_PATTERN = '(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)';

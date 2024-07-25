@@ -94,7 +94,7 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
 
   const getNavItems = () => {
     if (!isAnalystAuthorRole(currentUser?.roles)) {
-      return [...analyticsNavItems.slice(0, 2), ...analyticsNavItems.slice(3)];
+      return [...analyticsNavItems.slice(0, 3), ...analyticsNavItems.slice(4)];
     }
     return analyticsNavItems;
   };
