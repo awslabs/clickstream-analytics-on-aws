@@ -33,7 +33,7 @@ const segmentServ = new SegmentServ();
 router_segment.post(
   '',
   validate([
-    body().custom(isValidEmpty),
+    body().custom(isValidEmpty).custom(isXSSRequest),
     ...commonValidationsForSegment(),
   ]),
   async (req: Request, res: Response, next: NextFunction) => {
@@ -84,7 +84,7 @@ router_segment.get(
 router_segment.patch(
   '/:segmentId',
   validate([
-    body().custom(isValidEmpty),
+    body().custom(isValidEmpty).custom(isXSSRequest),
     body('id').notEmpty(),
     body('type').notEmpty(),
     body('segmentId').notEmpty(),
