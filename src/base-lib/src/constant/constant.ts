@@ -502,3 +502,7 @@ export const GTM_TRANSFORMER_NAME_PARAMETER = 'gtm';
 export const SENSORS_TRANSFORMER_NAME_PARAMETER = 'sensors';
 
 export const FILTER_TIME_ZONE: string[] = [];
+
+export const BUILTIN_TAG_AWS_SOLUTION = 'aws-solution/name';
+export const BUILTIN_TAG_AWS_SOLUTION_VERSION = 'aws-solution/version';
+export const BUILTIN_TAG_CLICKSTREAM_PROJECT = 'aws-solution/clickstream/project';

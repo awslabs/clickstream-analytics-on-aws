@@ -295,6 +295,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
         </FormField>
 
         <Tags
+          update={update}
           tags={pipelineInfo.tags.filter(
             (tag) => !tag.key.startsWith('#.') && !tag.value.startsWith('#.')
           )} // filter internal tags with '#.' prefix
