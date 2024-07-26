@@ -11,6 +11,11 @@
  *  and limitations under the License.
  */
 
+import {
+  BUILTIN_TAG_AWS_SOLUTION,
+  BUILTIN_TAG_AWS_SOLUTION_VERSION,
+  BUILTIN_TAG_CLICKSTREAM_PROJECT,
+} from '@aws/clickstream-base-lib';
 import { TagEditor, TagEditorProps } from '@cloudscape-design/components';
 import { isEqual } from 'lodash';
 import React, { useRef } from 'react';
@@ -25,7 +30,7 @@ interface TagsProps {
 const Tags: React.FC<TagsProps> = (props: TagsProps) => {
   const { t } = useTranslation();
   const { tags, changeTags } = props;
-  const prevItemsRef = useRef(tags.slice(0, 3));
+  const prevItemsRef = useRef(tags);
 
   const renderTagLimit = (availableTags: number, tagLimit: number) => {
     if (availableTags === tagLimit) {
@@ -92,24 +97,30 @@ const Tags: React.FC<TagsProps> = (props: TagsProps) => {
       }}
       tags={tags}
       onChange={(event) => {
-        if (event.detail.tags.length >= 3) {
-          const prevItems = prevItemsRef.current;
-          const currentItems = event.detail.tags.slice(0, 3);
-          let changeCount = 0;
-          for (let i = 0; i < currentItems.length; i++) {
-            if (!isEqual(prevItems[i], currentItems[i])) {
-              changeCount = changeCount + 1;
-            }
-          }
-          if (changeCount > 0) {
-            alertMsg(t('tag.deleteTips'), 'error');
-            return;
-          } else {
-            changeTags(event.detail.tags);
-          }
-        } else {
-          changeTags(event.detail.tags);
+        const prevItems = prevItemsRef.current;
+        // get the diff between prevItems and event.detail.tags
+
+        const addItems = event.detail.tags.filter(
+          (tag) => !prevItems.some((prevTag) => isEqual(prevTag, tag))
+        );
+        const deleteItems = prevItems.filter(
+          (tag) => !event.detail.tags.some((curTag) => isEqual(curTag, tag))
+        );
+        const diffItemKeys = [...addItems, ...deleteItems].map(
+          (item) => item.key
+        );
+        const builtInTagKeys = [
+          BUILTIN_TAG_AWS_SOLUTION,
+          BUILTIN_TAG_AWS_SOLUTION_VERSION,
+          BUILTIN_TAG_CLICKSTREAM_PROJECT,
+        ];
+
+        // check diffItemKeys contains any one builtInTagKeys
+        if (builtInTagKeys.some((key) => diffItemKeys.includes(key))) {
+          alertMsg(t('tag.deleteTips'), 'error');
+          return;
         }
+        changeTags(event.detail.tags);
       }}
     />
   );
