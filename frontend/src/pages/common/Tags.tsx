@@ -31,7 +31,7 @@ interface TagsProps {
 const Tags: React.FC<TagsProps> = (props: TagsProps) => {
   const { t } = useTranslation();
   const { update, tags, changeTags } = props;
-  const prevItemsRef = useRef(tags.slice(0, 3));
+  const prevItemsRef = useRef(tags);
 
   const renderTagLimit = (availableTags: number, tagLimit: number) => {
     if (availableTags === tagLimit) {
