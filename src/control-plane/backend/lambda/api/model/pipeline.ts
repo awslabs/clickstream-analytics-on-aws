@@ -17,11 +17,12 @@ import {
   SECRETS_MANAGER_ARN_PATTERN,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
   SolutionVersion,
+  SolutionInfo,
 } from '@aws/clickstream-base-lib';
 import { Tag } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { EditedPath, getDiff } from 'json-difference';
-import { cloneDeep, truncate } from 'lodash';
+import { truncate } from 'lodash';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
@@ -43,6 +44,7 @@ import {
   listenStackQueueArn,
 } from '../common/constants';
 import {
+  BuiltInTagKeys,
   ExecutionDetail,
   PipelineStackType,
   PipelineStatusDetail,
@@ -76,6 +78,7 @@ import {
   getPipelineStatusType,
   getStackOutputFromPipelineStatus,
   getStackPrefix,
+  getStackTags,
   getStateMachineExecutionName,
   getStreamEnableAppIdsFromPipeline,
   getTemplateUrl,
@@ -302,6 +305,7 @@ export class CPipeline {
   private stackManager: StackManager;
   private resources?: CPipelineResources;
   private validateNetworkOnce: boolean;
+  private stackTags?: Tag[];
 
   constructor(pipeline: IPipeline) {
     this.pipeline = pipeline;
@@ -405,7 +409,6 @@ export class CPipeline {
     if (isEmpty(oldPipeline.workflow) || isEmpty(oldPipeline.workflow?.Workflow)) {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
-    const newTags = cloneDeep(this.pipeline.tags);
     // create rule to listen CFN stack
     await this._createRules();
     this.pipeline.lastAction = 'Update';
@@ -420,9 +423,9 @@ export class CPipeline {
     // update parameters
     await this._mergeUpdateParameters(oldPipeline);
     // update tags
-    this.pipeline.tags = getUpdateTags(newTags, oldPipeline);
+    this.pipeline.tags = getUpdateTags(this.pipeline, oldPipeline);
     if (this._editStackTags(oldPipeline)) {
-      this.stackManager.updateWorkflowTags(this.pipeline.tags);
+      this.stackManager.updateWorkflowTags();
     }
     // update workflow callback
     this.stackManager.setPipelineWorkflowCallback(executionName);
@@ -762,6 +765,11 @@ export class CPipeline {
 
     await this._checkExistenceS3Bucket();
 
+    if (!this.stackTags || this.stackTags?.length === 0) {
+      this.patchBuiltInTags();
+      this.stackTags = getStackTags(this.pipeline);
+    }
+
     if (!this.validateNetworkOnce) {
       this.validateNetworkOnce = true;
       await validatePipelineNetwork(this.pipeline, this.resources!);
@@ -899,6 +907,37 @@ export class CPipeline {
     }
     const templateName = this.resources?.templates?.data[name] as string;
     return getTemplateUrl(templateName, this.resources?.solution);
+  };
+
+  private patchBuiltInTags() {
+    const version = SolutionVersion.Of(this.pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
+    if (this.resources?.solution) {
+      const builtInTagKeys = [
+        BuiltInTagKeys.AWS_SOLUTION,
+        BuiltInTagKeys.AWS_SOLUTION_VERSION,
+        BuiltInTagKeys.CLICKSTREAM_PROJECT,
+      ];
+      const keys = this.pipeline.tags.map(tag => tag.key);
+      for (let builtInTagKey of builtInTagKeys) {
+        if (keys.includes(builtInTagKey)) {
+          const index = keys.indexOf(builtInTagKey);
+          this.pipeline.tags.splice(index, 1);
+          keys.splice(index, 1);
+        }
+      }
+
+      // Add preset tags to the beginning of the tags array
+      this.pipeline.tags.unshift({
+        key: BuiltInTagKeys.AWS_SOLUTION,
+        value: SolutionInfo.SOLUTION_SHORT_NAME,
+      }, {
+        key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
+        value: version.fullVersion,
+      }, {
+        key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
+        value: this.pipeline.projectId,
+      });
+    }
   };
 
   public getStackOutputBySuffixes(stackType: PipelineStackType, outputKeySuffixes: string[]): Map<string, string> {
