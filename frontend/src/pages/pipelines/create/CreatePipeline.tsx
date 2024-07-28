@@ -219,17 +219,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             {
               key: 'aws-solution/name',
               value: 'Clickstream',
-              existing: true,
             },
             {
               key: 'aws-solution/version',
               value: appConfig?.solution_version,
-              existing: true,
             },
             {
               key: 'aws-solution/clickstream/project',
               value: projectId,
-              existing: true,
             },
           ],
         }

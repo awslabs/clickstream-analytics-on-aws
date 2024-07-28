@@ -21,8 +21,8 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
 } from '../common/types';
-import { getPipelineLastActionFromStacksStatus, getStackName } from '../common/utils';
-import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
+import { getPipelineLastActionFromStacksStatus, getStackName, getStackTags } from '../common/utils';
+import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { startExecution } from '../store/aws/sfn';
 
 
@@ -416,31 +416,25 @@ export class StackManager {
     state.Data!.Callback = getStateCallback(this.pipeline);
   }
 
-  public updateWorkflowTags(tags: ITag[]): void {
+  public updateWorkflowTags(): void {
     if (!this.execWorkflow || !this.workflow) {
       throw new Error('Pipeline workflow is empty.');
     }
-    this.execWorkflow.Workflow = this._updateTags(this.execWorkflow.Workflow, 'Update', tags);
-    this.workflow.Workflow = this._updateTags(this.workflow.Workflow, 'Create', tags);
+    this.execWorkflow.Workflow = this._updateTags(this.execWorkflow.Workflow, 'Update');
+    this.workflow.Workflow = this._updateTags(this.workflow.Workflow, 'Create');
   }
 
-  private _updateTags(state: WorkflowState, action: string, tags: ITag[]): WorkflowState {
+  private _updateTags(state: WorkflowState, action: string): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
         for (let key of Object.keys(branch.States)) {
-          branch.States[key] = this._updateTags(branch.States[key], action, tags);
+          branch.States[key] = this._updateTags(branch.States[key], action);
         }
       }
     } else if (state.Type === WorkflowStateType.STACK || state.Type === WorkflowStateType.PASS) {
-      const tagParam = tags.map((tag) => {
-        return {
-          Key: tag.key,
-          Value: tag.value,
-        };
-      });
       state.Type = WorkflowStateType.STACK;
       state.Data!.Input.Action = action;
-      state.Data!.Input.Tags = tagParam;
+      state.Data!.Input.Tags = getStackTags(this.pipeline);
     }
     return state;
   }

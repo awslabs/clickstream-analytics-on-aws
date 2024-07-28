@@ -11,10 +11,16 @@
  *  and limitations under the License.
  */
 
+import {
+  BUILTIN_TAG_AWS_SOLUTION,
+  BUILTIN_TAG_AWS_SOLUTION_VERSION,
+  BUILTIN_TAG_CLICKSTREAM_PROJECT,
+} from '@aws/clickstream-base-lib';
 import { TagEditor, TagEditorProps } from '@cloudscape-design/components';
-import React from 'react';
+import { isEqual } from 'lodash';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { defaultStr } from 'ts/utils';
+import { alertMsg, defaultStr } from 'ts/utils';
 
 interface TagsProps {
   tags: TagEditorProps.Tag[];
@@ -24,6 +30,7 @@ interface TagsProps {
 const Tags: React.FC<TagsProps> = (props: TagsProps) => {
   const { t } = useTranslation();
   const { tags, changeTags } = props;
+  const prevItemsRef = useRef(tags);
 
   const renderTagLimit = (availableTags: number, tagLimit: number) => {
     if (availableTags === tagLimit) {
@@ -90,6 +97,29 @@ const Tags: React.FC<TagsProps> = (props: TagsProps) => {
       }}
       tags={tags}
       onChange={(event) => {
+        const prevItems = prevItemsRef.current;
+        // get the diff between prevItems and event.detail.tags
+
+        const addItems = event.detail.tags.filter(
+          (tag) => !prevItems.some((prevTag) => isEqual(prevTag, tag))
+        );
+        const deleteItems = prevItems.filter(
+          (tag) => !event.detail.tags.some((curTag) => isEqual(curTag, tag))
+        );
+        const diffItemKeys = [...addItems, ...deleteItems].map(
+          (item) => item.key
+        );
+        const builtInTagKeys = [
+          BUILTIN_TAG_AWS_SOLUTION,
+          BUILTIN_TAG_AWS_SOLUTION_VERSION,
+          BUILTIN_TAG_CLICKSTREAM_PROJECT,
+        ];
+
+        // check diffItemKeys contains any one builtInTagKeys
+        if (builtInTagKeys.some((key) => diffItemKeys.includes(key))) {
+          alertMsg(t('tag.deleteTips'), 'error');
+          return;
+        }
         changeTags(event.detail.tags);
       }}
     />

@@ -3570,11 +3570,9 @@ describe('Pipeline test', () => {
       const dataProcessingInput = dataProcessingState.M.Data.M.Input;
       const reportingState = level3State.M.Branches.L[0].M.States.M.Reporting;
       const reportInput = reportingState.M.Data.M.Input;
-
       expect(
-        dataProcessingInput.M.Tags.L[3].M.Key.S === 'customerKey3' &&
-        reportInput.M.Tags.L[3].M.Key.S === 'customerKey3' &&
-        reportInput.M.Tags.L[0].M.Value.S === MOCK_SOLUTION_VERSION,
+        dataProcessingInput.M.Tags.L[5].M.Key.S === 'customerKey3' &&
+        reportInput.M.Tags.L[5].M.Key.S === 'customerKey3',
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -3842,7 +3840,7 @@ describe('Pipeline test', () => {
         expressionAttributeValues[':timezone'].L.length === 0 &&
         expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
         expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
-        dataProcessingInput.M.Tags.L[0].M.Value.S === 'v1.0.0' &&
+        dataProcessingInput.M.Tags.L[1].M.Value.S === 'v1.0.0' &&
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main' &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'Admin/fakeUser' &&
         reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser' &&
@@ -3934,8 +3932,8 @@ describe('Pipeline test', () => {
         expressionAttributeValues[':timezone'].L.length === 0 &&
         expressionAttributeValues[':templateVersion'].S === SolutionVersion.V_1_2_0.fullVersion &&
         expressionAttributeValues[':tags'].L[0].M.value.S === SolutionVersion.V_1_2_0.fullVersion &&
-        dataProcessingInput.M.Tags.L[0].M.Value.S === SolutionVersion.V_1_2_0.fullVersion &&
-        dataProcessingInput.M.Tags.L[1].M.Value.S === 'test-value' &&
+        dataProcessingInput.M.Tags.L[1].M.Value.S === SolutionVersion.V_1_2_0.fullVersion &&
+        dataProcessingInput.M.Tags.L[3].M.Value.S === 'test-value' &&
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main' &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'Admin/fakeUser' &&
         reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser' &&
@@ -4374,7 +4372,6 @@ describe('Pipeline test', () => {
       const ingestionInput = ingestionState.M.Data.M.Input;
       const dataProcessingState = level1State.M.Branches.L[2].M.States.M.DataProcessing;
       const dataProcessingInput = dataProcessingState.M.Data.M.Input;
-
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
