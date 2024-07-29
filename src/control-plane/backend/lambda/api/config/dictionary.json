@@ -138,7 +138,7 @@
     "data": {
       "PresetEvents": [
         {
-          "name": "_first_open",          
+          "name": "_first_open",
           "displayName": {
             "en-US": "First visit",
             "zh-CN": "首次访问"
@@ -149,7 +149,7 @@
           }
         },
         {
-          "name": "_session_start",        
+          "name": "_session_start",
           "displayName": {
             "en-US": "Session start",
             "zh-CN": "会话开始"
@@ -643,8 +643,8 @@
             "zh-CN": "外链类"
           },
           "description": {
-            "en-US": "The content of class in tag <a>",
-            "zh-CN": "标签<a>中class里的内容"
+            "en-US": "The content of class in anchor tag",
+            "zh-CN": "超链接标签中class里的内容"
           },
           "eventName": "_click"
         },
@@ -657,8 +657,8 @@
             "zh-CN": "外链的类"
           },
           "description": {
-            "en-US": "The domain of href in tag <a>",
-            "zh-CN": "标签 <a>中href里的域名"
+            "en-US": "The domain of href in anchor tag",
+            "zh-CN": "超链接标签中href里的域名"
           },
           "eventName": "_click"
         },
@@ -671,8 +671,8 @@
             "zh-CN": "外链ID"
           },
           "description": {
-            "en-US": "The content of id in tag <a>",
-            "zh-CN": "标签 <a>中id里的内容"
+            "en-US": "The content of id in anchor tag",
+            "zh-CN": "超链接标签中id里的内容"
           },
           "eventName": "_click"
         },
@@ -685,8 +685,8 @@
             "zh-CN": "外链地址"
           },
           "description": {
-            "en-US": "The content of href in tag <a>",
-            "zh-CN": "标签 <a>中href里的内容"
+            "en-US": "The content of href in anchor tag",
+            "zh-CN": "超链接标签中href里的内容"
           },
           "eventName": "_click"
         },
@@ -1477,7 +1477,7 @@
         },
         {
           "name": "_first_visit_date",
-          "dataType": "string", 
+          "dataType": "string",
           "category": "user_outer",
           "displayName": {
             "en-US": "First touch date",
