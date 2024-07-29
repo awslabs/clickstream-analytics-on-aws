@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS {{schema}}.event_v2 (
     screen_view_previous_screen_id  varchar(255),
     -- METADATA {"name":"screen_view_previous_screen_unique_id","dataType":"string","scanValue":"false","category":"{{{category_screen_view}}}","displayName":{"en-US":"Previous screen unique ID","zh-CN":"上一个屏幕唯一ID"},"description":{"en-US":"The unique ID of previous screen during rendering","zh-CN":"App渲染上一个屏幕时生成唯一ID"}}
     screen_view_previous_screen_unique_id varchar(255),
-    screen_view_previous_time_msec bigint, 
+    screen_view_previous_time_msec bigint,
     screen_view_engagement_time_msec bigint,
     -- METADATA {"name":"screen_view_entrances","dataType":"boolean","scanValue":"true","category":"{{{category_screen_view}}}","displayName":{"en-US":"Session entry screen or not","zh-CN":"是否会话进入界面"},"description":{"en-US":"The first screen view event in a session is 1, others is 0","zh-CN":"会话中的第一个屏幕浏览事件该值为 1，其他则为 0"}}
     screen_view_entrances bool,
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS {{schema}}.event_v2 (
     search_key varchar(2048),
     -- METADATA {"name":"search_term","dataType":"string","scanValue":"false","category":"{{{category_search}}}","displayName":{"en-US":"Search term","zh-CN":"搜索内容"},"description":{"en-US":"The search content","zh-CN":"搜索内容"}}
     search_term varchar(2048),
-    -- METADATA {"name":"outbound_link_classes","dataType":"string","scanValue":"true","category":"{{{category_outbound}}}","displayName":{"en-US":"Link class","zh-CN":"外链类"},"description":{"en-US":"The content of class in tag <a>","zh-CN":"标签<a>中class里的内容"}}
+    -- METADATA {"name":"outbound_link_classes","dataType":"string","scanValue":"true","category":"{{{category_outbound}}}","displayName":{"en-US":"Link class","zh-CN":"外链类"},"description":{"en-US":"The content of class in anchor tag","zh-CN":"超链接标签中class里的内容"}}
     outbound_link_classes varchar(2048),
     -- METADATA {"name":"outbound_link_domain","dataType":"string","scanValue":"true","category":"{{{category_outbound}}}","displayName":{"en-US":"Outbound Link domain","zh-CN":"外链域名"},"description":{"en-US":"The domain of the outbound link","zh-CN":"外链域名"}}
     outbound_link_domain varchar(2048),
