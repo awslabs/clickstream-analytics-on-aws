@@ -357,9 +357,9 @@ const AnalyticsRealtime: React.FC = () => {
                           <Loading isPage />
                         ) : (
                           <ExploreEmbedFrame
-                            embedType="console"
+                            embedType="dashboard"
                             embedUrl={dashboardEmbedUrl}
-                            embedPage="analyze"
+                            embedPage="dashboard"
                           />
                         )}
                       </>
