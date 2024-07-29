@@ -1465,7 +1465,7 @@ export class ReportingService {
         principals.publishUserArn,
         allowedDomain,
         {
-          initialPath: `/dashboards/${presetRealtimeDashboard?.id}`,
+          dashboardId: presetRealtimeDashboard?.id,
         },
       );
       return res.json(

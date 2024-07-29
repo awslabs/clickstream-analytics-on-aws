@@ -555,8 +555,8 @@ describe('Realtime test', () => {
       AllowedDomains: ['https://example.com'],
       AwsAccountId: awsAccountId,
       ExperienceConfiguration: {
-        QuickSightConsole: {
-          InitialPath: '/dashboards/clickstream_dashboard_rt_v1_notepad_mtzfsocy_app1',
+        Dashboard: {
+          InitialDashboardId: 'clickstream_dashboard_rt_v1_notepad_mtzfsocy_app1',
         },
       },
       UserArn: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamPublishUser',
