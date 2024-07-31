@@ -119,21 +119,30 @@ Key assumptions include:
 !!! info "Note"
     The term **Redshift storage cost** refers to the cost of Redshift storage incurred for one month based on the corresponding RPS (Requests Per Second) specified in the above table. If the data is stored for more than one month, please refer to the [Redshift pricing](https://aws.amazon.com/redshift/pricing/?nc1=h_ls) for calculating the pricing.
 
-## Realtime streaming mode
+## Realtime Streaming mode
 
 If you enable real-time reports, the following additional cost will be incurred:
+
 Key assumptions include:
 
+- Only one application
 - For 10/100 RPS, the batch EMR schedule interval is daily
 - For 1000 RPS, the batch EMR schedule interval is hourly
 
 | Request Per Second | Daily enable real-time duration |  Kinesis (On-Demand) | Redshift type     | Redshift cost  | Managed Apache Flink | Additional Total (USD/Month) |
 | ----------------------- | --------------------- | ---------------- | -------- | ------------------------ |  ----- | -----  |
-| 10RPS             | 1 Hour                |    $35    | Serverless (8 based RPU) |   $90       |  $6.8     |    $131.8  |
-|                         | 24 Hours                |    $169    | Serverless (8 based RPU) |    $1810      |  $163     |   $2142   |
-| 100RPS             | 1 Hour                |    $85    | Serverless (8 based RPU) |    $140      |  $10.2     |  $235.2    |
-|                         | 24 Hour                |    $1205    | Serverless (8 based RPU) |   $1950       |  $244.8     |  $3399.8    |
-| 1000RPS             | 1 Hour                |    $138    | Serverless (16 based RPU) |   $75       |  $24     |   $237   |
+| 10RPS             | 1 Hour                |    $73    | Serverless (8 based RPU) |   $90       |  $6.8     |    $169.8  |
+|                         | 24 Hours                |    $207    | Serverless (8 based RPU) |    $1810      |  $163     |   $2180   |
+| 100RPS             | 1 Hour                |    $200    | Serverless (8 based RPU) |    $140      |  $10.2     |  $350.2    |
+|                         | 24 Hour                |    $1320    | Serverless (8 based RPU) |   $1950       |  $244.8     |  $3514.8    |
+| 1000RPS             | 1 Hour                |    $1189    | Serverless (16 based RPU) |   $75       |  $24     |   $1288   |
+
+!!! info "Tips"
+
+    - Kinesis (On-Demand) cost include ingestion Kinesis cost.
+
+    - If streaming is enabled 24 hours a day, provisioning redshift is more economical.
+
 
 ## Reporting module
 
