@@ -87,7 +87,7 @@ function createECSClusterAndService(
 
   const ecsConfig = {
     instanceType: ecsAsgSetting.instanceType,
-    machineImage: EcsOptimizedImage.amazonLinux2(
+    machineImage: EcsOptimizedImage.amazonLinux2023(
       arch === Platform.LINUX_ARM64 ? AmiHardwareType.ARM : AmiHardwareType.STANDARD,
     ),
     platform: arch,
