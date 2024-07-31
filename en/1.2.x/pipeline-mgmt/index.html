@@ -2974,8 +2974,8 @@
 <!-- BEGIN INCLUDE ./vpc-prerequisites.md -->
 <ul>
 <li>At least two public subnets across two availability zones (AZs) in the VPC.</li>
-<li>At least two private (with NAT gateways or instances) subnets across two AZs, or at least two isolated subnets across two AZs in the VPC. If you want to deploy the solution resources in the isolated subnets, you have to create <a href="https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html">VPC endpoints</a> for the AWS services below.<ul>
-<li><code>s3</code>, <code>logs</code>, <code>ecr.api</code>, <code>ecr.dkr</code>, <code>ecs</code>, <code>ecs-agent</code>, <code>ecs-telemetry</code>.</li>
+<li>At least two private (with NAT gateways or instances) subnets across two AZs, or at least two isolated subnets across two AZs in the VPC. If you want to deploy the solution resources in the isolated subnets, you have to configure route table to access ECR Public Gallery through NAT and create <a href="https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html">VPC endpoints</a> for the AWS services below.<ul>
+<li><code>s3</code>, <code>logs</code>, <code>ecs</code>, <code>ecs-agent</code>, <code>ecs-telemetry</code>.</li>
 <li><code>kinesis-streams</code> if you use KDS as a sink buffer in the ingestion module.</li>
 <li><code>emr-serverless</code>, <code>glue</code> if you enable the data processing module.</li>
 <li><code>redshift-data</code>, <code>sts</code>, <code>dynamodb</code>(must be <a href="https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-ddb.html">Gateway endpoints for DynamoDB</a>), <code>states</code> and <code>lambda</code> if you enable Redshift as an analytics engine in the data modeling module.</li>
