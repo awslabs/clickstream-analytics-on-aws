@@ -850,7 +850,7 @@
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      仪表板
+      实时流模式
     </span>
   </a>
   
@@ -859,7 +859,7 @@
         <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
-      日志和监控
+      仪表板
     </span>
   </a>
   
@@ -867,6 +867,15 @@
       
         <li class="md-nav__item">
   <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      日志和监控
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       额外功能
     </span>
@@ -894,7 +903,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       应用负载均衡器访问日志
     </span>
@@ -2946,7 +2955,7 @@
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      仪表板
+      实时流模式
     </span>
   </a>
   
@@ -2955,7 +2964,7 @@
         <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
-      日志和监控
+      仪表板
     </span>
   </a>
   
@@ -2963,6 +2972,15 @@
       
         <li class="md-nav__item">
   <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      日志和监控
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       额外功能
     </span>
@@ -2990,7 +3008,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       应用负载均衡器访问日志
     </span>
@@ -3455,7 +3473,7 @@
 <td>1000RPS</td>
 <td>每小时</td>
 <td>$1260（$0.26/GB）</td>
-<td>无服务器 (基于8个RPU)</td>
+<td>无服务器 (基于16个RPU)</td>
 <td>$2325</td>
 <td>$340</td>
 <td>$36</td>
@@ -3467,7 +3485,89 @@
 <p class="admonition-title">提示</p>
 <p><strong>Redshift存储数据 费用</strong>是指您以表格中对应的RPS发送一个月的请求所花费的redshift存储费用，如果数据存放超过一个月，请根据<a href="https://aws.amazon.com/redshift/pricing/?nc1=h_ls">Redshift 定价</a>计算价格</p>
 </div>
-<h2 id="_4">仪表板</h2>
+<h2 id="_4">实时流模式</h2>
+<p>如果您开启实时流报告，会产生格外费用，参考如下：</p>
+<p>主要假设包括：</p>
+<ul>
+<li>一个应用程序</li>
+<li>对于10/100 RPS，批量的EMR调度间隔为每日</li>
+<li>对于1000 RPS，批量的EMR调度间隔为每小时</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>每日数据量/每秒请求数 (RPS)</th>
+<th>每日开启实时时长</th>
+<th>Kinesis (On-Demand) 费用</th>
+<th>Redshift类型</th>
+<th>Redshift 费用</th>
+<th>Managed Apache Flink 费用</th>
+<th>总计 (美元/月)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10RPS</td>
+<td>1 Hour</td>
+<td>$73</td>
+<td>无服务器 (基于8个RPU)</td>
+<td>$124.4</td>
+<td>$6.8</td>
+<td>$204.2</td>
+</tr>
+<tr>
+<td></td>
+<td>24 Hours</td>
+<td>$207</td>
+<td>无服务器 (基于8个RPU)</td>
+<td>$1844.4</td>
+<td>$163</td>
+<td>$2214.4</td>
+</tr>
+<tr>
+<td>100RPS</td>
+<td>1 Hour</td>
+<td>$200</td>
+<td>无服务器 (基于8个RPU)</td>
+<td>$334</td>
+<td>$10.2</td>
+<td>$544.2</td>
+</tr>
+<tr>
+<td></td>
+<td>24 Hour</td>
+<td>$1320</td>
+<td>无服务器 (基于8个RPU)</td>
+<td>$2144</td>
+<td>$244.8</td>
+<td>$3708.8</td>
+</tr>
+<tr>
+<td>1000RPS</td>
+<td>1 Hour</td>
+<td>$1189</td>
+<td>无服务器 (基于16个RPU)</td>
+<td>$2400</td>
+<td>$24</td>
+<td>$3613</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">提示</p>
+<ul>
+<li>
+<p>Kinesis (On-Demand) 的费用包含了摄入模块使用的的Kinesis费用。</p>
+</li>
+<li>
+<p>如果实时流全天开启，使用预置Redshift会更加经济。</p>
+</li>
+<li>
+<p>Redshift 的费用包含了数据建模模块的使用费用。</p>
+</li>
+</ul>
+</div>
+<h2 id="_5">仪表板</h2>
 <p>如果您选择启用，仪表板模块包括以下成本组成部分：</p>
 <ul>
 <li>QuickSight</li>
@@ -3502,9 +3602,9 @@
 <p class="admonition-title">提示</p>
 <p>所有数据管道都适用于以上 QuickSight 费用，即使是在解决方案之外管理的可视化内容也是如此。</p>
 </div>
-<h2 id="_5">日志和监控</h2>
+<h2 id="_6">日志和监控</h2>
 <p>方案使用CloudWatch Logs，CloudWatch Metrics和CloudWatch Dashboard来实现日志，监控，展示功能，合计费用约为每月约14美元，根据Logs的使用量和Metrics的数量会有一定浮动。</p>
-<h2 id="_6">额外功能</h2>
+<h2 id="_7">额外功能</h2>
 <p>只有在您选择启用以下功能时，您才会被收取额外费用。</p>
 <h3 id="secrets-manager">Secrets Manager</h3>
 <ul>
@@ -3555,7 +3655,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="_7">应用负载均衡器访问日志</h3>
+<h3 id="_8">应用负载均衡器访问日志</h3>
 <p>您需要为 Amazon S3 的存储费用付费，但无需为 Elastic Load Balancing 用于将日志文件发送到 Amazon S3 的带宽使用付费。有关存储费用的更多信息，请参阅 <a href="https://aws.amazon.com/s3/pricing/">Amazon S3 定价</a>。</p>
 <table>
 <thead>
