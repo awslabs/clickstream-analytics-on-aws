@@ -846,6 +846,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#realtime-streaming-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      Realtime Streaming mode
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#reporting-module" class="md-nav__link">
     <span class="md-ellipsis">
       Reporting module
@@ -2963,6 +2972,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#realtime-streaming-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      Realtime Streaming mode
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#reporting-module" class="md-nav__link">
     <span class="md-ellipsis">
       Reporting module
@@ -3481,6 +3499,88 @@
 <div class="admonition info">
 <p class="admonition-title">Note</p>
 <p>The term <strong>Redshift storage cost</strong> refers to the cost of Redshift storage incurred for one month based on the corresponding RPS (Requests Per Second) specified in the above table. If the data is stored for more than one month, please refer to the <a href="https://aws.amazon.com/redshift/pricing/?nc1=h_ls">Redshift pricing</a> for calculating the pricing.</p>
+</div>
+<h2 id="realtime-streaming-mode">Realtime Streaming mode</h2>
+<p>If you enable real-time reports, the following cost will be incurred:</p>
+<p>Key assumptions include:</p>
+<ul>
+<li>Only one application</li>
+<li>For 10/100 RPS, the batch EMR schedule interval is daily</li>
+<li>For 1000 RPS, the batch EMR schedule interval is hourly</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Request Per Second</th>
+<th>Daily enable real-time duration</th>
+<th>Kinesis (On-Demand)</th>
+<th>Redshift type</th>
+<th>Redshift cost</th>
+<th>Managed Apache Flink</th>
+<th>Total (USD/Month)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10RPS</td>
+<td>1 Hour</td>
+<td>$73</td>
+<td>Serverless (8 based RPU)</td>
+<td>$124.4</td>
+<td>$6.8</td>
+<td>$204.2</td>
+</tr>
+<tr>
+<td></td>
+<td>24 Hours</td>
+<td>$207</td>
+<td>Serverless (8 based RPU)</td>
+<td>$1844.4</td>
+<td>$163</td>
+<td>$2214.4</td>
+</tr>
+<tr>
+<td>100RPS</td>
+<td>1 Hour</td>
+<td>$200</td>
+<td>Serverless (8 based RPU)</td>
+<td>$334</td>
+<td>$10.2</td>
+<td>$544.2</td>
+</tr>
+<tr>
+<td></td>
+<td>24 Hour</td>
+<td>$1320</td>
+<td>Serverless (8 based RPU)</td>
+<td>$2144</td>
+<td>$244.8</td>
+<td>$3708.8</td>
+</tr>
+<tr>
+<td>1000RPS</td>
+<td>1 Hour</td>
+<td>$1189</td>
+<td>Serverless (16 based RPU)</td>
+<td>$2400</td>
+<td>$24</td>
+<td>$3613</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Tips</p>
+<ul>
+<li>
+<p>Kinesis (On-Demand) costs include Kinesis used by the Ingestion module.</p>
+</li>
+<li>
+<p>If streaming is enabled 24 hours a day, Provisioned Redshift is more economical.</p>
+</li>
+<li>
+<p>Redshift costs include the cost of data modeling usage.</p>
+</li>
+</ul>
 </div>
 <h2 id="reporting-module">Reporting module</h2>
 <p>Reporting module include the following cost components if you choose to enable:</p>
