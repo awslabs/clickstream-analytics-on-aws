@@ -119,6 +119,33 @@ Key assumptions include:
 !!! info "Note"
     The term **Redshift storage cost** refers to the cost of Redshift storage incurred for one month based on the corresponding RPS (Requests Per Second) specified in the above table. If the data is stored for more than one month, please refer to the [Redshift pricing](https://aws.amazon.com/redshift/pricing/?nc1=h_ls) for calculating the pricing.
 
+## Realtime Streaming mode
+
+If you enable real-time reports, the following cost will be incurred:
+
+Key assumptions include:
+
+- Only one application
+- For 10/100 RPS, the batch EMR schedule interval is daily
+- For 1000 RPS, the batch EMR schedule interval is hourly
+
+| Request Per Second | Daily enable real-time duration |  Kinesis (On-Demand) | Redshift type     | Redshift cost  | Managed Apache Flink | Total (USD/Month) |
+| ----------------------- | --------------------- | ---------------- | -------- | ------------------------ |  ----- | -----  |
+| 10RPS             | 1 Hour                |    $73    | Serverless (8 based RPU) |   $124.4       |  $6.8     |    $204.2  |
+|                         | 24 Hours                |    $207    | Serverless (8 based RPU) |    $1844.4      |  $163     |   $2214.4   |
+| 100RPS             | 1 Hour                |    $200    | Serverless (8 based RPU) |    $334      |  $10.2     |  $544.2    |
+|                         | 24 Hour                |    $1320    | Serverless (8 based RPU) |   $2144       |  $244.8     |  $3708.8    |
+| 1000RPS             | 1 Hour                |    $1189    | Serverless (16 based RPU) |   $2400       |  $24     |   $3613   |
+
+!!! info "Tips"
+
+    - Kinesis (On-Demand) costs include Kinesis used by the Ingestion module.
+
+    - If streaming is enabled 24 hours a day, Provisioned Redshift is more economical.
+
+    - Redshift costs include the cost of data modeling usage.
+
+
 ## Reporting module
 
 Reporting module include the following cost components if you choose to enable:
