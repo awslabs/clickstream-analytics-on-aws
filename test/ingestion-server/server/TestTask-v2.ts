@@ -25,6 +25,7 @@ import {
   SecurityGroup,
   SubnetType,
   Vpc,
+  InstanceType,
 } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
@@ -146,6 +147,8 @@ export interface TestStackV2Props extends StackProps {
   mskSecurityGroupId?: string;
   mskClusterName?: string;
 
+  ecsInfraType: string;
+
   withKinesisSinkConfig: boolean;
   kinesisDataStreamArn?: string;
 
@@ -178,6 +181,7 @@ export class TestStackV2 extends Stack {
       serverMin: 1,
       enableAuthentication: 'No',
       protocol: 'HTTP',
+      ecsInfraType: 'FARGATE',
       serverMax: 1,
       scaleOnCpuUtilizationPercent: 50,
       workerStopTimeout: 60,
@@ -232,6 +236,7 @@ export class TestStackV2 extends Stack {
       taskMin: props.serverMin || 1,
       taskMax: props.serverMax || 1,
       scaleOnCpuUtilizationPercent: props.scaleOnCpuUtilizationPercent || 50,
+      instanceType: new InstanceType('c6i.large'),
     };
 
     const serverProps: IngestionServerV2Props = {
@@ -248,7 +253,7 @@ export class TestStackV2 extends Stack {
       devMode: props.devMode,
       projectId: 'test-project',
       workerStopTimeout: props.workerStopTimeout,
-      ecsInfraType: 'FARGATE',
+      ecsInfraType: props.ecsInfraType,
       albTargetGroupArn: 'arn:aws:elasticloadbalancing:us-east-1:111111111111:targetgroup/test/xxxx',
       ecsSecurityGroupArn: 'arn:aws:ec2:us-east-1:111111111111:security-group/sg-xxxx',
       loadBalancerFullName: 'test-load-balancer',
