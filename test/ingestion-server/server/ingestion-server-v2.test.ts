@@ -39,6 +39,7 @@ function generateCommonTestStackProps() {
     serverMin: 1,
     enableAuthentication: 'No',
     protocol: 'HTTP',
+    ecsInfraType: 'FARGATE',
     serverMax: 1,
     scaleOnCpuUtilizationPercent: 50,
     workerStopTimeout: 330,
@@ -107,6 +108,22 @@ test('ECS service has load balancer', () => {
   const ecsService = findFirstResource(template, 'AWS::ECS::Service')?.resource;
 
   expect(ecsService.Properties.LoadBalancers.length == 1).toBeTruthy();
+});
+
+test('Check EC2 IMDSv2 Enabled', () => {
+  const app = new App();
+  let commonTestStackProps = generateCommonTestStackProps();
+  commonTestStackProps.withMskConfig = true;
+  commonTestStackProps.ecsInfraType = 'EC2';
+  const stack = new TestStackV2(app, 'test', commonTestStackProps);
+  const template = Template.fromStack(stack);
+  const launchConfiguration = findFirstResource(
+    template,
+    'AWS::EC2::LaunchTemplate',
+  )?.resource;
+
+  const properties = launchConfiguration.Properties;
+  expect(properties.LaunchTemplateData.MetadataOptions.HttpTokens == 'required').toBeTruthy();
 });
 
 test('ECS service has HealthCheck grace time configured', () => {

@@ -160,7 +160,7 @@ export class IngestionServer extends Construct {
     }
 
     // ECS Cluster
-    const { ecsService, httpContainerName, autoScalingGroup, ecsCluster } =
+    const { ecsService, httpContainerName, autoScalingGroup, ecsCluster, ec2Role } =
       createECSClusterAndService(this, {
         ...props,
         ecsSecurityGroup,
@@ -169,7 +169,7 @@ export class IngestionServer extends Construct {
 
     const mskClusterName = props.kafkaSinkConfig?.mskClusterName;
     if (mskClusterName) {
-      const autoScalingGroupRole = autoScalingGroup.role;
+      const autoScalingGroupRole = ec2Role;
       grantMskReadWrite(
         this,
         autoScalingGroupRole,
