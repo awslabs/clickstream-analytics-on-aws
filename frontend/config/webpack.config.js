@@ -358,6 +358,7 @@ module.exports = function (webpackEnv) {
         util: require.resolve('browserify-util'),
         assert: require.resolve('assert-browserify'),
         vm: require.resolve('vm-browserify'),
+        'process/browser': require.resolve('process/browser'),
       },
       // This allows you to set a fallback for where webpack should look for modules.
       // We placed these paths second because we want `node_modules` to "win"
@@ -634,9 +635,9 @@ module.exports = function (webpackEnv) {
       ].filter(Boolean),
     },
     plugins: [
-      // new webpack.ProvidePlugin({
-      //   process: 'process/browser',
-      // }),
+      new webpack.ProvidePlugin({
+        process: 'process/browser',
+      }),
       new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {
         const mod = resource.request.replace(/^node:/, '');
         switch (mod) {
