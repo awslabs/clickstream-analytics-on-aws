@@ -123,7 +123,7 @@ const depsForFrontendProject = [
   '@pmmmwh/react-refresh-webpack-plugin@^0.5.3',
   '@svgr/webpack@^5.5.0',
   'amazon-quicksight-embedding-sdk@^2.4.0',
-  'axios@^1.4.0',
+  'axios@^1.7.4',
   'bfj@^7.0.2',
   'browserslist@^4.21.7',
   'camelcase@^6.2.1',
@@ -224,6 +224,7 @@ const devDepsForFrontendProject = [
   'assert-browserify@^2.0.0',
   'vm-browserify@^1.1.2',
   'nock@^13.5.4',
+  'process@^0.11.10',
 ];
 
 const depsForApiProject = [

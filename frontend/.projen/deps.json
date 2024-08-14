@@ -313,7 +313,7 @@
     },
     {
       "name": "axios",
-      "version": "^1.4.0",
+      "version": "^1.7.4",
       "type": "runtime"
     },
     {

@@ -634,9 +634,9 @@ module.exports = function (webpackEnv) {
       ].filter(Boolean),
     },
     plugins: [
-      new webpack.ProvidePlugin({
-        process: 'process/browser',
-      }),
+      // new webpack.ProvidePlugin({
+      //   process: 'process/browser',
+      // }),
       new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {
         const mod = resource.request.replace(/^node:/, '');
         switch (mod) {
