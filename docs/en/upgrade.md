@@ -55,7 +55,7 @@ You can view the status of the stack in the AWS CloudFormation console in the **
 
 You can view the status of the pipeline in the solution console in the **Status** column. After a few minutes, you can receive an Active status.
 
-## Post-Upgrade Actions (only applicable to data modeling enabled)
+## Post-Upgrade Actions I (only applicable to data modeling enabled)
 
 ### Upgrade the Data Schema and Out-of-the-box Dashboards
 
@@ -152,6 +152,15 @@ The solution automatically and asynchronously upgrades the views and materialize
     DROP PROCEDURE "<app-id>".sp_migrate_session_to_v2();
     DROP PROCEDURE "<app-id>".sp_clear_item_and_user();
     ```
+
+## Post-Upgrade Actions II (only applicable for upgrading to V1.2.0 from earlier version)
+After upgrading the Ingestion Module from a version earlier than V1.2.0 to V1.2.0, please check whether the Amazon ECS's EC2 Instances match the configuration in the Auto Scaling Group's Instance Template.
+
+If they do not match, you can replace the EC2 instances with the new version's configuration by following steps:
+
+1. Manually increase the desired tasks number in Amazon ECS.
+2. After the newly added Amazon ECS tasks have successfully started, manually stop the old tasks.
+3. Manually terminate the old version EC2 Instances.
 
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md

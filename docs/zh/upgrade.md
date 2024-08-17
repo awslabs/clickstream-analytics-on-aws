@@ -51,7 +51,7 @@
 
 您可以在解决方案控制台的 **状态** 列中查看管道的状态。 几分钟后您应该会收到`活跃`状态。
 
-## 升级后操作(仅适用于已启用数据建模)
+## 升级后操作一(仅适用于已启用数据建模)
 
 ### 升级数据模型和预置仪表板
 
@@ -148,6 +148,14 @@
     DROP PROCEDURE "<app-id>".sp_migrate_session_to_v2();
     DROP PROCEDURE "<app-id>".sp_clear_item_and_user();
     ```
+
+## 升级后操作二(仅适用于从V1.2.0之前的版本升级到V1.2.0版本)
+当数据摄取模块从V1.2.0之前的版本升级到V1.2.0后，请检查Amazon ECS使用的EC2实例是否与Auto Scaling组中的启动模板配置一致，
+如果不一致可以按以下操作将EC2实例置换到新版本配置：
+
+1. 手动增加 Amazon ECS的预期任务数。
+2. 等新增加的 Amazon ECS 任务启动完成后，手动停止旧的 Amazon ECS 任务。
+3. 手动将旧版本的 EC2 实例终止。
 
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
