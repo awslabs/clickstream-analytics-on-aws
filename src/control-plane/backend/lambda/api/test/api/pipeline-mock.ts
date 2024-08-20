@@ -2064,3 +2064,42 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_FAILED: IPipeline = {
   },
 };
 
+export const RETRY_PIPELINE_WITH_WORKFLOW_CREATE_FAILED: IPipeline = {
+  ...BASE_RETRY_PIPELINE,
+  lastAction: 'Create',
+  stackDetails: [
+    BASE_STATUS.stackDetails[0],
+    BASE_STATUS.stackDetails[1],
+    BASE_STATUS.stackDetails[2],
+    {
+      ...BASE_STATUS.stackDetails[3],
+      stackStatus: StackStatus.CREATE_FAILED,
+    },
+    {
+      ...BASE_STATUS.stackDetails[4],
+      stackId: '',
+      stackStatus: undefined,
+      stackStatusReason: '',
+      stackTemplateVersion: '',
+      stackType: PipelineStackType.STREAMING,
+      outputs: [],
+    },
+    BASE_STATUS.stackDetails[5],
+    {
+      ...BASE_STATUS.stackDetails[6],
+      stackId: '',
+      stackStatus: undefined,
+      stackStatusReason: '',
+      stackTemplateVersion: '',
+      stackType: PipelineStackType.REPORTING,
+      outputs: [],
+    },
+    BASE_STATUS.stackDetails[7],
+  ],
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    status: ExecutionStatus.FAILED,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+  },
+};
+

@@ -442,7 +442,7 @@ export class StackManager {
   private getStackStatusByName(stackName: string, statusDetail: PipelineStatusDetail[]) {
     for (let detail of statusDetail) {
       if (detail.stackName === stackName) {
-        if (detail.stackTemplateVersion !== this.pipeline.templateVersion) {
+        if (detail.stackTemplateVersion && detail.stackTemplateVersion !== this.pipeline.templateVersion) {
           return StackStatus.UPDATE_FAILED;
         }
         return detail.stackStatus;
