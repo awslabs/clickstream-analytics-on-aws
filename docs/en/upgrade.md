@@ -65,11 +65,11 @@ Due to AWS no longer supporting Launch Configurations in Auto Scaling Groups, we
 
 ### Data Modeling
 
-### Upgrade the Data Schema and Out-of-the-box Dashboards
+#### Upgrade the Data Schema and Out-of-the-box Dashboards
 
 The solution automatically and asynchronously upgrades the views and materialized views used by the dashboard after upgrading the pipeline of the project. The duration of the update depends on the workload of the Redshift cluster and the existing data volume, and can take minutes to hours. You can track the progress in the **Redshift Schemas** section in the **Processing** tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via **Actions - Redrive** or **New execution** with the input unchanged.
 
-### Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
+#### Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
 
 !!! danger "Important"
 
