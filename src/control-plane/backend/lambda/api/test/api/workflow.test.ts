@@ -64,6 +64,7 @@ import {
   MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   RETRY_PIPELINE_WITH_WORKFLOW,
   RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
+  RETRY_PIPELINE_WITH_WORKFLOW_CREATE_FAILED,
   RETRY_PIPELINE_WITH_WORKFLOW_FAILED,
   RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_EMPTY,
   RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED,
@@ -2610,9 +2611,9 @@ describe('Workflow test', () => {
   });
   it('Generate Retry Workflow when create failed', async () => {
     dictionaryMock(ddbMock);
-    // KafkaConnector, DataModelingRedshift Failed
-    // Reporting Miss
-    const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW });
+    // DataModelingRedshift Failed
+    // Reporting Streaming Miss
+    const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_CREATE_FAILED });
     stackManager.retryWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -2660,7 +2661,7 @@ describe('Workflow test', () => {
                             BucketPrefix: 'clickstream/workflow/main-3333-3333',
                           },
                           Input: {
-                            Action: 'Update',
+                            Action: 'Create',
                             Region: 'ap-southeast-1',
                             Parameters: [
                               ...BASE_KAFKACONNECTOR_BATCH_PARAMETERS,
@@ -2672,7 +2673,7 @@ describe('Workflow test', () => {
                           },
                         },
                         End: true,
-                        Type: WorkflowStateType.STACK,
+                        Type: WorkflowStateType.PASS,
                       },
                     },
                   },
@@ -2709,11 +2710,7 @@ describe('Workflow test', () => {
                   {
                     StartAt: 'Streaming',
                     States: {
-                      Streaming: replaceStackInputProps(StreamingStack,
-                        {
-                          Action: 'Update',
-                        },
-                      ),
+                      Streaming: StreamingStack,
                     },
                   },
                   {
