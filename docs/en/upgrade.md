@@ -55,13 +55,23 @@ You can view the status of the stack in the AWS CloudFormation console in the **
 
 You can view the status of the pipeline in the solution console in the **Status** column. After a few minutes, you can receive an Active status.
 
-## Post-Upgrade Actions (only applicable to data modeling enabled)
+## Post-Upgrade Actions
 
-### Upgrade the Data Schema and Out-of-the-box Dashboards
+### Ingestion
+
+Due to AWS no longer supporting Launch Configurations in Auto Scaling Groups, we will use Launch Template instead. After upgrading the data ingestion module to v1.2.0, please follow below steps to replace the EC2 instances used by Amazon ECS with the new Launch Template configuration:
+
+1. Manually increase the desired number of tasks in Amazon ECS.
+2. Once the newly added Amazon ECS tasks have started successfully, manually stop the old tasks.
+3. Manually terminate the old EC2 instances.
+
+### Data Modeling
+
+#### Upgrade the Data Schema and Out-of-the-box Dashboards
 
 The solution automatically and asynchronously upgrades the views and materialized views used by the dashboard after upgrading the pipeline of the project. The duration of the update depends on the workload of the Redshift cluster and the existing data volume, and can take minutes to hours. You can track the progress in the **Redshift Schemas** section in the **Processing** tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via **Actions - Redrive** or **New execution** with the input unchanged.
 
-### Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
+#### Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
 
 !!! danger "Important"
 
