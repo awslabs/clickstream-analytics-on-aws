@@ -55,6 +55,8 @@ You can view the status of the stack in the AWS CloudFormation console in the **
 
 You can view the status of the pipeline in the solution console in the **Status** column. After a few minutes, you can receive an Active status.
 
+## Post-Upgrade Actions
+
 ### Ingestion
 
 Due to AWS no longer supporting Launch Configurations in Auto Scaling Groups, we will use Launch Template instead. After upgrading the data ingestion module to v1.2.0, please follow below steps to replace the EC2 instances used by Amazon ECS with the new Launch Template configuration:

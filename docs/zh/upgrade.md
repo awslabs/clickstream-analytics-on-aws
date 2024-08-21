@@ -51,6 +51,8 @@
 
 您可以在解决方案控制台的 **状态** 列中查看管道的状态。 几分钟后您应该会收到`活跃`状态。
 
+## 升级后操作
+
 ### 数据摄取
 因为AWS不再在Auto Scaling组中支持Launch Configurations，我们会使用Launch Template替换。当数据摄取模块升级到v1.2.0后，请按以下操作将Amazon ECS使用的EC2实例置换成最新的Launch Template的配置：
 
