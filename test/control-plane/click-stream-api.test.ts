@@ -546,6 +546,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'iam:TagRole',
               'iam:UntagRole',
               'iam:ListRoleTags',
+              'iam:UpdateAssumeRolePolicy',
             ],
             Effect: 'Allow',
             Resource: [
@@ -2291,6 +2292,7 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
               'iam:TagRole',
               'iam:UntagRole',
               'iam:ListRoleTags',
+              'iam:UpdateAssumeRolePolicy',
             ],
             Effect: 'Allow',
             Resource: [
