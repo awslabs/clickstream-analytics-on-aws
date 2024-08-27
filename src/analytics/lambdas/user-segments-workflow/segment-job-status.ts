@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Readable } from 'stream';
 import {
   CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME,
   CLICKSTREAM_SEGMENTS_JOB_OUTPUT_SUMMARY_FILENAME,
@@ -23,7 +24,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { StatusString } from '@aws-sdk/client-redshift-data';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
-import { NodeJsClient } from '@smithy/types';
+import { SdkStream } from '@smithy/types';
 import csvParser from 'csv-parser';
 import { ExecuteSegmentQueryOutput } from './execute-segment-query';
 import { handleBackoffTimeInfo } from '../../../common/workflow';
@@ -45,7 +46,7 @@ const redshiftClient = getRedshiftClient(process.env.REDSHIFT_DATA_API_ROLE!);
 const s3Client = new S3Client({
   ...aws_sdk_client_common_config,
   region: process.env.AWS_REGION,
-}) as NodeJsClient<S3Client>;
+});
 
 const _handler = async (event: SegmentJobStatusEvent) => {
   const { appId, segmentId, jobRunId } = event;
@@ -145,7 +146,7 @@ async function readSegmentSampleDataFromS3(bucketName: string, key: string): Pro
       logger.warn('GetObject response body is undefined or empty.');
       resolve([]);
     } else {
-      const stream = fullData.Body;
+      const stream = fullData.Body as SdkStream<Readable>;
       stream.pipe(csvParser())
         .on('data', (row: any) => {
           if (sampleData.length < 50) {
