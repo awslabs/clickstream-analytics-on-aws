@@ -320,6 +320,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   pnpmVersion,
   jestOptions: {
     jestConfig: {
+      maxWorkers: 16,
       setupFiles: ['./test/jestEnv.js'],
       modulePathIgnorePatterns: [
         '<rootDir>/cdk.out/',
