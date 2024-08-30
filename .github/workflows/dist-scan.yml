@@ -144,7 +144,7 @@ jobs:
   sonarqube:
     name: sonarqube scan
     if: ${{ github.event.pull_request.number }}
-    runs-on: ${{ vars.LARGE_RUNNER_S || 'ubuntu-latest' }}
+    runs-on: ${{ vars.LARGE_RUNNER_L || 'ubuntu-latest' }}
     permissions:
       id-token: write
       pull-requests: write
@@ -185,7 +185,7 @@ jobs:
         run: pnpm i --no-frozen-lockfile
       - name: Run build and unit tests
         env:
-          JEST_MAX_WORKERS: ${{ vars.JEST_MAX_WORKERS || 'auto' }}
+          JEST_WORKERS: 8
           LOCAL_TESTING: true # speed up the tests for infra
         run: |
           bash deployment/run-unit-tests.sh

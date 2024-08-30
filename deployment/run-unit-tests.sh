@@ -8,7 +8,6 @@ rm src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 cp src/reporting/private/dashboard.ts src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 
 export CI=true
-export JEST_WORKERS=16
 
 echo "pnpm install"
 npm install -g pnpm@8.15.3
