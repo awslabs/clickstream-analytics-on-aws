@@ -64,6 +64,7 @@ phases:
                 fi
             }
 
+            export JEST_WORKERS=16
             bash ${CODEBUILD_SRC_DIR}/deployment/run-unit-tests.sh
             cd ${CODEBUILD_SRC_DIR}/deployment/
             if [ -n "$VERSION" ]; then
