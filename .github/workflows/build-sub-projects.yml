@@ -123,7 +123,7 @@ jobs:
       - name: Add coverage to PR
         id: jacoco
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-        uses: madrapps/jacoco-report@v1.6.1
+        uses: madrapps/jacoco-report@v1.7.0
         with:
           paths: ./src/data-pipeline/etl-common/build/reports/jacoco/jacocoAggregatedReport/jacocoAggregatedReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -169,7 +169,7 @@ jobs:
       - name: Add coverage to PR
         id: jacoco
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-        uses: madrapps/jacoco-report@v1.6.1
+        uses: madrapps/jacoco-report@v1.7.0
         with:
           paths: ./src/data-pipeline/spark-etl/build/reports/jacoco/jacocoAggregatedReport/jacocoAggregatedReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -215,7 +215,7 @@ jobs:
       - name: Add coverage to PR
         id: jacoco
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-        uses: madrapps/jacoco-report@v1.6.1
+        uses: madrapps/jacoco-report@v1.7.0
         with:
           paths: ./src/streaming-ingestion/flink-etl/build/reports/jacoco/jacocoAggregatedReport/jacocoAggregatedReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
