@@ -14,7 +14,7 @@ results = []
 data = json.loads(json_in)
 for key, value_dict in data.items():
 	if 'value' in value_dict:
-		value = value_dict['value']
+		value = value_dict['value'][:100]
 		type = value_dict['type']
 		results.append({'key': key, 'value': value, 'type': type})
 return json.dumps(results)
@@ -152,6 +152,7 @@ BEGIN
 				WHERE
 					custom_parameters IS NOT NULL
 					AND event_timestamp < end_timestamp
+					AND LEN(custom_parameters_json_str) < 50000
 			) AS ep,
 			ep.custom_parameters_array AS cp
 		);
@@ -182,6 +183,7 @@ BEGIN
 					custom_parameters IS NOT NULL
 					AND event_timestamp >= start_timestamp
 					AND event_timestamp < end_timestamp
+					AND LEN(custom_parameters_json_str) < 50000
 			) AS ep,
 			ep.custom_parameters_array AS cp
 		);
@@ -291,7 +293,8 @@ BEGIN
 			FROM
 				{{schema}}.user_v2
 			WHERE
-				user_properties IS NOT NULL	
+				user_properties IS NOT NULL
+				AND LEN(user_properties_json_str) < 50000
 		) as u,
 		u.user_properties_array AS up
 	);	
