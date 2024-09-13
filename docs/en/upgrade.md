@@ -55,13 +55,23 @@ You can view the status of the stack in the AWS CloudFormation console in the **
 
 You can view the status of the pipeline in the solution console in the **Status** column. After a few minutes, you can receive an Active status.
 
-## Post-Upgrade Actions (only applicable to data modeling enabled)
+## Post-Upgrade Actions
+This section provides instructions for post-upgrade actions.
+### Ingestion
 
-### Upgrade the Data Schema and Out-of-the-box Dashboards
+As of version 1.1.7, this solution uses [launch templates][launch templates]. After upgrading the data ingestion module, complete the following steps to replace the Amazon EC2 instances used by Amazon ECS with the new launch template configuration.
+
+1. Increase the desired task number by [updating the Amazon ECS service][updating the Amazon ECS service].
+2. After the newly added Amazon ECS tasks have started successfully, [manually stop the old tasks][manually stop the old tasks].
+3. Manually [terminate the old Amazon EC2 instances][terminate the old Amazon EC2 instances].
+
+### Data Modeling
+
+#### Upgrade the Data Schema and Out-of-the-box Dashboards
 
 The solution automatically and asynchronously upgrades the views and materialized views used by the dashboard after upgrading the pipeline of the project. The duration of the update depends on the workload of the Redshift cluster and the existing data volume, and can take minutes to hours. You can track the progress in the **Redshift Schemas** section in the **Processing** tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via **Actions - Redrive** or **New execution** with the input unchanged.
 
-### Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
+#### Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
 
 !!! danger "Important"
 
@@ -169,3 +179,7 @@ The solution automatically and asynchronously upgrades the views and materialize
 [exploration]: ./analytics/explore/index.md
 [view-schema-in-redshift]: ./faq.md#i-already-enable-data-modeling-on-redshift-so-why-cant-i-see-the-schema-and-tables-created-by-this-solution-in-the-redshift-query-editor
 [faq-recalculate-data]: ./faq.md#how-do-i-recalculate-historical-events-for-out-of-the-box-dashboards
+[launch templates]: https://alpha.www.docs.aws.a2z.com/autoscaling/ec2/userguide/launch-templates.html
+[updating the Amazon ECS service]: https://alpha.www.docs.aws.a2z.com/AmazonECS/latest/developerguide/update-service-console-v2.html
+[manually stop the old tasks]: https://alpha.www.docs.aws.a2z.com/AmazonECS/latest/developerguide/standalone-task-stop.html
+[terminate the old Amazon EC2 instances]: https://alpha.www.docs.aws.a2z.com/AWSEC2/latest/UserGuide/terminating-instances.html

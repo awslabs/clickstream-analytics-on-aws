@@ -853,11 +853,11 @@ test('Check EC2 IMDSv2 Enabled', () => {
   const template = Template.fromStack(stack);
   const launchConfiguration = findFirstResource(
     template,
-    'AWS::AutoScaling::LaunchConfiguration',
+    'AWS::EC2::LaunchTemplate',
   )?.resource;
 
   const properties = launchConfiguration.Properties;
-  expect(properties.MetadataOptions.HttpTokens == 'required').toBeTruthy();
+  expect(properties.LaunchTemplateData.MetadataOptions.HttpTokens == 'required').toBeTruthy();
 });
 
 
