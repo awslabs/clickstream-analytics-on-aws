@@ -80,6 +80,7 @@ export class StackActionStateMachine extends Construct {
           'iam:TagRole',
           'iam:UntagRole',
           'iam:ListRoleTags',
+          'iam:UpdateAssumeRolePolicy',
         ],
         resources: [
           `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/${props.conditionStringRolePrefix}*`,
