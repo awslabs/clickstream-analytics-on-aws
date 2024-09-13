@@ -65,6 +65,7 @@ import {
   MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   RETRY_PIPELINE_WITH_WORKFLOW,
   RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
+  RETRY_PIPELINE_WITH_WORKFLOW_CREATE_FAILED,
   RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_EMPTY,
   RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED,
   S3_DATA_PROCESSING_PIPELINE,
@@ -2883,9 +2884,9 @@ describe('Workflow test', () => {
   });
   it('Generate Retry Workflow when create failed', async () => {
     dictionaryMock(ddbMock);
-    // KafkaConnector, DataModelingRedshift Failed
-    // Reporting Miss
-    const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW });
+    // DataModelingRedshift Failed
+    // Reporting Streaming Miss
+    const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_CREATE_FAILED });
     stackManager.retryWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -2918,7 +2919,7 @@ describe('Workflow test', () => {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
-                    Action: 'Update',
+                    Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: `${getStackPrefix()}-KafkaConnector-6666-6666`,
@@ -2926,7 +2927,7 @@ describe('Workflow test', () => {
                   },
                 },
                 End: true,
-                Type: 'Stack',
+                Type: 'Pass',
               },
             },
           },
