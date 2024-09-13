@@ -51,13 +51,23 @@
 
 您可以在解决方案控制台的 **状态** 列中查看管道的状态。 几分钟后您应该会收到`活跃`状态。
 
-## 升级后操作(仅适用于已启用数据建模)
+## 升级后操作
+本节提供升级后操作的说明。
 
-### 升级数据模型和预置仪表板
+### 数据摄取
+从 1.1.7 版本开始，此解决方案使用[launch templates][launch templates]。升级数据提取模块后，请完成以下步骤，将 Amazon ECS 使用的 Amazon EC2 实例替换为新的launch template配置。
+
+1. 通过[更新 Amazon ECS 服务][updating the Amazon ECS service]增加所需任务数量。
+2. 等新增加的 Amazon ECS 任务启动完成后，[手动停止旧的 Amazon ECS 任务][manually stop the old tasks]。
+3. 手动[终止旧版本的 EC2 实例][terminate the old Amazon EC2 instances]。
+
+### 数据建模模块
+
+#### 升级数据模型和预置仪表板
 
 在升级项目的管道后，解决方案会自动异步升级仪表板所需的视图和物化视图。更新持续时间取决于 Redshift 集群的工作负载和现有数据量，可能需要几分钟到几小时。您可以在管道详情页面的**数据处理和建模**标签下的**Redshift Schemas**部分中跟踪进度。如果后期配置作业失败，您可以通过其链接访问工作流程的执行情况，然后使用保持不变的输入通过**操作 - 重启**或**新执行**来重新运行作业。
 
-### 迁移现有数据(仅适用于从1.1.6之前的版本升级)
+#### 迁移现有数据(仅适用于从1.1.6之前的版本升级)
 
 !!! danger "注意"
 
@@ -166,3 +176,7 @@
 [exploration]: ./analytics/explore/index.md
 [view-schema-in-redshift]: ./faq.md#redshift-redshift-schema
 [faq-recalculate-data]: ./faq.md#_10
+[launch templates]: https://alpha.www.docs.aws.a2z.com/zh_cn/autoscaling/ec2/userguide/launch-templates.html
+[updating the Amazon ECS service]: https://alpha.www.docs.aws.a2z.com/zh_cn/AmazonECS/latest/developerguide/update-service-console-v2.html
+[manually stop the old tasks]: https://alpha.www.docs.aws.a2z.com/zh_cn/AmazonECS/latest/developerguide/standalone-task-stop.html
+[terminate the old Amazon EC2 instances]: https://alpha.www.docs.aws.a2z.com/zh_cn/AWSEC2/latest/UserGuide/terminating-instances.html

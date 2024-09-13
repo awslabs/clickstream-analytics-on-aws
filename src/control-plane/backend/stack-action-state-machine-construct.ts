@@ -72,6 +72,7 @@ export class StackActionStateMachine extends Construct {
           'iam:GetRolePolicy',
           'iam:CreateInstanceProfile',
           'iam:DeleteInstanceProfile',
+          'iam:GetInstanceProfile',
           'iam:RemoveRoleFromInstanceProfile',
           'iam:AddRoleToInstanceProfile',
           'iam:ListPolicies',

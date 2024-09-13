@@ -18,7 +18,7 @@ import {
   CfnWarmPool,
   HealthCheck,
 } from 'aws-cdk-lib/aws-autoscaling';
-import { ISecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, SubnetType, UserData, LaunchTemplate, LaunchTemplateHttpTokens } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import {
   Cluster,
@@ -29,6 +29,7 @@ import {
   AmiHardwareType,
   CfnClusterCapacityProviderAssociations,
 } from 'aws-cdk-lib/aws-ecs';
+import { IRole, ServicePrincipal, Role } from 'aws-cdk-lib/aws-iam';
 import { Construct, IConstruct } from 'constructs';
 import { createProxyAndWorkerECRImages } from './ecr';
 
@@ -48,6 +49,7 @@ export interface EcsServiceResult {
 export interface EcsClusterResult extends EcsServiceResult {
   ecsCluster: Cluster;
   autoScalingGroup: AutoScalingGroup;
+  ec2Role: IRole;
 }
 
 export function createECSClusterAndService(
@@ -66,11 +68,34 @@ export function createECSClusterAndService(
 
   const ecsConfig = {
     instanceType: ecsAsgSetting.instanceType,
-    machineImage: EcsOptimizedImage.amazonLinux2(
+    machineImage: EcsOptimizedImage.amazonLinux2023(
       isArm ? AmiHardwareType.ARM : AmiHardwareType.STANDARD,
     ),
     platform: isArm ? Platform.LINUX_ARM64 : Platform.LINUX_AMD64,
   };
+
+  const ec2Role = new Role(scope, `${RESOURCE_ID_PREFIX}ecs-role`, {
+    assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
+  });
+
+  const userData = UserData.forLinux();
+
+  const launchTemplate = new LaunchTemplate(scope, `${RESOURCE_ID_PREFIX}ecs-launch-template`, {
+    machineImage: ecsConfig.machineImage,
+    instanceType: ecsConfig.instanceType,
+    securityGroup: props.ecsSecurityGroup,
+    associatePublicIpAddress: props.vpcSubnets.subnetType == SubnetType.PUBLIC,
+    userData,
+    blockDevices: [
+      {
+        deviceName: '/dev/xvda',
+        volume: BlockDeviceVolume.ebs(30),
+      },
+    ],
+    role: ec2Role,
+    requireImdsv2: true,
+    httpTokens: LaunchTemplateHttpTokens.REQUIRED,
+  });
 
   let notifications = {};
 
@@ -81,23 +106,13 @@ export function createECSClusterAndService(
   const autoScalingGroup = new AutoScalingGroup(scope, `${RESOURCE_ID_PREFIX}ecs-asg`, {
     vpc,
     vpcSubnets: props.vpcSubnets,
-    associatePublicIpAddress: props.vpcSubnets.subnetType == SubnetType.PUBLIC,
-    instanceType: ecsConfig.instanceType,
-    machineImage: ecsConfig.machineImage,
-    maxCapacity: ecsAsgSetting.serverMax,
-    minCapacity: ecsAsgSetting.serverMin,
+    launchTemplate,
+    maxCapacity: ecsAsgSetting.taskMax,
+    minCapacity: ecsAsgSetting.taskMin,
+    ...notifications,
     healthCheck: HealthCheck.ec2({
       grace: Duration.seconds(60),
     }),
-    securityGroup: props.ecsSecurityGroup,
-    ...notifications,
-    blockDevices: [
-      {
-        deviceName: '/dev/xvda',
-        volume: BlockDeviceVolume.ebs(30),
-      },
-    ],
-    requireImdsv2: true,
   });
 
   if (Token.isUnresolved(ecsAsgSetting.warmPoolSize)) {
@@ -117,7 +132,7 @@ export function createECSClusterAndService(
     }
   }
 
-  addPoliciesToAsgRole(autoScalingGroup.role);
+  addPoliciesToAsgRole(ec2Role);
 
   const capacityProvider = new AsgCapacityProvider(
     scope,
@@ -143,7 +158,7 @@ export function createECSClusterAndService(
     autoScalingGroup,
   });
   Aspects.of(scope).add(new AddDefaultCapacityProviderStrategyAspect(capacityProvider));
-  return { ...ecsServiceInfo, autoScalingGroup, ecsCluster };
+  return { ...ecsServiceInfo, autoScalingGroup, ecsCluster, ec2Role };
 }
 
 
