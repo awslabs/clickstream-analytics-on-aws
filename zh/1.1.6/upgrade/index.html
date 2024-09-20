@@ -2503,15 +2503,34 @@
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      升级后操作(仅适用于已启用数据建模)
+      升级后操作
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="升级后操作(仅适用于已启用数据建模)">
+    <nav class="md-nav" aria-label="升级后操作">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      数据摄取
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      数据建模模块
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="数据建模模块">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       升级数据模型和预置仪表板
     </span>
@@ -2525,6 +2544,11 @@
       迁移现有数据(仅适用于从1.1.6之前的版本升级)
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2891,15 +2915,34 @@
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      升级后操作(仅适用于已启用数据建模)
+      升级后操作
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="升级后操作(仅适用于已启用数据建模)">
+    <nav class="md-nav" aria-label="升级后操作">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      数据摄取
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      数据建模模块
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="数据建模模块">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       升级数据模型和预置仪表板
     </span>
@@ -2913,6 +2956,11 @@
       迁移现有数据(仅适用于从1.1.6之前的版本升级)
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3023,10 +3071,19 @@
 <li>点击<strong>确认</strong>，管道将处于“正在更新”状态。</li>
 </ol>
 <p>您可以在解决方案控制台的 <strong>状态</strong> 列中查看管道的状态。 几分钟后您应该会收到<code>活跃</code>状态。</p>
-<h2 id="_4">升级后操作(仅适用于已启用数据建模)</h2>
-<h3 id="_5">升级数据模型和预置仪表板</h3>
+<h2 id="_4">升级后操作</h2>
+<p>本节提供升级后操作的说明。</p>
+<h3 id="_5">数据摄取</h3>
+<p>从 1.1.7 版本开始，此解决方案使用<a href="https://alpha.www.docs.aws.a2z.com/zh_cn/autoscaling/ec2/userguide/launch-templates.html">launch templates</a>。升级数据提取模块后，请完成以下步骤，将 Amazon ECS 使用的 Amazon EC2 实例替换为新的launch template配置。</p>
+<ol>
+<li>通过<a href="https://alpha.www.docs.aws.a2z.com/zh_cn/AmazonECS/latest/developerguide/update-service-console-v2.html">更新 Amazon ECS 服务</a>增加所需任务数量。</li>
+<li>等新增加的 Amazon ECS 任务启动完成后，<a href="https://alpha.www.docs.aws.a2z.com/zh_cn/AmazonECS/latest/developerguide/standalone-task-stop.html">手动停止旧的 Amazon ECS 任务</a>。</li>
+<li>手动<a href="https://alpha.www.docs.aws.a2z.com/zh_cn/AWSEC2/latest/UserGuide/terminating-instances.html">终止旧版本的 EC2 实例</a>。</li>
+</ol>
+<h3 id="_6">数据建模模块</h3>
+<h4 id="_7">升级数据模型和预置仪表板</h4>
 <p>在升级项目的管道后，解决方案会自动异步升级仪表板所需的视图和物化视图。更新持续时间取决于 Redshift 集群的工作负载和现有数据量，可能需要几分钟到几小时。您可以在管道详情页面的<strong>数据处理和建模</strong>标签下的<strong>Redshift Schemas</strong>部分中跟踪进度。如果后期配置作业失败，您可以通过其链接访问工作流程的执行情况，然后使用保持不变的输入通过<strong>操作 - 重启</strong>或<strong>新执行</strong>来重新运行作业。</p>
-<h3 id="116">迁移现有数据(仅适用于从1.1.6之前的版本升级)</h3>
+<h4 id="116">迁移现有数据(仅适用于从1.1.6之前的版本升级)</h4>
 <div class="admonition danger">
 <p class="admonition-title">注意</p>
 <p>数据迁移过程是CPU密集型的，会<strong>产生额外的成本</strong>。在开始迁移之前，请确保您的Redshift的负载较低。当迁移大量数据时，建议临时增加Redshift Serverless的RPU或集群大小。</p>
