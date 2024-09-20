@@ -2529,13 +2529,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#post-upgrade-actions-only-applicable-to-data-modeling-enabled" class="md-nav__link">
+  <a href="#post-upgrade-actions" class="md-nav__link">
     <span class="md-ellipsis">
-      Post-Upgrade Actions (only applicable to data modeling enabled)
+      Post-Upgrade Actions
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Post-Upgrade Actions (only applicable to data modeling enabled)">
+    <nav class="md-nav" aria-label="Post-Upgrade Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ingestion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ingestion
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-modeling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Modeling
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Modeling">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2553,6 +2572,11 @@
       Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2926,13 +2950,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#post-upgrade-actions-only-applicable-to-data-modeling-enabled" class="md-nav__link">
+  <a href="#post-upgrade-actions" class="md-nav__link">
     <span class="md-ellipsis">
-      Post-Upgrade Actions (only applicable to data modeling enabled)
+      Post-Upgrade Actions
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Post-Upgrade Actions (only applicable to data modeling enabled)">
+    <nav class="md-nav" aria-label="Post-Upgrade Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ingestion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ingestion
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-modeling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Modeling
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Modeling">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2950,6 +2993,11 @@
       Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3064,10 +3112,19 @@
 <li>Click on <strong>Confirm</strong>, the pipeline will be in <code>Updating</code> status.</li>
 </ol>
 <p>You can view the status of the pipeline in the solution console in the <strong>Status</strong> column. After a few minutes, you can receive an Active status.</p>
-<h2 id="post-upgrade-actions-only-applicable-to-data-modeling-enabled">Post-Upgrade Actions (only applicable to data modeling enabled)</h2>
-<h3 id="upgrade-the-data-schema-and-out-of-the-box-dashboards">Upgrade the Data Schema and Out-of-the-box Dashboards</h3>
+<h2 id="post-upgrade-actions">Post-Upgrade Actions</h2>
+<p>This section provides instructions for post-upgrade actions.</p>
+<h3 id="ingestion">Ingestion</h3>
+<p>As of version 1.1.7, this solution uses <a href="https://alpha.www.docs.aws.a2z.com/autoscaling/ec2/userguide/launch-templates.html">launch templates</a>. After upgrading the data ingestion module, complete the following steps to replace the Amazon EC2 instances used by Amazon ECS with the new launch template configuration.</p>
+<ol>
+<li>Increase the desired task number by <a href="https://alpha.www.docs.aws.a2z.com/AmazonECS/latest/developerguide/update-service-console-v2.html">updating the Amazon ECS service</a>.</li>
+<li>After the newly added Amazon ECS tasks have started successfully, <a href="https://alpha.www.docs.aws.a2z.com/AmazonECS/latest/developerguide/standalone-task-stop.html">manually stop the old tasks</a>.</li>
+<li>Manually <a href="https://alpha.www.docs.aws.a2z.com/AWSEC2/latest/UserGuide/terminating-instances.html">terminate the old Amazon EC2 instances</a>.</li>
+</ol>
+<h3 id="data-modeling">Data Modeling</h3>
+<h4 id="upgrade-the-data-schema-and-out-of-the-box-dashboards">Upgrade the Data Schema and Out-of-the-box Dashboards</h4>
 <p>The solution automatically and asynchronously upgrades the views and materialized views used by the dashboard after upgrading the pipeline of the project. The duration of the update depends on the workload of the Redshift cluster and the existing data volume, and can take minutes to hours. You can track the progress in the <strong>Redshift Schemas</strong> section in the <strong>Processing</strong> tab of the Pipeline Detail page. If the post-configuration job fails, you can access the execution of the workflow through its link and rerun the job via <strong>Actions - Redrive</strong> or <strong>New execution</strong> with the input unchanged.</p>
-<h3 id="migrate-the-existing-data-only-applicable-when-upgrading-from-a-version-earlier-than-v116">Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)</h3>
+<h4 id="migrate-the-existing-data-only-applicable-when-upgrading-from-a-version-earlier-than-v116">Migrate the Existing Data (only applicable when upgrading from a version earlier than v1.1.6)</h4>
 <div class="admonition danger">
 <p class="admonition-title">Important</p>
 <p>The data migration process is CPU-intensive, and it will <strong>incur additional cost</strong>. Before starting the migration, ensure that the load on your Redshift is low. It's also advisable to consider temporarily increasing the RPUs of Redshift Serverless or the cluster size when migrating large volumes of data.</p>
