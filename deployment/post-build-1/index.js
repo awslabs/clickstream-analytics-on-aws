@@ -15,9 +15,34 @@ const fs = require('fs');
 const path = require('path');
 
 const outTagImageShellFile = process.env.OUT_TAG_IMAGE_SHELL_FILE || 'tag-images.sh';
-const solutionEcrAccount = process.env.SOLUTION_ECR_ACCOUNT || '366590864501';
+const solutionEcrAccount = process.env.SOLUTION_ECR_ACCOUNT;
 const solutionEcrRepoName = process.env.SOLUTION_ECR_REPO_NAME || 'test-clickstream-analytics-on-aws';
 const solutionEcrBuildVersion = process.env.BUILD_VERSION;
+const awsRegion = process.env.AWS_REGION || 'us-east-1';
+const awsProfile = process.env.AWS_DEFAULT_PROFILE || 'default';
+const buildPlatform = process.env.BUILD_PLATFORM || 'linux/amd64';
+
+// Debug environment variables
+console.log('Environment variables:');
+console.log('BUILD_VERSION:', process.env.BUILD_VERSION);
+console.log('SOLUTION_ECR_ACCOUNT:', process.env.SOLUTION_ECR_ACCOUNT);
+console.log('SOLUTION_ECR_REPO_NAME:', process.env.SOLUTION_ECR_REPO_NAME);
+console.log('AWS_REGION:', process.env.AWS_REGION);
+console.log('AWS_DEFAULT_PROFILE:', process.env.AWS_DEFAULT_PROFILE);
+console.log('BUILD_PLATFORM:', process.env.BUILD_PLATFORM);
+console.log('OUT_TAG_IMAGE_SHELL_FILE:', process.env.OUT_TAG_IMAGE_SHELL_FILE);
+
+// Validate required environment variables
+
+if (!solutionEcrBuildVersion) {
+    console.error('ERROR: BUILD_VERSION environment variable is not set!');
+    process.exit(1);
+}
+
+if (!solutionEcrAccount) {
+    console.error('ERROR: SOLUTION_ECR_ACCOUNT environment variable is not set!');
+    process.exit(1);
+}
 
 const imagesSet = new Set();
 const tagCommands = [
@@ -25,18 +50,18 @@ const tagCommands = [
     '',
     `set -e`,
     '',
-    `region=$1`,
+    `region=${awsRegion}`,
+    `profile=${awsProfile}`,
     `echo region=$region`,
+    `echo profile=$profile`,
     '',
-    "echo Generate STS token for publish assets",
-    "set +x",
-    `json_output=$(aws sts assume-role --role-arn "$AWS_ASSET_PUBLISH_ROLE" --role-session-name "publishing-ecr-assets-role" --duration-seconds "3600" 2>&1)`,
-    `export AWS_ACCESS_KEY_ID=$(echo "\${json_output}"     | jq -r .Credentials.AccessKeyId)`,
-    `export AWS_SECRET_ACCESS_KEY=$(echo "\${json_output}" | jq -r .Credentials.SecretAccessKey)`,
-    `export AWS_SESSION_TOKEN=$(echo "\${json_output}"     | jq -r .Credentials.SessionToken)`,
-    `set -x`,
+    "echo Using current AWS credentials",
     '',
-    `aws ecr get-login-password --region $region | docker login --username AWS --password-stdin ${solutionEcrAccount}.dkr.ecr.$region.amazonaws.com`,
+    `if [[ "$region" == "cn-northwest-1" || "$region" == "cn-north-1" ]]; then
+        aws ecr get-login-password --region $region --profile $profile | docker login --username AWS --password-stdin ${solutionEcrAccount}.dkr.ecr.$region.amazonaws.com.cn
+    else
+        aws ecr get-login-password --region $region --profile $profile | docker login --username AWS --password-stdin ${solutionEcrAccount}.dkr.ecr.$region.amazonaws.com
+    fi`,
     '',
 ];
 
@@ -48,24 +73,36 @@ async function main() {
 
     infoLog(`solutionEcrAccount: ${solutionEcrAccount}`);
     infoLog(`solutionEcrRepoName: ${solutionEcrRepoName}`);
+    infoLog(`source: ${source}`);
     infoLog(`newTagShellFile: ${newTagShellFile}`);
     infoLog(`solutionEcrBuildVersion: ${solutionEcrBuildVersion}`);
 
-    fs.readdirSync(source, {
+    // Check if templates are directly in the source directory
+    const directTemplates = fs.readdirSync(source).filter(f => f.endsWith('.template.json') && !f.includes('/cn/'));
+    debugLog(`Direct templates found: ${JSON.stringify(directTemplates)}`);
+    
+    // Process direct templates
+    directTemplates.forEach(t => processTemplate(source, t));
+    
+    // Also check for subdirectories (original logic)
+    const directories = fs.readdirSync(source, {
             withFileTypes: true
         })
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name)
-        .filter(d => !d.includes('/cn/'))
-        .forEach(
+        .filter(d => !d.includes('/cn/'));
+    
+    debugLog(`Found directories: ${JSON.stringify(directories)}`);
+    
+    directories.forEach(
             d => {
-                fs.readdirSync(path.join(source, d)).filter(f => f.endsWith('.template.json'))
-                    .forEach(t => processTemplate(path.join(source, d), t));
+                const templates = fs.readdirSync(path.join(source, d)).filter(f => f.endsWith('.template.json'));
+                debugLog(`Templates in ${d}: ${JSON.stringify(templates)}`);
+                templates.forEach(t => processTemplate(path.join(source, d), t));
             }
         );
 
     tagCommands.push("echo \"=== tag images done ===\"");
-    tagCommands.push("unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN");
     tagCommands.push("");
     fs.writeFileSync(newTagShellFile, tagCommands.join("\n"));
     infoLog("will tag new images: ")
@@ -139,8 +176,20 @@ function getResourcesByType(template, resourceType) {
 
 
 function addNewTag(oldImage, newImage) {
-    oldImage = (oldImage + '').replace('${AWS::Region}', '$region').replace('${AWS::URLSuffix}', 'amazonaws.com');
-    newImage = (newImage + '').replace('${AWS::Region}', '$region').replace('${AWS::URLSuffix}', 'amazonaws.com');
+    oldImage = (oldImage + '').replace('${AWS::Region}', '$region');
+    newImage = (newImage + '').replace('${AWS::Region}', '$region');
+    
+    if (awsRegion === 'cn-northwest-1' || awsRegion === 'cn-north-1') {
+        oldImage = oldImage.replace('${AWS::URLSuffix}', 'amazonaws.com.cn');
+        newImage = newImage.replace('${AWS::URLSuffix}', 'amazonaws.com.cn');
+    } else {
+        oldImage = oldImage.replace('${AWS::URLSuffix}', 'amazonaws.com');
+        newImage = newImage.replace('${AWS::URLSuffix}', 'amazonaws.com');
+    }
+
+    debugLog(`Processing image: ${oldImage}`);
+    debugLog(`Expected account: ${solutionEcrAccount}`);
+    debugLog(`Image contains account: ${oldImage.includes(solutionEcrAccount)}`);
 
     if (!oldImage.includes(solutionEcrAccount)) {
         debugLog("ignore image: " + oldImage)
@@ -148,16 +197,42 @@ function addNewTag(oldImage, newImage) {
     }
 
     if (imagesSet.has(newImage)) {
+        debugLog(`Duplicate image skipped: ${newImage}`);
         return;
     }
 
+    debugLog(`Adding new tag: ${oldImage} -> ${newImage}`);
     imagesSet.add(newImage);
 
+    // Determine Dockerfile path based on image suffix
+    let dockerfilePath = '';
+    let buildContext = '';
+    let exebuildPlatform = buildPlatform;
+    if (oldImage.includes('portal_fn')) {
+        dockerfilePath = 'src/control-plane/frontend/Dockerfile';
+        buildContext = '..';
+        exebuildPlatform = 'linux/arm64'; // Use arm64 for frontend
+    } else if (oldImage.includes('ecs-task-def-proxy')) {
+        dockerfilePath = 'Dockerfile';
+        buildContext = '../src/ingestion-server/server/images/nginx';
+        exebuildPlatform = buildPlatform;
+    } else if (oldImage.includes('ecs-task-def-worker')) {
+        dockerfilePath = 'Dockerfile';
+        buildContext = '../src/ingestion-server/server/images/vector';
+        exebuildPlatform = buildPlatform;
+    }
+
     tagCommands.push(
-        `echo "docker tag ${oldImage} ${newImage}"`,
-        `docker pull ${oldImage}`,
-        `docker tag  ${oldImage} ${newImage}`,
-        `docker push ${newImage}`,
+        `echo "Processing image: ${oldImage}"`,
+        `echo "Building from Dockerfile: ${dockerfilePath}"`,
+        `docker build -f ${buildContext}/${dockerfilePath} --platform ${exebuildPlatform} --build-arg PLATFORM_ARG=${exebuildPlatform} -t ${newImage} ${buildContext}`,
+        `if docker manifest inspect ${oldImage} > /dev/null 2>&1; then`,
+        `  echo "Old image exists, tagging fresh build: ${oldImage}"`,
+        `  docker pull ${oldImage} --platform ${exebuildPlatform}`,
+        `  docker tag ${oldImage} ${newImage}`,
+        `fi`,
+        `docker push ${newImage} --platform ${exebuildPlatform}`,
+        `echo "Successfully pushed: ${newImage}"`,
         "",
     );
 }

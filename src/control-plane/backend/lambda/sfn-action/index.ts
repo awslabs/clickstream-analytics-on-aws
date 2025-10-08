@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { fetchRemoteUrl, getAWSSDKClientConfig, logger } from '@aws/clickstream-base-lib';
+import { fetchRemoteUrl, fetchFromS3Direct, getAWSSDKClientConfig, logger } from '@aws/clickstream-base-lib';
 import {
   CloudFormationClient,
   CreateStackCommand,
@@ -372,6 +372,7 @@ export const doUpdate = async (region: string, input: UpdateStackCommandInput): 
 
 const fetchTemplateParameters = async (templateUrl: string): Promise<any> => {
   let parameters;
+  // First, try to fetch from remote URL using standard fetch
   try {
     const response = await fetchRemoteUrl(templateUrl);
     const jsonData = await response.json();
@@ -380,9 +381,21 @@ const fetchTemplateParameters = async (templateUrl: string): Promise<any> => {
     logger.info('fetched the template Parameters.', { parameters });
   } catch (error) {
     logger.warn(`failed to fetch the template from ${templateUrl}`, { error });
+    // If fetch fails and URL is an S3 URL, try S3 SDK
+    if (templateUrl.includes('s3') || templateUrl.includes('s3://')) {
+      try {
+        const s3Response = await fetchFromS3Direct(templateUrl);
+        const jsonData = JSON.parse(s3Response);
+        parameters = jsonData.Parameters;
+        logger.info('fetched template Parameters from S3 SDK.', { parameters });
+      } catch (s3Error) {
+        logger.warn('S3 SDK fallback also failed', { s3Error });
+      }
+    }
   }
   return parameters;
 };
+
 
 const usePreviousParameterValue = async (region: string, stackName: string, templateUrl: string, parameters: Parameter[]): Promise<Parameter[]> => {
   const stack = await describe(region, stackName);

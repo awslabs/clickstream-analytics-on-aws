@@ -45,6 +45,7 @@ run_helper="true"
     run_helper="false"
     echo "${bold}Solution_helper disabled:${normal} template format is yaml"
 }
+export TEMPLATE_OUTPUT_BUCKET="$1"
 
 #------------------------------------------------------------------------------
 # DISABLE OVERRIDE WARNINGS
@@ -155,15 +156,19 @@ update_dict() {
     local target=$1
     local prefix=$2
     currDir=$(pwd);
+    dict_file="src/control-plane/backend/lambda/api/config/dictionary.json"
 
-    cd ${CODEBUILD_SRC_DIR}
+    cd ${CODEBUILD_SRC_DIR:-$PWD}
 
-    sed -i'' -e 's/__SOLUTION_NAME__/'$SOLUTION_NAME'/g' src/control-plane/backend/lambda/api/config/dictionary.json
-    sed -i'' -e 's/__DIST_OUTPUT_BUCKET__/'$TEMPLATE_OUTPUT_BUCKET'/g' src/control-plane/backend/lambda/api/config/dictionary.json
-    sed -i'' -e 's~__TARGET__~'$target'~g' src/control-plane/backend/lambda/api/config/dictionary.json
-    sed -i'' -e 's~__PREFIX__~'$prefix'~g' src/control-plane/backend/lambda/api/config/dictionary.json
-    sed -i'' -e 's/__SOLUTION_VERSION__/'$VERSION'/g' src/control-plane/backend/lambda/api/config/dictionary.json
-    cat src/control-plane/backend/lambda/api/config/dictionary.json
+     # Update only the fields within the Solution object's data section
+    sed -i'' -e '/"name": "Solution"/,/^  }/ { /"data": {/,/}/ s/"name": "[^"]*"/"name": "'$SOLUTION_NAME'"/; }' $dict_file
+    sed -i'' -e '/"name": "Solution"/,/^  }/ s/"dist_output_bucket": "[^"]*"/"dist_output_bucket": "'$SOLUTION_BUCKET'"/' $dict_file
+    sed -i'' -e '/"name": "Solution"/,/^  }/ s/"target": "[^"]*"/"target": "'$target'"/' $dict_file
+    sed -i'' -e '/"name": "Solution"/,/^  }/ s/"prefix": "[^"]*"/"prefix": "'$prefix'"/' $dict_file
+    sed -i'' -e '/"name": "Solution"/,/^  }/ s/"version": "[^"]*"/"version": "'$VERSION'"/' $dict_file
+
+    echo "Updated dictionary.json:"
+    cat $dict_file
 
     cd $currDir
 }
@@ -226,13 +231,6 @@ else
     export SOLUTION_ECR_REPO_NAME
 fi
 
-if [[ -z ${SOLUTION_CN_TEMPLATES[@]} ]]; then
-    echo "SOLUTION_CN_TEMPLATES is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_CN_TEMPLATES
-fi
-
 
 # Validate command line input - must provide bucket
 [[ -z $1 ]] && { usage; exit 1; } || { SOLUTION_BUCKET=$1; }
@@ -245,8 +243,6 @@ export TARGET=$VERSION
 if [[ $PIPELINE_TYPE == "release" ]]; then
     TARGET='latest'
 fi
-
-update_dict $TARGET ''
 
 #-----------------------------------------------------------------------------------
 # Get reference for all important folders
@@ -303,6 +299,11 @@ export PATH=$(npm bin):$PATH
                            # and may succeed using old build files. This ensures we
                            # have fresh javascript from a successful build
 
+echo "------------------------------------------------------------------------------"
+echo "${bold}[Update] Dictionary before template synthesis${normal}"
+echo "------------------------------------------------------------------------------"
+
+update_dict $TARGET ''
 
 echo "------------------------------------------------------------------------------"
 echo "${bold}[Create] Templates${normal}"
@@ -341,17 +342,6 @@ do_replace "*.template.json" %%SOLUTION_ECR_ACCOUNT%% ${SOLUTION_ECR_ACCOUNT}
 do_replace "*.template.json" %%SOLUTION_ECR_REPO_NAME%% ${SOLUTION_ECR_REPO_NAME}
 do_replace "*.template.json" %%SOLUTION_ECR_BUILD_VERSION%% ${SOLUTION_ECR_BUILD_VERSION}
 
-
-for cn_template in ${SOLUTION_CN_TEMPLATES[@]}; do 
-   echo $cn_template
-   template_name=$(basename $cn_template)
-   if [[ $(echo $template_name | grep 'stack.template.json') ]]; then
-       template_name=$(echo $template_name | sed 's/stack.template.json/stack-cn.template.json/')
-   fi 
-   echo $template_name
-   do_cmd curl -s $cn_template -o ./$template_name
-done
- 
 echo "------------------------------------------------------------------------------"
 echo "${bold}[Packing] Source code artifacts${normal}"
 echo "------------------------------------------------------------------------------"

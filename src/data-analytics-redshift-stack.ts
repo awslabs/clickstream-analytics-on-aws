@@ -41,7 +41,6 @@ import {
 } from './common/cfn-nag';
 import { REDSHIFT_MODE } from './common/model';
 import { Parameters } from './common/parameters';
-import { associateApplicationWithStack } from './common/stack';
 
 export class DataAnalyticsRedshiftStack extends Stack {
   public readonly nestedStacks: {
@@ -73,9 +72,6 @@ export class DataAnalyticsRedshiftStack extends Stack {
 
     addCfnNagForLogRetention(this);
     addCfnNagForCustomResourceProvider(this, 'CDK built-in provider for GetSourcePrefixCustomerResource', 'GetSourcePrefixCustomerResourceProvider');
-
-    // Associate Service Catalog AppRegistry application with stack
-    associateApplicationWithStack(this);
 
     // Add IAM role permission boundary aspect
     const {

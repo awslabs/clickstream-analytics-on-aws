@@ -31,7 +31,6 @@ import {
   ruleRolePolicyWithWildcardResourcesAndHighSPCM,
 } from './common/cfn-nag';
 import { Parameters } from './common/parameters';
-import { associateApplicationWithStack } from './common/stack';
 import { getExistVpc } from './common/vpc-utils';
 import { ClickstreamSinkTables, DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
@@ -249,9 +248,6 @@ export class DataPipelineStack extends Stack {
       description: 'EMR Serverless Application Id',
       value: dataPipelineStackWithoutCustomPlugins.emrServerlessApplicationId,
     }).condition = withoutCustomPluginsCondition;
-
-    // Associate Service Catalog AppRegistry application with stack
-    associateApplicationWithStack(this);
 
     // Add IAM role permission boundary aspect
     const {

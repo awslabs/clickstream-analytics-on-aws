@@ -65,7 +65,6 @@ import {
 } from '../common/types';
 import {
   corsStackInput,
-  getAppRegistryApplicationArn,
   getBucketPrefix,
   getIamRoleBoundaryArn,
   getKafkaTopic,
@@ -505,13 +504,6 @@ export class CIngestionServerStack extends JSONObject {
     SinkType?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
-    return getAppRegistryApplicationArn(stack._pipeline);
-  })
-  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
-    AppRegistryApplicationArn?: string;
-
-  @JSONObject.optional('')
   @JSONObject.custom( (_stack:CIngestionServerStack, _key:string, _value:string) => {
     return getIamRoleBoundaryArn();
   })
@@ -706,13 +698,6 @@ export class CKafkaConnectorStack extends JSONObject {
     return stack._pipeline?.ingestionServer.sinkBatch?.size ?? 50000;
   })
     FlushSize?: number;
-
-  @JSONObject.optional('')
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
-    return getAppRegistryApplicationArn(stack._pipeline);
-  })
-  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
-    AppRegistryApplicationArn?: string;
 
   @JSONObject.optional('')
   @JSONObject.custom( (_stack:CIngestionServerStack, _key:string, _value:string) => {
@@ -912,13 +897,6 @@ export class CDataProcessingStack extends JSONObject {
     return stack._pipeline?.dataProcessing?.outputFormat ?? 'parquet';
   })
     OutputFormat?: string;
-
-  @JSONObject.optional('')
-  @JSONObject.custom( (stack:CDataProcessingStack, _key:string, _value:string) => {
-    return getAppRegistryApplicationArn(stack._pipeline);
-  })
-  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
-    AppRegistryApplicationArn?: string;
 
   @JSONObject.optional('')
   @JSONObject.custom( (_stack:CDataProcessingStack, _key:string, _value:string) => {
@@ -1273,13 +1251,6 @@ export class CDataModelingStack extends JSONObject {
     DataFreshnessInHour?: number;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
-    return getAppRegistryApplicationArn(stack._pipeline);
-  })
-  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
-    AppRegistryApplicationArn?: string;
-
-  @JSONObject.optional('')
   @JSONObject.custom( (_stack:CDataModelingStack, _key:string, _value:string) => {
     return getIamRoleBoundaryArn();
   })
@@ -1468,13 +1439,6 @@ export class CReportingStack extends JSONObject {
     RedshiftDefaultDBParam?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:string) => {
-    return getAppRegistryApplicationArn(stack._pipeline);
-  })
-  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
-    AppRegistryApplicationArn?: string;
-
-  @JSONObject.optional('')
   @JSONObject.custom( (_stack:CReportingStack, _key:string, _value:string) => {
     return getIamRoleBoundaryArn();
   })
@@ -1505,13 +1469,6 @@ export class CAthenaStack extends JSONObject {
   @JSONObject.required
     AthenaEventTable?: string;
 
-  @JSONObject.optional('')
-  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
-    AppRegistryApplicationArn?: string;
-
-  @JSONObject.optional(undefined)
-    IamRoleBoundaryArn?: string;
-
   constructor(pipeline: IPipeline) {
     super({
       AthenaDatabase: getValueFromStackOutputSuffix(
@@ -1524,8 +1481,6 @@ export class CAthenaStack extends JSONObject {
         PipelineStackType.DATA_PROCESSING,
         OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
       ),
-      // Service Catalog AppRegistry
-      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
       IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
@@ -1562,10 +1517,6 @@ export class CMetricsStack extends JSONObject {
   @JSONObject.optional('1')
     Version?: string;
 
-  @JSONObject.optional('')
-  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
-    AppRegistryApplicationArn?: string;
-
   @JSONObject.optional(undefined)
     IamRoleBoundaryArn?: string;
 
@@ -1579,19 +1530,7 @@ export class CMetricsStack extends JSONObject {
     super({
       ProjectId: pipeline.projectId,
       Emails: uniqueEmails?.join(','),
-      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
       IamRoleBoundaryArn: getIamRoleBoundaryArn(),
-    });
-  }
-}
-
-export class CAppRegistryStack extends JSONObject {
-  @JSONObject.required
-    ProjectId?: string;
-
-  constructor(pipeline: IPipeline) {
-    super({
-      ProjectId: pipeline.projectId,
     });
   }
 }

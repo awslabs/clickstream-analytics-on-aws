@@ -18,9 +18,7 @@ import {
   CORS_ORIGIN_DOMAIN_PATTERN,
   EMAIL_PATTERN,
   IP_PATTERN,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
   ServerlessRedshiftRPUByRegionMapping,
-  SERVICE_CATALOG_SUPPORTED_REGIONS,
   ConditionCategory,
   MetadataValueType,
   SolutionInfo,
@@ -34,7 +32,6 @@ import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { cloneDeep } from 'lodash';
 import { FULL_SOLUTION_VERSION, amznRequestContextHeader, awsUrlSuffix } from './constants';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
@@ -267,7 +264,6 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   names.set(PipelineStackType.REPORTING, `${getStackPrefix()}-${PipelineStackType.REPORTING}-${pipelineId}`);
   names.set(PipelineStackType.METRICS, `${getStackPrefix()}-${PipelineStackType.METRICS}-${pipelineId}`);
   names.set(PipelineStackType.ATHENA, `${getStackPrefix()}-${PipelineStackType.ATHENA}-${pipelineId}`);
-  names.set(PipelineStackType.APP_REGISTRY, `${getStackPrefix()}-${PipelineStackType.APP_REGISTRY}-${pipelineId}`);
   return names.get(key) ?? '';
 }
 
@@ -1113,14 +1109,6 @@ function pathNodesToAttribute(nodes: IMetadataRawValue[] | undefined) {
   return pathNodes;
 }
 
-function getAppRegistryApplicationArn(pipeline: IPipeline | undefined): string {
-  if (!pipeline) {
-    return '';
-  }
-  return SERVICE_CATALOG_SUPPORTED_REGIONS.includes(pipeline.region) ?
-    getValueFromStackOutputSuffix(pipeline, PipelineStackType.APP_REGISTRY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN) : '';
-}
-
 function getIamRoleBoundaryArn(): string | undefined {
   const iamRoleBoundaryArn = process.env.IAM_ROLE_BOUNDARY_ARN;
   if (!iamRoleBoundaryArn || iamRoleBoundaryArn.trim() === '') {
@@ -1219,18 +1207,6 @@ function getDefaultTags(projectId: string) {
       Value: projectId,
     },
   ];
-  return tags;
-}
-
-function getAppRegistryStackTags(stackTags: Tag[] | undefined): Tag[] {
-  if (!stackTags) {
-    return [];
-  }
-  const tags = cloneDeep(stackTags);
-  const index = tags.findIndex(tag => tag.Key?.startsWith('#'));
-  if (index !== -1) {
-    tags.splice(index, 1);
-  }
   return tags;
 }
 
@@ -1466,7 +1442,7 @@ function getTemplateUrl(templateName: string, solutionMetadata?: IDictionary, us
   const solutionName = solutionMetadata?.data.name;
   // default/ or cn/ or 'null',''
   const prefix = isEmpty(solutionMetadata?.data.prefix) ? '' : solutionMetadata?.data.prefix;
-  const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
+  const s3Region = process.env.AWS_REGION;
   const s3Host = `https://${solutionMetadata?.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
 
   let version = (useTarget || solutionMetadata?.data.version === 'latest') ?
@@ -1531,7 +1507,6 @@ export {
   pathNodesToAttribute,
   getCurMonthStr,
   getVersionFromTags,
-  getAppRegistryApplicationArn,
   getIamRoleBoundaryArn,
   deserializeContext,
   pipelineAnalysisStudioEnabled,
@@ -1552,7 +1527,6 @@ export {
   getLocalDateISOString,
   getSinkType,
   defaultValueFunc,
-  getAppRegistryStackTags,
   readMetadataFromSqlFile,
   getTemplateUrl,
 };

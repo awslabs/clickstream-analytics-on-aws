@@ -32,7 +32,6 @@ cloudformation_templates:
   - template: data-reporting-quicksight-stack.template.json
   - template: metrics-stack.template.json
   - template: data-modeling-athena-stack.template.json
-  - template: service-catalog-appregistry-stack.template.json
 build_environment:
   build_image: 'aws/codebuild/standard:7.0'
   compute_type: 'BUILD_GENERAL1_2XLARGE'

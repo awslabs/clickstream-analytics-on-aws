@@ -1,0 +1,359 @@
+Resources:
+  WorkshopVpc225294A4:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/Resource
+  WorkshopVpcPublicSubnet1SubnetE45D3E70:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: WorkshopVpc225294A4
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.0.0/19
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: Public
+        - Key: aws-cdk:subnet-type
+          Value: Public
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc/PublicSubnet1
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PublicSubnet1/Subnet
+  WorkshopVpcPublicSubnet1RouteTable3FF2F875:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: WorkshopVpc225294A4
+      Tags:
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc/PublicSubnet1
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PublicSubnet1/RouteTable
+  WorkshopVpcPublicSubnet1RouteTableAssociation7E585217:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: WorkshopVpcPublicSubnet1RouteTable3FF2F875
+      SubnetId:
+        Ref: WorkshopVpcPublicSubnet1SubnetE45D3E70
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PublicSubnet1/RouteTableAssociation
+  WorkshopVpcPublicSubnet1DefaultRoute37DB6426:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: WorkshopVpcPublicSubnet1RouteTable3FF2F875
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: WorkshopVpcIGWAA708C99
+    DependsOn:
+      - WorkshopVpcVPCGW083D1E14
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PublicSubnet1/DefaultRoute
+  WorkshopVpcPublicSubnet1EIP7DE35E5D:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc/PublicSubnet1
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PublicSubnet1/EIP
+  WorkshopVpcPublicSubnet1NATGateway7AA9DF7F:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId:
+        Ref: WorkshopVpcPublicSubnet1SubnetE45D3E70
+      AllocationId:
+        Fn::GetAtt:
+          - WorkshopVpcPublicSubnet1EIP7DE35E5D
+          - AllocationId
+      Tags:
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc/PublicSubnet1
+    DependsOn:
+      - WorkshopVpcPublicSubnet1DefaultRoute37DB6426
+      - WorkshopVpcPublicSubnet1RouteTableAssociation7E585217
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PublicSubnet1/NATGateway
+  WorkshopVpcPublicSubnet2Subnet4032CE5A:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: WorkshopVpc225294A4
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.32.0/19
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: Public
+        - Key: aws-cdk:subnet-type
+          Value: Public
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc/PublicSubnet2
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PublicSubnet2/Subnet
+  WorkshopVpcPublicSubnet2RouteTableB2D1FD20:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: WorkshopVpc225294A4
+      Tags:
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc/PublicSubnet2
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PublicSubnet2/RouteTable
+  WorkshopVpcPublicSubnet2RouteTableAssociationD7958FEB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: WorkshopVpcPublicSubnet2RouteTableB2D1FD20
+      SubnetId:
+        Ref: WorkshopVpcPublicSubnet2Subnet4032CE5A
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PublicSubnet2/RouteTableAssociation
+  WorkshopVpcPublicSubnet2DefaultRoute8245B093:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: WorkshopVpcPublicSubnet2RouteTableB2D1FD20
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: WorkshopVpcIGWAA708C99
+    DependsOn:
+      - WorkshopVpcVPCGW083D1E14
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PublicSubnet2/DefaultRoute
+  WorkshopVpcPrivateSubnet1SubnetD789DDFF:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: WorkshopVpc225294A4
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.96.0/19
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: Private
+        - Key: aws-cdk:subnet-type
+          Value: Private
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc/PrivateSubnet1
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PrivateSubnet1/Subnet
+  WorkshopVpcPrivateSubnet1RouteTableE72F3266:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: WorkshopVpc225294A4
+      Tags:
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc/PrivateSubnet1
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PrivateSubnet1/RouteTable
+  WorkshopVpcPrivateSubnet1RouteTableAssociationF5756487:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: WorkshopVpcPrivateSubnet1RouteTableE72F3266
+      SubnetId:
+        Ref: WorkshopVpcPrivateSubnet1SubnetD789DDFF
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PrivateSubnet1/RouteTableAssociation
+  WorkshopVpcPrivateSubnet1DefaultRouteDFDF3564:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: WorkshopVpcPrivateSubnet1RouteTableE72F3266
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: WorkshopVpcPublicSubnet1NATGateway7AA9DF7F
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PrivateSubnet1/DefaultRoute
+  WorkshopVpcPrivateSubnet2Subnet4AA82EE9:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: WorkshopVpc225294A4
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.128.0/19
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: Private
+        - Key: aws-cdk:subnet-type
+          Value: Private
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc/PrivateSubnet2
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PrivateSubnet2/Subnet
+  WorkshopVpcPrivateSubnet2RouteTableF3A3EE9D:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: WorkshopVpc225294A4
+      Tags:
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc/PrivateSubnet2
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PrivateSubnet2/RouteTable
+  WorkshopVpcPrivateSubnet2RouteTableAssociationA1453584:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: WorkshopVpcPrivateSubnet2RouteTableF3A3EE9D
+      SubnetId:
+        Ref: WorkshopVpcPrivateSubnet2Subnet4AA82EE9
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PrivateSubnet2/RouteTableAssociation
+  WorkshopVpcPrivateSubnet2DefaultRoute7C52AD09:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: WorkshopVpcPrivateSubnet2RouteTableF3A3EE9D
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: WorkshopVpcPublicSubnet1NATGateway7AA9DF7F
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/PrivateSubnet2/DefaultRoute
+  WorkshopVpcIGWAA708C99:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: WorkshopEnvStack/WorkshopVpc
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/IGW
+  WorkshopVpcVPCGW083D1E14:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: WorkshopVpc225294A4
+      InternetGatewayId:
+        Ref: WorkshopVpcIGWAA708C99
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/WorkshopVpc/VPCGW
+  SecurityGroupDD263621:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH in
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow RDP Access
+          FromPort: 3389
+          IpProtocol: tcp
+          ToPort: 3389
+      VpcId:
+        Ref: WorkshopVpc225294A4
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/SecurityGroup/Resource
+  clickstreamasset4436046B:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/clickstream-asset/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/02OwY6CQAxAv8X7UBf2sF5dsjFeDAHj1QylZis4Y2Y6GkP4d0FUPPX1pWleAj8L+Jrpq4+wqqOGS2gL0VirXu1bwgTa3RlVejC7LFVZKBvGIpSGZHAT5TYIbXXZ0OQnt/TeImtha97HA/yts2FstKy00FXfVOb40uP0eG2EXM+vg7HkuS2lb/0/kRFVEAbHcls5G86Phk/RKf8N7W/Aevw6UtepnLwNDh81n5xaU/HQ2yljK4Kjn1/iBcQJxLOjZ45cMMIngnycd0OWsKRJAQAA
+    Metadata:
+      aws:cdk:path: WorkshopEnvStack/CDKMetadata/Default
+    Condition: CDKMetadataAvailable
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - af-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-2

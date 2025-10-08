@@ -48,11 +48,10 @@ import {
 } from './ddb-mock';
 import {
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
-  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE, KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_CN,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_CN,
 } from './pipeline-mock';
 import {
-  APPREGISTRY_APPLICATION_ARN_PARAMETER,
-  APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
   BASE_METRICS_PARAMETERS,
   DATA_PROCESSING_PLUGIN3_PARAMETERS,
   INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
@@ -63,7 +62,7 @@ import {
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION } from '../../common/constants';
 // eslint-disable-next-line import/order
-import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE, SolutionInfo, SolutionVersion } from '@aws/clickstream-base-lib';
+import { SolutionInfo, SolutionVersion } from '@aws/clickstream-base-lib';
 import { BuiltInTagKeys } from '../../common/model-ln';
 import { getStackPrefix } from '../../common/utils';
 import { server } from '../../index';
@@ -120,14 +119,9 @@ const InitTags = [
     Value: 'tagValue2',
   },
 ];
-const appRegistryApplicationTag = {
-  Key: `#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
-  Value: `#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
-};
 
 const Tags = [
   ...InitTags,
-  appRegistryApplicationTag,
 ];
 
 const IngestionStack = {
@@ -141,7 +135,6 @@ const IngestionStack = {
       Region: 'ap-southeast-1',
       Parameters: [
         ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
-        APPREGISTRY_APPLICATION_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
       Tags: InitTags,
@@ -163,7 +156,6 @@ const IngestionStackCn = {
       Region: 'cn-north-1',
       Parameters: [
         ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
-        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
       Tags: InitTags,
@@ -173,6 +165,7 @@ const IngestionStackCn = {
   End: true,
   Type: 'Stack',
 };
+
 
 const DataProcessingStack = {
   Data: {
@@ -185,7 +178,6 @@ const DataProcessingStack = {
       Region: 'ap-southeast-1',
       Parameters: [
         ...DATA_PROCESSING_PLUGIN3_PARAMETERS,
-        APPREGISTRY_APPLICATION_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-DataProcessing-6666-6666`,
       Tags: InitTags,
@@ -207,7 +199,6 @@ const DataProcessingStackCn = {
       Region: 'cn-north-1',
       Parameters: [
         ...DATA_PROCESSING_PLUGIN3_PARAMETERS,
-        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-DataProcessing-6666-6666`,
       Tags: InitTags,
@@ -229,7 +220,6 @@ const DataModelingRedshiftStack = {
       Region: 'ap-southeast-1',
       Parameters: [
         ...MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-        APPREGISTRY_APPLICATION_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-DataModelingRedshift-6666-6666`,
       Tags: InitTags,
@@ -251,7 +241,6 @@ const DataModelingRedshiftStackCn = {
       Region: 'cn-north-1',
       Parameters: [
         ...MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-DataModelingRedshift-6666-6666`,
       Tags: InitTags,
@@ -273,7 +262,6 @@ const ReportingStack = {
       Region: 'ap-southeast-1',
       Parameters: [
         ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
-        APPREGISTRY_APPLICATION_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-Reporting-6666-6666`,
       Tags: InitTags,
@@ -295,7 +283,6 @@ const ReportingStackCn = {
       Region: 'cn-north-1',
       Parameters: [
         ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
-        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-Reporting-6666-6666`,
       Tags: InitTags,
@@ -317,7 +304,6 @@ const MetricsStack = {
       Region: 'ap-southeast-1',
       Parameters: [
         ...BASE_METRICS_PARAMETERS,
-        APPREGISTRY_APPLICATION_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-Metrics-6666-6666`,
       Tags: InitTags,
@@ -339,7 +325,6 @@ const MetricsStackCn = {
       Region: 'cn-north-1',
       Parameters: [
         ...BASE_METRICS_PARAMETERS,
-        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-Metrics-6666-6666`,
       Tags: InitTags,
@@ -347,54 +332,6 @@ const MetricsStackCn = {
     },
   },
   End: true,
-  Type: 'Stack',
-};
-
-const ServiceCatalogAppRegistryStack = {
-  Data: {
-    Callback: {
-      BucketName: 'TEST_EXAMPLE_BUCKET',
-      BucketPrefix: 'clickstream/workflow/main-3333-3333',
-    },
-    Input: {
-      Action: 'Create',
-      Region: 'ap-southeast-1',
-      Parameters: [
-        {
-          ParameterKey: 'ProjectId',
-          ParameterValue: 'project_8888_8888',
-        },
-      ],
-      StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-      Tags: InitTags,
-      TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
-    },
-  },
-  Next: 'PipelineStacks',
-  Type: 'Stack',
-};
-
-const ServiceCatalogAppRegistryStackCn = {
-  Data: {
-    Callback: {
-      BucketName: 'TEST_EXAMPLE_BUCKET',
-      BucketPrefix: 'clickstream/workflow/main-3333-3333',
-    },
-    Input: {
-      Action: 'Create',
-      Region: 'cn-north-1',
-      Parameters: [
-        {
-          ParameterKey: 'ProjectId',
-          ParameterValue: 'project_8888_8888',
-        },
-      ],
-      StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-      Tags: InitTags,
-      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
-    },
-  },
-  Next: 'PipelineStacks',
   Type: 'Stack',
 };
 
@@ -464,39 +401,27 @@ describe('Workflow test with pipeline version', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'ServiceCatalogAppRegistry',
+            StartAt: 'Ingestion',
             States: {
-              PipelineStacks: {
-                Branches: [
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: setTagsToStack(IngestionStack, Tags),
-                    },
-                  },
-                  {
-                    StartAt: 'DataProcessing',
-                    States: {
-                      DataProcessing: setTagsToStack(DataProcessingStack, Tags),
-                      DataModelingRedshift: setTagsToStack(DataModelingRedshiftStack, Tags),
-                      Reporting: removeParametersFromStack(setTagsToStack(ReportingStack, Tags), [
-                        {
-                          ParameterKey: 'QuickSightPrincipalParam',
-                        },
-                      ]),
-                    },
-                  },
-                  {
-                    StartAt: 'Metrics',
-                    States: {
-                      Metrics: setTagsToStack(MetricsStack, Tags),
-                    },
-                  },
-                ],
-                End: true,
-                Type: 'Parallel',
-              },
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              Ingestion: setTagsToStack(IngestionStack, Tags),
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: setTagsToStack(DataProcessingStack, Tags),
+              DataModelingRedshift: setTagsToStack(DataModelingRedshiftStack, Tags),
+              Reporting: removeParametersFromStack(setTagsToStack(ReportingStack, Tags), [
+                {
+                  ParameterKey: 'QuickSightPrincipalParam',
+                },
+              ]),
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: setTagsToStack(MetricsStack, Tags),
             },
           },
         ],
@@ -524,107 +449,73 @@ describe('Workflow test with pipeline version', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'ServiceCatalogAppRegistry',
+            StartAt: 'Ingestion',
             States: {
-              PipelineStacks: {
-                Branches: [
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: removeParametersFromStack(
-                        setTagsWithVersion(IngestionStack, SolutionVersion.V_1_0_0),
-                        [
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn.#',
-                          },
-                        ],
-                      ),
+              Ingestion: removeParametersFromStack(setTagsWithVersion(IngestionStack, SolutionVersion.V_1_0_0), []),
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: removeParametersFromStack(
+                mergeParametersFromStack(
+                  setTagsWithVersion(DataProcessingStack, SolutionVersion.V_1_0_0), [
+                    {
+                      ParameterKey: 'TransformerAndEnrichClassNames',
+                      ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                     },
+                  ],
+                ),
+                [],
+              ),
+              DataModelingRedshift: removeParametersFromStack(
+                setTagsWithVersion(DataModelingRedshiftStack, SolutionVersion.V_1_0_0),
+                [
+                  {
+                    ParameterKey: 'PipelineS3Bucket',
                   },
                   {
-                    StartAt: 'DataProcessing',
-                    States: {
-                      DataProcessing: removeParametersFromStack(
-                        mergeParametersFromStack(
-                          setTagsWithVersion(DataProcessingStack, SolutionVersion.V_1_0_0), [
-                            {
-                              ParameterKey: 'TransformerAndEnrichClassNames',
-                              ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                            },
-                          ],
-                        ),
-                        [
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn.#',
-                          },
-                        ],
-                      ),
-                      DataModelingRedshift: removeParametersFromStack(
-                        setTagsWithVersion(DataModelingRedshiftStack, SolutionVersion.V_1_0_0),
-                        [
-                          {
-                            ParameterKey: 'PipelineS3Bucket',
-                          },
-                          {
-                            ParameterKey: 'PipelineS3Prefix',
-                          },
-                          {
-                            ParameterKey: 'SegmentsS3Prefix',
-                          },
-                          {
-                            ParameterKey: 'ClickstreamAnalyticsMetadataDdbArn',
-                          },
-                          {
-                            ParameterKey: 'ClickstreamMetadataDdbArn',
-                          },
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn.#',
-                          },
-                          {
-                            ParameterKey: 'TimeZoneWithAppId',
-                          },
-                          {
-                            ParameterKey: 'DataFreshnessInHour',
-                          },
-                        ],
-                      ),
-                      Reporting: removeParametersFromStack(
-                        setTagsWithVersion(ReportingStack, SolutionVersion.V_1_0_0), [
-                          {
-                            ParameterKey: 'QuickSightOwnerPrincipalParam',
-                          },
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn.#',
-                          },
-                          {
-                            ParameterKey: 'QuickSightTimezoneParam',
-                          },
-                          {
-                            ParameterKey: 'RedshiftIAMRoleParam.#',
-                          },
-                          {
-                            ParameterKey: 'RedshiftDefaultDBParam',
-                          },
-                        ],
-                      ),
-                    },
+                    ParameterKey: 'PipelineS3Prefix',
                   },
                   {
-                    StartAt: 'Metrics',
-                    States: {
-                      Metrics: removeParametersFromStack(
-                        setTagsWithVersion(MetricsStack, SolutionVersion.V_1_0_0), [
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn.#',
-                          },
-                        ]),
-                    },
+                    ParameterKey: 'SegmentsS3Prefix',
+                  },
+                  {
+                    ParameterKey: 'ClickstreamAnalyticsMetadataDdbArn',
+                  },
+                  {
+                    ParameterKey: 'ClickstreamMetadataDdbArn',
+                  },
+                  {
+                    ParameterKey: 'TimeZoneWithAppId',
+                  },
+                  {
+                    ParameterKey: 'DataFreshnessInHour',
                   },
                 ],
-                End: true,
-                Type: 'Parallel',
-              },
-              ServiceCatalogAppRegistry: setTagsWithVersion(ServiceCatalogAppRegistryStack, SolutionVersion.V_1_0_0),
+              ),
+              Reporting: removeParametersFromStack(
+                setTagsWithVersion(ReportingStack, SolutionVersion.V_1_0_0), [
+                  {
+                    ParameterKey: 'QuickSightOwnerPrincipalParam',
+                  },
+                  {
+                    ParameterKey: 'QuickSightTimezoneParam',
+                  },
+                  {
+                    ParameterKey: 'RedshiftIAMRoleParam.#',
+                  },
+                  {
+                    ParameterKey: 'RedshiftDefaultDBParam',
+                  },
+                ],
+              ),
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: removeParametersFromStack(setTagsWithVersion(MetricsStack, SolutionVersion.V_1_0_0), []),
             },
           },
         ],
@@ -652,72 +543,60 @@ describe('Workflow test with pipeline version', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'ServiceCatalogAppRegistry',
+            StartAt: 'Ingestion',
             States: {
-              PipelineStacks: {
-                Branches: [
+              Ingestion: setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_0),
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: mergeParametersFromStack(
+                setTagsWithVersion(DataProcessingStack, SolutionVersion.V_1_1_0), [
                   {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_0),
-                    },
-                  },
-                  {
-                    StartAt: 'DataProcessing',
-                    States: {
-                      DataProcessing: mergeParametersFromStack(
-                        setTagsWithVersion(DataProcessingStack, SolutionVersion.V_1_1_0), [
-                          {
-                            ParameterKey: 'TransformerAndEnrichClassNames',
-                            ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                          },
-                        ],
-                      ),
-                      DataModelingRedshift: removeParametersFromStack(
-                        setTagsWithVersion(DataModelingRedshiftStack, SolutionVersion.V_1_1_0),
-                        [
-                          {
-                            ParameterKey: 'SegmentsS3Prefix',
-                          },
-                          {
-                            ParameterKey: 'TimeZoneWithAppId',
-                          },
-                          {
-                            ParameterKey: 'DataFreshnessInHour',
-                          },
-                        ],
-                      ),
-                      Reporting: removeParametersFromStack(
-                        mergeParametersFromStack(setTagsWithVersion(ReportingStack, SolutionVersion.V_1_1_0), [
-                          {
-                            ParameterKey: 'QuickSightOwnerPrincipalParam',
-                            ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
-                          },
-                        ],
-                        ), [
-                          {
-                            ParameterKey: 'QuickSightTimezoneParam',
-                          },
-                          {
-                            ParameterKey: 'RedshiftIAMRoleParam.#',
-                          },
-                          {
-                            ParameterKey: 'RedshiftDefaultDBParam',
-                          },
-                        ]),
-                    },
-                  },
-                  {
-                    StartAt: 'Metrics',
-                    States: {
-                      Metrics: setTagsWithVersion(MetricsStack, SolutionVersion.V_1_1_0),
-                    },
+                    ParameterKey: 'TransformerAndEnrichClassNames',
+                    ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                   },
                 ],
-                End: true,
-                Type: 'Parallel',
-              },
-              ServiceCatalogAppRegistry: setTagsWithVersion(ServiceCatalogAppRegistryStack, SolutionVersion.V_1_1_0),
+              ),
+              DataModelingRedshift: removeParametersFromStack(
+                setTagsWithVersion(DataModelingRedshiftStack, SolutionVersion.V_1_1_0),
+                [
+                  {
+                    ParameterKey: 'SegmentsS3Prefix',
+                  },
+                  {
+                    ParameterKey: 'TimeZoneWithAppId',
+                  },
+                  {
+                    ParameterKey: 'DataFreshnessInHour',
+                  },
+                ],
+              ),
+              Reporting: removeParametersFromStack(
+                mergeParametersFromStack(setTagsWithVersion(ReportingStack, SolutionVersion.V_1_1_0), [
+                  {
+                    ParameterKey: 'QuickSightOwnerPrincipalParam',
+                    ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
+                  },
+                ],
+                ), [
+                  {
+                    ParameterKey: 'QuickSightTimezoneParam',
+                  },
+                  {
+                    ParameterKey: 'RedshiftIAMRoleParam.#',
+                  },
+                  {
+                    ParameterKey: 'RedshiftDefaultDBParam',
+                  },
+                ]),
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: setTagsWithVersion(MetricsStack, SolutionVersion.V_1_1_0),
             },
           },
         ],
@@ -745,67 +624,55 @@ describe('Workflow test with pipeline version', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'ServiceCatalogAppRegistry',
+            StartAt: 'Ingestion',
             States: {
-              PipelineStacks: {
-                Branches: [
+              Ingestion: setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_5),
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: mergeParametersFromStack(setTagsWithVersion(DataProcessingStack, SolutionVersion.V_1_1_5), [
+                {
+                  ParameterKey: 'TransformerAndEnrichClassNames',
+                  ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                },
+              ],
+              ),
+              DataModelingRedshift: removeParametersFromStack(
+                setTagsWithVersion(DataModelingRedshiftStack, SolutionVersion.V_1_1_5),
+                [
                   {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_5),
-                    },
+                    ParameterKey: 'SegmentsS3Prefix',
                   },
                   {
-                    StartAt: 'DataProcessing',
-                    States: {
-                      DataProcessing: mergeParametersFromStack(setTagsWithVersion(DataProcessingStack, SolutionVersion.V_1_1_5), [
-                        {
-                          ParameterKey: 'TransformerAndEnrichClassNames',
-                          ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                        },
-                      ],
-                      ),
-                      DataModelingRedshift: removeParametersFromStack(
-                        setTagsWithVersion(DataModelingRedshiftStack, SolutionVersion.V_1_1_5),
-                        [
-                          {
-                            ParameterKey: 'SegmentsS3Prefix',
-                          },
-                          {
-                            ParameterKey: 'TimeZoneWithAppId',
-                          },
-                          {
-                            ParameterKey: 'DataFreshnessInHour',
-                          },
-                        ],
-                      ),
-                      Reporting: removeParametersFromStack(
-                        setTagsWithVersion(ReportingStack, SolutionVersion.V_1_1_5),
-                        [
-                          {
-                            ParameterKey: 'QuickSightTimezoneParam',
-                          },
-                          {
-                            ParameterKey: 'RedshiftIAMRoleParam.#',
-                          },
-                          {
-                            ParameterKey: 'RedshiftDefaultDBParam',
-                          },
-                        ],
-                      ),
-                    },
+                    ParameterKey: 'TimeZoneWithAppId',
                   },
                   {
-                    StartAt: 'Metrics',
-                    States: {
-                      Metrics: setTagsWithVersion(MetricsStack, SolutionVersion.V_1_1_5),
-                    },
+                    ParameterKey: 'DataFreshnessInHour',
                   },
                 ],
-                End: true,
-                Type: 'Parallel',
-              },
-              ServiceCatalogAppRegistry: setTagsWithVersion(ServiceCatalogAppRegistryStack, SolutionVersion.V_1_1_5),
+              ),
+              Reporting: removeParametersFromStack(
+                setTagsWithVersion(ReportingStack, SolutionVersion.V_1_1_5),
+                [
+                  {
+                    ParameterKey: 'QuickSightTimezoneParam',
+                  },
+                  {
+                    ParameterKey: 'RedshiftIAMRoleParam.#',
+                  },
+                  {
+                    ParameterKey: 'RedshiftDefaultDBParam',
+                  },
+                ],
+              ),
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: setTagsWithVersion(MetricsStack, SolutionVersion.V_1_1_5),
             },
           },
         ],
@@ -833,40 +700,28 @@ describe('Workflow test with pipeline version', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'ServiceCatalogAppRegistry',
+            StartAt: 'Ingestion',
             States: {
-              PipelineStacks: {
-                Branches: [
+              Ingestion: setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_6),
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: setTagsWithVersion(DataProcessingStack, SolutionVersion.V_1_1_6),
+              DataModelingRedshift: setTagsWithVersion(DataModelingRedshiftStack, SolutionVersion.V_1_1_6),
+              Reporting: removeParametersFromStack(
+                setTagsWithVersion(ReportingStack, SolutionVersion.V_1_1_6), [
                   {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: setTagsWithVersion(IngestionStack, SolutionVersion.V_1_1_6),
-                    },
+                    ParameterKey: 'QuickSightPrincipalParam',
                   },
-                  {
-                    StartAt: 'DataProcessing',
-                    States: {
-                      DataProcessing: setTagsWithVersion(DataProcessingStack, SolutionVersion.V_1_1_6),
-                      DataModelingRedshift: setTagsWithVersion(DataModelingRedshiftStack, SolutionVersion.V_1_1_6),
-                      Reporting: removeParametersFromStack(
-                        setTagsWithVersion(ReportingStack, SolutionVersion.V_1_1_6), [
-                          {
-                            ParameterKey: 'QuickSightPrincipalParam',
-                          },
-                        ]),
-                    },
-                  },
-                  {
-                    StartAt: 'Metrics',
-                    States: {
-                      Metrics: setTagsWithVersion(MetricsStack, SolutionVersion.V_1_1_6),
-                    },
-                  },
-                ],
-                End: true,
-                Type: 'Parallel',
-              },
-              ServiceCatalogAppRegistry: setTagsWithVersion(ServiceCatalogAppRegistryStack, SolutionVersion.V_1_1_6),
+                ]),
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: setTagsWithVersion(MetricsStack, SolutionVersion.V_1_1_6),
             },
           },
         ],
@@ -938,39 +793,27 @@ describe('Workflow test with pipeline version in China region', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'ServiceCatalogAppRegistry',
+            StartAt: 'Ingestion',
             States: {
-              PipelineStacks: {
-                Branches: [
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: setTagsToStack(IngestionStackCn, Tags),
-                    },
-                  },
-                  {
-                    StartAt: 'DataProcessing',
-                    States: {
-                      DataProcessing: setTagsToStack(DataProcessingStackCn, Tags),
-                      DataModelingRedshift: setTagsToStack(DataModelingRedshiftStackCn, Tags),
-                      Reporting: removeParametersFromStack(reportingStackCn, [
-                        {
-                          ParameterKey: 'QuickSightPrincipalParam',
-                        },
-                      ]),
-                    },
-                  },
-                  {
-                    StartAt: 'Metrics',
-                    States: {
-                      Metrics: setTagsToStack(MetricsStackCn, Tags),
-                    },
-                  },
-                ],
-                End: true,
-                Type: 'Parallel',
-              },
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStackCn,
+              Ingestion: setTagsToStack(IngestionStackCn, Tags),
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: setTagsToStack(DataProcessingStackCn, Tags),
+              DataModelingRedshift: setTagsToStack(DataModelingRedshiftStackCn, Tags),
+              Reporting: removeParametersFromStack(reportingStackCn, [
+                {
+                  ParameterKey: 'QuickSightPrincipalParam',
+                },
+              ]),
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: setTagsToStack(MetricsStackCn, Tags),
             },
           },
         ],
@@ -1003,91 +846,61 @@ describe('Workflow test with pipeline version in China region', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'ServiceCatalogAppRegistry',
+            StartAt: 'Ingestion',
             States: {
-              PipelineStacks: {
-                Branches: [
-                  {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: removeParametersFromStack(
-                        setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_0_0), [
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn',
-                          },
-                        ],
-                      ),
+              Ingestion: removeParametersFromStack(setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_0_0), []),
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: removeParametersFromStack(
+                mergeParametersFromStack(
+                  setTagsWithVersion(DataProcessingStackCn, SolutionVersion.V_1_0_0), [
+                    {
+                      ParameterKey: 'TransformerAndEnrichClassNames',
+                      ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                     },
+                  ],
+                ),
+                [],
+              ),
+              DataModelingRedshift: removeParametersFromStack(
+                setTagsWithVersion({
+                  Data: DataModelingRedshiftStackCn.Data,
+                  End: true,
+                  Type: 'Stack',
+                }, SolutionVersion.V_1_0_0),
+                [
+                  {
+                    ParameterKey: 'PipelineS3Bucket',
                   },
                   {
-                    StartAt: 'DataProcessing',
-                    States: {
-                      DataProcessing: removeParametersFromStack(
-                        mergeParametersFromStack(
-                          setTagsWithVersion(DataProcessingStackCn, SolutionVersion.V_1_0_0), [
-                            {
-                              ParameterKey: 'TransformerAndEnrichClassNames',
-                              ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                            },
-                          ],
-                        ),
-                        [
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn',
-                          },
-                        ],
-                      ),
-                      DataModelingRedshift: removeParametersFromStack(
-                        setTagsWithVersion({
-                          Data: DataModelingRedshiftStackCn.Data,
-                          End: true,
-                          Type: 'Stack',
-                        }, SolutionVersion.V_1_0_0),
-                        [
-                          {
-                            ParameterKey: 'PipelineS3Bucket',
-                          },
-                          {
-                            ParameterKey: 'PipelineS3Prefix',
-                          },
-                          {
-                            ParameterKey: 'SegmentsS3Prefix',
-                          },
-                          {
-                            ParameterKey: 'ClickstreamAnalyticsMetadataDdbArn',
-                          },
-                          {
-                            ParameterKey: 'ClickstreamMetadataDdbArn',
-                          },
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn',
-                          },
-                          {
-                            ParameterKey: 'TimeZoneWithAppId',
-                          },
-                          {
-                            ParameterKey: 'DataFreshnessInHour',
-                          },
-                        ],
-                      ),
-                    },
+                    ParameterKey: 'PipelineS3Prefix',
                   },
                   {
-                    StartAt: 'Metrics',
-                    States: {
-                      Metrics: removeParametersFromStack(
-                        setTagsWithVersion(MetricsStackCn, SolutionVersion.V_1_0_0), [
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn',
-                          },
-                        ]),
-                    },
+                    ParameterKey: 'SegmentsS3Prefix',
+                  },
+                  {
+                    ParameterKey: 'ClickstreamAnalyticsMetadataDdbArn',
+                  },
+                  {
+                    ParameterKey: 'ClickstreamMetadataDdbArn',
+                  },
+                  {
+                    ParameterKey: 'TimeZoneWithAppId',
+                  },
+                  {
+                    ParameterKey: 'DataFreshnessInHour',
                   },
                 ],
-                End: true,
-                Type: 'Parallel',
-              },
-              ServiceCatalogAppRegistry: setTagsWithVersion(ServiceCatalogAppRegistryStackCn, SolutionVersion.V_1_0_0),
+              ),
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: removeParametersFromStack(setTagsWithVersion(MetricsStackCn, SolutionVersion.V_1_0_0), []),
             },
           },
         ],
@@ -1120,58 +933,46 @@ describe('Workflow test with pipeline version in China region', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'ServiceCatalogAppRegistry',
+            StartAt: 'Ingestion',
             States: {
-              PipelineStacks: {
-                Branches: [
+              Ingestion: setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_0),
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: mergeParametersFromStack(
+                setTagsWithVersion(DataProcessingStackCn, SolutionVersion.V_1_1_0), [
                   {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_0),
-                    },
-                  },
-                  {
-                    StartAt: 'DataProcessing',
-                    States: {
-                      DataProcessing: mergeParametersFromStack(
-                        setTagsWithVersion(DataProcessingStackCn, SolutionVersion.V_1_1_0), [
-                          {
-                            ParameterKey: 'TransformerAndEnrichClassNames',
-                            ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                          },
-                        ],
-                      ),
-                      DataModelingRedshift: removeParametersFromStack(
-                        setTagsWithVersion({
-                          Data: DataModelingRedshiftStackCn.Data,
-                          End: true,
-                          Type: 'Stack',
-                        }, SolutionVersion.V_1_1_0),
-                        [
-                          {
-                            ParameterKey: 'SegmentsS3Prefix',
-                          },
-                          {
-                            ParameterKey: 'TimeZoneWithAppId',
-                          },
-                          {
-                            ParameterKey: 'DataFreshnessInHour',
-                          },
-                        ],
-                      ),
-                    },
-                  },
-                  {
-                    StartAt: 'Metrics',
-                    States: {
-                      Metrics: setTagsWithVersion(MetricsStackCn, SolutionVersion.V_1_1_0),
-                    },
+                    ParameterKey: 'TransformerAndEnrichClassNames',
+                    ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                   },
                 ],
-                End: true,
-                Type: 'Parallel',
-              },
-              ServiceCatalogAppRegistry: setTagsWithVersion(ServiceCatalogAppRegistryStackCn, SolutionVersion.V_1_1_0),
+              ),
+              DataModelingRedshift: removeParametersFromStack(
+                setTagsWithVersion({
+                  Data: DataModelingRedshiftStackCn.Data,
+                  End: true,
+                  Type: 'Stack',
+                }, SolutionVersion.V_1_1_0),
+                [
+                  {
+                    ParameterKey: 'SegmentsS3Prefix',
+                  },
+                  {
+                    ParameterKey: 'TimeZoneWithAppId',
+                  },
+                  {
+                    ParameterKey: 'DataFreshnessInHour',
+                  },
+                ],
+              ),
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: setTagsWithVersion(MetricsStackCn, SolutionVersion.V_1_1_0),
             },
           },
         ],
@@ -1204,82 +1005,70 @@ describe('Workflow test with pipeline version in China region', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'ServiceCatalogAppRegistry',
+            StartAt: 'Ingestion',
             States: {
-              PipelineStacks: {
-                Branches: [
+              Ingestion: setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_5),
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: mergeParametersFromStack(
+                setTagsWithVersion(DataProcessingStackCn, SolutionVersion.V_1_1_5), [
                   {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_5),
-                    },
-                  },
-                  {
-                    StartAt: 'DataProcessing',
-                    States: {
-                      DataProcessing: mergeParametersFromStack(
-                        setTagsWithVersion(DataProcessingStackCn, SolutionVersion.V_1_1_5), [
-                          {
-                            ParameterKey: 'TransformerAndEnrichClassNames',
-                            ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                          },
-                        ],
-                      ),
-                      DataModelingRedshift: removeParametersFromStack(
-                        setTagsWithVersion(DataModelingRedshiftStackCn, SolutionVersion.V_1_1_5),
-                        [
-                          {
-                            ParameterKey: 'SegmentsS3Prefix',
-                          },
-                          {
-                            ParameterKey: 'TimeZoneWithAppId',
-                          },
-                          {
-                            ParameterKey: 'DataFreshnessInHour',
-                          },
-                        ],
-                      ),
-                      Reporting: removeParametersFromStack(
-                        mergeParametersFromStack(
-                          setTagsWithVersion(ReportingStackCn, SolutionVersion.V_1_1_5), [
-                            {
-                              ParameterKey: 'QuickSightUserParam',
-                              ParameterValue: 'GCRUser',
-                            },
-                            {
-                              ParameterKey: 'QuickSightPrincipalParam',
-                              ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                            },
-                            {
-                              ParameterKey: 'QuickSightOwnerPrincipalParam',
-                              ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                            },
-                          ]),
-                        [
-                          {
-                            ParameterKey: 'QuickSightTimezoneParam',
-                          },
-                          {
-                            ParameterKey: 'RedshiftIAMRoleParam.#',
-                          },
-                          {
-                            ParameterKey: 'RedshiftDefaultDBParam',
-                          },
-                        ],
-                      ),
-                    },
-                  },
-                  {
-                    StartAt: 'Metrics',
-                    States: {
-                      Metrics: setTagsWithVersion(MetricsStackCn, SolutionVersion.V_1_1_5),
-                    },
+                    ParameterKey: 'TransformerAndEnrichClassNames',
+                    ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                   },
                 ],
-                End: true,
-                Type: 'Parallel',
-              },
-              ServiceCatalogAppRegistry: setTagsWithVersion(ServiceCatalogAppRegistryStackCn, SolutionVersion.V_1_1_5),
+              ),
+              DataModelingRedshift: removeParametersFromStack(
+                setTagsWithVersion(DataModelingRedshiftStackCn, SolutionVersion.V_1_1_5),
+                [
+                  {
+                    ParameterKey: 'SegmentsS3Prefix',
+                  },
+                  {
+                    ParameterKey: 'TimeZoneWithAppId',
+                  },
+                  {
+                    ParameterKey: 'DataFreshnessInHour',
+                  },
+                ],
+              ),
+              Reporting: removeParametersFromStack(
+                mergeParametersFromStack(
+                  setTagsWithVersion(ReportingStackCn, SolutionVersion.V_1_1_5), [
+                    {
+                      ParameterKey: 'QuickSightUserParam',
+                      ParameterValue: 'GCRUser',
+                    },
+                    {
+                      ParameterKey: 'QuickSightPrincipalParam',
+                      ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                    },
+                    {
+                      ParameterKey: 'QuickSightOwnerPrincipalParam',
+                      ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                    },
+                  ]),
+                [
+                  {
+                    ParameterKey: 'QuickSightTimezoneParam',
+                  },
+                  {
+                    ParameterKey: 'RedshiftIAMRoleParam.#',
+                  },
+                  {
+                    ParameterKey: 'RedshiftDefaultDBParam',
+                  },
+                ],
+              ),
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: setTagsWithVersion(MetricsStackCn, SolutionVersion.V_1_1_5),
             },
           },
         ],
@@ -1324,40 +1113,28 @@ describe('Workflow test with pipeline version in China region', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'ServiceCatalogAppRegistry',
+            StartAt: 'Ingestion',
             States: {
-              PipelineStacks: {
-                Branches: [
+              Ingestion: setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_6),
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: setTagsWithVersion(DataProcessingStackCn, SolutionVersion.V_1_1_6),
+              DataModelingRedshift: setTagsWithVersion(DataModelingRedshiftStackCn, SolutionVersion.V_1_1_6),
+              Reporting: removeParametersFromStack(
+                setTagsWithVersion(reportingStackCn, SolutionVersion.V_1_1_6), [
                   {
-                    StartAt: 'Ingestion',
-                    States: {
-                      Ingestion: setTagsWithVersion(IngestionStackCn, SolutionVersion.V_1_1_6),
-                    },
+                    ParameterKey: 'QuickSightPrincipalParam',
                   },
-                  {
-                    StartAt: 'DataProcessing',
-                    States: {
-                      DataProcessing: setTagsWithVersion(DataProcessingStackCn, SolutionVersion.V_1_1_6),
-                      DataModelingRedshift: setTagsWithVersion(DataModelingRedshiftStackCn, SolutionVersion.V_1_1_6),
-                      Reporting: removeParametersFromStack(
-                        setTagsWithVersion(reportingStackCn, SolutionVersion.V_1_1_6), [
-                          {
-                            ParameterKey: 'QuickSightPrincipalParam',
-                          },
-                        ]),
-                    },
-                  },
-                  {
-                    StartAt: 'Metrics',
-                    States: {
-                      Metrics: setTagsWithVersion(MetricsStackCn, SolutionVersion.V_1_1_6),
-                    },
-                  },
-                ],
-                End: true,
-                Type: 'Parallel',
-              },
-              ServiceCatalogAppRegistry: setTagsWithVersion(ServiceCatalogAppRegistryStackCn, SolutionVersion.V_1_1_6),
+                ]),
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: setTagsWithVersion(MetricsStackCn, SolutionVersion.V_1_1_6),
             },
           },
         ],

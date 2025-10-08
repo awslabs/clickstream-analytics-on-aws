@@ -286,7 +286,6 @@ qrcode-terminal under the Apache-2.0 license.
 @aws-cdk/asset-node-proxy-agent-v6 under the Apache-2.0 license.
 @aws-cdk/aws-batch-alpha under the Apache-2.0 license.
 @aws-cdk/aws-glue-alpha under the Apache-2.0 license.
-@aws-cdk/aws-servicecatalogappregistry-alpha under the Apache-2.0 license.
 @aws-crypto/crc32 under the Apache-2.0 license.
 @aws-crypto/crc32c under the Apache-2.0 license.
 @aws-crypto/ie11-detection under the Apache-2.0 license.

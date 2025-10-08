@@ -1,0 +1,6 @@
+ParameterKey=DomainName,ParameterValue=clickstream04.amt.a2z.org.cn
+ParameterKey=IAMCertificateId,ParameterValue=ASCATQAKRS2EKF44WM6FD
+ParameterKey=OIDCProvider,ParameterValue=https://cognito-idp.us-west-2.amazonaws.com/us-west-2_FkCFY5vL5
+ParameterKey=OIDCClientId,ParameterValue=1ncbpc28be0kods4hhart55nl5
+ParameterKey=IamRoleBoundaryArn,ParameterValue=
+ParameterKey=IamRolePrefix,ParameterValue=

@@ -18,7 +18,6 @@ import { createAthenaStackParameters } from './analytics/parameter';
 import { AthenaSavedQuery } from './analytics/private/athena-saved-queries';
 import { RolePermissionBoundaryAspect } from './common/aspects';
 import { Parameters } from './common/parameters';
-import { associateApplicationWithStack } from './common/stack';
 
 export class DataModelingAthenaStack extends Stack {
 
@@ -44,9 +43,6 @@ export class DataModelingAthenaStack extends Stack {
       userTable: athenaParameters.userTable,
       itemTable: athenaParameters.itemTable,
     });
-
-    // Associate Service Catalog AppRegistry application with stack
-    associateApplicationWithStack(this);
 
     // Add IAM role permission boundary aspect
     const {

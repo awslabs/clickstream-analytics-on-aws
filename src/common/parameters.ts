@@ -43,7 +43,6 @@ import {
   REDSHIFT_DB_USER_NAME_PATTERN,
   S3_BUCKET_NAME_PATTERN,
   S3_PREFIX_PATTERN,
-  SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN,
   SUBNETS_PATTERN,
   VPC_ID_PATTERN,
 } from '@aws/clickstream-base-lib';
@@ -461,16 +460,6 @@ export class Parameters {
       projectIdParam,
       appIdsParam,
     };
-  }
-
-  public static createAppRegistryApplicationArnParameters(scope: Construct, id?: string) : CfnParameter {
-    return new CfnParameter(scope, id ?? 'AppRegistryApplicationArn', {
-      description: 'Service Catalog AppRegistry Application Arn',
-      type: 'String',
-      default: '',
-      allowedPattern: `^(|${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN})$`,
-      constraintDescription: `Service Catalog AppRegistry application arn parameter can either match pattern ${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN} or be empty`,
-    });
   }
 
   public static createRedshiftModeParameter(scope: Construct, id?: string, props: ParameterProps ={}) : CfnParameter {
