@@ -684,46 +684,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   ],
                 ],
               },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry',
-                  ],
-                ],
-              },
             ],
-          },
-          {
-            Action: [
-              'resource-groups:GetGroup',
-              'resource-groups:DisassociateResource',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':resource-groups:*:',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':group/AWS_AppRegistry_Application-clickstream-analytics-*',
-                ],
-              ],
-            },
           },
           {
             Action: [
@@ -754,15 +715,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'globalaccelerator:*',
               'kms:*',
               'athena:*',
-              'servicecatalog:CreateApplication',
-              'servicecatalog:UpdateApplication',
-              'servicecatalog:DeleteApplication',
-              'servicecatalog:GetApplication',
-              'servicecatalog:GetAssociatedResource',
-              'servicecatalog:AssociateResource',
-              'servicecatalog:DisassociateResource',
-              'servicecatalog:TagResource',
-              'servicecatalog:UntagResource',
               'tag:GetResources',
               'tag:UntagResources',
             ],
@@ -2379,46 +2331,7 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
                   ],
                 ],
               },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry',
-                  ],
-                ],
-              },
             ],
-          },
-          {
-            Action: [
-              'resource-groups:GetGroup',
-              'resource-groups:DisassociateResource',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':resource-groups:*:',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':group/AWS_AppRegistry_Application-clickstream-analytics-*',
-                ],
-              ],
-            },
           },
           {
             Action: [
@@ -2449,15 +2362,6 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
               'globalaccelerator:*',
               'kms:*',
               'athena:*',
-              'servicecatalog:CreateApplication',
-              'servicecatalog:UpdateApplication',
-              'servicecatalog:DeleteApplication',
-              'servicecatalog:GetApplication',
-              'servicecatalog:GetAssociatedResource',
-              'servicecatalog:AssociateResource',
-              'servicecatalog:DisassociateResource',
-              'servicecatalog:TagResource',
-              'servicecatalog:UntagResource',
               'tag:GetResources',
               'tag:UntagResources',
             ],

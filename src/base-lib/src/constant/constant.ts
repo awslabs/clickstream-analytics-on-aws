@@ -190,36 +190,6 @@ export const ServerlessRedshiftRPUByRegionMapping = {
   },
 };
 
-export const SERVICE_CATALOG_SUPPORTED_REGIONS = [
-  'us-east-1',
-  'us-east-2',
-  'us-west-1',
-  'us-west-2',
-  'af-south-1',
-  'ap-east-1',
-  'ap-south-1',
-  'ap-south-2',
-  'ap-northeast-1',
-  'ap-northeast-2',
-  'ap-northeast-3',
-  'ap-southeast-1',
-  'ap-southeast-2',
-  'ap-southeast-3',
-  'ap-southeast-4',
-  'ca-central-1',
-  'eu-central-1',
-  'eu-central-2',
-  'eu-west-1',
-  'eu-west-2',
-  'eu-west-3',
-  'eu-south-1',
-  'eu-south-2',
-  'eu-north-1',
-  'me-south-1',
-  'me-central-1',
-  'sa-east-1',
-];
-
 // regex patterns
 export const SUBNETS_PATTERN = 'subnet-[a-f0-9]+,(subnet-[a-f0-9]+,?)+';
 export const SECURITY_GROUP_PATTERN = 'sg-[a-f0-9]+';
@@ -241,7 +211,6 @@ export const KAFKA_TOPIC_PATTERN = '[a-zA-Z0-9_\\-\\.]+';
 export const OIDC_ISSUER_PATTERN =
   '(https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?';
 export const OIDC_CLIENT_ID_PATTERN = '^[^ ]+$';
-export const OIDC_JWKS_SUFFIX_PATTERN = '^/[^ ]+$';
 export const MULTI_APP_ID_PATTERN = `^((${APP_ID_PATTERN})(,${APP_ID_PATTERN}){0,})?$`;
 export const EMAIL_BASE_PATTERN =
   '\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*';
@@ -264,10 +233,6 @@ export const SECRETS_MANAGER_ARN_PATTERN =
   '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-\/]+$';
 export const DDB_TABLE_ARN_PATTERN =
   '^arn:aws(-cn|-us-gov)?:dynamodb:[a-z0-9-]+:[0-9]{12}:table\/[a-zA-Z0-9_.-]+$';
-export const SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN = 'arn:aws(-cn|-us-gov)?:servicecatalog:[a-z0-9-]+:[0-9]{12}:\/applications\/[a-zA-Z0-9_.-]+';
-export const S3_BUCKET_ARN_PATTERN = 'arn:aws(-cn|-us-gov)?:s3:::[a-z0-9\\.\\-]{3,63}';
-export const KINESIS_DATA_STREAM_ARN_PATTERN = '^arn:aws(-cn|-us-gov)?:kinesis:[a-z0-9-]+:[0-9]{12}:stream/[a-zA-Z0-9_.-]{1,128}$';
-export const KMS_KEY_ARN_PATTERN = '^arn:aws(-cn|-us-gov)?:kms:[a-z0-9-]+:[0-9]{12}:key/([a-zA-Z0-9-_]+)$';
 export const IAM_ROLE_ARN_PATTERN = '^arn:aws(-cn|-us-gov)?:iam::[0-9]{12}:role/([a-zA-Z0-9-_]+)$';
 export const SCHEDULE_EXPRESSION_PATTERN =
   '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$';
@@ -283,8 +248,6 @@ export const STACK_CORS_PATTERN = `^$|^(\\.\\*)$|^(${STACK_CORS_ORIGIN}(\\|${STA
 export const XSS_PATTERN = '<(?:"[^"]*"[\'"]*|\'[^\']*\'[\'"]*|[^\'">])+(?<!/\s*)>';
 export const REGION_PATTERN = '[a-z]{2}-[a-z0-9]{1,10}-[0-9]{1}';
 export const EMR_VERSION_PATTERN='^emr-[0-9]+\\.[0-9]+\\.[0-9]+$';
-
-export const METADATA_EVENT_NAME_PATTERN = '[a-z][a-z0-9_]{0,64}';
 
 export const QUICKSIGHT_USER_ARN_PATTERN =
   '^$|^arn:aws(-cn|-us-gov)?:quicksight:[a-z0-9-]+:[0-9]{12}:user/([A-Za-z])[A-Za-z0-9]{4,63}/[A-Za-z0-9][A-Za-z0-9/_@.\\-]+[A-Za-z0-9]$';
@@ -306,8 +269,6 @@ export const PARAMETER_LABEL_DOMAIN_NAME = 'Domain Name';
 export const PARAMETER_LABEL_CERTIFICATE_ARN = 'Certificate ARN';
 export const PARAMETER_LABEL_OIDC_ISSUER = 'OpenID Connector Issuer';
 export const PARAMETER_LABEL_OIDC_CLIENT_ID = 'OpenID Connector Client Id';
-export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX =
-  'OpenID Connector Jwks Uri Suffix';
 export const PARAMETER_LABEL_IAM_ROLE_PREFIX = 'IAM Role Prefix(Optional)';
 export const PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN = 'IAM Role Boundary ARN(Optional)';
 
@@ -317,10 +278,6 @@ export const KDS_PROVISIONED_MODE = 'PROVISIONED';
 // ods data partitions
 export const PARTITION_APP = 'partition_app';
 export const TABLE_NAME_INGESTION = 'ingestion_events';
-export const TABLE_NAME_EVENT = 'event';
-export const TABLE_NAME_EVENT_PARAMETER = 'event_parameter';
-export const TABLE_NAME_USER = 'user';
-export const TABLE_NAME_ITEM= 'item';
 export const TABLE_NAME_EVENT_V2 = 'event_v2';
 export const TABLE_NAME_ITEM_V2 = 'item_v2';
 export const TABLE_NAME_SESSION = 'session';
@@ -374,20 +331,12 @@ export const OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME =
   'ObservabilityDashboardName';
 export const OUTPUT_METRICS_SNS_TOPIC_ARN_NAME = 'ObservabilityTopicArn';
 
-export const OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN = 'ServiceCatalogAppRegistryApplicationArn';
-export const OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY = 'ServiceCatalogAppRegistryApplicationTagKey';
-export const OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE = 'ServiceCatalogAppRegistryApplicationTagValue';
-
 export const DATA_PROCESSING_APPLICATION_NAME_PREFIX = 'Clickstream';
 
 export const CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME =
   'RedshiftBIUsername';
 
 export const OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX = 'SQLExecutionStateMachineArn';
-
-export const OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN = 'FlinkAppArn';
-export const OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON = 'SinkKinesisJson';
-export const OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH = 'FlinkAppIdStreamConfigS3Path';
 
 // Ingestion server
 export const INGESTION_SERVER_PING_PATH = '/ping';
@@ -434,16 +383,6 @@ export const DATASET_ADMIN_PERMISSION_ACTIONS = [
   'quicksight:DeleteDataSet',
   'quicksight:CreateIngestion',
   'quicksight:CancelIngestion',
-];
-
-export const ANALYSIS_ADMIN_PERMISSION_ACTIONS = [
-  'quicksight:DescribeAnalysis',
-  'quicksight:UpdateAnalysisPermissions',
-  'quicksight:QueryAnalysis',
-  'quicksight:UpdateAnalysis',
-  'quicksight:RestoreAnalysis',
-  'quicksight:DeleteAnalysis',
-  'quicksight:DescribeAnalysisPermissions',
 ];
 
 export const DASHBOARD_READER_PERMISSION_ACTIONS = [

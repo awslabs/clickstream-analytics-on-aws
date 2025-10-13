@@ -20,7 +20,6 @@ import { Construct } from 'constructs';
 import { RolePermissionBoundaryAspect } from './common/aspects';
 import { addCfnNagForLogRetention, addCfnNagToStack, addCfnNagForCustomResourceProvider, ruleToSuppressRolePolicyWithWildcardResources, ruleToSuppressRolePolicyWithHighSPCM } from './common/cfn-nag';
 import { Parameters } from './common/parameters';
-import { associateApplicationWithStack } from './common/stack';
 import {
   KafkaS3SinkConnector,
   KafkaS3SinkConnectorProps,
@@ -199,9 +198,6 @@ export class KafkaS3SinkConnectorStack extends Stack {
     new KafkaS3SinkConnector(this, 'KafkaS3SinkConnector', p);
     addCdkNagToStack(this);
     addCfnNag(this);
-
-    // Associate Service Catalog AppRegistry application with stack
-    associateApplicationWithStack(this);
 
     // Add IAM role permission boundary aspect
     const {

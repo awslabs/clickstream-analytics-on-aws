@@ -1,0 +1,197 @@
+{
+    "create_project": {
+        "method": "POST",
+        "path": "/api/project",
+        "data": {
+            "id": "project_01_1234",
+            "name": "project_01",
+            "description": "Description of Project-01",
+            "emails": "clickstream-autotest@dashboard.solutionsbuilder.aws.dev",
+            "platform": "",
+            "region": "us-east-1",
+            "environment": "Dev"
+        }
+    },
+    "create_pipeline": {
+        "method": "POST",
+        "path": "/api/pipeline",
+        "data": {
+            "projectId": "project_01_1234",
+            "appIds": [],
+            "region": "us-east-1",
+            "dataCollectionSDK": "clickstream",
+            "tags": [
+                {
+                    "key": "aws-solution/name",
+                    "value": "clickstream",
+                    "existing": true
+                },
+                {
+                    "key": "aws-solution/version",
+                    "value": "v0.3.0-main-202305080216-ac0b2e54",
+                    "existing": true
+                },
+                {
+                    "key": "aws-solution/clickstream/project",
+                    "value": "project_01_1234",
+                    "existing": true
+                }
+            ],
+            "network": {
+                "vpcId": "vpc-0b94d1c7ca09b38b3",
+                "publicSubnetIds": [
+                    "subnet-0a763ad4d20c170cf",
+                    "subnet-010ecca7d106703f8",
+                    "subnet-0b955ea6cf1c2a39b"
+                ],
+                "privateSubnetIds": [
+                    "subnet-0143c6534324f8002",
+                    "subnet-0048fdd6a22215fbe",
+                    "subnet-07ae52d86899877ba"
+                ]
+            },
+            "bucket": {
+                "name": "clickstream-workshop-clickstreamasset4436046b-ve01qvmeoajy",
+                "prefix": ""
+            },
+            "ingestionServer": {
+                "size": {
+                    "serverMin": 2,
+                    "serverMax": 4,
+                    "warmPoolSize": 1,
+                    "scaleOnCpuUtilizationPercent": 50
+                },
+                "domain": {
+                    "domainName": "",
+                    "certificateArn": ""
+                },
+                "loadBalancer": {
+                    "serverEndpointPath": "/collect",
+                    "serverCorsOrigin": "http://*.example.com,http://localhost:8080,https://example.com:80",
+                    "protocol": "HTTP",
+                    "enableGlobalAccelerator": false,
+                    "enableApplicationLoadBalancerAccessLog": false,
+                    "authenticationSecretArn": null,
+                    "logS3Bucket": {
+                        "name": "clickstream-workshop-clickstreamasset4436046b-ve01qvmeoajy",
+                        "prefix": ""
+                    },
+                    "notificationsTopicArn": ""
+                },
+                "sinkType": "kinesis",
+                "sinkS3": {
+                    "sinkBucket": {
+                        "name": "",
+                        "prefix": ""
+                    },
+                    "s3BufferSize": 10,
+                    "s3BufferInterval": 180
+                },
+                "sinkKafka": {
+                    "brokers": [],
+                    "topic": "",
+                    "securityGroupId": "",
+                    "mskCluster": {
+                        "name": "",
+                        "arn": ""
+                    },
+                    "kafkaConnector": {
+                        "enable": true
+                    }
+                },
+                "sinkKinesis": {
+                    "kinesisStreamMode": "ON_DEMAND",
+                    "kinesisShardCount": 2,
+                    "sinkBucket": {
+                        "name": "clickstream-workshop-clickstreamasset4436046b-ve01qvmeoajy",
+                        "prefix": ""
+                    }
+                }
+            },
+            "dataProcessing": {
+                "dataFreshnessInHour": 72,
+                "scheduleExpression": "rate(6 minutes)",
+                "sourceS3Bucket": {
+                    "name": "clickstream-workshop-clickstreamasset4436046b-ve01qvmeoajy",
+                    "prefix": ""
+                },
+                "sinkS3Bucket": {
+                    "name": "clickstream-workshop-clickstreamasset4436046b-ve01qvmeoajy",
+                    "prefix": ""
+                },
+                "pipelineBucket": {
+                    "name": "clickstream-workshop-clickstreamasset4436046b-ve01qvmeoajy",
+                    "prefix": ""
+                },
+                "transformPlugin": "",
+                "enrichPlugin": [
+                    "BUILT-IN-2",
+                    "BUILT-IN-3"
+                ]
+            },
+            "dataModeling": {
+                "athena": false,
+                "redshift": {
+                    "dataRange": 259200,
+                    "provisioned": {},
+                    "newServerless": {
+                        "network": {
+                            "vpcId": "vpc-0b94d1c7ca09b38b3",
+                            "subnetIds": [
+                                "subnet-07ae52d86899877ba",
+                                "subnet-0143c6534324f8002",
+                                "subnet-0048fdd6a22215fbe"
+                            ],
+                            "securityGroups": [
+                                "sg-043ada1496a86910a"
+                            ]
+                        },
+                        "baseCapacity": 32
+                    }
+                },
+                "upsertUsers": {
+                    "scheduleExpression": "rate(1 day)"
+                }
+            },
+            "reporting": {
+                "quickSight": {
+                    "accountName": "clickstream-test"
+                }
+            }
+        }
+    },
+    "get_pipeline": {
+        "method": "GET",
+        "path": "/api/pipeline"
+    },
+    "delete_project": {
+        "method": "DELETE",
+        "path": "/api/project"
+    },
+    "add_app": {
+        "method": "POST",
+        "path": "/api/app",
+        "data": {
+            "projectId": "project_auto57573",
+            "appId": "notepad12345",
+            "name": "notepad12345",
+            "description": "",
+            "timezone": "Asia/Shanghai",
+            "androidPackage": "com.farmerbb.notepad12345",
+            "iosBundleId": "",
+            "iosAppStoreId": ""
+        }
+    },
+    "ping_service": {
+        "method": "GET",
+        "path": "/api/env/ping"
+    },
+    "delete_app": {
+        "method": "DELETE",
+        "path": "/api/app"
+    },
+    "get_app": {
+        "method": "GET",
+        "path": "/api/app"
+    }
+}

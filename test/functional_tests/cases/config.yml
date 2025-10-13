@@ -1,0 +1,38 @@
+cloudformationInfo:
+  ClickStreamApiEndpoint: https://y47l6pwaw3.execute-api.us-east-1.amazonaws.com/api/
+  ControlPlaneBucket: tcat-cs-cloudfront-s3-nw7-clickstreamsolutiondatab-5k7psvkj3aeg
+  ControlPlaneURL: https://d2iwtpjv4w8wmt.cloudfront.net
+  UserPoolClientId: 51gu5qmisn7v5elejglmg7bqft
+  UserPoolId: us-east-1_81jwdWzZr
+  UserPoolUser: clickstream-84d7@dashboard.solutionsbuilder.aws.dev
+  region: us-east-1
+enableServerlessRedshift: enable
+environment: local
+msk:
+  cluster_arn: arn:aws:kafka:us-east-1:850995545712:cluster/demo-cluster-1/55904b75-d072-4a7e-80c0-57bfce45531f-10
+  cluster_name: demo-cluster-1
+provisionRedshift:
+  clusterIdentifier: redshift-autotest-cluster
+  dbUser: admin
+quicksight:
+  AccountName: nw-test-user
+stack:
+  UserPoolPassd: 1234QWER#qwer
+  region: us-east-1
+  stackName: tcat-cs-cloudfront-s3-nw778984d7
+workshopResource:
+  PrivateSubnet:
+  - subnet-0a2d2753c82bc1f87
+  - subnet-0f3d69784b8734e8b
+  - subnet-06cddbff4fc063e88
+  PublicSubnet:
+  - subnet-033a5ff6b04258226
+  - subnet-0b62ca24d4e5da645
+  - subnet-00f9066cc6eddf31b
+  default_sg: sg-0a7d5aabe6fe4b9a3
+  s3Bucket: clickstream-workshop-new-clickstreamasset4436046b-13f4btcpg6mob
+  securityGroup:
+  - sg-0f7bc9a4d1c3ec198
+  vpcId: vpc-08e61004a7bad5417
+workshopStack:
+  stackName: clickstream-workshop-new

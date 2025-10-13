@@ -13,8 +13,6 @@
 
 import {
   MULTI_APP_ID_PATTERN,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
@@ -29,7 +27,6 @@ import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
 import {
-  CAppRegistryStack,
   CAthenaStack,
   CDataModelingStack,
   CDataProcessingStack,
@@ -43,7 +40,6 @@ import {
   CFN_RULE_PREFIX,
   CFN_TOPIC_PREFIX,
   FULL_SOLUTION_VERSION,
-  PIPELINE_STACKS,
   awsAccountId,
   awsPartition,
   awsRegion,
@@ -84,7 +80,6 @@ import {
   WorkflowVersion,
 } from '../common/types';
 import {
-  getAppRegistryStackTags,
   getPipelineStatusType,
   getStackName,
   getStackOutputFromPipelineStatus,
@@ -94,8 +89,6 @@ import {
   getTemplateUrl,
   getUpdateTags,
   isEmpty,
-  mergeIntoPipelineTags,
-  mergeIntoStackTags,
 } from '../common/utils';
 import { StackManager } from '../service/stack';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
@@ -837,22 +830,6 @@ export class CPipeline {
     return appIds;
   }
 
-  public async getStackTemplateNameUrlMap() {
-    const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
-    const stackTemplateMap = new Map();
-    for (let stackName of stackNames) {
-      const cutPrefixName = stackName.substring(getStackPrefix().length);
-      const stackType = cutPrefixName.split('-')[1] as PipelineStackType;
-      let templateName: string = stackType;
-      if (stackType === PipelineStackType.INGESTION) {
-        templateName = `${stackType}_${this.pipeline.ingestionServer.sinkType}`;
-      }
-      const templateURL = await this.getTemplateUrl(templateName);
-      stackTemplateMap.set(stackName, templateURL);
-    }
-    return stackTemplateMap;
-  };
-
   public async getTemplateUrl(name: string) {
     if (!this.resources?.solution || !this.resources?.templates) {
       const solution = await store.getDictionary('Solution');
@@ -906,7 +883,7 @@ export class CPipeline {
 
     return {
       Version: WorkflowVersion.V20220315,
-      Workflow: await this.generateAppRegistryWorkflow(),
+      Workflow: await this.generatePipelineStacksWorkflow(),
     };
   }
 
@@ -937,63 +914,6 @@ export class CPipeline {
     }
 
     return state;
-  }
-
-  private async generateAppRegistryWorkflow(): Promise<WorkflowState> {
-    if (!stackWorkflowS3Bucket) {
-      throw new ClickStreamBadRequestError('Stack Workflow S3Bucket can not empty.');
-    }
-
-    const appRegistryTemplateURL = await this.getTemplateUrl(PipelineStackType.APP_REGISTRY);
-    if (!appRegistryTemplateURL) {
-      throw new ClickStreamBadRequestError('Template: AppRegistry not found in dictionary.');
-    }
-
-    const appRegistryStack = new CAppRegistryStack(this.pipeline);
-    const appRegistryParameters = getStackParameters(appRegistryStack, SolutionVersion.Of(this.pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
-    const appRegistryStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.APP_REGISTRY, this.pipeline.ingestionServer.sinkType);
-
-    const appRegistryState: WorkflowState = {
-      Type: WorkflowStateType.STACK,
-      Data: {
-        Input: {
-          Action: 'Create',
-          Region: this.pipeline.region,
-          StackName: appRegistryStackName,
-          TemplateURL: appRegistryTemplateURL,
-          Parameters: appRegistryParameters,
-          Tags: getAppRegistryStackTags(this.stackTags),
-        },
-        Callback: {
-          BucketName: stackWorkflowS3Bucket,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
-        },
-      },
-      Next: PIPELINE_STACKS,
-    };
-
-    // Add awsApplication tag to start viewing the cost, security, and operational metrics for the application
-    if (this.pipeline.templateVersion === FULL_SOLUTION_VERSION) {
-      const awsApplicationTag: Tag = {
-        Key: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
-        Value: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
-      };
-      mergeIntoStackTags(this.stackTags, awsApplicationTag);
-      mergeIntoPipelineTags(this.pipeline.tags, awsApplicationTag); // Save tag to pipeline tags for persistence
-    }
-    return {
-      Type: WorkflowStateType.PARALLEL,
-      End: true,
-      Branches: [
-        {
-          StartAt: PipelineStackType.APP_REGISTRY,
-          States: {
-            [PipelineStackType.APP_REGISTRY]: appRegistryState,
-            [PIPELINE_STACKS]: await this.generatePipelineStacksWorkflow(),
-          },
-        },
-      ],
-    };
   }
 
   private async getWorkflowStack(type: PipelineStackType): Promise<WorkflowParallelBranch | undefined> {

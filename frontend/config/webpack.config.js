@@ -349,6 +349,7 @@ module.exports = function (webpackEnv) {
     },
     resolve: {
       fallback: {
+        buffer: require.resolve('buffer'),
         crypto: require.resolve('crypto-browserify'),
         http: require.resolve('stream-http'),
         https: require.resolve('https-browserify'),
@@ -636,6 +637,7 @@ module.exports = function (webpackEnv) {
     },
     plugins: [
       new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
         process: 'process/browser',
       }),
       new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {

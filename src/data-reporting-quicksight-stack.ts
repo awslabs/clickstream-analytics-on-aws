@@ -36,7 +36,7 @@ import {
   ruleRolePolicyWithWildcardResources,
 } from './common/cfn-nag';
 import { Parameters } from './common/parameters';
-import { associateApplicationWithStack, getShortIdOfStack } from './common/stack';
+import { getShortIdOfStack } from './common/stack';
 import { createNetworkInterfaceCheckCustomResource } from './reporting/network-interface-check-custom-resource';
 import { createStackParametersQuickSight } from './reporting/parameter';
 import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
@@ -204,8 +204,6 @@ export class DataReportingQuickSightStack extends Stack {
 
     addCfnNag(this);
 
-    // Associate Service Catalog AppRegistry application with stack
-    associateApplicationWithStack(this);
     const {
       iamRoleBoundaryArnParam,
     } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);

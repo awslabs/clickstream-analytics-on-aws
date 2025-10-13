@@ -134,17 +134,7 @@ fs.readdirSync(global_s3_assets).forEach(file => {
     const templateName = fn.Metadata['aws:asset:path'];
 
     fn.Properties.TemplateURL = {
-      'Fn::Join': [
-        '',
-        [
-          'https://%%TEMPLATE_OUTPUT_BUCKET%%.s3.',
-          {
-            'Ref': 'AWS::URLSuffix'
-          },
-          '/',
-          `%%SOLUTION_NAME%%/%%VERSION%%/${templateName}`
-        ]
-      ]
+      'Fn::Sub': `https://%%TEMPLATE_OUTPUT_BUCKET%%.s3.\${AWS::Region}.\${AWS::URLSuffix}/%%SOLUTION_NAME%%/%%VERSION%%/${templateName}`
     };
 
     const params = fn.Properties.Parameters ? fn.Properties.Parameters : {};

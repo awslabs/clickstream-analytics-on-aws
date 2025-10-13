@@ -1,6 +1,0 @@
-
-Config
-.nightswatch
-.crux_template.md
-test/functional_tests
-

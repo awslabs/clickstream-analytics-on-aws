@@ -509,12 +509,6 @@ describe('DataPipelineStack parameter test', () => {
     });
   });
 
-  test('Should has Parameter AppRegistryApplicationArn', () => {
-    template.hasParameter('AppRegistryApplicationArn', {
-      Type: 'String',
-    });
-  });
-
   test('Should has parameter FilterBotEventParam', () => {
     template.hasParameter('FilterBotEventParam', {
       Default: 'true',
@@ -1746,51 +1740,4 @@ test('Root template has Cfn Outputs for Glue database and table', () => {
     Condition: 'withoutCustomPluginsCondition',
   });
 
-});
-
-test('Should has ApplicationArnCondition', () => {
-  rootTemplate.hasCondition('ApplicationArnCondition', {
-    'Fn::Not': [
-      {
-        'Fn::Equals': [
-          {
-            Ref: 'AppRegistryApplicationArn',
-          },
-          '',
-        ],
-      },
-    ],
-  });
-});
-
-test('Should has AppRegistryAssociation', () => {
-  rootTemplate.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
-    Application: {
-      'Fn::Select': [
-        2,
-        {
-          'Fn::Split': [
-            '/',
-            {
-              'Fn::Select': [
-                5,
-                {
-                  'Fn::Split': [
-                    ':',
-                    {
-                      Ref: 'AppRegistryApplicationArn',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    Resource: {
-      Ref: 'AWS::StackId',
-    },
-    ResourceType: 'CFN_STACK',
-  });
 });

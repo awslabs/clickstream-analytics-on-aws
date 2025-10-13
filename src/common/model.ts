@@ -52,7 +52,6 @@ export enum PipelineStackType {
   REPORTING = 'Reporting',
   METRICS = 'Metrics',
   ATHENA = 'DataModelingAthena',
-  APP_REGISTRY = 'ServiceCatalogAppRegistry',
 }
 
 export enum PipelineStatusType {

@@ -36,7 +36,6 @@ import { Construct } from 'constructs';
 import { RolePermissionBoundaryAspect } from './common/aspects';
 import { SINK_TYPE_MODE } from './common/model';
 import { Parameters } from './common/parameters';
-import { associateApplicationWithStack } from './common/stack';
 import { getALBSubnetsCondtion, getExistVpc } from './common/vpc-utils';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
 import {
@@ -466,9 +465,6 @@ export class IngestionServerStack extends Stack {
       );
       this.nestedStacks.push(nestedStack);
     }
-
-    // Associate Service Catalog AppRegistry application with stack
-    associateApplicationWithStack(this);
 
     // Add IAM role permission boundary aspect
     const {

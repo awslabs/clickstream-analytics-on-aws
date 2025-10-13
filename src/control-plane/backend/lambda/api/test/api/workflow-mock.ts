@@ -1125,16 +1125,6 @@ export const BASE_ATHENA_PARAMETERS = [
   },
 ];
 
-export const APPREGISTRY_APPLICATION_ARN_PARAMETER = {
-  ParameterKey: 'AppRegistryApplicationArn.#',
-  ParameterValue: `#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn`,
-};
-
-export const APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER = {
-  ParameterKey: 'AppRegistryApplicationArn',
-  ParameterValue: '',
-};
-
 export const BOUNDARY_ARN_PARAMETER = {
   ParameterKey: 'IamRoleBoundaryArn',
   ParameterValue: 'arn:aws:iam::555555555555:policy/test-boundary-policy',

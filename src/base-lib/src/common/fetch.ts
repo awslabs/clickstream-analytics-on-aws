@@ -11,9 +11,10 @@
  *  and limitations under the License.
  */
 
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import fetch from 'node-fetch';
 import { logger } from './powertools';
-import { httpsAgent } from './sdk-client-config';
+import { httpsAgent, getAWSSDKClientConfig } from './sdk-client-config';
 import { sleep } from './utils';
 
 const retryDelay = 2000; // Delay between retries in milliseconds
@@ -41,4 +42,24 @@ export const fetchRemoteUrl = async (url: string, options = {}, retries = 3): Pr
     }
     throw err;
   }
+};
+
+export const fetchFromS3Direct = async (url: string): Promise<string> => {
+  const s3UrlMatch = url.match(/https:\/\/([^.]+)\.s3\.[^.]+\.amazonaws\.com(?:\.cn)?\/(.+)/) ||
+                     url.match(/https:\/\/([^.]+)\.s3\.amazonaws\.com(?:\.cn)?\/(.+)/) ||
+                     url.match(/https:\/\/s3\.amazonaws\.com(?:\.cn)?\/([^/]+)\/(.+)/) ||
+                     url.match(/s3:\/\/([^/]+)\/(.+)/);
+
+  if (!s3UrlMatch) {
+    throw new Error('Invalid S3 URL format');
+  }
+
+  const bucket = s3UrlMatch[1];
+  const key = s3UrlMatch[2];
+
+  const s3Client = new S3Client(getAWSSDKClientConfig());
+  const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+  const response = await s3Client.send(command);
+
+  return await response.Body?.transformToString() || '{}';
 };

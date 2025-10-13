@@ -28,7 +28,6 @@ describe('Athena built-in query test', () => {
     template.hasParameter('AthenaSessionTable', {});
     template.hasParameter('AthenaUserTable', {});
     template.hasParameter('AthenaItemTable', {});
-    template.hasParameter('AppRegistryApplicationArn', {});
   });
 
   test('Should have event-user-session query', () => {
@@ -113,53 +112,6 @@ describe('Athena built-in query test', () => {
         ],
       },
       Description: 'Athena SQL that queries item information',
-    });
-  });
-
-  test('Should has ApplicationArnCondition', () => {
-    template.hasCondition('ApplicationArnCondition', {
-      'Fn::Not': [
-        {
-          'Fn::Equals': [
-            {
-              Ref: 'AppRegistryApplicationArn',
-            },
-            '',
-          ],
-        },
-      ],
-    });
-  });
-
-  test('Should has AppRegistryAssociation', () => {
-    template.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
-      Application: {
-        'Fn::Select': [
-          2,
-          {
-            'Fn::Split': [
-              '/',
-              {
-                'Fn::Select': [
-                  5,
-                  {
-                    'Fn::Split': [
-                      ':',
-                      {
-                        Ref: 'AppRegistryApplicationArn',
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      Resource: {
-        Ref: 'AWS::StackId',
-      },
-      ResourceType: 'CFN_STACK',
     });
   });
 });

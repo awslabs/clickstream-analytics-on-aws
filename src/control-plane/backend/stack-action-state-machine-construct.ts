@@ -100,16 +100,6 @@ export class StackActionStateMachine extends Construct {
           `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS`,
           `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing`,
           `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator`,
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry`,
-        ],
-      }),
-      new iam.PolicyStatement({
-        actions: [
-          'resource-groups:GetGroup',
-          'resource-groups:DisassociateResource',
-        ],
-        resources: [
-          `arn:${Aws.PARTITION}:resource-groups:*:${Aws.ACCOUNT_ID}:group/AWS_AppRegistry_Application-clickstream-analytics-*`,
         ],
       }),
       // This list of actions is to ensure the call stack can be created/updated/deleted successfully.
@@ -142,15 +132,6 @@ export class StackActionStateMachine extends Construct {
           'globalaccelerator:*',
           'kms:*',
           'athena:*',
-          'servicecatalog:CreateApplication',
-          'servicecatalog:UpdateApplication',
-          'servicecatalog:DeleteApplication',
-          'servicecatalog:GetApplication',
-          'servicecatalog:GetAssociatedResource',
-          'servicecatalog:AssociateResource',
-          'servicecatalog:DisassociateResource',
-          'servicecatalog:TagResource',
-          'servicecatalog:UntagResource',
           'tag:GetResources',
           'tag:UntagResources',
         ],

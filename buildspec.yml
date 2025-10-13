@@ -44,36 +44,36 @@ phases:
   build:
     commands:
       - |-
-         set -euxo pipefail
-         if [ $IS_IN_GCR_PIPELINE -eq 1 ]; then
-            ${CODEBUILD_SRC_DIR}/deployment/build-s3-dist-1.sh ${DIST_OUTPUT_BUCKET} ${SOLUTION_NAME} ${BUILD_VERSION}
-            mkdir -p deployment/open-source/ && touch deployment/open-source/.empty
-         fi
+        set -euxo pipefail
+        if [ $IS_IN_GCR_PIPELINE -eq 1 ]; then
+           ${CODEBUILD_SRC_DIR}/deployment/build-s3-dist-1.sh ${DIST_OUTPUT_BUCKET} ${SOLUTION_NAME} ${BUILD_VERSION}
+           mkdir -p deployment/open-source/ && touch deployment/open-source/.empty
+        fi
 
-         if [ $IS_IN_GCR_PIPELINE -eq 0 ]; then
-            echo "Starting build `date` in `pwd`"
+        if [ $IS_IN_GCR_PIPELINE -eq 0 ]; then
+           echo "Starting build `date` in `pwd`"
 
-            [ ! -z $SOLUTION_VERSION ] && {
-                if [ $(echo $SOLUTION_VERSION | grep 'v[0-9]\+\.[0-9]\+\.[0-9]\+') ]; then
-                    echo "SOLUTION_VERSION: $SOLUTION_VERSION"
-                else
-                    echo "SOLUTION_VERSION: $SOLUTION_VERSION is not as expected, unset it"
-                    unset SOLUTION_VERSION
-                fi
-            }
+           [ ! -z $SOLUTION_VERSION ] && {
+               if [ $(echo $SOLUTION_VERSION | grep 'v[0-9]\+\.[0-9]\+\.[0-9]\+') ]; then
+                   echo "SOLUTION_VERSION: $SOLUTION_VERSION"
+               else
+                   echo "SOLUTION_VERSION: $SOLUTION_VERSION is not as expected, unset it"
+                   unset SOLUTION_VERSION
+               fi
+           }
 
-            bash ${CODEBUILD_SRC_DIR}/deployment/run-unit-tests.sh
-            cd ${CODEBUILD_SRC_DIR}/deployment/
-            if [ -n "$VERSION" ]; then
-              chmod +x ./build-s3-dist.sh && ./build-s3-dist.sh $DIST_OUTPUT_BUCKET $SOLUTION_NAME ${VERSION}
-            else
-              chmod +x ./build-s3-dist.sh && ./build-s3-dist.sh $DIST_OUTPUT_BUCKET $SOLUTION_NAME ${BUILD_VERSION}
-            fi
-            echo "Build completed `date`"
-            echo "Starting open-source-dist `date` in `pwd`"
-            chmod +x ./build-open-source-dist.sh && ./build-open-source-dist.sh $SOLUTION_NAME
-            echo "Open Source Dist completed `date`"
-         fi
+           bash ${CODEBUILD_SRC_DIR}/deployment/run-unit-tests.sh
+           cd ${CODEBUILD_SRC_DIR}/deployment/
+           if [ -n "$VERSION" ]; then
+             chmod +x ./build-s3-dist.sh && ./build-s3-dist.sh $DIST_OUTPUT_BUCKET $SOLUTION_NAME ${VERSION}
+           else
+             chmod +x ./build-s3-dist.sh && ./build-s3-dist.sh $DIST_OUTPUT_BUCKET $SOLUTION_NAME ${BUILD_VERSION}
+           fi
+           echo "Build completed `date`"
+           echo "Starting open-source-dist `date` in `pwd`"
+           chmod +x ./build-open-source-dist.sh && ./build-open-source-dist.sh $SOLUTION_NAME
+           echo "Open Source Dist completed `date`"
+        fi
 
   post_build:
     commands:

@@ -57,7 +57,6 @@
   },
   "dependencies": {
     "@aws-cdk/aws-glue-alpha": "^2.81.0-alpha.0",
-    "@aws-cdk/aws-servicecatalogappregistry-alpha": "^2.81.0-alpha.0",
     "@aws-lambda-powertools/logger": "^1.17.0",
     "@aws-lambda-powertools/metrics": "^1.17.0",
     "@aws-sdk/client-acm": "3.523.0",

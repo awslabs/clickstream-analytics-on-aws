@@ -10,10 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-
-import { Application } from '@aws-cdk/aws-servicecatalogappregistry-alpha';
-import { Aws, CfnCondition, CfnResource, Fn, Stack } from 'aws-cdk-lib';
-import { Parameters } from './parameters';
+import { Aws, Fn, Stack } from 'aws-cdk-lib';
 
 export function getShortIdOfStack(stack: Stack): string {
   return Fn.select(0, Fn.split('-', Fn.select(2, Fn.split('/', stack.stackId))));
@@ -21,13 +18,4 @@ export function getShortIdOfStack(stack: Stack): string {
 
 export function getShortIdOfStackWithRegion(stack: Stack): string {
   return `${Aws.REGION}-${getShortIdOfStack(stack)}`;
-}
-
-export function associateApplicationWithStack(stack: Stack): void {
-  const appRegistryApplicationArn = Parameters.createAppRegistryApplicationArnParameters(stack).valueAsString;
-  const application = Application.fromApplicationArn(stack, 'ServiceCatalogApplication', appRegistryApplicationArn);
-  application.associateApplicationWithStack(stack);
-  (stack.node.findChild('AppRegistryAssociation') as CfnResource).cfnOptions.condition = new CfnCondition(stack, 'ApplicationArnCondition', {
-    expression: Fn.conditionNot(Fn.conditionEquals(appRegistryApplicationArn, '')),
-  });
 }

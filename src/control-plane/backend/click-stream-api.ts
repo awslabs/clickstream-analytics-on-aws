@@ -130,7 +130,7 @@ export class ClickStreamApiConstruct extends Construct {
         },
         'cn-northwest-1': {
           LayerArn: 'arn:aws-cn:lambda:cn-northwest-1:069767869989:layer:LambdaAdapterLayerX86:25',
-        }
+        },
       },
     });
 

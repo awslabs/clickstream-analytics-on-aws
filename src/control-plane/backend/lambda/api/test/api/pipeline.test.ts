@@ -232,16 +232,6 @@ describe('Pipeline test', () => {
       .useFakeTimers()
       .setSystemTime(new Date('2023-03-02'));
     ddbMock.on(PutCommand).resolves({});
-    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
-      const workflow = input.TransactItems[1].Put.Item.workflow.M.Workflow.M;
-      const serviceCatalogAppRegistry = workflow.Branches.L[0].M.States.M.ServiceCatalogAppRegistry.M;
-      const callback = serviceCatalogAppRegistry.Data.M.Callback.M;
-      expect(
-        callback.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
-        callback.BucketPrefix.S.startsWith('clickstream/workflow/main-') &&
-        callback.BucketPrefix.S.endsWith('-1677715200000'),
-      ).toBeTruthy();
-    });
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -1156,10 +1146,6 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({
-      message: 'Template: AppRegistry not found in dictionary.',
-      success: false,
-    });
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline with mock error', async () => {
@@ -3880,8 +3866,8 @@ describe('Pipeline test', () => {
     });
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const pipelineStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M.PipelineStacks.M;
-      const dataProcessingInput = pipelineStacks.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      const branches = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L;
+      const dataProcessingInput = branches[1].M.States.M.DataProcessing.M.Data.M.Input;
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
@@ -3948,8 +3934,8 @@ describe('Pipeline test', () => {
     });
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const pipelineStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M.PipelineStacks.M;
-      const dataProcessingInput = pipelineStacks.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      const branches = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L;
+      const dataProcessingInput = branches[1].M.States.M.DataProcessing.M.Data.M.Input;
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&

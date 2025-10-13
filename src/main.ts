@@ -29,7 +29,6 @@ import { IngestionServerStack } from './ingestion-server-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 import { MetricsStack } from './metrics-stack';
 import { SolutionNodejsFunction } from './private/function';
-import { ServiceCatalogAppregistryStack } from './service-catalog-appregistry-stack';
 
 const app = new App();
 
@@ -212,10 +211,6 @@ stackSuppressions([
     suppressTemplateIndentation: true,
   }),
 ], commonCdkNagRules);
-
-new ServiceCatalogAppregistryStack(app, app.node.tryGetContext('appRegistryStackName') ?? 'service-catalog-appregistry-stack', {
-  synthesizer: synthesizer(),
-});
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 if (process.env.USE_BSS) {
