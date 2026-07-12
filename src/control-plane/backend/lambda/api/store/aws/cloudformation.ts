@@ -47,7 +47,11 @@ export const getStacksDetailsByNames = async (region: string, stackNames: string
       stackDetails.push({
         stackId: stack?.StackId ?? '',
         stackName: name,
-        stackType: cutPrefixName.split('-')[1] as PipelineStackType,
+        // Robustly resolve stack type by matching a known PipelineStackType token as
+        // a hyphen-delimited segment (avoids the fragile positional split that yields
+        // "Clickstream" when the stack name has an extra prefix). Falls back to old logic.
+        stackType: (Object.values(PipelineStackType).find(
+          t => name.split('-').includes(t)) ?? cutPrefixName.split('-')[1]) as PipelineStackType,
         stackStatus: stack?.StackStatus as StackStatus,
         stackStatusReason: stack?.StackStatusReason ?? '',
         stackTemplateVersion: getVersionFromTags(stack?.Tags),

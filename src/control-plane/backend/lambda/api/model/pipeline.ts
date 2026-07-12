@@ -1213,7 +1213,10 @@ export class CPipeline {
     const res: Map<string, string> = new Map<string, string>();
     const stackDetails = this.pipeline.stackDetails ?? this.pipeline.status?.stackDetails;
     const stack = stackDetails?.filter(s => s.stackType === stackType);
-    if (!stack) {
+    // Guard against an empty filter result: `!stack` is false for an empty array `[]`,
+    // so without the length check `stack[0].outputs` throws
+    // "Cannot read properties of undefined (reading 'outputs')" and the app-detail API 500s.
+    if (!stack || stack.length === 0) {
       return res;
     }
     for (let suffix of outputKeySuffixes) {
