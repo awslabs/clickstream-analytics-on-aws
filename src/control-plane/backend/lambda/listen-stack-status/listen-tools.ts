@@ -197,7 +197,14 @@ export function getNewStackDetails(curStack: Stack, stackDetails: PipelineStatus
       stackDetails.push({
         stackId: '',
         stackName: stackName,
-        stackType: cutPrefixName.split('-')[1] as PipelineStackType,
+        // Resolve the stack type by matching a known PipelineStackType token as a
+        // hyphen-delimited segment of the stack name. The previous positional
+        // `split('-')[1]` was fragile: when the deployed stack name carries an extra
+        // prefix (e.g. `clickstream-Clickstream-<Type>-<id>`), index [1] resolved to
+        // "Clickstream", corrupting stackType for every stack and breaking the app
+        // detail API (getStackOutputBySuffixes). Falls back to the old behavior.
+        stackType: (Object.values(PipelineStackType).find(
+          t => stackName.split('-').includes(t)) ?? cutPrefixName.split('-')[1]) as PipelineStackType,
         stackStatus: undefined,
         stackStatusReason: '',
         stackTemplateVersion: '',

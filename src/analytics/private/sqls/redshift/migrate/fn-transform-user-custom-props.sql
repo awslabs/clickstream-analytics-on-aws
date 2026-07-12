@@ -1,65 +1,13 @@
+-- Amazon Redshift no longer supports creating plpythonu UDFs (Patch 198, 2025-10-30),
+-- which broke new-app schema initialization (see issue #1609). This function is used ONLY by
+-- the one-time v1->v2 migration procedures (sp_migrate_*_to_v2) and is NOT used by new v2 apps.
+-- It is replaced with a native SQL stub so schema init succeeds without plpythonu.
+-- TODO(#1609): reimplement as a Lambda UDF (external function) before running any v1->v2 migration.
+-- Original (plpythonu) behavior: flatten {"k":{"type":..,"set_time_msec":..,"value":..}}
+--   into {"k":{"set_time_msec":..,"value":typed}}.
 create or replace function {{schema}}.transform_user_custom_props(s varchar(65535))
   returns varchar(65535)
-  /*
-  this function transforms a list of json objects to a json object
-  e.g. input:
-"""
-{
-  "gender": {
-    "type": "string",
-    "set_time_msec": 1708282081550,
-    "value": "female"
-  },
-  "age": {
-    "type": "number",
-    "set_time_msec": 1708282081550,
-    "value": "33"
-  },
-  "_user_name": {
-    "type": "string",
-    "set_time_msec": 1708282081550,
-    "value": "Madison Allen"
-  },
-}
-"""
-output:
-""" 
-{
-  "gender": {
-    "set_time_msec": 1708282081550,
-    "value": "female"
-  },
-  "age": {
-    "set_time_msec": 1708282081550,
-    "value": 33
-  },
-  "_user_name": {
-    "set_time_msec": 1708282081550,
-    "value": "Madison Allen"
-  },
-}
-"""
-  */
 stable
 as $$
-
-import json
-
-def transform_user_custom_props(input):
-    data = json.loads(input)
-    transformed_data = {}
-    for key, value in data.items():
-        if value['type'] == 'number':
-            try :
-                transformed_data[key] = {'value': int(value['value']), 'set_time_msec': value['set_time_msec']}
-            except ValueError:
-                transformed_data[key] = {'value': float(value['value']), 'set_time_msec': value['set_time_msec']}
-        elif value['type'] == 'boolean':
-            transformed_data[key] = {'value': True if str(value['value'].lower()) == 'true' else False, 'set_time_msec': value['set_time_msec']}
-        else:
-            transformed_data[key] = {'value': value['value'], 'set_time_msec': value['set_time_msec']}
-    return json.dumps(transformed_data)
-
-return transform_user_custom_props(s)
-
-$$ language plpythonu;
+  select null::varchar(65535)
+$$ language sql;

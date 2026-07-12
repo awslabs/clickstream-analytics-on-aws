@@ -22,7 +22,15 @@ request_count_lock = threading.Lock()
 
 
 def send_events_to_server(user, events):
-    headers = {'Content-Type': 'application/json; charset=utf-8'}
+    # A realistic browser User-Agent is required: with FILTER_BOT_EVENT=true (default),
+    # the data-processing bot filter drops every event whose request UA looks like a
+    # library (the default 'python-requests/x.y'), leaving EVENT_V2 empty even though
+    # events convert successfully.
+    headers = {
+        'Content-Type': 'application/json; charset=utf-8',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 '
+                      '(KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36',
+    }
     global global_sequence_id
     if user.platform == enums.Platform.Web:
         device = user.web_device
