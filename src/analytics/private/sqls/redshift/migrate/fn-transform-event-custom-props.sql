@@ -1,58 +1,12 @@
+-- Amazon Redshift no longer supports creating plpythonu UDFs (Patch 198, 2025-10-30),
+-- which broke new-app schema initialization (see issue #1609). This function is used ONLY by
+-- the one-time v1->v2 migration procedures (sp_migrate_*_to_v2) and is NOT used by new v2 apps.
+-- It is replaced with a native SQL stub so schema init succeeds without plpythonu.
+-- TODO(#1609): reimplement as a Lambda UDF (external function) before running any v1->v2 migration.
+-- Original (plpythonu) behavior: flatten {"k":{"type":..,"value":..}} into typed {"k": value}.
 create or replace function {{schema}}.transform_event_custom_props(s varchar(65535))
   returns varchar(65535)
-  /*
-  this function transforms a list of json objects to a json object
-  e.g. input:
-"""
-{
-    "item_id": {
-        "type": "string",
-        "value": "9a66adca"
-    },
-    "currency": {
-        "type": "string",
-        "value": "USD"
-    },
-    "age": {
-        "type": "number",
-        "value": "12"
-    },
-    "first": {
-        "type": "boolean",
-        "value": "true"
-    }
-}
-"""
-output:
-""" 
-{
-    "item_id": "9a66adca",
-    "currency": "USD",
-    "age": 12,
-    "first": true
-}
-"""
-  */
 stable
 as $$
-
-import json
-
-def transform_event_custom_props(input):
-    data = json.loads(input)
-    transformed_data = {}
-    for key, value in data.items():
-        if value['type'] == 'number':
-            try :
-                transformed_data[key] = int(value['value'])
-            except ValueError:
-                transformed_data[key] = float(value['value'])
-        elif value['type'] == 'boolean':
-            transformed_data[key] = value['value'].lower() == 'true'
-        else:
-            transformed_data[key] = value['value']
-    return json.dumps(transformed_data)
-
-return transform_event_custom_props(s)
-
-$$ language plpythonu;
+  select null::varchar(65535)
+$$ language sql;

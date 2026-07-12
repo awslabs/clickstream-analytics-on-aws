@@ -1,24 +1,5 @@
-CREATE OR REPLACE FUNCTION {{schema}}.convert_json_list(json_in varchar(65535))
-RETURNS varchar(65535)
-/*
-	This function is used to convert a json to a json list
-	Example: 
-	Input: {"key1": {"value": "value2", "type": "string"}, "key2": {"value": "1", "type": "int"}}
-	Output: [{"key": "key1", "value": "value2", "type": "string"}, {"key": "key2", "value": "1", "type": "int"}]
-*/
-STABLE
-AS $$
-import json
-
-results = []
-data = json.loads(json_in)
-for key, value_dict in data.items():
-	if 'value' in value_dict:
-		value = value_dict['value'][:100]
-		type = value_dict['type']
-		results.append({'key': key, 'value': value, 'type': type})
-return json.dumps(results)
-$$ LANGUAGE plpythonu;
+-- NOTE(#1609): plpythonu convert_json_list removed (Redshift no longer supports plpythonu).
+-- Custom event / user property flattening below is done inline via native PartiQL UNPIVOT.
 
 CREATE OR REPLACE PROCEDURE {{schema}}.sp_scan_metadata(top_frequent_properties_limit NUMERIC, end_timestamp TIMESTAMP, start_timestamp TIMESTAMP) 
 AS 
@@ -125,67 +106,43 @@ BEGIN
 		END IF;
 	END LOOP;
 
-	-- query custom event parameters
+	-- query custom event parameters (native PartiQL UNPIVOT; no plpythonu, #1609)
 	IF start_timestamp IS NULL THEN
-		INSERT INTO properties_temp_table (	
+		INSERT INTO properties_temp_table (
 			SELECT
 				event_name,
 				project_id,
 				app_id,
 				event_timestamp,
-				property_category,
-				cp.key::VARCHAR AS property_name,
-				cp.value::VARCHAR AS property_value,
-				cp.type::VARCHAR AS value_type,
+				'event' AS property_category,
+				attr_name::VARCHAR AS property_name,
+				LEFT(attr_value.value::VARCHAR, 100) AS property_value,
+				attr_value.type::VARCHAR AS value_type,
 				platform
-			FROM (
-				SELECT
-					event_name,
-					project_id,
-					app_id,
-					event_timestamp,
-					'event' AS property_category,
-					platform,
-					json_parse({{schema}}.convert_json_list(json_serialize(custom_parameters))) AS custom_parameters_array
-				FROM
-					{{schema}}.event_v2
-				WHERE
-					custom_parameters IS NOT NULL
-					AND event_timestamp < end_timestamp
-					AND LEN(custom_parameters_json_str) < 50000
-			) AS ep,
-			ep.custom_parameters_array AS cp
+			FROM {{schema}}.event_v2 AS ep, UNPIVOT ep.custom_parameters AS attr_value AT attr_name
+			WHERE ep.custom_parameters IS NOT NULL
+				AND ep.event_timestamp < end_timestamp
+				AND LEN(ep.custom_parameters_json_str) < 50000
+				AND attr_value.value IS NOT NULL
 		);
 	ELSE
-		INSERT INTO properties_temp_table (	
+		INSERT INTO properties_temp_table (
 			SELECT
 				event_name,
 				project_id,
 				app_id,
 				event_timestamp,
-				property_category,
-				cp.key::VARCHAR AS property_name,
-				cp.value::VARCHAR AS property_value,
-				cp.type::VARCHAR AS value_type,
+				'event' AS property_category,
+				attr_name::VARCHAR AS property_name,
+				LEFT(attr_value.value::VARCHAR, 100) AS property_value,
+				attr_value.type::VARCHAR AS value_type,
 				platform
-			FROM (
-				SELECT
-					event_name,
-					project_id,
-					app_id,
-					event_timestamp,
-					'event' AS property_category,
-					platform,
-					json_parse({{schema}}.convert_json_list(json_serialize(custom_parameters))) AS custom_parameters_array
-				FROM
-					{{schema}}.event_v2
-				WHERE
-					custom_parameters IS NOT NULL
-					AND event_timestamp >= start_timestamp
-					AND event_timestamp < end_timestamp
-					AND LEN(custom_parameters_json_str) < 50000
-			) AS ep,
-			ep.custom_parameters_array AS cp
+			FROM {{schema}}.event_v2 AS ep, UNPIVOT ep.custom_parameters AS attr_value AT attr_name
+			WHERE ep.custom_parameters IS NOT NULL
+				AND ep.event_timestamp >= start_timestamp
+				AND ep.event_timestamp < end_timestamp
+				AND LEN(ep.custom_parameters_json_str) < 50000
+				AND attr_value.value IS NOT NULL
 		);
 	END IF;
 
@@ -282,21 +239,14 @@ BEGIN
 
 	INSERT INTO user_attribute_temp_table (
 		SELECT
-			property_category,
-			up.key::VARCHAR as property_name,
-			up.value::VARCHAR as property_value,
-			up.type::VARCHAR as value_type
-		FROM (
-			SELECT
-				'user' AS property_category,
-				json_parse({{schema}}.convert_json_list(json_serialize(user_properties))) AS user_properties_array
-			FROM
-				{{schema}}.user_v2
-			WHERE
-				user_properties IS NOT NULL
-				AND LEN(user_properties_json_str) < 50000
-		) as u,
-		u.user_properties_array AS up
+			'user' AS property_category,
+			attr_name::VARCHAR AS property_name,
+			LEFT(attr_value.value::VARCHAR, 100) AS property_value,
+			attr_value.type::VARCHAR AS value_type
+		FROM {{schema}}.user_v2 AS u, UNPIVOT u.user_properties AS attr_value AT attr_name
+		WHERE u.user_properties IS NOT NULL
+			AND LEN(u.user_properties_json_str) < 50000
+			AND attr_value.value IS NOT NULL
 	);	
 
   -- user attribute
